@@ -87,7 +87,8 @@ class MF32(MF_base):
         # actual data:
         J = []; L = []
         En = []; Gn = []; Gg = []
-        par4 = []; par5 = []; par6 = []
+        Gf1 = []; Gf2 = [];
+        pars = {4:[],5:[],6:[]} # three 'multi-purpose' columns in atlas
         
         
         f = open(filename,"r").readlines()
@@ -130,12 +131,21 @@ class MF32(MF_base):
             # Said seems to use last three columns for various purposes:
             # Gn_0, capture kernel, G_p, G_a, or
             # fission channels in heavy nuclei. Must check book case-by-case
-            par4.append( vals[24:26] )
-            par5.append( vals[28:30] )
-            par6.append( vals[32] )
+            
+            Gf1.append([0,0])
+            Gf2.append([0,0])
+            
+            pars[4].append( vals[24:26] )
+            pars[5].append( vals[28:30] )
+            pars[6].append( vals[32] )
             
             idx += 1
         
+        fissile = (zam%1000)>88 # Radium
+        if fissile:
+            fission = raw_input("Where is Gamma_fission in e-Atlas (Parameter"\
+                    +"4,5 or 6)?")
+            Gf1 = pars[ int(fission) ][:]
         
         
         # at this point raw atlas data is dumped to lists, now two more steps:
@@ -177,9 +187,11 @@ class MF32(MF_base):
         En = numpy.array( check(En), dtype=float)
         Gn = numpy.array( check(Gn), dtype=float)
         Gg = numpy.array( check(Gg), dtype=float)
-        par4 = numpy.array( check(par4), dtype=float)
-        par5 = numpy.array( check(par5), dtype=float)
-        par6 = numpy.array( check(par6, ncols=1), dtype=float)
+        Gf1 = numpy.array( check(Gf1), dtype=float)
+        Gf2 = numpy.array( check(Gf2), dtype=float)
+        pars[4] = numpy.array( check(pars[4]), dtype=float)
+        pars[5] = numpy.array( check(pars[5]), dtype=float)
+        pars[6] = numpy.array( check(pars[6], ncols=1), dtype=float)
         
         
         ###############################################
@@ -229,12 +241,8 @@ class MF32(MF_base):
             kern = raw_input("is the kernel (g*Gn*Gg/Gamma) available Y/n?")
             if not kern.lower().startswith('n'):
                 kern = raw_input("what column of the e-Atlas file (4,5,6)?")
-                if kern=='4': 
-                    kernel=par4
-                elif kern=='5': 
-                    kernel=par5
-                elif kern=='6': 
-                    kernel=par6
+                if kern in ('4','5','6'): 
+                    kernel=pars[int(kern)]
                 else:
                     raise ValueError, "Don't recognize input \"%s\"" % kern
         
@@ -343,9 +351,11 @@ class MF32(MF_base):
         self.En = En
         self.Gn = Gn
         self.Gg = Gg
-        self.par4 = par4
-        self.par5 = par5
-        self.par6 = par6
+        self.Gf1 = Gf1
+        self.Gf2 = Gf2
+        self.par4 = pars[4]
+        self.par5 = pars[5]
+        self.par6 = pars[6]
         
         self.nres = len(self.J)
         self.zam = zam

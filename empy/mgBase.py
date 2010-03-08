@@ -111,7 +111,7 @@ class mgBase:
                                     self.xsecs[ckey][i],self.uncert[rkey][i],
                                     self.uncert[ckey][i]) )
                 
-                # either way, writing the matrix is the same:
+                # matrix header:
                 asc += ' <<< correlation matrix >>>\n'
                 asc += ' column material mat-mt=(%4i,%3i)  vs  row material mat-mt=(%4i,%3i)\n' % (self.mat, mt, self.mat, colMT)
                 
@@ -120,34 +120,47 @@ class mgBase:
                 matrix = ( self.corrs[key]*maxCorr ).astype(int)
                 
                 # get dimensions of matrix (rows, columns):
-                r_start, r_end = self.thresholds[rkey]  # 1-based index
-                c_start, c_end = self.thresholds[ckey]
-                #if rkey != ckey:
-                #    print (r_start, r_end, rkey)
-                #    print (c_start, c_end, ckey)
+                if mt==colMT:
+                    r_start, r_end = self.thresholds[rkey]  # 1-based index
+                    c_start, c_end = self.thresholds[ckey]
+                else:
+                    # for cross-correlations, thresholds may be misleading
+                    # so check manually for first and last rows:
+                    for r_start in range(self.ngroups):
+                        if not numpy.all(matrix[r_start]==0): break
+                    for c_start in range(self.ngroups):
+                        if not numpy.all(matrix[:,c_start]==0): break
+                    for r_end in range(self.ngroups-1,-1,-1):
+                        if not numpy.all(matrix[r_end]==0): break
+                    for c_end in range(self.ngroups-1,-1,-1):
+                        if not numpy.all(matrix[:,c_end]==0): break
+                    # convert to 1-based index for consistency:
+                    r_start+=1; r_end+=1; c_start+=1; c_end+=1
                 
                 nblocks, remainder = divmod(c_end-c_start+1,cpb)
                 
                 for block in range(nblocks):
                     head = '    row'+'%4i'+'%5i'*24+'\n'
-                    asc += head % tuple(range(cpb*block+1,cpb*(block+1)+1))
+                    asc += head % tuple(range(cpb*block+r_start,
+                        cpb*(block+1)+r_start ) )
                     asc += ' column'+'-'*(25*5-1)+'\n'
-                    for j in range(r_end-r_start+1):
+                    for j in range(c_start-1,c_end):
                         line = '%5i ' % (j+1)
                         line += ' %4i'*25 % tuple(
-                                matrix[j,cpb*block:cpb*(block+1)] )
+                                matrix[j,cpb*block+r_start-1:
+                                    cpb*(block+1)+r_start-1] )
                         asc += line + '\n'
                 
                 if remainder:
                     head = '    row'+'%4i'+'%5i'*(remainder-1)+'\n'
-                    start = cpb*nblocks + 1
+                    start = cpb*nblocks+r_start
                     asc += head % tuple(range(start,start+remainder))
                     asc += ' column'+'-' * (remainder*5-1)+'\n'
-                    for j in range(r_end-r_start+1):
+                    for j in range(c_start-1,c_end):
                         line = '%5i ' % (j+1)
                         line += ' %4i'*remainder % tuple(
-                                matrix[j,cpb*nblocks:
-                                    cpb*nblocks+remainder] )
+                                matrix[j,cpb*nblocks+r_start-1:
+                                    cpb*nblocks+remainder+r_start-1] )
                         asc += line + '\n'
             
             f = open(filename,'w')
