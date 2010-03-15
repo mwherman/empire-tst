@@ -148,7 +148,9 @@ C--------------check whether tfis is not too big compared to a good Tlump
                   H_Tav = H_Sumtls/H_Sumtl
                ENDIF
 C--------------redefine fission transmission coef. using single iteration
-               TFIs = VT1(TFIs,H_Tav,H_Sumtl)
+C              RCN & MS 03-2010
+C              redefinition avoided to keep the Cross section difference  right. No observed change to corrected XSs.
+C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
                sumfis = FLOAT(NDIvf)*TFIs
             ELSE
                H_Tav = 0.0

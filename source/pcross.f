@@ -64,7 +64,9 @@ C
       INTEGER INT, NINT
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
-      SAVE r, /KALB/
+C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls 	
+      SAVE r, /KALB/, callpcross
+
 C
 C
       DATA callpcross/.FALSE./
