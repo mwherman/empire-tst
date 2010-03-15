@@ -74,7 +74,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, ares, atotsp, coef, controln, controlp,
+      DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
      &                 dang, debinhms, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
@@ -95,7 +95,7 @@ C                      Total PF angular distribution defined only for neutrons
      &                 csepfns(NDEPFN,0:1),ratio2maxw(NDEPFN),
      &                 tequiv1, tequiv2, ddxs(NDAngecis), ebind,
      &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
-     &                 fisxse, dtmp0, dtmp1, csinel,eps
+     &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -256,9 +256,12 @@ C          READ (45,'( 7x,E12.5)',END = 1400) ftmp
 C--------Get and add inelastic cross sections (including double-differential)
          DO i = 2, ND_nlv
             ilv = ICOller(i)
-            IF ( (ilv.LE.NLV(nnurec)) .and.
+C           IF ( (ilv.LE.NLV(nnurec)) .and.
+C           RCN 2010 
+	      IF(ilv.LE.NLV(nnurec)) then
+C           IF ( (ilv.LT.NLV(nnurec)) .and.
 C           For odd nuclides, collective states in continuum have different spin than the ground state
-     &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
+C    &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
 C------------Adding inelastic to discrete levels
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
 C------------Avoid reading closed channels
@@ -375,16 +378,18 @@ C
                  isigma2 = 2*isigma*isigma
                endif
                if(isigma.gt.0) then
-                 dtmp = 0.d0
+
+                 dcor  = 0.d0
                  do ie = max(icsl - 3*isigma,1) ,
      &                   min(icsl + 3*isigma,ncon)
-                   dtmp = dexp(-dble(ie-icsl)**2/isigma2) + dtmp
+                   dcor = dexp(-dble(ie-icsl)**2/isigma2) + dcor
                  enddo
-                 if(dtmp.gt.0.d0) then
+
+                 if(dcor.gt.0.d0) then
                    do ie = max(icsl - 3*isigma,1) ,
      &                     min(icsl + 3*isigma,ncon)
                      CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) +
-     &                 popread/DE*dexp(-dble(ie-icsl)**2/isigma2)/dtmp
+     &                 popread/DE*dexp(-dble(ie-icsl)**2/isigma2)/dcor
                    enddo
                  else
                    CSEmsd(icsl  ,nejcec) = CSEmsd(icsl,nejcec)
@@ -3611,6 +3616,7 @@ C
 
       Dencomp = DENhf - Sumfis
       IF(NRBar.GT.3) GOTO 101
+      GOTO 101
       IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
      &    .NE.1.) THEN
          IF (FISmod(Nnuc).EQ.0.) THEN

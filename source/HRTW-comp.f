@@ -38,7 +38,7 @@ C
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
-      DOUBLE PRECISION VT1
+C     DOUBLE PRECISION VT1
 C
 C
 C

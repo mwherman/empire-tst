@@ -253,7 +253,8 @@ C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.
-         WIDcoll = 0.d0
+C        WIDcoll = 0.d0    
+         WIDcoll = 0.05d0  ! Default changed to 50 keV resolution  RCN 2010
          DXSred = 1.d0     ! scaling factor for direct processes in deuteron induced reactions
          DEFdyn = 1.d0
          DEFsta = 1.d0
@@ -289,7 +290,7 @@ C        IX4ret = 1 local MySQL server (default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 0
-         IF(IOPSYS.EQ.0) IX4ret = 1
+C        IF(IOPSYS.EQ.0) IX4ret = 1
 C--------CCFUF parameters
          DV = 10.
          FCC = 1.
@@ -1965,7 +1966,7 @@ c               ENDIF
 Cpr         WRITE(8,*) 'etl(5,.),netl',etl(5,nejc,nnur),netl
 Cpr         etlmax=EX(NEX(NNUC),NNUC)-Q(NEJC,NNUC)
 Cpr         WRITE(8,*) 'etlmax',etlmax
-            ETL(1,nejc,nnur) = 0
+            ETL(1,nejc,nnur) = 0.
             ETL(2,nejc,nnur) = 0.1*ETL(5,nejc,nnur)
             ETL(3,nejc,nnur) = 0.2*ETL(5,nejc,nnur)
             ETL(4,nejc,nnur) = 0.5*ETL(5,nejc,nnur)
@@ -7522,9 +7523,14 @@ C
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
+
+
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
-            if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
+C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
+
+	      if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
+
 C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn

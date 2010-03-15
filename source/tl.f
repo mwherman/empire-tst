@@ -1831,10 +1831,12 @@ C-----Absorption and elastic cross sections in mb
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-         IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND.
+C        RCN 2010 
+         IF ( ICOller(l+1).LE.NLV(nnuc) ) THEN 
+C        IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND.
 C            For odd nuclides, collective states in continuum have
 C            different spin than the ground state
-     &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN
+C    &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
