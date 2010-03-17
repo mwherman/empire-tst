@@ -5740,9 +5740,11 @@ if {$elm != "$::env(EMPIREDIR)/RIPL-2/" && $elm != "$::env(EMPIREDIR)/data/" && 
 lappend archdirlist $elm }
 }
 set archdirlist [lsort -dictionary $archdirlist]
-set repository "https://ndclx4.bnl.gov/svn/$file-covariance/trunk"
+#set repository "https://ndclx4.bnl.gov/svn/$file-covariance/trunk"
+set repository "https://ndclx4.bnl.gov/svn/put-your-svn-repository"
 set selsvnfilelist ""
-set svnfilelist [lsort [glob -nocomplain *]]
+set svnfilelist ""
+#set svnfilelist [lsort [glob -nocomplain *]]
 set output [exec svn log]
 set output [split $output "\n"]
 foreach elm $output {
@@ -7323,7 +7325,7 @@ adjourn .top75 }} \
         -in $site_8_4 -anchor nw -expand 1 -fill y -side top 
     set site_8_5 [lindex [$top.tab88 childsite] 5]
     ::iwidgets::scrolledlistbox $site_8_5.cpd67 \
-        -hscrollmode dynamic -labelpos nw -labeltext {Local directory:} \
+        -hscrollmode dynamic -labelpos nw -labeltext {Local directory:} -background #d9d9d9\
         -listvariable svnfilelist \
         -selectioncommand {set selsvnfilelist [selection get]} \
         -selectmode extended -textbackground #ffffff -vscrollmode dynamic 
@@ -7370,7 +7372,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_10_0.but75" "Button4" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but75 "$site_10_0.but75 Button $top all _vTclBalloon"
     bind $site_10_0.but75 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {produce ZVV plots comparing two revisions}
+        set ::vTcl::balloon::%W {Produce ZVV plots comparing two revisions}
     }
     button $site_10_0.but76 \
         \
@@ -7400,7 +7402,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_10_0.but76" "Button5" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.but76 "$site_10_0.but76 Button $top all _vTclBalloon"
     bind $site_10_0.but76 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {check out a working copy from a repository}
+        set ::vTcl::balloon::%W {Check out a working copy from a repository}
     }
     label $site_10_0.lab65 \
         -text MT 
@@ -7465,7 +7467,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_10_0.ent67" "Entry5" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.ent67 "$site_10_0.ent67 Entry $top all _vTclBalloon"
     bind $site_10_0.ent67 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {revision number}
+        set ::vTcl::balloon::%W {Revision number}
     }
     label $site_10_0.lab68 \
         -text {Rev #2} 
@@ -7475,7 +7477,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_10_0.ent69" "Entry6" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.ent69 "$site_10_0.ent69 Entry $top all _vTclBalloon"
     bind $site_10_0.ent69 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {revision number}
+        set ::vTcl::balloon::%W {Revision number}
     }
     place $site_10_0.but75 \
         -in $site_10_0 -x 144 -y 65 -width 100 -height 26 -anchor nw \
@@ -7527,7 +7529,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_9_0.cpd70" "Button1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd70 "$site_9_0.cpd70 Button $top all _vTclBalloon"
     bind $site_9_0.cpd70 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {schedule files or directories for addition to the repository}
+        set ::vTcl::balloon::%W {Schedule files or directories for addition to the repository}
     }
     button $site_9_0.cpd71 \
         \
@@ -7542,7 +7544,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_9_0.cpd71" "Button2" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd71 "$site_9_0.cpd71 Button $top all _vTclBalloon"
     bind $site_9_0.cpd71 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {send changes from your working copy to the repository}
+        set ::vTcl::balloon::%W {Send changes from your working copy to the repository}
     }
     button $site_9_0.cpd72 \
         \
@@ -7557,10 +7559,10 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_9_0.cpd72" "Button3" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd72 "$site_9_0.cpd72 Button $top all _vTclBalloon"
     bind $site_9_0.cpd72 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {update your working copy}
+        set ::vTcl::balloon::%W {Update your working copy}
     }
     label $site_9_0.lab65 \
-        -text Repository: 
+       -background #d9d9d9 -text Repository: 
     vTcl:DefineAlias "$site_9_0.lab65" "Label5" vTcl:WidgetProc "Toplevel1" 1
     entry $site_9_0.ent66 \
         -background white -insertbackground black -textvariable repository 
@@ -7591,14 +7593,14 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_9_0.but65" "Button12" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but65 "$site_9_0.but65 Button $top all _vTclBalloon"
     bind $site_9_0.but65 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {delete local directories or file}
+        set ::vTcl::balloon::%W {Delete local directories or file}
     }
     button $site_9_0.but66 \
         -command { refreshsvndirectory } -text Refresh 
     vTcl:DefineAlias "$site_9_0.but66" "Button13" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but66 "$site_9_0.but66 Button $top all _vTclBalloon"
     bind $site_9_0.but66 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {refresh local directory}
+        set ::vTcl::balloon::%W {Refresh local directory}
     }
     place $site_9_0.fra68 \
         -in $site_9_0 -x 15 -y 54 -width 260 -height 102 -anchor nw \
@@ -7628,7 +7630,7 @@ adjourn .top75 }} \
         -in $site_9_0 -x 15 -y 205 -width 126 -height 26 -anchor nw \
         -bordermode ignore 
     ::iwidgets::scrolledlistbox $site_8_5.scr66 \
-        -hscrollmode dynamic -labelpos nw -labeltext {Commit history:} \
+        -hscrollmode dynamic -labelpos nw -labeltext {Commit history:} -background #d9d9d9\
         -listvariable svnlog -textbackground #ffffff -vscrollmode dynamic 
     vTcl:DefineAlias "$site_8_5.scr66" "Scrolledlistbox12" vTcl:WidgetProc "Toplevel1" 1
     pack $site_8_5.cpd67 \
