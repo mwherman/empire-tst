@@ -4926,9 +4926,89 @@ proc vTcl:project:info {} {
     }
     set site_8_5 [lindex [$base.tab88 childsite] 5]
     namespace eval ::widgets::$site_8_5 {
-        array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
+        array set save {-background 1 -highlightcolor 1}
     }
     set site_8_0 $site_8_5
+    namespace eval ::widgets::$site_8_0.cpd67 {
+        array set save {-hscrollmode 1 -labelpos 1 -labeltext 1 -listvariable 1 -selectioncommand 1 -selectmode 1 -textbackground 1 -vscrollmode 1}
+    }
+    namespace eval ::widgets::$site_8_0.fra68 {
+        array set save {-borderwidth 1 -height 1 -relief 1 -width 1}
+    }
+    set site_9_0 $site_8_0.fra68
+    namespace eval ::widgets::$site_9_0.fra68 {
+        array set save {-borderwidth 1 -height 1 -relief 1 -width 1}
+    }
+    set site_10_0 $site_9_0.fra68
+    namespace eval ::widgets::$site_10_0.but75 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.but76 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab65 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent66 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_10_0.men67 {
+        array set save {-indicatoron 1 -menu 1 -padx 1 -pady 1 -relief 1}
+    }
+    namespace eval ::widgets::$site_10_0.men67.m {
+        array set save {-tearoff 1}
+        namespace eval subOptions {
+            array set save {-command 1 -label 1 -value 1 -variable 1}
+        }
+    }
+    namespace eval ::widgets::$site_10_0.lab66 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent67 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_10_0.lab68 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_10_0.ent69 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd70 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd71 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_9_0.cpd72 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_9_0.lab65 {
+        array set save {-text 1}
+    }
+    namespace eval ::widgets::$site_9_0.ent66 {
+        array set save {-_tooltip 1 -background 1 -insertbackground 1 -textvariable 1}
+    }
+    namespace eval ::widgets::$site_9_0.lab66 {
+        array set save {-foreground 1 -height 1 -text 1 -width 1}
+    }
+    set site_10_0 $site_9_0.lab66
+    namespace eval ::widgets::$site_10_0.scr67 {
+        array set save {-listvariable 1 -textbackground 1}
+    }
+    namespace eval ::widgets::$site_9_0.but65 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_9_0.but66 {
+        array set save {-_tooltip 1 -command 1 -text 1}
+    }
+    namespace eval ::widgets::$site_8_0.scr66 {
+        array set save {-hscrollmode 1 -labelpos 1 -labeltext 1 -listvariable 1 -textbackground 1 -vscrollmode 1}
+    }
+    set site_8_6 [lindex [$base.tab88 childsite] 6]
+    namespace eval ::widgets::$site_8_6 {
+        array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
+    }
+    set site_8_0 $site_8_6
     namespace eval ::widgets::$site_8_0.scr77 {
         array set save {-activebackground 1 -hscrollmode 1 -labelfont 1 -labelpos 1 -labeltext 1 -listvariable 1 -selectioncommand 1 -selectmode 1 -textbackground 1 -textfont 1 -vscrollmode 1 -width 1}
     }
@@ -4972,11 +5052,11 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_9_0.but86 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -disabledforeground 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
-    set site_8_6 [lindex [$base.tab88 childsite] 6]
-    namespace eval ::widgets::$site_8_6 {
+    set site_8_7 [lindex [$base.tab88 childsite] 7]
+    namespace eval ::widgets::$site_8_7 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
-    set site_8_0 $site_8_6
+    set site_8_0 $site_8_7
     namespace eval ::widgets::$site_8_0.fra83 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
@@ -5077,11 +5157,11 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_13_0.but78 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
-    set site_8_7 [lindex [$base.tab88 childsite] 7]
-    namespace eval ::widgets::$site_8_7 {
+    set site_8_8 [lindex [$base.tab88 childsite] 8]
+    namespace eval ::widgets::$site_8_8 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
-    set site_8_0 $site_8_7
+    set site_8_0 $site_8_8
     namespace eval ::widgets::$site_8_0.fra84 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
     }
@@ -5203,6 +5283,9 @@ proc vTcl:project:info {} {
     }
     namespace eval ::vTcl::modules::main {
         set procs {
+            editFile
+            pspdfView
+            refreshsvndirectory
             init
             main
             ArchiveList
@@ -5594,10 +5677,20 @@ global widget file profilter zvfilter archfilter
 }
 
 #############################################################################
+# Refresh local directory for SVN
+#
+proc ::refreshsvndirectory {} {
+  global svnfilelist
+  set selsvnfilelist ""
+  set svnfilelist [lsort [glob -nocomplain *]]
+}
+
+#############################################################################
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat EXPDAT
+global svnfilelist selsvnfilelist svnlog repository
 
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
@@ -5647,6 +5740,16 @@ if {$elm != "$::env(EMPIREDIR)/RIPL-2/" && $elm != "$::env(EMPIREDIR)/data/" && 
 lappend archdirlist $elm }
 }
 set archdirlist [lsort -dictionary $archdirlist]
+set repository "https://ndclx4.bnl.gov/svn/$file-covariance/trunk"
+set selsvnfilelist ""
+set svnfilelist [lsort [glob -nocomplain *]]
+set output [exec svn log]
+set output [split $output "\n"]
+foreach elm $output {
+  if {[string index $elm 0] != ""} {
+    lappend svnlog $elm
+  }
+}
 }
 
 init $argc $argv
@@ -5947,6 +6050,8 @@ adjourn .top75}} \
         -command {} -label {DDX plots} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
+    $top.tab88 add \
+        -command {} -label Archive -width 0
     $top.tab88 add \
         -command {} -label Folders -width 0 
     $top.tab88 add \
@@ -7217,7 +7322,323 @@ adjourn .top75 }} \
     pack $site_8_4.lab81 \
         -in $site_8_4 -anchor nw -expand 1 -fill y -side top 
     set site_8_5 [lindex [$top.tab88 childsite] 5]
-    ::iwidgets::scrolledlistbox $site_8_5.scr77 \
+    ::iwidgets::scrolledlistbox $site_8_5.cpd67 \
+        -hscrollmode dynamic -labelpos nw -labeltext {Local directory:} \
+        -listvariable svnfilelist \
+        -selectioncommand {set selsvnfilelist [selection get]} \
+        -selectmode extended -textbackground #ffffff -vscrollmode dynamic 
+    vTcl:DefineAlias "$site_8_5.cpd67" "Scrolledlistbox11" vTcl:WidgetProc "Toplevel1" 1
+    frame $site_8_5.fra68 \
+        -borderwidth 2 -relief groove -height 75 -width 288 
+    vTcl:DefineAlias "$site_8_5.fra68" "Frame1" vTcl:WidgetProc "Toplevel1" 1
+    set site_9_0 $site_8_5.fra68
+    frame $site_9_0.fra68 \
+        -borderwidth 2 -relief groove -height 102 -width 260 
+    vTcl:DefineAlias "$site_9_0.fra68" "Frame3" vTcl:WidgetProc "Toplevel1" 1
+    set site_10_0 $site_9_0.fra68
+    button $site_10_0.but75 \
+        \
+        -command {
+    if { $mt == "" } {
+      tk_dialog .msgbox "Error" "Please enter a MT number for comparison." info 0 OK
+    } else {
+      if { $rev1 == "" || $rev2 == "" } {
+        tk_dialog .msgbox "Error" "Please enter a revision number." info 0 OK
+      } else {
+        if {[file isdirectory rev$rev1] == 0} {
+          set output [exec svn checkout $repository@$rev1 rev$rev1]
+          set output [split $output "\n"]
+          foreach elm $output {
+            lappend svnoutput $elm
+          }
+          refreshsvndirectory
+        }
+        if {[file isdirectory rev$rev2] == 0} {
+          set output [exec svn checkout $repository@$rev2 rev$rev2]
+          set output [split $output "\n"]
+          foreach elm $output {
+            lappend svnoutput $elm
+          }
+          refreshsvndirectory
+        }
+        exec $::env(EMPIREDIR)/scripts/mtacomp $mt comp $file rev$rev1 Rev$rev1 rev$rev2/$file-s.endf Rev$rev2
+        exec $::env(EMPIREDIR)/scripts/zvv $file-${mt}comp.zvd &
+      }
+    }
+        } \
+        -text Plot 
+    vTcl:DefineAlias "$site_10_0.but75" "Button4" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.but75 "$site_10_0.but75 Button $top all _vTclBalloon"
+    bind $site_10_0.but75 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {produce ZVV plots comparing two revisions}
+    }
+    button $site_10_0.but76 \
+        \
+        -command {
+    if { $rev1 == "" && $rev2 == "" } {
+      tk_dialog .msgbox "Error" "Please enter a revision number." info 0 OK
+    } else {
+      if {$rev1 != ""} {
+        set output [exec svn checkout $repository@$rev1 rev$rev1]
+        set output [split $output "\n"]
+        foreach elm $output {
+          lappend svnoutput $elm
+        }
+        refreshsvndirectory
+      }
+      if {$rev2 != ""} {
+        set output [exec svn checkout $repository@$rev2 rev$rev2]
+        set output [split $output "\n"]
+        foreach elm $output {
+          lappend svnoutput $elm
+        }
+        refreshsvndirectory
+      }
+    }
+        } \
+        -text Retrieve 
+    vTcl:DefineAlias "$site_10_0.but76" "Button5" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.but76 "$site_10_0.but76 Button $top all _vTclBalloon"
+    bind $site_10_0.but76 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {check out a working copy from a repository}
+    }
+    label $site_10_0.lab65 \
+        -text MT 
+    vTcl:DefineAlias "$site_10_0.lab65" "Label2" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent66 \
+        -background white -insertbackground black -textvariable mt 
+    vTcl:DefineAlias "$site_10_0.ent66" "Entry4" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent66 "$site_10_0.ent66 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {MT number}
+    }
+    menubutton $site_10_0.men67 \
+        -indicatoron 1 -menu "$site_10_0.men67.m" -padx 4 -pady 3 \
+        -relief raised 
+    vTcl:DefineAlias "$site_10_0.men67" "Menubutton2" vTcl:WidgetProc "Toplevel1" 1
+    menu $site_10_0.men67.m \
+        -tearoff 0 
+    $site_10_0.men67.m add radiobutton \
+        -value 1 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=1 (total)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 2 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=2 (elastic)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 4 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=4 (inelastic)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 16 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=16 (x,2n)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 17 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=17 (x,3n)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 18 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=18 (x,f)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 22 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=22 (x,na)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 28 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=28 (x,np)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 45 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=45 (x,npa)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 102 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=102 (x,g)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 103 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=103 (x,p)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 107 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=107 (x,a)} 
+    $site_10_0.men67.m add radiobutton \
+        -value 112 -variable mt -command {# TODO: Your menu handler here} \
+        -label {MT=112 (n,pa)} 
+    label $site_10_0.lab66 \
+        -text {Rev #1} 
+    vTcl:DefineAlias "$site_10_0.lab66" "Label3" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent67 \
+        -background white -insertbackground black -textvariable rev1 
+    vTcl:DefineAlias "$site_10_0.ent67" "Entry5" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent67 "$site_10_0.ent67 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent67 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {revision number}
+    }
+    label $site_10_0.lab68 \
+        -text {Rev #2} 
+    vTcl:DefineAlias "$site_10_0.lab68" "Label4" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_10_0.ent69 \
+        -background white -insertbackground black -textvariable rev2 
+    vTcl:DefineAlias "$site_10_0.ent69" "Entry6" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_10_0.ent69 "$site_10_0.ent69 Entry $top all _vTclBalloon"
+    bind $site_10_0.ent69 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {revision number}
+    }
+    place $site_10_0.but75 \
+        -in $site_10_0 -x 144 -y 65 -width 100 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.but76 \
+        -in $site_10_0 -x 15 -y 65 -width 100 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab65 \
+        -in $site_10_0 -x 136 -y 13 -width 50 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent66 \
+        -in $site_10_0 -x 136 -y 33 -width 50 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.men67 \
+        -in $site_10_0 -x 193 -y 32 -width 49 -height 24 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab66 \
+        -in $site_10_0 -x 15 -y 13 -width 50 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent67 \
+        -in $site_10_0 -x 15 -y 33 -width 50 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.lab68 \
+        -in $site_10_0 -x 74 -y 13 -width 50 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_10_0.ent69 \
+        -in $site_10_0 -x 74 -y 33 -width 50 -height 22 -anchor nw \
+        -bordermode ignore 
+    button $site_9_0.cpd70 \
+        \
+        -command {
+#  set addfiles {}
+  foreach el $selsvnfilelist {
+      lappend svnoutput [exec svn add $el]
+#      lappend addfiles $el
+  }
+#  set output [open "| svn add $addfiles"]
+#  set svnoutput $svnoutput$output
+
+  if {[tk_dialog .dialogsi Confirm "Do you want to commit your changes right now?" "" 0 No Yes ] == 1} {
+    set output [exec svn commit --editor-cmd $editor]
+    set output [split $output "\n"]
+    foreach elm $output {
+      lappend svnoutput $elm
+    }
+  }
+    } \
+        -text Add 
+    vTcl:DefineAlias "$site_9_0.cpd70" "Button1" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.cpd70 "$site_9_0.cpd70 Button $top all _vTclBalloon"
+    bind $site_9_0.cpd70 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {schedule files or directories for addition to the repository}
+    }
+    button $site_9_0.cpd71 \
+        \
+        -command {
+    set output [exec svn commit --editor-cmd $editor]
+    set output [split $output "\n"]
+    foreach elm $output {
+      lappend svnoutput $elm
+    }
+        } \
+        -text Commit 
+    vTcl:DefineAlias "$site_9_0.cpd71" "Button2" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.cpd71 "$site_9_0.cpd71 Button $top all _vTclBalloon"
+    bind $site_9_0.cpd71 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {send changes from your working copy to the repository}
+    }
+    button $site_9_0.cpd72 \
+        \
+        -command {
+    set output [exec svn update]
+    set output [split $output "\n"]
+    foreach elm $output {
+      lappend svnoutput $elm
+    }
+        } \
+        -text Update 
+    vTcl:DefineAlias "$site_9_0.cpd72" "Button3" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.cpd72 "$site_9_0.cpd72 Button $top all _vTclBalloon"
+    bind $site_9_0.cpd72 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {update your working copy}
+    }
+    label $site_9_0.lab65 \
+        -text Repository: 
+    vTcl:DefineAlias "$site_9_0.lab65" "Label5" vTcl:WidgetProc "Toplevel1" 1
+    entry $site_9_0.ent66 \
+        -background white -insertbackground black -textvariable repository 
+    vTcl:DefineAlias "$site_9_0.ent66" "Entry11" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.ent66 "$site_9_0.ent66 Entry $top all _vTclBalloon"
+    bind $site_9_0.ent66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {repository }
+    }
+    labelframe $site_9_0.lab66 \
+        -foreground black -text Output -height 185 -width 260 
+    vTcl:DefineAlias "$site_9_0.lab66" "Labelframe1" vTcl:WidgetProc "Toplevel1" 1
+    set site_10_0 $site_9_0.lab66
+    ::iwidgets::scrolledlistbox $site_10_0.scr67 \
+        -listvariable svnoutput -textbackground #ffffff 
+    vTcl:DefineAlias "$site_10_0.scr67" "Scrolledlistbox4" vTcl:WidgetProc "Toplevel1" 1
+    place $site_10_0.scr67 \
+        -in $site_10_0 -x 15 -y 21 -width 232 -height 150 -anchor nw \
+        -bordermode ignore 
+    button $site_9_0.but65 \
+        -command {
+    if {[tk_dialog .dialogsi Confirm "Do you really want to delete the selected directories or files?" "" 0 No Yes ] == 1} {
+      foreach el $selsvnfilelist {
+        lappend svnoutput [exec rm -rf $el]
+      }
+      refreshsvndirectory
+    }
+        } -text {Delete local files} 
+    vTcl:DefineAlias "$site_9_0.but65" "Button12" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.but65 "$site_9_0.but65 Button $top all _vTclBalloon"
+    bind $site_9_0.but65 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {delete local directories or file}
+    }
+    button $site_9_0.but66 \
+        -command { refreshsvndirectory } -text Refresh 
+    vTcl:DefineAlias "$site_9_0.but66" "Button13" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_9_0.but66 "$site_9_0.but66 Button $top all _vTclBalloon"
+    bind $site_9_0.but66 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {refresh local directory}
+    }
+    place $site_9_0.fra68 \
+        -in $site_9_0 -x 15 -y 54 -width 260 -height 102 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.cpd70 \
+        -in $site_9_0 -x 15 -y 166 -width 80 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.cpd71 \
+        -in $site_9_0 -x 106 -y 165 -width 80 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.cpd72 \
+        -in $site_9_0 -x 197 -y 165 -width 80 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.lab65 \
+        -in $site_9_0 -x 15 -y 25 -width 75 -height 20 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.ent66 \
+        -in $site_9_0 -x 93 -y 25 -width 183 -height 22 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.lab66 \
+        -in $site_9_0 -x 14 -y 236 -width 260 -height 185 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.but65 \
+        -in $site_9_0 -x 151 -y 205 -width 126 -height 26 -anchor nw \
+        -bordermode ignore 
+    place $site_9_0.but66 \
+        -in $site_9_0 -x 15 -y 205 -width 126 -height 26 -anchor nw \
+        -bordermode ignore 
+    ::iwidgets::scrolledlistbox $site_8_5.scr66 \
+        -hscrollmode dynamic -labelpos nw -labeltext {Commit history:} \
+        -listvariable svnlog -textbackground #ffffff -vscrollmode dynamic 
+    vTcl:DefineAlias "$site_8_5.scr66" "Scrolledlistbox12" vTcl:WidgetProc "Toplevel1" 1
+    pack $site_8_5.cpd67 \
+        -in $site_8_5 -anchor nw -expand 1 -fill both -side left 
+    pack $site_8_5.fra68 \
+        -in $site_8_5 -anchor center -expand 0 -fill y -side left 
+    pack $site_8_5.scr66 \
+        -in $site_8_5 -anchor ne -expand 1 -fill both -side right 
+    set site_8_6 [lindex [$top.tab88 childsite] 6]
+    ::iwidgets::scrolledlistbox $site_8_6.scr77 \
         -activebackground #dcdcdc -hscrollmode dynamic \
         -labelfont {Helvetica -12 } -labelpos nw -background #d9d9d9\
         -labeltext {Other working folders:} -listvariable archdirlist \
@@ -7232,7 +7653,7 @@ foreach el $archfiletmp {
 set archfile ""} \
         -selectmode single -textbackground #ffffff -textfont {Helvetica -12 } \
         -vscrollmode dynamic -width 150 
-    ::iwidgets::scrolledlistbox $site_8_5.scr78 \
+    ::iwidgets::scrolledlistbox $site_8_6.scr78 \
         -activebackground #dcdcdc \
         -dblclickcommand {set selarchfilelist [selection get]
 set archfile [lindex $selarchfilelist 0]
@@ -7252,10 +7673,10 @@ if {$archexten == ".ps"} {
 set archfile [lindex $selarchfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
         -textfont {Helvetica -12 } -vscrollmode dynamic -width 150 
-    frame $site_8_5.fra78 \
+    frame $site_8_6.fra78 \
         -borderwidth 2 -background #d9d9d9 -height 75 \
         -highlightbackground #dcdcdc -width 125 
-    set site_9_0 $site_8_5.fra78
+    set site_9_0 $site_8_6.fra78
     ::iwidgets::entryfield $site_9_0.ent79 \
         -command {adjourn .top75} -labelfont {Helvetica -12 } \
         -labeltext Folder: -textbackground white -textvariable archdir \
@@ -7312,10 +7733,10 @@ adjourn .top75 }} \
     pack $site_9_0.lab81 \
         -in $site_9_0 -anchor ne -expand 1 -fill y -ipady 5 -padx 5 -pady 5 \
         -side top 
-    frame $site_8_5.fra82 \
+    frame $site_8_6.fra82 \
         -borderwidth 2 -background #d9d9d9 -height 75 \
         -highlightbackground #dcdcdc -width 125 
-    set site_9_0 $site_8_5.fra82
+    set site_9_0 $site_8_6.fra82
     button $site_9_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
@@ -7346,25 +7767,25 @@ set archfilelist "" }} \
     pack $site_9_0.but86 \
         -in $site_9_0 -anchor nw -expand 0 -fill x -padx 5 -pady 17 \
         -side bottom 
-    pack $site_8_5.scr77 \
-        -in $site_8_5 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
+    pack $site_8_6.scr77 \
+        -in $site_8_6 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
         -side left 
-    pack $site_8_5.scr78 \
-        -in $site_8_5 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
+    pack $site_8_6.scr78 \
+        -in $site_8_6 -anchor nw -expand 1 -fill both -padx 10 -pady 5 \
         -side left 
-    pack $site_8_5.fra78 \
-        -in $site_8_5 -anchor nw -expand 0 -fill y -side left 
-    pack $site_8_5.fra82 \
-        -in $site_8_5 -anchor ne -expand 1 -fill y -side top 
-    set site_8_6 [lindex [$top.tab88 childsite] 6]
-    frame $site_8_6.fra83 \
+    pack $site_8_6.fra78 \
+        -in $site_8_6 -anchor nw -expand 0 -fill y -side left 
+    pack $site_8_6.fra82 \
+        -in $site_8_6 -anchor ne -expand 1 -fill y -side top 
+    set site_8_7 [lindex [$top.tab88 childsite] 7]
+    frame $site_8_7.fra83 \
         -background #d9d9d9 -highlightbackground #dcdcdc \
         -highlightcolor black 
-    bindtags $site_8_6.fra83 "itk-destroy-.top75.tab88.canvas.notebook.cs.page9.cs.fra83 .top75.tab88.canvas.notebook.cs.page6.cs Frame $top all"
-    bind $site_8_6.fra83 <Configure> {
+    bindtags $site_8_7.fra83 "itk-destroy-.top75.tab88.canvas.notebook.cs.page9.cs.fra83 .top75.tab88.canvas.notebook.cs.page6.cs Frame $top all"
+    bind $site_8_7.fra83 <Configure> {
         namespace inscope ::iwidgets::Tabnotebook {::.top75.tab88 _pageReconfigure .top75.tab88.canvas.notebook.cs.page9.cs.fra83 5 %w %h}
     }
-    set site_9_0 $site_8_6.fra83
+    set site_9_0 $site_8_7.fra83
     ::iwidgets::labeledframe $site_9_0.lab84 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
         -background #d9d9d9 -labeltext {Multiple run} 
@@ -7699,17 +8120,17 @@ adjourn .top75} \
         -in $site_11_0 -anchor n -expand 0 -fill none -ipady 5 -side top 
     pack $site_9_0.lab84 \
         -in $site_9_0 -anchor center -expand 1 -fill both -side left 
-    pack $site_8_6.fra83 \
-        -in $site_8_6 -anchor center -expand 1 -fill both -side top 
-    set site_8_7 [lindex [$top.tab88 childsite] 7]
-    frame $site_8_7.fra84 \
+    pack $site_8_7.fra83 \
+        -in $site_8_7 -anchor center -expand 1 -fill both -side top 
+    set site_8_8 [lindex [$top.tab88 childsite] 8]
+    frame $site_8_8.fra84 \
         -background #d9d9d9 -highlightbackground #dcdcdc \
         -highlightcolor black 
-    bindtags $site_8_7.fra84 "itk-destroy-.top75.tab88.canvas.notebook.cs.page10.cs.fra84 .top75.tab88.canvas.notebook.cs.page7.cs Frame $top all"
-    bind $site_8_7.fra84 <Configure> {
+    bindtags $site_8_8.fra84 "itk-destroy-.top75.tab88.canvas.notebook.cs.page10.cs.fra84 .top75.tab88.canvas.notebook.cs.page7.cs Frame $top all"
+    bind $site_8_8.fra84 <Configure> {
         namespace inscope ::iwidgets::Tabnotebook {::.top75.tab88 _pageReconfigure .top75.tab88.canvas.notebook.cs.page10.cs.fra84 6 %w %h}
     }
-    set site_9_0 $site_8_7.fra84
+    set site_9_0 $site_8_8.fra84
     ::iwidgets::scrolledlistbox $site_9_0.scrolledlistbox83 \
         -activebackground #dcdcdc -cursor {} \
         -dblclickcommand { editFile $::env(EMPIREDIR)/source/[selection get] } \
@@ -7768,8 +8189,8 @@ cd $workdir} \
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
         -pady 27 -side left 
-    pack $site_8_7.fra84 \
-        -in $site_8_7 -anchor center -expand 1 -fill both -side top 
+    pack $site_8_8.fra84 \
+        -in $site_8_8 -anchor center -expand 1 -fill both -side top 
     $top.tab88 select 0
     menu $top.m88 \
         -activebackground #dcdcdc -activeforeground #000000 \
