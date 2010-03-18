@@ -5745,7 +5745,8 @@ set repository "https://ndclx4.bnl.gov/svn/put-your-svn-repository"
 set selsvnfilelist ""
 set svnfilelist ""
 #set svnfilelist [lsort [glob -nocomplain *]]
-set output [exec svn log]
+#set output [exec svn log]
+set output ""
 set output [split $output "\n"]
 foreach elm $output {
   if {[string index $elm 0] != ""} {
