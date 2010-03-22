@@ -5677,6 +5677,15 @@ proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat EXPDAT
 global svnfilelist selsvnfilelist svnlog repository
 
+# check for EMPIREDIR
+if {[info exists env(EMPIREDIR)]} {
+        puts "Empire found in $::env(EMPIREDIR)"
+    } else {
+        puts "Assuming empire root directory is at '..'"
+        set env(EMPIREDIR) ".."
+    }
+
+
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
    gets $rcfl file
@@ -7154,7 +7163,7 @@ lappend dd} \
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #d9d9d9 \
-        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ /Users/herman/empire/scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nset\ work\ \[pwd\]\nset\ detlist\ \"\"\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\n\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"n\"\ \}\ continue\n\ \ \ set\ detl\ \[glob\ -path\ \$work/\$file-tl/\ \$el*\]\n\ \ \ set\ detll\ \[split\ \$detl\ \"\ \"\]\n\ \ \ foreach\ edel\ \$detll\ \{\n\ \ \ file\ delete\ \$edel\n\ \ \ \}\n\}\nif\ \{\$ctldir\ ==\ 1\}\ \{\n\ \ \ file\ delete\ -force\ \$work/\$file-tl\n\}\n\nadjourn\ .top75\n\} \
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ $::env(EMPIREDIR)/scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nset\ work\ \[pwd\]\nset\ detlist\ \"\"\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\n\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"n\"\ \}\ continue\n\ \ \ set\ detl\ \[glob\ -path\ \$work/\$file-tl/\ \$el*\]\n\ \ \ set\ detll\ \[split\ \$detl\ \"\ \"\]\n\ \ \ foreach\ edel\ \$detll\ \{\n\ \ \ file\ delete\ \$edel\n\ \ \ \}\n\}\nif\ \{\$ctldir\ ==\ 1\}\ \{\n\ \ \ file\ delete\ -force\ \$work/\$file-tl\n\}\n\nadjourn\ .top75\n\} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -state normal -text {Delete selected files} \
