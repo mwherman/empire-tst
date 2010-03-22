@@ -21,7 +21,8 @@ LINK   = cc
 OPT    =
 LIBS   =
 LFLAGS = /out:$(NAMEEXE)
-LFLAGS = -o $(NAMEEXE) -static
+#LFLAGS = -o $(NAMEEXE) -static
+LFLAGS = -o $(NAMEEXE)
 
 $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 	$(LINK) $(OBJS) $(LFLAGS)
