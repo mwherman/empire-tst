@@ -1,7 +1,8 @@
 #----GNU gfortran FORTRAN compiler
-#FC     =  gfortran
+FC     =  gfortran
+CC     =  gcc
 #----flags for production compilation with gfortran
-#FFLAGS = -O3 -pg -std=legacy
+FFLAGS = -O3 -pg -std=legacy -m64
 #FFLAGS = -std=legacy
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check 
@@ -30,7 +31,7 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for optimalization using ifort
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #FFLAGS = -arch pn4 -O3 -ipo
@@ -38,7 +39,7 @@ FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3 -ipo
+#FFLAGS =  -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
@@ -64,13 +65,17 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
-            fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o
+            fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
+            systematics.o
 
-OBJE =      subecis06m.o systematics.o
+# ECIS must not be optimized:
+OBJE =      subecis06m.o
 
-empire:   $(OBJF) $(OBJE)
-	$(FC) -o $@ $(OBJF) $(OBJE)
+empire:   $(OBJF) ecis
+	$(FC) -m64 -o $@ $(OBJF) $(OBJE)
 
+ecis:	
+	$(FC) -O0 -pg -std=legacy -m64 -c subecis06m.f
 
 #for profiling (also turn on -pg option for each -o file above):
 #empire:   $(OBJF) $(OBJE)
