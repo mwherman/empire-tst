@@ -8435,6 +8435,7 @@ $file.inp &}} -label {Create input}
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add cascade \
+        -menu "$site_3_0.menu93.men87" \
         -command {} -label {KALMAN for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men87 \
