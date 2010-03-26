@@ -5677,15 +5677,6 @@ proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat EXPDAT
 global svnfilelist selsvnfilelist svnlog repository
 
-# check for EMPIREDIR
-if {[info exists env(EMPIREDIR)]} {
-        puts "Empire found in $::env(EMPIREDIR)"
-    } else {
-        puts "Assuming empire root directory is at '..'"
-        set env(EMPIREDIR) ".."
-    }
-
-
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
    gets $rcfl file
@@ -5748,6 +5739,14 @@ foreach elm $output {
   }
 }
 }
+
+# before calling init, check for EMPIREDIR at global scope
+if {[info exists env(EMPIREDIR)]} {
+        puts "Empire found in $::env(EMPIREDIR)"
+    } else {
+        puts "Assuming empire root directory is at '..'"
+        set env(EMPIREDIR) ".."
+    }
 
 init $argc $argv
 
