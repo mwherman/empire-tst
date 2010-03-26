@@ -122,7 +122,7 @@ def cleanUp():
     # clean up some temporary files if present:
     for f in (project+'-l.endf', project+'-lin.endf', 
         project+'-f.endf',project+'-rec.endf', 
-        project+'-.endf', project+'-s.endf'):
+        project+'-.endf', project+'-sig.endf'):
         # rm function defined below
         rm(f)
     
