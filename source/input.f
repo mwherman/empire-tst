@@ -768,8 +768,8 @@ C                    From n,2n2p   to   n,a
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
 C                    From n,3n2p   to   n,an   
                      iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 1) = 'an'
-                     iend = iend + 1
+                     REAction(nnuc)(iend + 1:iend + 2) = 'an'
+                     iend = iend + 2
                      ENDF(nnuc) = 1
                   ENDIF
                                   
@@ -7525,11 +7525,14 @@ C
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
 
 
+
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
+
 	      if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
+
 
 C
 C           For covariance calculation of dynamical deformation
