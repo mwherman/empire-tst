@@ -31,7 +31,9 @@ fi
 if [ -f "XS_(z,nel).zvd" ]; then
   mv "XS_(z,nel).zvd" $file-el.zvd
 fi
-mv "XS_(z,nonel).zvd" $file-non.zvd
+if [ -f "XS_(z,nonel).zvd" ]; then
+  mv "XS_(z,nonel).zvd" $file-non.zvd
+fi
 if [ -f "XS_(z,gamma).zvd" ]; then
   mv "XS_(z,gamma).zvd" $file-zg.zvd
 fi
