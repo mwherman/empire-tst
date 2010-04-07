@@ -29,11 +29,12 @@ for file in lis:
     line, flag = endf.locate_section( file.strip(), 2, 151)
     if flag[0] == 0:
         fin = open(file.strip(),"r").readlines()
-        valList = m.readENDFline( fin[line+2] )
-        Eh = valList[1]
+        # energy boundaries on 3rd line of MF2:
+        elow,ehigh,lru,lrf,nro,naps = m.readENDFline(line+2)
+        # isotope name (Mn_055 for example)
         isot = file[6:].split('.')[0]
         names.append( isot )
-        vals.append( Eh )
+        vals.append( ehigh )
 
 cutoff = 5e+3   # 5 keV
 # sorted() sorts by first part of zipped pair, so this gives results sorted
