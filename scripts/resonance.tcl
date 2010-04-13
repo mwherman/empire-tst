@@ -925,7 +925,7 @@ proc ::LoadVars {} {
 
   set m_nNoResToBeAdjusted 10
   set m_nNoResToBeEvaluated 3
-  set m_nNoExtraRes 5
+  set m_nNoExtraRes 9999
 
   set m_nZA [expr int($m_nZA)]
   set m_nZ [expr $m_nZA/1000]
