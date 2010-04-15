@@ -37,7 +37,7 @@ C*               SEE SUBROUTINE EXDATA                               *
 C*                                                                   *
 C*********************************************************************
 c     PARAMETER(NP=100,MP=5050,NX=6000,MX=45150,NS=100,NR=30)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
 C               NP : MAXIMAL NUMBER OF PARAMETERS
 C               NX : MAXIMAL NUMBER OF EXPERIMENTAL DATA
@@ -148,8 +148,10 @@ C***************************************
       IF(RATIO.LE.1.0) RATIO=1.0
       RATIO=DSQRT(RATIO)
 C
+      WRITE(21,'(25X,I5)') NPARM
       IF(KCTL1 .EQ. 0) THEN
          WRITE(6,2120)
+         WRITE(21,'(11A12)')(PNAME(I),I=1,NPARM)
          DO 100 I=1,NPARM
             PE(I)=DSQRT(X0(I*(I+1)/2))
             XX=P1(I)
@@ -160,9 +162,11 @@ C
                WRITE(6,2140) I,PNAME(I),P0(I),P1(I),YY
             END IF
   100    CONTINUE
+         WRITE(21,'(11(1PE12.5))') (P1(I),I=1,NPARM)
          WRITE(21,'(11(1PE12.5))') (PE(I)/P1(I),I=1,NPARM)
       ELSE
          WRITE(6,2150)
+         WRITE(21,'(11A12)')(PNAME(I),I=1,NPARM)
          DO 110 I=1,NPARM
             PE(I)=DSQRT(X0(I*(I+1)/2))
             XX=P1(I)
@@ -179,7 +183,7 @@ C
          WRITE(21,'(11(1PE12.5))') (PE(I)/P1(I),I=1,NPARM)
       END IF
 C
-      write(6,*) 'SCALE = ', SCALE
+      WRITE(6,*) 'SCALE = ', SCALE
 
       DO 200 I=1,NPARM
          KI=IPARM(I)
@@ -253,7 +257,7 @@ C*************************************************************
 C
       SUBROUTINE PRCALC(NDATA,NENRG,NPARM,
      &                  X,Y,V,P1,PD,X0,S0,E0,A,CHISQ)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 X(NX),Y(NX),V(MX),S0(NS),E0(NS),A(NS,NP)
       REAL*8 P1(NP),PD(NP),X0(MP)
@@ -409,7 +413,7 @@ C     GETCRX : READ CALCULATED VALUES WITH PRIOR PARAMETERS  *
 C*************************************************************
 C
       SUBROUTINE GETCRX(NENRG,NRMAX,SG,EG,REACT)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS)
       DIMENSION NENRG(NR)
@@ -435,7 +439,7 @@ C*************************************************************
 C
       SUBROUTINE GETPRM(NPARM,NPMAX,P0,P1,X0,PRIP,PRIE,PRIC,IPARM,
      &                  PNAME)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 P1(NP),P0(NP),X0(MP)
       REAL*8 PRIP(NP),PRIE(NP),PRIC(MP)
@@ -467,7 +471,7 @@ C     GETSTV : READ SENSITIVITY MATRIX                       *
 C*************************************************************
 C
       SUBROUTINE GETSTV(NENRG,NRMAX,NPARM,NPMAX,AG,IPARM)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 AG(NR,NS,NP)
       DIMENSION IPARM(NP),NENRG(NR)
@@ -496,7 +500,7 @@ C     SETSTV : PREPARE SENSITIVITY AND SPLINE                *
 C*************************************************************
 C
       SUBROUTINE SETSTV(NENRG,NPARM,S0,E0,A,SG,EG,AG,IPARM,KREAC,IZERO)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS),AG(NR,NS,NP),S0(NS),E0(NS),A(NS,NP)
       DIMENSION NENRG(NR),IPARM(NP)
@@ -542,7 +546,7 @@ C     EXDATA : READ EXPERIMENTAL DATA                        *
 C*************************************************************
 C
       SUBROUTINE EXDATA(X,Y,V,EMAX,EMIN,EW,NDATA,NGROUP,KCOVEX)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
 C
 C           KCOVEX = 1 : READ COVARIANCE FILE FROM UNIT(12)
@@ -721,7 +725,7 @@ C***************************************
 C     SWAP COLUMNS OF COVARIANCE       *
 C***************************************
       SUBROUTINE SWCL(V,N,I1,I2)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 V(MX)
       REAL*8 A(NX),B(NX),C(NX)
@@ -771,7 +775,7 @@ C     DESIGN : PREPARE DESIGN MATRIX                         *
 C*************************************************************
 C
       SUBROUTINE DESIGN(D,X,E0,NDATA,NENRG)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       PARAMETER(NO=1)
 C               NO : ORDER OF POLYNOMIAL = 1
@@ -819,7 +823,7 @@ C*************************************************************
 C     OUTSPL : WRITE SPLINES ON UNIT 13                      *
 C*************************************************************
       SUBROUTINE OUTSPL(NPARM,NRMAX,NENRG,IPARM,SG,EG,AG,P0,P1,REACT)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 SG(NR,NS),EG(NR,NS),AG(NR,NS,NP),P0(NP),P1(NP)
       REAL*8 XX
@@ -848,7 +852,7 @@ C*************************************************************
 C     CVRSPL : WRITE COVARIANCE MATRIX OF SPLINES ON UNIT 14 *
 C*************************************************************
       SUBROUTINE CVRSPL(NPMAX,NRMAX,NENRG,PRIC,AG,SG,EG,REACT)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 PRIC(MP),SG(NR,NS),EG(NR,NS),AG(NR,NS,NP)
       REAL*8 VG(NS,NS),ER(NR,NS)
@@ -869,7 +873,7 @@ c
 c**************************************
 c     Generate ENDF-like numbers      *
 c**************************************
-         write(16,101) nenrg(ir),react(ir)
+         write(16,102) nenrg(ir),react(ir),react(ir)
          write(16,500) (eg(ir,i),i=1,nenrg(ir))
          write(16,500) (sg(ir,i),i=1,nenrg(ir))
          do i=1,nenrg(ir)
@@ -907,6 +911,17 @@ C***************************************
             CALL MULMTX(IR,JR,NENRG(IR),NENRG(JR),NPMAX,PRIC,AG,VG)
             WRITE(14,400) REACT(IR),REACT(JR)
             WRITE(14,200)(JNDEX+J,J=1,NENRG(JR))
+c
+c**************************************
+c     Generate ENDF-like numbers      *
+c**************************************
+         write(32,102) nenrg(ir),react(ir),react(jr)
+         write(32,500) (eg(ir,i),i=1,nenrg(ir))
+         write(32,500) (sg(ir,i),i=1,nenrg(ir))
+         do i=1,nenrg(ir)
+            write(32,500) (vg(i,j),j=1,nenrg(ir))
+         end do
+c
             DO 70 I=1,NENRG(IR)
                DO 80 J=1,NENRG(JR)
                   IF(ER(IR,I).EQ.0.0 .OR. ER(JR,J).EQ.0.0) THEN
@@ -933,6 +948,7 @@ C***************************************
    50 CONTINUE
   100 FORMAT(I5,2(1PE10.2),50I5)
   101 FORMAT(I5,43X,A12)
+  102 FORMAT(I5,43X,A12,1X,A12)
   150 FORMAT(I5,20F6.2)
   200 FORMAT(25X,50I5)
   300 FORMAT('DIAGONAL    ',A43)
@@ -946,7 +962,7 @@ C***************************************
 C     VG <= A * PRIC * A**T            *
 C***************************************
       SUBROUTINE MULMTX(IR,JR,NIR,NJR,NPMAX,PRIC,AG,VG)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 PRIC(MP),AG(NR,NS,NP),VG(NS,NS)
       REAL*8 W(NP),XX
@@ -980,7 +996,7 @@ C     PRSORT : WRITE VARIATION OF PARAMETERS ON UNIT 15      *
 C*************************************************************
 C
       SUBROUTINE PRSORT(PNAME)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       PARAMETER(NT=300)
 C               NT : MAXIMAL NUMBER OF ESTIMATION STEPS
@@ -1011,7 +1027,7 @@ C     CVRPRM : WRITE COVARIANCE MATRIX                       *
 C*************************************************************
 C
       SUBROUTINE CVRPRM(K,NPARM,P1,PE,PNAME,X0)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 X0(MP),P1(NP),PE(NP),W(NP,NP)
       CHARACTER*12 PNAME(NP)
@@ -1069,7 +1085,7 @@ C     PREAD  : PRIOR PARAMETER READ                          *
 C*************************************************************
 C
       SUBROUTINE PREAD(KUNIT,NPARM,NPMAX,P1,X0,PRIP,PRIE,PRIC,IPARM)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 P1(NP),X0(MP),PRIP(NP),PRIE(NP),PRIC(MP)
       REAL*8 PW(NP)
@@ -1115,7 +1131,7 @@ C     PWRITE : POSTERIOR PARAMETER OUTPUT                    *
 C*************************************************************
 C
       SUBROUTINE PWRITE(KUNIT,NPARM,NPMAX,P1,PE,PRIP,PRIE,PRIC,IPARM)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 P1(NP),PE(NP),PRIP(NP),PRIE(NP),PRIC(MP)
       REAL*8 PW(NP)
@@ -1144,7 +1160,7 @@ C     INVMTX : CALCULATION IF INVERSE MATRIX                 *
 C*************************************************************
 C
       SUBROUTINE INVMTX(NDATA,V)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 V(MX)
       ICOND=0
@@ -1182,12 +1198,12 @@ C              U TRANSPOSE OF L                              *
 C*************************************************************
 C
       SUBROUTINE CHOLSK(N,V,ICOND)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 V(MX)
       REAL*8 X1,XX,EPS
 C
-      EPS=1.0E-72
+      EPS=1.0E-30
       ICOND=0
       If(V(1).EQ.0.0) THEN
          ICOND=-2
@@ -1264,7 +1280,7 @@ C              V**(-1)= U**(-1) D L**(-1)                    *
 C*************************************************************
 C
       SUBROUTINE INVERS(N,V,ICOND)
-      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=200,
+      PARAMETER(NP=180,MP=NP*(NP+1)/2,NX=6000,MX=NX*(NX+1)/2,NS=1300,
      &          NR=30)
       REAL*8 V(MX)
       REAL*8 X1,XX

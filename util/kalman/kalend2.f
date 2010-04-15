@@ -30,8 +30,8 @@ C*********************************************************************
 
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       IMPLICIT INTEGER (I-N)
-      PARAMETER (NRMAX=20,NR=60,NS=200,EV=1.D-6)
-      DIMENSION X(NS),Y(NS),W(NS,NS)
+      PARAMETER (NRMAX=20,NR=60,NS=1300,EV=1.D-6)
+      DIMENSION X(NS),Y(NS),W(NS,NS),V2(NS,NS)
       DIMENSION S(NS),E(NS),D(NS),V(NS,NS),C(NS,NS)
       DIMENSION M(NR),EG(NS),SG(NS,NR)
       CHARACTER*4  XSC
@@ -48,18 +48,33 @@ C*********************************************************************
 
 
       LS=1
+c averaged covariance
       LB=5
+c absolute covariance
+C      LB=0
+C      LB=1
+      IF (LB.GE.0.AND.LB.LE.2) THEN
+       LS=0
+      ELSE
+       LS=1
+      ENDIF
+c
       NL=1
       NI=1
+      NC=0
+      MTL=0
+
 
       READ(5,*) FILE,MT1,MAT1
 
-      CALL STRLEN(FILE,L)
+      CALL STRLEN(FILE,L1,L2)
+
+
 
 C GET THE SEQUENCE OF REACTIONS IN XSC FILE IN ORDER TO GET THE CROSS SECTIONS
 C IN THE FILE -xsc.kal (FORT.13).
 
-      OPEN(10,FILE=FILE(1:L)//XSC,STATUS='OLD',ERR=100)
+      OPEN(10,FILE=FILE(L1:L2)//XSC,STATUS='OLD',ERR=100)
       READ(10,'(1X,I3)') NNUCD
       IF (NNUCD .GT. NR) STOP 'TOO MANY REACTIONS'
       READ(10,'(12X,(3A12),(A10),(90A12))') (RECTN(I),I=1,NNUCD)
@@ -107,6 +122,12 @@ C IN THE FILE -xsc.kal (FORT.13).
  100  CONTINUE
 
 
+c      do i=1,nenrg
+c         write(66,'(50(1x,1pe12.5))') 
+c     &(w(i,j)/dsqrt(w(i,i)*w(j,j)),j=1,nenrg)
+c      enddo
+
+
 C COMPARISON BETWEEN PRIOR AND POSTERIOR CROSS SECTIONS
 
       OPEN(UNIT=25,FILE='xscplot.d',STATUS='UNKNOWN')
@@ -115,6 +136,11 @@ C COMPARISON BETWEEN PRIOR AND POSTERIOR CROSS SECTIONS
  15      CONTINUE
       CLOSE(25)
 
+
+C PLOT FOR MOST IMPORTANT MT NUMBERS (1,2,4,16,18,102,103,107)
+      REWIND(16)
+      CALL PLOTUNC(NNUCD,RECTN)
+      CLOSE(16)
 
 
       DO 20 I=1,NS
@@ -140,7 +166,6 @@ C ZERO CROSS SECTION, AND A DEFAULT ERROR OF 50%.
          E(K)  = ETH
          S(K)  = 0.0
          V(K,K)= 0.25
-C         V(K,K)= 0.
       ENDIF
 
 C FIND THE FIRST ENERGY THAT IS HIGHER THAN ETH
@@ -212,20 +237,36 @@ C COVARIANCE MATRIX NORMALIZED TO CROSS SECTIONS
          DO J=K+1,NE
             IF(S(I).EQ.0.0 .OR. S(J).EQ.0.0) THEN
                V(I,J)= 0.0
+               V2(I,J)=0.0
 C            ELSE IF(S(I).LT.0.D0 .OR. S(J).LT.0.D0) THEN
 C               WRITE(0,*) 'CROSS SECTIONS < 0 !!!!'
             ELSE
+               V2(I,J)= V(I,J)
                V(I,J) = V(I,J)/S(I)/S(J)
             ENDIF
          ENDDO
       ENDDO
 
+
+c      do i=1,ne
+c         write(66,'(50(1x,1pe12.5))') 
+c     &e(i)/ev,s(i),(v(i,j),j=1,ne)
+c      enddo
+
+
+
+c LB=5
       NT = NE*(NE+1)/2
+C LB=0,1,2
+C      NT=2*NE
+
       WRITE(20,2020) ZA,AWR,0,MTL,0,NL
 C     WRITE(20,2020) XMF1,XLFS1,MAT1,MT1,NC,NI
       WRITE(20,2020) XMF1,XLFS1,0,MT1,NC,NI
       WRITE(20,2020) 0.0,0.0,LS,LB,NT,NE
-      WRITE(20,2030)(E(I)/EV,I=1,NE),((V(I,J),J=I,NE-1),I=1,NE-1)
+      WRITE(20,2030)(E(I)/EV,I=1,NE),((V(I,J),J=I,NE-1),I=1,NE-1) !LB=5
+C      WRITE(20,2030)(E(I)/EV,V2(I,I),I=1,NE)  ! LB=0
+C      WRITE(20,2030)(E(I)/EV,V(I,I),I=1,NE)   ! LB=1
       DO I=1,NE
          WRITE(18,2040) E(I),SQRT(V(I,I))*100.0
          WRITE(0,2040) E(I),SQRT(V(I,I))*100.0
@@ -237,7 +278,7 @@ C     WRITE(20,2020) XMF1,XLFS1,MAT1,MT1,NC,NI
       WRITE(18,*)
 
 C NN DEFINES THE MESH IN PLOTTING - HIGHER NN MAKES BIGGER (IN SIZE) PLOTS.
-      NN=8
+      NN=1
 
       OPEN(UNIT=25,FILE='corrplot.d',STATUS='UNKNOWN')
 
@@ -251,10 +292,10 @@ C NN DEFINES THE MESH IN PLOTTING - HIGHER NN MAKES BIGGER (IN SIZE) PLOTS.
                DO 73 JP=0,NN-1
                   IF(W(I,I).GT.0.D0.AND.W(J,J).GT.0.D0) THEN
                      WRITE(25,2040)
-                    1EI+IP*DEI,EJ+JP*DEJ,W(I,J)/DSQRT(W(I,I)*W(J,J))
+     &               EI+IP*DEI,EJ+JP*DEJ,W(I,J)/DSQRT(W(I,I)*W(J,J))
                   ELSE
                     WRITE(25,2040)
-                   1EI+IP*DEI,EJ+JP*DEJ,0.D0
+     &              EI+IP*DEI,EJ+JP*DEJ,0.D0
                   ENDIF
  73               CONTINUE
  72            CONTINUE
@@ -272,6 +313,77 @@ C NN DEFINES THE MESH IN PLOTTING - HIGHER NN MAKES BIGGER (IN SIZE) PLOTS.
  3000 STOP
       END
 
+      SUBROUTINE PLOTUNC(NNUCD,RECTN)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      PARAMETER (NRMAX=20,NR=60,NS=1300,EV=1.D-6,NC=8)
+      CHARACTER*12 REACTION,RECTN(NR)
+      DIMENSION MT1(NC),M(NR),X(NS),Y(NS),W(NS,NS)
+      DATA MT1/1,2,4,16,18,102,103,107/
+
+      DO 10 I=1,NNUCD
+
+       DO 11 J=1,NNUCD
+          CALL RCTN(RECTN(J),M(J))
+C          write(0,*) NNUCD,RECTN(j),mt1(j)
+  11   CONTINUE
+
+
+       NSKIP=0
+       DO 12 K=1,NNUCD
+          IF (M(K) .EQ. MT1(I)) THEN
+             NSKIP=K
+             GOTO 13
+          ENDIF
+  12   CONTINUE
+  13   CONTINUE
+
+
+C      CALL READENDF(MT1(I), MAT1, ZA, AWR, XMF1, XLFS1, ETH, RES)
+C      ETH=ETH*EV
+
+ 99   READ(16,1900,END=101) NENRG,REACTION
+      READ(16,2010)(X(K),K=1,NENRG)
+      READ(16,2010)(Y(K),K=1,NENRG)
+      DO K=1,NENRG
+          READ(16,2010)(W(K,L),L=1,NENRG)
+      ENDDO
+      MT=0
+      IF (M(I).EQ.-111) THEN
+         WRITE(0,*) 'NO MT NUMBER IN ENDF FILE!'
+         STOP
+      ENDIF
+      CALL RCTN(REACTION,MT)
+C      write(0,*) reaction,mt,mt1(i)
+C      IF (MT.EQ.MT1(I)) GOTO 100
+      IF (MT.EQ.M(I)) GOTO 100
+      GOTO 99
+ 101     PAUSE 'NO COVARIANCE MATRIX FOUND IN FORT.16'
+ 100  CONTINUE
+C      write(0,*) reaction,mt,mt1(i)
+C COMPARISON BETWEEN POSTERIOR AND PRIOR CROSS SECTIONS
+
+      OPEN(UNIT=26,FILE='allplot.d',STATUS='UNKNOWN')
+      WRITE(26,*)'#',REACTION
+      DO 15 K=1,NENRG
+C         WRITE(26,'(4(1X,1PE12.5))') X(I),Y(I),EG(I),SG(I,NSKIP)
+         IF (Y(K).NE.0.D0) THEN
+         WRITE(26,'(4(1X,1PE12.5))') X(K),Y(K),DSQRT(W(K,K))/Y(K)*100.D0
+         ENDIF
+ 15      CONTINUE
+         WRITE(26,*) '             '
+         WRITE(26,*) '             '
+ 14      REWIND(16)
+  10      CONTINUE
+
+      CLOSE(26)
+ 1900 FORMAT(I5,43X,A12)
+ 2000 FORMAT(I5)
+ 2010 FORMAT(6E12.5)
+      RETURN
+      END
+
+
+
       SUBROUTINE READENDF(MT1, MAT1, ZA, AWR, XMF1, XLFS1, ETH, RES)
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       LOGICAL RES
@@ -285,19 +397,20 @@ C WITHIN ONE REACTION OF A SINGLE MATERIAL
 
       ENDF='.endf'
 
-      CALL STRLEN(FILE,L)
+      CALL STRLEN(FILE,L1,L2)
 
 
       XMF1  = 0.0
       XLFS1 = 0.0
 
-      IF (MT1.EQ.1 .OR. MT1.EQ.2 .OR. MT1.EQ.102 .OR. MT1.EQ.18) THEN
+      IF (MT1.EQ.1 .OR. MT1.EQ.2 .OR. MT1.EQ.102 .OR. MT1.EQ.18
+     & .OR. MT1.EQ.3) THEN
          RES = .TRUE.
       ELSE
          RES = .FALSE.
       ENDIF
 
-      OPEN(LIN, FILE=FILE(1:L)//ENDF, STATUS='UNKNOWN')
+      OPEN(LIN, FILE=FILE(L1:L2)//ENDF, STATUS='UNKNOWN')
       READ (LIN,940) C66,MAT,MF,MT,NC !TOP LINE
   10  READ (LIN,940) C66,MAT,MF,MT,NC !LINE 1
       IF (MAT .LT. 0) THEN

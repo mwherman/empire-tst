@@ -1,4 +1,4 @@
-set term X11
+#set term X11
 
 set size square
 
@@ -27,8 +27,8 @@ reset
 pause -2
 
 
-set xrange [ 0 : * ]
-set yrange [ 0 : * ]
+#set xrange [ 0 : * ]
+#set yrange [ 0 : * ]
 
 set xlabel 'Energy [MeV]'
 set ylabel 'Cross Section [barn]'
@@ -40,7 +40,7 @@ b=1.e-3
 set logscale y
 set logscale x
 
-plot[1.e-5:35][1.e-4:*]\
+plot[][]\
 'expxscplot.d' u 1:2:3 not w yerr,\
 'xscplot.d'    u 1:($2*b) t 'posterior' w l,'' u 3:($4*b) t 'prior' w l
 

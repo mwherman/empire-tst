@@ -1,7 +1,7 @@
 #----GNU g77 FORTRAN compiler
-FC     =  g77
+#FC     =  g77
 #----flags for production compilation with g77
-FFLAGS = -Wall -g -C -ffortran-bounds-check -Wuninitialized -O3
+#FFLAGS = -Wall -g -C -ffortran-bounds-check -Wuninitialized -O3
 #----flags for debuging using g77 compiler
 #FFLAGS = -g -ffortran-bounds-check -Wuninitialized -O
 #----GNU g95 FORTRAN compiler
@@ -9,12 +9,17 @@ FFLAGS = -Wall -g -C -ffortran-bounds-check -Wuninitialized -O3
 #----flags for detailed warnings
 #FFLAGS = -Wall
 
+#----GNU gFORTRAN compiler
+#FC     =  gfortran
+#FFLAGS = 
+
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
+#FFLAGS =  -O3 -warn
+FFLAGS =  -O3 -ipo
 #----flags for automatic parallelization
 #FFLAGS =  -parallel
 
@@ -31,6 +36,7 @@ FFLAGS = -Wall -g -C -ffortran-bounds-check -Wuninitialized -O3
 #----flag for Lahey/Fujitsu to check boundaries and more
 #FFLAGS = -g --chk
 
+#all: kalman3 kalend2 kalend3 c4tokal genkal
 all: kalman3 kalend2 c4tokal genkal
 
 OBJF =	kalman3.1.o
@@ -59,6 +65,11 @@ OBJI =	genkal.o rctn.o strlen.o
 genkal:   $(OBJI)
 	$(FC) -o $@.exe $(OBJI)
 
+
+#OBJL = kalend3.o rctn.o strlen.o
+
+#kalend3:   $(OBJL)
+#	$(FC) -o $@.exe $(OBJL)
 
 clean:
 	rm *.o
