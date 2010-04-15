@@ -9,21 +9,24 @@ file=$1
 MT=$2
 MAT=$3
 EXPDAT=$4
+#CRCOV=$5
 
 if [ -z $file ]; then
 echo "INPUT FILE NOT FOUND"
 exit
 fi
 if [ -z $MT -o "$MT" = "0" ]; then
-   MT="1 2 4 16 102 103 107"
+   MT="1 2 3 4 16 17 18 102 103 107"
 fi
 if [ -z $MAT ]; then
    MAT="1111"
 fi
 if [ -z $EXPDAT ]; then
-   EXPDAT="1"
+   EXPDAT="0"
 fi
-
+#if [ -z $CRCOV ]; then
+#   CRCOV="0"
+#fi
 if [ ! -s $file.endf ]; then
    echo "ENDF FILE NOT FOUND ($file.endf)"
    exit 0
@@ -55,7 +58,7 @@ rm $file-{c4,par,*-err}.kal 2>/dev/null
 rm $file-33-*.cov  2>/dev/null
 
 
-for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
+for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
     grep "^.\{12,19\}  3 $j " $file.c4 >>$file-c4.kal
 done
 
@@ -84,7 +87,7 @@ EOF
     $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
 
 # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
-for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
+for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
     l=`echo ${j}`
     grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
 done
@@ -115,18 +118,19 @@ done
        cp $file-parcorr.kal fort.52
     fi
 
-#    if [ "$EXPDAT" != 0 ]; then
+# DO NOT OPEN KALMAN INPUT IF EXP. DATA ARE NOT INCLUDED
+    if [ "$EXPDAT" != 0 ]; then
        echo 'EDIT KALMAN INPUT'
        emacs KALMAN.INP
-#    fi
+    fi
 
     $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
 
     mv fort.13 $file-xsc.kal
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
-
-
+    cat fort.16 fort.32 > fort.48
+ 
     $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
 
 
@@ -143,8 +147,10 @@ done
 
     cp $file-${k}-c4.gpd expxscplot.d
 
+
+#PLOT DATA ONLY WITH EXPERIMENTAL DATA
     if [ "$EXPDAT" != 0 ]; then
-       gnuplot $EMPIREDIR/util/kalman/corr.gp
+       gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
     fi
 
     mv corrplot.d $file-${k}-cov.gpd
@@ -153,6 +159,18 @@ done
     rm fort.17
     rm fort.20
     rm expxscplot.d
+
+# CROSS-REACTION CORRELATIONS TAKEN FROM KALMAN
+#    if [ "$CRCOV" != 0 ]; then
+#     rm $file-33-*.cov
+#     $EMPIREDIR/util/kalman/kalend3.exe <INPUT.D
+##     for j in "  1" "  2" "  3" "  4" " 16" " 18" "102" "103" "107"; do
+#     for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102"; do
+#      l=`echo ${j}`
+#      grep "^.\{70,75\}33$j" fort.112 >$file-33-$l.cov
+#      echo "                                                                 0${MAT}33  099999" >> $file-33-$l.cov
+#     done
+#    fi
 
     echo 'COMPLETE ...'
 
