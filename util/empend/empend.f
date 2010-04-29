@@ -2642,7 +2642,7 @@ C* Isomer production cross section - ground state
       GO TO 226
 C* Isomer production cross section - ground state
   224 CONTINUE
-      READ (REC(59:65),'(F7.0)') EISO
+      READ (REC(60:66),'(F7.0)') EISO
       EISO=EISO*1.E6
       MISO=1
   226 QI  =QQ-EISO
