@@ -970,7 +970,6 @@ C*    Backward sweep (x = U-1 p)
       END
 
 
-
       SUBROUTINE INTERMAT(Xi,Si,Yi,N,Xo,So,Yo,M,L,Emin,Emax)
 Ccc
 Ccc   ********************************************************************
@@ -1037,45 +1036,45 @@ C
 C-----Check ranges and steps
 C     IF(Emin.LT.Xo) THEN
       IF (Emin - Xo.LT. - 0.0001) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) 'INTERMAT: Inconsistent request               '
-         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (8,*) 'INTERMAT: is below the minimum:        ', Xo
-         WRITE (8,*) 'INTERMAT: Execution terminated'
+         WRITE (6,*) ' '
+         WRITE (6,*) 'INTERMAT: Inconsistent request               '
+         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (6,*) 'INTERMAT: is below the minimum:        ', Xo
+         WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xo + (M-1)*So).GT.0.0001) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) 'INTERMAT: Inconsistent request               '
-         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (8,*) 'INTERMAT: is above the maximum:        ',
+         WRITE (6,*) ' '
+         WRITE (6,*) 'INTERMAT: Inconsistent request               '
+         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (6,*) 'INTERMAT: is above the maximum:        ',
      &               Xo + (M - 1)*So
-         WRITE (8,*) 'INTERMAT: Execution terminated'
+         WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Xi - Emin.GT.0.5*Si) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) 'INTERMAT: Lower limit point provided:  ', Xi
-         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (8,*) 'INTERMAT: Execution terminated'
+         WRITE (6,*) ' '
+         WRITE (6,*) 'INTERMAT: Lower limit point provided:  ', Xi
+         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xi + (N-1)*Si).GT.0.5*Si) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (8,*) 'INTERMAT: Upper limit point  provided: ',
+         WRITE (6,*) ' '
+         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (6,*) 'INTERMAT: Upper limit point  provided: ',
      &               Xi + (N - 1)*Si
-         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (8,*) 'INTERMAT: Execution terminated'
+         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (So.LE.0 .OR. Si.LE.0) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) 'INTERMAT: Both X increments must be positive '
-         WRITE (8,*) 'INTERMAT: Provided input  increment: ', Si
-         WRITE (8,*) 'INTERMAT: Provided output increment: ', So
-         WRITE (8,*) 'INTERMAT: Execution terminated'
+         WRITE (6,*) ' '
+         WRITE (6,*) 'INTERMAT: Both X increments must be positive '
+         WRITE (6,*) 'INTERMAT: Provided input  increment: ', Si
+         WRITE (6,*) 'INTERMAT: Provided output increment: ', So
+         WRITE (6,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
 C-----Start with the matrix
@@ -1110,7 +1109,145 @@ C--------start intrpolation
       ENDDO
       END
 
-
+      SUBROUTINE HINTERMAT(Xi,Si,Yi,N,Xo,So,Yo,M,L,Emin,Emax)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:apu*
+Ccc   *                      I N T E R M A T                             *
+Ccc   *                                                                  *
+Ccc   * Interpolate along the first dimension of the array Yi assumed    *
+Ccc   * to contain histograms on the same equidistant grid Si.           *
+Ccc   * The resulting histogram(!), on the different but uniform grid,   *
+Ccc   * is added to the values contained in the array Yo in the energy   *
+Ccc   * range specified by Emin and Emax. Data outside this range are    *
+Ccc   * ignored. Emin and Emax must be within energy range span by Xi.   *
+Ccc   * The interpolation is linear. The total area is conserved         *
+Ccc   * but NOT for a single histogram bin.                              *
+Ccc   *                                                                  *
+Ccc   * This routine is used to sum two distributions stored on a        *
+Ccc   * different energy grid. Usually, the first dimension of Y         *
+Ccc   * corresponds to energy (interpolated) and the second one          *
+Ccc   * to angle.                                                        *
+Ccc   *                                                                  *
+Ccc   * Both histograms are assumed to begin at X=0                      *
+Ccc   *                                                                  *
+Ccc   * input:Xi   lower X value of the first bin in the Yi array        *
+Ccc   *       Si   input argument increment (histogram bin width)        *
+Ccc   *       Yi   histogram values given at the middle of the histogram *
+Ccc   *            bin (e.g., in case of spectrum this will be cross     *
+Ccc   *            section in mb/MeV)                                    *
+Ccc   *        N   number of histogram bins (1-st dimension of Yi)       *
+Ccc   *                                                                  *
+Ccc   *       Xo   lower X value of the first bin in the Yo array        *
+Ccc   *       So   step in the argument of the Yo array                  *
+Ccc   *       Yo   values of the function to which interpolated results  *
+Ccc   *            will be added (in the above example of spectrum these *
+Ccc   *            will be in mb/MeV)                                    *
+Ccc   *        M   number of points in the Yo array (1-st dimension)     *
+Ccc   *        L   second dimension of Yi and Yo                         *
+Ccc   *       Emin lower limit of energy range for interpolation         *
+Ccc   *       Emax upper limit of energy range for interpolation         *
+Ccc   *                                                                  *
+Ccc   * output:                                                          *
+Ccc   *       Yo   interpolated function values corresponding to XO(i)   *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      IMPLICIT NONE
+C
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Emax, Emin, Si, So, Xi, Xo
+      INTEGER L, M, N
+      DOUBLE PRECISION Yi(N,L), Yo(M,L)
+C
+C Local variables
+C
+      DOUBLE PRECISION ABS, MIN
+      INTEGER nn, mm, ll, it 
+      INTEGER INT, MAX
+      DOUBLE PRECISION En, Em, E
+C-----Check ranges and steps
+      IF (Emin - Xo .LT. -0.0001) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: is below the minimum:        ', Xo
+         WRITE (8,*) 'INTERMAT: Execution terminated'
+         STOP
+      ENDIF
+      IF (Emax - (Xo+M*So).GT.0.0001) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: is above the maximum:        ', Xo+M*So
+         WRITE (8,*) 'INTERMAT: Execution terminated'
+         STOP
+      ENDIF
+      IF (Emin - Xi .LT. -0.0001) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Lower limit point provided:  ', Xi
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
+         STOP
+      ENDIF
+      IF (Emax - (Xi + N*Si).GT.0.0001) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: Upper limit point  provided: ', Xi+N*Si
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
+         STOP
+      ENDIF
+      IF (So.LE.0 .OR. Si.LE.0) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Both X increments must be positive '
+         WRITE (8,*) 'INTERMAT: Provided input  increment: ', Si
+         WRITE (8,*) 'INTERMAT: Provided output increment: ', So
+         WRITE (8,*) 'INTERMAT: Execution terminated'
+         STOP
+      ENDIF
+C-----Start with the matrix
+      DO ll = 1, L   !take one column at a time
+C--------first sum the initial array to determine the norm
+        nn = INT((Emin-Xi)/Si)
+        En = Si*nn + Xi
+        nn = nn + 1
+        mm = INT((Emin-Xo)/So)
+        Em = So*mm + Xo
+        mm = mm + 1
+        E = Emin
+        DO it = 1, Max(N,M)
+          IF(En+Si.LT.Em+So) THEN
+            En = MIN(En + Si,Emax)
+            Yo(mm,ll) = Yo(mm,ll) + (En-E)*Yi(nn,ll)/So
+            nn = nn + 1
+            E = En
+           ELSEIF(Em+So.LT.En+Si) THEN
+            Em = MIN(Em + So,Emax)
+            Yo(mm,ll) = Yo(mm,ll) + (Em-E)*Yi(nn,ll)/So
+            mm = mm + 1
+            E = Em
+           ELSE
+            Em = MIN(Em + So,Emax)
+            En = Em
+            Yo(mm,ll) = Yo(mm,ll) + (Em-E)*Yi(nn,ll)/So
+            mm = mm + 1
+            nn = nn + 1
+            E = Em
+           ENDIF
+          IF(ABS(E-Emax).LT.1.0D-6) Go TO 10
+         ENDDO
+ 10     CONTINUE 
+       ENDDO
+      RETURN
+      END
 
       SUBROUTINE BINTERMAT(Yi,Xi,Sxi,Nxi,Zi,Szi,Nzi,Yo,Xo,Sxo,Nxo,Zo,
      &                     Szo,Nzo,Exmin,Exmax,Ezmin,Ezmax)
