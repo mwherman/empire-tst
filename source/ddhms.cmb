@@ -1,23 +1,31 @@
 c CVS Version Management $Revision: 1.8 $
-c $Id: ddhms.cmb,v 1.8 2007-09-03 14:20:29 Capote Exp $
+c $Id: ddhms.cmb,v 1.8 2007/09/03 14:20:29 Capote Exp $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 500)    !must be >  emax=einc+Q /debin
 	integer maxnemiss  
-	parameter (maxnemiss = 3)  ! max number of emitted preeq. nucleons  
+	parameter (maxnemiss = 6)  ! max number of emitted preeq. nucleons  
 
 	integer ndim_zem,ndim_nem   
 	parameter (ndim_zem = maxnemiss)  !max # of protons emitted	
 	parameter (ndim_nem = maxnemiss)  !max # of neutrons emitted
+
 	integer ndim_jbins,ndim_recbins
 	parameter (ndim_jbins = 50)  ! number of spin bins
 	parameter (ndim_recbins = 50)! number of recoil kinetc energy bins
 
+        integer ndanghms,ndanghms1,ndanghms2
+        parameter(ndanghms=37)
+        parameter(ndanghms1=ndanghms-1,ndanghms2=2*ndanghms1)
+
+        INTEGER nemx, nxmx
+        PARAMETER(nemx=50,nxmx=20) ! dimensions of energy selecton tables
+
 ! other hardwired dimensions:
 ! 100=number of p-h states that can be created and deexcited in the 
 !     MC cascade. 100 should be more than enough even at high energies
-!  36=number of theta angle bins (every 5 degrees)
-!  72=number of   phi angle bins (every 5 degrees)
+!  ndanghms1 = number of theta angle bins (every 5 degrees)
+!  ndanghms2 = number of   phi angle bins (every 5 degrees)
 
 !--------------------------------------------------------------
 
@@ -29,25 +37,25 @@ c quasideuteron frac. of photoabsorption cross section -- used in SETUPINITPH
       common/qdsetup/ QDFrax
       real*8 QDFrax
 
-c /nstates/  nexist = number of 2p1h,1p1h,1h states excited and need to decay
-c            ntot = total # 2p1h,1p1h,1h states that have been created
-      common/nstates/ nexist2p1h, nexist1p1h, nexist1h,
-     +               ntot2p1h, ntot1p1h, ntot1h
-      integer nexist2p1h, nexist1p1h, nexist1h
-      integer ntot2p1h, ntot1p1h, ntot1h
-c /iexist/ iexist...(n) - label (1 or 0) to signify if nth state is excited
-      common/iexist/ iexist2p1h(100),iexist1p1h(100),iexist1h(100)
-      integer iexist2p1h,iexist1p1h,iexist1h
+c lookup tables for particle energy selection for Fermi distributions
+      INTEGER ntmx, ifermi
+      REAL*8 tab2, tab3, eav2, rho3, detab
+      COMMON/seltabs/tab2(0:nxmx,0:nemx), tab3(0:nxmx,0:nemx),
+     1          eav2(0:nemx), rho3(0:nemx), detab, ntmx, ifermi
+
+c /nstates/  nexist = number of 1p and 1h states excited and yet to decay
+c            ntot = total # 1p and 1h states that have been created
+      common/nstates/  nexist, ntot
+      integer nexist, ntot
+
+c /iexistph/ iexist...(n) - label 1 - particle, 0 - inactive, -1 - hole
+      common/iexistph/ iexist(200)
+      integer iexist
  
-c phprops describes U,theta,phi,mom of nth p-h state type 2p1h,1p1h,1h
-      common/phprops/uex2p1h(100),uex1p1h(100),uex1h(100),
-     +               th2p1h(100),th1p1h(100),th1h(100),
-     +               ph2p1h(100),ph1p1h(100),ph1h(100),
-     +               zk2p1h(100),zk1p1h(100),zk1h(100)
-      real*8 uex2p1h,uex1p1h,uex1h
-      real*8 th2p1h,th1p1h,th1h
-      real*8 ph2p1h,ph1p1h,ph1h
-      real*8 zk2p1h,zk1p1h,zk1h
+c phprops describes U,theta,phi,mom, gamma_up, gamma_down of nth p or h state
+      common/phprops/uex(200), th(200), ph(200), zk(200),
+     + gamup(200),gamdown(200)
+      real*8 uex, th, ph, zk, gamup, gamdown
  
 c /empropos/ for 1-event, eemiss,th...,ph.. describes channel energy,angle of ejectile,
 c and "l" at end implies laboratory frame
@@ -56,28 +64,36 @@ c and "l" at end implies laboratory frame
 c /iemissprops/ izaemiss labels the ejectile type (=1000Z+A)
 c jnresid, jzresid give the N,Z of the residual (running variables decreased as part. are emitted)
       common/iemissprops/ izaemiss(100),jnresid, jzresid,
-     +jninitcn,jzinitcn,jzdiff,jndiff
+     +jninitcn,jzinitcn
 	
       real*8 eemiss,themiss,phemiss,eemissl,themissl,phemissl
-      integer izaemiss,jnresid, jzresid,jninitcn,jzinitcn,jzdiff,jndiff
+      integer izaemiss,jnresid, jzresid,jninitcn,jzinitcn
+
+c /xsection/ exclusive cross  sections
+      real*8 xsnx,xspx,xsn0,xsp0
+      common/xsection/ xsnx(0:ndim_zem,0:ndim_nem),
+     +                 xspx(0:ndim_zem,0:ndim_nem),
+     +                 xsn0,xsp0
  
 c /spec/ arrays of neutron and proton differential spectra
       common/binning/debin,debinrec
       real*8 debin,debinrec
       common/spec/ dxsn(0:ndim_ebins),dxsp(0:ndim_ebins), 
-     +             dxsn1(0:ndim_ebins),dxsp1(0:ndim_ebins),
-     +             ddxsn(0:ndim_ebins,36), ddxsp(0:ndim_ebins,36),
-     +             dddxsn(0:ndim_ebins,36,72),
-     +             dddxsp(0:ndim_ebins,36,72)
-      real*8 dxsn,dxsp,dxsn1,dxsp1,ddxsn,ddxsp,dddxsn,dddxsp
+     +             ddxsn(0:ndim_ebins,ndanghms),
+     +             ddxsp(0:ndim_ebins,ndanghms),
+     +             dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem)
+      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx
       common/speclab/ dxsnlab(0:ndim_ebins),dxsplab(0:ndim_ebins), 
-     +             dxsn1lab(0:ndim_ebins),dxsp1lab(0:ndim_ebins),
-     +             ddxsnlab(0:ndim_ebins,36), 
-     +             ddxsplab(0:ndim_ebins,36),
-     +             dddxsnlab(0:ndim_ebins,36,72),
-     +             dddxsplab(0:ndim_ebins,36,72)
-      real*8 dxsnlab,dxsplab,dxsn1lab,dxsp1lab,ddxsnlab,ddxsplab,
-     +                dddxsnlab,dddxsplab
+     +           dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +           dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +           ddxsnlab(0:ndim_ebins,ndanghms),
+     +           ddxsplab(0:ndim_ebins,ndanghms),
+     +           ddxsnxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
+     +           ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem)
+c23456789012345678901234567890123456789012345678901234567890123456789012
+      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab
+     +              ,dxsnxlab,dxspxlab,ddxsnxlab,ddxspxlab
  
 c /siginv/ inverse cross sections for HMS calculation
       common/siginv/ siginvn(0:2000),siginvp(0:2000) ! defined evergy 0.25 MeV to ndim_ebins
@@ -86,8 +102,6 @@ c /siginv/ inverse cross sections for HMS calculation
 c /nemiss/ number of ejectiles emitted in a given event,number of events
       common/nemiss/ nemiss, nevents
       integer nemiss,nevents
-      common/floatnevents/ readnev
-      real*8 readnev
  
 c /nhistory/ numscat is the number of scatterings prior to emission (not used yet)
       common/nhistory/ numscat(100)
@@ -153,9 +167,9 @@ c /const/ used in calculation   !vdepang used just in ang dist routines
       real*8 pi_g,amu,hbarc,zmnuc,vdep,vdepang
  
 c /isochar/isospin structure of p-h states
-      common/isochar/isospi2p1h(100),isospi1p1h(100),isospi1h(100),
-     &                  isospi1p2h(100)
-      character*4 isospi2p1h,isospi1p1h,isospi1h,isospi1p2h
+      common/isochar/isospin(200)
+      character*4 isospin
+
       common/typechar/seltype,coltype,projtype
       character*4 seltype,coltype,projtype
  
@@ -165,9 +179,10 @@ c angles and momenta of selected particle and remaining p-h state:
       real*8 th1p, ph1p, th1rem, ph1rem, zkscat, zkrem
  
 c diagnostic arrays for phi-dependence
-      common /phidep/phin(0:ndim_ebins,72),
-     +               phip(0:ndim_ebins,72),phin1(72),phip1(72)
-      real*8 phin,phip,phin1,phip1
+c      common /phidep/phin(0:ndim_ebins,ndanghms2),
+c     +               phip(0:ndim_ebins,ndanghms2),
+c     +               phin1(ndanghms2),phip1(ndanghms2)
+c      real*8 phin,phip,phin1,phip1
 
 c /badevents/ events where ucndump whent slightly negative
       common /badevents1/ubad
