@@ -197,7 +197,7 @@ c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
 99900    FORMAT ('/RIPL-2/fission/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//filename
      &      ,STATUS = 'old',ERR = 460)
-  410    read(52,*) izrr,iarr,npoints
+  410    read(52,*,END=460) izrr,iarr,npoints
          if(izrr.ne.iz .or. iarr.ne.ia) then
             do ii=1,npoints
               READ (52,*,END = 460)
