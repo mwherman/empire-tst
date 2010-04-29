@@ -1,22 +1,22 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-10-14 21:32:19 $
-Ccc   * $Id: ddhms.f,v 1.31 2008-10-14 21:32:19 Capote Exp $
+Ccc   * $Author: herman $ 
+Ccc   * $Date: 2006/01/02 06:13:33 $
+Ccc   * $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
-     &                 Amultdamp,Debinr,Readnevr,Ihistlabr,Irecprintr,
-     &                 Iomlreadr,Qdfracr,Icalled)
+     &                 Amultdamp,Debinr,FHMs,NHMs,Ihistlabr,
+     &                 Irecprintr,Iomlreadr,Qdfracr,Icalled)
 C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1.31 $
-C $Id: ddhms.f,v 1.31 2008-10-14 21:32:19 Capote Exp $
+C CVS Version Management $Revision: 1.25 $
+C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
-C  Name DDHMS stands for "double-differential HMS preeq."
-C  Computes preequilibrium spectra with Hybrid Monte Carlo simulaion (HMS)
+C  name ddhms stands for "double-differential HMS preeq."
+C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
 C
 C  Formalism implemented developed in collaboration with M. Blann,
-C  see Phys Rev C57, 233 (1998), and ang. mom. transfer model developed
+C  see phys rev c57, 233 (1998), and ang. mom. transfer model developed
 C  with P. Oblozinsky. Aspects of machine dependence and portability
 C  of random numbers studied with P. Talou.
 C
@@ -82,9 +82,10 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Ajtarr, Amultdamp, Debinr, Elabprojr, Qdfracr, Readnevr,
+      REAL*8 Ajtarr, Amultdamp, Debinr, Elabprojr, Qdfracr, 
      &       Sigreacr, Tartyper
       INTEGER Icalled, Ihistlabr, Iomlreadr, Irecprintr, Izaproj
+      INTEGER FHMs, NHMs
 C
 C     define kinematics option ikin=1,2
       IKIn = 1   !ikin=1 prefered. see text at top of this code.
@@ -105,7 +106,8 @@ Cmh---since the latter ones can not be used as formal parameters directly
       SIGreac = Sigreacr
       AMUltdamprate = Amultdamp
       DEBin = Debinr
-      REAdnev = Readnevr
+      IFErmi = FHMs
+      NEVents = NHMs
       IHIstlab = Ihistlabr
       IREcprint = Irecprintr
       IOMlread = Iomlreadr
@@ -119,24 +121,24 @@ C
          PROjtype = 'gamm'
          IF (Qdfracr.GT.0.0D0) CALL QDPINIT(Elabprojr)
       ELSE
-         WRITE (8,*) ''
-         WRITE (8,*) 'WARNING'
-         WRITE (8,*) 'WARNING: HMS can treat only neutron, proton or '
-         WRITE (8,*) 'WARNING: gamma as projectiles.'
-         WRITE (8,*) 'WARNING: HMS disposition ignored.'
-         WRITE (8,*) 'WARNING'
-         WRITE (8,*) ''
+         WRITE (6,*) ''
+         WRITE (6,*) 'WARNING'
+         WRITE (6,*) 'WARNING: XHMS can treat only neutron, proton or '
+         WRITE (6,*) 'WARNING: gamma as projectiles.'
+         WRITE (6,*) 'WARNING: XHMS disposition ignored.'
+         WRITE (6,*) 'WARNING'
+         WRITE (6,*) ''
          RETURN
       ENDIF
 C
       IF (IHIstlab.NE.0) OPEN (UNIT = 4,FILE = 'HISTORY',STATUS =
      &                         'unknown')                     !big file
 C
-      CALL HMS(Icalled)
+      CALL XHMS(Icalled)
       END
 C
 C
-      SUBROUTINE HMS(Icalled)
+      SUBROUTINE XHMS(Icalled)
 C
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
@@ -154,19 +156,25 @@ C Local variables
 C
       REAL*8 adiffuse, ajfinal, ajhms, ajinit, amrec, avradius, c,
      &       etotemiss, event, prec, pxrec, pyrec, pzrec, ra, radius,
-     &       rsample, sumav, test
-      DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
-      INTEGER i, jbin, jsweep, jtrans, mrecbin, n, nem, nubin
-      INTEGER INT, NINT
+     &       rsample, sumav, test,gamx
+      REAL*8 gamtot(0:200)
+      DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT,RANG
+      INTEGER i, jbin, jsweep, jexist, jtrans, mrecbin, n, nem, nubin
+      INTEGER nebinchan,nebinlab,nth,nthlab,nph,nphlab
+      INTEGER jndx,jstudy,jzdiff,jndiff,j
+      INTEGER indx(0:200)
+      INTEGER INT, NINT, MIN
 C
       avradius = 0
       sumav = 0
+
+      indx(0) = 0
+      gamtot(0) = 0.
 C
 C     convert input variables to those used in code:
       ZTAr = INT(TARtype/1000.D0)
       ATAr = TARtype - (1000.D0*ZTAr)
       ANTar = ATAr - ZTAr
-      NEVents = NINT(REAdnev)
       DEBinrec = DEBin*(10/ATAr)
 C     ! recoils need to be on a finer grid
 C     ! kinematics suggests this smaller grid-size
@@ -176,6 +184,8 @@ C
       CALL CONSTANTS  ! defines constants
 
       CALL INIT0(Icalled)
+C
+      IF(IFErmi.EQ.1) CALL EXTABPREP
 C
       IF (IOMlread.NE.0) CALL OM_INCANGMOM
 C     !read in om l-dist from tape10
@@ -225,51 +235,137 @@ C        write(iuo,20)rijk
 C        20 format(25h starting random number =,2x,f16.0,tl1,1h )
 C++++++++++++++++++++++++++++++++++
 C
+         IF (IPRintdiag.EQ.1) WRITE (28,*) ' '
          IF (IPRintdiag.EQ.1) WRITE (28,*) '****new event ', NEV
-         IF (NEV.EQ.12345678) WRITE (8,*) 'event=', NEV
+         IF (NEV.EQ.12345678) WRITE (6,*) 'event=', NEV
 C        every 100000 events, print out a statement to screen:
          event = NEV
-         IF (DMOD(event,100000.D0).EQ.0.D0) WRITE (8,*) 'events=', NEV
-C
+         IF (DMOD(event,100000.D0).EQ.0.D0) WRITE (6,*) 'events=', NEV
+
          CALL ZEROARRAYS
-C
+
          CALL INIT1
-C
-C
+
 C        set up the initial excitation type:
          CALL SETUPINITPH
-C
-         IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
+
+C         IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
 C        consider a 2p1h state created with an excitation energy of 200 MeV
+
+C At low energy, SETUPINITPH can dump all energy to the CN => NEXist = 0
+         IF(NEXist.LE.0) GO TO 100
+
+C main decay loop
+ 50      IF (NEMiss.LT.MAXNEMISS) THEN
+           IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
+           jexist=0
+C accumulate total width of active particles and holes
+           DO jsweep = 1, NTOt
+             IF (IEXist(jsweep).NE.0) THEN
+               jexist = jexist + 1
+               gamtot(jexist) = gamtot(jexist-1) 
+     &                          + GAMup(jsweep) + GAMdown(jsweep)
+               indx(jexist) = jsweep
+              ENDIF
+            END DO
+C choose one of the active particles/holes
+           gamx = gamtot(NEXist) * RANG()
+           CALL FINDIND(gamx,gamtot,NEXist,jndx)
+           jstudy = indx(jndx)
+           IF (IEXist(jstudy).LT.0) THEN
+C if hole, calculate 1h->1p2h contributions
+             IF (IPRintdiag.EQ.1) WRITE(28,*) 'Deexcite hole ',jstudy
+             CALL DEEXCITE(jstudy)
+            ELSE
+C if particle,decide whether emission or 1p->2p1h 
+             IF(gamx.LT.gamtot(jndx-1)+GAMdown(jstudy)) THEN
+C Calculate 1p->2p1h contributions
+               IF (IPRintdiag.EQ.1) WRITE(28,*) 'Deexcite part ',jstudy
+               CALL DEEXCITE(jstudy)
+              ELSE
+C emit particle
+               IF (IPRintdiag.EQ.1) WRITE(28,*) 'Emit part ',jstudy
+               CALL EMIT(jstudy)
+              ENDIF
+            ENDIF
+          ELSE      ! NEMiss.GE.MAXNEMISS
+C dump remaining energy in UCNdump
+           DO jsweep = 1, NTOt
+             IF (IEXist(jsweep).NE.0) THEN
+               UCNdump = UCNdump + UEX(jsweep)
+               IEXist(jsweep) = 0
+              ENDIF
+            END DO
+           NEXist=0
+          ENDIF
 C
+         IF (NEXist.NE.0) GO TO 50
 C
-         jsweep = 0
-   50    jsweep = jsweep + 1
-         IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                ' SWEEP of 2p1h states NUMBER',
-     &                               jsweep
+C        print out ejectile information:
+ 100     IF (IPRintdiag.EQ.1) WRITE (28,*) 'number of ejectiles=',
+     &                               NEMiss
+         IF (IPRintdiag.EQ.1) WRITE (28,*) ' energies are:'
+         etotemiss = 0.
+         jndiff=0
+         jzdiff=0
+         DO nem = 1, NEMiss
+
+C     !if debin=1, say, then bin 0: 0->1 MeV
+C     !                      bin 1: 1->2  etc.
+           nebinchan = INT(EEMiss(nem)/DEBin)
+           nebinlab = INT(EEMissl(nem)/DEBin)
+
+           nth = INT(THEmiss(nem)*FLOAT(NDAnghms1)/PI_g) + 1
+           nthlab = INT(THEmissl(nem)*FLOAT(NDAnghms1)/PI_g) + 1
+
+C           nph = INT(PHEmiss(nem)*FLOAT(NDAnghms1)/PI_g) + 1
+C           nphlab = INT(PHEmissl(nem)*FLOAT(NDAnghms1)/PI_g) + 1
+
+           IF (IZAemiss(nem).EQ.1001) THEN
+C       ! add into emission spectra
+C       Inclusive spectra and DDXS
+             DXSp(nebinchan) = DXSp(nebinchan) + 1.
+             DDXsp(nebinchan,nth) = DDxsp(nebinchan,nth) + 1.
+             DXSplab(nebinlab) = DXSplab(nebinlab) + 1.
+             DDXsplab(nebinlab,nthlab) = DDxsplab(nebinlab,nthlab) + 1.
+C       Exclusive spectra and DDXS
+             DXSpx(nebinchan,jzdiff,jndiff) = 
+     &                 DXSpx(nebinchan,jzdiff,jndiff) + 1.
+             DXSpxlab(nebinlab,jzdiff,jndiff) = 
+     &                 DXSpxlab(nebinlab,jzdiff,jndiff) + 1.
+             DDXspxlab(nebinlab,nthlab,jzdiff,jndiff) = 
+     &                 DDxspxlab(nebinlab,nthlab,jzdiff,jndiff) + 1.
+             jzdiff = jzdiff + 1
+            ENDIF
 C
-  100    IF (NEXist2p1h.NE.0) CALL DEEXCITE2P1H
-         IF (NEXist2p1h.NE.0) GOTO 100
-C        !deexcite additional 2p1h just been made
-         IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
-C
-  150    IF (NEXist1p1h.NE.0) CALL DEEXCITE1P1H
-         IF (NEXist1p1h.NE.0) GOTO 150
-C        !deexcite additional 1p1h just been made
-         IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
-C
-  200    IF (NEXist1h.NE.0) CALL DEEXCITE1H
-         IF (NEXist1h.NE.0) GOTO 200
-C        !deexcite additional 1h just been made
-         IF (IPRintdiag.EQ.1) CALL PRINTIEXIST
-C
-         IF (NEXist2p1h.NE.0 .OR. NEXist1p1h.NE.0 .OR. NEXist1h.NE.0.)
-     &       GOTO 50
-C
-C        finally ikin=2 needs to determine recoil energy,direction, from
-C        mom conservation:
-         IF (IKIn.EQ.2) THEN
+           IF (IZAemiss(nem).EQ.1) THEN
+C       ! add into emission spectra
+C       Inclusive spectra and DDXS
+             DXSn(nebinchan) = DXSn(nebinchan) + 1.
+             DDXsn(nebinchan,nth) = DDxsn(nebinchan,nth) + 1.
+             DXSnlab(nebinlab) = DXSnlab(nebinlab) + 1.
+             DDXsnlab(nebinlab,nthlab) = DDxsnlab(nebinlab,nthlab) + 1.
+C       Exclusive spectra and DDXS
+             DXSnx(nebinchan,jzdiff,jndiff) = 
+     &                 DXSnx(nebinchan,jzdiff,jndiff) + 1.
+             DXSnxlab(nebinlab,jzdiff,jndiff) = 
+     &                 DXSnxlab(nebinlab,jzdiff,jndiff) + 1.
+             DDXsnxlab(nebinlab,nthlab,jzdiff,jndiff) = 
+     &                 DDxsnxlab(nebinlab,nthlab,jzdiff,jndiff) + 1.
+             jndiff = jndiff + 1
+            ENDIF
+
+            IF (IPRintdiag.EQ.1) WRITE (28,'(3f10.4,i6)') EEMiss(nem)
+C     &          ,THEmiss(nem),PHEmiss(nem),IZAemiss(nem)
+            etotemiss = etotemiss + EEMiss(nem)
+C           note, if ikin=2, these numbers = lab emission numbers
+         ENDDO
+
+         IF (IKIn.EQ.1) THEN
+            test = DABS(((etotemiss+UCNdump+CONvmass)/(ECMproj)) - 1.)
+         ELSE
+C           for ikin=2
+C        need to determine recoil energy, direction, from mom conservation:
             pzrec = PZProj - PZEjec
             pxrec = -PXEjec
             pyrec = -PYEjec
@@ -286,38 +382,17 @@ C              !keep a sum of events where ucndump is negative
                NBAd = NBAd + 1
                IF (UCNdump.LT.UBAd) UBAd = UCNdump
             ENDIF
-C
-C
+            test = DABS(((etotemiss+UCNdump+CONvmass+EREclab)/(ELAbproj)
+     &             ) - 1.)
          ENDIF
-C
-C
-C        print out ejectile information:
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'number of ejectiles=',
-     &                               NEMiss
-         IF (IPRintdiag.EQ.1) WRITE (28,*) ' energies are:'
-         etotemiss = 0.
-         DO nem = 1, NEMiss
-            IF (IPRintdiag.EQ.1) WRITE (28,*) EEMiss(nem)
-            etotemiss = etotemiss + EEMiss(nem)
-C           note, if ikin=2, these numbers = lab emission numbers
-         ENDDO
-C
+
 C        write(8,*)'total initial energy=',ecmproj+sepproj
 C        write(8,*)'total ejectile k.e.=',etotemiss
 C        write(8,*)'total c.n. energy dumped=',ucndump
 C        write(8,*)'total energy converted to mass=',convmass
          IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                                'ejectile energy + c.n. energy=',
-     &                               etotemiss + UCNdump
-         IF (IKIn.EQ.1) THEN
-            test = DABS(((etotemiss+UCNdump+CONvmass)/(ECMproj)) - 1.)
-         ELSE
-C           for ikin=2
-            test = DABS(((etotemiss+UCNdump+CONvmass+EREclab)/(ELAbproj)
-     &             ) - 1.)
-         ENDIF
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'etotemiss+ucndump=',
-     &                               etotemiss + UCNdump, test
+     &                               etotemiss + UCNdump,test
          IF (test.GE.0.001D0) THEN
             WRITE (28,*) 'etotemiss,ucndump,convmass,ecmproj:',
      &                   etotemiss, UCNdump, CONvmass, ECMproj
@@ -384,19 +459,19 @@ C
          IF (ajfinal.LT. - 0.1D0) STOP '-ve spin'
 C
 C        ---- dump events into excitation energy arrays (uspec, ujspec)
-         JNDiff = JNInitcn - JNResid
-         JZDiff = JZInitcn - JZResid
+c         jndiff = JNInitcn - JNResid
+c         jzdiff = JZInitcn - JZResid
          nubin = INT(UCNdump/DEBin)
-         jbin = INT(ajfinal)
+         jbin = MIN(INT(ajfinal),NDIM_JBINS)
 C
-         USPec(JZDiff,JNDiff,nubin) = USPec(JZDiff,JNDiff,nubin) + 1
-         UJSpec(JZDiff,JNDiff,nubin,jbin)
-     &      = UJSpec(JZDiff,JNDiff,nubin,jbin) + 1
+         USPec(jzdiff,jndiff,nubin) = USPec(jzdiff,jndiff,nubin) + 1
+         UJSpec(jzdiff,jndiff,nubin,jbin)
+     &      = UJSpec(jzdiff,jndiff,nubin,jbin) + 1
 C
          mrecbin = INT(EREclab/DEBinrec)
 C        !energy bin for recoil spectra
-         RECspec(JZDiff,JNDiff,nubin,mrecbin)
-     &      = RECspec(JZDiff,JNDiff,nubin,mrecbin) + 1
+         RECspec(jzdiff,jndiff,nubin,mrecbin)
+     &      = RECspec(jzdiff,jndiff,nubin,mrecbin) + 1
 C
 C        ----
 C
@@ -446,7 +521,7 @@ C     write(7,*)'  ' !insert blank line at end of hist file
 C
       CALL OUTPUTPRINT
 C
-      IF (IKIn.EQ.2) WRITE (8,*) '*WARNING:', NBAd,
+      IF (IKIn.EQ.2) WRITE (6,*) '*WARNING:', NBAd,
      &                           ' events had -ve ucndump, worst case=',
      &                           UBAd
 99005 FORMAT (i9,4x,i5,5x,1p,1E10.4,2x,1p,1E10.4,2x,1p,1E10.4,2x,1p,
@@ -455,1058 +530,459 @@ C     write(8,*)'av. radius from sampling to get a.m.=',avradius/sumav
 C     write(8,*)'sumav=',sumav,'nevents=',nevents
 C
       END
-C
-C
-C
-C
-C
-C
-C
-C      variables and arrays:
-C
-C      i2p1h = index of 2p1h excitation under consideration
-C      i1p1h = index of 1p1h excitation under consideration
-C        i1h = index of   1h excitation under consideration
-C
-C      iexist2p1h() =1 if exists, 0 if no longer exists
-C      iexist1p1h() =1 if exists, 0 if no longer exists
-C      iexist1h()   =1 if exists, 0 if no longer exists
-C
-C      isospi2p1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
-C      isospi1p1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
-C      isospi1h() = ppipnuhpihnu indicator of prot (PI_g) - neu(nu) excitations
-C
-C      uex2p1h(i2p1h)= excitation energy of i2p1h-th 2p1h state
-C      uex1p1h(i1p1h)= excitation energy of i1p1h-th 1p1h state
-C      uex1h(i1h)    = excitation energy of   i1h-th   1h state
-C
-C      ntot2p1h = total number of 2p1h states created so far
-C      ntot1p1h = total number of 1p1h states created so far
-C      ntot1h   = total number of   1h states created so far
-C      (initially, ntot2p1h=1, ntot1p1h=0, ntot1h=0 )
-C
-C      nexist2p1h = total number of 2p1h states still existing
-C      nexist1p1h = total number of 1p1h states still existing
-C      nexist1h   = total number of   1h states still existing
-C
-C
-C
-      SUBROUTINE DEEXCITE2P1H
+
+C***********************************************************************
+
+      SUBROUTINE EMIT(jstudy)
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
 C Local variables
 C
-      REAL*8 damprate, emrate, epart, pair, probemiss, zran
-      INTEGER index1p1h, index2p1h, jflagem, jstudy, jwarning, n,
-     &        nebinchan, nebinlab, nexist1p1horig, nexist2p1horig,
+      INTEGER  jstudy, jsweep, jexist, jwarning
+      INTEGER INT
+      REAL*8 RANG
+      REAl FLOAT
+C
+C This subroutine does the bookkeeping for a particle emission.
+
+      IF(IEXist(jstudy).le.0) return
+
+      IEXist(jstudy) = 0
+      NEXist = NEXist - 1
+      SELtype = ISOspin(jstudy)
+
+      CALL SEPARATION
+
+      NEMiss = NEMiss + 1
+C     ! a particle has been emitted
+      EEM = UEX(jstudy) - BINding
+C     !the emission energy reduced by b.e.
+      CONvmass = CONvmass + BINding
+C     ! add to buffer energy converted to mass
+      EEMiss(NEMiss) = EEM
+C     ! the emission energy put in this array
+      THEmiss(NEMiss) = TH(jstudy)
+      PHEmiss(NEMiss) = PH(jstudy)
+
+      TH1p = TH(Jstudy)
+      PH1p = PH(Jstudy)
+C     now convert eem,th1p,ph1p to eplab,thplab,phplab
+      IF (IKIn.EQ.1) THEN
+C      here, recoil calculated for each emission in the preeq. cascade.
+        CALL BOOSTLAB1
+        EEMissl(NEMiss) = EPLab
+        THEmissl(NEMiss) = THPlab
+        PHEmissl(NEMiss) = PHPlab
+       ELSE
+C       here, calculate recoil after preequilibrium has finished:
+C       the channel emission energy is interpreted as lab
+C       thus, boostlab2 lab values=channel values, but also keeps a
+C       running sum of ej. mom.
+        CALL BOOSTLAB2
+        EEMissl(NEMiss) = EPLab
+        THEmissl(NEMiss) = THPlab
+        PHEmissl(NEMiss) = PHPlab
+       ENDIF
+
+      IF (SELtype.EQ.'prot') THEN
+        IZAemiss(NEMiss) = 1001
+        JZResid = JZResid - 1
+       ENDIF
+
+      IF (SELtype.EQ.'neut') THEN
+        IZAemiss(NEMiss) = 1
+        JNResid = JNResid - 1
+       ENDIF
+
+C recalculate partial widths since separation energy has changed
+      IF (NEMiss.LT.MAXNEMISS) THEN 
+        DO jsweep = 1, NTOt
+          IF (IEXist(jsweep).NE.0) THEN
+
+            SELtype=ISOspin(jsweep)
+            CALL SEPARATION
+            IF (IEXist(jsweep).GT.0) THEN
+
+C             warning declared in the following light-nucleus scenarios
+C             if jwarning=1, then insist that particle is trapped
+              jwarning = 0
+              IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+              IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+
+              IF (IPRintdiag.EQ.1) WRITE(28,*) 'jsweep, uex, bind =',
+     &              jsweep, UEX(jsweep), BINding, SELtype
+
+              IF (UEX(jsweep).LE.BINding .OR. jwarning.EQ.1) THEN
+C               dump 1p energy into c.n. excitation
+                IEXist(jsweep) = 0
+                NEXist = NEXist - 1
+                UCNdump = UCNdump + UEX(jsweep)
+               ELSE
+C               recalculate emission and damping rates
+                CALL EMISSRATE(UEX(jsweep),GAMup(jsweep))
+                CALL DAMPING(UEX(jsweep),GAMdown(jsweep))
+               ENDIF
+
+             ELSE
+
+              IF (IPRintdiag.EQ.1) WRITE(28,*) 'jsweep, uex, bind =',
+     &              jsweep, UEX(jsweep), BINding, SELtype
+
+              IF (UEX(jsweep).LE.BINding) THEN
+C               dump 1h energy into c.n. excitation
+                IEXist(jsweep) = 0
+                NEXist = NEXist - 1
+                UCNdump = UCNdump + UEX(jsweep)
+               ELSE
+C               recalculate damping rate
+                GAMup(jsweep)=0.
+                CALL DAMPING(-UEX(jsweep),GAMdown(jsweep))
+               ENDIF
+
+             ENDIF
+           ENDIF
+         END DO
+       ENDIF
+
+      RETURN
+      END
+
+C***********************************************************************
+
+      SUBROUTINE DEEXCITE(jstudy)
+      IMPLICIT NONE
+      INCLUDE 'ddhms.cmb'
+C
+C Local variables
+C
+      REAL*8 damprate, emrate, epart, pair, zran
+      INTEGER jflagem, jstudy, jwarning, n,
      &        nhresid, nph, nphlab, npresid, nth, nthlab
       INTEGER INT
       REAL*8 RANG
-      CHARACTER*4 rem1p1h
-C
-C
-C
-C
-C     At this stage there are ntot2p1h 2p1h states. We want to step
-C     through each one to deexcite it (particle emission or rescattering)
-C     j= j-th 2p1h state being descited.
-C
-C     in the course of deexciting the nexist2p1h 2p1h states, more 2p1h
-C     states may be created (nexist2p1h may decrease and increase)
-C     and more 1p1h will be created (nexist1p1h increases)
-C
-      nexist2p1horig = NEXist2p1h
-      nexist1p1horig = NEXist1p1h
-      IF (NEV.EQ.12345678) WRITE (8,*) 'called deexcite2p1h'
-C
-C     write(8,*)'number of 2p1h states to consider=',nexist2p1horig
-      DO n = 1, nexist2p1horig
-C
-         IF (NEV.EQ.12345678) WRITE (8,*) 'n=', n, ' of ',
-     &                               nexist2p1horig
-C
-C
-C        find the corresponding existing 2p1h state (1st non zero iexist)
-         jstudy = 0
-   50    jstudy = jstudy + 1
-         IF (IEXist2p1h(jstudy).NE.1) GOTO 50
-C        jstudy = label to indicate which 2p1h will be deexcited
-C
-C---------------------------
-C        ! ABORT if nemiss > maxnemiss, and do not consider the cascade
-C        ! any futher. Dump energy of state into compound nucleus.
-         IF (NEMiss.GE.MAXNEMISS) THEN
-            UCNdump = UCNdump + UEX2p1h(jstudy)
-C           since this 2p1h state has now been deexcited, reduce count by 1:
-            NEXist2p1h = NEXist2p1h - 1
-            IEXist2p1h(jstudy) = 0
-C           !no longer exists
-            ISOspi2p1h(jstudy) = '    '
-            UEX2p1h(jstudy) = 0.
-            ZK2p1h(jstudy) = 0.
-            GOTO 200
-         ENDIF
-C---------------------------
-C
-C
-C
-C        now select a particle type (neutron or proton)
-C        and define the nature of the remaining 1p1h state (rem1p1h)
-         SELtype = 'neut'                !this and next line assume 50:50 weighting
-C        zran=ranf(0)
-         zran = RANG()
-         IF (zran.GT.0.5D0) SELtype = 'prot'
-C        ! for 1110 and 1101 configs.
-         IF (ISOspi2p1h(jstudy).EQ.'1101') THEN
-            IF (SELtype.EQ.'prot') rem1p1h = '0101'
-            IF (SELtype.EQ.'neut') rem1p1h = '1001'
-         ENDIF
-         IF (ISOspi2p1h(jstudy).EQ.'1110') THEN
-            IF (SELtype.EQ.'prot') rem1p1h = '0110'
-            IF (SELtype.EQ.'neut') rem1p1h = '1010'
-         ENDIF
-         IF (ISOspi2p1h(jstudy).EQ.'2010') THEN
-            SELtype = 'prot'
-C           !must be a proton
-            rem1p1h = '1010'
-         ENDIF
-         IF (ISOspi2p1h(jstudy).EQ.'0201') THEN
-            SELtype = 'neut'
-C           !must be a neutron
-            rem1p1h = '0101'
-         ENDIF
-         IF (NEV.EQ.12345678) THEN
-            WRITE (8,*) 'zran=', zran, 'isospin=', ISOspi2p1h(jstudy)
-            WRITE (8,*) 'seltype=', SELtype
-         ENDIF
-C
-C
-C
-C        now select a particle energy
-C
-C        now test to see if rescattered or emitted:
-C        **** note another possibility is partile trapped....put energy into
-C        C.N.
-C        now sample particle energy
-         CALL PAIRING(pair)
-         CALL SELECTEN2P1H(jstudy,pair,epart)
-         IF (NEV.EQ.12345678) WRITE (8,*) 'pair=', pair, 'epart=', epart
-C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
-     &                               ' uex2p1h=', UEX2p1h(jstudy),
-     &                               ' epart=', epart
-C
-C        jflagem=1,0
-C        1=emitted
-C        0=rescattered
-C
-C
-C
-C        warning declared in the following light-nucleus scenarios
-C        if jwarning=1, then insist that particle is trapped
-         jwarning = 0
-         IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
-         IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
-C
-C
-         IF (jwarning.EQ.0) CALL SEPARATION
-C        this returns a value 'binding' for the separation energy
-C
-C
-C        now determine selected particle and remaining 1p1h angle and momenta
-C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
-         npresid = 1
-C        !remaining state = 1p1h here
-         nhresid = 1
-         CALL DANGLES(jstudy,npresid,nhresid,epart)
-C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
-         IF (NEV.EQ.12345678) WRITE (8,*) 'th1p,ph1p=', TH1p, PH1p
-C
-C
-C
-C        first check to see if particle is trapped:
-         IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
-     &                               BINding
-C
-         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
-C           like emission, make a 1p1h state, dump 1p energy into c.n.
-C           excitation
-            NEXist1p1h = NEXist1p1h + 1
-C           !we have created a 1p1h state
-C           find index for 1p1h state =>index1p1h
-            NTOt1p1h = NTOt1p1h + 1
-            index1p1h = NTOt1p1h
-            IEXist1p1h(index1p1h) = 1
-C           ! this state is now created
-            ISOspi1p1h(index1p1h) = rem1p1h
-C           ! this is the n-p structure of the created 1p1h
-            UEX1p1h(index1p1h) = UEX2p1h(jstudy) - epart
-C           ! this is the excitation energy
-            ZK1p1h(index1p1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1p1h(index1p1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1p1h(index1p1h) = PH1rem
-            UCNdump = UCNdump + epart
-C           !dumps particle energy into c.n. excitation
-C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
-     &                                  ' uex1p1h=', UEX1p1h(index1p1h),
-     &                                  'trapped 1p energy=', epart
-            GOTO 100
-         ENDIF
-C
-C
-C
-C        we get here if the particle isn't trapped: now either emit or rescat
-C
-C        now work out emission probability:
-         CALL EMISSRATE(epart,emrate)
-         CALL DAMPING(epart,damprate)
-         probemiss = emrate/(emrate + damprate)
-C        write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
-C        +' damprate=',damprate,' probemiss=',probemiss
-         jflagem = 0
-C        zran=ranf(0)
-         zran = RANG()
-         IF (zran.LE.probemiss) jflagem = 1
-         IF (NEV.EQ.12345678) WRITE (8,*) 'zran,probemiss=', zran,
-     &                               probemiss
-C
-C
-C
-         IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ',
-     &                                  SELtype
-C           emission occurs
-C           1p1h state created with a certain energy
-            NEXist1p1h = NEXist1p1h + 1
-C           !we have created a 1p1h state
-C           find index for 1p1h state =>index1p1h
-            NTOt1p1h = NTOt1p1h + 1
-            index1p1h = NTOt1p1h
-            IEXist1p1h(index1p1h) = 1
-C           ! this state is now created
-            ISOspi1p1h(index1p1h) = rem1p1h
-C           ! this is the n-p structure of the created 1p1h
-            UEX1p1h(index1p1h) = UEX2p1h(jstudy) - epart
-C           ! this is the excitation energy
-            ZK1p1h(index1p1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1p1h(index1p1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1p1h(index1p1h) = PH1rem
-            NEMiss = NEMiss + 1
-C           ! an extra particle has been emitted
-            EEM = epart - BINding
-C           !the emission energy reduced by b.e.
-            CONvmass = CONvmass + BINding
-C           ! add to buffer energy converted to mass
-            EEMiss(NEMiss) = EEM
-C           ! the emission energy put in this array
-            THEmiss(NEMiss) = TH1p
-            PHEmiss(NEMiss) = PH1p
-C           now convert eem,th1p,ph1p to eplab,thplab,phplab
-            IF (IKIn.EQ.1) THEN
-C              here, recoil calculated for each emission in the preeq. cascade.
-               CALL BOOSTLAB1
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ELSE
-C              here, calculate recoil after preequilibrium has finished:
-C              the channel emission energy is interpreted as lab
-C              thus, boostlab2 lab values=channel values, but also keeps a
-C              running sum of ej. mom.
-               CALL BOOSTLAB2
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ENDIF
-C
-            nebinchan = INT(EEM/DEBin)
-C           !if debin=1, say, then bin 0: 0->1 MeV
-C           !                      bin 1: 1->2  etc.
-            nebinlab = INT(EPLab/DEBin)
-            IF (SELtype.EQ.'prot') THEN
-               IZAemiss(NEMiss) = 1001
-               DXSp(nebinchan) = DXSp(nebinchan) + 1.
-C              ! add into emiss spec
-               DXSplab(nebinlab) = DXSplab(nebinlab) + 1.
-C              ! add into emiss spec
-               JZResid = JZResid - 1
-C              !change composite nucleus
-            ENDIF
-C
-            IF (SELtype.EQ.'neut') THEN
-               IZAemiss(NEMiss) = 1
-               DXSn(nebinchan) = DXSn(nebinchan) + 1.
-               DXSnlab(nebinlab) = DXSnlab(nebinlab) + 1.
-               JNResid = JNResid - 1
-            ENDIF
-C
-            nth = INT(TH1p*36./PI_g) + 1
-            nph = INT(PH1p*36./PI_g) + 1
-            nthlab = INT(THPlab*36./PI_g) + 1
-            nphlab = INT(PHPlab*36./PI_g) + 1
-            IF (SELtype.EQ.'prot') THEN
-               DDDxsp(nebinchan,nth,nph) = DDDxsp(nebinchan,nth,nph)
-     &            + 1.                                  ! add into p emiss spec
-               DDDxsplab(nebinlab,nthlab,nphlab)
-     &            = DDDxsplab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-            IF (SELtype.EQ.'neut') THEN
-               DDDxsn(nebinchan,nth,nph) = DDDxsn(nebinchan,nth,nph)
-     &            + 1.                      ! add into n emiss spec
-               DDDxsnlab(nebinlab,nthlab,nphlab)
-     &            = DDDxsnlab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-C
-C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
-     &                                  ' uex1p1h=', UEX1p1h(index1p1h)
-C
-         ELSE
-C
-C           rescattering:
-C           1p1h state created with a certain energy, and a new 2p1h state made
-C
-C           now select a collision partner (=> returns "coltype")
-            CALL SELCOLTYPE(epart)
-            IF (IPRintdiag.EQ.1) WRITE (28,'(a4,a4)') SELtype, COLtype
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                      '***rescattering of 1p of 2p1h state, of a '
+
+      NTOt = NTOt + 2
+
+      IF (IEXist(jstudy).GT.0) THEN
+C    A 1p state creates a new 2p1h
+        epart = UEX(jstudy)
+        SELtype = ISOspin(jstudy)
+C    now select a collision partner (=> returns "coltype")
+        CALL SELCOLTYPE(epart)
+        ISOspin(NTOt-1) = COLtype
+        ISOspin(NTOt) = COLtype
+        IF (IPRintdiag.EQ.1) WRITE (28,'(a4,a4)') SELtype, COLtype
+        IF (IPRintdiag.EQ.1) WRITE (28,*)
+     &                      '***rescattering of 1p, of a '
      &                      , SELtype, ' with a coll partner=', COLtype
+
+C    now sample particle energy
+        CALL PAIRING(pair)
+        CALL SELECTEN2P1H(jstudy,pair,epart)
+        IF (NEV.EQ.12345678) WRITE (6,*) 'pair=', pair, 'epart=', epart
 C
-C           first the created 1p1h state:
-            NEXist1p1h = NEXist1p1h + 1
-C           !we have created a 1p1h state
-C           find index for 1p1h state =>index1p1h
-            NTOt1p1h = NTOt1p1h + 1
-            index1p1h = NTOt1p1h
-            IEXist1p1h(index1p1h) = 1
-C           ! this state is now created
-            ISOspi1p1h(index1p1h) = rem1p1h
-C           ! this is the n-p structure of the created 1p1h
-            UEX1p1h(index1p1h) = UEX2p1h(jstudy) - epart
-C           ! this is the excitation energy
-            ZK1p1h(index1p1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1p1h(index1p1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1p1h(index1p1h) = PH1rem
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1p1h=', index1p1h,
-     &                                  ' uex1p1h=', UEX1p1h(index1p1h)
+        IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
+     &                               ' uex2p1h=', UEX(jstudy),
+     &                               ' epart=', epart
+
+C       warning declared in the following light-nucleus scenarios
+C       if jwarning=1, then insist that particle is trapped
+        jwarning = 0
+        IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+        IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+
+        CALL SEPARATION
+C       this returns a value 'binding' for the separation energy
+
+C       now determine selected particle and remaining 1p1h angle and momenta
+C       using Chadwick ang-dist theory (PRC57, 233 (1998)).
+        npresid = 1
+C       !remaining state = 1p1h here
+        nhresid = 1
+        CALL DANGLES(jstudy,npresid,nhresid,epart)
+C       return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
+        IF (NEV.EQ.12345678) WRITE (6,*) 'th1p,ph1p=', TH1p, PH1p
 C
-C           next the created 2p1h state:
-            NEXist2p1h = NEXist2p1h + 1
-C           !we have created a 2p1h state
-C           find index for 2p1h state =>index2p1h
-            NTOt2p1h = NTOt2p1h + 1
-            index2p1h = NTOt2p1h
-            IEXist2p1h(index2p1h) = 1
-C           ! this state is now created
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '2010'
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '1101'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '1110'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '0201'
-            UEX2p1h(index2p1h) = epart
-C           ! this is the excitation energy
-            ZK2p1h(index2p1h) = ZKScat
-C           ! this is the momentum rel to well-bottom
-            TH2p1h(index2p1h) = TH1p
-C           ! this is the angle in the proj coord system
-            PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
-     &                                  'uex2p1h=', UEX2p1h(index2p1h),
-     &                                  ' isospin structure=',
-     &                                  ISOspi2p1h(index2p1h)
+C temporarily store the properties of the 1p1h state
+        UEX(NTOt) = UEX(jstudy) - epart
+C       ! this is the excitation energy
+        ZK(NTOt) = ZKRem
+C       ! this is the momentum rel to well-bottom
+        TH(NTOt) = TH1rem
+C       ! this is the angle in the proj coord system
+        PH(NTOt) = PH1rem
+
+C  this is the first particle
+        UEX(jstudy) = epart
+C       ! this is the excitation energy
+        ZK(jstudy) = ZKScat
+C       ! this is the momentum rel to well-bottom
+        TH(jstudy) = TH1p
+C       ! this is the angle in the proj coord system
+        PH(jstudy) = PH1p
+
+C       first check to see if particle is trapped:
+        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
+C
+        IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C         like emission, make a 1p1h state, dump 1p energy into c.n.
+C         excitation
+          IEXist(jstudy) = 0
+          NEXist = NEXist - 1
+          UCNdump = UCNdump + epart
+C         !dumps particle energy into c.n. excitation
+C
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex=', UEX(NTOt),
+     &                                  'trapped 1p energy=', epart
+         ELSE
+C        we get here if the particle isn't trapped: now either emit or rescat
+C        now work out emission probability:
+          CALL EMISSRATE(epart,emrate)
+          GAMup(jstudy) = emrate
+          CALL DAMPING(epart,damprate)
+          GAMdown(jstudy) = damprate
+C         write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
+C       +' damprate=',damprate,' probemiss=',probemiss
 C
          ENDIF
 C
+        SELtype = ISOspin(NTOt)
+        IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
 C
-C        since this 2p1h state has now been deexcited, reduce count by 1:
-  100    NEXist2p1h = NEXist2p1h - 1
-         IEXist2p1h(jstudy) = 0
-C        !no longer exists
-         ISOspi2p1h(jstudy) = '    '
-         UEX2p1h(jstudy) = 0.
-         ZK2p1h(jstudy) = 0.
-C
-  200 ENDDO
-C
-C     finally, at the end of this sweep, we have:
-C     deexcited  nexist2p1horig states
-C     created    nexist2p1h     states
-C     created    (nexist1p1h - nexist1p1horig)     states
-C
-      END
-C
-C
-C
-C
-      SUBROUTINE DEEXCITE1P1H
-      IMPLICIT NONE
-      INCLUDE 'ddhms.cmb'
-C
-C Local variables
-C
-      REAL*8 damprate, emrate, epart, probemiss, zran
-      INTEGER index1h, index2p1h, jflagem, jstudy, jwarning, n,
-     &        nebinchan, nebinlab, nexist1horig, nexist1p1horig,
-     &        nexist2p1horig, nhresid, nph, nphlab, npresid, nth, nthlab
-      INTEGER INT
-      REAL*8 RANG
-      CHARACTER*4 rem1h
-C
-C
-C
-C
-C     REAL*8 pair, epart, emrate, damprate, probemiss, zran
-C
-C     At this stage there are ntot1p1h 1p1h states. We want to step
-C     through each one to deexcite it (particle emission or rescattering)
-C     j= j-th 1p1h state being descited.
-C
-C     in the course of deexciting the nexist1p1h 1p1h states, more 2p1h
-C     states may be created (nexist2p1h may increase)
-C     and the number of 1p1h will decrease (nexist1p1h decreases)
-C     also  whether emission or scattering occurs, we also make 1h.
-C
-C     3 choices after selecting particle: trapped, emitted, or rescattered
-C
-      nexist2p1horig = NEXist2p1h
-      nexist1p1horig = NEXist1p1h
-      nexist1horig = NEXist1h
-C
-C     write(8,*)'number of 1p1h states to consider=',nexist1p1horig
-      IF (NEV.EQ.12345678) WRITE (8,*) '**** called deexcite1p1h'
-C
-      DO n = 1, nexist1p1horig
-         IF (NEV.EQ.12345678) WRITE (8,*) 'n=', n, ' of ',
-     &                               nexist1p1horig
-C
-C
-C        find the corresponding existing1p1h state (1st non zero iexist)
-         jstudy = 0
-   50    jstudy = jstudy + 1
-         IF (IEXist1p1h(jstudy).NE.1) GOTO 50
-C        jstudy = label to indicate which 2p1h will be deexcited
-C
-C---------------------------
-C        ! ABORT if nemiss > maxnemiss, and do not consider the cascade
-C        ! any futher. Dump energy of state into compound nucleus.
-         IF (NEMiss.GE.MAXNEMISS) THEN
-            UCNdump = UCNdump + UEX1p1h(jstudy)
-C           since this 1p1h state has now been deexcited, reduce count by 1:
-            NEXist1p1h = NEXist1p1h - 1
-            IEXist1p1h(jstudy) = 0
-C           !no longer exists
-            ISOspi1p1h(jstudy) = '    '
-            UEX1p1h(jstudy) = 0.
-            ZK1p1h(jstudy) = 0.
-            GOTO 200
-         ENDIF
-C---------------------------
-C
-C        now select a particle type (neutron or proton)
-C        and define the nature of the remaining 1h state (rem1h)
-         IF (ISOspi1p1h(jstudy).EQ.'1010') THEN
-            SELtype = 'prot'
-            rem1h = '0010'
-         ENDIF
-         IF (ISOspi1p1h(jstudy).EQ.'0101') THEN
-            SELtype = 'neut'
-            rem1h = '0001'
-         ENDIF
-         IF (ISOspi1p1h(jstudy).EQ.'1001') THEN
-            SELtype = 'prot'
-C           !must be a proton
-            rem1h = '0001'
-         ENDIF
-         IF (ISOspi1p1h(jstudy).EQ.'0110') THEN
-            SELtype = 'neut'
-C           !must be a neutron
-            rem1h = '0010'
-         ENDIF
-C
-         IF (NEV.EQ.12345678) WRITE (8,*) 'seltype=', SELtype
-C
-C
-C        now select a particle energy
-C
-C        now test to see if rescattered or emitted:
-C
-C        now select particle energy
-C        CALL PAIRING(pair)
-C        RCN, pairing energy is not used here, see comment inside SELECTEN1P1H
-C        CALL SELECTEN1P1H(jstudy, pair, epart)
-         CALL SELECTEN1P1H(jstudy,epart)
-C        IF(NEV.EQ.12345678)WRITE(8, *)'pair,epart=', pair, epart
-         IF (NEV.EQ.12345678) WRITE (8,*) 'epart=', epart
-C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
-     &                               ' uex1p1h=', UEX1p1h(jstudy),
+C       now select particle energy
+        CALL SELECTEN1P1H(NTOt,epart)
+        IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+
+        IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                               ' uex1p1h=', UEX(NTOt),
      &                               ' epart=', epart
 C
+C       warning declared in the following light-nucleus scenarios
+C       if jwarning=1, then insist that particle is trapped
+        jwarning = 0
+        IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+        IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+
+        CALL SEPARATION
+C       this returns a value 'binding' for the separation energy
 C
-C        warning declared in the following light-nucleus scenarios
-C        if jwarning=1, then insist that particle is trapped
-         jwarning = 0
-         IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
-         IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+C       now determine selected particle and remaining 1h angle and momenta
+C       using Chadwick ang-dist theory (PRC57, 233 (1998)).
+        npresid = 0
+C       !remaining state = 1h here
+        nhresid = 1
+        CALL DANGLES(NTOt,npresid,nhresid,epart)
+C       return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
 C
-C
-         IF (jwarning.EQ.0) CALL SEPARATION
-C
-C        this returns a value 'binding' for the separation energy
-C
-C        now determine selected particle and remaining 1h angle and momenta
-C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
-         npresid = 0
-C        !remaining state = 1h here
-         nhresid = 1
-         CALL DANGLES(jstudy,npresid,nhresid,epart)
-C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
-C
-C
-         IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
-     &                               BINding
-C        first check to see if particle is trapped:
-         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
-C           like emission, make a 1h state, dump 1p energy into c.n. excitation
-            NEXist1h = NEXist1h + 1
-C           !we have created a 1h state
-C           find index for 1h state =>index1p1h
-            NTOt1h = NTOt1h + 1
-            index1h = NTOt1h
-            IEXist1h(index1h) = 1
-C           ! this state is now created
-            ISOspi1h(index1h) = rem1h
-C           ! this is the n-p structure of the created 1h
-            UEX1h(index1h) = UEX1p1h(jstudy) - epart
-C           ! this is the excitation energy
-            ZK1h(index1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1h(index1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1h(index1h) = PH1rem
-            UCNdump = UCNdump + epart
-C           !dumps particle energy into c.n. excitation
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
-     &                                  ' uex1h=', UEX1h(index1h),
-     &                                  'trapped 1p energy=', epart
-            GOTO 100
-         ENDIF
-C
-C        we get here if the particle isn't trapped: now either emit or rescat
-C
-C        now work out emission probability:
-         CALL EMISSRATE(epart,emrate)
-         CALL DAMPING(epart,damprate)
-         probemiss = emrate/(emrate + damprate)
-C        write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
-C        +' damprate=',damprate,' probemiss=',probemiss
-         jflagem = 0
-C        zran=ranf(0)
-         zran = RANG()
-         IF (zran.LE.probemiss) jflagem = 1
-         IF (NEV.EQ.12345678) WRITE (8,*) 'zran,probemiss=', zran,
-     &                               probemiss
-C
-         IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*) '*****emission of a ',
-     &                                  SELtype
-C           emission occurs
-C           1h state created with a certain energy
-            NEXist1h = NEXist1h + 1
-C           !we have created a 1p1h state
-C           find index for 1h state =>index1h
-            NTOt1h = NTOt1h + 1
-            index1h = NTOt1h
-            IEXist1h(index1h) = 1
-C           ! this state is now created
-            ISOspi1h(index1h) = rem1h
-C           ! this is the n-p structure of the created 1h
-            UEX1h(index1h) = UEX1p1h(jstudy) - epart
-C           ! this is excit energy
-            ZK1h(index1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1h(index1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1h(index1h) = PH1rem
-C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
-     &                                  ' uex1h=', UEX1h(index1h)
-            NEMiss = NEMiss + 1 ! an extra particle has been emitted
-            EEM = epart - BINding !the emission energy reduced by b.e.
-            CONvmass = CONvmass + BINding
-C           ! add to buffer energy converted to mass
-            EEMiss(NEMiss) = EEM  ! the emission energy put in this array
-            THEmiss(NEMiss) = TH1p
-            PHEmiss(NEMiss) = PH1p
-C           now convert eem,th1p,ph1p to eplab,thplab,phplab
-            IF (IKIn.EQ.1) THEN
-C              here, recoil calculated for each emission in the preeq. cascade.
-               CALL BOOSTLAB1
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ELSE
-C              here, calculate recoil after preequilibrium has finished:
-C              the channel emission energy is interpreted as lab
-C              thus, boostlab2 lab values=channel values, but also keeps a
-C              running sum of ej. mom.
-               CALL BOOSTLAB2
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ENDIF
-C
-            nebinchan = INT(EEM/DEBin)
-C           !if debin=1, say, then bin 0: 0->1 MeV
-C           !                      bin 1: 1->2  etc.
-            nebinlab = INT(EPLab/DEBin)
-            IF (SELtype.EQ.'prot') THEN
-               IZAemiss(NEMiss) = 1001
-               DXSp(nebinchan) = DXSp(nebinchan) + 1.
-C              ! add into emiss spec
-               DXSplab(nebinlab) = DXSplab(nebinlab) + 1.
-C              ! add into emiss spec
-               JZResid = JZResid - 1
-C              !change composite nucleus
-            ENDIF
-C
-            IF (SELtype.EQ.'neut') THEN
-               IZAemiss(NEMiss) = 1
-               DXSn(nebinchan) = DXSn(nebinchan) + 1.
-               DXSnlab(nebinlab) = DXSnlab(nebinlab) + 1.
-               JNResid = JNResid - 1
-            ENDIF
-C
-            nth = INT(TH1p*36./PI_g) + 1
-            nph = INT(PH1p*36./PI_g) + 1
-            nthlab = INT(THPlab*36./PI_g) + 1
-            nphlab = INT(PHPlab*36./PI_g) + 1
-            IF (SELtype.EQ.'prot') THEN
-               DDDxsp(nebinchan,nth,nph) = DDDxsp(nebinchan,nth,nph)
-     &            + 1.                                  ! add into p emiss spec
-               DDDxsplab(nebinlab,nthlab,nphlab)
-     &            = DDDxsplab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-            IF (SELtype.EQ.'neut') THEN
-               DDDxsn(nebinchan,nth,nph) = DDDxsn(nebinchan,nth,nph)
-     &            + 1.                      ! add into n emiss spec
-               DDDxsnlab(nebinlab,nthlab,nphlab)
-     &            = DDDxsnlab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-C
-C
+C  this is the hole
+        UEX(NTOt-1) = UEX(NTOt) - epart
+C       ! this is the excitation energy
+        ZK(NTOt-1) = ZKRem
+C       ! this is the momentum rel to well-bottom
+        TH(NTOt-1) = TH1rem
+C       ! this is the angle in the proj coord system
+        PH(NTOt-1) = PH1rem
+
+C       check to see if hole is trapped:
+        IF (UEX(NTOt-1).LE.BINding ) THEN
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                ' uex1h=', UEX(NTOt),
+     &                                'trapped 1h energy=', UEX(NTOt-1)
+          UCNdump = UCNdump + UEX(NTOt-1)
+          IEXist(NTOt-1) = 0
          ELSE
-C
-C           rescattering:
-C           1h state created with a certain energy, and a new 2p1h state made
-C
-C
-C           now select a collision partner (=> returns "coltype")
-            CALL SELCOLTYPE(epart)
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                        '***rescattering  1p of 1p1h state, of a '
-     &                        , SELtype, ' with coll partner=', COLtype
-C
-C           first the created 1h state:
-            NEXist1h = NEXist1h + 1
-C           !we have created a 1p1h state
-C           find index for 1h state =>index1h
-            NTOt1h = NTOt1h + 1
-            index1h = NTOt1h
-            IEXist1h(index1h) = 1
-C           ! this state is now created
-            ISOspi1h(index1h) = rem1h
-C           ! this is the n-p structure of the created 1h
-            UEX1h(index1h) = UEX1p1h(jstudy) - epart
-C           ! this is the excitation energy
-            ZK1h(index1h) = ZKRem
-C           ! this is the momentum rel to well-bottom
-            TH1h(index1h) = TH1rem
-C           ! this is the angle in the proj coord system
-            PH1h(index1h) = PH1rem
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index1h=', index1h,
-     &                                  ' uex1h=', UEX1h(index1h)
-C
-C           next the created 2p1h state:
-            NEXist2p1h = NEXist2p1h + 1
-C           !we have created a 2p1h state
-C           find index for 2p1h state =>index2p1h
-            NTOt2p1h = NTOt2p1h + 1
-            index2p1h = NTOt2p1h
-            IEXist2p1h(index2p1h) = 1
-C           ! this state is now created
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '2010'
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '1101'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '1110'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '0201'
-            UEX2p1h(index2p1h) = epart
-C           ! this is the excitation energy
-            ZK2p1h(index2p1h) = ZKScat
-C           ! this is the momentum rel to well-bottom
-            TH2p1h(index2p1h) = TH1p
-C           ! this is the angle in the proj coord system
-            PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
-     &                                  'uex2p1h=', UEX2p1h(index2p1h),
-     &                                  'isospin struc=',
-     &                                  ISOspi2p1h(index2p1h)
+          IEXist(NTOt-1) = -1
+          NEXist = NEXist + 1
+          GAMup(NTOt-1) = 0.
+          CALL DAMPING(-UEX(NTOt-1),damprate)
+          GAMdown(NTOt-1) = damprate
+         ENDIF
+
+C this is the remaining particle
+        UEX(NTOt) = epart
+C       ! this is the excitation energy
+        ZK(NTOt) = ZKScat
+C       ! this is the momentum rel to well-bottom
+        TH(NTOt) = TH1p
+C       ! this is the angle in the proj coord system
+        PH(NTOt) = PH1p
+
+        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
+C        check to see if particle is trapped:
+        IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C         like emission, but dump 1p energy into c.n. excitation
+          IEXist(NTOt) = 0
+          UCNdump = UCNdump + epart
+C         !dumps particle energy into c.n. excitation
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex1p=', UEX(NTOt),
+     &                                  'trapped 1p energy=', epart
+         ELSE 
+C        we get here if the particle isn't trapped: 
+C          now work out emission probability:
+           IEXist(NTOt) = 1
+           NEXist = NEXist + 1
+           CALL EMISSRATE(epart,emrate)
+           GAMup(NTOt) = emrate
+           CALL DAMPING(epart,damprate)
+           GAMdown(NTOt) = damprate
+C          write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
+C        +' damprate=',damprate,' probemiss=',probemiss
 C
          ENDIF
+       
+       ELSE
 C
-C
-C        since this 1p1h state has now been deexcited, reduce count by 1:
-  100    NEXist1p1h = NEXist1p1h - 1
-         IEXist1p1h(jstudy) = 0 !no longer exists
-         ISOspi1p1h(jstudy) = '    '
-         UEX1p1h(jstudy) = 0.
-         ZK1p1h(jstudy) = 0.
-C
-C
-  200 ENDDO
-C
-C     finally, at the end of this sweep, we have:
-C     deexcited  nexist1p1horig states
-C     created    nexist2p1h - nexist2p1horig   states
-C     created    (nexist1h - nexist1horig)     states
-C
-      END
-C
-C
-C
-C
-C
-      SUBROUTINE DEEXCITE1H
-      IMPLICIT NONE
-      INCLUDE 'ddhms.cmb'
-C
-C Local variables
-C
-      REAL*8 damprate, emrate, epart, pair, probemiss, zran
-      INTEGER index2p1h, jflagem, jstudy, jwarning, n, nebinchan,
-     &        nebinlab, nexist1horig, nexist1p1horig, nexist2p1horig,
-     &        nhresid, nph, nphlab, npresid, nth, nthlab
-      INTEGER INT
-      REAL*8 RANG
-C
-C
-C
-C
-C
-C     At this stage there are ntot1h 1h states. We want to step
-C     through each one to deexcite it (hole conversion)
-C     j= j-th 1h state being dexcited.
-C
-C     here 1h either does nothing if Eh< B.E.
-C     or converts to 1p2h. The 1p energy is then selected, and may
-C     be emitted, or undergo scattering (=> put into 2p1h buffer)
-C     The 2h left, here, are assumed to do nothing (go into C.N. energy).
-C     one could select hole energies, and then let them convert
-C     if one wanted to (i.e. just increase 2* 1h arrays). However, the
-C     probability of these holes having enough energy to convert is small
-C     since on average each of the new holes has 1/3 initial hole energy
-C
-C     in the course of deexciting the nexist1h 1h states, more 2p1h
-C     states may be created via hole conversion => 1p2h (nexist2p1h may
-C     increase) and the number of 1h will decrease (nexist1h decreases)
-C
-C     3 choices after selecting particle: trapped, emitted, or rescattered
-C
-      nexist2p1horig = NEXist2p1h
-      nexist1p1horig = NEXist1p1h
-      nexist1horig = NEXist1h
-C
-      DO n = 1, nexist1horig
-C
-C
-C        find the corresponding existing 1h state (1st non zero iexist)
-         jstudy = 0
-   50    jstudy = jstudy + 1
-         IF (IEXist1h(jstudy).NE.1) GOTO 50
-C        jstudy = label to indicate which 2p1h will be deexcited
-C
-C---------------------------
-C        ! ABORT if nemiss > maxnemiss, and do not consider the cascade
-C        ! any futher. Dump energy of state into compound nucleus.
-         IF (NEMiss.GE.MAXNEMISS) THEN
-            UCNdump = UCNdump + UEX1h(jstudy)
-C           since this 1h state has now been deexcited, reduce count by 1:
-            NEXist1h = NEXist1h - 1
-            IEXist1h(jstudy) = 0
-C           !no longer exists
-            ISOspi1h(jstudy) = '    '
-            UEX1h(jstudy) = 0.
-            ZK1h(jstudy) = 0.
-            GOTO 200
-         ENDIF
-C---------------------------
-C
-C        select a nucleon type below Ferm level for scattering into hole =>1p2h
-C        now select a collision partner - Note for hole conversion, collision
-C        partner is slightly diff concept, but everything works out as for
-C        particles
-C        now select a collision partner (=> returns "coltype")
-         IF (ISOspi1h(jstudy).EQ.'0001') SELtype = 'neut'
-C        !the type of studied hole
-         IF (ISOspi1h(jstudy).EQ.'0010') SELtype = 'prot'
-C
-C        next line corrected on 000821. previously, used epart, but this was
-C        not yet defined. epart here is really the 1h energy measured rel
-C        to the fermi energy hence the -ve sign.
-         epart = -UEX1h(jstudy)
-         CALL SELCOLTYPE(epart)
+C      1h state creates new 1p2h state
+         
+        epart = -UEX(jstudy)
+        SELtype = ISOspin(jstudy)
+C    now select a collision partner (=> returns "coltype")
+        CALL SELCOLTYPE(epart)
+        ISOspin(NTOt-1) = COLtype
+        ISOspin(NTOt) = COLtype
+        IF (IPRintdiag.EQ.1) WRITE (28,'(a4,a4)') SELtype, COLtype
 C        !returns the collision nucleon type "coltype"
 C
-         IF (COLtype.EQ.'prot') SELtype = 'prot'
-C        !since the excited particle=collision partner
-         IF (COLtype.EQ.'neut') SELtype = 'neut'
 C
-C        if hole conversion is viewed as nucl-nucl scat in which
-C        the hole is filled by the scattering partner of the same type
-         IF (ISOspi1h(jstudy).EQ.'0001') THEN
-            IF (COLtype.EQ.'prot') ISOspi1p2h(jstudy) = '1011'
-            IF (COLtype.EQ.'neut') ISOspi1p2h(jstudy) = '0102'
-         ELSE
-C           hole='0010' here
-            IF (COLtype.EQ.'prot') ISOspi1p2h(jstudy) = '1020'
-            IF (COLtype.EQ.'neut') ISOspi1p2h(jstudy) = '0111'
-         ENDIF
-C
-C
-C        now select a particle energy from converted hole =>1p2h
-C
-         IF (IPRintdiag.EQ.1) WRITE (28,*)
+        IF (IPRintdiag.EQ.1) WRITE (28,*)
      &                          'hole conversion from 1h => 1p2h occurs'
 C
-C        now test to see if rescattered or emitted:
-C        **** note another possibility is partile trapped....put energy into
-C        C.N.
-C        now select a particle energy
-         CALL PAIRING(pair)
-         CALL SELECTEN1P2H(jstudy,pair,epart)
+C       now select a particle energy
+        CALL PAIRING(pair)
+        CALL SELECTEN1P2H(jstudy,pair,epart)
 C
-C        determine what type of particle this is:
-         IF (ISOspi1p2h(jstudy).EQ.'1011' .OR. ISOspi1p2h(jstudy)
-     &       .EQ.'1020') SELtype = 'prot'
-         IF (ISOspi1p2h(jstudy).EQ.'0102' .OR. ISOspi1p2h(jstudy)
-     &       .EQ.'0111') SELtype = 'neut'
+        IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, ' uex1h=',
+     &                               UEX(jstudy), ' epart=', epart
 C
-         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy, ' uex1h=',
-     &                               UEX1h(jstudy), ' epart=', epart
+C change SELtype to that of particle
+        SELtype = ISOspin(NTOt)
 C
-C        jflagem=1,0
-C        1=emitted
-C        0=rescattered
+C       warning declared in the following light-nucleus scenarios
+C       if jwarning=1, then insist that particle is trapped
+        jwarning = 0
+        IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+        IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
 C
-C        warning declared in the following light-nucleus scenarios
-C        if jwarning=1, then insist that particle is trapped
-         jwarning = 0
-         IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
-         IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+        CALL SEPARATION
+C       this returns a value 'binding' for the separation energy
+
+C       now determine selected particle and remaining 2h angle and momenta
+C       using Chadwick ang-dist theory (PRC57, 233 (1998)).
+        npresid = 0
+C       !remaining state = 2h here
+        nhresid = 2
+        CALL DANGLES(jstudy,npresid,nhresid,epart)
+C       return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
 C
+C  this is the particle
+        UEX(NTOt) = epart
+C       ! this is the excitation energy
+        ZK(NTOt) = ZKScat
+C       ! this is the momentum rel to well-bottom
+        TH(NTOt) = TH1p
+C       ! this is the angle in the proj coord system
+        PH(NTOt) = PH1p
+
+C  these are the 2h values 
+        UEX(jstudy) = UEX(jstudy) - epart
+C       ! this is the excitation energy
+        ZK(jstudy) = ZKRem
+C       ! this is the momentum rel to well-bottom
+        TH(jstudy) = TH1rem
+C       ! this is the angle in the proj coord system
+        PH(jstudy) = PH1rem
+
+C Dump the first hole into UCNdump
+        IEXist(jstudy) = 0
+        NEXist = NEXist - 1
+        UCNdump = UCNdump + UEX(jstudy)
 C
-         IF (jwarning.EQ.0) CALL SEPARATION
+C  now dump the second hole
+        IEXist(NTOt-1) = 0
+        UEX(NTOt-1) = 0.
+C       ! this is the excitation energy
+        ZK(NTOt-1) = 0.
+C       ! this is the momentum rel to well-bottom
+        TH(NTOt-1) = 0.
+C       ! this is the angle in the proj coord system
+        PH(NTOt-1) = 0.
+
+C       first check to see if particle is trapped:
+        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
 C
-C        this returns a value 'binding' for the separation energy
+        IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C         dump 1p energy into c.n. excitation
+          IEXist(NTOt) = 0
+          UCNdump = UCNdump + epart
+C         !dumps particle energy into c.n. excitation
 C
-C        now determine selected particle and remaining 2h angle and momenta
-C        using Chadwick ang-dist theory (PRC57, 233 (1998)).
-         npresid = 0
-C        !remaining state = 2h here
-         nhresid = 2
-         CALL DANGLES(jstudy,npresid,nhresid,epart)
-C        return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
-C
-C
-C
-C        first check to see if particle from 1p2h is trapped:
-         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
-C           put all energy into c.n. excitation
-            UCNdump = UCNdump + UEX1h(jstudy)
-C           !dumps particle energy into c.n. excitation
-C
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                   'trapped 1p (and 2h) energy=',
-     &                                  UEX1h(jstudy)
-            GOTO 100
-         ENDIF
-C
-C        we get here if the particle isn't trapped: now either emit or rescat
-C
-C        now work out emission probability:
-         CALL EMISSRATE(epart,emrate)
-         CALL DAMPING(epart,damprate)
-         probemiss = emrate/(emrate + damprate)
-C        write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
-C        +' damprate=',damprate,' probemiss=',probemiss
-         jflagem = 0
-C        zran=ranf(0)
-         zran = RANG()
-         IF (zran.LE.probemiss) jflagem = 1
-C
-         IF (jflagem.EQ.1) THEN
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                           '*****emission of 1p of 1p2h state, of'
-     &                           , SELtype
-C           emission occurs
-C           could add 2 * 1h buffers into 1h array, but small effect. ignore
-C           for moment and dump energy into the C.N.
-            NEMiss = NEMiss + 1
-C           ! an extra particle has been emitted
-            EEM = epart - BINding
-C           !the emission energy reduced by b.e.
-            CONvmass = CONvmass + BINding
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                                   'BINding,CONvmass,epart,EEM:',
-     &                                  BINding, CONvmass, epart, EEM
-C           ! add to buffer energy converted to mass
-            EEMiss(NEMiss) = EEM
-C           ! the emission energy put in this array
-            THEmiss(NEMiss) = TH1p
-            PHEmiss(NEMiss) = PH1p
-C           now convert eem,th1p,ph1p to eplab,thplab,phplab
-            IF (IKIn.EQ.1) THEN
-C              here, recoil calculated for each emission in the preeq. cascade.
-               CALL BOOSTLAB1
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ELSE
-C              here, calculate recoil after preequilibrium has finished:
-C              the channel emission energy is interpreted as lab
-C              thus, boostlab2 lab values=channel values, but also keeps a
-C              running sum of ej. mom.
-               CALL BOOSTLAB2
-               EEMissl(NEMiss) = EPLab
-               THEmissl(NEMiss) = THPlab
-               PHEmissl(NEMiss) = PHPlab
-            ENDIF
-C
-            nebinchan = INT(EEM/DEBin)
-C           !if debin=1, say, then bin 0: 0->1 MeV
-C           !                      bin 1: 1->2  etc.
-            nebinlab = INT(EPLab/DEBin)
-            IF (SELtype.EQ.'prot') THEN
-               IZAemiss(NEMiss) = 1001
-               DXSp(nebinchan) = DXSp(nebinchan) + 1.
-C              ! add into emiss spec
-               DXSplab(nebinlab) = DXSplab(nebinlab) + 1.
-C              ! add into emiss spec
-               JZResid = JZResid - 1
-C              !change composite nucleus
-            ENDIF
-C
-            IF (SELtype.EQ.'neut') THEN
-               IZAemiss(NEMiss) = 1
-               DXSn(nebinchan) = DXSn(nebinchan) + 1.
-               DXSnlab(nebinlab) = DXSnlab(nebinlab) + 1.
-               JNResid = JNResid - 1
-            ENDIF
-C
-            nth = INT(TH1p*36./PI_g) + 1
-            nph = INT(PH1p*36./PI_g) + 1
-            nthlab = INT(THPlab*36./PI_g) + 1
-            nphlab = INT(PHPlab*36./PI_g) + 1
-            IF (SELtype.EQ.'prot') THEN
-               DDDxsp(nebinchan,nth,nph) = DDDxsp(nebinchan,nth,nph)
-     &            + 1.                                  ! add into p emiss spec
-               DDDxsplab(nebinlab,nthlab,nphlab)
-     &            = DDDxsplab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-            IF (SELtype.EQ.'neut') THEN
-               DDDxsn(nebinchan,nth,nph) = DDDxsn(nebinchan,nth,nph)
-     &            + 1.                      ! add into n emiss spec
-               DDDxsnlab(nebinlab,nthlab,nphlab)
-     &            = DDDxsnlab(nebinlab,nthlab,nphlab) + 1.
-            ENDIF
-C
-C
-            UCNdump = UCNdump + (UEX1h(jstudy) - epart)
-C           !dumps 2h energy in c.n. excitation
-C
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=',
-     &                                  UEX1h(jstudy) - epart
-C
-         ELSE
-C
-C           rescattering:
-C
-C           now select a new collision partner "coltype" for the excited
-C           particle
-            CALL SELCOLTYPE(epart)
-C
-C
-C           2h state created (ignore) , and a new 2p1h state made
-            IF (IPRintdiag.EQ.1) WRITE (28,*)
-     &                         '***rescattering of 1p of 1p2h state, of'
-     &                         , SELtype, ' coll partner=', COLtype
-C           next the created 2p1h state:
-            NEXist2p1h = NEXist2p1h + 1
-C           !we have created a 2p1h state
-C           find index for 2p1h state =>index2p1h
-            NTOt2p1h = NTOt2p1h + 1
-            index2p1h = NTOt2p1h
-            IEXist2p1h(index2p1h) = 1
-C           ! this state is now created
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '2010'
-            IF (SELtype.EQ.'prot' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '1101'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'prot')
-     &          ISOspi2p1h(index2p1h) = '1110'
-            IF (SELtype.EQ.'neut' .AND. COLtype.EQ.'neut')
-     &          ISOspi2p1h(index2p1h) = '0201'
-            UEX2p1h(index2p1h) = epart
-C           ! this is the excitation energy
-            ZK2p1h(index2p1h) = ZKScat
-C           ! this is the momentum rel to well-bottom
-            TH2p1h(index2p1h) = TH1p
-C           ! this is the angle in the proj coord system
-            PH2p1h(index2p1h) = PH1p
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'index2p1h=', index2p1h,
-     &                                  'uex2p1h=', UEX2p1h(index2p1h),
-     &                                  ' isospin structure=',
-     &                                  ISOspi2p1h(index2p1h)
-            UCNdump = UCNdump + (UEX1h(jstudy) - epart)
-C           !dumps 2h energy in c.n. excitation
-C
-C           ignore for now the 2 holes left (dump energy into c.n.)
-            IF (IPRintdiag.EQ.1) WRITE (28,*) 'trapped 2h energy=',
-     &                                  UEX1h(jstudy) - epart
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex1p1h=', UEX(NTOt),
+     &                                  'trapped 1p energy=', epart
+          ELSE
+C        we get here if the particle isn't trapped:
+C         now work out emission probability:
+          IEXist(NTOt) = 1
+          NEXist = NEXist + 1
+          CALL EMISSRATE(epart,emrate)
+          GAMup(NTOt) = emrate
+          CALL DAMPING(epart,damprate)
+          GAMdown(NTOt) = damprate
+C         write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
+C       +' damprate=',damprate
 C
          ENDIF
-C
-C
-C        since this 1h state has now been deexcited, reduce count by 1:
-  100    NEXist1h = NEXist1h - 1
-         IEXist1h(jstudy) = 0 !no longer exists
-         ISOspi1h(jstudy) = '    '
-         UEX1h(jstudy) = 0.
-         ZK1h(jstudy) = 0.
-C
-  200 ENDDO
-C
-C     finally, at the end of this sweep, we have:
-C     deexcited  nexist1horig states
-C     created    nexist2p1h - nexist2p1horig   states
-C
+
+      ENDIF
+
+      RETURN
       END
-C
+c
+c----------------------------------------------------------------
+c
+      SUBROUTINE FINDIND(rwt,wts,ndmx,ind)
+      IMPLICIT NONE
+
+c binary search to find emitted nucleon or internal collision pair 
+c chosen by MC
+
+      REAL*8 wts(0:200), rwt
+      INTEGER ndmx, ind
+
+      REAL ALOG, FLOAT
+      INTEGER ilo, ihi, intmx, ix, iter
+      INTEGER INT
+
+      ilo=1
+      ihi=ndmx
+
+C      write(*,*) ilo,ihi,wts(ilo),wts(ihi),rwt
+
+      intmx=INT(ALOG(FLOAT(ndmx))/ALOG(2.)+0.999)
+      DO iter = 1, intmx
+
+        ix=(ihi-ilo)/2+ilo
+
+        IF (rwt.LT.wts(ix)) THEN
+          ihi=ix
+         ELSE
+          ilo=ix
+         ENDIF
+
+C       write(*,*) ilo,ihi,wts(ilo),wts(ihi),rwt
+
+       END DO
+
+      ind=ihi
+
+      RETURN
+      END
 C
 C
       SUBROUTINE PRINTIEXIST
@@ -1519,27 +995,51 @@ C
 C
 C
       WRITE (28,*) '**************************************************'
-      WRITE (28,*) 'isospin (prot-part neut-part prot-hole neut-hole:'
-      WRITE (28,*)
-     &           '    1     2     3     4     5     6     7     8     9'
-      WRITE (28,99005) (ISOspi2p1h(i),i = 1,9)
-99005 FORMAT ('2p1h:',9(a4,2x))
-      WRITE (28,99010) (ISOspi1p1h(i),i = 1,9)
-99010 FORMAT ('1p1h:',9(a4,2x))
-      WRITE (28,99015) (ISOspi1h(i),i = 1,9)
-99015 FORMAT ('  1h:',9(a4,2x))
-      WRITE (28,99020) (ISOspi1p2h(i),i = 1,9)
-99020 FORMAT ('1p2h:',9(a4,2x))
+      WRITE (28,*) ' iexist'
+      WRITE (28,*) '      ',
+     & '      1     2     3     4     5     6     7     8     9    10'
+      WRITE (28,99045) (IEXist(i),i = 1,10)
+99045 FORMAT (' ( 1-10):',2x,10(i3,3x))
+      IF (NTOt.GT.10)
+     & WRITE (28,99050) (IEXist(i),i = 11,20)
+99050 FORMAT (' (11-20):',2x,10(i3,3x))
+      IF (NTOt.GT.20)
+     & WRITE (28,99055) (IEXist(i),i = 21,30)
+99055 FORMAT (' (21-30):',2x,10(i3,3x))
+      IF (NTOt.GT.30)
+     & WRITE (28,99060) (IEXist(i),i = 31,40)
+99060 FORMAT (' (31-40):',2x,10(i3,3x))
+      WRITE (28,*) ' isospin'
+      WRITE (28,*) '      ',
+     & '      1     2     3     4     5     6     7     8     9    10'
+      WRITE (28,99005) (ISOspin(i),i = 1,10)
+99005 FORMAT (' ( 1-10):',2x,10(a4,2x))
+      IF (NTOt.GT.10)
+     & WRITE (28,99010) (ISOspin(i),i = 11,20)
+99010 FORMAT (' (11-20):',2x,10(a4,2x))
+      IF (NTOt.GT.20)
+     & WRITE (28,99015) (ISOspin(i),i = 21,30)
+99015 FORMAT (' (21-30):',2x,10(a4,2x))
+      IF (NTOt.GT.30)
+     & WRITE (28,99020) (ISOspin(i),i = 31,40)
+99020 FORMAT (' (31-40):',2x,10(a4,2x))
 C
-      WRITE (28,*) 'iexist vals followed by energies'
-      WRITE (28,*)
-     &           '    1     2     3     4     5     6     7     8     9'
-      WRITE (28,99025) (UEX2p1h(i),i = 1,9)
-99025 FORMAT ('2p1h:',9(f5.1,1x))
-      WRITE (28,99030) (UEX1p1h(i),i = 1,9)
-99030 FORMAT ('1p1h:',9(f5.1,1x))
-      WRITE (28,99035) (UEX1h(i),i = 1,9)
-99035 FORMAT ('  1h:',9(f5.1,1x))
+      WRITE (28,*) ' energy'
+      WRITE (28,*) '      ',
+     & '      1     2     3     4     5     6     7     8     9    10'
+      WRITE (28,99025) (UEX(i),i = 1,10)
+99025 FORMAT (' ( 1-10):',1x,10(f5.1,1x))
+      IF (NTOt.GT.10)
+     & WRITE (28,99030) (UEX(i),i = 11,20)
+99030 FORMAT (' (11-20):',1x,10(f5.1,1x))
+      IF (NTOt.GT.20)
+     & WRITE (28,99035) (UEX(i),i = 21,30)
+99035 FORMAT (' (21-30):',1x,10(f5.1,1x))
+      IF (NTOt.GT.30)
+     & WRITE (28,99040) (UEX(i),i = 31,40)
+99040 FORMAT (' (31-40):',1x,10(f5.1,1x))
+C
+      WRITE (28,*) '**************************************************'
 C
       END
 C
@@ -1563,7 +1063,6 @@ C
       REAL*8 RANG
 C
 C
-C
 C     there was a mistake in Blann's hms code as used in his 1st PRC pub.
 C     2 ways to handle e>thermodynamic max because of pairing:(1) reject and
 C     re-montecarlo; (2) set to highest value. Marshall planned to do (1)
@@ -1576,7 +1075,7 @@ C     A) use MC, and if necessary, re montecarlo. But re-MC just once, otherwise
 C     set to highest possible value. (to avoid long loops for low energies)
 C     B) for 1p1h, always use pair=0.
 C
-      e = UEX2p1h(Jstudy) - Pair   !pair is -ve, so e increases
+      e = UEX(Jstudy) - Pair   !pair is -ve, so e increases
       nmonte = 0
 C
 C     10   x=ranf(0)
@@ -1584,29 +1083,33 @@ C     10   x=ranf(0)
       nmonte = nmonte + 1
 C     !count # of times, so we only loop once if rejected
 C
-      IF (e.LE.VDEp) THEN
-         Epart = e*(1. - DSQRT(1. - x))
-      ELSE
-C        for e > vdep:
-         xtest = (e - VDEp)/(e - (VDEp/2.))
-         IF (x.LE.xtest) THEN
-            Epart = (e - (VDEp/2.))*x
+      IF(IFErmi.EQ.1) THEN
+        CALL ESEL3(x,e,Epart)
+       ELSE
+        IF (e.LE.VDEp) THEN
+          Epart = e*(1. - DSQRT(1. - x))
          ELSE
+C         for e > vdep:
+          xtest = (e - VDEp)/(e - (VDEp/2.))
+          IF (x.LE.xtest) THEN
+            Epart = (e - (VDEp/2.))*x
+           ELSE
             Epart = e - DSQRT((2.*e - VDEp)*VDEp*(1. - x))
+           ENDIF
          ENDIF
-      ENDIF
+       ENDIF
 C     now test to see if epart is unphysically > e (thermodynamic temp)
 C     if so for first MC loop, reject and do a new event
 C     but if already looped once, just set = max possible energy
 C     (saves time doing lots of random numbers when e is small):
-      IF (Epart.GT.UEX2p1h(Jstudy)) THEN
+      IF (Epart.GT.UEX(Jstudy)) THEN
          IF (nmonte.EQ.1) GOTO 100
 C        !reject and re-MC 1st time
-         Epart = UEX2p1h(Jstudy)    !otherwise set to max value
+         Epart = UEX(Jstudy)    !otherwise set to max value
       ENDIF
 C
 C     if(seltype.eq.'neut'.and.jstudy.eq.1)then
-C     write(8,*)'u,pair,e,vdep,epart=',uex2p1h(jstudy),pair,e,vdep,epart
+C     write(8,*)'u,pair,e,vdep,uex(jstudy),pair,e,vdep,epart
 C     endif
 C
       END
@@ -1636,16 +1139,20 @@ C     for a linear (flat) distribution.
 C     Differs from Blann's PRC calcs, since blann didn't re-MC here,
 C     but added into max energy bin.(nasty shape when flat dist function!)
 C
-C     e=uex1p1h(jstudy) - pair  !pair is -ve, so e increases
-      e = UEX1p1h(Jstudy)
+C     e=uex(jstudy) - pair  !pair is -ve, so e increases
+      e = UEX(Jstudy)
 C     10   x=ranf(0)
       x = RANG()
-      IF (e.LE.VDEp) THEN
-         Epart = e*x
-      ELSE
-C        for e > vdep:
-         Epart = VDEp*x - VDEp + e
-      ENDIF
+      IF(IFErmi.EQ.1) THEN
+        CALL ESEL2(x,e,Epart)
+       ELSE
+        IF (e.LE.VDEp) THEN
+          Epart = e*x
+         ELSE
+C         for e > vdep:
+          Epart = VDEp*x - VDEp + e
+         ENDIF
+       ENDIF
 C
 C
       END
@@ -1673,7 +1180,7 @@ C
 C     note that since 1p2h are created from 1h by hole conversion,
 C     they always have e<vdep (never feel well bottom)
 C
-      e = UEX1h(Jstudy) - Pair
+      e = UEX(Jstudy) - Pair
 C     !pair is -ve, so e increases
       nmonte = 0
 C     10   x=ranf(0)
@@ -1693,9 +1200,9 @@ C     if so for first MC reject, do a new event
 C     but if already looped once, just set = max possible energy
 C     (saves time doing lots of random numbers when e is small):
 C
-      IF (Epart.GT.UEX1h(Jstudy)) THEN
+      IF (Epart.GT.UEX(Jstudy)) THEN
          IF (nmonte.EQ.1) GOTO 100
-         Epart = UEX1h(Jstudy)
+         Epart = UEX(Jstudy)
       ENDIF
 C
       END
@@ -1732,6 +1239,16 @@ C     c      = internal variable (random number)
 C----------------------------------------------------------
 C
 C
+      IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') THEN
+        COLtype = 'prot'
+        RETURN
+       ENDIF
+
+      IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') THEN
+        COLtype = 'neut'
+        RETURN
+       ENDIF
+
       vfermi = 31.27
 C     !from mean free path calculation
       IF (Epart + vfermi.LE.0.D0) Epart = -vfermi + 0.01
@@ -1740,20 +1257,18 @@ C     !more negative thanvfermi (hopefully rare, or never)
 C
       beta = DSQRT(1. - (ZMNuc/(ZMNuc+Epart+vfermi))**2) !relativistic beta
 C
-C
-C
 C     now calculate nucleon nucleon scattering cross sections:
 C
       signnpp = 10.63/(beta*beta) - 29.92/beta + 42.9
       signp = 34.1/(beta*beta) - 82.2/beta + 82.2
-      IF (NEV.EQ.12345678) WRITE (8,*) 'epart,beta,signnpp,signp=',
+      IF (NEV.EQ.12345678) WRITE (6,*) 'epart,beta,signnpp,signp=',
      &                                 Epart, beta, signnpp, signp
       IF (SELtype.EQ.'neut') THEN
          probnn = signnpp*ANTar/(signnpp*ANTar + signp*ZTAr)
          COLtype = 'neut'
 C        c=ranf(0)
          c = RANG()
-         IF (NEV.EQ.12345678) WRITE (8,*) 'c,probnn=', c, probnn
+         IF (NEV.EQ.12345678) WRITE (6,*) 'c,probnn=', c, probnn
          IF (c.GT.probnn) COLtype = 'prot'
       ELSE
 C        seltype='prot'
@@ -1761,10 +1276,10 @@ C        seltype='prot'
          COLtype = 'prot'
 C        c=ranf(0)
          c = RANG()
-         IF (NEV.EQ.12345678) WRITE (8,*) 'c,probpp=', c, probpp
+         IF (NEV.EQ.12345678) WRITE (6,*) 'c,probpp=', c, probpp
          IF (c.GT.probpp) COLtype = 'neut'
       ENDIF
-      IF (NEV.EQ.12345678) WRITE (8,*) 'coltype=', COLtype
+      IF (NEV.EQ.12345678) WRITE (6,*) 'coltype=', COLtype
 C
       IF (IPRintdiag.EQ.1) WRITE (28,*) ' selcol subroutine: sel col=',
      &                                  SELtype, COLtype
@@ -1801,13 +1316,13 @@ C
 C
 C
 C     I calculate the Fermi energy. Do simply using nonrel expressions.
-C     rho(eps)=4 r0**3/(3.PI_g (hbarc)**3)*atar*mdsqrt(2m)dsqrt(e)  nonrel.
+C     rho(eps)=4 r0**3/(3.PI_g (hbarc)**3)*atar*m*dsqrt(2m)dsqrt(e)  nonrel.
 C     = identical to dsqrt(e)*atar/131.
 C     integrate this to ef gives the number of neutrons and protons
 C     so (atar/131.)*(2/3)*ef**(3/2) = N or Z, so:
       efermin = (3.*131.*ANTar/(2.*ATAr))**(2./3.)
       efermip = (3.*131.*ZTAr/(2.*ATAr))**(2./3.)
-C     thus, for N=Z+A/2. the above reduces to a fermi en of 21.3 MeV, and if
+C     thus, for N=Z=A/2. the above reduces to a fermi en of 21.3 MeV, and if
 C     this was plugged in the (nonrel) expr for rho, we get rho=A/28  (correct
 C     value for diff types of nucleon), equiv to A/14 for all types.
 C
@@ -1842,7 +1357,8 @@ C     now calculate relativistic free phase space
       gfree = gfree/(2.*PI_g*PI_g*(HBArc**3.))
 C     this doesn't include the free volume, which cancels
 C
-      cons = 3.E22  ! constants multiplier (inc c, and fm*3 to mb)
+      cons=1.0d0
+C      cons = 3.E22  ! constants multiplier (inc c, and fm*3 to mb)
       Emrate = cons*beta*siginv*gfree/glev
 C
 C
@@ -1866,9 +1382,10 @@ C
 C
 C Local variables
 C
+      INTEGER ne
       REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pauli, r0,
-     &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z
-      DOUBLE PRECISION DEXP, DLOG, DSQRT
+     &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z, de, rhop
+      DOUBLE PRECISION DEXP, DLOG, DSQRT, DABS
 C
 C     followed Blann's prescription
 C
@@ -1877,7 +1394,7 @@ C     where MFP multiplier =2.
 C
 C     first average density =central density * average factor to account
 C     for averaging along a st. line trajectory from R to nucleus center
-C     based on a Woods-Saxon type desnity distribution
+C     based on a Woods-Saxon type density distribution
 C     I (and Marshall) obtain: averaging factor=dave
 C     dave=[1 + (z/rr)*{ ln(1+dexp(-c/z) - ln(1+dexp((rr-c)/z) ) }
 C     where c= nuclear radius parameter
@@ -1899,6 +1416,7 @@ C     !in units of fermi
       z = 0.55   !diffuseness
       dave = 1. + (z/rr)
      &       *(DLOG(1. + DEXP(-c/z)) - DLOG(1. + DEXP((rr-c)/z)))
+C      IF (IPRintdiag.EQ.1) WRITE (28,*)'c,rr,dave:',c,rr,dave
 C
 C
 C     Blann seems to use a central density of ds=A/(4/3 PI_g r0**3 A) where
@@ -1920,9 +1438,14 @@ C     determined from an average of the Fermi energy over the density
 C     distribution, in a local density approx. Blann uses (an approximate)
 C     average of
       vfermi = 40.*((dave)**(2./3.))      !i.e. assumes 40 MeV at well bottom
+
+C      IF (IPRintdiag.EQ.1) WRITE (28,*)'Epart,vfermi:',Epart,vfermi
 C
-C
-      beta = DSQRT(1. - (ZMNuc/(ZMNuc+Epart+vfermi))**2) !relativistic beta
+C      beta = DSQRT(1. - (ZMNuc/(ZMNuc+Epart+vfermi))**2) !relativistic beta
+C      beta = DSQRT(1. - (ZMNuc/(ZMNuc+DABS(Epart+vfermi)))**2) !relativistic beta
+
+C well depth taken consistent with energy selection      
+      beta = DSQRT(1. - (ZMNuc/(ZMNuc+Epart+VDEp))**2) !relativistic beta
 C
 C
 C     now calculate nucleon nucleon scattering cross sections:
@@ -1937,7 +1460,7 @@ C     work out averages for proton and neutron particle:
       IF (SELtype.EQ.'prot') sigav = (ZTAr*signnpp + ANTar*signp)/ATAr !for proton
 C
 C     now Pauli correction factors (see Blann's NPA213, 1973 paper)
-      re = vfermi/(vfermi + (Epart))
+      re = vfermi/(vfermi + DABS(Epart))
 C     I think above is correct (no binding red. to epart since epart=energy in
 C     nucleus)
       IF (re.LE.0.5D0) pauli = 1. - 1.4*re
@@ -1945,11 +1468,20 @@ C     nucleus)
       sigav = sigav*pauli
 C     write(8,*)'sigav,pauli,re=',sigav,pauli,re
 C
-      cons = 3.E22
+      cons=1.0d0
+C      cons = 3.E22
 C     !this includes various units mult. factors, including c
 C
       Damprate = cons*rhoav*sigav*beta/amultmfp
       Damprate = Damprate*AMUltdamprate !fudge option for evaluation work
+C
+C      IF(IFErmi.EQ.1) THEN
+C        de = Epart/detab
+C        ne = MIN(INT(de),ntmx-1)
+C        de = de - ne
+C        rhop = (1. - de)*rho3(ne) + de*rho3(ne+1)
+C        Damprate = Damprate*acomp**2*rhop
+C       ENDIF
 C
 C     if(epart.lt.29.0.and.epart.gt.28.5)then
 C     if(seltype.ne.'prot')go to 123
@@ -1968,108 +1500,345 @@ C
 C
 C Local variables
 C
-      REAL*8 c, e, eg2, ph, px, pz
+      REAL*8 c, e, eg2, phi, px, pz, epart
       DOUBLE PRECISION DACOS, DSQRT
       REAL*8 RANG
+      INTEGER jwarning, npresid, nhresid
 C
 C     subroutine sets up the initial p-h excitation
 C
       IF (PROjtype.EQ.'gamm') THEN
 C     here, we assume 1p1h for GR excitation and 2 1p1h for QD excitation
-         c = RANG()
-         IF (IPRintdiag.EQ.1) WRITE (28,*) ' gam - QDFrax,c', QDFrax, c
-         IF (c.GT.QDFrax) THEN
+        c = RANG()
+        IF (IPRintdiag.EQ.1) WRITE (28,*) ' gam - QDFrax,c', QDFrax, c
+        IF (c.GT.QDFrax) THEN
 C     GR excitation
-            NEXist1p1h = 1
-            NTOt1p1h = 1
-            IEXist1p1h(1) = 1
+          c = RANG()
 
-            c = RANG()
-
-            IF (c.GT.ZTAr/ATAr) THEN
+          IF (c.GT.ZTAr/ATAr) THEN
 C     ! neutron particle-hole
-               ISOspi1p1h(1) = '0101'
-            ELSE
+            ISOspin(1) = 'neut'
+            ISOspin(2) = 'neut'
+           ELSE
 C     ! proton particle-hole
-               ISOspi1p1h(1) = '1010'
-            ENDIF
+            ISOspin(1) = 'prot'
+            ISOspin(2) = 'prot'
+           ENDIF
 
-            UEX1p1h(1) = ECMproj
-            IF (NEV.EQ.12345678) WRITE (8,*) 'ecmproj, uex2p1h(1)=',
-     &                                  ECMproj, UEX1p1h(1)
-            TH1p1h(1) = 0.
+c Temporarily store 1p1h characteristics
+          UEX(2) = ECMproj
+          IF (NEV.EQ.12345678) WRITE (6,*) 'ecmproj, uex=',
+     &                                  ECMproj, UEX(2)
+          TH(2) = 0.
 C     !initial projectile moving along the z-axis
-            PH1p1h(1) = 0.
-            ZK1p1h(1) = ECMproj
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' GD:ex,p,th,ph',
-     &                                  UEX1p1h(1), ZK1p1h(1), TH1p1h(1)
-     &                                  , PH1p1h(1)
+          PH(2) = 0.
+          ZK(2) = ECMproj
 C     !init mom of gamma
-         ELSE
-C     QD excitation
-            NEXist1p1h = 2
-            NTOt1p1h = 2
-            IEXist1p1h(1) = 1
-            IEXist1p1h(2) = 1
-C neutron and proton p-h
-            ISOspi1p1h(1) = '0101'
-            ISOspi1p1h(2) = '1010'
-C
-            CALL QDPCHOOSE(ECMproj,e,px,pz,ph)
-            eg2 = 0.5D0*ECMproj
-C neutron p-h
-            UEX1p1h(1) = eg2 + e
-            ZK1p1h(1) = DSQRT((eg2 + pz)**2 + px**2)
-            TH1p1h(1) = DACOS((eg2 + pz)/ZK1p1h(1))
-            PH1p1h(1) = ph
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-n:ex,p,th,ph',
-     &                                  UEX1p1h(1), ZK1p1h(1), TH1p1h(1)
-     &                                  , PH1p1h(1)
-C proton p-h
-            UEX1p1h(2) = eg2 - e
-            ZK1p1h(2) = DSQRT((eg2 - pz)**2 + px**2)
-            TH1p1h(2) = DACOS((eg2 - pz)/ZK1p1h(2))
-            IF (ph.GT.PI_g) THEN
-               PH1p1h(2) = ph - PI_g
-            ELSE
-               PH1p1h(2) = ph + PI_g
-            ENDIF
-            IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-p:ex,p,th,ph',
-     &                                  UEX1p1h(2), ZK1p1h(2), TH1p1h(2)
-     &                                  , PH1p1h(2)
+          IF (IPRintdiag.EQ.1) WRITE (28,*) ' GD:ex,p,th,phi',
+     &                                  UEX(2), ZK(2), TH(2), PH(2)
 
-         ENDIF
-      ELSE
-C     here, for starts, we assume 2p1h
+          NEXist = 0
+          NTOt = 2
+
+          SELtype = ISOspin(2)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
 C
-C     projectile type = variable projtype
-         SELtype = PROjtype
-         CALL SELCOLTYPE(ECMproj + SEPproj)
-C     returns the collision partner type 'coltype'
+C         now select particle energy
+          CALL SELECTEN1P1H(2,epart)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                               ' uex1p1h=', UEX(2),
+     &                               ' epart=', epart
 C
-         NEXist2p1h = 1
-         NTOt2p1h = 1
-         IEXist2p1h(1) = 1
 C
-         IF (PROjtype.EQ.'prot' .AND. COLtype.EQ.'prot') ISOspi2p1h(1)
-     &        = '2010'
-         IF (PROjtype.EQ.'prot' .AND. COLtype.EQ.'neut') ISOspi2p1h(1)
-     &        = '1101'
-         IF (PROjtype.EQ.'neut' .AND. COLtype.EQ.'prot') ISOspi2p1h(1)
-     &        = '1110'
-         IF (PROjtype.EQ.'neut' .AND. COLtype.EQ.'neut') ISOspi2p1h(1)
-     &        = '0201'
+          CALL SEPARATION
+C         this returns a value 'binding' for the separation energy
 C
-         UEX2p1h(1) = ECMproj + SEPproj
-         IF (NEV.EQ.12345678) WRITE (8,*)
-     &                               'ecmproj,sepproj, uex2p1h(1)=',
-     &                               ECMproj, SEPproj, UEX2p1h(1)
-         TH2p1h(1) = 0.
-C     !initial projectile moving along the z-axis
-         PH2p1h(1) = 0.
-         ZK2p1h(1) = DSQRT(2.D0*ZMNuc*(UEX2p1h(1) + VDEp))
-C     !init mom rel to well-bottom
-      ENDIF
+C         warning declared in the following light-nucleus scenarios
+C         if jwarning=1, then insist that particle is trapped
+          jwarning = 0
+          IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+          IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+C
+C         now determine selected particle and remaining 1h angle and momenta
+C         using Chadwick ang-dist theory (PRC57, 233 (1998)).
+          npresid = 0
+C         !remaining state = 1h here
+          nhresid = 1
+          CALL DANGLES(2,npresid,nhresid,epart)
+C         return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
+
+C         this is the hole
+          UEX(1) = UEX(2) - epart
+C         ! this is the excitation energy
+          ZK(1) = ZKRem
+C         ! this is the momentum rel to well-bottom
+          TH(1) = TH1rem
+C         ! this is the angle in the proj coord system
+          PH(1) = PH1rem
+
+C         check to see if hole is trapped:
+          IF (UEX(1).LE.BINding ) THEN
+            UCNdump = UCNdump + UEX(1)
+            IEXist(1) = 0
+           ELSE
+            IEXist(1) = -1
+            NEXist = NEXist + 1
+            GAMup(1) = 0.
+            CALL DAMPING(-UEX(1),GAMdown(1))
+           ENDIF
+
+C         this is the remaining particle
+          UEX(2) = epart
+C         ! this is the excitation energy
+          ZK(2) = ZKScat
+C         ! this is the momentum rel to well-bottom
+          TH(2) = TH1p
+C         ! this is the angle in the proj coord system
+          PH(2) = PH1p
+
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
+C         check to see if particle is trapped:
+          IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C         like emission, but dump 1p energy into c.n. excitation
+            IEXist(2) = 0
+            UCNdump = UCNdump + epart
+C          !dumps particle energy into c.n. excitation
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex=', UEX(2),
+     &                                  'trapped 1p energy=', epart
+           ELSE 
+C           we get here if the particle isn't trapped: 
+C           now work out emission probability:
+            IEXist(2) = 1
+            NEXist = NEXist + 1
+            CALL EMISSRATE(epart,GAMup(2))
+            CALL DAMPING(epart,GAMdown(2))
+C            write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',
+C        + GAMup(2),' damprate=',GAMdown(2)
+C
+           ENDIF
+
+         ELSE
+C         QD excitation
+C         neutron and proton p-h
+          ISOspin(1) = 'neut'
+          ISOspin(2) = 'neut'
+          ISOspin(3) = 'prot'
+          ISOspin(4) = 'prot'
+C
+          CALL QDPCHOOSE(ECMproj,e,px,pz,phi)
+          eg2 = 0.5D0*ECMproj
+C         neutron p-h
+          UEX(1) = eg2 + e
+          ZK(1) = DSQRT((eg2 + pz)**2 + px**2)
+          TH(1) = DACOS((eg2 + pz)/ZK(1))
+          PH(1) = phi
+          IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-n:ex,p,th,phi',
+     &                                  UEX(1), ZK(1), TH(1), PH(1)
+C         proton p-h
+          UEX(3) = eg2 - e
+          ZK(3) = DSQRT((eg2 - pz)**2 + px**2)
+          TH(3) = DACOS((eg2 - pz)/ZK(2))
+          IF (phi.GT.PI_g) THEN
+            PH(3) = phi - PI_g
+           ELSE
+            PH(3) = phi + PI_g
+           ENDIF
+          IF (IPRintdiag.EQ.1) WRITE (28,*) ' QD-p:ex,p,th,phi',
+     &                                  UEX(3), ZK(3), TH(3), PH(3)
+C
+          NEXist = 0
+          NTOt = 4
+
+C          neutron p-h pair in quase-deuteron
+          SELtype = ISOspin(2)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+C
+C         now select particle energy
+          CALL SELECTEN1P1H(2,epart)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                               ' uex1p1h=', UEX(2),
+     &                               ' epart=', epart
+C
+C
+          CALL SEPARATION
+C         this returns a value 'binding' for the separation energy
+C
+C         warning declared in the following light-nucleus scenarios
+C         if jwarning=1, then insist that particle is trapped
+          jwarning = 0
+          IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+          IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+C
+C         now determine selected particle and remaining 1h angle and momenta
+C         using Chadwick ang-dist theory (PRC57, 233 (1998)).
+          npresid = 0
+C         !remaining state = 1h here
+          nhresid = 1
+          CALL DANGLES(2,npresid,nhresid,epart)
+C         return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
+
+C         this is the hole
+          UEX(1) = UEX(2) - epart
+C         ! this is the excitation energy
+          ZK(1) = ZKRem
+C         ! this is the momentum rel to well-bottom
+          TH(1) = TH1rem
+C         ! this is the angle in the proj coord system
+          PH(1) = PH1rem
+
+C         check to see if hole is trapped:
+          IF (UEX(1).LE.BINding ) THEN
+            UCNdump = UCNdump + UEX(1)
+            IEXist(1) = 0
+           ELSE
+            IEXist(1) = -1
+            NEXist = NEXist + 1
+            GAMup(1) = 0.
+            CALL DAMPING(-UEX(1),GAMdown(1))
+           ENDIF
+
+C         this is the particle
+          UEX(2) = epart
+C         ! this is the excitation energy
+          ZK(2) = ZKScat
+C         ! this is the momentum rel to well-bottom
+          TH(2) = TH1p
+C         ! this is the angle in the proj coord system
+          PH(2) = PH1p
+
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
+C         check to see if particle is trapped:
+          IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C           like emission, but dump 1p energy into c.n. excitation
+            IEXist(2) = 0
+            UCNdump = UCNdump + epart
+C           !dumps particle energy into c.n. excitation
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex=', UEX(2),
+     &                                  'trapped 1p energy=', epart
+           ELSE 
+C           we get here if the particle isn't trapped: 
+C           now work out emission probability:
+            IEXist(2) = 1
+            NEXist = NEXist + 1
+            CALL EMISSRATE(epart,GAMup(2))
+            CALL DAMPING(epart,GAMdown(2))
+C           write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
+C        +' damprate=',damprate,' probemiss=',probemiss
+           ENDIF
+
+C         neutron p-h pair in quase-deuteron
+          SELtype = ISOspin(4)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+
+C         now select particle energy
+          CALL SELECTEN1P1H(4,epart)
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+
+          IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                               ' uex1p1h=', UEX(4),
+     &                               ' epart=', epart
+
+C          CALL SEPARATION
+C         this returns a value 'binding' for the separation energy
+C
+C         warning declared in the following light-nucleus scenarios
+C         if jwarning=1, then insist that particle is trapped
+          jwarning = 0
+          IF (JNResid.EQ.1 .AND. SELtype.EQ.'neut') jwarning = 1
+          IF (JZResid.EQ.1 .AND. SELtype.EQ.'prot') jwarning = 1
+C
+C         now determine selected particle and remaining 1h angle and momenta
+C         using Chadwick ang-dist theory (PRC57, 233 (1998)).
+          npresid = 0
+C         !remaining state = 1h here
+          nhresid = 1
+          CALL DANGLES(4,npresid,nhresid,epart)
+C         return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
+
+C         this is the hole
+          UEX(3) = UEX(4) - epart
+C         ! this is the excitation energy
+          ZK(3) = ZKRem
+C         ! this is the momentum rel to well-bottom
+          TH(3) = TH1rem
+C         ! this is the angle in the proj coord system
+          PH(3) = PH1rem
+
+C         check to see if hole is trapped:
+          IF (UEX(3).LE.BINding ) THEN
+            UCNdump = UCNdump + UEX(3)
+            IEXist(3) = 0
+           ELSE
+            IEXist(3) = -1
+            NEXist = NEXist + 1
+            GAMup(3) = 0.
+            CALL DAMPING(-UEX(3),GAMdown(3))
+           ENDIF
+
+C         this is the remaining particle
+          UEX(4) = epart
+C         ! this is the excitation energy
+          ZK(4) = ZKScat
+C         ! this is the momentum rel to well-bottom
+          TH(4) = TH1p
+C         ! this is the angle in the proj coord system
+          PH(4) = PH1p
+
+          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+     &                               BINding
+C         check to see if particle is trapped:
+          IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
+C           like emission, but dump 1p energy into c.n. excitation
+            IEXist(4) = 0
+            UCNdump = UCNdump + epart
+C           !dumps particle energy into c.n. excitation
+            IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
+     &                                  ' uex=', UEX(4),
+     &                                  'trapped 1p energy=', epart
+           ELSE 
+C           we get here if the particle isn't trapped: 
+C           now work out emission probability:
+            IEXist(4) = 1
+            NEXist = NEXist + 1
+            CALL EMISSRATE(epart,GAMup(4))
+            CALL DAMPING(epart,GAMdown(4))
+C           write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
+C        +' damprate=',damprate,' probemiss=',probemiss
+           ENDIF
+
+         ENDIF 
+C       end of gamma options
+       ELSE
+C       here, we assume 2p1h
+C
+C       projectile type = variable projtype
+C       returns the collision partner type 'coltype'
+C
+        NEXist = 1
+        NTOt = 1
+        IEXist(1) = 1
+        ISOspin(1) = PROjtype
+        UEX(1) = ECMproj + SEPproj
+        IF (NEV.EQ.12345678) WRITE (6,*)
+     &                               'ecmproj,sepproj, uex =',
+     &                               ECMproj, SEPproj, UEX(1)
+        TH(1) = 0.
+C       !initial projectile moving along the z-axis
+        PH(1) = 0.
+        ZK(1) = DSQRT(2.D0*ZMNuc*(UEX(1) + VDEp))
+        CALL DEEXCITE(1)
+C       !init mom rel to well-bottom
+       ENDIF
+
+      RETURN
       END
 C
       SUBROUTINE ZEROARRAYS
@@ -2079,44 +1848,32 @@ C
 C Local variables
 C
       INTEGER j
-      NEXist2p1h = 0
-      NEXist1p1h = 0
-      NEXist1h = 0
-      NTOt2p1h = 0
-      NTOt1p1h = 0
-      NTOt1h = 0
+      NEXist = 0
+      NTOt = 0
       NEMiss = 0
       UCNdump = 0.
+      DO j = 1, 200
+        IEXist(j) = 0
+        ISOspin(j) = '    '
+        UEX(j) = 0.
+        TH(j) = 0.
+        PH(j) = 0.
+        ZK(j) = 0.
+        GAMup(j)=0.
+        GAMdown(j)=0.
+       ENDDO
       DO j = 1, 100
-         IEXist2p1h(j) = 0
-         IEXist1p1h(j) = 0
-         IEXist1h(j) = 0
-         ISOspi2p1h(j) = '    '
-         ISOspi1p1h(j) = '    '
-         ISOspi1h(j) = '    '
-         ISOspi1h(j) = '    '
-         ISOspi1p2h(j) = '    '
-         UEX2p1h(j) = 0.
-         UEX1p1h(j) = 0.
-         UEX1h(j) = 0.
-         TH2p1h(j) = 0.
-         TH1p1h(j) = 0.
-         TH1h(j) = 0.
-         PH2p1h(j) = 0.
-         PH1p1h(j) = 0.
-         PH1h(j) = 0.
-         ZK2p1h(j) = 0.
-         ZK1p1h(j) = 0.
-         ZK1h(j) = 0.
-         NUMscat(j) = 0
-         EEMiss(j) = 0.
-         THEmiss(j) = 0.
-         PHEmiss(j) = 0.
-         EEMissl(j) = 0.
-         THEmissl(j) = 0.
-         PHEmissl(j) = 0.
-      ENDDO
-      END
+        EEMiss(j) = 0.
+        THEmiss(j) = 0.
+        PHEmiss(j) = 0.
+        EEMissl(j) = 0.
+        THEmissl(j) = 0.
+        PHEmissl(j) = 0.
+        NUMscat(j) = 0
+       ENDDO
+
+      RETURN
+      END     
 C
 C
       SUBROUTINE OUTPUTPRINT
@@ -2125,9 +1882,9 @@ C
 C
 C Local variables
 C
-      REAL*8 anorm, dph, dth, ecount(0:10), restot, sumn, sumnlab, sump,
-     &       sumplab, th, thet, zjadd
-      DOUBLE PRECISION DSIN
+      REAL*8 anorm, dph, dth, ecount(0:10), restot, tht, thet,
+     &        zjadd, anormrec, dxang, angnorm
+      DOUBLE PRECISION DSIN, DCOS
       REAL FLOAT
       INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
@@ -2135,8 +1892,18 @@ C
 
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
+
+C  zero arrays to accumulate exclusive emission cross sections
+      DO jz = 0, NDIM_ZEM
+        DO jn = 0, NDIM_NEM
+          xsnx(jz,jn) = 0.
+          xspx(jz,jn) = 0.
+         ENDDO
+       ENDDO
 C
 C     convert spectra from events into ddxs
+      anorm = SIGreac/(DEBin*FLOAT(NEVents))
+      anormrec = SIGreac/(DEBinrec*FLOAT(NEVents))
 C
       nemax = INT(ELAbejecmax/DEBin)
       numax = INT((ELAbproj + SEPproj)/DEBin)
@@ -2144,27 +1911,35 @@ C
 C        write(8,9)(debin*(ne+0.5)),dxsn(ne),dxsp(ne)
 C
 C        convert to mb/MeV for later printing
-         DXSn(ne) = DXSn(ne)*SIGreac/(FLOAT(NEVents)*DEBin)
-         DXSp(ne) = DXSp(ne)*SIGreac/(FLOAT(NEVents)*DEBin)
-         DXSnlab(ne) = DXSnlab(ne)*SIGreac/(FLOAT(NEVents)*DEBin)
-         DXSplab(ne) = DXSplab(ne)*SIGreac/(FLOAT(NEVents)*DEBin)
-C
-      ENDDO
+C         write(28,*) ne,DXSplab(ne)
+         DXSn(ne) = DXSn(ne)*anorm
+         DXSp(ne) = DXSp(ne)*anorm
+         DXSnlab(ne) = DXSnlab(ne)*anorm
+         DXSplab(ne) = DXSplab(ne)*anorm
+         DO jz = 0, NDIM_ZEM
+            DO jn = 0, NDIM_NEM
+               DXSnx(ne,jz,jn) = DXSnx(ne,jz,jn)*anorm
+               DXSpx(ne,jz,jn) = DXSpx(ne,jz,jn)*anorm
+               DXSnxlab(ne,jz,jn) = DXSnxlab(ne,jz,jn)*anorm
+               DXSpxlab(ne,jz,jn) = DXSpxlab(ne,jz,jn)*anorm
+               XSNx(jz,jn) = XSNx(jz,jn) + DXSnx(ne,jz,jn)*DEBin
+               XSPx(jz,jn) = XSPx(jz,jn) + DXSpx(ne,jz,jn)*DEBin
+             ENDDO
+          ENDDO
+       ENDDO
 C
       DO nu = 0, numax
          DO jz = 0, NDIM_ZEM
             DO jn = 0, NDIM_NEM
-               USPec(jz,jn,nu) = USPec(jz,jn,nu)
-     &                           *SIGreac/(FLOAT(NEVents)*DEBin)
+               USPec(jz,jn,nu) = USPec(jz,jn,nu)*anorm
                RESpop(jz,jn) = RESpop(jz,jn) + USPec(jz,jn,nu)*DEBin
                restot = restot + USPec(jz,jn,nu)*DEBin
                DO jsp = 0, NDIM_JBINS
-                  UJSpec(jz,jn,nu,jsp) = UJSpec(jz,jn,nu,jsp)
-     &               *SIGreac/(FLOAT(NEVents)*DEBin)
+                  UJSpec(jz,jn,nu,jsp) = UJSpec(jz,jn,nu,jsp)*anorm
                ENDDO
                DO mrec = 0, NDIM_RECBINS
                   RECspec(jz,jn,nu,mrec) = RECspec(jz,jn,nu,mrec)
-     &               *SIGreac/(FLOAT(NEVents)*DEBinrec)
+     &                                   *anormrec
                ENDDO
             ENDDO
          ENDDO
@@ -2192,13 +1967,14 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1.31 $')
+99005 FORMAT ('  ddhms version: $Revision: 1.25 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.31 2008-10-14 21:32:19 Capote Exp $')
+99010 FORMAT ('  $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $')
 C
       WRITE (28,*) ' '
-      WRITE (28,*) ' ddhms.f code, m.b. chadwick, los alamos'
-      WRITE (28,*) ' contact: mbchadwick@lanl.gov'
+      WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
+      WRITE (28,*) ' based on the ddhms code, m.b. chadwick, los alamos'
+      WRITE (28,*) ' contact: brett@ita.br'
       WRITE (28,*)
      &          ' calculates preequilibrium reactions using Monte Carlo'
       WRITE (28,*) ' see phys rev c57, 233 (1998), blann and chadwick'
@@ -2237,6 +2013,11 @@ C
      &'       the excitation energy and spin (assume 50:50 parity ratio)
      &'
 C
+      IF(IFErmi.EQ.1) THEN
+        WRITE (28,'(/,''  Fermi gas densities of states were used'')') 
+       ELSE 
+        WRITE (28,'(/,''  Exciton densities of states were used'')') 
+       ENDIF
       WRITE (28,*) ' '
 C
 C
@@ -2257,7 +2038,7 @@ C
 99045 FORMAT (' multiplier to damping rate = ',1p,1E10.3)
       WRITE (28,99050) DEBin
 99050 FORMAT ('        delta-E for binning = ',1p,1E10.3)
-      WRITE (28,99055) REAdnev
+      WRITE (28,99055) FLOAT(NEVents)
 99055 FORMAT ('           number of events = ',1p,1E10.3)
       IF (IHIstlab.EQ.0) WRITE (28,99060) IHIstlab
 99060 FORMAT ('               history file = ',1x,i1,
@@ -2317,10 +2098,8 @@ C
      &'inclusive angle-integrated emission spectra of neutrons and proto
      &ns:'
       WRITE (28,99170) DEBin
-      sumn = 0.
-      sump = 0.
-      sumnlab = 0.
-      sumplab = 0.
+      XSN0 = 0.
+      XSP0 = 0.
       WRITE (28,*) ' '
       WRITE (28,*)
      &'  kinetic       channel-energy frame            laboratory-frame'
@@ -2333,16 +2112,14 @@ C
       DO ne = 0, nemax
          WRITE (28,99175) (DEBin*(ne + 0.5)), DXSn(ne), DXSp(ne),
      &                    DXSnlab(ne), DXSplab(ne)
-         sumn = sumn + DXSn(ne)*DEBin
-         sump = sump + DXSp(ne)*DEBin
-         sumnlab = sumnlab + DXSnlab(ne)*DEBin
-         sumplab = sumplab + DXSplab(ne)*DEBin
+         XSN0 = XSN0 + DXSn(ne)*DEBin
+         XSP0 = XSP0 + DXSp(ne)*DEBin
       ENDDO
       WRITE (28,*) ' '
-      WRITE (28,99105) sumn, sumn/SIGreac
+      WRITE (28,99105) XSN0, XSN0/SIGreac
 99105 FORMAT ('neutron inclusive production x/s=',1p,1E10.3,
      &        ' mb;  multiplicity=',1p,1E10.3)
-      WRITE (28,99110) sump, sump/SIGreac
+      WRITE (28,99110) XSP0, XSP0/SIGreac
 99110 FORMAT (' proton inclusive production x/s=',1p,1E10.3,
      &        ' mb;  multiplicity=',1p,1E10.3)
 C
@@ -2351,10 +2128,11 @@ C
 C
 C     lab spectrum print on o/p file 'spec' for plotting:
       DO ne = 0, nemax
-         IF (DXSnlab(ne).LT.1.D-10) DXSnlab(ne) = 1.D-10
+C         IF (DXSnlab(ne).LT.1.D-10) DXSnlab(ne) = 1.D-10
 C        !for plotting
-         IF (DXSplab(ne).LT.1.D-10) DXSplab(ne) = 1.D-10
-         WRITE (9,99115) (DEBin*(ne + 0.5)), DXSnlab(ne), DXSplab(ne)
+C         IF (DXSplab(ne).LT.1.D-10) DXSplab(ne) = 1.D-10
+         WRITE (9,99115) (DEBin*(ne + 0.5)),
+     &       MAX(DXSnlab(ne),1.D-10), MAX(DXSplab(ne),1.D-10)
 99115    FORMAT (1p,1E10.3,2x,1p,1E10.3,2x,1p,1E10.3)
       ENDDO
 C
@@ -2388,46 +2166,54 @@ C
 99135    FORMAT (7x,i2,13x,9(1x,1p,1E9.3))
       ENDDO
 C
+      WRITE (28,*)
+      WRITE (28,*)
+     &'exclusive neutron emission cross sections:'
+      WRITE (28,*)
+     &          '(1000Z+A is given, below which is given the x/s in mb)'
+      WRITE (28,99120) (jn,jn = jnmax,0, - 1)
+      WRITE (28,99125)
+      DO jz = 0, jzmax
+         WRITE (28,99130) (1000*(JZInitcn - jz) + (JZInitcn - jz) + (
+     &                    JNInitcn - jn),jn = jnmax,0, - 1)
+         WRITE (28,99135) jz, (xsnx(jz,jn),jn = jnmax,0, - 1)
+      ENDDO
+C
+      WRITE (28,*)
+      WRITE (28,*)
+     &'exclusive proton emission cross sections:'
+      WRITE (28,*)
+     &          '(1000Z+A is given, below which is given the x/s in mb)'
+      WRITE (28,99120) (jn,jn = jnmax,0, - 1)
+      WRITE (28,99125)
+      DO jz = 0, jzmax
+         WRITE (28,99130) (1000*(JZInitcn - jz) + (JZInitcn - jz) + (
+     &                    JNInitcn - jn),jn = jnmax,0, - 1)
+         WRITE (28,99135) jz, (xspx(jz,jn),jn = jnmax,0, - 1)
+      ENDDO
+C
       WRITE (28,99180)
 C
 C     ddxs printouts
-      anorm = SIGreac/(DEBin*FLOAT(NEVents))
 C     now double-differential spectra
-      dph = 5.*PI_g/180.
-      dth = 5.*PI_g/180.
-      DO ne = 0, nemax
-         DO nth = 1, 36
-            th = (FLOAT(nth)*5. - 2.5)*PI_g/180.
-            DO nph = 1, 72
-               DDXsn(ne,nth) = DDXsn(ne,nth) + DDDxsn(ne,nth,nph)
-               DDXsp(ne,nth) = DDXsp(ne,nth) + DDDxsp(ne,nth,nph)
-               DDXsnlab(ne,nth) = DDXsnlab(ne,nth)
-     &                            + DDDxsnlab(ne,nth,nph)
-               DDXsplab(ne,nth) = DDXsplab(ne,nth)
-     &                            + DDDxsplab(ne,nth,nph)
-            ENDDO
-            DDXsn(ne,nth) = DDXsn(ne,nth)/72.
-C           !averaged value over all phi
-            DDXsp(ne,nth) = DDXsp(ne,nth)/72.
-            DDXsnlab(ne,nth) = DDXsnlab(ne,nth)/72.
-C           !averaged value over all phi
-            DDXsplab(ne,nth) = DDXsplab(ne,nth)/72.
+      dth = PI_g/FLOAT(NDAnghms1)
+      DO nth = 1, NDAnghms1
+             dxang = DCOS(FLOAT(nth-1)*dth)-DCOS(FLOAT(nth)*dth)
+             angnorm = anorm/(2.*PI_g*dxang)
+         DO ne = 0, nemax
+            DDXsn(ne,nth) = DDXsn(ne,nth)*angnorm
+            DDXsp(ne,nth) = DDXsp(ne,nth)*angnorm
+            DDXsnlab(ne,nth) = DDXsnlab(ne,nth)*angnorm
+            DDXsplab(ne,nth) = DDXsplab(ne,nth)*angnorm
+            DO jn = 0, jnmax
+              DO jz = 0, jzmax
+               DDXsnxlab(ne,nth,jz,jn) = DDXsnxlab(ne,nth,jz,jn)*angnorm
+               DDXspxlab(ne,nth,jz,jn) = DDXspxlab(ne,nth,jz,jn)*angnorm
+               ENDDO
+             ENDDO
+          ENDDO
 C
-            DDXsn(ne,nth) = DDXsn(ne,nth)*anorm/(DSIN(th)*dth*dph)
-            DDXsp(ne,nth) = DDXsp(ne,nth)*anorm/(DSIN(th)*dth*dph)
-            DDXsnlab(ne,nth) = DDXsnlab(ne,nth)*anorm/(DSIN(th)*dth*dph)
-            DDXsplab(ne,nth) = DDXsplab(ne,nth)*anorm/(DSIN(th)*dth*dph)
-C
-            DXSn1(ne) = DXSn1(ne) + DDXsn(ne,nth)*2.*PI_g*DSIN(th)*dth
-            DXSp1(ne) = DXSp1(ne) + DDXsp(ne,nth)*2.*PI_g*DSIN(th)*dth
-            DXSn1lab(ne) = DXSn1lab(ne) + DDXsnlab(ne,nth)
-     &                     *2.*PI_g*DSIN(th)*dth
-            DXSp1lab(ne) = DXSp1lab(ne) + DDXsplab(ne,nth)
-     &                     *2.*PI_g*DSIN(th)*dth
-C
-         ENDDO
-C
-      ENDDO
+       ENDDO
 C
 C
 C
@@ -2444,13 +2230,14 @@ C
      &' Angle       channel energy (mev) [histogram mid-pt. of bin is gi
      &ven] '
          WRITE (28,99185) ((ecount(j) + 0.5)*DEBin,j = 0,9)
-         DO nth = 1, 36
-            thet = FLOAT(nth)*5. - 2.5
+         DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180.0/NDAnghms1
             WRITE (28,99190) thet,
      &                       (DDXsn(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
-         WRITE (28,99195) (DXSn1(ne),ne = norder*10,norder*10 + 9)
+C         WRITE (28,99195) (DXSn1(ne),ne = norder*10,norder*10 + 9)
+         WRITE (28,99195) (DXSn(ne),ne = norder*10,norder*10 + 9)
 C
       ENDDO
 C
@@ -2462,13 +2249,14 @@ C
      &' Angle       channel energy (mev) [histogram mid-pt. of bin is gi
      &ven] '
          WRITE (28,99200) ((ecount(j) + 0.5)*DEBin,j = 0,9)
-         DO nth = 1, 36
-            thet = FLOAT(nth)*5. - 2.5
+         DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180.0/NDAnghms1
             WRITE (28,99190) thet,
      &                       (DDXsp(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
-         WRITE (28,99195) (DXSp1(ne),ne = norder*10,norder*10 + 9)
+C         WRITE (28,99195) (DXSp1(ne),ne = norder*10,norder*10 + 9)
+         WRITE (28,99195) (DXSp(ne),ne = norder*10,norder*10 + 9)
       ENDDO
 C     ---- end channel energy ddxs spectra -------------------------------------
 C
@@ -2487,14 +2275,15 @@ C
      & '
 C
          WRITE (28,99185) ((ecount(j) + 0.5)*DEBin,j = 0,9)
-         DO nth = 1, 36
-            thet = FLOAT(nth)*5. - 2.5
+         DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180./NDAnghms1
             WRITE (28,99190) thet,
      &                       (DDXsnlab(ne,nth),ne = norder*10,norder*10
      &                       + 9)
 C
          ENDDO
-         WRITE (28,99195) (DXSn1lab(ne),ne = norder*10,norder*10 + 9)
+C         WRITE (28,99195) (DXSn1lab(ne),ne = norder*10,norder*10 + 9)
+         WRITE (28,99195) (DXSnlab(ne),ne = norder*10,norder*10 + 9)
 C
       ENDDO
 C
@@ -2506,13 +2295,14 @@ C
      &' Angle       lab energy (mev) [histogram mid-pt. of bin is given]
      & '
          WRITE (28,99200) ((ecount(j) + 0.5)*DEBin,j = 0,9)
-         DO nth = 1, 36
-            thet = FLOAT(nth)*5. - 2.5
+         DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180./NDAnghms1
             WRITE (28,99190) thet,
      &                       (DDXsplab(ne,nth),ne = norder*10,norder*10
      &                       + 9)
          ENDDO
-         WRITE (28,99195) (DXSp1lab(ne),ne = norder*10,norder*10 + 9)
+C         WRITE (28,99195) (DXSp1lab(ne),ne = norder*10,norder*10 + 9)
+         WRITE (28,99195) (DXSplab(ne),ne = norder*10,norder*10 + 9)
       ENDDO
 C     ---- end lab-frame ddxs spectra -------------------------------------
 C
@@ -2535,18 +2325,26 @@ C
                WRITE (28,99205) JZInitcn - jz, JZInitcn - jz +
      &                          JNInitcn - jn, RESpop(jz,jn),
      &                          100*RESpop(jz,jn)/SIGreac
-               WRITE (28,*) 'excitation      population'
-               WRITE (28,*) '   energy       cross section'
-               WRITE (28,*) '    (MeV)       (mb/MeV)'
-               DO nu = 0, numax
-                  WRITE (28,99175) DEBin*(nu + 0.5), USPec(jz,jn,nu)
-               ENDDO
+               WRITE (28,'(a29,a55)') 'excitation       population  ',
+     & '  exclusive channel spectra      exclusive lab spectra'
+               WRITE (28,'(a29,a54)') '   energy       cross section',
+     & '     neutron     proton            neutron     proton' 
+               WRITE (28,'(a29,a54)') '    (MeV)       (mb/MeV)     ',
+     & '     (mb/MeV)   (mb/MeV)           (mb/MeV)   (mb/MeV)'
+               DO nu = 0, MAX(numax,nemax)
+                  WRITE (28,99173) DEBin*(nu + 0.5), USPec(jz,jn,nu),
+     &                  DXSnx(nu,jz,jn), DXSpx(nu,jz,jn),
+     &                  DXSnxlab(nu,jz,jn),DXSpxlab(nu,jz,jn)
+                ENDDO
+               WRITE (28,'(6x,a4,2x,f10.2,2(8x,f10.2,2x,f10.2))') 
+     &           'SUM:',RESpop(jz,jn),
+     &         XSNx(jz,jn),XSPx(jz,jn), XSNx(jz,jn),XSPx(jz,jn)
             ENDIF
 C
          ENDDO
       ENDDO
       WRITE (28,99140) restot, 100*restot/SIGreac
-99140 FORMAT ('sum of prod. of all heavy residuals=',1p,1E10.3,
+99140 FORMAT (/,'sum of prod. of all heavy residuals=',1p,1E10.3,
      &        ' (% of reaction x/s=',0p,f6.2,'%)')
 C
       WRITE (28,99180)
@@ -2646,6 +2444,7 @@ C
       ENDIF
       CALL EMPTRANS(nemax,jzmax,jnmax,numax)
 99170 FORMAT (' energy-bin histogram width=',f10.3,' MeV')
+99173 FORMAT (3(f10.2,2x,f10.2,8x))
 99175 FORMAT (f10.2,2x,f10.2,2x,f10.2,10x,f10.2,2x,f10.2)
 99180 FORMAT (/,
      &'+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2663,7 +2462,97 @@ C
 C     RCN, 09/2004
 C     SUBROUTINE DELETED AS EXCessmass and RESmas defined globally
       END
-
+C
+      SUBROUTINE NUCMAS(Nn,Nz,Ebin)
+C
+C                --------------------------------------------
+C                |Nuclear mass formula of Duflo-Zuker (1992)|
+C                --------------------------------------------
+C nn  : neutron number
+C nz  : proton number
+C ebin: total binding energy
+C
+      IMPLICIT NONE
+C
+C Dummy arguments
+C
+      REAL*8 Ebin
+      INTEGER Nn, Nz
+C
+C Local variables
+C
+      REAL*8 a(21), a5, dfn, dfz, e0, edef, esh, esh1, f1, f2, f3, f4,
+     &       pn, pz, ron, roz, s, t, txxx, txxz, tzzx, tzzz, u, v, x,
+     &       xmag(6), xx, z, zmag(5), zz
+      DOUBLE PRECISION DABS
+      INTEGER k, kl, l, nn2, nz2
+      DATA zmag/14., 28., 50., 82., 114./
+      DATA xmag/14., 28., 50., 82., 126., 184./
+      DATA a/16.178, 18.422, 120.146, 202.305, 12.454, 0.73598, 5.204,
+     &     1.0645, 1.4206, 0.0548, 0.1786, .6181, .0988, .0265, -.1537,
+     &     .3113, -.6650, -.0553, -.0401, .1774, .4523/
+      x = Nn
+      z = Nz
+      t = DABS(x - z)*.5
+      v = x + z
+      s = v**(2./3.)
+      u = v**(1./3.)
+C
+C     E0:macroscopic part of the binding energy
+C
+      a5 = a(5)
+      IF (z.GT.x) a5 = 0.
+      e0 = a(1)*v - a(2)*s - a(3)*t*t/v + a(4)*t*t/u/v - a(5)*t/u - a(6)
+     &     *z*z/u
+      esh = 0.
+      esh1 = 0.
+      DO k = 2, 5
+         f1 = zmag(k - 1)
+         f2 = zmag(k)
+         dfz = f2 - f1
+         IF (z.GE.f1 .AND. z.LT.f2) THEN
+            roz = (z - f1)/dfz
+            pz = roz*(roz - 1)*dfz
+            DO l = 2, 6
+               f3 = xmag(l - 1)
+               f4 = xmag(l)
+               dfn = f4 - f3
+               IF (x.GE.f3 .AND. x.LT.f4) THEN
+                  ron = (x - f3)/dfn
+                  pn = ron*(ron - 1)*dfn
+                  esh = (pn + pz)*a(8) + a(10)*pn*pz
+                  xx = 2.*ron - 1.
+                  zz = 2.*roz - 1.
+                  txxx = pn*xx
+                  tzzz = pz*zz
+                  txxz = pn*zz
+                  tzzx = pz*xx
+                  kl = l - k
+                  IF (kl.EQ.0) esh1 = a(k + 10)*(txxx + tzzz)
+     &                                + a(k + 15)*(txxz + tzzx)
+                  IF (kl.EQ.1) esh1 = a(k + 11)*txxx - a(k + 16)
+     &                                *txxz + a(k + 10)*tzzz - a(k + 15)
+     &                                *tzzx
+                  IF (kl.EQ.2) esh1 = a(k + 12)*txxx + a(k + 17)
+     &                                *txxz + a(k + 10)*tzzz + a(k + 15)
+     &                                *tzzx
+                  edef = a(9)*(pn + pz) + a(11)*pn*pz
+                  IF (esh.LT.edef) esh = edef
+               ENDIF
+            ENDDO
+         ENDIF
+      ENDDO
+      Ebin = e0 + esh + esh1
+      nn2 = Nn/2
+      nz2 = Nz/2
+      nn2 = 2*nn2
+      nz2 = 2*nz2
+      IF (nn2.NE.Nn) Ebin = Ebin - a(7)/u
+      IF (nz2.NE.Nz) Ebin = Ebin - a(7)/u
+      END
+C
+C
+C
       SUBROUTINE SEPARATION
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
@@ -2706,7 +2595,7 @@ C     write(8,*)'binding',binding
 C     new method for more accurate (precision):
       BINding = EXCessmass(jzfinal,jafinal) + EXCessmass(jzejec,jaejec)
      &          - EXCessmass(JZResid,jaresid)
-C     write(8,*)'binding from excess=',binding
+C     write(6,*)'binding from excess=',binding
 C
 C     masses of light and heavy decay products needed for boostlab routine:
       AMEjec = ampart*AMU
@@ -2817,37 +2706,37 @@ C     zero emission spectrum:
       DO nen = 0, NDIM_EBINS
          DXSn(nen) = 0.
          DXSp(nen) = 0.
-         DXSn1(nen) = 0.
-         DXSp1(nen) = 0.
          DXSnlab(nen) = 0.
          DXSplab(nen) = 0.
-         DXSn1lab(nen) = 0.
-         DXSp1lab(nen) = 0.
          DO jz = 0, NDIM_ZEM
             DO jn = 0, NDIM_NEM
-               USPec(jz,jn,nen) = 0
-               RESpop(jz,jn) = 0
+               USPec(jz,jn,nen) = 0.
+               DXSnx(nen,jz,jn) = 0.
+               DXSpx(nen,jz,jn) = 0.
+               DXSnxlab(nen,jz,jn) = 0.
+               DXSpxlab(nen,jz,jn) = 0.
+               RESpop(jz,jn) = 0.
                DO jsp = 0, NDIM_JBINS
-                  UJSpec(jz,jn,nen,jsp) = 0
+                  UJSpec(jz,jn,nen,jsp) = 0.
                ENDDO
                DO mem = 0, NDIM_RECBINS
-                  RECspec(jz,jn,nen,mem) = 0
+                  RECspec(jz,jn,nen,mem) = 0.
                ENDDO
             ENDDO
          ENDDO
-         DO nth = 1, 36
+         DO nth = 1, NDAnghms1
             DDXsn(nen,nth) = 0.
             DDXsp(nen,nth) = 0.
             DDXsnlab(nen,nth) = 0.
             DDXsplab(nen,nth) = 0.
-            DO nph = 1, 72
-               DDDxsn(nen,nth,nph) = 0.
-               DDDxsp(nen,nth,nph) = 0.
-               DDDxsnlab(nen,nth,nph) = 0.
-               DDDxsplab(nen,nth,nph) = 0.
-            ENDDO
-         ENDDO
-      ENDDO
+            DO jz = 0, NDIM_ZEM
+              DO jn = 0, NDIM_NEM
+                DDXsnxlab(nen,nth,jz,jn) = 0.
+                DDXspxlab(nen,nth,jz,jn) = 0.
+               ENDDO
+             ENDDO
+          ENDDO
+       ENDDO
 C     zero number of bad events where res. nucl. energy goes negative
       NBAd = 0
       UBAd = 0.
@@ -2978,6 +2867,8 @@ C     !odd-odd
 C
 C
       SUBROUTINE AANG(Zkinit,Eemchan,Np,Nh,Er,Aa)
+C      INTEGER INT, MIN
+
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
@@ -2988,7 +2879,8 @@ C
 C
 C Local variables
 C
-      REAL*8 an, eav, zeta
+      INTEGER ne
+      REAL*8 an, de, eav, zeta, eax
       DOUBLE PRECISION DSQRT
       REAL FLOAT
 C     calculates a-value in my Ang dis theory. Determines extent of
@@ -3013,9 +2905,15 @@ C     vdepang in the average energy expressions below.
 C
       IF (Np.EQ.1 .AND. Nh.EQ.1) THEN
 C        ! 1p1h final state
-         IF (Er.GE.VDEpang) THEN
-            eav = (3.*VDEpang/5.) + (Er/2.)
+        IF(IFErmi.EQ.1) THEN
+          de = Er/detab
+          ne = MIN(IDINT(de),ntmx-1)
+          de = de - ne
+          eav = (1. - de)*eav2(ne) + de*eav2(ne+1)
          ELSE
+          IF (Er.GE.VDEpang) THEN
+            eav = (3.*VDEpang/5.) + (Er/2.)
+           ELSE
             IF (Er.LE.0.1) THEN
                eav = VDEpang
                GOTO 100
@@ -3025,19 +2923,30 @@ C        ! 1p1h final state
      &            *Er*(VDEpang**(3./2.) - (VDEpang - Er)**(3./2.))
             eav = eav/((2./3.)*(VDEpang**(3./2.) - (VDEpang-Er)**(3./2.)
      &            ))
-         ENDIF
-         GOTO 100
-      ENDIF
+           ENDIF
+         ENDIF 
+        GOTO 100
+       ENDIF
       IF (Np.EQ.0 .AND. Nh.EQ.1) THEN
-C        ! 1h final state
-         eav = VDEpang - Er
-         IF (eav.LE.0.0D0) STOP ' er ge vdep should never happen'
-         GOTO 100
-      ENDIF
+C      ! 1h final state
+        IF(IFErmi.EQ.1) THEN
+          eav = VDEp - Er
+          eav = eav*(1.+0.5*eav/(ZMNuc*AMU))
+         ELSE
+          eav = VDEpang - Er
+         ENDIF
+        IF (eav.LE.0.0D0) STOP ' er ge vdep should never happen'
+        GOTO 100
+       ENDIF
       IF (Np.EQ.0 .AND. Nh.EQ.2) THEN
-C        ! 2h final state
-         eav = VDEpang - (Er/2.)
-         IF (eav.LE.0.0D0) STOP ' er ge 2vdep should never happen'
+C       ! 2h final state
+        IF(IFErmi.EQ.1) THEN
+          eav = VDEp - (Er/2.)
+          eav = eav*(1.+0.5*eav/(ZMNuc*AMU))
+         ELSE
+          eav = VDEpang - (Er/2.)
+         ENDIF
+        IF (eav.LE.0.0D0) STOP ' er ge 2vdep should never happen'
       ENDIF
 C     now calculate aa forward-peaking a-parameter
   100 zeta = 9.3/DSQRT(Eemchan)
@@ -3052,6 +2961,10 @@ C     write(8,*)'aa, zkinit,zkscat,np,nh,eav,er,zeta=',
 C     +aa, zkinit,zkscat,np,nh,eav,er,zeta
       IF (Aa.GT.80.D0) Aa = 80.
 C     ! this prevents overflow.
+C      IF(IPrintdiag.EQ.1) THEN
+C        write(28,'(a8,2i4,2f8.3)') 'In AANG:',Np,Nh,Zkinit,ZKScat
+C        write(28,'(a8,4f8.3)') 'In AANG:',eav,Eemchan,Er,Aa
+C        ENDIF
 C     endif
       END
 C
@@ -3094,7 +3007,7 @@ C
       z = -DCOS(Ph2)*DSIN(Th2)*DSIN(Th1) + DCOS(Th1)*DCOS(Th2)
       Rottheta = DACOS(z)
       IF (Rottheta.LT.0.D0) Rottheta = Rottheta + 2.*PI_g
-      IF (Rottheta.LT.0.D0) WRITE (8,*) Rottheta
+      IF (Rottheta.LT.0.D0) WRITE (6,*) Rottheta
       IF (Rottheta.LT.0.D0) STOP 'rottheta -ve'
 C     remember, theta is always in range 0 to PI_g, so single valued and no
 C     ambiguity.
@@ -3140,9 +3053,9 @@ C
 C Local variables
 C
       REAL*8 aa, arg, eemchan, er, ph1, ph2, ph2rem, r, rotphi,
-     &       rottheta, th1, th2, th2rem, zkinit, zkrem2
+     &       rottheta, th1, th2, th2rem, zkinit, zkrem2, de
       DOUBLE PRECISION DABS, DACOS, DCOS, DEXP, DLOG, DSIN, DSQRT
-      INTEGER nh, np
+      INTEGER nh, np, ne
       REAL*8 RANG
 C     for a given particle-hole state, a particle has been selected with energy
 C     epart relative to the Fermi level.
@@ -3159,35 +3072,27 @@ C     vdep, binding, and commons: /uex/, /momph/, /thetaph/, /phiph/
 C
 C     notation used: "2" implies variables before rotation, "1" = after
 C     rotation.
+
+      zkinit = ZK(Jstudy)
+      er = UEX(Jstudy) - Epart
+C     !remaining energy for remaining p-h state
+      th1 = TH(Jstudy)   !th1,ph1= initial dirn of the state
+      ph1 = PH(Jstudy)
+
 C     3 types of decay, leaving either 1p1h, 1h , or 2h
 C     setup info depending on which of the above:
       IF (Npresid.EQ.1 .AND. Nhresid.EQ.1) THEN
 C        !1p1h state
-         zkinit = ZK2p1h(Jstudy)
-         er = UEX2p1h(Jstudy) - Epart
-C        !remaining energy for remaining p-h state
-         th1 = TH2p1h(Jstudy)   !th1,ph1= initial dirn of the 2p1h state
-         ph1 = PH2p1h(Jstudy)
          np = 1
          nh = 1
       ENDIF
       IF (Npresid.EQ.0 .AND. Nhresid.EQ.1) THEN
 C        !1h state
-         zkinit = ZK1p1h(Jstudy)
-         er = UEX1p1h(Jstudy) - Epart
-C        !remaining energy for remaining p-h state
-         th1 = TH1p1h(Jstudy)   !th1,ph1= initial dirn of the12p1h state
-         ph1 = PH1p1h(Jstudy)
          np = 0
          nh = 1
       ENDIF
       IF (Npresid.EQ.0 .AND. Nhresid.EQ.2) THEN
 C        !2h state (after 1h=>1p2h)
-         zkinit = ZK1h(Jstudy)
-         er = UEX1h(Jstudy) - Epart
-C        !remaining energy for remaining p-h state
-         th1 = TH1h(Jstudy)   !th1,ph1= initial dirn of 1h state
-         ph1 = PH1h(Jstudy)
          np = 0
          nh = 2
       ENDIF
@@ -3198,7 +3103,7 @@ C     !particle's mom rel to well bottom
       IF (eemchan.LT.0.1D0) eemchan = 0.1
 C     prevents eemchan going -ve. this variable is used in the ang-dis
 C     expression to approx quantum effects. meaningless if <= 0.
-      IF (eemchan.LE.0.D0) WRITE (8,*) 'eemchan,epart,binding=',
+      IF (eemchan.LE.0.D0) WRITE (6,*) 'eemchan,epart,binding=',
      &                                 eemchan, Epart, BINding
       CALL AANG(zkinit,eemchan,np,nh,er,aa)
 C     aa value is returned. Then sample distribution function:
@@ -3248,9 +3153,9 @@ C        these values need to be rotated into projectile's coordinate system:
          PH1rem = rotphi
          GOTO 99999
       ENDIF
-      WRITE (8,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit,
+      WRITE (6,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit,
      &            eemchan, np, nh, er, aa
-      WRITE (8,*) 'r=', r, 'arg=',
+      WRITE (6,*) 'r=', r, 'arg=',
      &            (DLOG(DEXP(aa) - r*(DEXP(aa)-DEXP(-aa))))/aa, 'th2=',
      &            th2
       STOP 'something screwy'
@@ -3751,9 +3656,11 @@ C     was vdep=31.27. But, In my angular distribution theory, a
 C     value vdepang=35. worked well. I want to continue using
 C     vdepang in the average energy expressions below.
 C     note, subroutine aang will have problems if vdepang<vdep
-      VDEp = 31.27D0
-C     vdepang=35.d0
-      VDEpang = 37.45D0 !I increased vdepang by 7% to give
+C      VDEp = 31.27D0
+      VDEp = 40.0D0
+C      VDEp = 35.D0
+      VDEpang=VDEp
+C      VDEpang = 37.45D0 !I increased vdepang by 7% to give
 C     !flatter angular distributions, for better agr, with expt,
 C     !(160 MeV Zr(p,xp), eout=100 MeV , used to estimate this.)
 C     !in part because ikin1 option assume that the Chad-Obl a.dist
@@ -3789,7 +3696,7 @@ C
   100 aj = aj + 1
       prob = (2*aj + 1)/((2*AJTar + 1)*(2*Ajhms + 1))
       IF (prob.GT.probmax) probmax = prob
-C     write(8,*)aj,prob
+C     write(6,*)aj,prob
       IF (aj.LE.(ajmax + 0.01D0)) GOTO 100
   200 xran = NINT( - 0.4999 + RANG()*((ajmax+2*0.4999) - ajmin))
      &       + (ajmin)
@@ -3824,7 +3731,7 @@ C
   100 aj = aj + 1
       prob = (2*aj + 1)/((2*0.5 + 1)*(2*Ajinit + 1))
       IF (prob.GT.probmax) probmax = prob
-C     write(8,*)aj,prob
+C     write(6,*)aj,prob
       IF (aj.LE.(ajmax + 0.01)) GOTO 100
   200 xran = NINT( - 0.4999 + RANG()*((ajmax+2*0.4999) - ajmin))
      &       + (ajmin)
@@ -3858,6 +3765,209 @@ C
       IF (yran.GT.prob) GOTO 100
       Rsample = xran
       END
+C
+C
+      SUBROUTINE EXTABPREP
+
+      IMPLICIT NONE
+      INCLUDE 'ddhms.cmb'
+
+      INTEGER nintmx, nintmx3
+      PARAMETER(nintmx=50,nintmx3=4*nintmx)
+
+      INTEGER n, nx, ne, n3
+      REAL*8 dxn, emax, xx, ee, ex, eps, de, de3, erem, xn, x3 
+      REAL*8 argold, argnew, arg3old, arg3new, ep, eh, pf, zmn
+      REAL*8 esum, eold, enew
+
+      dimension x3(0:nintmx3)
+
+      data pf/200.0/ 
+
+      dxn = 1./FLOAT(nxmx)
+
+      zmn = ZMNuc*AMU
+
+      emax = ECMproj + SEPproj +20.
+      detab = 10.*(INT(0.1*emax/nemx)+1)
+      ntmx = INT(emax/detab)+1
+
+      tab2(0,0) = 0.
+      tab3(0,0) = 0.
+      eav2(0) = Vdep
+      rho3(0) = 0.
+      
+      x3(0)=0.
+
+      DO nx=1,nxmx
+        xx = dxn*nx
+        tab2(nx,0) = xx
+        tab3(nx,0) = 1.-SQRT(ABS(1.-xx))
+       END DO
+
+       DO ne = 1, ntmx
+
+         ee = detab*ne
+
+         ex = DMAX1(0.,ee-vdep)
+         eps = ex
+         de = (ee - ex)/nintmx
+         eh = ABS(vdep - ee + eps)
+         ep = vdep + eps
+         argold = SQRT(eh*(eh + 2.*zmn)*ep*(ep + 2.*zmn))
+     1                         *(eh + zmn)*(ep + zmn)
+
+         eold = (eh*(eh + 2.*zmn)+ep*(ep + 2.*zmn))*argold
+         esum = 0.
+
+         DO n = 1, nintmx
+           eps = eps + de
+           eh = vdep - ee + eps
+           ep = vdep + eps
+           argnew = SQRT(eh*(eh + 2.*zmn)*ep*(ep + 2.*zmn))
+     1                         *(eh + zmn)*(ep + zmn)
+
+           enew = (eh*(eh + 2.*zmn)+ep*(ep + 2.*zmn))*argnew
+           x3(n) = x3(n-1) + 0.5*(argold+argnew)
+           esum = esum + 0.5*(eold + enew)
+           argold = argnew
+           eold = enew
+          END DO
+
+         arg3old = x3(nintmx)*de 
+     1            *SQRT(vdep*(vdep + 2.*zmn))*(vdep+zmn)
+
+         eav2(ne) = esum/(4.*Zmn*x3(nintmx))
+
+         DO n = 1,nintmx
+           x3(n) = x3(n)/x3(nintmx)
+          END DO
+
+         tab2(0,ne) = ex
+         tab2(nxmx,ne) = ee
+
+         n = 1
+         DO nx = 1, nxmx-1
+           xn = dxn*nx
+ 10        IF(x3(n).gt.xn) go to 20
+           n=n+1
+           go to 10
+ 20        tab2(nx,ne) = ex + de*(n + (xn-x3(n))/(x3(n)-x3(n-1)))
+          END DO
+
+         de3 = ee/nintmx3
+
+         DO n3 = 1, nintmx3-1
+
+           eps = de3*n3
+           erem = ee - eps
+
+           ex =  DMAX1(0., erem - vdep)
+           de = (erem - ex)/nintmx
+           eh = ABS(vdep - erem + ex)
+           ep = vdep + ex
+           argold = SQRT(eh*(eh + 2.*zmn)*ep*(ep + 2.*zmn))
+     1                         *(eh + zmn)*(ep + zmn)
+           xx = 0.
+
+           DO n = 1, nintmx
+             ex = ex + de
+             eh = vdep - erem + ex
+             ep = vdep + ex
+             argnew = SQRT(eh*(eh + 2.*zmn)*ep*(ep + 2.*zmn))
+     1                         *(eh + zmn)*(ep + zmn)
+             xx = xx + 0.5*(argold+argnew)
+             argold = argnew
+            END DO
+           ep = vdep + eps
+           arg3new = xx*de*SQRT(ep*(ep + 2.*zmn))*(ep + zmn)
+
+           x3(n3) = x3(n3-1) + 0.5*(arg3old + arg3new)
+           arg3old = arg3new
+          END DO
+         x3(nintmx3) = x3(nintmx3-1) + 0.5*arg3old
+
+         rho3(ne) = x3(nintmx3)/pf**6
+     1               /(SQRT(ep*(ep + 2.*zmn))*(ep + zmn))
+
+         DO n3 = 1, nintmx3
+           x3(n3) = x3(n3)/x3(nintmx3)
+          END DO
+
+         tab3(0,ne) = 0.
+         tab3(nxmx,ne) = ee
+
+         n = 1
+         DO nx = 1, nxmx-1
+           xn = dxn*nx
+ 30        IF(x3(n).gt.xn) go to 40
+           n=n+1
+           go to 30
+ 40        tab3(nx,ne) = de3*(n + (xn-x3(n))/(x3(n)-x3(n-1)))
+          END DO
+        END DO
+       RETURN
+       END
+C
+C
+      subroutine esel3(x,etot,epart)
+
+      IMPLICIT NONE
+      INCLUDE 'ddhms.cmb'
+
+      REAL*8 x,etot,epart
+
+      INTEGER nx,ne
+      REAL*8 dx,de
+
+      dx = nxmx*x
+      nx = MIN(INT(dx),nxmx-1)
+      dx = dx - nx
+
+      de = etot/detab
+      ne = MIN(INT(de),ntmx-1)
+      de = de - ne
+
+      IF(ne.eq.0) THEN
+        epart = etot*((1.-dx)*tab3(nx,0) + dx*tab3(nx+1,0))
+       ELSE IF(nx.EQ.nxmx-1) THEN
+        epart = etot - (etot-(1.-de)*tab3(nx,ne)-de*tab3(nx,ne+1))
+     1                      *dsqrt(dble(nxmx)*dabs(1.-x))
+       ELSE
+        epart = (1.-dx)*(1.-de)*tab3(nx,ne) + (1.-dx)*de*tab3(nx,ne+1)
+     1           + dx*(1.-de)*tab3(nx+1,ne) + dx*de*tab3(nx+1,ne+1)
+       ENDIF
+
+      RETURN
+      END  
+
+      subroutine esel2(x,etot,epart)
+
+      IMPLICIT NONE
+      INCLUDE 'ddhms.cmb'
+
+      REAL*8 x,etot,epart
+
+      INTEGER nx,ne
+      REAL*8 dx,de
+
+      dx = nxmx*x
+      nx = MIN(INT(dx),nxmx-1)
+      dx = dx - nx
+
+      de = etot/detab
+      ne = MIN(INT(de),ntmx-1)
+      de = de - ne
+
+      IF(ne.eq.0) THEN
+        epart = etot*((1.-dx)*tab2(nx,0) + dx*tab2(nx+1,0))
+       ELSE
+        epart = (1.-dx)*(1.-de)*tab2(nx,ne) + (1.-dx)*de*tab2(nx,ne+1)
+     1           + dx*(1.-de)*tab2(nx+1,ne) + dx*de*tab2(nx+1,ne+1)
+       ENDIF
+
+      RETURN
+      END  
 C
 C
 C ran0c not used now that MCNP package is used:
@@ -4107,7 +4217,7 @@ C  Purpose:
 C  To read in transmission coefficients from tape10
 C  Method based on GNASH tcprep subroutine. However, certain changes
 C  were made:
-C  - old GNASH uses a ratio cut-off criterial (2(l+1)+1)T(l)/T(0) < epsilon
+C  - old GNASH uses a ratio cut-off criteria (2(l+1)+1)T(l)/T(0) < epsilon
 C    instead of my (2l+1)T(l)/T(0). (Mistake in old GNASH, but doesn't matter)
 C  - To be safe, I use an epsilon=epsilontc=1.e-6, instead of 1.e-5 in old GNASH
 C  - For an unknown reason, GNASH has the max-l array (nlein, = lmaxtc here)
@@ -4213,7 +4323,7 @@ C              ! if projectile, fill in arrays of
 C              ! elab,reac,elas,tot cross sections
                XSEproj(nen) = du3sige
                XSTproj(nen) = du4sigt
-C              WRITE(8,*)'nen=',nen,' id=',id,' exslproj(nen)=',
+C              WRITE(6,*)'nen=',nen,' id=',id,' exslproj(nen)=',
 C              &              exslproj(nen)
             ENDIF
             IF (id.LE.2) THEN
@@ -4312,7 +4422,7 @@ C f77 version
 C
 C  Purpose:
 C  Hauser-Feshbach calculation of initial population of
-C  first compound nuclues (in absence of preeq/direct effects)
+C  first compound nucleus (in absence of preeq/direct effects)
 C  Uses collapsed transmission coeffecients
 C  Checked against GNASH results with very good agreement.
 C
@@ -4356,7 +4466,7 @@ C     Coding adapted from that in subroutine tcspline
 C
 C     now splined transmission coefficients for projectile at incident energy
       ek = ECM
-C     WRITE(8,*)'ek=',ek,' idproj=',idproj
+C     WRITE(6,*)'ek=',ek,' idproj=',idproj
       ne = NETc(IDProj)         ! # energies in trans co arrayp
 C     the iserch function call I use differs form gnash. I make a dummy array
 C     dum
@@ -4391,13 +4501,13 @@ C        !set-up. calcs y2derivs
          IF (y.GT.1.D0) y = 1
          IF (y.LT.0.D0) y = 0
          TCInc_splined(l) = y
-C        WRITE(8,*)'l=',l,' tcinc_splined (l)=',tcinc_splined (l)
+C        WRITE(6,*)'l=',l,' tcinc_splined (l)=',tcinc_splined (l)
          sumtl = sumtl + (2*l + 1)*TCInc_splined(l)
       ENDDO
       LMAx_om = LMAx_inctcsplined
       DO l = 0, LMAx_om
          OM_ldist(l) = (2*l + 1)*TCInc_splined(l)/sumtl
-C        write(8,*)'l=',l,' probabiity l=',om_ldist(l)
+C        write(6,*)'l=',l,' probabiity l=',om_ldist(l)
       ENDDO
       END
 C
@@ -4572,250 +4682,424 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Jnmax, Jzmax, Nemax, Numax
+      INTEGER Jnmax, Jzmax, Nemax, Numax, Inx
 C
 C Local variables
 C
       REAL*8 adum(5,7), csfit(NDANGecis), qq(5)
       DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1),
-     &                 auxout(NDEX,NDIM_JBINS + 1),
+     &                 auxout(NDEX,NDIM_JBINS + 1),difcon,elf,auxsum,
      &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon,
-     &                 xmre, xnor, zero
+     &                 xmre, xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
       REAL FLOAT
+      DOUBLE PRECISION DCOS
       INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre,
-     &        mrec,  na, ndiscmax, ne, nejc, nempmax(2),
-     &        nnur, nth, nu, nucn, nucnhi, nucnlo
+     &        mrec, na, ndiscmax, ne, nejc, nspec,
+     &        nnur, nth, nu, nucn, nucnhi, nucnlo, ip
       INTEGER INT
 C
 C-----Nemax max number of energy bins in HMS
 C
-C     introduced: CSHms(nejc)     - total HMS emission for nejc
-C     CSEhms(ie,nejc) - energy spectrum for HMS emission of nejc
-C
+C     used:
+C     CSEmis(nejc,nnuc) - exclusive XS for HMS emission of nejc
+C                          from nnuc (inclusive in nnuc=0)
+C     introduced:
+C     CSEhms(ie,nejc,nnuc) - exclusive CM spectrum for HMS emission of nejc 
+C                             from nnuc (inclusive in nnuc=0)
+C     CSEhmslab(ie,nejc,nnuc) - exclusive lab spectrum for HMS emission of nejc 
+C                             from nnuc (inclusive in nnuc=0)
+C     CSEahmslab(ie,ia,nejc,nnuc) - exclusive lab DDXS for HMS emission of nejc
+C                             from nnuc (inclusive in nnuc=0)
 C
       IF (DE.GT.DEBin) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) ' Energy grid in EMPIRE must be at least as dense'
-         WRITE (8,*)
+         WRITE (6,*) ' '
+         WRITE (6,*) ' Energy grid in EMPIRE must be at least as dense'
+         WRITE (6,*)
      &              ' as in HMS to avoid going out of memory boundaries'
-         WRITE (8,*)
+         WRITE (6,*)
      &              ' You have to increase NEX in the optional input to'
-         WRITE (8,*) MAX(Nemax,Numax) + 3,
+         WRITE (6,*) MAX(Nemax,Numax) + 3,
      &               ' or more. Ensure that this    '
-         WRITE (8,*) ' number fits NDEX value in the dimension.h file.'
-         WRITE (8,*) ' EXECUTION STOPPED ! ! !'
+         WRITE (6,*) ' number fits NDEX value in the dimension.h file.'
+         WRITE (6,*) ' EXECUTION STOPPED ! ! !'
          STOP
-      ENDIF
-C-----fix end points of neutron and proton spectra in Empire units
-      DO nejc = 1, 2
-         nempmax(nejc) = (NEXr(nejc,1)*DE + ECUt(nejc + 1))/DE + 1.0
-      ENDDO
+       ENDIF
+C Estimate maximum lab energy as elf*Ecm_max
+      elf = 1. + EJMass(1)/AMAss(1) 
+C
+C------convert HMS angular histograms to point data
+       dth = PI_g/NDAnghms1
+       DO ne = 0, Nemax
+         thx = PI_g - dth
+         xhi = DCOS(thx)
+         dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
+c         DDXsn(ne,NDAnghms1+1) = DDXsn(ne,NDAnghms1)
+c         DDXsp(ne,NDAnghms1+1) = DDXsp(ne,NDAnghms1)
+         DDXsnlab(ne,NDAnghms1+1) = DDXsnlab(ne,NDAnghms1)
+         DDXsplab(ne,NDAnghms1+1) = DDXsplab(ne,NDAnghms1)
+         DO jn = 0,Jnmax
+           DO jz = 0,Jzmax
+             DDXsnxlab(ne,NDAnghms1+1,jz,jn) = 
+     &                                     DDXsnxlab(ne,NDAnghms1,jz,jn)
+             DDXspxlab(ne,NDAnghms1+1,jz,jn) = 
+     &                                     DDXspxlab(ne,NDAnghms1,jz,jn)
+            ENDDO
+          ENDDO
+         DO nth = NDAnghms1, 2, -1
+           thx = thx - dth
+           xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
+           dxlo = xlo - xhi
+c           DDXsn(ne,nth) = (dxhi*DDXsn(ne,nth)+dxlo*DDXsn(ne,nth-1))/
+c     &                                              (dxhi+dxlo)
+c           DDXsp(ne,nth) = (dxhi*DDXsp(ne,nth)+dxlo*DDXsp(ne,nth-1))/
+c     &                                              (dxhi+dxlo)
+           DDXsnlab(ne,nth) = (dxhi*DDXsnlab(ne,nth)
+     &                          +dxlo*DDXsnlab(ne,nth-1))/(dxhi+dxlo)
+           DDXsp(ne,nth) = (dxhi*DDXsplab(ne,nth)
+     &                          +dxlo*DDXsplab(ne,nth-1))/(dxhi+dxlo)
+           DO jn = 0,Jnmax
+             DO jz = 0,Jzmax
+               DDXsnxlab(ne,nth,jz,jn) = (dxhi*DDXsnxlab(ne,nth,jz,jn)
+     &                      +dxlo*DDXsnxlab(ne,nth-1,jz,jn))/(dxhi+dxlo)
+               DDXspxlab(ne,nth,jz,jn) = (dxhi*DDXspxlab(ne,nth,jz,jn)
+     &                      +dxlo*DDXspxlab(ne,nth-1,jz,jn))/(dxhi+dxlo)
+              ENDDO
+            ENDDO
+           xhi = xlo
+           dxhi = dxlo
+          ENDDO
+        ENDDO
+C
+C-----transfer inclusive spectra e DDX's
+C
       zero = 0.0
 C
-C-----transfer inclusive neutron spectrum
+C-----transfer inclusive neutron CM spectrum
 C
-      jz = 0
-      jn = 1
-      izar = IZA(1) - 1000*jz - (jn + jz)
-      CALL WHERE(izar,nnur,iloc)
+      CALL WHERE(IZA(1)-1,nnur,iloc)
+      CSHms(1,0) =  XSN0
+      CSEmis(1,0) = CSEmis(1,0) + XSN0
 C-----to continuum
-      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
-     &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
-     &                                  zero,(NEX(nnur) - 1)*DE)
+      IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSn,NDIM_EBINS+1, 
+     &                              0.0D0,DE,CSEhms(1,1,0),
+     &                              NDECSE,1,0.0d0,NEX(nnur)*DE)
 C-----to discrete levels
-      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSn,NDIM_EBINS +
-     &                                  1,0.0D0,DE,CSEhms(1,1),NDECSE,1,
-     &                                  NEX(nnur)*DE,EMAx(nnur))
-      DO ne = 1, NDECSE
-         IF (ENDf(1).EQ.1) THEN
-            CSE(ne,1,1) = CSE(ne,1,1) + CSEhms(ne,1)
-         ELSE
-            CSE(ne,1,0) = CSE(ne,1,0) + CSEhms(ne,1)
-         ENDIF
-         CSHms(1) = CSHms(1) + CSEhms(ne,1)
-      ENDDO
-      CSHms(1) = CSHms(1) - 0.5*(CSEhms(1,1) + CSEhms(NDECSE,1))
-      CSHms(1) = CSHms(1)*DE
+      IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSn,NDIM_EBINS+1,
+     &                              0.0D0,DE,CSEhms(1,1,0),
+     &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
+      nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
+      DO ne = 1, nspec
+         CSE(ne,1,0) = CSE(ne,1,0) + CSEhms(ne,1,0)
+       ENDDO
+C
+C-----transfer inclusive neutron lab spectrum
+C
+C-----to continuum
+      IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSnlab,
+     &                              NDIM_EBINS+1,0.0D0,DE,
+     &                              CSEhmslab(1,1,0),NDECSE,1,
+     &                              0.0d0,NEX(nnur)*DE/elf)
+C-----to discrete levels
+      IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSnlab,
+     &                              NDIM_EBINS+1,0.0D0,DE,
+     &                              CSEhmslab(1,1,0),NDECSE,1,
+     &                              NEX(nnur)*DE/elf,EMAx(nnur)*elf)
+C
+C-----transfer inclusive neutron lab double-differential cross sections
+C
+C-----interpolate in energy
+C-----to continuum
+      IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DDXsnlab,
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,1,0),NDECSE,
+     &                                 NDAnghms,0.0d0,
+     &                                 NEX(nnur)*DE/elf)
+C-----to discrete levels
+      IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DDXsnlab,
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,1,0),NDECSE,
+     &                                 NDAnghms,NEX(nnur)*DE/elf,
+     &                                 EMAx(nnur)*elf)
+C-----integrate interpolated ddx over angle and normalize ddx to the angle
+C-----integrated spectrum obtained above 
+      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
+      DO ne = 1, nspec
+         DO na = 1, NDAnghms
+            csfit(na) = CSEahmslab(ne,NDAnghms - na + 1,1,0)
+         ENDDO
+         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+         IF (qq(1).NE.0.0D+0) THEN
+            xnor = CSEhmslab(ne,1,0)/(4.0*3.14159*qq(1))
+            DO na = 1, NDAnghms
+               CSEahmslab(ne,na,1,0) = CSEahmslab(ne,na,1,0)*xnor
+c               CSEa(ne,na,1,0) = CSEa(ne,na,1,0)
+c     &                                 + CSEahmslab(ne,na,1,0)
+             ENDDO
+          ENDIF
+       ENDDO
 C
 C-----transfer inclusive proton spectrum
 C
-      jz = 1
-      jn = 0
-      izar = IZA(1) - 1000*jz - (jn + jz)
-      CALL WHERE(izar,nnur,iloc)
+      CALL WHERE(IZA(1)-1001,nnur,iloc)
+      CSHms(2,0) =  XSP0
+      CSEmis(2,0) = CSEmis(2,0) + XSP0
 C-----to continuum
-      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS +
-     &                                  1,0.0D0,DE,CSEhms(1,2),NDECSE,1,
-     &                                  zero,(NEX(nnur) - 1)*DE)
-C-----to discrte levels
-      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DXSp,NDIM_EBINS +
-     &                                  1,0.0D0,DE,CSEhms(1,2),NDECSE,1,
-     &                                  NEX(nnur)*DE,EMAx(nnur))
-      DO ne = 1, NDECSE
-         IF (ENDf(1).EQ.1) THEN
-            CSE(ne,2,1) = CSE(ne,2,1) + CSEhms(ne,2)
-         ELSE
-            CSE(ne,2,0) = CSE(ne,2,0) + CSEhms(ne,2)
-         ENDIF
-         CSHms(2) = CSHms(2) + CSEhms(ne,2)
-      ENDDO
-      CSHms(2) = CSHms(2) - 0.5*(CSEhms(1,2) + CSEhms(NDECSE,2))
-      CSHms(2) = CSHms(2)*DE
+      IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSp,NDIM_EBINS+1,
+     &                              0.0D0,DE,CSEhms(1,2,0),
+     &                              NDECSE,1,zero,NEX(nnur)*DE)
+C-----to discrete levels
+      IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSp,NDIM_EBINS+1,
+     &                              0.0D0,DE,CSEhms(1,2,0),
+     &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
+      nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
+      DO ne = 1, nspec
+         CSE(ne,2,0) = CSE(ne,2,0) + CSEhms(ne,2,0)
+        ENDDO
 C
-C-----transfer inclusive neutron double-differential cross sections
+C-----transfer inclusive proton lab spectrum
 C
-      nejc = 1  !neutron out
-      jz = 0
-      jn = 1
-      izar = IZA(1) - 1000*jz - (jn + jz)
-      CALL WHERE(izar,nnur,iloc)
-      IF (NDANG.EQ.19) THEN
-C------convert HMS 5 deg grid into 10 deg grid of EMPIRE
-       DO ne = 0, Nemax
-         DDXsn(ne,1) = DDXsn(ne,1) + (DDXsn(ne,1) - DDXsn(ne,2))/2.0
-         IF (DDXsn(ne,1).LT.0.0D+0) DDXsn(ne,1) = 0.0
-         DO nth = 2, NDANG - 1
-            DDXsn(ne,nth) = (DDXsn(ne,2*(nth-1)) + DDXsn(ne,2*nth - 1))
-     &                      /2.
+C-----to continuum
+      IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSplab,
+     &                              NDIM_EBINS+1,0.0D0,DE,
+     &                              CSEhmslab(1,2,0),NDECSE,1,
+     &                              0.0d0,NEX(nnur)*DE/elf)
+C-----to discrete levels
+      IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSplab,
+     &                              NDIM_EBINS+1,0.0D0,DE,
+     &                              CSEhmslab(1,2,0),NDECSE,1,
+     &                              NEX(nnur)*DE/elf,EMAx(nnur)*elf)
+C
+C-----transfer inclusive proton lab double-differential cross sections
+C
+C-----interpolate in energy
+C-----to continuum
+      IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DDXsplab,
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,2,0),NDECSE,
+     &                                 NDAnghms,0.0d0,
+     &                                 NEX(nnur)*DE/elf)
+C-----to discrete levels
+      IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DDXsplab,
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,2,0),NDECSE,
+     &                                 NDAnghms,NEX(nnur)*DE/elf,
+     &                                 EMAx(nnur)*elf)
+C-----integrate interpolated ddx over angle and normalize ddx to the angle
+C-----integrated spectrum obtained above 
+      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
+      DO ne = 1, nspec
+         DO na = 1, NDAnghms
+            csfit(na) = CSEahmslab(ne,NDAnghms - na + 1,2,0)
          ENDDO
-         DDXsn(ne,NDANG) = DDXsn(ne,36) + (DDXsn(ne,36) - DDXsn(ne,35))
-     &                     /2.
-         IF (DDXsn(ne,NDANG).LT.0.0D+0) DDXsn(ne,NDANG) = 0.0
+         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+         IF (qq(1).NE.0.0D+0) THEN
+            xnor = CSEhmslab(ne,2,0)/(4.0*3.14159*qq(1))
+            DO na = 1, NDAnghms
+               CSEahmslab(ne,na,2,0) = CSEahmslab(ne,na,2,0)*xnor
+c               CSEa(ne,na,2,0) = CSEa(ne,na,2,0)
+c     &                                 + CSEahmslab(ne,na,2,0)
+             ENDDO
+          ENDIF
        ENDDO
-       ENDIF
+C
+C-----transfer exclusive spectra e DDX's
+C
+      DO jn = 0,Jnmax
+        DO jz = 0,Jzmax
+          izar = IZA(1) - 1000*jz - (jn + jz)
+          CALL WHERE(izar,nnuc,iloc)
+          IF(iloc .NE. 0) CYCLE
+C
+C-----transfer exclusive neutron CM spectrum
+C
+          Inx=INExc(nnuc)
+          CALL WHERE(izar-1,nnur,iloc)
+          IF(iloc .EQ. 0 .AND. XSNx(jz,jn) .GT. 1.0d-6) THEN
+           CSHms(1,nnuc) =  XSNx(jz,jn)
+           CSEmis(1,nnuc) = CSEmis(1,nnuc) + XSNx(jz,jn)
+C-----to continuum
+         IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSnx(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhms(1,1,nnuc),
+     &                              NDECSE,1,zero,(NEX(nnur) - 1)*DE)
+C-----to discrete levels
+         IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSnx(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhms(1,1,nnuc),
+     &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
+         nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
+         DO ne = 1, nspec
+            IF (ENDf(nnuc).EQ.1) THEN
+               CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + CSEhms(ne,1,nnuc)
+               IF(Inx.GT.0) POPcse(0,1,ne,Inx)=
+     &                       POPcse(0,1,ne,Inx) + CSEhms(ne,1,nnuc)
+             ENDIF
+          ENDDO
+C
+C-----transfer exclusive neutron lab spectrum
+C
+C-----to continuum
+         IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                              DXSnxlab(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhmslab(1,1,nnuc),
+     &                              NDECSE,1,0.0d0,NEX(nnur)*DE/elf)
+C-----to discrete levels
+         IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                              DXSnxlab(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhmslab(1,1,nnuc),
+     &                              NDECSE,1,NEX(nnur)*DE/elf,
+     &                              EMAx(nnur)*elf)
+
+C
+C-----transfer exclusive neutron lab double-differential cross sections
+C
 C-----interpolate in energy
 C-----to continuum
-      IF (IDNa(2,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
-     &                                 1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                 NDECSE,NDAng,zero,(NEX(nnur) - 1)
-     &                                 *DE)
-C-----to discrte levels
-      IF (IDNa(1,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsn,NDIM_EBINS +
-     &                                 1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                 NDECSE,NDAng,NEX(nnur)*DE,
-     &                                 EMAx(nnur))
+          IF (IDNa(2,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                                 DDXsnxlab(0,1,jz,jn),
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,1,nnuc),
+     &                                 NDECSE,NDAnghms,0.0d0,
+     &                                 NEX(nnur)*DE/elf)
+C-----to discrete levels
+          IF (IDNa(1,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                                 DDXsnxlab(0,1,jz,jn),
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,1,nnuc),
+     &                                 NDECSE,NDAnghms,NEX(nnur)*DE/elf,
+     &                                 EMAx(nnur)*elf)
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
-C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
-C-----finally store ddx on Empire array CSEa
-      DO ne = 1, nempmax(nejc)
-         DO na = 1, NDANG
-            csfit(na) = CSEahms(ne,NDANG - na + 1,nejc)
-         ENDDO
-         CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
-            DO na = 1, NDANG
-               CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
-               IF (ENDf(1).EQ.1) THEN
-                  CSEa(ne,na,nejc,1) = CSEa(ne,na,nejc,1)
-     &                                 + CSEahms(ne,na,nejc)
-               ELSE
-                  CSEa(ne,na,nejc,0) = CSEa(ne,na,nejc,0)
-     &                                 + CSEahms(ne,na,nejc)
-               ENDIF
-            ENDDO
-         ENDIF
-      ENDDO
+C-----integrated spectrum obtained above 
+          nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
+          DO ne = 1, nspec
+            DO na = 1, NDAnghms
+              csfit(na) = CSEahmslab(ne,NDAnghms - na + 1,1,nnuc)
+             ENDDO
+            CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+            IF (qq(1).NE.0.0D+0) THEN
+              xnor = CSEhmslab(ne,1,nnuc)/(4.0*3.14159*qq(1))
+              DO na = 1, NDAnghms
+                CSEahmslab(ne,na,1,nnuc) = CSEahmslab(ne,na,1,nnuc)*xnor
+               ENDDO
+             ENDIF
+           ENDDO
+          ENDIF ! iloc
 C
-C-----transfer inclusive proton double-differential cross sections
+C-----transfer exclusive proton CM spectrum
 C
-      nejc = 2  !proton out
-      jz = 1
-      jn = 0
-      izar = IZA(1) - 1000*jz - (jn + jz)
-      CALL WHERE(izar,nnur,iloc)
-C-----convert HMS 5 deg grid into 10 deg grid of EMPIRE
-      DO ne = 0, Nemax
-         DDXsp(ne,1) = DDXsp(ne,1) + (DDXsp(ne,1) - DDXsp(ne,2))/2.0
-         IF (DDXsp(ne,1).LT.0.0D+0) DDXsp(ne,1) = 0.0
-         DO nth = 2, NDANG - 1
-            DDXsp(ne,nth) = (DDXsp(ne,2*(nth-1)) + DDXsp(ne,2*nth - 1))
-     &                      /2.
-         ENDDO
-         DDXsp(ne,NDANG) = DDXsp(ne,36) + (DDXsp(ne,36) - DDXsp(ne,35))
-     &                     /2.
-         IF (DDXsp(ne,NDANG).LT.0.0D+0) DDXsp(ne,NDANG) = 0.0
-      ENDDO
+          CALL WHERE(izar-1001,nnur,iloc)
+          IF(iloc .EQ. 0 .AND. XSPx(jz,jn) .GT. 1.0d-6) THEN
+           CSHms(2,nnuc) =  XSPx(jz,jn)
+           CSEmis(2,nnuc) = CSEmis(2,nnuc) + XSPx(jz,jn)
+C-----to continuum
+         IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSpx(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhms(1,2,nnuc),
+     &                              NDECSE,1,0.0d0,(NEX(nnur) - 1)*DE)
+C-----to discrete levels
+         IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,DXSpx(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhms(1,2,nnuc),
+     &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
+         nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
+         DO ne = 1, nspec
+            IF (ENDf(nnuc).EQ.1) THEN
+               CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + CSEhms(ne,2,nnuc)
+               IF(Inx.GT.0) POPcse(0,2,ne,Inx)=
+     &                       POPcse(0,2,ne,Inx) + CSEhms(ne,2,nnuc)
+             ENDIF
+          ENDDO
+C
+C-----transfer exclusive proton lab spectrum
+C
+C-----to continuum
+         IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                              DXSpxlab(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhmslab(1,2,nnuc),
+     &                              NDECSE,1,0.0d0,NEX(nnur)*DE/elf)
+C-----to discrete levels
+         IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                              DXSpxlab(0,jz,jn),
+     &                              NDIM_EBINS + 1,0.0D0,DE,
+     &                              CSEhmslab(1,2,nnuc),
+     &                              NDECSE,1,NEX(nnur)*DE/elf,
+     &                              EMAx(nnur)*elf)
+C
+C-----transfer exclusive proton lab double-differential cross sections
+C
 C-----interpolate in energy
 C-----to continuum
-      IF (IDNa(4,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
-     &                                 1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                 NDECSE,NDAng,zero,(NEX(nnur) - 1)
-     &                                 *DE)
-C-----to discrte levels
-      IF (IDNa(3,5).EQ.1) CALL INTERMAT(DEBin/2,DEBin,DDXsp,NDIM_EBINS +
-     &                                 1,0.D0,DE,CSEahms(1,1,nejc),
-     &                                 NDECSE,NDAng,NEX(nnur)*DE,
-     &                                 EMAx(nnur))
+          IF (IDNa(4,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                                 DDXspxlab(0,1,jz,jn),
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,2,nnuc),
+     &                                 NDECSE,NDAnghms,0.0d0,
+     &                                 NEX(nnur)*DE/elf)
+C-----to discrete levels
+          IF (IDNa(3,5).EQ.1) CALL HINTERMAT(0.0d0,DEBin,
+     &                                 DDXspxlab(0,1,jz,jn),
+     &                                 NDIM_EBINS + 1,0.D0,DE,
+     &                                 CSEahmslab(1,1,2,nnuc),
+     &                                 NDECSE,NDAnghms,NEX(nnur)*DE/elf,
+     &                                 EMAx(nnur)*elf)
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
-C-----integrated spectrum (CSEhms) obtained above (also from interpolation)
-C-----finally store ddx on Empire array CSEa
-      DO ne = 1, nempmax(nejc)
-         DO na = 1, NDANG
-            csfit(na) = CSEahms(ne,NDANG - na + 1,nejc)
-         ENDDO
-         CALL LSQLEG(CANgler,csfit,NDANG,qq,5,adum,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,nejc)/(4.0*3.14159*qq(1))
-            DO na = 1, NDANG
-               CSEahms(ne,na,nejc) = CSEahms(ne,na,nejc)*xnor
-               IF (ENDf(1).EQ.1) THEN
-                  CSEa(ne,na,nejc,1) = CSEa(ne,na,nejc,1)
-     &                                 + CSEahms(ne,na,nejc)
-               ELSE
-                  CSEa(ne,na,nejc,0) = CSEa(ne,na,nejc,0)
-     &                                 + CSEahms(ne,na,nejc)
-               ENDIF
-            ENDDO
-         ENDIF
-      ENDDO
+C-----integrated spectrum obtained above 
+         nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
+          DO ne = 1, nspec
+            DO na = 1, NDAnghms
+              csfit(na) = CSEahmslab(ne,NDAnghms - na + 1,2,nnuc)
+             ENDDO
+            CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+            IF (qq(1).NE.0.0D+0) THEN
+              xnor = CSEhmslab(ne,2,nnuc)/(4.0*3.14159*qq(1))
+              DO na = 1, NDAnghms
+                CSEahmslab(ne,na,2,nnuc) = CSEahmslab(ne,na,2,nnuc)*xnor
+               ENDDO
+             ENDIF
+           ENDDO
+
+          ENDIF ! iloc
+         ENDDO ! jz
+       ENDDO   ! jn
 C
 C-----transfer population of residual nuclei
 C
+      jmax = MIN(NDLW,NDIM_JBINS + 1)
       CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)
       CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)
       DO jz = 0, Jzmax
          DO jn = 0, Jnmax
             IF (jz.EQ.0 .AND. jn.EQ.0) THEN ! 1-st CN
-               nucn = EX(NEX(1),1)/DEBin
-               nucnlo = nucn
-               IF (JMAxujspec(0,0,nucn - 1).GT.0) nucnlo = nucn - 1
-               nucnhi = nucn
-               IF (JMAxujspec(0,0,nucn + 1).GT.0) nucnhi = nucn + 1
-               IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
+              nucn = EX(NEX(1),1)/DEBin
+              nucnlo = nucn
+              IF (JMAxujspec(0,0,nucn - 1).GT.0) nucnlo = nucn - 1
+              nucnhi = nucn
+              IF (JMAxujspec(0,0,nucn + 1).GT.0) nucnhi = nucn + 1
+              IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
      &             (JMAxujspec(0,0,nucn).EQ.0)) THEN
-C                  WRITE(8, *)' '
-C                  WRITE(8, *)'Got lost! Can not find HMS '
-C                  WRITE(8, *)'population of the 1-st CN. '
-C                  WRITE(8, *)'Have searched bins ', nucn - 1
-C                  WRITE(8, *)'through ', nucn + 1, ' but they'
-C                  WRITE(8, *)'seem to contain 0 cross section.'
-C                  WRITE(8, *)'I better STOP              '
-C                  STOP
-                  WRITE (8,*) ' '
-                  WRITE (8,*) 'Funny!? The population of '
-                  WRITE (8,*) 'the 1-st CN seems to be 0.'
-                  WRITE (8,*) 'Have searched bins ', nucn - 1
-                  WRITE (8,*) 'through ', nucn + 1, ' but they'
-                  WRITE (8,*) 'seem to contain 0 cross section.'
-                  WRITE (8,*) 'Check ddhms.out!'
-                  WRITE (8,*) ' '
-               ENDIF
-               DO jsp = 1, NDLW
-                  POP(NEX(1),jsp,1,1) = 0
-                  POP(NEX(1),jsp,2,1) = 0
+                WRITE (6,*) ' '
+                WRITE (6,*) 'Funny!? The population of '
+                WRITE (6,*) 'the 1-st CN seems to be 0.'
+                WRITE (6,*) 'Have searched bins ', nucn - 1
+                WRITE (6,*) 'through ', nucn + 1, ' but they'
+                WRITE (6,*) 'seem to contain 0 cross section.'
+                WRITE (6,*) 'Check ddhms.out!'
+                WRITE (6,*) ' '
+                RETURN
+              ENDIF
+             DO jsp = 1, NDLW
+               POP(NEX(1),jsp,1,1)=0.0d0
+               POP(NEX(1),jsp,2,1)=0.0d0
                ENDDO
-               DO nu = nucnlo, nucnhi
-                  DO jsp = 0, JMAxujspec(0,0,nu)
-                     POP(NEX(1),jsp + 1,1,1) = POP(NEX(1),jsp + 1,1,1)
-     &                  + 0.5*UJSpec(0,0,nu,jsp)
-                     POP(NEX(1),jsp + 1,2,1) = POP(NEX(1),jsp + 1,2,1)
-     &                  + 0.5*UJSpec(0,0,nu,jsp)
-                  ENDDO
-               ENDDO
-               GOTO 50
+             DO jsp = 0, JMAxujspec(0,0,nucn)
+               POP(NEX(1),jsp+1,1,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
+               POP(NEX(1),jsp+1,2,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
+              ENDDO
+              GO TO 50
             ENDIF
-            jmax = MIN(NDLW,NDIM_JBINS + 1)
             izar = IZA(1) - 1000*jz - (jn + jz)
             CALL WHERE(izar,nnur,iloc)
             IF (iloc.NE.1) THEN   !ignore population of not considered nuclei
@@ -4832,17 +5116,6 @@ C                  STOP
                      auxin(nu + 1,jsp + 1) = 0.0
                   ENDDO
                ENDDO
-C--------------test output
-C              WRITE(8,*)' '
-C              WRITE(8,*)'jz,jn,nnur:',jz,jn,nnur
-C              WRITE(8,*)' '
-C              DO nu = 0, numax
-C              WRITE(8,'(12G12.5)') (nu+0.5)*Debin,
-C     &                           (auxin(nu+1,jsp),jsp=1,11)
-C              ENDDO
-C              WRITE(8,*)'input range ',Debin/2,(ndim_ebins+0.5)*Debin
-C              WRITE(8,*)'reqst range ',EX(1,nnur),EMAx(nnur)
-C--------------test output *** done ***
 C--------------clean interpolation output matrix
                DO nu = 1, NDEX
                   DO jsp = 0, NDIM_JBINS
@@ -4850,9 +5123,9 @@ C--------------clean interpolation output matrix
                   ENDDO
                ENDDO
 C--------------population of continuum
-               CALL INTERMAT(DEBin/2,DEBin,auxin,NDIM_EBINS + 1,
+               CALL HINTERMAT(0.0d0,DEBin,auxin,NDIM_EBINS + 1,
      &                       EX(1,nnur),DE,auxout,NDEX,NDIM_JBINS + 1,
-     &                       EX(1,nnur),EMAx(nnur))
+     &                       EX(1,nnur),EMAx(nnur)+DE)
                sumcon = 0.0D0
                DO nu = 1, NEX(nnur)
                   DO jsp = 1, jmax
@@ -4878,56 +5151,52 @@ C--------------population of continuum
                   ENDDO
                ENDDO
                sumcon = sumcon*DE
-C              WRITE(8 ,*)'continuum population = ', sumcon, ' mb'
-C              WRITE(8 ,*)'HMS resid population = ', RESpop(jz, jn),' mb'
                IF (nnur.GT.3 .AND. FIRst_ein) THEN
                   IF (IDNa(2,5).EQ.0) THEN
-                     WRITE (8,*) ' '
-                     WRITE (8,*) 'WARNING: Inconsistent use of HMS.'
-                     WRITE (8,*) 'WARNING: HMS emission of neutrons'
-                     WRITE (8,*)
+                     WRITE (6,*) ' '
+                     WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
+                     WRITE (6,*) 'WARNING: HMS emission of neutrons'
+                     WRITE (6,*)
      &                         'WARNING: to continuum has been blocked.'
-                     WRITE (8,*) 'WARNING: However, residues after '
-                     WRITE (8,*) 'WARNING: multiple P.E. are populated'
-                     WRITE (8,*) ' '
+                     WRITE (6,*) 'WARNING: However, residues after '
+                     WRITE (6,*) 'WARNING: multiple P.E. are populated'
+                     WRITE (6,*) ' '
                   ENDIF
                   IF (IDNa(4,5).EQ.0) THEN
-                     WRITE (8,*) ' '
-                     WRITE (8,*) 'WARNING: Inconsistent use of HMS.'
-                     WRITE (8,*) 'WARNING: HMS emission of protons '
-                     WRITE (8,*)
+                     WRITE (6,*) ' '
+                     WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
+                     WRITE (6,*) 'WARNING: HMS emission of protons '
+                     WRITE (6,*)
      &                         'WARNING: to continuum has been blocked.'
-                     WRITE (8,*) 'WARNING: However, residues after '
-                     WRITE (8,*) 'WARNING: multiple P.E. are populated'
-                     WRITE (8,*) ' '
+                     WRITE (6,*) 'WARNING: However, residues after '
+                     WRITE (6,*) 'WARNING: multiple P.E. are populated'
+                     WRITE (6,*) ' '
                   ENDIF
                ENDIF
-C--------------test output
-C             WRITE(8, *)' '
-C             WRITE(8, *)'jz,jn,nnur',jz,jn,nnur
-C             WRITE(8, *)' '
-C             DO nu = 1,NEX(nnur)+1
-C               WRITE( 8,'(12G12.5)') EX(nu,nnur),
-C     &                           (POP(nu,jsp,1,nnur),jsp=1,11)
-C              ENDDO
-C--------------test output *** done ***
 C--------------population of discrete levels (evenly distributed)
-               sumcon = (RESpop(jz,jn) - sumcon)/NLV(nnur)
+               difcon = (RESpop(jz,jn) - sumcon)/NLV(nnur)
                IF (IDNa(1,5).EQ.1 .AND. nnur.EQ.mt91) THEN
                   DO il = 1, NLV(nnur)
-                     POPlv(il,nnur) = POPlv(il,nnur) + sumcon
-                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + sumcon
+                     POPlv(il,nnur) = POPlv(il,nnur) + difcon
+                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + difcon
+                     sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (IDNa(3,5).EQ.1 .AND. nnur.EQ.mt649) THEN
                   DO il = 1, NLV(nnur)
-                     POPlv(il,nnur) = POPlv(il,nnur) + sumcon
-                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + sumcon
+                     POPlv(il,nnur) = POPlv(il,nnur) + difcon
+                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + difcon
+                     sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (nnur.NE.mt91 .AND. nnur.NE.mt649) THEN
                   DO il = 1, NLV(nnur)
-                     POPlv(il,nnur) = POPlv(il,nnur) + sumcon
+                     POPlv(il,nnur) = POPlv(il,nnur) + difcon
+                     sumcon=sumcon+difcon
                   ENDDO
                ENDIF
+C              WRITE(28,*)' jz,jn,nnur,nlv=',jz,jn,nnur,NLV(nnur)
+C              WRITE(28,*)' discrete pop  = ', difcon*NLV(nnur),' mb'
+C              WRITE(28,*)' total pop     = ', sumcon, ' mb'
+C              WRITE(28,*)' HMS resid pop = ', RESpop(jz, jn),' mb'
 C
 C--------------transfer excitation energy dependent recoil spectra
 C
@@ -4956,44 +5225,46 @@ C-----------------interpolate and transfer continuum part
      &                           (maxrecener + 0.5)*DEBinrec,EX(1,nnur),
      &                           EMAx(nnur))
 C-----------------test printout
-C                 WRITE(8, *)'A=', A(nnur), ' Z=', Z(nnur),
+C                 WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur),
 C                 &                    'recoil population'
-C                 WRITE(8, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
-C                 WRITE(8, *)' '
+C                 WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
+C                 WRITE(6, *)' '
 C                 DO nu = 1, NEX(nnur)
-C                 WRITE(8, '(12G12.5)')EX(nu, nnur),
+C                 WRITE(6, '(12G12.5)')EX(nu, nnur),
 C                 &                                 (RECcse(mrec, nu, nnur),
 C                 &                                 mrec = 1, 11)
 C                 ENDDO
 C-----------------test printout *** done ***
 C-----------------recoils to discrete levels
 C-----------------sum HMS recoil spectra to discrete levels on the first row of auxrec1
-                  ndiscmax = EX(1,nnur)/DEBin + 1.001
-                  DO mrec = 1, maxrecener + 1
-                     DO nu = 1, ndiscmax
+                  IF(maxrecener.GT.0) THEN
+                    ndiscmax = EX(1,nnur)/DEBin + 1.001
+                    DO mrec = 1, maxrecener + 1
+                      DO nu = 1, ndiscmax
                         IF (nu.EQ.1 .OR. nu.EQ.ndiscmax) THEN
-                           sumcon = 0.5*auxrec1(mrec,nu)
-                        ELSE
-                           sumcon = auxrec1(mrec,nu)
-                        ENDIF
+                          sumcon = 0.5*auxrec1(mrec,nu)
+                         ELSE
+                          sumcon = auxrec1(mrec,nu)
+                         ENDIF
                         auxrec1(mrec,1) = auxrec1(mrec,1) + sumcon
+                       ENDDO
+                      auxrec1(mrec,1) = auxrec1(mrec,1)*DEBin
                      ENDDO
-                     auxrec1(mrec,1) = auxrec1(mrec,1)*DEBin
-                  ENDDO
 C-----------------interpolate in recoil energy and store on  RECcse(mrec, 0, nnur)
-                  RECcse(1,0,nnur) = RECcse(1,0,nnur) + 2*auxrec1(1,1)
+                    RECcse(1,0,nnur) = RECcse(1,0,nnur) + 2*auxrec1(1,1)
      &                               - auxrec1(2,1)
-                  auxrec1(maxrecener + 2,1)
+                    auxrec1(maxrecener + 2,1)
      &               = 2*auxrec1(maxrecener + 1,1)
      &               - auxrec1(maxrecener,1)
-                  ndiscmax = (maxrecener + 0.5)*DEBinrec/DERec + 1
-                  DO mrec = 2, ndiscmax
-                     xmre = (mrec - 1)*DERec/DEBinrec + 1.0001
-                     mre = INT(xmre)
-                     RECcse(mrec,0,nnur) = RECcse(mrec,0,nnur)
+                    ndiscmax = (maxrecener + 0.5)*DEBinrec/DERec + 1
+                    DO mrec = 2, ndiscmax
+                      xmre = (mrec - 1)*DERec/DEBinrec + 1.0001
+                      mre = INT(xmre)
+                      RECcse(mrec,0,nnur) = RECcse(mrec,0,nnur)
      &                  + auxrec1(mre,1) + (xmre - FLOAT(mre))
      &                  *(auxrec1(mre + 1,1) - auxrec1(mre,1))
-                  ENDDO
+                     ENDDO
+                   ENDIF
 C
                ENDIF
             ENDIF
