@@ -1835,7 +1835,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &           iz, SYMb(nnuc), ia, ftmp_gs
          ENDIF
          IF(CSFis.gt.0.)
-     &      WRITE (12,'(''    fission  cross section'',G12.5,'' mb'')')
+     &     WRITE (12,'(14x,''fission  cross section'',G12.5,''  mb'')') 
      &          CSFis
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
