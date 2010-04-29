@@ -14,6 +14,7 @@
      *,NDECSE=NDEX+20
      *,NDEPFN=2*NDEX     
      *,NDANGecis=91
+     *,NDAnghmx=37   ! Must be equal to NDAnghms in ddhms.cmb
      *,NDNUCD=NDNUC
      *,NDECSED=NDECSE
      *,NDANGD=NDANGecis
