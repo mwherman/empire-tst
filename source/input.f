@@ -329,7 +329,8 @@ C--------default input parameters for HMS
 C
          LHMs = 0 !controls HMS (must be different from 0 for HMS to be used)
          NHMs = 100000   !number of events for Monte Carlo
-         CHMs = 1.0      ! mult. default damp rate (for eval work to scale preq)
+         FHMs = 1  ! Fermi gas densities default (exciton densities FHMs->0 )
+         CHMs = 1.0  ! mult. default damp rate (for eval work to scale preq)
 C
 C--------default input parameters for MSD
 C
@@ -496,12 +497,12 @@ C        NDAng   = 73
            STOP 'FATAL: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
-         da = 180.0/(NDANG - 1)
-         DO na = 1, NDANG
+         da = 180.0/(NDAng - 1)
+         DO na = 1, NDAng
            ANGles(na) = (na - 1)*da
          ENDDO
-         DO na = 1, NDANG
-           CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
+         DO na = 1, NDAng
+           CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
            SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
@@ -1187,38 +1188,31 @@ C
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
 C--------------------------------------------------------------------------
-         IF (LHMs.NE.0 .AND. ENDf(1).GT.0) THEN
-            WRITE (8,*) ' '
+         IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
-     &                 'WARNING: HMS is incompatible with ENDF>0 option'
-            WRITE (8,*) 'WARNING: and has been turned off'
-            LHMs = 0
-         ENDIF
-         IF (LHMs.NE.0 .AND. ENDf(1).EQ.0 .AND. NDAng.NE.37 ) THEN
+            WRITE (8,*) 'WARNING: NDAng reset to ',NDAnghmx, 
+     &                             ' for compatibility with HMS'
             WRITE (8,*)
-            WRITE (8,*) 'WARNING: NDANG reset to 37 for compatibility ',
-     1                                                  ' with HMS'
-            WRITE (8,*)
-            NANgela = 37
-            NDAng   = 37
+            NANgela = NDAnghmx
+            NDAng   = NDAnghmx
 C--------reset angles for inelastic calculations
-            da = 180.0/(NDANG - 1)
-            DO na = 1, NDANG
+            da = 180.0/(NDAng - 1)
+            DO na = 1, NDAng
               ANGles(na) = (na - 1)*da
             ENDDO
-            DO na = 1, NDANG
-              CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
+            DO na = 1, NDAng
+              CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
               SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
-c         IF (LHMs.NE.0 .AND. (NDANG.NE.19 .OR. NDANG.NE.37)) THEN
+c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
-c            WRITE (8,*) 'FATAL: NDANG IN dimension.h MUST BE 19 or 37'
+c            WRITE (8,*) 'FATAL: NDAng IN dimension.h MUST BE 19 or 37'
 c            WRITE (8,*)
 c     &'FATAL: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
 c            WRITE (8,*)
-c     &'FATAL: SET NDANG TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-c            STOP 'FATAL: NDANG IN dimension.h MUST BE 19 or 37 for HMS'
+c     &'FATAL: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+c            STOP 'FATAL: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
 c         ENDIF
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (8,*) ' '
@@ -4633,6 +4627,22 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'FHMS  ') THEN
+            IF (val.LT.1.0D0) THEN
+               FHMs = 0
+               WRITE (8,
+     &             '('' Exciton densities were used in DDHMS '')')
+               WRITE (12,
+     &             '('' Exciton densities were used in DDHMS '')')
+             ELSE
+               WRITE (8,
+     &             '('' Fermi gas densities were used in DDHMS '')')
+               WRITE (12,
+     &             '('' Fermi gas densities were used in DDHMS '')')
+            ENDIF
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'CHMS  ') THEN
             IF (val.GT.0.0D0) THEN
                CHMs = val
@@ -7524,15 +7534,11 @@ C
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
 
-
-
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
-
 	      if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
-
 
 C
 C           For covariance calculation of dynamical deformation
