@@ -43,9 +43,10 @@ C
       CSE    = 0.d0
       CSEmsd = 0.d0
       CSEhms = 0.d0
+      CSEhmslab = 0.d0
       AUSpec = 0.d0
       CSEa   = 0.d0
-      CSEahms= 0.d0
+      CSEahmslab = 0.d0
 
       REClev   = 0.d0
       CSDirlev = 0.d0
