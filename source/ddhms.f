@@ -5224,13 +5224,13 @@ C--------------population of discrete levels (evenly distributed)
                IF (IDNa(1,5).EQ.1 .AND. nnur.EQ.mt91) THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon
-                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + difcon
+                     CSDirlev(il,1) = CSDirlev(il,1) + difcon
                      sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (IDNa(3,5).EQ.1 .AND. nnur.EQ.mt649) THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon
-                     CSDirlev(il,nejc) = CSDirlev(il,nejc) + difcon
+                     CSDirlev(il,2) = CSDirlev(il,2) + difcon
                      sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (nnur.NE.mt91 .AND. nnur.NE.mt649) THEN
