@@ -1888,7 +1888,7 @@ C
       REAL FLOAT
       INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
-     &        nemax, norder, nph, nth, nu, numax
+     &        nemax, norder, nph, nth, nu, numax,iwritxddx
 
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
@@ -2236,7 +2236,6 @@ C
      &                       (DDXsn(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
-C         WRITE (28,99195) (DXSn1(ne),ne = norder*10,norder*10 + 9)
          WRITE (28,99195) (DXSn(ne),ne = norder*10,norder*10 + 9)
 C
       ENDDO
@@ -2255,7 +2254,6 @@ C
      &                       (DDXsp(ne,nth),ne = norder*10,norder*10 +
      &                       9)
          ENDDO
-C         WRITE (28,99195) (DXSp1(ne),ne = norder*10,norder*10 + 9)
          WRITE (28,99195) (DXSp(ne),ne = norder*10,norder*10 + 9)
       ENDDO
 C     ---- end channel energy ddxs spectra -------------------------------------
@@ -2282,7 +2280,6 @@ C
      &                       + 9)
 C
          ENDDO
-C         WRITE (28,99195) (DXSn1lab(ne),ne = norder*10,norder*10 + 9)
          WRITE (28,99195) (DXSnlab(ne),ne = norder*10,norder*10 + 9)
 C
       ENDDO
@@ -2301,7 +2298,6 @@ C
      &                       (DDXsplab(ne,nth),ne = norder*10,norder*10
      &                       + 9)
          ENDDO
-C         WRITE (28,99195) (DXSp1lab(ne),ne = norder*10,norder*10 + 9)
          WRITE (28,99195) (DXSplab(ne),ne = norder*10,norder*10 + 9)
       ENDDO
 C     ---- end lab-frame ddxs spectra -------------------------------------
@@ -2339,6 +2335,56 @@ C
                WRITE (28,'(6x,a4,2x,f10.2,2(8x,f10.2,2x,f10.2))') 
      &           'SUM:',RESpop(jz,jn),
      &         XSNx(jz,jn),XSPx(jz,jn), XSNx(jz,jn),XSPx(jz,jn)
+
+C!!!!!!!!!!
+      iwritxddx=0
+      IF(iwritxddx.NE.0) THEN
+        WRITE (28,*) ' '
+        WRITE (28,*)
+     &'ddxs spectra in lab frame (lab angle & energy) follow (units=mb/M
+     &eVsr)'
+C
+        DO norder = 0, INT(ELAbejecmax/(DEBin*10.))
+          DO jen = 0, 9
+            ecount(jen) = norder*10 + jen
+           ENDDO
+          WRITE (28,*)
+     &' Angle       lab energy (mev) [histogram mid-pt. of bin is given]
+     & '
+C
+          WRITE (28,99185) ((ecount(j) + 0.5)*DEBin,j = 0,9)
+          DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180./NDAnghms1
+            WRITE (28,99190) thet,
+     &                       (DDXsnxlab(ne,nth,jz,jn),
+     &                                  ne = norder*10,norder*10+ 9)
+
+           ENDDO
+          WRITE (28,99195) (DXSnxlab(ne,jz,jn),
+     &                                 ne = norder*10,norder*10 + 9)
+C
+         ENDDO
+C
+        DO norder = 0, INT(ELAbejecmax/(DEBin*10.))
+          DO jen = 0, 9
+            ecount(jen) = norder*10 + jen
+           ENDDO
+          WRITE (28,*)
+     &' Angle       lab energy (mev) [histogram mid-pt. of bin is given]
+     & '
+          WRITE (28,99200) ((ecount(j) + 0.5)*DEBin,j = 0,9)
+          DO nth = 1, NDAnghms1
+            thet = (FLOAT(nth) - 0.5)*180./NDAnghms1
+            WRITE (28,99190) thet,
+     &                       (DDXspxlab(ne,nth,jz,jn),
+     &                                  ne = norder*10,norder*10+ 9)
+C
+           ENDDO
+          WRITE (28,99195) (DXSpxlab(ne,jz,jn),
+     &                                 ne = norder*10,norder*10 + 9)
+         ENDDO
+       ENDIF
+C!!!!!!!!!!!!!!!!!!!!
             ENDIF
 C
          ENDDO
