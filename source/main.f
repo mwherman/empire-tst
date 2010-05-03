@@ -281,7 +281,6 @@ C------------Avoid reading closed channels
                READ (46,*,END = 1400) popread
                popread = popread*FCCred
                ncoll = i
-               Write(12,*) i,ilv,nnurec,popread,FCCred
                POPlv(ilv,nnurec) = POPlv(ilv,nnurec) + popread
                CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
                CSEmis(nejcec,1) = CSEmis(nejcec,1) + popread
