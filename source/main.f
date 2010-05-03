@@ -281,6 +281,7 @@ C------------Avoid reading closed channels
                READ (46,*,END = 1400) popread
                popread = popread*FCCred
                ncoll = i
+               Write(12,*) i,ilv,nnurec,popread,FCCred
                POPlv(ilv,nnurec) = POPlv(ilv,nnurec) + popread
                CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
                CSEmis(nejcec,1) = CSEmis(nejcec,1) + popread
@@ -2281,7 +2282,7 @@ c                   ENDIF
                  ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
  1530          ENDDO   ! over ejectiles
               IF (nnuc.NE.1  .AND. RECoil.GT.0)
-     &          CALL PRINT_RECOIL(nnur,REAction(nnuc))
+     &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 C
