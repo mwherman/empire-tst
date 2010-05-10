@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2009-11-06 20:15:57 $ 
-Ccc   * $Id: empend.f,v 1.61 2009-11-06 20:15:57 trkov Exp $ 
+Ccc   * $Date: 2009/11/06 20:15:57 $ 
+Ccc   * $Id: empend.f,v 1.61 2010/05/10 16:49:57 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -76,6 +76,9 @@ C-V        - Activate formatting of charged particles.
 C-V  09/04 - Fix gamma BR=1 to ground state in MF12 when no data given.
 C-V  09/06 - Fix ELFS=QM-QI in MF8.
 C-V  09/08 - Fix NS in MF12 and again ELFS (see above).
+C-V  09/11 - Process light charged-particle emission data.
+C-V  09/12 - Add total inelastic MT4 as the redundant cross section.
+C-V  10/05 - Trivial format change for isomeric states(column alignment)
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -337,6 +340,8 @@ C* Separate out (z,t) from (z,2np) into MT105
       REWIND LIN
       CALL FIXTRI(LIN,IZI,IZA,NXS,NEN,IWO(MTH)
      &           ,RWO(LXS),QQM,QQI,MXE,MXT,RWO(LSC),LXR,LTT,LER)
+C* Eliminate all (nearly)-zero cross sections
+      CALL FIXZRO(NXS,NEN,IWO(MTH),RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER)
 C*
 C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       REWIND LIN
@@ -780,20 +785,22 @@ C*       --Discrete levels (z,p') cross section
            MT =600
            IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
+C*          Note: (z,2n2p) reaction will remain unaccounted!
 C*        --Discrete levels (z,a') cross section
             MT =800
-C*        --(p,n+He3) cross section
+C*        --(z,n+He3) cross section
             IF(MEQ.EQ.1) MT =34
 C*        --(z,pt) cross section
             IF(MEQ.EQ.2) MT =116
-            IF(MEQ.GT.2) MT =0
+            IF(MEQ.EQ.3) MT =10*JZA+5
+            IF(MEQ.GT.3) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-1004) THEN
-C*        --(z,nt) cross section
-            MT =   33
+C*        --(z,3np) cross section
+            MT =   42
 C*        --(p,2nd) cross section
             IF(MEQ.EQ.1) MT =   11
-C*        --(z,3np) cross section
-            IF(MEQ.EQ.2) MT =   42
+C*        --(z,nt) cross section
+            IF(MEQ.EQ.2) MT =   33
             IF(MEQ.GT.2) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI   -2) THEN
 C*        --(z,2n) cross section
@@ -820,10 +827,10 @@ C*        --(z,3na) cross section
             MT =   25
             IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
-C*        --(z,d) cross section
-            MT =  104
 C*        --(z,np) cross section
-            IF(MEQ.EQ.1) MT =   28
+            MT =   28
+C*        --(z,d) cross section
+            IF(MEQ.EQ.1) MT =  104
             IF(MEQ.GT.1) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-4009) THEN
 C*        --(z,n2a) cross section
@@ -834,12 +841,12 @@ C*        --(z,2n2a) cross section
             MT =   30
             IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
-C*        --(z,t) cross section
-            MT =105
-C*        --(p,nd) cross section
-            IF(MEQ.EQ.1) MT =   32
 C*        --(z,2np) cross section
-            IF(MEQ.EQ.2) MT =   41
+            MT =   41
+C*        --(z,nd) cross section
+            IF(MEQ.EQ.1) MT =   32
+C*        --(z,t) cross section
+            IF(MEQ.EQ.2) MT =105
             IF(MEQ.GT.2) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-5011) THEN
 C*        --(z,nd2a) cross section
@@ -856,12 +863,12 @@ C*        --(z,4n) cross section
             MT =   37
             IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
-C*        --(z,He3) cross section
-            MT =  106
+C*        --(z,n2p) cross section
+            MT = 44
 C*        --(z,pd) cross section
             IF(MEQ.EQ.1) MT =115
-C*        --(z,n2p) cross section
-            IF(MEQ.EQ.2) MT = 44
+C*        --(z,He3) cross section
+            IF(MEQ.EQ.2) MT =106
             IF(MEQ.GT.2) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
 C*        --(z,npa) cross section
@@ -878,7 +885,7 @@ C*        --(z,2a) cross section
             MT =  108
             IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-6012) THEN
-C*        --(p,3a) cross section
+C*        --(z,3a) cross section
             MT =  109
             IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
@@ -896,7 +903,7 @@ C*        --(z,d2a) cross section
         END IF
       RETURN
       END
-      SUBROUTINE EMTCHR(POUT,PTST,MT,IZI,IZA)
+      SUBROUTINE EMTCHR(POUT,PTST,MT,IZI,IZA,MEQ)
 C-Title  : Subroutine EMTCHR
 C-Purpose: Assign MT number from reaction string
 C-Version:
@@ -905,8 +912,17 @@ C-Description:
 C-D  POUT  Outgoing particle (input)
 C-D  PTST  Reaction string (input)
 C-D  IZI   Incident particle ZA designation (input)
-C-D  MT    Assigned reaction number
-C-D        =0 if reaction is undefined
+C-D  MT    Assigned reaction number, meaning:
+C-D        =0 reaction is undefined
+C-D        <0 reaction was found but outgoing particle was not matched;
+C-D           reaction could be under different MT number - 
+C-D           increase MEQ and try again
+C-D  MEQ   An outgoing particle may appear under different MT numbers.
+C-D        Increment MEQ on entry until MT=0.
+C-D  Note: Gamma spectra are not processed for secondary reactions
+C-D        (MEQ>0) because they are fully included in the primary.
+C-D        If included, the yields are severely incorrect!
+C-
       CHARACTER*8 PTST,POUT
 C* Force incident particle designation "z" for backward compatibility
       PTST(3:3)='z'
@@ -923,6 +939,7 @@ C* Assign MT numbers
         END IF
 C*
         IF(PTST.EQ.' (z,x)  ') MT=  5
+C*
         IF(PTST.EQ.' (z,2n) ') THEN
           MT= 16
           IF(POUT.NE.'recoils ' .AND.
@@ -937,26 +954,44 @@ C*
      &       POUT.NE.'neutrons') MT=-MT
         END IF
 C*
-        IF(PTST.EQ.' (z,np)') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'neutrons' .OR.
-     &            POUT.EQ.'protons ') THEN
-            MT= 28
-          ELSE IF(POUT.EQ.'deuteron') THEN
+        IF(PTST.EQ.' (z,d)  ') THEN
+C*        -- Checking under reaction label (z,d)
+          IF(MEQ.GE.2) THEN
+            MT=0
+            GO TO 200
+          END IF
+C*        -- Try (z,d)
+          IF     (POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
             MT=104
+C*        -- Try (z,np)
+          ELSE IF(POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'neutrons' .OR.
+     &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
+            MT= 28
           ELSE
-            MT=-28
+            MT=-104
           END IF
         END IF
 C*
-        IF(PTST.EQ.' (z,d) ') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'deuteron') THEN
+        IF(PTST.EQ.' (z,np) ') THEN
+C*        -- Checking under reaction label (z,np), otherwise same
+          IF(MEQ.GE.2) THEN
+            MT=0
+            GO TO 200
+          END IF
+C*        -- Try (z,d)
+          IF     (POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT=104
-          ELSE IF(POUT.EQ.'neutrons' .OR.
-     &            POUT.EQ.'protons ') THEN
+C*        -- Try (z,np)
+          ELSE IF(POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'neutrons' .OR.
+     &          ((POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
             MT= 28
           ELSE
             MT=-104
@@ -976,11 +1011,14 @@ C*        -- Ignore other particles, they are added to MT5 automatically
         END IF
 C*
         IF(PTST.EQ.' (z,2na)') THEN
-          MT= 24
-          IF(     POUT.NE.'recoils ' .AND.
-     &            POUT.NE.'gammas  ' .AND.
-     &            POUT.NE.'neutrons' .AND.
-     &            POUT.NE.'alphas  ') MT=-MT
+          IF(     POUT.EQ.'alphas  ' .OR.
+     &            POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ') THEN
+            MT= 24
+          ELSE
+            MT=-MT
+          END IF
         END IF
 C*
         IF(PTST.EQ.' (z,3na)') THEN
@@ -993,35 +1031,32 @@ C*
 C*
         IF(PTST.EQ.' (z,4n) ') THEN
           MT= 37
-          IF(     POUT.NE.'recoils ' .AND.
-     &            POUT.NE.'gammas  ' .AND.
-     &            POUT.NE.'neutrons') MT=-MT
-        END IF
-C*
-        IF(PTST.EQ.' (z,2np)') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'neutrons' .OR.
-     &            POUT.EQ.'protons ') THEN
-            MT= 41
-          ELSE IF(POUT.EQ.'tritons ') THEN
-            MT=105
-          ELSE IF(POUT.EQ.'deuteron') THEN
-            MT= 32
-          ELSE
-            MT=-41
-          END IF
+          IF(     POUT.NE.'neutrons' .AND.
+     &            POUT.NE.'recoils ' .AND.
+     &            POUT.NE.'gammas  ') MT=-MT
         END IF
 C*
         IF(PTST.EQ.' (z,t)  ') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'tritons ') THEN
+          IF(MEQ.GE.3) THEN
+            MT=0
+            GO TO 200
+          END IF
+C*        -- Try (z,t)
+          IF     (POUT.EQ.'tritons ' .OR.
+     &          ((POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
             MT=105
+C*        -- Try (z,nd)
           ELSE IF(POUT.EQ.'deuteron' .OR.
-     &            POUT.EQ.'neutrons') THEN
+     &          ((POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT= 32
-          ELSE IF(POUT.EQ.'protons ') THEN
+C*        -- Try (z,2np)
+          ELSE IF(POUT.EQ.'protons ' .OR.
+     &          ((POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.2)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.2)) THEN
             MT= 41
           ELSE
             MT=-105
@@ -1029,62 +1064,102 @@ C*
         END IF
 C*
         IF(PTST.EQ.' (z,3np)') THEN
-          IF(     POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'tritons ' .OR.
-     &            POUT.EQ.'neutrons') THEN
-            MT = 33
-          ELSE IF(POUT.EQ.'deuteron') THEN
+          IF(MEQ.GE.3) THEN
+            MT=0
+            GO TO 200
+          END IF
+C*        -- Try (z,nt)
+          IF(     POUT.EQ.'tritons ' .OR.
+     &          ((POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
+            MT= 33
+C*        -- Try (z,2nd)
+          ELSE IF(POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT= 11
-          ELSE IF(POUT.EQ.'protons ') THEN
+C*        -- Try (z,3np)
+          ELSE IF(POUT.EQ.'protons ' .OR.
+     &          ((POUT.EQ.'neutrons' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.2)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.2)) THEN
             MT= 42
           ELSE
-            MT =-33
+            MT=-33
           END IF
         END IF
 C*
-        IF(PTST.EQ.' (z,n2p)') THEN
-          IF(     POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'neutrons' .OR.
-     &            POUT.EQ.'protons ') THEN
-            MT= 44
-          ELSE IF(POUT.EQ.'helium-3') THEN
+        IF(PTST.EQ.' (z,h)  ') THEN
+          IF(MEQ.GE.3) THEN
+            MT=0
+            GO TO 200
+          END IF
+          IF(     POUT.EQ.'helium-3' .OR.
+     &          ((POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
             MT=106
-          ELSE IF(POUT.EQ.'deuteron') THEN
+          ELSE IF(POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT=115
+          ELSE IF(POUT.EQ.'neutrons' .OR.
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.2)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.2)) THEN
+            MT= 44
           ELSE
             MT=-44
           END IF
         END IF
 C*
         IF(PTST.EQ.' (z,pd) ') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'deuteron' .OR.
-     &            POUT.EQ.'protons ') THEN
-            MT=115
-          ELSE IF(POUT.EQ.'helium-3') THEN
+          IF(MEQ.GE.3) THEN
+            MT=0
+            GO TO 200
+          END IF
+          IF(     POUT.EQ.'helium-3' .OR.
+     &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT=106
-          ELSE IF(POUT.EQ.'neutrons') THEN
+          ELSE IF(POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
+            MT=115
+          ELSE IF(POUT.EQ.'neutrons' .OR.
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.2)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.2)) THEN
             MT= 44
           ELSE
-            MT=-115
+            MT=-44
           END IF
         END IF
 C*
-        IF(PTST.EQ.' (z,h)  ') THEN
-          IF     (POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'helium-3') THEN
+        IF(PTST.EQ.' (z,n2p)') THEN
+          IF(MEQ.GE.3) THEN
+            MT=0
+            GO TO 200
+          END IF
+          IF(     POUT.EQ.'helium-3' .OR.
+     &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT=106
-          ELSE IF(POUT.EQ.'deuteron') THEN
+          ELSE IF(POUT.EQ.'deuteron' .OR.
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ').AND. MEQ.EQ.2)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.2)) THEN
             MT=115
           ELSE IF(POUT.EQ.'neutrons' .OR.
-     &            POUT.EQ.'protons ') THEN
+     &          ((POUT.EQ.'protons ' .OR.
+     &            POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
             MT= 44
           ELSE
-            MT=-106
+            MT=-44
           END IF
         END IF
 C*
@@ -1145,16 +1220,19 @@ C*
         IF(PTST.EQ.' (z,a)  ') THEN
 C*        -- Ignore protons and deuterons, they are added to MT5
 C*           (no MT defined for reactions)
-          IF(     POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ' .OR.
-     &            POUT.EQ.'alphas  ') THEN
+          IF(     POUT.EQ.'alphas  ' .OR.
+     &          ((POUT.EQ.'recoils ' .OR.
+     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
              MT=849
              IF(IZI.NE.1) MT=107
           ELSE IF(POUT.EQ.'helium-3' .OR.
-     &            POUT.EQ.'neutrons') THEN
+     &            POUT.EQ.'neutrons' .OR.
+     &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
              MT = 34
           ELSE
-             MT=-107
+c...         MT =-107
+             MT = 10*(IZI+IZA-2004)+5
           END IF
         END IF
 C*
@@ -1165,9 +1243,11 @@ C*
      &            POUT.NE.'protons ' .AND.
      &            POUT.NE.'alphas  ') MT=-MT
         END IF
+  200 CONTINUE
 c...
 c...  print *,'React,Pout,MT,IZI,IZA',ptst,pout,mt,izi,iza
 c...
+      IF(MEQ.GT.4) MT=0
       RETURN
       END
       SUBROUTINE QVALUE(IMT,MT,IZA,IZB,BEN,QQM)
@@ -1560,6 +1640,7 @@ C-
       DIMENSION RWO(MXRW)
       DATA PI/3.1415926D0/
 C*
+      MEQ=0
       IEN=0
   110 READ (LIN,891,END=200) REC
 C* Keep track of the incident energy index
@@ -1570,7 +1651,7 @@ c...
       IF(REC( 1:14).NE.'  Spectrum of '    ) GO TO 110
       IF(REC(15:22).NE.'alphas  ') GO TO 110
 C* Identify the reaction and assign the MT number
-      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA)
+      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 c...
 c...  print *,'fixalf reaction ',REC(15:22),' ',REC(23:30),MT,IZI
 c...
@@ -1708,41 +1789,68 @@ C*
 C-Title  : FIXTRI Subroutine
 C-Purpose: Separate out (z,h), (z,t), (z,d) from precursor reactions
 C-Version: Oct 2009
+      PARAMETER (MXMCH=20)
       CHARACTER*136 REC
       DOUBLE PRECISION  SS,E1,E2,X1,X2,A1,A2,D1,D2,PI,XS,XS0
       DIMENSION MTH(MXT)
       DIMENSION XSR(MXE,MXT),QQM(MXT),QQI(MXT)
       DIMENSION RWO(MXRW)
+      DIMENSION MCH(MXMCH)
       DATA PI/3.1415926D0/
 C*
-      IEN=0
+      NMCH=0
+      IEN =0
+      MEQ =0
 
       jen=0
 
   110 READ (LIN,891,END=200) REC
 C* Keep track of the incident energy index
-      IF(REC( 1:10).EQ.' REACTION '                  ) IEN=IEN+1
+      IF(REC( 1:10).EQ.' REACTION '                  ) then
+        IEN=IEN+1
+        read(rec(50:60),*) ee
+      end if
       IF(REC( 1:14).NE.'  Spectrum of '    ) GO TO 110
-c...
-c...  IF(REC(15:22).NE.'protons ' .AND.
-c... &   REC(15:22).NE.'deuteron' .AND.
-c...
-      IF(REC(15:22).NE.'deuteron' .AND.
+C* Subtract light-ion cross sections from the base reactions
+      IF(REC(15:22).NE.'protons ' .AND.
+     &   REC(15:22).NE.'deuteron' .AND.
      &   REC(15:22).NE.'tritons ' .AND.
-     &   REC(15:22).NE.'helium-3') GO TO 110
+     &   REC(15:22).NE.'helium-3' .AND.
+     &   REC(15:22).NE.'alphas  ') GO TO 110
 C* Identify the reaction and assign the MT number for the spectrum
-      CALL EMTCHR(REC(15:22),REC(23:30),MTJ,IZI,IZA)
+      CALL EMTCHR(REC(15:22),REC(23:30),MTJ,IZI,IZA,MEQ)
 C*    --Special case to avoid double subtraction
-      IF(MTJ.EQ.849 .AND. REC(15:22).EQ.'neutron ') GO TO 110
-      IF(MTJ.EQ.104 .AND. REC(15:22).EQ.'neutron ') GO TO 110
       IF(MTJ.EQ.5) GO TO 110
+C* Identify the residual from the reaction
+      IF(MTJ.LE.999) THEN
+        CALL MTTOZA(IZI,IZA,JZA,MTJ)
+      ELSE
+        JZA=MTJ/10
+      END IF
+C* Assume all complex multi-particle emissions involve only protons
+      IF(REC(15:22).EQ.'protons ') THEN
+        NPROT=(IZA-JZA)/1000
+C... WARNING - Proton spectrum integral in EMPIRE is suspect!!!
+C...           It seems a factor of 2 is probably missing???
+        NPROT=NPROT*2
+C...
+      ELSE
+        NPROT=1
+      END IF
 c...
       IF(jen.ne.ien) then
-        PRINT *,'**** Energy point',JEN
+        PRINT *,'**** Energy point',JEN,ee
         jen=ien
       end if
 c...
       print *,'fixtri reaction ',REC(15:22),' ',REC(23:30),MTJ
+
+      if(REC(15:28).EQ.'protons  (z,a)') then
+        print *,'        found it'
+        ifound=1
+      else
+        ifound=0
+      end if
 c...
 C* Calculate the cross section by integrating the spectrum
       READ (LIN,891) REC
@@ -1773,18 +1881,16 @@ C* Integrate to calculate the cross section
             D1 =D2
             D2 =DBLE(RWO(LDS+(I-1)*(NAN+1)+J))
             X2 =X2+(A1-A2)*(D2+D1)/2
-c...
-c...    if(mtj.eq.28) print *,'   ',a1,a2,d1,d2,x2
-c...
           END DO
         END IF
         IF(E1.GE.0) SS =SS + (E2-E1)*(X2+X1)/2
-c...
-c...    if(mtj.eq.28) print *,e2,x2
-c...
       END DO
 C*    -- Convert units from mb/MeV/st to b/eV
-      SS =SS*PI*4.0D-9
+      SS =SS*PI*4.0D-9/NPROT
+
+      if(ifound.eq.1) then
+        print *,'        spectrum integral, Z',ss,nprot
+      end if
 C*
 C* Find the spectrum cross section in the stored array
       JX  =0
@@ -1795,24 +1901,46 @@ C* Find the spectrum cross section in the stored array
         IF(MTH(I).EQ. 201) J201=I
         IF(MTH(I).EQ. 203) J203=I
       END DO
-C*
-C* Identify the residual from the reaction
-      CALL MTTOZA(IZI,IZA,JZA,MTJ)
 C* Define the base reaction for the given residual
+C* Base reaction is the one initially assigned from residual
       MEQ=0
+      CALL EMTIZA(IZI,IZA,JZA,MT0,MEQ)
+      IF(MT0.EQ.600) MT0=649
+      IF(MT0.EQ.800) MT0=849
+
+      if(ifound.eq.1) then
+        print *,'        mtj,mt0,jza',mtj,mt0,jza
+      end if
+
+C* If spectrum for base reaction is given, no action is needed
+      IF(MTJ.EQ.MT0) GO TO 110
+C* Define the next reaction with the same residual
+  130 MEQ=MEQ+1
       CALL EMTIZA(IZI,IZA,JZA,MT1,MEQ)
       IF(MT1.EQ.600) MT1=649
       IF(MT1.EQ.800) MT1=849
-  130 MT0=MT1
-C* Define the next reaction with the same residual
-      MEQ=MEQ+1
-      CALL EMTIZA(IZI,IZA,JZA,MT1,MEQ)
-      IF(MT0.EQ.MTJ .OR. MT1.EQ.MTJ) GO TO 132
-      IF(MT1.GT.0) THEN
+
+      if(ifound.eq.1) then
+        print *,'        mtj,mt1',mtj,mt1
+      end if
+
+      IF(MT1.EQ.MTJ) THEN
+        GO TO 132
+      ELSE IF(MT1.GT.0) THEN
         GO TO 130
       ELSE
-c...    print *,' Spectrum reaction',MTJ,' not matched by',MT0,MT1
-c...    print *,'                          reaction skipped'
+C*      -- No matching reaction found
+        IF(NMCH.GT.0) THEN
+          DO I=1,NMCH
+            IF(MCH(I).EQ.MTJ) GO TO 110
+          END DO
+          IF(ABS(NMCH).LT.MXMCH) THEN
+            NMCH=NMCH+1
+            MCH(NMCH)=MTJ
+          ELSE
+            NMCH=-NMCH
+          END IF
+        END IF
         GO TO 110
       END IF
   132 IF(MT1.EQ.0) MT1=10*JZA+5
@@ -1824,6 +1952,11 @@ C* Find the indices of the reactions in the cross section array
         IF(MTH(I).EQ.MT0) I0=I
         IF(MTH(I).EQ.MT1) I1=I
       END DO
+
+      if(ifound.eq.1) then
+        print *,'    mtj,mt0,i0,i1',mtj,mt0,i0,i1
+      end if
+
 C*
       IF(I0.EQ.0 .AND. MTJ.EQ.MT0) THEN
 C*      -- Reaction has spectrum but no cross section
@@ -1898,13 +2031,70 @@ c...
       END IF
       GO TO 110
 C*
-  200 RETURN
+  200 CONTINUE
+      IF(NMCH.NE.0) THEN
+        NMCH=ABS(NMCH)
+        WRITE(LTT,*) ' No match found for the following spectra:'
+        WRITE(LTT,896) (MCH(I),I=1,NMCH)
+      END IF
+      RETURN
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   804 FORMAT(F10.0,F14.0)
   891 FORMAT(A136)
   894 FORMAT('  FIXTRI Created reaction     ',I8,' at pos.',I4
      &      :' from MT',I4)
+  896 FORMAT(10I8)
+      END
+      SUBROUTINE FIXZRO(NXS,NEN,MTH,XSC,QQM,QQI,MXE,MXT,LTT,LER)
+C-Title  : Subroutine FIXZRO
+C-Purpose: Eliminate reactions with all-zero cross sections
+      DIMENSION MTH(MXT),XSC(MXE,MXT),QQM(MXT),QQI(MXT)
+C*
+      II=0
+      DO I=1,NXS
+        NPT=0
+        XMX=0
+        DO J=1,NEN
+          XX=XSC(J,I)
+          IF(XX.GT.0) THEN
+C*          -- Count non-zero cross sections
+            NPT=NPT+1
+            XMX=MAX(XMX,XX)
+          ELSE
+C*          -- If cross section returns to zero, eliminate
+C*             spurious values at lower energies
+            IF(NPT.GT.0 .AND. NPT.LT.3 .AND. XMX.LT.1.E-6) THEN
+              DO K=1,NPT
+                XSC(J-K,I)=0
+                NPT=0
+                XMX=0
+              END DO
+            END IF
+          END IF
+        END DO
+C*      -- Eliminate cross sections with a single non-zero value
+        IF(NPT.LT.2) NPT=0
+C*
+C* Repack the array, removing All-zero cross section from the list
+        IF(NPT.GT.0) THEN
+          II=II+1
+          MTH(II)=MTH(I)
+          QQM(II)=QQM(I)
+          QQI(II)=QQI(I)
+          DO J=1,NEN
+            XSC(J,II)=XSC(J,I)
+          END DO
+        ELSE
+          WRITE(LTT,904) ' Eliminated all-zero reaction MT        '
+     &                  ,MTH(I)
+          WRITE(LER,904) ' Eliminated all-zero reaction MT        '
+     &                  ,MTH(I)
+        END IF
+      END DO
+      NXS=II
+      RETURN
+  904 FORMAT(A40,I10)
       END
       SUBROUTINE SCNMF6(LIN,LTT,LER,NT6,MTH,MXI,IZI,IZA)
 C-Title  : SCNMF6 Subroutine
@@ -1917,6 +2107,7 @@ C-D  assigned, if possible.
       CHARACTER*8   CUN(MXKUN)
       DIMENSION MTH(MXI)
 C*
+      MEQ=0
       KUN=0
       NT6=0
   110 READ (LIN,891,END=200) REC
@@ -1927,8 +2118,8 @@ C* Test for elastic angular distributions of neutral particles
       END IF
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C* Identify the reaction and assign the MT number
-      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA)
-      IF(MT .LE.0) THEN
+      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
+      IF(MT .LE.0 .OR. MT.GT.999) THEN
 C*      -- Unknown reaction encountered
         IF(KUN.GT.0) THEN
           DO K=1,KUN
@@ -1950,8 +2141,8 @@ C*      -- Unknown reaction encountered
         ELSE
           JZA=0
         END IF
-        WRITE(LTT,*) 'WARNING - Unknown Spectrum of ',REC(15:30),JZA
-        WRITE(LER,*) 'WARNING - Unknown Spectrum of ',REC(15:30),JZA
+        WRITE(LTT,*) 'WARNING - Ignoring Spectrum of ',REC(15:30),JZA
+        WRITE(LER,*) 'WARNING - Ignoring Spectrum of ',REC(15:30),JZA
         KUN=KUN+1
         CUN(KUN)=REC(23:30)
         GO TO 110
@@ -2640,9 +2831,14 @@ C* Isomer production cross section - ground state
       EISO=0
       MISO=0
       GO TO 226
-C* Isomer production cross section - ground state
+C* Isomer production cross section - isomeric state
   224 CONTINUE
-      READ (REC(60:66),'(F7.0)') EISO
+C*    -- Format options for backward compatibility (B.V. Carlson)
+      IF(REC(59:59).EQ.'=') THEN
+        READ (REC(60:66),'(F7.0)') EISO
+      ELSE
+        READ (REC(59:65),'(F7.0)') EISO
+      END IF
       EISO=EISO*1.E6
       MISO=1
   226 QI  =QQ-EISO
@@ -2661,6 +2857,7 @@ C* Read the total cross section but exclude incident charged particles
 C*
 C* General processing of cross sections
   310 READ (LIN,891) REC
+C*    Test for the presence of the average resonance gamma-width
       IF(REC(1:5).EQ.' Gg =') THEN
 C*      -- Trap print overflow in empire_ctl.f,v 1.27 2007/09/07
         IF(REC(7:7).EQ.'*') THEN
@@ -2738,6 +2935,8 @@ C* Special case when no discrete levels are given
         IF(MT0.EQ.800) MT=107
         GO TO 311
       END IF
+      EL1=0
+      JL1=0
 C* Next could be elastic, discrete level or continuum cross section
   351 READ (LIN,891,END=710) REC
       IF(REC( 1:10).EQ.' ELASTIC C') GO TO 370
@@ -2773,6 +2972,9 @@ c... 1    print *,' discrete level il,el,xs,jl',il,xs,jl,qq
 c...
 C* Exclude level that results in the same energy state (=elastic by def.)
       IF(IZI.EQ.1 .AND. NINT(EL/1000).EQ.NINT(QQ/1000)) GO TO 352
+C*    -- Save the level energy of the first level
+        IF(JL1.EQ.0) EL1=EL
+        JL1=1
 c... Inelastic scattering on metastable target to ground is MT51, not 50
 c...  MT=MT0-1+IL
       JL=JL+1
@@ -2844,7 +3046,7 @@ C* Positioned to read continuum cross section (subtract discrete levels)
   390 CONTINUE
       READ (REC,803) XC
       XS=XC-XI
-      IF(XC.GT.0 .AND. XS/XC.LT.2.E-5) THEN
+      IF(XS.LE.XC*2.E-5) THEN
 c...        CPC=100*XS/XC
 c...        print *
 c...        print *, ' ---            Skip continuum for MT : ',MT0
@@ -2860,6 +3062,10 @@ C* Add continuum to the list
       IF(MT0.EQ. 50) MT= 91
       IF(MT0.EQ.600) MT=649
       IF(MT0.EQ.800) MT=849
+C* Reaction QM value from the last discrete level
+C* Reaction QI may be lower due to (z,g+x) reactions
+      QIE=-0.99*EE*AWR/(AWR+AWI)
+      QI =MAX(QI,QIE)
 C* Test if reaction is already registered
   392 IF(NXS.GT.0  ) THEN
         DO I=1,NXS
@@ -2871,14 +3077,17 @@ C* Test if reaction is already registered
       NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
       IXS=NXS
-C* Reaction QM value from the last discrete level
-C* Reaction QI may be lower due to (z,g+x) reactions
-      QIE=-0.99*EE*AWR/(AWR+AWI)
-      QI =MAX(QI,QIE)
       MTH(IXS)=MT
       QQM(IXS)=QM
       QQI(IXS)=QI
   396 XSC(NEN,IXS)=XS*1.E-3
+      IF(MT.EQ.91) THEN
+C*      --Add the total inelastic cross section
+        XS =XC
+        QI =QM-EL1
+        MT = 4
+        GO TO 392
+      END IF
       GO TO 110
 C*
 C* All data read
@@ -3035,13 +3244,19 @@ C* For discrete level reactions consider only neutrons, protons, alphas
         END IF
       END IF
 C* Identify reaction and check if it matches the required given by JT6
-      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA)
+      MEQ=0
+  112 CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 C...
 c...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
 C...
-      IF(MT.LE. 0 .OR. MT.NE.JT6) GO TO 110
+      IF(MT.EQ.  0) GO TO 110
+      IF(MT.NE.JT6) THEN
+        IF(MT.EQ.5) GO TO 110
+        MEQ=MEQ+1
+        GO TO 112
+      END IF
 C...
-c...      print *,'     Found MT,JT,MTC',MT,JT6,MTC
+          print *,'   Found MT,JT,MTC',MT,JT6,MTC,REC(15:22),REC(23:30)
 C...
 C* Assign KZAK to outgoing particle ZA for unique react. identification
       PTST=REC(15:22)
@@ -3065,7 +3280,7 @@ C* New particle for this reaction identified
         RETURN
       END IF
 C...
-c...       print *,'    New NK',NK,' particle ',PTST,KZAK
+           print *,'    New NK',NK,' particle ',PTST,KZAK
 C...
       POUT(NK)=PTST
       IZAK(NK)=KZAK
@@ -3237,11 +3452,9 @@ C* Check if Legendre coefficients are given explicitly
         READ (REC(9:13),'(I5)') LHI
         IF(LHI.GE.LMX) STOP 'REAMF6 - LMX array capacity exceeded'
         READ (LIN,891) REC
-C...
-C... Truncate the series temporarily to suppress switching to tabular
-c...    LHI=MIN(LHI,LOMX+1)
-C...
-        IF(LHI.LE.LOMX+1) THEN
+C* 
+C...    IF(LHI.LE.LOMX+1) THEN
+        IF(LHI.LE.LOMX-3) THEN
           READ (LIN,809) (RWO(L64+L),L=1,LHI)
           LHI=LHI-1
           RWO(L64)=0
@@ -3322,10 +3535,18 @@ c...    print *,rec(15:41),pout(ik),izak(ik)
 c...
         IF(KZAK.NE.IZAK(IK)) GO TO 210
       END IF
-C* Identify the reaction and assign the MT number
-      CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA)
-      IF(MT.LE. 0 ) GO TO 210
-      IF(MT.NE.JT6) GO TO 210
+C* Identify reaction and check if it matches the required given by JT6
+      MEQ=0
+  612 CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
+C...
+c...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
+C...
+      IF(MT.EQ.  0) GO TO 210
+      IF(MT.NE.JT6) THEN
+        IF(MT.EQ.5) GO TO 210
+        MEQ=MEQ+1
+        GO TO 612
+      END IF
 c...
 c...  print *,'processing energy ne6,ee,eth,mt',ne6,ee,eth,mt,mt6
 c...
@@ -3442,6 +3663,7 @@ c...
       LSC=L64+NEP*(NAN+1)
       LMX=MXR-LSC
       LOX=MIN(LOMX,NAN-1)
+C*
       CALL ANGLEG(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
      &           ,MT6,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
 c...
@@ -5707,6 +5929,10 @@ C-
       LM0=LMX
       LM1=LM0+1
       LST=0
+      MNS=0
+C*    -- Max. number of adjustment cycles on -ve distributions
+c*       (does not work very well)
+      MNSMX=0
 C* Check if zero-order
       QQ(1)=YP(1)
       IF(NP.LT.2) GO TO 40
@@ -5809,6 +6035,7 @@ c...      PRINT *,EMM,ERR,YNP,YNM,JNM,LO1,JER
 c...
       YNP=YNP/QQ(1)
       YNM=YNM/QQ(1)
+      YNX=MIN(YNP,YNM)
       IF(YNP.LT.0) ERR=MIN(ERR,YNP)
       IF(YNM.LT.0) ERR=MIN(ERR,YNM)
 C*
@@ -5818,7 +6045,7 @@ C* Case: Distribution negative at mesh point - increase L
         IF(LO1.LT.LMM) THEN
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
-          IF(LO1.LT.LMX) THEN
+          IF(LO1.LT.LMX .AND. MNS.EQ.0) THEN
             LO1=LO1+1
             GO TO 20
           END IF
@@ -5833,7 +6060,7 @@ c...        print *,'            Increase order to',LO1
 c...
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
-          IF(LO1.LT.LMX) THEN
+          IF(LO1.LT.LMX .AND. MNS.EQ.0) THEN
             LO1=LO1+1
             GO TO 20
           END IF
@@ -5842,7 +6069,7 @@ c...
 c...        print *,'            Double the mesh to',1+(NNP-1)*2
 c...
 C*          Try Doubling the mesh
-          IF(NNP.LE.MXP/3 .AND. ERR.GT.EMM*2) THEN
+          IF(NNP.LE.MXP/3 .AND. ERR.GT.EMM*2 .AND. MNS.EQ.0) THEN
             JNP=1+(NNP-1)*2
             DO J=2,NNP
               RWO(LXP+JNP+3-2*J)= RWO(LXP+NNP+1-J)
@@ -5857,7 +6084,8 @@ C*          Try Doubling the mesh
         END IF
       END IF
 C* Case: Distribution is negative - force extra points
-      IF((KNM.GT.0 .OR. KNP.GT.0) .AND. NNP.LT.MXP) THEN
+      IF((KNM.GT.0 .OR. KNP.GT.0) .AND.
+     &    MNS.EQ.0 .AND. NNP.LT.MXP) THEN
 C*    Force extra point if distribution negative at midpoint
         IF(YNP.LT.YNM) THEN
           IP=JNP
@@ -5901,7 +6129,7 @@ c###  DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
 C### &          ERHI(LO1-1).LT.2.0*EMM .AND. 
 C### &          ERHI(LO1-1).LT.1.2*ELS)
 C*      Reduce order as long as error <1.2*last and <2.0*max
-   32 IF(LO1.GT.1) THEN
+   32 IF(LO1.GT.1 .AND. MNS.EQ.0) THEN
         IF(ERHI(LO1-1).GT.0 .AND. ERHI(LO1-1).LT.1.2*ELS) THEN
 C*        -- Reduce order as long as error <1.2*previous
           LO1=LO1-1
@@ -5913,10 +6141,21 @@ c...
 c...  if(ll0.ge.64 .and. lo1.ge.64) print *,'Limit 64',erhi(lo1-1),err
 c...
       LST=1
-      IF(LO1.LT.LL0) GO TO 20
+      IF(LO1.LT.LL0 .AND. MNS.EQ.0) GO TO 20
 C*
-C* Terminate
+C* Terminate iterations
    40 LMX=NLG
+      IF(YNM.LT.0 .AND. JNM.GT.NP*4/5 .AND.
+     &   NLG.GT.2 .AND. MNS.LT.MNSMX) THEN
+C*      -- Try to fix -ve distrib. by adjusting 2-nd & 3-rd parameter
+
+        print *,'Increment coef by',YNM,' of',NLG
+
+        QQ(2)=QQ(2)+YNM
+        QQ(3)=QQ(3)-YNM
+        MNS=MNS+1
+        GO TO 30
+      END IF
 c...
 c...      print *,'jnm',jnm,NP,nnp,LMI,LMX,EMM,ERR,ynp,ynm
 c...
