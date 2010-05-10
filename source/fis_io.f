@@ -198,16 +198,25 @@ c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//filename
      &      ,STATUS = 'old',ERR = 460)
   410    read(52,*,END=460) izrr,iarr,npoints
-         if(izrr.ne.iz .or. iarr.ne.ia) then
-            do ii=1,npoints
-              READ (52,*,END = 460)
-            enddo
-            goto 410
-         endif
-         do ii=1,npoints
+         write(8,*) iz,ia,izrr,iarr
+C   When the mass number is smaller than that of all existing barriers,
+C         the barrier of smallest mass number is used (BVC, MS - 05/10)
+C         if(izrr.ne.iz .or. iarr.ne.ia) then
+         IF(izrr.NE.iz .OR. iarr.LT.ia) THEN
+           DO ii=1,npoints
+             READ (52,*,END = 460)
+            ENDDO
+           GOTO 410
+         ENDIF
+          IF(ia.LT.iarr) THEN
+            WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
+     &                     ' IN HFB2007 (RIPL-3)'
+            WRITE (8,*) '      Using barriers FOR Z=', iz, ' A=', iarr
+           ENDIF    
+         DO ii=1,npoints
            READ (52,*,END = 480) bb2, bb3, bb4, vdef_1d(ii)
            eps_1d(ii) = bb2
-         enddo
+          ENDDO
          GOTO 480
  460     WRITE (8,*)' CHANGE FISBAR OPTION(NOW=3). EXECUTION TERMINATED'
          WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
