@@ -121,13 +121,13 @@ C
          PROjtype = 'gamm'
          IF (Qdfracr.GT.0.0D0) CALL QDPINIT(Elabprojr)
       ELSE
-         WRITE (6,*) ''
-         WRITE (6,*) 'WARNING'
-         WRITE (6,*) 'WARNING: XHMS can treat only neutron, proton or '
-         WRITE (6,*) 'WARNING: gamma as projectiles.'
-         WRITE (6,*) 'WARNING: XHMS disposition ignored.'
-         WRITE (6,*) 'WARNING'
-         WRITE (6,*) ''
+         WRITE (8,*) ''
+         WRITE (8,*) 'WARNING'
+         WRITE (8,*) 'WARNING: XHMS can treat only neutron, proton or '
+         WRITE (8,*) 'WARNING: gamma as projectiles.'
+         WRITE (8,*) 'WARNING: XHMS disposition ignored.'
+         WRITE (8,*) 'WARNING'
+         WRITE (8,*) ''
          RETURN
       ENDIF
 C
@@ -237,7 +237,7 @@ C++++++++++++++++++++++++++++++++++
 C
          IF (IPRintdiag.EQ.1) WRITE (28,*) ' '
          IF (IPRintdiag.EQ.1) WRITE (28,*) '****new event ', NEV
-         IF (NEV.EQ.12345678) WRITE (6,*) 'event=', NEV
+         IF (NEV.EQ.12345678) WRITE (8,*) 'event=', NEV
 C        every 100000 events, print out a statement to screen:
          event = NEV
          IF (DMOD(event,100000.D0).EQ.0.D0) WRITE (6,*) 'events=', NEV
@@ -521,7 +521,7 @@ C     write(7,*)'  ' !insert blank line at end of hist file
 C
       CALL OUTPUTPRINT
 C
-      IF (IKIn.EQ.2) WRITE (6,*) '*WARNING:', NBAd,
+      IF (IKIn.EQ.2) WRITE (8,*) '*WARNING:', NBAd,
      &                           ' events had -ve ucndump, worst case=',
      &                           UBAd
 99005 FORMAT (i9,4x,i5,5x,1p,1E10.4,2x,1p,1E10.4,2x,1p,1E10.4,2x,1p,
@@ -680,7 +680,7 @@ C    now select a collision partner (=> returns "coltype")
 C    now sample particle energy
         CALL PAIRING(pair)
         CALL SELECTEN2P1H(jstudy,pair,epart)
-        IF (NEV.EQ.12345678) WRITE (6,*) 'pair=', pair, 'epart=', epart
+        IF (NEV.EQ.12345678) WRITE (8,*) 'pair=', pair, 'epart=', epart
 C
         IF (IPRintdiag.EQ.1) WRITE (28,*) 'jstudy=', jstudy,
      &                               ' uex2p1h=', UEX(jstudy),
@@ -702,7 +702,7 @@ C       !remaining state = 1p1h here
         nhresid = 1
         CALL DANGLES(jstudy,npresid,nhresid,epart)
 C       return variables th1p,ph1p,th1rem,ph1rem,zkscat,zkrem
-        IF (NEV.EQ.12345678) WRITE (6,*) 'th1p,ph1p=', TH1p, PH1p
+        IF (NEV.EQ.12345678) WRITE (8,*) 'th1p,ph1p=', TH1p, PH1p
 C
 C temporarily store the properties of the 1p1h state
         UEX(NTOt) = UEX(jstudy) - epart
@@ -723,7 +723,7 @@ C       ! this is the angle in the proj coord system
         PH(jstudy) = PH1p
 
 C       first check to see if particle is trapped:
-        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+        IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C
         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -750,11 +750,11 @@ C
          ENDIF
 C
         SELtype = ISOspin(NTOt)
-        IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+        IF (NEV.EQ.12345678) WRITE (8,*) 'seltype=', SELtype
 C
 C       now select particle energy
         CALL SELECTEN1P1H(NTOt,epart)
-        IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+        IF (NEV.EQ.12345678) WRITE (8,*) 'epart=', epart
 
         IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
      &                               ' uex1p1h=', UEX(NTOt),
@@ -810,7 +810,7 @@ C       ! this is the momentum rel to well-bottom
 C       ! this is the angle in the proj coord system
         PH(NTOt) = PH1p
 
-        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+        IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C        check to see if particle is trapped:
         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -913,7 +913,7 @@ C       ! this is the angle in the proj coord system
         PH(NTOt-1) = 0.
 
 C       first check to see if particle is trapped:
-        IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+        IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C
         IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -1261,14 +1261,14 @@ C     now calculate nucleon nucleon scattering cross sections:
 C
       signnpp = 10.63/(beta*beta) - 29.92/beta + 42.9
       signp = 34.1/(beta*beta) - 82.2/beta + 82.2
-      IF (NEV.EQ.12345678) WRITE (6,*) 'epart,beta,signnpp,signp=',
+      IF (NEV.EQ.12345678) WRITE (8,*) 'epart,beta,signnpp,signp=',
      &                                 Epart, beta, signnpp, signp
       IF (SELtype.EQ.'neut') THEN
          probnn = signnpp*ANTar/(signnpp*ANTar + signp*ZTAr)
          COLtype = 'neut'
 C        c=ranf(0)
          c = RANG()
-         IF (NEV.EQ.12345678) WRITE (6,*) 'c,probnn=', c, probnn
+         IF (NEV.EQ.12345678) WRITE (8,*) 'c,probnn=', c, probnn
          IF (c.GT.probnn) COLtype = 'prot'
       ELSE
 C        seltype='prot'
@@ -1276,10 +1276,10 @@ C        seltype='prot'
          COLtype = 'prot'
 C        c=ranf(0)
          c = RANG()
-         IF (NEV.EQ.12345678) WRITE (6,*) 'c,probpp=', c, probpp
+         IF (NEV.EQ.12345678) WRITE (8,*) 'c,probpp=', c, probpp
          IF (c.GT.probpp) COLtype = 'neut'
       ENDIF
-      IF (NEV.EQ.12345678) WRITE (6,*) 'coltype=', COLtype
+      IF (NEV.EQ.12345678) WRITE (8,*) 'coltype=', COLtype
 C
       IF (IPRintdiag.EQ.1) WRITE (28,*) ' selcol subroutine: sel col=',
      &                                  SELtype, COLtype
@@ -1527,7 +1527,7 @@ C     ! proton particle-hole
 
 c Temporarily store 1p1h characteristics
           UEX(2) = ECMproj
-          IF (NEV.EQ.12345678) WRITE (6,*) 'ecmproj, uex=',
+          IF (NEV.EQ.12345678) WRITE (8,*) 'ecmproj, uex=',
      &                                  ECMproj, UEX(2)
           TH(2) = 0.
 C     !initial projectile moving along the z-axis
@@ -1541,11 +1541,11 @@ C     !init mom of gamma
           NTOt = 2
 
           SELtype = ISOspin(2)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+          IF (NEV.EQ.12345678) WRITE (8,*) 'seltype=', SELtype
 C
 C         now select particle energy
           CALL SELECTEN1P1H(2,epart)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart=', epart
 
           IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
      &                               ' uex1p1h=', UEX(2),
@@ -1598,7 +1598,7 @@ C         ! this is the momentum rel to well-bottom
 C         ! this is the angle in the proj coord system
           PH(2) = PH1p
 
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C         check to see if particle is trapped:
           IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -1655,11 +1655,11 @@ C
 
 C          neutron p-h pair in quase-deuteron
           SELtype = ISOspin(2)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+          IF (NEV.EQ.12345678) WRITE (8,*) 'seltype=', SELtype
 C
 C         now select particle energy
           CALL SELECTEN1P1H(2,epart)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart=', epart
 
           IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
      &                               ' uex1p1h=', UEX(2),
@@ -1712,7 +1712,7 @@ C         ! this is the momentum rel to well-bottom
 C         ! this is the angle in the proj coord system
           PH(2) = PH1p
 
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C         check to see if particle is trapped:
           IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -1736,11 +1736,11 @@ C        +' damprate=',damprate,' probemiss=',probemiss
 
 C         neutron p-h pair in quase-deuteron
           SELtype = ISOspin(4)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'seltype=', SELtype
+          IF (NEV.EQ.12345678) WRITE (8,*) 'seltype=', SELtype
 
 C         now select particle energy
           CALL SELECTEN1P1H(4,epart)
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart=', epart
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart=', epart
 
           IF (IPRintdiag.EQ.1) WRITE (28,*) 'NTOt=', NTOt,
      &                               ' uex1p1h=', UEX(4),
@@ -1792,7 +1792,7 @@ C         ! this is the momentum rel to well-bottom
 C         ! this is the angle in the proj coord system
           PH(4) = PH1p
 
-          IF (NEV.EQ.12345678) WRITE (6,*) 'epart,binding=', epart,
+          IF (NEV.EQ.12345678) WRITE (8,*) 'epart,binding=', epart,
      &                               BINding
 C         check to see if particle is trapped:
           IF (epart.LE.BINding .OR. jwarning.EQ.1) THEN
@@ -1827,7 +1827,7 @@ C
         IEXist(1) = 1
         ISOspin(1) = PROjtype
         UEX(1) = ECMproj + SEPproj
-        IF (NEV.EQ.12345678) WRITE (6,*)
+        IF (NEV.EQ.12345678) WRITE (8,*)
      &                               'ecmproj,sepproj, uex =',
      &                               ECMproj, SEPproj, UEX(1)
         TH(1) = 0.
@@ -3053,7 +3053,7 @@ C
       z = -DCOS(Ph2)*DSIN(Th2)*DSIN(Th1) + DCOS(Th1)*DCOS(Th2)
       Rottheta = DACOS(z)
       IF (Rottheta.LT.0.D0) Rottheta = Rottheta + 2.*PI_g
-      IF (Rottheta.LT.0.D0) WRITE (6,*) Rottheta
+      IF (Rottheta.LT.0.D0) WRITE (8,*) Rottheta
       IF (Rottheta.LT.0.D0) STOP 'rottheta -ve'
 C     remember, theta is always in range 0 to PI_g, so single valued and no
 C     ambiguity.
@@ -3149,7 +3149,7 @@ C     !particle's mom rel to well bottom
       IF (eemchan.LT.0.1D0) eemchan = 0.1
 C     prevents eemchan going -ve. this variable is used in the ang-dis
 C     expression to approx quantum effects. meaningless if <= 0.
-      IF (eemchan.LE.0.D0) WRITE (6,*) 'eemchan,epart,binding=',
+      IF (eemchan.LE.0.D0) WRITE (8,*) 'eemchan,epart,binding=',
      &                                 eemchan, Epart, BINding
       CALL AANG(zkinit,eemchan,np,nh,er,aa)
 C     aa value is returned. Then sample distribution function:
@@ -3199,9 +3199,9 @@ C        these values need to be rotated into projectile's coordinate system:
          PH1rem = rotphi
          GOTO 99999
       ENDIF
-      WRITE (6,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit,
+      WRITE (8,*) 'th2,zkinit,eemchan,np,nh,er,aa=', th2, zkinit,
      &            eemchan, np, nh, er, aa
-      WRITE (6,*) 'r=', r, 'arg=',
+      WRITE (8,*) 'r=', r, 'arg=',
      &            (DLOG(DEXP(aa) - r*(DEXP(aa)-DEXP(-aa))))/aa, 'th2=',
      &            th2
       STOP 'something screwy'
@@ -4369,7 +4369,7 @@ C              ! if projectile, fill in arrays of
 C              ! elab,reac,elas,tot cross sections
                XSEproj(nen) = du3sige
                XSTproj(nen) = du4sigt
-C              WRITE(6,*)'nen=',nen,' id=',id,' exslproj(nen)=',
+C              WRITE (8,*)'nen=',nen,' id=',id,' exslproj(nen)=',
 C              &              exslproj(nen)
             ENDIF
             IF (id.LE.2) THEN
@@ -4512,7 +4512,7 @@ C     Coding adapted from that in subroutine tcspline
 C
 C     now splined transmission coefficients for projectile at incident energy
       ek = ECM
-C     WRITE(6,*)'ek=',ek,' idproj=',idproj
+C     WRITE (8,*)'ek=',ek,' idproj=',idproj
       ne = NETc(IDProj)         ! # energies in trans co arrayp
 C     the iserch function call I use differs form gnash. I make a dummy array
 C     dum
@@ -4547,7 +4547,7 @@ C        !set-up. calcs y2derivs
          IF (y.GT.1.D0) y = 1
          IF (y.LT.0.D0) y = 0
          TCInc_splined(l) = y
-C        WRITE(6,*)'l=',l,' tcinc_splined (l)=',tcinc_splined (l)
+C        WRITE (8,*)'l=',l,' tcinc_splined (l)=',tcinc_splined (l)
          sumtl = sumtl + (2*l + 1)*TCInc_splined(l)
       ENDDO
       LMAx_om = LMAx_inctcsplined
@@ -4758,16 +4758,16 @@ C     CSEahmslab(ie,ia,nejc,nnuc) - exclusive lab DDXS for HMS emission of nejc
 C                             from nnuc (inclusive in nnuc=0)
 C
       IF (DE.GT.DEBin) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) ' Energy grid in EMPIRE must be at least as dense'
-         WRITE (6,*)
+         WRITE (8,*) ' '
+         WRITE (8,*) ' Energy grid in EMPIRE must be at least as dense'
+         WRITE (8,*)
      &              ' as in HMS to avoid going out of memory boundaries'
-         WRITE (6,*)
+         WRITE (8,*)
      &              ' You have to increase NEX in the optional input to'
-         WRITE (6,*) MAX(Nemax,Numax) + 3,
+         WRITE (8,*) MAX(Nemax,Numax) + 3,
      &               ' or more. Ensure that this    '
-         WRITE (6,*) ' number fits NDEX value in the dimension.h file.'
-         WRITE (6,*) ' EXECUTION STOPPED ! ! !'
+         WRITE (8,*) ' number fits NDEX value in the dimension.h file.'
+         WRITE (8,*) ' EXECUTION STOPPED ! ! !'
          STOP
        ENDIF
 C Estimate maximum lab energy as elf*Ecm_max
@@ -5126,14 +5126,14 @@ C
               IF (JMAxujspec(0,0,nucn + 1).GT.0) nucnhi = nucn + 1
               IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
      &             (JMAxujspec(0,0,nucn).EQ.0)) THEN
-                WRITE (6,*) ' '
-                WRITE (6,*) 'Funny!? The population of '
-                WRITE (6,*) 'the 1-st CN seems to be 0.'
-                WRITE (6,*) 'Have searched bins ', nucn - 1
-                WRITE (6,*) 'through ', nucn + 1, ' but they'
-                WRITE (6,*) 'seem to contain 0 cross section.'
-                WRITE (6,*) 'Check ddhms.out!'
-                WRITE (6,*) ' '
+                WRITE (8,*) ' '
+                WRITE (8,*) 'Funny!? The population of '
+                WRITE (8,*) 'the 1-st CN seems to be 0.'
+                WRITE (8,*) 'Have searched bins ', nucn - 1
+                WRITE (8,*) 'through ', nucn + 1, ' but they'
+                WRITE (8,*) 'seem to contain 0 cross section.'
+                WRITE (8,*) 'Check ddhms.out!'
+                WRITE (8,*) ' '
                 RETURN
               ENDIF
              DO jsp = 1, NDLW
@@ -5199,24 +5199,24 @@ C--------------population of continuum
                sumcon = sumcon*DE
                IF (nnur.GT.3 .AND. FIRst_ein) THEN
                   IF (IDNa(2,5).EQ.0) THEN
-                     WRITE (6,*) ' '
-                     WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
-                     WRITE (6,*) 'WARNING: HMS emission of neutrons'
-                     WRITE (6,*)
+                     WRITE (8,*) ' '
+                     WRITE (8,*) 'WARNING: Inconsistent use of HMS.'
+                     WRITE (8,*) 'WARNING: HMS emission of neutrons'
+                     WRITE (8,*)
      &                         'WARNING: to continuum has been blocked.'
-                     WRITE (6,*) 'WARNING: However, residues after '
-                     WRITE (6,*) 'WARNING: multiple P.E. are populated'
-                     WRITE (6,*) ' '
+                     WRITE (8,*) 'WARNING: However, residues after '
+                     WRITE (8,*) 'WARNING: multiple P.E. are populated'
+                     WRITE (8,*) ' '
                   ENDIF
                   IF (IDNa(4,5).EQ.0) THEN
-                     WRITE (6,*) ' '
-                     WRITE (6,*) 'WARNING: Inconsistent use of HMS.'
-                     WRITE (6,*) 'WARNING: HMS emission of protons '
-                     WRITE (6,*)
+                     WRITE (8,*) ' '
+                     WRITE (8,*) 'WARNING: Inconsistent use of HMS.'
+                     WRITE (8,*) 'WARNING: HMS emission of protons '
+                     WRITE (8,*)
      &                         'WARNING: to continuum has been blocked.'
-                     WRITE (6,*) 'WARNING: However, residues after '
-                     WRITE (6,*) 'WARNING: multiple P.E. are populated'
-                     WRITE (6,*) ' '
+                     WRITE (8,*) 'WARNING: However, residues after '
+                     WRITE (8,*) 'WARNING: multiple P.E. are populated'
+                     WRITE (8,*) ' '
                   ENDIF
                ENDIF
 C--------------population of discrete levels (evenly distributed)
@@ -5271,12 +5271,12 @@ C-----------------interpolate and transfer continuum part
      &                           (maxrecener + 0.5)*DEBinrec,EX(1,nnur),
      &                           EMAx(nnur))
 C-----------------test printout
-C                 WRITE(6, *)'A=', A(nnur), ' Z=', Z(nnur),
+C                 WRITE (8, *)'A=', A(nnur), ' Z=', Z(nnur),
 C                 &                    'recoil population'
-C                 WRITE(6, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
-C                 WRITE(6, *)' '
+C                 WRITE (8, '(12G12.5)')zero, (mrec*DERec, mrec = 0, 10)
+C                 WRITE (8, *)' '
 C                 DO nu = 1, NEX(nnur)
-C                 WRITE(6, '(12G12.5)')EX(nu, nnur),
+C                 WRITE (8, '(12G12.5)')EX(nu, nnur),
 C                 &                                 (RECcse(mrec, nu, nnur),
 C                 &                                 mrec = 1, 11)
 C                 ENDDO
