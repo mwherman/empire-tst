@@ -687,6 +687,8 @@ C              residues must be heavier than alpha !! (RCN)
                CALL WHERE(izatmp,nnuc,iloc)
                IF (iloc.EQ.1) THEN
                   A(nnuc) = atmp
+C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
+                  AMAss(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
                   IZA(nnuc) = izatmp
