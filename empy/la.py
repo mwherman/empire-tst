@@ -22,6 +22,13 @@ def eliminateNegEigenvals( corrmat ):
         return corrmat
     
     print "negative eigenvalues encountered"
+    
+    # save the original diagonal (should have only zeros/ones):
+    diagonal = corrmat.diagonal().copy()
+    if numpy.any( (diagonal!=0)*(diagonal!=1) ):
+        print "Bad values on diagonal: is this a correlation matrix?"
+        return corrmat
+    
     while True:
         tmp = corrmat.copy()
         P,D,Pinv = diagonalize( corrmat )
@@ -40,6 +47,11 @@ def eliminateNegEigenvals( corrmat ):
         corrmat /= 1000
         
         assert numpy.all( corrmat==corrmat.T ), "non-symmetric matrix %s"%key
+        
+        # diagonal elements should be 0 or 1:
+        if numpy.any( (corrmat.diagonal()!=1.0) * (corrmat.diagonal()!=0) ):
+            print "Warning: diagonal was modified, reverting to original!"
+            corrmat[range(len(corrmat)),range(len(corrmat))] = diagonal
         
         if not numpy.any( numpy.linalg.eigvals(corrmat)<0 ):
             print "fixed"
@@ -89,8 +101,26 @@ def offdiag( matrix ):
 
 
 def rebin(arr, N=2):
-    """rebin array by factor of N (not necessarily multiple of 2"""
-    return [sum(arr[N*i:N*i+N])/float(N) for i in range(len(arr)//N)]
+    """rebin array by factor of N (not necessarily multiple of 2)"""
+    d,r = divmod(len(arr),N)
+    if r:
+        d += 1
+    return [sum(arr[N*i:N*i+N])/float(N) for i in range(d)]
+
+
+def dotproduct(*args):
+    """Matrix multiplication (dot product) of all arguments
+    dotproduct(V.T, A, V) = V.T * A * V
+    """
+    """ explicit method, since reduce is gone in py3000
+    lis = list(args)
+    while len(lis)>1:
+        print len(lis)
+        b,a = lis.pop(), lis.pop()
+        lis.append( numpy.dot(a,b) )
+    return lis
+    """
+    return reduce(dot,args)
 
 
 if __name__ == '__main__':

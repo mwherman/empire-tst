@@ -141,7 +141,7 @@ class MF32(MF_base):
             
             idx += 1
         
-        fissile = (zam%1000)>88 # Radium
+        fissile = (zam//1000)>88 # Radium
         if fissile:
             fission = raw_input("Where is Gamma_fission in e-Atlas (Parameter"\
                     +"4,5 or 6)?")
@@ -830,6 +830,9 @@ class MF32(MF_base):
 
         elif LCOMP==2:
             # write 'full-compact' format using integers to represent matrix:
+            if max(numpy.corr_mat)<=1.0:
+                print "corr_mat should be integers (corr_mat *= 1000)"
+                return -1
             
             mf32 += self.writeENDFline([self.spin,self.ap,0,LCOMP,0,0], 
                     MAT,32,151)

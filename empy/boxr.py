@@ -6,14 +6,14 @@ boxr.py
 Created by Caleb Mattoon on 2008-10-23.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
-Extract from binary "Boxer" format, from NJOY
+Extract from "boxr" format, from NJOY
 
-This can handle binary output from errorj that has
+This can handle ascii or binary output from errorj with:
 MF3 and MF33 (cross-sections and covariances)
 OR MF5 and MF35 (spectra and covariances)
 OR probably nubar covariances (not tested yet)
 
-binary output is obtained from njoy using '-' switch.
+switch between ascii and binary in njoy using '-'
 For spectra for example, the input
 
     -- ERRORJ, mf35
@@ -24,7 +24,7 @@ For spectra for example, the input
      33 / # of groups, energy boundaries follow:
      ...
 
-puts binary output to tape28
+puts binary output to tape28. Remove '-' for ascii
 """
 
 from __future__ import division
@@ -34,12 +34,17 @@ import math
 import struct
 import numpy
 
+import MF_base, endf
+from mgBase import *
+
 __metaclass__ = type
 
-class mgCovars:
+m = MF_base.MF_base()   # for ENDF-style file io
+
+class mgCovars(mgBase):
     """
     class containing processed, multigroup covariances
-    obtained from binary output of NJOY/PUFF in BOXR format:
+    obtained from NJOY/PUFF in BOXR format:
     
     >mg = mgCovars(filename)
     
@@ -47,17 +52,148 @@ class mgCovars:
     and matrices in the 'covars' and 'corrs' dictionaries
     """
     def __init__(self, filename):
-        self.elist = []
-        self.xsecs = {}
-        self.covars = {}
-        self.corrs = {}
-        
-        # number of groups:
-        ngroups = 33
+        super(mgCovars,self).__init__()
         
         assert os.path.exists(filename), "File %s not found!" % filename
         f = open(filename,"r")
+        self.filename = filename
         
+        # binary or ascii file?
+        line = f.next()
+        # must re-open, there's no way to 'peek'
+        f.close(); f = open(filename,"r")
+        
+        if len(line)==81:   # including \n
+            self.__initFromAscii__(f)
+        else:
+            self.__initFromBinary__(f)
+    
+    
+    ######  methods for ascii files: ######
+    
+    def __initFromAscii__(self, fin):
+        
+        fin.next()  # past TINIT line
+        
+        # get list of energies from MT451:
+        HEAD = fin.next()
+        self.mat, MF, MT = endf.getVals(HEAD)
+        self.zam,self.awt, dum,dum,dum,dum = m.readENDFline(HEAD)
+        
+        CONT = fin.next()
+        dum,dum, ngroups, dum,dum,dum = m.readENDFline(CONT)
+        self.ngroups = ngroups
+        
+        # have ngroups+1 energy boundaries:
+        lines,rem = divmod(ngroups+1,6)
+        for i in range(lines):
+            self.elist += m.readENDFline(fin.next())
+        if rem:
+            self.elist += m.readENDFline(fin.next())[:rem]
+        
+        send = fin.next()
+        fend = fin.next()
+        
+        # now the cross sections from MT3 or MT5:
+        while True:
+            line = fin.next()
+            if endf.isFEND(line, self.mat):
+                break
+            
+            xsec = []
+            MAT, MF, MT = endf.getVals(line)
+            dum,dum,dum,dum,ngroups,dum = m.readENDFline(line)
+            
+            lines,rem = divmod(ngroups,6)
+            for i in range(lines):
+                xsec += m.readENDFline(fin.next())
+            if rem:
+                xsec += m.readENDFline(fin.next())[:rem]
+            
+            key = 'MT%i' % MT
+            self.xsecs[key] = xsec
+            send = fin.next()
+        
+        # now ready for the matrices:
+        while True:
+            line = fin.next()   # could be new MT, or FEND
+            if endf.isFEND(line, self.mat):
+                break
+            
+            # how many sections for this MT#?
+            zam,awt,dum,dum,dum,nsec = m.readENDFline(line)
+            MAT,MF,MT = endf.getVals(line)
+            print "MF%i, MT%i: %i sections" % (MF,MT,nsec)
+            
+            # read all subsections:
+            self.readMTSection(fin)
+            
+        #import time
+        #start = time.clock()
+        #print ('Create correlation matrices:')
+        for key in self.covars.keys():
+            covmat = self.covars[key]
+            
+            rowkey = ('MT'+key.split('MT')[1]) * 2
+            colkey = ('MT'+key.split('MT')[2]) * 2
+            rsd1 = numpy.sqrt( self.covars[rowkey].diagonal() )
+            rsd2 = numpy.sqrt( self.covars[colkey].diagonal() )
+
+            corrmat = self.covars[key].copy()
+            for i in range( ngroups ):
+                corrmat[i,:] /= rsd1[i]
+            for j in range( ngroups ):
+                corrmat[:,j] /= rsd2[j]
+            corrmat[ numpy.isnan(corrmat) ] = 0
+            self.corrs[ key ] = corrmat
+        #stop = time.clock()
+        #print ('Elapsed time = %f s\n' % (stop - start) )
+    
+
+    def readMTSection(self, fin):
+        """ helper function for __initFromAscii__ """
+        while True:
+            # keep going until all subsections are read
+            line = fin.next()
+            if endf.isSEND(line):
+                return
+            
+            # head of subsection:
+            dum,dum,MAT,colMT,dum,ngroups = m.readENDFline(line)
+            assert ngroups==self.ngroups
+            MAT,MF,rowMT = endf.getVals(line)
+            matrix = numpy.zeros((ngroups,ngroups))
+            lastRow = False
+            
+            # read in square or rectangular matrix:
+            while True:
+                line = fin.next();
+                dum,dum,ncols,cstart,nrows,rstart = m.readENDFline(line)
+                #print "columns:",ncols,cstart,nrows,rstart
+                if rstart==ngroups:
+                    lastRow = True
+                
+                # to 0-based index:
+                cstart -= 1; rstart -= 1
+                row = []
+                lines,rem = divmod(ncols,6)
+                for j in range(lines):
+                    row += m.readENDFline(fin.next())
+                if rem:
+                    row += m.readENDFline(fin.next())[:rem]
+                #print "row:", len(row), ncols
+                matrix[rstart,cstart:cstart+ncols] = row
+                
+                if lastRow:
+                    break
+            
+            key = 'MT%iMT%i' % (rowMT, colMT)
+            self.covars[key] = matrix
+    
+
+    ######  methods for binary files: ######
+    
+    def __initFromBinary__(self, f):
         # Still not sure what the header represents:
         header = struct.unpack( "<10i140x", f.read(180) )
         n_secs = header[-1]
@@ -81,6 +217,7 @@ class mgCovars:
                 # using 'MT1', 'MT2' etc as keys
                 if mf==1 and mt==451:
                     self.elist = datlist[i][18:]
+                    self.ngroups = int( datlist[i][14] )
                 elif mf in [3,5]:
                     name = 'MT'+repr(mt)
                     self.xsecs[name] = datlist[i][18:]
@@ -94,6 +231,7 @@ class mgCovars:
         
         # idx should now point to covariances
         #print "i = ", i
+        ngroups = self.ngroups
         
         MT = 0
         for d in datlist[i:]:
@@ -144,8 +282,10 @@ class mgCovars:
             self.corrs[ key ] = corrmat
         #stop = time.clock()
         #print ('Elapsed time = %f s\n' % (stop - start) )
-
     
+
+    # helper functions for __initFromBinary__:
+
     def readSection( self, fin ):
         """
         return one section from binary file, including header of 12 ints
@@ -159,7 +299,7 @@ class mgCovars:
         
         return header + data
     
-    
+
     def parseSection( self, sec ):
         """
         learn about the contents of each section. Returns:
@@ -183,8 +323,8 @@ class mgCovars:
     def getVals( self, sec ):
         """ get MAT, MF, MT """
         return sec[2:8:2]
+
     
-        
 
 if __name__ == '__main__':
     pass
