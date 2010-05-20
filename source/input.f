@@ -329,7 +329,7 @@ C--------default input parameters for HMS
 C
          LHMs = 0 !controls HMS (must be different from 0 for HMS to be used)
          NHMs = 100000   !number of events for Monte Carlo
-         FHMs = 1  ! Fermi gas densities default (exciton densities FHMs->0 )
+         FHMs = 0  ! Exciton densities default (Fermi gas densities FHMs->1 )
          CHMs = 1.0  ! mult. default damp rate (for eval work to scale preq)
 C
 C--------default input parameters for MSD
@@ -4633,14 +4633,15 @@ C-----
             IF (val.LT.1.0D0) THEN
                FHMs = 0
                WRITE (8,
-     &             '('' Exciton densities were used in DDHMS '')')
+     &             '('' Exciton densities are used in DDHMS '')')
                WRITE (12,
-     &             '('' Exciton densities were used in DDHMS '')')
+     &             '('' Exciton densities are be used in DDHMS '')')
              ELSE
+               FHMs = 1
                WRITE (8,
-     &             '('' Fermi gas densities were used in DDHMS '')')
+     &             '('' Fermi gas densities are used in DDHMS '')')
                WRITE (12,
-     &             '('' Fermi gas densities were used in DDHMS '')')
+     &             '('' Fermi gas densities are used in DDHMS '')')
             ENDIF
             GOTO 100
          ENDIF
@@ -5432,11 +5433,11 @@ C-----
          IF (name.EQ.'FITOMP') THEN
             FITomp = val
             IF (FITomp.GT.0) WRITE (8,
-     &'('' OM parameter adjustment selected,'',
-     & '' (will reset several options'')')
+     &'('' OM parameter adjustment has been peformed,'',
+     & '' (several options will be reset.'')')
             IF (FITomp.LT.0) WRITE (8,
-     &'('' Automatic OM parameter adjustment selected,'',
-     & '' (will reset several options'')')
+     &'('' Automatic OM parameter adjustment was selected,'',
+     & '' (several options will be rest.'')')
             GOTO 100
          ENDIF
 
