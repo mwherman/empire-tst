@@ -344,6 +344,10 @@ NHMS    Number of events in HMS set to VAL
 
 CHMS    Default damp rate in HMS multiplied by VAL
 
+FHMS    Controls densities to be used,
+        = 0 Exciton densities (default),
+        = 1 Fermi gas densities
+
 Exciton model with cluster emission (PCROSS)
 --------------------------------------------
 
@@ -624,7 +628,7 @@ FITOMP  Controls fitting of optical model potential in the incident channel
             
 
 
-                         D I M E S I O N S
+                         D I M E N S I O N S
                          -----------------
 
 The dimensions which may require modifications in everyday use of the
