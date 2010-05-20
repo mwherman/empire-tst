@@ -56,7 +56,7 @@ C-------------------------------------------------------------------
 C
       subroutine scan4fit(autofit,pars,dparmx,nnft,xitr,sensit)
 C
-C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=1) and the corresponding
+C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=2) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
 C--- C4 data file is read to prepare experimental data and an appropriate
 C--- input file (FITIN.DAT) is prepared.
@@ -87,10 +87,10 @@ C
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
       common /fitwts/wt(15,2)
-      common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
+      common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
-     &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
-     &                  icala(mxind),idint(mxind),idang(mxind),nnde
+     &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
+     &                  icala(mxind),idnt(mxind),idang(mxind),nnde
 
       data emax/30.0/
       data pot1/'RV','IV','RS','IS','RO','IO'/
@@ -103,7 +103,6 @@ C
       xitr=3.05
 
       egrid(0)=-1.1
-      ngrid=1
       nfit=0
       nwt=0
 
@@ -135,14 +134,16 @@ C--- taken to about 0.6 to 0.8 of the Coulomb barrier, for neutrons 1 keV.
       culbar=1.44*zzp*zzt/(3.75+1.25*aat**(1./3.))
       eclmn= max(culbar-0.75-0.5*(2*zzp-aap)-0.01*zzt,0.6*culbar)
       eclmn=int(disc*eclmn+0.5)/disc
-      emin=max(int(disc*emin+0.5),1)/disc
-      egrid(1)=min(emin,max(0.001,eclmn))
+      emin=int(disc*emin+0.5)/disc
+      emin=max(0.001,emin,eclmn)
+      egrid(1)=emin
+      ngrid=1
 
       write(18,'(f7.3)') egrid(1)
       write(18,'(a35)') cmndt
       write(18,'(a35)') cmndp
 
-      do i=1,4
+      do i=1,7
         read(5,'(a35)') cmnd
         write(72,'(a35)') cmnd
        end do
@@ -153,16 +154,61 @@ C--- as well as prepare neutron or proton fit input or jump out.
         write(18,'(i3)') 1
         write(18,'(i3)') 0
         write(18,'(i3)') 0
+        write(18,'(i3)') 0
+        write(18,'(i3)') 0
+        write(18,'(i3)') 0
        else if(int(aap+0.1).eq.1 .and. int(zzp+0.1).eq.1) then
         write(18,'(i3)') 0
         write(18,'(i3)') 1
         write(18,'(i3)') 0
+        write(18,'(i3)') 0
+        write(18,'(i3)') 0
+        write(18,'(i3)') 0
         aat=0.
-       else if(int(aap+0.1).eq.2 .and. int(zzp+0.1).eq.4) then
-        close(5)
-        close(18,status='delete')
-        close(72,status='delete')
-        return
+c       else if(int(aap+0.1).eq.4 .and. int(zzp+0.1).eq.2) then
+c        close(5)
+c        close(18,status='delete')
+c        close(72,status='delete')
+c        return
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 1
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        aat=0.
+c       else if(int(aap+0.1).eq.2 .and. int(zzp+0.1).eq.1) then
+c        close(5)
+c        close(18,status='delete')
+c        close(72,status='delete')
+c        return
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 1
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        aat=0.
+c       else if(int(aap+0.1).eq.3 .and. int(zzp+0.1).eq.1) then
+c        close(5)
+c        close(18,status='delete')
+c        close(72,status='delete')
+c        return
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 1
+c        write(18,'(i3)') 0
+c        aat=0.
+c       else if(int(aap+0.1).eq.3 .and. int(zzp+0.1).eq.2) then
+c        close(5)
+c        close(18,status='delete')
+c        close(72,status='delete')
+c        return
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
+c        write(18,'(i3)') 0
 c        write(18,'(i3)') 0
 c        write(18,'(i3)') 0
 c        write(18,'(i3)') 1
@@ -193,7 +239,7 @@ C--- The fundamental fit command - automatic fitting will be attempted
 C--- if its value is 2 or larger.
       if (cmnd(1:6).eq.'FITOMP') then
         read(cmnd,'(6x,g10.5,4i5)') val
-        if (val.gt.0.) then
+        if (val.gt.1.) then
           autofit = .TRUE.
           write(18,'(a6,f10.5)') cmnd(1:6),-1.0
           write(72,'(a6,f10.5)') cmnd(1:6),1.0
@@ -263,16 +309,17 @@ C--- used in the fit. The default value is 30 MeV.
 
 C--- Command for specifying mesh of incident energies at which EMPIRE
 C--- will calculate cross sections for subsequent interpolation of
-C--- integrated cross sections in CHISQRD. If specified, the intervals between
+C--- integrated cross sections in CHISQRD. If specified, the INTERVALS between
 C--- energies, from emin, are egrid(2), egrid(2)+0.001*i1,egrid(2)+0.002*i1,...
-C--- If not specified, the energies afte the GO line are used.
+C--- If not specified, the energies after the GO line are used.
       if(cmnd(1:6).eq.'FITGRD') then
         read(cmnd,'(6x,g10.5,4i5)') egrid(2),i1
         egrid(0)=1.1
         if(egrid(2).lt.1.0/disc) then
-          egrid(2)=0.2
+          egrid(2)=0.1
           egrid(3)=0.02
          else
+          egrid(2)=INT(disc*egrid(2)+0.5)/disc
           egrid(3)=0.001*i1
          endif
         go to 10
@@ -318,6 +365,13 @@ C--- by FITGRD.
               egrid(ngrid)=int(disc*egrid(ngrid)+0.5)/disc
              endif
            end do
+          IF(egrid(0).LT.1.5) then
+            write(2,*)' WARNING! Only one point in energy grid for fit.'
+            write(2,*) '         Default grid will be used.'
+            egrid(0)=1.1
+            egrid(2)=0.1
+            egrid(3)=0.02
+           ENDIF
  40       close(5)
           close(72)
           go to 50
@@ -651,7 +705,7 @@ C--- iaa is set to zero when the projectile is not a neutron.
 C--- izz and iaa are used to obtain the s-wave neutron scattering length.
 C---
 C--- The routine also accumulates and prints statistics on the number and
-C--- type of data and calls the routine WRITENP which determines and writes
+C--- type of data and calls the routine WRITENPUT which determines and writes
 C--- the energy grid for EMPIRE calculations used in CHISQRD.
 C---
 C--- To facilitate comparison, in particular, to be able to determine
@@ -673,10 +727,10 @@ C
 
       COMMON /GLOBAL_E/ EMPiredir
 
-      common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
+      common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
-     &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
-     &                  icala(mxind),idint(mxind),idang(mxind),nnde
+     &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
+     &                  icala(mxind),idnt(mxind),idang(mxind),nnde
 
       data elequiv/1.5e3/,aequiv/1.0e0/
 
@@ -685,8 +739,10 @@ C--- be converted accordingly.
       angfac=45./atan(1.)
       eminm=1.0e6*emin
       emaxm=1.0e6*emax
+      en(0)= 0.0
 
 C--- Istat will be used later to accumulate statistics of data types.
+      istat0=0
       do i=1,15
         do j=1,3
           istat(i,1)=0
@@ -697,37 +753,42 @@ C--- Istat will be used later to accumulate statistics of data types.
       write(2,*) 'Preparing experimental data and input files for fits.'
       write(2,*)
 
-C--- The first datum included is the strength function, assumed to be that
-C--- at 1 keV. MF=3, MT=0 is used internally to specify it.
-      ex(1)=egrid(1)
-      mf(1)=3
-      mt(1)=0
-      six(1)=0.0
-      dsix(1)=0.0
+C--- If emin=1 keV, the first datum included is assumed to be the strength 
+C--- function. MF=3, MT=0 is used to specify it internally.
+      ind=0
+      IF(INT(eminm+0.5).EQ.1000) THEN
+        ex(1)=egrid(1)
+        mf(1)=3
+        mt(1)=0
+        six(1)=0.0
+        dsix(1)=0.0
 
 C--- It is obtained from the following file.
-      INQUIRE(FILE=trim(empiredir)//'/RIPL-2/resonances/resonances0.dat'
-     &                        ,EXIST=fexist)
-      IF(fexist .and. iaa.ne.0) then
-        OPEN (47,FILE=trim(empiredir)//'/RIPL-2/resonances'
+        INQUIRE(
+     &   FILE=trim(empiredir)//'/RIPL-2/resonances/resonances0.dat',
+     &                                                   EXIST=fexist)
+        IF(fexist .AND. iaa.NE.0) THEN
+          OPEN (47,FILE=trim(empiredir)//'/RIPL-2/resonances'
      &      //'/resonances0.dat',STATUS = 'old')
-        READ (47,'(///)') ! Skipping first 4 title lines
-        DO i = 1, 296
-          READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60)
+          READ (47,'(///)') ! Skipping first 4 title lines
+          DO i = 1, 296
+            READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60)
      &                           nztmp, natmp, ss0tmp, ss0_unc
-          IF (nztmp.NE.izz .OR. natmp.NE.iaa) CYCLE
-          six(1) = ss0tmp
-          dsix(1) = ss0_unc
-        ENDDO
- 60     CLOSE (47)
-       endif
+            IF (nztmp.NE.izz .OR. natmp.NE.iaa) CYCLE
+            six(1) = ss0tmp
+            dsix(1) = ss0_unc
+           ENDDO
+ 60       CLOSE (47)
+         ENDIF
+        IF(six(1).GT.0.0) ind=1
+       ENDIF
 
 C--- The C4 data file is used to obtain the rest of the experimental data.
 C--- Z and A are not checked so that natural data can be included with the
 C--- isotopic data.
-      open(unit=26,file='C4.dat',status='old')
+      OPEN(unit=26,file='C4.dat',status='old')
 
-      ind=2
+      ind=ind+1
       inda=1
       mxlvl=0
 
@@ -735,7 +796,6 @@ C--- Reads a line from the C4 file.
  10   read(26,'(i5,i6,a1,i3,i4,3a1,8e9.3,a3)',END=20) izap,izat,metat,
      1      mf(ind),mt(ind),metap,ex4st,cm,ex(ind),dex(ind),six(ind),
      2      dsix(ind),cth,dcth,elvl,xxx,lvl
-
 C--- First check to see that the datum is in the desired energy range.
       if( ex(ind).lt.eminm .or. ex(ind).gt.emaxm ) go to 10
 C--- The incident energy is discretized and converted to MeV.
@@ -785,7 +845,7 @@ C--- was stored when read.)
       if(ind.gt.mxind. or.inda.gt.mxinda) then
         write(2,*) ' Data arrays too small in READC4.'
         write(2,*) ' Increase dimension of MXIND or MXINDA. STOP.'
-        stop
+        stop ' Increase dimension of MXIND or MXINDA in READC4. STOP.'
        endif
       go to 10
 
@@ -798,25 +858,14 @@ C--- The experimental data are ordered in incident energy. The ordering is
 C--- contained in the array ipe.
       call bubble(indmx,ex,ipe)
 
-C--- The data are now explixcitly ordered in incident energy, as they will be
-C---  calculated in EMPIRE and used in CHISQRD.
-C---  The first point is the strength function.
-      en(1)=ex(1)
-      sig(1)=six(1)
-      dsig(1)=dsix(1)
-      nint(1)=1
-      idint(1)=0
-      nangs(1)=0
-      icala(1)=0
-
 C--- Several counters important for storage are initialized.
 C---   inde - number of distinct incident energies
 C---   nintot - number of integrated cross sections
 C---   nanxtot - number of angular data (angles times ang. dists.)
 C---   nangtot - number of angles
 C---   nangdtot - number of angular distributions
-      inde=1
-      nintot=1
+      inde=0
+      nintot=0
       nanxtot=0
       nangtot=0
       nangdtot=0
@@ -832,7 +881,7 @@ C--- discretization.
 
 C--- The data are scanned and combined according to the discretized
 C--- incident energy.
-      do i=2,indmx+1
+      do i=1,indmx+1
         if(int(disc*ex(ipe(i))+0.5)-int(disc*en(inde)+0.5).GT.0) then
 C--- When a different energy is found, angular distributions of the preceding
 C--- energy are stored.
@@ -879,11 +928,11 @@ C--- at a given incident energy is determined.
              endif
            endif
 C--- Once the angular data of the preceding energy has been treated,
-C--- relevant indices for the new enegry are initialized and the enrgy is
+C--- relevant indices for the new energy are initialized and the energy is
 C--- stored.
           inde=inde+1
           en(inde)=ex(ipe(i))
-          nint(inde)=0
+          nints(inde)=0
           nangd(inde)=0
           nangs(inde)=0
           nangtmp=0
@@ -891,24 +940,31 @@ C--- stored.
 C--- Integrated data are stored. Data are converted to millibarns.
 C--- Statistics on data type are accumulated.
         if(mf(ipe(i)).eq.3) then
-          nint(inde)=nint(inde)+1
+          nints(inde)=nints(inde)+1
           nintot=nintot+1
-          sig(nintot)=1.0e3*six(ipe(i))
-          dsig(nintot)=1.0e3*dsix(ipe(i))
-          if(mt(ipe(i)).eq.1) then
-            idint(nintot)=1
-            istat(1,1)=istat(1,1)+1
-           else if(mt(ipe(i)).eq.2) then
-            idint(nintot)=3
-            istat(3,1)=istat(3,1)+1
-           else if(mt(ipe(i)).eq.3) then
-            idint(nintot)=2
-            istat(2,1)=istat(2,1)+1
+          if(mt(ipe(i)).eq.0) then
+            sig(nintot)=six(ipe(i))
+            dsig(nintot)=dsix(ipe(i))
+            idnt(nintot)=0
+            istat0=1
            else
-            mtpe=mt(ipe(i))-47
-            idint(nintot)=mtpe
-            istat(mtpe,1)=istat(mtpe,1)+1
-           end if
+            sig(nintot)=1.0e3*six(ipe(i))
+            dsig(nintot)=1.0e3*dsix(ipe(i))
+            if(mt(ipe(i)).eq.1) then
+              idnt(nintot)=1
+              istat(1,1)=istat(1,1)+1
+             else if(mt(ipe(i)).eq.2) then
+              idnt(nintot)=3
+              istat(3,1)=istat(3,1)+1
+             else if(mt(ipe(i)).eq.3) then
+              idnt(nintot)=2
+              istat(2,1)=istat(2,1)+1
+             else
+              mtpe=mt(ipe(i))-47
+              idnt(nintot)=mtpe
+              istat(mtpe,1)=istat(mtpe,1)+1
+             end if
+           endif
 C--- Angular data are stored in a preliminary manner. They can be
 C--- processed completely (above) only after a new energy is found
 C--- and one is sure that no more distributions follow.
@@ -941,7 +997,7 @@ C--- Statistics on experimental data are printed.
       write(2,'('' The experimental data set in the energy range from'',
      &   f6.3,'' MeV to '', f6.2,'' MeV'',/,''  contains values at'',i5,
      &   '' energies:'')') emin,emax,nnde
-      if(sig(1).gt.0.) write(2,'(7x,''1 s-wave strength function'')')
+      if(istat0.gt.0.) write(2,'(7x,''1 s-wave strength function'')')
       if(istat(1,1).gt.0) write(2,'(i8,'' total cross sections'')')
      &                                                    istat(1,1)
       if(istat(2,1).gt.0) write(2,'(i8,'' absorption cross sections'')')
@@ -982,52 +1038,24 @@ C
       integer*4 PIPE,itmp
       character*132 ctmp
 
-      common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
+      common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
-     &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
-     &                  icala(mxind),idint(mxind),idang(mxind),nnde
+     &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
+     &                  icala(mxind),idnt(mxind),idang(mxind),nnde
       LINUX = .TRUE.
-C--- Treats the case in which the energy mesh is defined by the FITGRD
-C--- keyword.
-      if(egrid(0).lt.2.) then
-        de=disc*egrid(2)
-        dde=disc*egrid(3)
-        egrid(2)=emin
-        emin3=1.0e3*emin
-        igr=3
-        do j=1,2*mxind
-          egrid(igr)=int(emin3+j*(de+0.5*(j-1)*dde)+0.5)/disc
-          if(egrid(igr).ge.en(nnde) .or. igr.ge.mxind) go to 10
-          if(egrid(igr).gt.en(2)) then
-            igr=igr+1
-           else
-            egrid(2)=egrid(3)
-           endif
-         end do
- 10     ngr=min(igr,mxind)
-C--- Treats the case in which the energy mesh is defined by the energies
-C--- given after the GO keyword in the original input file.
-       else
+
+      IF(egrid(0).LT.1.5) THEN
+C--- The case in which the energy mesh is defined by the FITGRD keyword.
+        ngr=2*mxind
+       ELSE
+C--- The case in which the energy mesh is defined by the input grid.
         ngr=egrid(0)
-        igr=3
-        do j=3,ngr
-          if(egrid(igr).ge.en(nnde)) go to 20
-          if(egrid(igr).gt.en(2)) then
-            igr=igr+1
-           else
-            egrid(2)=egrid(igr)
-           endif
-         end do
-        write(2,*) ' Data points exist above the maximum energy, ',
-     &       egrid(ngr),' MeV, of the energy grid used in fitting.'
-        write(2,*) ' They will be disregarded in the fit.'
- 20     ngr=igr
-       endif
+       ENDIF
 
 C--- Initialize parameters used in writing the energy grid.
       ntangs=0
-      ie=2
-      igr=2
+      ie=1
+      igr=1
       nodata=0
 
 C--- The mesh of energies is now written to the FITIN.DAT file.
@@ -1039,40 +1067,73 @@ C---
 C--- The flag nodata avoids writing energies of the grid which will not
 C--- be needed later for interpolation of integrated cross sections nor
 C--- for angular distributions.
- 30   if(int(disc*en(ie)+0.5).lt.int(disc*egrid(igr)+0.5)) then
-        if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
+
+      egr=egrid(1)
+      ieg=INT(disc*egr+0.5)
+      ien=INT(disc*en(1)+0.5)
+
+ 30   if(ien.lt.ieg) then
+        if(nodata.gt.1) write(18,'(f8.4,3i8)') egrold,0,0
         if(nangs(ie).gt.0) then
           write(18,'(f8.4,3i8)') en(ie),nangs(ie),icala(ie)
           write(18,'(10f8.2)') (angs(j),j=ntangs+1,ntangs+nangs(ie))
           ntangs=ntangs+nangs(ie)
          endif
-         ie=ie+1
-         nodata=0
-        else if(int(disc*en(ie)+0.5).gt.int(disc*egrid(igr)+0.5)) then
-          if(nodata.eq.0) write(18,'(f8.4,3i8)') egrid(igr),0,0
-          igr=igr+1
-          nodata=nodata+1
-          if(igr.gt.ngr) go to 40
-       else
+C--- Increment ie and define new ien
+        ie=ie+1
+        ien=INT(disc*en(ie)+0.5)
+        nodata=0
+       else if(ien.gt.ieg) then
+        if(igr.gt.1 .and. nodata.eq.0) write(18,'(f8.4,3i8)') egr,0,0
+C--- Increment igr and define new ieg
+        if(ie.gt.nnde) go to 40
+        igr=igr+1
+        if(igr.gt.ngr) go to 40
+        egrold=egr
+        IF(egrid(0).LT.1.5) THEN
+          egr=egrid(1)+(igr-1)*(egrid(2)+0.5*(igr-2)*egrid(3))
+         ELSE
+          egr=egrid(igr)
+         ENDIF
+        ieg=INT(disc*egr+0.5)
+        nodata=nodata+1
+       else     ! ien.EQ.ieg
         if(nangs(ie).gt.0) then
-          if(nodata.gt.1) write(18,'(f8.4,2i8)') egrid(igr-1),0,0
+          if(nodata.gt.1) write(18,'(f8.4,2i8)') egrold,0,0
           write(18,'(f8.4,2i8)') en(ie),nangs(ie),icala(ie)
           write(18,'(10f8.2)') (angs(j),j=ntangs+1,ntangs+nangs(ie))
           ntangs=ntangs+nangs(ie)
          else
-          if(nodata.gt.1) write(18,'(f8.4,3i8)') egrid(igr-1),0,0
-          write(18,'(f8.4,3i8)') egrid(igr),0,0
+          if(nodata.gt.1) write(18,'(f8.4,3i8)') egrold,0,0
+          if(igr.gt.1) write(18,'(f8.4,3i8)') egr,0,0
          endif
-        ie=ie+1
+C--- Increment igr and define new ieg
         igr=igr+1
-        nodata=0
         if(igr.gt.ngr) go to 40
+        egrold=egr
+        IF(egrid(0).LT.1.5) THEN
+          egr=egrid(1)+(igr-1)*(egrid(2)+0.5*(igr-2)*egrid(3))
+         ELSE
+          egr=egrid(igr)
+         ENDIF
+        ieg=INT(disc*egr+0.5)
+C--- Increment ie and define new ien
+        ie=ie+1
+        if(ie.gt.nnde) go to 40
+        ien=INT(disc*en(ie)+0.5)
+        nodata=0
        endif
       go to 30
 
 C--- Finalizes the energy grid, as required by EMPIRE
  40   write(18,'(f8.4,2i8)') -1.,0,0
       close(18)
+
+      IF(ie.LT.nnde) THEN
+        WRITE(2,*) ' Data points exist above the maximum energy, ',
+     &       egrold,' MeV, of the energy grid used in fitting.'
+        WRITE(2,*) ' They will be disregarded in the fit.'
+       ENDIF
 
 C--- The file FITIN.DAT is now moved to INPUT.DAT to perform the
 C--- the EMPIRE calculations used in CHISQRD. The original input file
@@ -1344,7 +1405,7 @@ c----------------------------------------------------------------------
             if(den.gt.1.0d-6) then
               dpx=0.5d0*(dp1**2*chi2-dp2**2*chi1)/den
               if(dpx.gt.dp2) then
-                dpx=min(dpx,10.0*dp2)
+                dpx=min(dpx,10.0d0*dp2)
                 id=3
                 if(chi2.lt.chi1) id=2
                else if(dpx.gt.dp1) then
@@ -1416,10 +1477,10 @@ C
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
       common /fitwts/wt(15,2)
-      common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
+      common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
-     &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
-     &                  icala(mxind),idint(mxind),idang(mxind),nnde
+     &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
+     &                  icala(mxind),idnt(mxind),idang(mxind),nnde
 
 C--- If there are parameters being varied, places them in vals, accessible
 C--- from FILEPREP, and modifies the OMPAR.DIR and TARGET_COLL.DAT files with
@@ -1437,7 +1498,7 @@ C--- Now run EMPIRE
 C--- The neutron s-wave strength function is obtained from the EMPIRE
 C--- output file and used to initialize chi2, if an experimental value
 C--- exists.
-      if(sig(1).gt.0.0) then
+      if(INT(1000.*en(1)+0.5).EQ.1 .AND. idnt(1).EQ.0) THEN
         ths0=0.0
         ths1=0.0
         OPEN(100,file='OUTPUT.DAT',status='old')
@@ -1449,13 +1510,20 @@ C--- exists.
          end do
         close(100)
         chi2=wt(15,2)*((sig(1)-ths0)/dsig(1))**2
+        ntint=1
        else
         chi2=0.0
+        ntint=0
        endif
 
-      ntint=1
       ntangd=0
       nt=0
+
+C--- Zero array elements that are irrelevant but that might be used.
+      ee(2)=0.0
+      DO j=1,12
+        thsig(j,2)=0.0
+       ENDDO
 
 C--- The rest of the calculations have been written to OPTFIT.CAL
 C--- Data at the first energy are read from the file.
@@ -1466,10 +1534,10 @@ C--- Data at the first energy are read from the file.
 C--- The loop runs over the experimental values of the incident energy.
 C--- Calculations are read from OPTFIT.CAL according to need for them.
 C--- Calculated integrated cross sections are interpolated. Angular
-C--- ditributions have been calculated at the experimental energy.
+C--- distributions have been calculated at the experimental energy.
       nh=1
       nl=2
-      do i=2,nnde
+      do i=ntint+1,nnde
  10     if(int(disc*en(i)+0.5).gt.int(disc*ee(nh)+0.5)) then
           nl=3-nl
           nh=3-nh
@@ -1479,13 +1547,13 @@ C--- ditributions have been calculated at the experimental energy.
          endif
         if(nangd(i).gt.0)
      &    READ (40,'(12x,10e12.5)') ((thangd(j,k),k=1,10),j=1,nangs(i))
-        if(nint(i).gt.0) then
-          do j=1,nint(i)
+        if(nints(i).gt.0) then
+          do j=1,nints(i)
             ntint=ntint+1
 C--- Interpolation of integrated cross section
-            tsig=((ee(nh)-en(i))*thsig(idint(ntint),nl)
-     &          +(en(i)-ee(nl))*thsig(idint(ntint),nh))/(ee(nh)-ee(nl))
-            chi2=chi2+wt(idint(ntint),1)
+            tsig=((ee(nh)-en(i))*thsig(idnt(ntint),nl)
+     &          +(en(i)-ee(nl))*thsig(idnt(ntint),nh))/(ee(nh)-ee(nl))
+            chi2=chi2+wt(idnt(ntint),1)
      &                              *((tsig-sig(ntint))/dsig(ntint))**2
            end do
          endif
@@ -1505,6 +1573,7 @@ C--- Angular distributions
       chisqrd=chi2
 
       write(*,*) 'chi2=',chi2
+      write(*,*)
 
       close(40)
 
@@ -1717,10 +1786,10 @@ C
       integer*4 PIPE,itmp
       character*132 ctmp
 
-      common /exptldat/en(mxind),sig(mxind),dsig(mxind),angs(mxinda),
+      common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
-     &                  wt0,ths0,nint(mxind),nangd(mxind),nangs(mxind),
-     &                  icala(mxind),idint(mxind),idang(mxind),nnde
+     &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
+     &                  icala(mxind),idnt(mxind),idang(mxind),nnde
 
       LINUX = .TRUE.
       if(sig(1).gt.1.0e-3) then
@@ -2175,7 +2244,7 @@ C-----------Relative sensitivity (per variation interval)
      &'('' FATAL: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
-C-----Resotore standard input
+C-----Restore standard input
   350 IF(LINUX) THEN
          ctmp='mv INPUTREF.DAT INPUT.DAT'
          itmp=PIPE(ctmp)
