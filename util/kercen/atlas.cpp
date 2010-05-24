@@ -59,89 +59,12 @@ double CAtlas::GetPenet(int l, double E)
 bool CAtlas::GetSpinProb(int l, double &basej, int &npr, double *pr)
 {
   // obtain pdf
-  if (l == 0) {
-    if (m_fSpin == 0) {
-      basej=0.5;
-      npr=1;
-      pr[0] = 1;
-    } else {
-      basej=m_fSpin-0.5;
-      npr=2;
-      pr[0] =  m_fSpin   /(2*m_fSpin+1);
-      pr[1] = (m_fSpin+1)/(2*m_fSpin+1);
-    }
-  } else if (l == 1) {
-    if (m_fSpin == 0) {
-      basej=0.5;
-      npr=2;
-      pr[0] = 1/3.0;
-      pr[1] = 2/3.0;
-    } else if (m_fSpin == 0.5) {
-      basej=0;
-      npr=3;
-      pr[0] = 1/9.0;
-      pr[1] = 3/9.0;
-      pr[2] = 5/9.0;
-    } else if (m_fSpin == 1) {
-      basej=0.5;
-      npr=3;
-      pr[0] = 1/6.0;
-      pr[1] = 2/6.0;
-      pr[2] = 3/6.0;
-    } else {
-      basej=m_fSpin-1.5;
-      npr=4;
-      pr[0] = (m_fSpin-1)/(4*m_fSpin+2);
-      pr[1] =  m_fSpin   /(4*m_fSpin+2);
-      pr[2] = (m_fSpin+1)/(4*m_fSpin+2);
-      pr[3] = (m_fSpin+2)/(4*m_fSpin+2);
-    }
-  } else if (l == 2) {
-    if (m_fSpin == 0) {
-      basej=1.5;
-      npr=2;
-      pr[0] = 0.4;
-      pr[1] = 0.6;
-    } else if (m_fSpin == 0.5) {
-      basej=1;
-      npr=3;
-      pr[0] = 3/15.0;
-      pr[1] = 5/15.0;
-      pr[2] = 7/15.0;
-    } else if (m_fSpin == 1) {
-      basej=0.5;
-      npr=4;
-      pr[0] = 1/10.0;
-      pr[1] = 2/10.0;
-      pr[2] = 3/10.0;
-      pr[3] = 4/10.0;
-    } else if (m_fSpin == 1.5) {
-      basej=0;
-      npr=5;
-      pr[0] = 1/25.0;
-      pr[1] = 3/25.0;
-      pr[2] = 5/25.0;
-      pr[3] = 7/25.0;
-      pr[4] = 9/25.0;
-    } else if (m_fSpin == 2) {
-      basej=0.5;
-      npr=5;
-      pr[0] = 1/15.0;
-      pr[1] = 2/15.0;
-      pr[2] = 3/15.0;
-      pr[3] = 4/15.0;
-      pr[4] = 5/15.0;
-    } else {
-      basej=m_fSpin-2.5;
-      npr=6;
-      pr[0] = (m_fSpin-2)/(6*m_fSpin+3);
-      pr[1] = (m_fSpin-1)/(6*m_fSpin+3);
-      pr[2] =  m_fSpin   /(6*m_fSpin+3);
-      pr[3] = (m_fSpin+1)/(6*m_fSpin+3);
-      pr[4] = (m_fSpin+2)/(6*m_fSpin+3);
-      pr[5] = (m_fSpin+3)/(6*m_fSpin+3);
-    }
-  }
+  double sum = 0;
+  if (m_fSpin <= l) basej = fabs(m_fSpin - l + 0.5);
+  else basej = fabs(m_fSpin - l - 0.5);
+  npr = int(m_fSpin + l + 0.5 - basej + 1);
+  for (int i=0;i<npr;i++) sum += (pr[i] = 2*(basej+i)+1);
+  for (int i=0;i<npr;i++) pr[i] /= sum;
 }
 
 bool CAtlas::ReadProperties(int z, int a)
@@ -237,9 +160,10 @@ bool CAtlas::ReadParameters(int z, int a)
   char v[20];
   int za = z*1000+a;
   int nzerogn = 0, nzerogg = 0;
+  double gnavg[3]={.0}, gnavg2[3]={.0}, dgnavg[3]={.0}, fgnavg[3]={.0};
   double ggavg[3]={.0}, ggavg2[3]={.0}, dggavg[3]={.0}, fggavg[3]={.0};
   double gfavg[3]={.0}, gfavg2[3]={.0}, dgfavg[3]={.0}, fgfavg[3]={.0};
-  int ngg[3]={0}, ndgg[3]={0}, ngf[3]={0}, ndgf[3]={0};
+  int ngn[3]={0}, ndgn[3]={0}, ngg[3]={0}, ndgg[3]={0}, ngf[3]={0}, ndgf[3]={0};
  
   m_nZ = z;
   m_nA = a;
@@ -323,6 +247,16 @@ bool CAtlas::ReadParameters(int z, int a)
     }
     if (m_Res[m_nRes].Gn == 0) ++nzerogn;
     if (m_Res[m_nRes].Gg == 0) ++nzerogg;
+    if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gn != 0) {
+      gnavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gn;
+      ++ngn[m_Res[m_nRes].l];
+      if (m_Res[m_nRes].dGn != 0) {
+        gnavg2[m_Res[m_nRes].l] += m_Res[m_nRes].Gn;
+        dgnavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGn;
+//        fgnavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGn/m_Res[m_nRes].Gn;
+        ++ndgn[m_Res[m_nRes].l];
+      }
+    }
     if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gg != 0) {
       ggavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gg;
       ++ngg[m_Res[m_nRes].l];
@@ -350,6 +284,9 @@ bool CAtlas::ReadParameters(int z, int a)
   printf("Number of resonances with zero Gn = %d\n", nzerogn);
   printf("Number of resonances with zero Gg = %d\n", nzerogg);
 
+  if (ngn[0] > 0) printf("Simple avg. s-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[0]/ngn[0], (gnavg2[0]==0)?0:gnavg[0]/ngn[0]*dgnavg[0]/gnavg2[0]);
+  if (ngn[1] > 0) printf("Simple avg. p-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[1]/ngn[1], (gnavg2[1]==0)?0:gnavg[1]/ngn[1]*dgnavg[1]/gnavg2[1]);
+  if (ngn[2] > 0) printf("Simple avg. d-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[2]/ngn[2], (gnavg2[2]==0)?0:gnavg[2]/ngn[2]*dgnavg[2]/gnavg2[2]);
   if (ngg[0] > 0) printf("Simple avg. s-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[0]/ngg[0], (ggavg2[0]==0)?0:ggavg[0]/ngg[0]*dggavg[0]/ggavg2[0]);
   if (ngg[1] > 0) printf("Simple avg. p-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[1]/ngg[1], (ggavg2[1]==0)?0:ggavg[1]/ngg[1]*dggavg[1]/ggavg2[1]);
   if (ngg[2] > 0) printf("Simple avg. d-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[2]/ngg[2], (ggavg2[2]==0)?0:ggavg[2]/ngg[2]*dggavg[2]/ggavg2[2]);
@@ -357,6 +294,9 @@ bool CAtlas::ReadParameters(int z, int a)
   if (ngf[1] > 0) printf("Simple avg. p-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[1]/ngf[1], (gfavg2[1]==0)?0:gfavg[1]/ngf[1]*dgfavg[1]/gfavg2[1]);
   if (ngf[2] > 0) printf("Simple avg. d-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[2]/ngf[2], (gfavg2[2]==0)?0:gfavg[2]/ngf[2]*dgfavg[2]/gfavg2[2]);
 /*
+  if (ngn[0] > 0) printf("Simple avg. s-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[0]/ngn[0], (ndgn[0]==0)?0:gnavg[0]/ngn[0]*fgnavg[0]/ndgn[0]);
+  if (ngn[1] > 0) printf("Simple avg. p-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[1]/ngn[1], (ndgn[1]==0)?0:gnavg[1]/ngn[1]*fgnavg[1]/ndgn[1]);
+  if (ngn[2] > 0) printf("Simple avg. d-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[2]/ngn[2], (ndgn[2]==0)?0:gnavg[2]/ngn[2]*fgnavg[2]/ndgn[2]);
   if (ngg[0] > 0) printf("Simple avg. s-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[0]/ngg[0], (ndgg[0]==0)?0:ggavg[0]/ngg[0]*fggavg[0]/ndgg[0]);
   if (ngg[1] > 0) printf("Simple avg. p-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[1]/ngg[1], (ndgg[1]==0)?0:ggavg[1]/ngg[1]*fggavg[1]/ndgg[1]);
   if (ngg[2] > 0) printf("Simple avg. d-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[2]/ngg[2], (ndgg[2]==0)?0:ggavg[2]/ngg[2]*fggavg[2]/ndgg[2]);

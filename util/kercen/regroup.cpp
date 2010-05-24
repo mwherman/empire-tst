@@ -44,7 +44,6 @@ void ReadData(const char *szGroup, const char *szXSFile)
   for (int i=0;i<=nGroup;i++) fscanf(fp, "%lf", pGroup+i);
   fclose(fp);
   memset(pNewGroup, 0, (nGroup+1)*sizeof(double));
-  for (int i=0;i<=nStart;i++) pNewGroup[i] = pGroup[i];
 
   if ((fp=fopen(szXSFile, "r")) == NULL) {
     fprintf(stderr, "cannot open '%s'\n", szXSFile);
@@ -62,11 +61,16 @@ void ReadData(const char *szGroup, const char *szXSFile)
   pNjoySum = new double[nGroup];
   pDiff = new double[nGroup];
   double sum = 0;
+  puts("<Original bin>");
+  puts("        E1          E2          Kernel      NJOY    Diff");
   for (int i=0;i<nGroup;i++) {
     fscanf(fp, "%lf %lf", pKernelXS+i, pNjoyXS+i);
     pKernelXS[i] *= (pGroup[i+1]-pGroup[i]);
     pNjoyXS[i] *= (pGroup[i+1]-pGroup[i]);
+    pDiff[i] = (pKernelXS[i]-pNjoyXS[i])/pNjoyXS[i];
     if (i >= nStart) sum += pKernelXS[i];
+    printf("%2d: %10.5lE %10.5lE %10.1f %10.1f %6.2lf %%\n",
+             i+1, pGroup[i], pGroup[i+1], pKernelXS[i], pNjoyXS[i], pDiff[i]*100);
 //    printf("%2d: %lf - %lf = %lf, %lf\n", i+1, pGroup[i], pGroup[i+1], pKernelXS[i], pNjoyXS[i]);
   }
   fclose(fp);
@@ -76,6 +80,12 @@ void Calculate(double fMinXS, double fMaxXS, double fDiffCut)
 {
   double xs1, xs2, diff, pxs1, pxs2;
   int n;
+  for (int i=0;i<nStart;i++) {
+    pNewGroup[i] = pGroup[i];
+    pKernelSum[i] = pKernelXS[i];
+    pNjoySum[i] = pNjoyXS[i];
+  }
+  pNewGroup[nStart] = pGroup[nStart];
   for (int i=nStart;i<nGroup;) {
     n = -1;
     xs1 = xs2 = 0;
@@ -86,9 +96,9 @@ void Calculate(double fMinXS, double fMaxXS, double fDiffCut)
       xs2 += pNjoyXS[j];
 //      printf("j=%d,xs=%lf\n",j,xs1);
       if (n != -1 && xs1 >= fMaxXS) break;
-      else if (xs1 > fMinXS && fabs(xs1-xs2)/xs2 < fDiffCut && fabs(xs1-xs2)/xs2 < diff) {
+      else if (xs1 > fMinXS && fabs(xs1-xs2)/xs2 < fDiffCut && fabs(xs1-xs2)/xs2 < fabs(diff)) {
         n = j;
-        diff = fabs(xs1-xs2)/xs2;
+        diff = (xs1-xs2)/xs2;
         pxs1 = xs1;
         pxs2 = xs2;
 //        printf("n = %d, diff = %lf %%\n", j, diff*100);
@@ -96,7 +106,7 @@ void Calculate(double fMinXS, double fMaxXS, double fDiffCut)
     }
     if (n == -1) {
       n = nGroup - 1;
-      diff = fabs(xs1-xs2)/xs2;
+      diff = (xs1-xs2)/xs2;
       pxs1 = xs1;
       pxs2 = xs2;
     }
@@ -108,17 +118,25 @@ void Calculate(double fMinXS, double fMaxXS, double fDiffCut)
     i = n+1;
 //    printf("*** i = %d now\n", i);
   }
+  if (nNewGroup - nStart >= 2 && pKernelSum[nNewGroup-1] < 50) {
+    pNewGroup[nNewGroup-1] = pNewGroup[nNewGroup];
+    pKernelSum[nNewGroup-2] += pKernelSum[nNewGroup-1];
+    pNjoySum[nNewGroup-2] += pNjoySum[nNewGroup-1];
+    pDiff[nNewGroup-2] = (pKernelSum[nNewGroup-2]-pNjoySum[nNewGroup-2])/pNjoySum[nNewGroup-2];
+    --nNewGroup;
+  }
 }
 
 void WriteResult()
 {
+  puts("<New bin>");
   puts("        E1          E2          Kernel      NJOY    Diff");
   for (int i=0;i<nNewGroup;i++) {
-    if (i >= nStart)
+    //if (i >= nStart)
       printf("%2d: %10.5lE %10.5lE %10.1f %10.1f %6.2lf %%\n",
              i+1, pNewGroup[i], pNewGroup[i+1], pKernelSum[i], pNjoySum[i], pDiff[i]*100);
-    else
-      printf("%2d: %10.5lE %10.5lE\n", i+1, pNewGroup[i], pNewGroup[i+1]);
+    //else
+     // printf("%2d: %10.5lE %10.5lE\n", i+1, pNewGroup[i], pNewGroup[i+1]);
   }
 
   puts("-------------------------------------------------------------");
@@ -126,6 +144,12 @@ void WriteResult()
   for (int i=0;i<=nNewGroup;i++) {
     printf("%10.5lE\n", pNewGroup[i]);
   }
+  printf(" %d\n", nNewGroup);
+  for (int i=0;i<=nNewGroup;i++) {
+    if (i > 0 && i%6 == 0) puts("");
+    printf("% 11.5lE", pNewGroup[i]);
+  }
+  puts("");
 }
 
 int main(int argc, char **argv)
@@ -197,16 +221,16 @@ int main(int argc, char **argv)
   puts("#############################################################");
 
   if (bScat) {
+    puts("\nFor scattering");
     ReadData(szScatGroup, szScatXS);
     Calculate(fScatMinXS, fScatMaxXS, fScatDiffCut);
-    puts("\nFor scattering");
     WriteResult();
   }
 
   if (bCapt) {
+    puts("\nFor capture");
     ReadData(szCaptGroup, szCaptXS);
     Calculate(fCaptMinXS, fCaptMaxXS, fCaptDiffCut);
-    puts("\nFor capture");
     WriteResult();
   }
 

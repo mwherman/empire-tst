@@ -179,7 +179,13 @@ int main(int argc, char **argv)
   puts("-------------------------------------------------------------");
   printf("%d\n", nGroup);
   for (int i=0;i<=nGroup;i++) {
-    printf("%10.5lE\n", pGroup[i]);
+    printf("%11.5lE\n", pGroup[i]);
   }
+  printf(" %d\n", nGroup);
+  for (int i=0;i<=nGroup;i++) {
+    if (i > 0 && i%6 == 0) puts("");
+    printf("% 11.5lE", pGroup[i]);
+  }
+  puts("");
   free(pGroup);
 }

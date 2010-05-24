@@ -10,64 +10,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <iostream>
-#include <math.h>
 #include <algorithm>
+#include <math.h>
 #include "kernel.h"
 #include "util.h"
 #include "endf.h"
 
 using namespace std;
 
-#define PI		3.14159
-
-#define SCAT		0
-#define CAPT		1
-#define FISS		2
-
 static CKernel kernel;
-static char szScatGroup[PATH_MAX];	// file containing energy group information for scattering
-static char szCaptGroup[PATH_MAX];	// file containing energy group information for capture
-static char szFissGroup[PATH_MAX];	// file containing energy group information for fission
-static char szAtlasDir[PATH_MAX];	// Atlas directory
-static bool bPotential = true;		// flag to take into account potential scattering
-static bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
 static bool bScattering = false;	// flag to calculate scattering cross sections and their uncertainties
 static bool bCapture = false;		// flag to calculate capture cross sections and their uncertainties
 static bool bFission = false;		// flag to calculate fission cross sections and their uncertainties
-static bool bFile2 = true;		// flag to create file 33 instead of file 2
-static bool bFile3 = true;		// flag to create file 33 instead of file 3
-static bool bFile32 = true;		// flag to create file 33 instead of file 32
-static bool bFile33 = false;		// flag to create file 33 instead of file 33
-static double fCorrNGS = 0;		// correlation between scattering and capture widths of single resonance
-static double fCorrNN = .5;		// correlation between scattering widths of different resonances
-static double fCorrGG = .5;		// correlation between capture widths of different resonances
-static double fCorrFF = .5;		// correlation between fission widths of different resonances
-static double fCorrNG = 0;		// correlation between scattering and capture widths of different resonances
-static double fCorrNNB = .5;		// correlation between scattering cross sections in different energy bins
-static double fCorrGGB = .5;		// correlation between capture cross sections in different energy bins
-static double fCorrRP = -.5;		// correlation between resonance and potential scatterings
-static double fCorrNNRT = 0;		// correlation between scattering cross sections in the thermal and resonance regions
-static double fCorrGGRT = 0;		// correlation between capture cross sections in the thermal and resonance regions
 static int nZ=-1, nA=-1, nMat=0;	// Z, A, MAt number
 static double fAwr = 0;			// AWR
 static double fMin = .0, fMax = 1e38;	// lower and upper energy of resonance region
-static double fGammaFactor = 4;		// factor multiplied to the total width to estimate the resonance area
-static double fDefaultScatUnc = .1;	// default scattering width uncertainty
 static double fR = -1, fdR = -1;			// scattering radius
 static int nScatGroup = 0, nCaptGroup = 0, nFissGroup = 0;	// number of energy groups for scattering and capture reactions
 static int nFirstResScatGroup = -1, nFirstResCaptGroup = -1, nFirstResFissGroup = 0;	// index of first energy group where resonance starts
 static double *pScatGroup = NULL;	// scattering group energy boundariies
 static double *pCaptGroup = NULL;	// capture group energy boundariies
 static double *pFissGroup = NULL;	// fission group energy boundariies
-static double *pPotXS = NULL;		// potential scattering cross sections
-static double *pSctXS = NULL;		// average scattering cross sections
-static double *pCapXS = NULL;		// average capture cross sections
-static double *pFisXS = NULL;		// average fission cross sections
-static double *pPotUN = NULL;		// potential scattering cross sections uncertainties
-static double *pSctUN = NULL;		// scattering cross section uncertainties
-static double *pCapUN = NULL;		// capture cross section uncertainties
-static double *pFisUN = NULL;		// fission cross section uncertainties
 static double *pCumSctXS = NULL;
 static double *pCumSctXS2 = NULL;
 static double *pCumCapXS = NULL;
@@ -78,276 +41,12 @@ static double *pCumSctUN = NULL;
 static double *pCumCapUN = NULL;
 static double *pCumFisUN = NULL;
 
-double GetPotentialXS(int n)
-{
-  double e = (pScatGroup[n+1]+pScatGroup[n])/2;		// average group energy in eV
-  double k = 2.19677e-3*nA/(nA+1)*sqrt(e);		// k in units of sqrt(barn) = 1.0E-14 m
-  double lambda2 = 1/(k*k);				// lambda^2 in 1/barns^2
-  double kR = k*fR/10.0;				// kR. 1fm = 0.1*sqrt(barn)
-/*
-  double fR0_inf = .22;
-  double fR1_inf = .34;
-
-  double phi0 = -kR + asin(kR*fR0_inf);
-  double phi1 = -kR + atan(kR) + asin(kR*kR*kR*fR1_inf/(1+kR*kR));
-*/
-  double phi0 = kR;
-  double phi1 = kR - atan(kR);
-  double phi2 = kR - atan(3.0*kR/(3.0-kR*kR));
-/*
-  double T0 = 1-exp(-2*PI*3.79e-4*sqrt(e));
-  double T1 = 1-exp(-2*PI*.5e-4*kR*kR/(1+kR*kR)*sqrt(e));
-  return 4*PI*lambda2*sin(phi0)*sin(phi0)*(1-0.5*T0) +
-         12*PI*lambda2*sin(phi1)*sin(phi1)*(1-.5*T1) +
-*/
-  return 4*PI*lambda2*sin(phi0)*sin(phi0) +
-         12*PI*lambda2*sin(phi1)*sin(phi1) +
-         20*PI*lambda2*sin(phi2)*sin(phi2);
-/*
-  return 4*PI*lambda2*sin(kR)*sin(kR) +
-         12*PI*lambda2*sin(kR-atan(kR))*sin(kR-atan(kR)) +
-         20*PI*lambda2*sin(kR-atan(3*kR/(3-kR*kR)))*sin(kR-atan(3*kR/(3-kR*kR)));
-*/
-}
-
-double GetPotentialUnc(int n)
-{
-  double e = (pScatGroup[n+1]+pScatGroup[n])/2;
-  double kR = 2.19677e-3*nA/(nA+1)*sqrt(e)*fR*.1;
-  double phi0 = kR;
-  double phi1 = kR-atan(kR);
-
-  return 2*fdR/fR*kR*(sin(phi0)*cos(phi0)+3*(1-(1/(1+kR*kR)))*sin(phi1)*cos(phi1))/
-         (sin(phi0)*sin(phi0)+3*sin(phi1)*sin(phi1));
-}
-
-bool Calculate(int nth, double *pGroup, int nGroup, int &nFirstResGroup, int nReaction)
-{
-  double E, dE, J, gGn, Gn, dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea;
-  double E2,dE2,J2,gGn2,Gn2,dGn2,Gg2,dGg2,Gf2,dGf2,area2,darea2,farea2,dfarea2;
-
-// calculate average cross section in each energy group
-  nFirstResGroup = -1;
-  int n = 0;
-  for (int i=0;i<kernel.NoRes();i++) {
-    kernel.GetParameter(i, E, J, gGn, Gn, Gg, Gf, area, farea);
-    if (E < fMin) continue;
-    if (E > fMax) break;
-    if (Gn+Gg == 0) {
-      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E);
-      continue;
-    }
-    if (E >= pGroup[n+1]) {
-      for (n++;n < nGroup && E >= pGroup[n+1];n++);
-//      if (nFirstResGroup == -1) nFirstResGroup = n;
-      if (n == nGroup) break;
-    }
-    if (nFirstResGroup == -1) nFirstResGroup = n;
-
-//    printf("group %d: E=%lf,Gn=%lf,Gg=%lf,area=%lf\n", n+1, E, Gn, Gg, area);
-    if (nReaction == SCAT) {
-      pSctXS[n] += kernel.GetScatXS(i, pGroup[n], pGroup[n+1]);
-//      printf("group %d: %lf from E=%lf, width=%lf\n", n+1, kernel.GetScatXS(i, pGroup[n], pGroup[n+1]), E, Gn+Gg);
-    } else if (nReaction == CAPT) {
-      pCapXS[n] += kernel.GetCaptXS(i, pGroup[n], pGroup[n+1], bUseArea);
-    } else if (nReaction == FISS) {
-      pFisXS[n] += kernel.GetFissXS(i, pGroup[n], pGroup[n+1], bUseArea);
-    }
-    for (int l=n;l>0;l--) {
-      if (E-fGammaFactor*(Gn+Gg) < pGroup[l]) {
-        fprintf(stderr, "WARNING: group %d: from E = %lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+1, E);
-/*
-        if (nReaction == SCAT) pSctXS[l-1] += kernel.GetScatXS(i, pGroup[l-1], pGroup[l]);
-        else if (nReaction == CAPT) pCapXS[l-1] += kernel.GetCaptXS(i, pGroup[l-1], pGroup[l], bUseArea);
-        else if (nReaction == FISS) pFisXS[l-1] += kernel.GetFissXS(i, pGroup[l-1], pGroup[l], bUseArea);
-*/
-      }
-    }
-    for (int l=n;l+2<nGroup;l++) {
-      if (E+fGammaFactor*(Gn+Gg) >= pGroup[l+1]) {
-        fprintf(stderr, "WARNING: group %d: from E = %lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+2, E);
-/*
-        if (nReaction == SCAT) pSctXS[l+1] += kernel.GetScatXS(i, pGroup[l+1], pGroup[l+2]);
-        else if (nReaction == CAPT) pCapXS[l+1] += kernel.GetCaptXS(i, pGroup[l+1], pGroup[l+2], bUseArea);
-        else if (nReaction == FISS) pFisXS[l+1] += kernel.GetFissXS(i, pGroup[l+1], pGroup[l+2], bUseArea);
-*/
-      }
-    }
-  }
-
-// calculate uncertainties due to resonance parameters in each energy group
-  n = 0;
-  double factor1, factor2;
-  for (int i=0;i<kernel.NoRes();i++) {
-    kernel.GetParameter(i, E, dE, J, gGn, Gn, dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea);
-/*
-    printf("E=%4.1lf,J=%3.1lf,g=%5.3lf,2gGn=%10.4lf+-%7.3lf,Gg=%10.3lf+-%6.3lf\n",
-            E/1000, J, (2*J+1)/(2*(2*kernel.GetSpin()+1)),2*gGn,2*(2*J+1)/(2*(2*kernel.GetSpin()+1))*dGn, Gg, dGg);
-*/
-    if (E < fMin) continue;
-    if (E > fMax) break;
-    if (Gn+Gg == 0) {
-      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E);
-      continue;
-    }
-    if (E >= pGroup[n+1]) {
-      for (n++;n < nGroup && E >= pGroup[n+1];n++);
-      if (n == nGroup) break;
-    }
-    if (nReaction == SCAT && pSctXS[n] == 0) {
-      pSctUN[n] = 0;
-      if (nth == 0) fprintf(stderr, "WARNING: average scattering c/s is 0 at group %d... zero uncertainty is assigned!\n", n+1);
-      continue;
-    } else if (nReaction == CAPT && pCapXS[n] == 0) {
-      pCapUN[n] = 0;
-      if (nth == 0) fprintf(stderr, "WARNING: average capture c/s is 0 at group %d... zero uncertainty is assigned!\n", n+1);
-      continue;
-    } else if (nReaction == FISS && pFisXS[n] == 0) {
-      pFisUN[n] = 0;
-      if (nth == 0) fprintf(stderr, "WARNING: average fission c/s is 0 at group %d... zero uncertainty is assigned!\n", n+1);
-      continue;
-    }
-    if (Gn == 0) dGn = 0;
-    else {
-      if (dGn == 0) dGn = fDefaultScatUnc;
-      else dGn /= Gn;
-    }
-    if (Gg == 0) dGg = 0;
-    else dGg /= Gg;
-
-    if (nReaction == SCAT) factor1 = kernel.GetScatXS(i, pGroup[n], pGroup[n+1]);
-    else if (nReaction == CAPT) factor1 = kernel.GetCaptXS(i, pGroup[n], pGroup[n+1], bUseArea);
-    else if (nReaction == FISS) factor1 = kernel.GetFissXS(i, pGroup[n], pGroup[n+1], bUseArea);
-
-    for (int j=0;j<kernel.NoRes();j++) {
-      kernel.GetParameter(j, E2, dE2, J2, gGn2, Gn2, dGn2, Gg2, dGg2, Gf2, dGf2, area2, darea2, farea2, dfarea2);
-      if (E < fMin) continue;
-      if (E > fMax) break;
-      if (Gn2+Gg2 == 0) {
-        if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E2);
-        continue;
-      }
-      if (Gn2 == 0) dGn2 = 0;
-      else {
-        if (dGn2 == 0) dGn2 = fDefaultScatUnc;
-        else dGn2 /= Gn2;
-      }
-      if (Gg2 == 0) dGg2= 0;
-      else dGg2 /= Gg2;
-
-      if (nReaction == SCAT) factor2 = kernel.GetScatXS(j, pGroup[n], pGroup[n+1]);
-      else if (nReaction == CAPT) factor2 = kernel.GetCaptXS(j, pGroup[n], pGroup[n+1], bUseArea);
-      else if (nReaction == FISS) factor2 = kernel.GetFissXS(j, pGroup[n], pGroup[n+1], bUseArea);
-
-      if (E2 >= pGroup[n] && E2 < pGroup[n+1]) {
-        if (i == j) {
-          if (nReaction == SCAT) pSctUN[n] += factor1*factor2/(pSctXS[n]*pSctXS[n])*(
-                                  (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2-(Gn+Gg+Gg)*Gg2*dGn*dGg2*fCorrNGS-
-                                  Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*fCorrNGS+Gg*Gg2*dGg*dGg2)/
-                                  (Gn+Gg)/(Gn2+Gg2);
-          else if (nReaction == CAPT) {
-            if (bUseArea && darea != 0 && darea2 != 0)
-              pCapUN[n] += factor1*factor2*darea*darea2/area/area2/(pCapXS[n]*pCapXS[n]);
-            else
-              pCapUN[n] += factor1*factor2/(pCapXS[n]*pCapXS[n])*(
-                           Gg*Gg2*dGn*dGn2+
-                           Gg*Gn2*dGn*dGg2*fCorrNGS+Gn*Gg2*dGg*dGn2*fCorrNGS+
-                           Gn*Gn2*dGg*dGg2)/
-                           (Gn+Gg)/(Gn2+Gg2);
-          } else if (nReaction == FISS) {
-            if (bUseArea && dfarea != 0 && dfarea2 != 0)
-              pFisUN[n] += factor1*factor2*dfarea*dfarea2/farea/farea2/(pFisXS[n]*pFisXS[n]);
-            else
-              pFisUN[n] += factor1*factor2/(pFisXS[n]*pFisXS[n])*(
-                           Gf*Gf2*dGn*dGn2+
-                           Gf*Gn2*dGn*dGf2*fCorrNGS+Gn*Gf2*dGf*dGn2*fCorrNGS+
-                           Gn*Gn2*dGf*dGf2)/
-                           (Gn+Gg+Gf)/(Gn2+Gg2+Gf2);
-          }
-/*
-          if (n==79 && nReaction == SCAT) printf("DEBUG: %5.1lf & %5.1lf: factor1=%9.3lE,factor2=%9.3lE,Gn1+Gg1=%lg,"
-                                     "Gn2+Gg2=%lg,SctXS=%lg,g1=%lg,g2=%lg,value=%lg\n",
-                                     E, E2, factor1, factor2, Gn+Gg, Gn2+Gg2, pSctXS[n],pGroup[n],pGroup[n+1],
-                                     factor1*factor2/(pSctXS[n]*pSctXS[n])*(
-                                     (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2-(Gn+Gg+Gg)*Gg2*dGn*dGg2*fCorrNGS-
-                                     Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*fCorrNGS+Gg*Gg2*dGg*dGg2)/
-                                     (Gn+Gg)/(Gn2+Gg2));
-*/
-        } else {
-          if (nReaction == SCAT) pSctUN[n] += factor1*factor2/(pSctXS[n]*pSctXS[n])*(
-                                  (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2*fCorrNN-(Gn+Gg+Gg)*Gg2*dGn*dGg2*fCorrNG-
-                                  Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*fCorrNG+Gg*Gg2*dGg*dGg2*fCorrGG)/
-                                  (Gn+Gg)/(Gn2+Gg2);
-          else if (nReaction == CAPT) {
-            if (bUseArea && darea != 0 && darea2 != 0)
-              pCapUN[n] += fCorrGG*factor1*factor2*darea*darea2/area/area2/(pCapXS[n]*pCapXS[n]);
-            else
-              pCapUN[n] += factor1*factor2/(pCapXS[n]*pCapXS[n])*(
-                           Gg*Gg2*dGn*dGn2*fCorrNN+Gg*Gn2*dGn*dGg2*fCorrNG+
-                           Gn*Gg2*dGg*dGn2*fCorrNG+Gn*Gn2*dGg*dGg2*fCorrGG)/
-                           (Gn+Gg)/(Gn2+Gg2);
-          } else if (nReaction == FISS) {
-            if (bUseArea && dfarea != 0 && dfarea2 != 0)
-              pFisUN[n] += fCorrGG*factor1*factor2*dfarea*dfarea2/farea/farea2/(pFisXS[n]*pFisXS[n]);
-            else
-              pFisUN[n] += factor1*factor2/(pFisXS[n]*pFisXS[n])*(
-                           Gf*Gf2*dGn*dGn2*fCorrNN+Gf*Gn2*dGn*dGf2*fCorrNG+
-                           Gn*Gf2*dGf*dGn2*fCorrNG+Gn*Gn2*dGf*dGf2*fCorrGG)/
-                           (Gn+Gg+Gf)/(Gn2+Gg2+Gf2);
-          }
-/*
-          if (n==79 && nReaction == SCAT) printf("DEBUG: %5.1lf & %5.1lf: factor1=%9.3lE,factor2=%9.3lE,Gn1+Gg1=%lg,"
-                                     "Gn2+Gg2=%lg,SctXS=%lg,g1=%lg,g2=%lg,value=%lg\n",
-                                     E, E2, factor1, factor2, Gn+Gg, Gn2+Gg2, pSctXS[n],pGroup[n],pGroup[n+1],
-                                     factor1*factor2*(
-                                     (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2*fCorrNN-(Gn+Gg+Gg)*Gg2*dGn*dGg2*fCorrNG-
-                                     Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*fCorrNG+Gg*Gg2*dGg*dGg2*fCorrGG)/(pSctXS[n]*pSctXS[n])/
-                                     (Gn+Gg)/(Gn2+Gg2));
-*/
-        }
-      }
-    }
-  }
-
-// calculate overall uncertainties including potential scattering in each energy group
-
-  for (int i=0;i<nGroup;i++) {
-    if (nReaction == SCAT) {
-//      printf("Sct. Unc. [%d] = %lg\n", i, sqrt(pSctUN[i]));
-      pCumSctXS[i] += pSctXS[i];
-      pCumSctXS2[i] += pSctXS[i]*pSctXS[i];
-      if (i >= nFirstResGroup) {
-        if (bPotential) {
-          double total = pSctXS[i] + pPotXS[i];
-          double rat2 = (pSctXS[i]*pSctXS[i])/(total*total); 
-          if (fR == 0)
-            pSctUN[i] = pSctUN[i]*rat2;
-          else
-            // pSctUN[i] = (pSctUN[i] + fCorrRP*2*sqrt(pSctUN[i])*2*fdR/fR + 4*fdR/fR*fdR/fR)*rat2;
-            pSctUN[i] = (pSctUN[i] + 2.0*fCorrRP*sqrt(pSctUN[i])*pPotUN[i] + pPotUN[i]*pPotUN[i])*rat2;
-        }
-      }
-//      printf("Sct. Unc. [%d] = %lg\n", i, sqrt(pSctUN[i]));
-      pCumSctUN[i] += sqrt(pSctUN[i]);
-    } else if (nReaction == CAPT) {
-      pCumCapXS[i] += pCapXS[i];
-      pCumCapXS2[i] += pCapXS[i]*pCapXS[i];
-      pCumCapUN[i] += sqrt(pCapUN[i]);
-    } else if (nReaction == FISS) {
-      pCumFisXS[i] += pFisXS[i];
-      pCumFisXS2[i] += pFisXS[i]*pFisXS[i];
-      pCumFisUN[i] += sqrt(pFisUN[i]);
-    }
-  }
-  return true;
-}
-
 void Plot()
 {
   char tmp[20];
   FILE *fp;
-  double xer;
   int i;
+  double xer;
 
   // create a data file including the average scattering cross sections
   if ((fp = fopen("SCAT-XS.dat", "w")) == NULL) {
@@ -355,27 +54,20 @@ void Plot()
     exit(1);
   }
   for (i=0;i<nScatGroup;i++)
-//    fprintf(fp, "%10.4lE %11.5lE\n", pScatGroup[i]*1E-3, pCumSctXS[i]);
     fprintf(fp, "%10.4lE %11.5lE\n", pScatGroup[i], pCumSctXS[i]);
-//  fprintf(fp, "%10.4lE %11.5lE\n", pScatGroup[nScatGroup]*1E-3, pCumSctXS[nScatGroup-1]);
-  fprintf(fp, "%10.4lE %11.5lE\n", pScatGroup[nScatGroup], pCumSctXS[nScatGroup-1]);
+  fprintf(fp, "%10.4lE %11.5lE\n", pScatGroup[i], pCumSctXS[i-1]);
   fclose(fp);
 
   // create a data file including the uncertainties of scattering cross sections
-
   if ((fp = fopen("SCAT-UNC.dat", "w")) == NULL) {
     fputs("ERROR: cannot creat a file 'SCAT-UNC.dat'\n", stderr);
     exit(1);
   }
-
   for (i=0;i<nScatGroup;i++) {
     xer = 100.0*sqrt(pCumSctUN[i]*pCumSctUN[i] + pCumSctXS2[i]);
-    fprintf(fp, "%10.4lE  %5.2lf  %5.2lf  %5.2lf\n", pScatGroup[i], 100.0*pCumSctUN[i], 100.0*sqrt(pCumSctXS2[i]), xer );
-    // fprintf(fp, "%10.4lE %5.2lf\n", pScatGroup[i], pCumSctUN[i]*100);
+    fprintf(fp, "%10.4lE %5.2lf %5.2lf %5.2lf\n", pScatGroup[i], 100.0*pCumSctUN[i], 100.0*sqrt(pCumSctXS2[i]), xer);
   }
-  fprintf(fp, "%10.4lE  %5.2lf  %5.2lf  %5.2lf\n", pScatGroup[i], 100.0*pCumSctUN[i-1], 100.0*sqrt(pCumSctXS2[i-1]), xer );
-  // fprintf(fp, "%10.4lE %5.2lf\n", pScatGroup[nScatGroup], pCumSctUN[nScatGroup-1]*100);
-
+  fprintf(fp, "%10.4lE %5.2lf %5.2lf %5.2lf\n", pScatGroup[i], 100.0*pCumSctUN[i-1], 100.0*sqrt(pCumSctXS2[i-1]), xer);
   fclose(fp);
 
   if ((fp = fopen("scattering.gp", "w")) == NULL) {
@@ -388,14 +80,14 @@ void Plot()
   fprintf(fp, "set terminal postscript enhanced color\n");
   fprintf(fp, "set output 'scattering.ps'\n");
   fprintf(fp, "set title 'Scattering c/s uncertainties for %s' font 'Times-Roman,24'\n", tmp);
-  fprintf(fp, "set xlabel 'Incident Neutron energy' font 'Times-Roman,20'\n");
+  fprintf(fp, "set xlabel 'Incident neutron energy, eV' font 'Times-Roman,20'\n");
   fprintf(fp, "set ylabel 'Uncertainty, %%' font 'Times-Roman,20'\n");
   fprintf(fp, "set y2label 'Cross section, b' font 'Times-Roman,20'\n");
   fprintf(fp, "set log x\n");
   fprintf(fp, "set log y2\n");
   fprintf(fp, "set format y2 \"10^{%%L}\"\n");
   fprintf(fp, "set key left top\n");
-  fprintf(fp, "set xrange [1E-3:%lf]\n", pScatGroup[nScatGroup]/1000);
+  fprintf(fp, "set xrange [1E-3:%lf]\n", pScatGroup[nScatGroup]);
   fprintf(fp, "set ytics nomirror\n");
   fprintf(fp, "set y2tics 1e-5,0.1,1e5\n");
   fprintf(fp, "set my2tics 10\n");
@@ -418,27 +110,20 @@ void Plot()
     exit(1);
   }
   for (i=0;i<nCaptGroup;i++)
-//    fprintf(fp, "%10.4lE %11.5lE\n", pCaptGroup[i]*1E-3, pCumCapXS[i]);
     fprintf(fp, "%10.4lE %11.5lE\n", pCaptGroup[i], pCumCapXS[i]);
-//  fprintf(fp, "%10.4lE %11.5lE\n", pCaptGroup[nCaptGroup]*1E-3, pCumCapXS[nCaptGroup-1]);
-  fprintf(fp, "%10.4lE %11.5lE\n", pCaptGroup[nCaptGroup], pCumCapXS[nCaptGroup-1]);
+  fprintf(fp, "%10.4lE %11.5lE\n", pCaptGroup[i], pCumCapXS[i-1]);
   fclose(fp);
 
   // create a data file including the uncertainties of capture cross sections
-
   if ((fp = fopen("CAPT-UNC.dat", "w")) == NULL) {
     fputs("ERROR: cannot creat a file 'CAPT-UNC.dat'\n", stderr);
     exit(1);
   }
-
   for (i=0;i<nCaptGroup;i++) {
     xer = 100.0*sqrt(pCumCapUN[i]*pCumCapUN[i] + pCumCapXS2[i]);
-    fprintf(fp, "%10.4lE  %5.2lf  %5.2lf  %5.2lf\n", pCaptGroup[i], 100.0*pCumCapUN[i], 100.0*sqrt(pCumCapXS2[i]), xer );
-    // fprintf(fp, "%10.4lE %5.2lf\n", pCaptGroup[i], pCumCapUN[i]*100);
+    fprintf(fp, "%10.4lE %5.2lf %5.2lf %5.2lf\n", pCaptGroup[i], 100.0*pCumCapUN[i], 100.0*sqrt(pCumCapXS2[i]), xer);
   }
-  fprintf(fp, "%10.4lE  %5.2lf  %5.2lf  %5.2lf\n", pCaptGroup[i], 100.0*pCumCapUN[i-1], 100.0*sqrt(pCumCapXS2[i-1]), xer );
-  // fprintf(fp, "%10.4lE %5.2lf\n", pCaptGroup[nCaptGroup], pCumCapUN[nCaptGroup-1]*100);
-
+  fprintf(fp, "%10.4lE %5.2lf %5.2lf %5.2lf\n", pCaptGroup[i], 100.0*pCumCapUN[i-1], 100.0*sqrt(pCumCapXS2[i-1]), xer);
   fclose(fp);
 
   if ((fp = fopen("capture.gp", "w")) == NULL) {
@@ -451,14 +136,14 @@ void Plot()
   fprintf(fp, "set terminal postscript enhanced color\n");
   fprintf(fp, "set output 'capture.ps'\n");
   fprintf(fp, "set title 'Capture c/s uncertainties for %s' font 'Times-Roman,24'\n", tmp);
-  fprintf(fp, "set xlabel 'Incident Neutron energy' font 'Times-Roman,20'\n");
+  fprintf(fp, "set xlabel 'Incident neutron energy, eV' font 'Times-Roman,20'\n");
   fprintf(fp, "set ylabel 'Uncertainty, %%' font 'Times-Roman,20'\n");
   fprintf(fp, "set y2label 'Cross section, b' font 'Times-Roman,20'\n");
   fprintf(fp, "set log x\n");
   fprintf(fp, "set log y2\n");
   fprintf(fp, "set format y2 \"10^{%%L}\"\n");
   fprintf(fp, "set key left top\n");
-  fprintf(fp, "set xrange [1E-3:%lf]\n", pCaptGroup[nCaptGroup]/1000);
+  fprintf(fp, "set xrange [1E-3:%lf]\n", pCaptGroup[nCaptGroup]);
   fprintf(fp, "set ytics nomirror\n");
   fprintf(fp, "set y2tics 1e-5,0.1,1e5\n");
   fprintf(fp, "set my2tics 10\n");
@@ -476,7 +161,7 @@ void Plot()
   system("gnuplot capture.gp");
 }
 
-void WriteMatrix()
+void WriteMatrix(double fCorrNNRT, double fCorrGGRT, double fCorrNNB, double fCorrGGB)
 {
   FILE *fp;
   if (bScattering && (fp=fopen("scattering.matrix", "w")) != NULL) {
@@ -513,13 +198,33 @@ void WriteMatrix()
   }
 }
 
-void WriteEndf()
+void WriteEndf(char *szEndfFiles, double fCorrNNRT, double fCorrGGRT, double fCorrNNB, double fCorrGGB)
 {
   char s[67];
   CEndf endf;
   double E, J, gGn, Gn, Gg, Gf, area, farea;
   double dE, dGn, dGg, dGf, darea, dfarea;
   int i, j, n;
+
+  bool bFile2 = true;		// flag to create file 33 instead of file 2
+  bool bFile3 = true;		// flag to create file 33 instead of file 3
+  bool bFile32 = true;		// flag to create file 33 instead of file 32
+  bool bFile33 = false;		// flag to create file 33 instead of file 33
+  if (szEndfFiles[0] != 0) {
+    bFile2 = bFile3 = bFile32 = bFile33 = false;
+    char *p = strtok(szEndfFiles, ",");
+    while (p) {
+      int n = atoi(p);
+      switch (n) {
+        case 2: bFile2 = true; break;
+        case 3: bFile3 = true; break;
+        case 32: bFile32 = true; break;
+        case 33: bFile33 = true; break;
+      }
+      p = strtok(NULL, ",");
+    }
+  }
+
   sprintf(s, "%d-%s-%d.endf", nZ, GetSymbol(nZ), nA);
   if (!endf.Open(s, "w")) return;
   printf("ENDF file '%s' is created\n", s);
@@ -665,13 +370,38 @@ int main(int argc, char **argv)
   FILE *fp;
   char s[1024];
   char szEndfFiles[1024] = "";
+  char szAtlasDir[PATH_MAX];		// Atlas directory
+  char szScatGroup[PATH_MAX];		// file containing energy group information for scattering
+  char szCaptGroup[PATH_MAX];		// file containing energy group information for capture
+  char szFissGroup[PATH_MAX];		// file containing energy group information for fission
   bool bReassignLJ = false;		// flag to reassign L and J
   bool bPrintAtlas = false;		// flag to print resonance parameters
   bool bPrintPotential = false;		// flag to print potential cross sections
   double fScatteringXS = -1 , fdScatteringXS = -1;	// thermal scattering cross section
   double fCaptureXS = -1, fdCaptureXS = -1;		// thermal capture cross section
+  bool bPotential = true;		// flag to take into account potential scattering
+  double fGammaFactor = 4;		// factor multiplied to the total width to estimate the resonance area
+  double fDefaultScatUnc = .1;		// default scattering width uncertainty
+  bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
   int nIteration = 1000;
+  double *pSctXS = NULL;		// average scattering cross sections
+  double *pCapXS = NULL;		// average capture cross sections
+  double *pFisXS = NULL;		// average fission cross sections
+  double *pSctUN = NULL;		// scattering cross section uncertainties
+  double *pCapUN = NULL;		// capture cross section uncertainties
+  double *pFisUN = NULL;		// fission cross section uncertainties
   double fdGg0 = -1, fdGg1 = -1, fdGg2 = -1;
+  double fCorrNGS = 0;			// correlation between scattering and capture widths of single resonance
+  double fCorrNN = .5;			// correlation between scattering widths of different resonances
+  double fCorrGG = .5;			// correlation between capture widths of different resonances
+  double fCorrRP = -.5;			// correlation between resonance and potential scatterings
+  double fCorrFF = .5;			// correlation between fission widths of different resonances
+  double fCorrNG = 0;			// correlation between scattering and capture widths of different resonances
+  double fCorrNNB = .5;		// correlation between scattering cross sections in different energy bins
+  double fCorrGGB = .5;		// correlation between capture cross sections in different energy bins
+  double fCorrNNRT = 0;		// correlation between scattering cross sections in the thermal and resonance regions
+  double fCorrGGRT = 0;		// correlation between capture cross sections in the thermal and resonance regions
+
   if (argc < 2) {
     fputs("usage: kercen inputfile\n", stderr);
     exit(1);
@@ -743,20 +473,6 @@ int main(int argc, char **argv)
   if (szCaptGroup[0] != 0) bCapture = true;
   if (szFissGroup[0] != 0) bFission = true;
 
-  if (szEndfFiles[0] != 0) {
-    bFile2 = bFile3 = bFile32 = bFile33 = false;
-    char *p = strtok(szEndfFiles, ",");
-    while (p) {
-      int n = atoi(p);
-      switch (n) {
-        case 2: bFile2 = true; break;
-        case 3: bFile3 = true; break;
-        case 32: bFile32 = true; break;
-        case 33: bFile33 = true; break;
-      }
-      p = strtok(NULL, ",");
-    }
-  }
 
   puts("#############################################################");
   puts("##                                                         ##");
@@ -776,42 +492,6 @@ int main(int argc, char **argv)
   printf("Groupfile for capture   : %s\n", szCaptGroup);
   printf("Groupfile for fission   : %s\n", szFissGroup);
 
-  if (bScattering) {
-    if ((fp = fopen(szScatGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open '%s'\n", szScatGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nScatGroup);
-    pScatGroup = new double[nScatGroup+1];
-    for (int i=0;i<nScatGroup+1;i++) fscanf(fp, "%lf", pScatGroup+i);
-    fclose(fp);
-  }
-
-  if (bCapture) {
-    if ((fp = fopen(szCaptGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open '%s'\n", szCaptGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nCaptGroup);
-    pCaptGroup = new double[nCaptGroup+1];
-    for (int i=0;i<nCaptGroup+1;i++) fscanf(fp, "%lf", pCaptGroup+i);
-    fclose(fp);
-  }
- 
-  if (bFission) {
-    if ((fp = fopen(szFissGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open '%s'\n", szFissGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nFissGroup);
-    pFissGroup = new double[nFissGroup+1];
-    for (int i=0;i<nFissGroup+1;i++) fscanf(fp, "%lf", pFissGroup+i);
-    fclose(fp);
-  }
-
   kernel.SetBaseDirectory(szAtlasDir);
   if (!kernel.ReadProperties(nZ, nA)) {
     fprintf(stderr, "ERROR: Error occured reading Atlas properties from the directory %s\n", szAtlasDir);
@@ -827,7 +507,6 @@ int main(int argc, char **argv)
     fprintf(stderr, "ERROR: Atomic weight should be provided\n");
     exit(1);
   }
-
 
   if (!kernel.ReadParameters(nZ, nA)) {
     fprintf(stderr, "ERROR: Error occured reading Atlas paraemters from the directory %s\n", szAtlasDir);
@@ -887,46 +566,69 @@ int main(int argc, char **argv)
   printf("CorrNNB = %lf, CorrGGB = %lf\n", fCorrNNB, fCorrGGB);
   printf("CorrRP  = %lf\n", fCorrRP);
 
+  kernel.SetR(fR, fdR);
+  kernel.SetRange(fMin, fMax);
+  kernel.SetGammaFactor(fGammaFactor);
+  kernel.SetDefaultScatUnc(fDefaultScatUnc);
+  kernel.SetCorr(fCorrNN, fCorrGG, fCorrRP, fCorrNG, fCorrNGS);
+
   if (bScattering) {
-    pPotXS = new double[nScatGroup];
-    pPotUN = new double[nScatGroup];
+    if ((fp = fopen(szScatGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open '%s'\n", szScatGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nScatGroup);
+    pScatGroup = new double[nScatGroup+1];
+    for (int i=0;i<nScatGroup+1;i++) fscanf(fp, "%lf", pScatGroup+i);
+    fclose(fp);
     pSctXS = new double[nScatGroup];
     pSctUN = new double[nScatGroup];
-    pCumSctXS  = new double[nScatGroup];
+    pCumSctXS = new double[nScatGroup];
     pCumSctXS2 = new double[nScatGroup];
-    pCumSctUN  = new double[nScatGroup];
-    memset(pPotXS, 0, nScatGroup*sizeof(double));
-    memset(pPotUN, 0, nScatGroup*sizeof(double));
-    memset(pCumSctXS,  0, nScatGroup*sizeof(double));
+    pCumSctUN = new double[nScatGroup];
+    memset(pCumSctXS, 0, nScatGroup*sizeof(double));
     memset(pCumSctXS2, 0, nCaptGroup*sizeof(double));
-    memset(pCumSctUN,  0, nScatGroup*sizeof(double));
-    for (int i=0;i<nScatGroup;i++) {
-      pPotXS[i] = GetPotentialXS(i);
-      pPotUN[i] = GetPotentialUnc(i);
-    }
+    memset(pCumSctUN, 0, nScatGroup*sizeof(double));
   }
   if (bCapture) {
+    if ((fp = fopen(szCaptGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open '%s'\n", szCaptGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nCaptGroup);
+    pCaptGroup = new double[nCaptGroup+1];
+    for (int i=0;i<nCaptGroup+1;i++) fscanf(fp, "%lf", pCaptGroup+i);
+    fclose(fp);
     pCapXS = new double[nCaptGroup];
     pCapUN = new double[nCaptGroup];
-    pCumCapXS  = new double[nCaptGroup];
+    pCumCapXS = new double[nCaptGroup];
     pCumCapXS2 = new double[nCaptGroup];
-    pCumCapUN  = new double[nCaptGroup];
-    memset(pCumCapXS,  0, nCaptGroup*sizeof(double));
+    pCumCapUN = new double[nCaptGroup];
+    memset(pCumCapXS, 0, nCaptGroup*sizeof(double));
     memset(pCumCapXS2, 0, nCaptGroup*sizeof(double));
-    memset(pCumCapUN,  0, nCaptGroup*sizeof(double));
+    memset(pCumCapUN, 0, nCaptGroup*sizeof(double));
   }
   if (bFission) {
+    if ((fp = fopen(szFissGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open '%s'\n", szFissGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nFissGroup);
+    pFissGroup = new double[nFissGroup+1];
+    for (int i=0;i<nFissGroup+1;i++) fscanf(fp, "%lf", pFissGroup+i);
+    fclose(fp);
     pFisXS = new double[nFissGroup];
     pFisUN = new double[nFissGroup];
-    pCumFisXS  = new double[nFissGroup];
+    pCumFisXS = new double[nFissGroup];
     pCumFisXS2 = new double[nFissGroup];
-    pCumFisUN  = new double[nFissGroup];
-    memset(pCumFisXS,  0, nFissGroup*sizeof(double));
+    pCumFisUN = new double[nFissGroup];
+    memset(pCumFisXS, 0, nFissGroup*sizeof(double));
     memset(pCumFisXS2, 0, nCaptGroup*sizeof(double));
-    memset(pCumFisUN,  0, nFissGroup*sizeof(double));
+    memset(pCumFisUN, 0, nFissGroup*sizeof(double));
   }
-
-
 
   if (bPrintPotential) {
     puts("#############################################################");
@@ -935,52 +637,71 @@ int main(int argc, char **argv)
     puts("###############                                ##############");
     puts("#############################################################");
     for (int i=0;i<nScatGroup;i++)
-      printf("%3d %10.4lE - %10.4lE: %11.5lE\n", i+1, pScatGroup[i], pScatGroup[i+1], pPotXS[i]);
+      printf("%3d %10.4lE - %10.4lE: %11.5lE\n", i+1, pScatGroup[i], pScatGroup[i+1],
+             kernel.GetPotentialXS(pScatGroup[i], pScatGroup[i+1]));
   }
 
   for (int i=0;i<nIteration;i++) {
     kernel.AssignJ();
     if (bScattering) {
-      memset(pSctXS, 0, nScatGroup*sizeof(double));
-      memset(pSctUN, 0, nScatGroup*sizeof(double));
-      Calculate(i, pScatGroup, nScatGroup, nFirstResScatGroup, SCAT);
+      kernel.GetXSnUNC(i, SCAT, nScatGroup, pScatGroup, nFirstResScatGroup, pSctXS, pSctUN);
+      for (int n=0;n<nScatGroup;n++) {
+        pCumSctXS[n] += pSctXS[n];
+        pCumSctXS2[n] += pSctXS[n]*pSctXS[n];
+        pCumSctUN[n] += pSctUN[n];
+      }
     }
     if (bCapture) {
-      memset(pCapXS, 0, nCaptGroup*sizeof(double));
-      memset(pCapUN, 0, nCaptGroup*sizeof(double));
-      Calculate(i, pCaptGroup, nCaptGroup, nFirstResCaptGroup, CAPT);
+      kernel.GetXSnUNC(i, CAPT, nCaptGroup, pCaptGroup, nFirstResCaptGroup, pCapXS, pCapUN, bUseArea);
+      for (int n=0;n<nCaptGroup;n++) {
+        pCumCapXS[n] += pCapXS[n];
+        pCumCapXS2[n] += pCapXS[n]*pCapXS[n];
+        pCumCapUN[n] += pCapUN[n];
+      }
     }
     if (bFission) {
-      memset(pFisXS, 0, nFissGroup*sizeof(double));
-      memset(pFisUN, 0, nFissGroup*sizeof(double));
-      Calculate(i, pFissGroup, nFissGroup, nFirstResFissGroup, FISS);
+      kernel.GetXSnUNC(i, FISS, nFissGroup, pFissGroup, nFirstResFissGroup, pFisXS, pFisUN);
+      for (int n=0;n<nFissGroup;n++) {
+        pCumFisXS[n] += pFisXS[n];
+        pCumFisXS2[n] += pFisXS[n]*pFisXS[n];
+        pCumFisUN[n] += pFisUN[n];
+      }
     }
   }
 
   double xs2;
-
   if (bScattering) {
-    for (int n=nFirstResScatGroup;n<nScatGroup;n++) {
-      pCumSctXS[n] /= nIteration;
-      xs2 = pCumSctXS[n]*pCumSctXS[n];
-      pCumSctXS2[n] = max(pCumSctXS2[n]/nIteration - xs2,0.0)/xs2;
-      pCumSctUN[n] /= nIteration;
-      // pCumSctUN[n] = sqrt(pCumSctUN[n]*pCumSctUN[n] + pCumSctXS2[n]);
+    for (int n=0;n<nScatGroup;n++) {
+      if (n < nFirstResScatGroup) {
+      // assign thermal scattering cross section
+        pCumSctXS[n] = fScatteringXS;
+        pCumSctUN[n] = fdScatteringXS/fScatteringXS;
+      } else {
+        pCumSctXS[n] /= nIteration;
+        xs2 = pCumSctXS[n]*pCumSctXS[n];
+        pCumSctXS2[n] = max(pCumSctXS2[n]/nIteration - xs2, 0.0)/xs2;
+        pCumSctUN[n] /= nIteration;
+        // pCumSctUN[n] = sqrt(pCumSctUN[n]*pCumSctUN[n] + pCumSctXS2[n]);
+      }
     }
   }
-
   if (bCapture) {
-    for (int n=nFirstResCaptGroup;n<nCaptGroup;n++) {
-      pCumCapXS[n] /= nIteration;
-      xs2 = pCumCapXS[n]*pCumCapXS[n];
-      pCumCapXS2[n] = max(pCumCapXS2[n]/nIteration - xs2,0.0)/xs2;
-      pCumCapUN[n] /= nIteration;
-      // pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + pCumCapXS2[n]);
+    for (int n=0;n<nCaptGroup;n++) {
+      if (n < nFirstResCaptGroup) {
+      // calculate thermal capture cross section
+        pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
+        pCumCapUN[n] = fdCaptureXS/fCaptureXS;
+      } else {
+        pCumCapXS[n] /= nIteration;
+        xs2 = pCumCapXS[n]*pCumCapXS[n];
+        pCumCapXS2[n] = max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2;
+        pCumCapUN[n] /= nIteration;
+        // pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + pCumCapXS2[n]);
+      }
     }
   }
-
   if (bFission) {
-    for (int n=nFirstResFissGroup;n<nFissGroup;n++) {
+    for (int n=0;n<nFissGroup;n++) {
       pCumFisXS[n] /= nIteration;
       xs2 = pCumFisXS[n]*pCumFisXS[n];
       pCumFisXS2[n] = max(pCumFisXS2[n]/nIteration - xs2,0.0)/xs2;
@@ -989,26 +710,6 @@ int main(int argc, char **argv)
     }
   }
 
-  //  set thermal scattering and add potential scattering to resonance bins
-  if (bScattering) {
-    for (int n=0;n<nScatGroup;n++) {
-      if (n<nFirstResScatGroup) {
-        pCumSctUN[n] = fdScatteringXS/fScatteringXS;
-        pCumSctXS[n] = fScatteringXS;
-      } else {
-        if (bPotential) pCumSctXS[n] += pPotXS[n];
-        // printf("pot xs %d = %lf\n", n, GetPotentialXS(n));
-      }
-    }
-  }
-
-  // calculate thermal capture cross section
-  if (bCapture) {
-    for (int n=0;n<nFirstResCaptGroup;n++) {
-      pCumCapXS[n] = 2.0*fCaptureXS*(sqrt(0.0253*pCaptGroup[n+1]) - sqrt(0.0253*pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-      pCumCapUN[n] = fdCaptureXS/fCaptureXS;
-    }
-  }
 
   puts("#############################################################");
   puts("###############                                ##############");
@@ -1016,7 +717,7 @@ int main(int argc, char **argv)
   puts("###############                                ##############");
   puts("#############################################################");
 
-// calculate resonance integral and its uncertainty
+// calculate resonance integral and its uncertainty for scattering
   if (bScattering) {
     double sri=0, dsri=0;
     double u1, u2;
@@ -1054,6 +755,7 @@ int main(int argc, char **argv)
     printf("RI for scattering = %7.2lf +- %7.2lf (%6.2lf %%)\n", sri, dsri, dsri/sri*100);
   }
 
+// calculate resonance integral and its uncertainty for capture
   if (bCapture) {
     double cri=0, dcri=0;
     double u1, u2;
@@ -1091,18 +793,20 @@ int main(int argc, char **argv)
   }
 //  printf("first res. group = %d, %d\n", nFirstResScatGroup, nFirstResCaptGroup);
 
+// print the results
   if (bScattering) {
     puts("Average scattering cross sections");
     for (int i=0;i<nScatGroup;i++) {
-      printf("%3d %10.4lE - %10.4lE: Avg. XS = %11.5lE +- %5.2f%%\n",
-        i+1, pScatGroup[i], pScatGroup[i+1], pCumSctXS[i], 100.0*sqrt(pCumSctUN[i]*pCumSctUN[i] + pCumSctXS2[i]));
+      printf("%3d %10.4lE - %10.4lE: Avg. XS = %11.5lE +- %5.2f %%\n",
+//        i+1, pScatGroup[i], pScatGroup[i+1], pCumSctXS[i], 100.0*pCumSctUN[i]);
+        i+1, pScatGroup[i], pScatGroup[i+1], pCumSctXS[i], 100.0*sqrt(pCumSctUN[i]*pCumSctUN[i]+pCumSctXS2[i]));
     }
   }
   if (bCapture) {
     puts("Average capture cross sections");
     for (int i=0;i<nCaptGroup;i++) {
       printf("%3d %10.4lE - %10.4lE: Avg. XS = %11.5lE +- %5.2f %%\n",
-        i+1, pCaptGroup[i], pCaptGroup[i+1], pCumCapXS[i], 100.0*sqrt(pCumCapUN[i]*pCumCapUN[i] + pCumCapXS2[i]));
+        i+1, pCaptGroup[i], pCaptGroup[i+1], pCumCapXS[i], 100.0*sqrt(pCumCapUN[i]*pCumCapUN[i]+pCumCapXS2[i]));
     }
   }
 
@@ -1110,21 +814,19 @@ int main(int argc, char **argv)
     puts("Average fission cross sections");
     for (int i=0;i<nFissGroup;i++) {
       printf("%3d %10.4lE - %10.4lE: Avg. XS = %11.5lE +- %5.2f %%\n",
-        i+1, pFissGroup[i], pFissGroup[i+1], pCumFisXS[i], 100.0*sqrt(pCumFisUN[i]*pCumFisUN[i] + pCumFisXS2[i]));
+        i+1, pFissGroup[i], pFissGroup[i+1], pCumFisXS[i], 100.0*sqrt(pCumFisUN[i]*pCumFisUN[i]+pCumFisXS2[i]));
     }
   }
 
-//  WriteMatrix();
+  WriteMatrix(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
 
-  WriteEndf();
+  WriteEndf(szEndfFiles, fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
 
   Plot();
 
   if (pScatGroup) delete[] pScatGroup;
   if (pCaptGroup) delete[] pCaptGroup;
   if (pFissGroup) delete[] pFissGroup;
-  if (pPotXS) delete[] pPotXS;
-  if (pPotUN) delete[] pPotUN;
   if (pSctXS) delete[] pSctXS;
   if (pCapXS) delete[] pCapXS;
   if (pFisXS) delete[] pFisXS;
