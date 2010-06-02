@@ -10,7 +10,6 @@ makList = *.mak
 
 all:
 	@for makfile in $(makList); do (echo $$makfile; $(MAKE) -f $$makfile); done
-	chmod a+x pntzvdl
 
 clean:
 	rm *.o
