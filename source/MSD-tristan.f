@@ -1664,12 +1664,12 @@ C
      &               gjj = (2.d0*vsq + (usq - vsq))/fpi                  ! nilsson
                   ENDIF                                                  ! nilsson
                   pjj = 2.d0*SQRT(usq*vsq)/fpi                           ! nilsson
+                  DO k = 1, NRX
+                     fsq = WFR(k,n)**2
+                     GSD(k,I3) = GSD(k,I3) + gjj*fsq
+                     GSP(k,I3) = GSP(k,I3) + pjj*fsq
+                  ENDDO
                ENDIF                                                     ! nilsson
-               DO k = 1, NRX
-                  fsq = WFR(k,n)**2
-                  GSD(k,I3) = GSD(k,I3) + gjj*fsq
-                  GSP(k,I3) = GSP(k,I3) + pjj*fsq
-               ENDDO
             ENDDO
             IF (NRX.GE.0) RETURN
             WRITE (8,99025)
@@ -1960,6 +1960,7 @@ C     ENDDO                                                             ! nilsso
          ESP(n,I3) = 0.0
          VAMp(n,I3) = 0.0
          UAMp(n,I3) = 0.0
+         BLKSP(n,I3) = 0
       ENDDO
       Do n=1,14                                                         ! nilsson
          do m=1,500                                                     ! nilsson
