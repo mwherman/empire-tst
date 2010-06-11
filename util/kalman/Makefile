@@ -10,16 +10,17 @@
 #FFLAGS = -Wall
 
 #----GNU gFORTRAN compiler
-#FC     =  gfortran
+FC     =  gfortran
+FFLAGS = -std=legacy -O3
 #FFLAGS = 
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
 #FFLAGS =  -O3 -warn
-FFLAGS =  -O3 -ipo
+#FFLAGS =  -O3 -ipo
 #----flags for automatic parallelization
 #FFLAGS =  -parallel
 
