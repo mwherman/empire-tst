@@ -2,7 +2,7 @@
 FC     =  gfortran
 CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -pg -std=legacy -m64
+FFLAGS = -O3 -pg -std=legacy 
 #FFLAGS = -std=legacy
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check 
@@ -72,10 +72,10 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
 OBJE =      subecis06m.o
 
 empire:   $(OBJF) ecis
-	$(FC) -m64 -o $@ $(OBJF) $(OBJE)
+	$(FC) -o $@ $(OBJF) $(OBJE)
 
 ecis:	
-	$(FC) -O0 -pg -std=legacy -m64 -c subecis06m.f
+	$(FC) -O0 -pg -std=legacy -c subecis06m.f
 
 #for profiling (also turn on -pg option for each -o file above):
 #empire:   $(OBJF) $(OBJE)

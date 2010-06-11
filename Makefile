@@ -9,7 +9,7 @@
 # --------------------------------------------------------------
 
 compiler = "FC=gfortran"
-flags1 = "FFLAGS=-O3 -std=legacy -m64"
+#flags1 = "FFLAGS=-O3 -std=legacy -m64"
 flags2 = "FFLAGS=-O3 -std=legacy"
 
 # empire program. See also source/Makefile
