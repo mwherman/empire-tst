@@ -7,58 +7,60 @@ result in loss of precision, beyond just round-off errors.
 """
 import sys
 import numpy
-from numpy import dot
 
 
-def eliminateNegEigenvals( corrmat ):
-    """starting from correlation matrix, try to reduce negative eigenvalues
+def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
+    """start with correlation/covariance matrix, 
+    try to reduce negative eigenvalues
     1) get eigenvalues/vectors, check if any are negative
     2) generate new matrix after setting negative eigenvalues to zero
-    3) truncate result to 3 significant digits: beware precision loss!
+    3) truncate result to 'ndigit' significant digits: beware precision loss!
     May have to iterate these steps
     """
-    if not numpy.any( numpy.linalg.eigvals(corrmat)<0 ):
+    if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
         print "No negative eigenvalues"
-        return corrmat
+        return matrix
     
     print "negative eigenvalues encountered"
     
-    # save the original diagonal (should have only zeros/ones):
-    diagonal = corrmat.diagonal().copy()
-    if numpy.any( (diagonal!=0)*(diagonal!=1) ):
-        print "Bad values on diagonal: is this a correlation matrix?"
-        return corrmat
+    if corrmat:
+        # save the original diagonal (should have only zeros/ones):
+        diagonal = matrix.diagonal().copy()
+        if numpy.any( (diagonal!=0)*(diagonal!=1) ):
+            print "Bad values on diagonal: is this a correlation matrix?"
+            return matrix
     
     while True:
-        tmp = corrmat.copy()
-        P,D,Pinv = diagonalize( corrmat )
-        assert numpy.allclose( dot( dot(P,D), Pinv ) , corrmat )
+        tmp = matrix.copy()
+        P,D,Pinv = diagonalize( matrix )
+        assert numpy.allclose( dotproduct( P,D,Pinv ) , matrix )
         
         # toss out negative eigenvalues:
         D[ D<0 ] = 0
-        corrmat = dot( dot(P,D), Pinv)
+        matrix = dotproduct( P,D,Pinv )
         
         # round to 10 digits (eliminate floating-point errors in final digits)
-        # then chop (don't round) to only 3 sig figs
+        # then chop (don't round) to desired # of sig figs, 'ndigit'
         # need both steps, or may have non-symmetric matrix
-        corrmat = corrmat.round(10)
-        corrmat *= 1000
-        corrmat = corrmat.astype(int).astype(float)
-        corrmat /= 1000
+        matrix = matrix.round(10)
+        matrix *= 10**ndigit
+        matrix = matrix.astype(int).astype(float)
+        matrix /= 10**ndigit
         
-        assert numpy.all( corrmat==corrmat.T ), "non-symmetric matrix %s"%key
+        assert numpy.all( matrix==matrix.T ), "non-symmetric matrix %s"%key
         
-        # diagonal elements should be 0 or 1:
-        if numpy.any( (corrmat.diagonal()!=1.0) * (corrmat.diagonal()!=0) ):
+        # correlation matrix diagonal elements should be 0 or 1:
+        if corrmat and numpy.any( (matrix.diagonal()!=1.0) * 
+                (matrix.diagonal()!=0) ):
             print "Warning: diagonal was modified, reverting to original!"
-            corrmat[range(len(corrmat)),range(len(corrmat))] = diagonal
+            matrix[range(len(matrix)),range(len(matrix))] = diagonal
         
-        if not numpy.any( numpy.linalg.eigvals(corrmat)<0 ):
+        if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
             print "fixed"
-            return corrmat
-        if numpy.all( tmp==corrmat ):
+            return matrix
+        if numpy.all( tmp==matrix ):
             print "unsuccessful: iterated without changes"
-            return corrmat
+            return matrix
         print "iterating again!"
 
 
@@ -112,15 +114,14 @@ def dotproduct(*args):
     """Matrix multiplication (dot product) of all arguments
     dotproduct(V.T, A, V) = V.T * A * V
     """
-    """ explicit method, since reduce is gone in py3000
-    lis = list(args)
-    while len(lis)>1:
-        print len(lis)
-        b,a = lis.pop(), lis.pop()
-        lis.append( numpy.dot(a,b) )
-    return lis
+    # py3000 has no built-in reduce function:
     """
-    return reduce(dot,args)
+    res = args[0]
+    for arr in args[1:]
+    res = numpy.dot(res,arr)
+    return res
+    """
+    return reduce( numpy.dot,args )
 
 
 if __name__ == '__main__':

@@ -26,7 +26,7 @@ fi
 
 # SORT C4 FILE
 
-ln  -sf $work/$file.c4 C4.DAT
+ln  -sf $file.c4 C4.DAT
 
 cat >C4SORT.INP<<EOF
 \$* C4SORT
@@ -65,4 +65,6 @@ if [ -s $file.c4 ]; then
     echo 'File with EXFOR data in computational format is EMPTY'
   fi
 
+rm C4SORT.INP
+rm C4SORT.TMP
 exit

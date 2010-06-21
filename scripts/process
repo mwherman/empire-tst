@@ -92,7 +92,7 @@ ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
 
 $EMPIREDIR/util/legend/legend < LEGEND.INP
 rm ENDF.IN
-rm LEGEND.INP
+rm LEGEND.INP LEGEND.TMP
 mv LEGEND.OUT $work/$file-l.endf
 mv LEGEND.LST $work/$file-log.legend
 
