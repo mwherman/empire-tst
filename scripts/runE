@@ -112,7 +112,11 @@ def runE(proj):
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
     sys.stdout.flush() # print in correct order under 'qsub'
-    os.system('time nice %s/source/empire' % os.environ['EMPIREDIR'])
+    cmd = os.path.join(os.environ['EMPIREDIR'],'source','empire')
+    if os.name=='posix':    # not windows
+        os.system('time nice "%s"' % cmd)
+    else:
+        os.system('"%s"' % cmd)
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
     
@@ -157,7 +161,7 @@ def runE(proj):
     else:
         if not isEmpty('TARGET_COLL.DAT'):
             cp('TARGET_COLL.DAT',proj+'-lev.col')
-        
+    
     # beware, these commands make assumptions about the system:
     if not isEmpty('CUMULPLOT.PS'):
         # no exception if ps2ps not found, just a message:
@@ -252,12 +256,13 @@ def runE(proj):
         if isEmpty(proj+'.c4'):
             # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
             
-            os.system('%s/scripts/c4 %s' % (os.environ['EMPIREDIR'],proj) )
+            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
+            os.system('"%s" %s' % (cmd,proj) )
             
             # RUN c4sort TO SORT C4 DATA
             
-            os.system('%s/scripts/sortc4 %s' %
-                (os.environ['EMPIREDIR'],proj) )
+            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+            os.system('"%s" %s' % (cmd,proj) )
     
     # REMOVE EMPTY FILES:
     
@@ -282,7 +287,8 @@ def runE(proj):
     
     # Produce ZVD files from cross-section tables:
     if not isEmpty(proj+'.xsc'):
-        os.system('%s/scripts/cs2zvd %s' % (os.environ['EMPIREDIR'],proj) )
+        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','cs2zvd')
+        os.system('"%s" %s' % (cmd, proj))
     
     return 0
 
@@ -335,8 +341,10 @@ def mv(source, target, verbose=True):
     silent on error unless verbose=True
     """
     try:
-        os.rename(source, target)
-    except OSError, e:
+        shutil.move(source, target)
+        #os.rename(source, target)  # no work on Windows
+    #except OSError, e:
+    except IOError, e:
         if verbose:
             print (e)
     """
@@ -367,6 +375,8 @@ def ln(source, target, verbose=True):
     except OSError, e:
         if verbose:
             print (e)
+    except AttributeError:  # no symlink on windows
+        mv(source, target, verbose)
 
 
 def isEmpty(filename):

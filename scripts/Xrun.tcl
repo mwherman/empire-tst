@@ -5304,8 +5304,32 @@ proc vTcl:project:info {} {
 # USER DEFINED PROCEDURES
 #
 #############################################################################
-## Procedure:  editFile
+## Procedure:  runCmd
+proc ::runCmd {args} {
+    if {$::tcl_platform(os)=="Windows NT"} {
+        set cmd [concat {cmd.exe /c start} $args]
+        eval exec $cmd
+    } else {
+        #set cmd [concat {xterm -e} $args]
+        #eval exec $cmd
+        # or, if we don't want to open new xterm each time:
+        execpipe $args
+    }
+}
+#############################################################################
+## Procedure:  runNoWin
+# same as runCmd, but shows no output unless errors occur
+proc runNoWin {args} {
+    if {$::tcl_platform(os)=="Windows NT"} {
+        set cmd [concat {cmd.exe /c} $args]
+        eval exec $cmd
+    } else {
+        eval exec $args
+    }
+}
 
+#############################################################################
+## Procedure:  editFile
 proc ::editFile {filename} {
         ## make empire flexible enough to handle opening files
         ## on various platforms. C.Mattoon, Nov 13 2008
@@ -5323,8 +5347,7 @@ proc ::editFile {filename} {
         } elseif {$::tcl_platform(os)=="Linux"} {
                 exec $::editor $filename &
         } else {
-                # most likely windows, I don't know how to handle this yet
-                # need a windows machine to test with...
+                # most likely windows.
                 exec $::editor $filename &
         }
 }
@@ -5348,10 +5371,41 @@ proc ::pspdfView {filename} {
         } elseif {$::tcl_platform(os)=="Linux"} {
                 exec $::psviewer $filename &
         } else {
-                # most likely windows, I don't know how to handle this yet
-                # need a windows machine to test with
+                # most likely windows.
                 exec $::psviewer $filename &
         }
+}
+#############################################################################
+## execpipe: put output to terminal
+proc execpipe {COMMAND} {
+
+ if { [catch {open "| $COMMAND 2>@stdout"} FILEHANDLE] } {
+   return "Can't open pipe for '$COMMAND'"
+ }
+
+ set PIPE $FILEHANDLE
+ fconfigure $PIPE -buffering none
+
+ set OUTPUT ""
+
+ while { [gets $PIPE DATA] >= 0 } {
+   puts $DATA
+   append OUTPUT $DATA "\n"
+ }
+
+ if { [catch {close $PIPE} ERRORMSG] } {
+   if { [string equal "$ERRORMSG" "child process exited abnormally"] } {
+     # this error means there was nothing on stderr (which makes sense) and
+     # there was a non-zero exit code - this is OK as we intentionally send
+     # stderr to stdout, so we just do nothing here (and return the output)
+   } else {
+     return "Error '$ERRORMSG' on closing pipe for '$COMMAND'"
+   }
+ }
+
+ regsub -all -- "\n$" $OUTPUT "" STRIPPED_STRING
+ return "$STRIPPED_STRING"
+
 }
 #############################################################################
 ## Procedure:  refreshsvndirectory
@@ -5380,13 +5434,13 @@ global widget
 #   set Starget [lindex $elspl 1]
 #   set Atarget [lindex $elspl 2]
 #   set mulinputn za[expr $Ztarget*1000+$Atarget]$mulstname
-#   exec xterm -e store $archdir $mulinputn
+#   runCmd store $archdir $mulinputn
 #}
-exec xterm -e $::env(EMPIREDIR)/scripts/storemul $archdir/ $mulstname
+runCmd $::env(EMPIREDIR)/scripts/storemul $archdir/ $mulstname
 if {$mulstname == ""} {
-    exec mv default.inp $archdir/
+    file rename default.inp $archdir/
     } else {
-    exec mv $mulstname.inp $archdir/
+    file rename $mulstname.inp $archdir/
 }
 adjourn .top75
 }
@@ -5625,31 +5679,31 @@ foreach el $stablist {
    }
    set seninpexists [file exists $mulinputn-inp.sen]
    if {$seninpexists == 0 } {file copy $::env(EMPIREDIR)/scripts/skel-inp.sen $mulinputn-inp.sen}
-   if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e $::env(EMPIREDIR)/scripts/runE $mulinputn}
-   if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $mulinputn 1111 }
-   if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $mulinputn}
-   if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $mulinputn 1111 }
-   if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
+   if {$cempire == 1 && [file exists $mulinputn.inp ]} {runCmd $::env(EMPIREDIR)/scripts/runE $mulinputn}
+   if {$cformat == 1 && [file exists $mulinputn.out ]} {runCmd $::env(EMPIREDIR)/scripts/format $mulinputn 1111 }
+   if {$cverify == 1 && [file exists $mulinputn.endf]} {runCmd $::env(EMPIREDIR)/scripts/verify $mulinputn}
+   if {$cprepro == 1 && [file exists $mulinputn.endf]} {runCmd $::env(EMPIREDIR)/scripts/process $mulinputn 1111 }
+   if {$cplot == 1 && [file exists $mulinputn-s.endf]} {runCmd $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
-#  exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111
+#  runCmd $::env(EMPIREDIR)/scripts/run $mulinputn 1111
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
    if {$el == ""} continue
-   eval exec $::env(EMPIREDIR)/scripts/cleansel $mulinputn $el
+   runCmd $::env(EMPIREDIR)/scripts/cleansel $mulinputn $el
       if {$el == $ckmlog} {
-         exec rm -f $mulinputn.x42c4_errs
-         exec rm -f $mulinputn.x42c4_lst
-         exec rm -f $mulinputn.war
+         file delete $mulinputn.x42c4_errs
+         file delete $mulinputn.x42c4_lst
+         file delete $mulinputn.war
       }
    }
 }
 if {$mulstname == ""} {
-    exec cp $::env(EMPIREDIR)/scripts/skel.inp default.inp
-    exec cp $::env(EMPIREDIR)/scripts/skel-inp.sen default-inp.sen
+    file copy $::env(EMPIREDIR)/scripts/skel.inp default.inp
+    file copy $::env(EMPIREDIR)/scripts/skel-inp.sen default-inp.sen
     } else {
-    exec cp $::env(EMPIREDIR)/scripts/skel.inp $mulstname.inp
-    exec cp $::env(EMPIREDIR)/scripts/skel-inp.sen $mulstname-inp.sen
+    file copy $::env(EMPIREDIR)/scripts/skel.inp $mulstname.inp
+    file copy $::env(EMPIREDIR)/scripts/skel-inp.sen $mulstname-inp.sen
     }
 }
 #############################################################################
@@ -5730,7 +5784,7 @@ set repository "https://ndclx4.bnl.gov/svn/put-your-svn-repository"
 set selsvnfilelist ""
 set svnfilelist ""
 #set svnfilelist [lsort [glob -nocomplain *]]
-#set output [exec svn log]
+#set output [runCmd svn log]
 set output ""
 set output [split $output "\n"]
 foreach elm $output {
@@ -5848,7 +5902,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/run $file $mat &
+        -command {runCmd $::env(EMPIREDIR)/scripts/run $file $mat
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5862,7 +5916,7 @@ adjourn .top75} \
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file &
+        -command {runCmd $::env(EMPIREDIR)/scripts/runE $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5991,7 +6045,7 @@ adjourn .top75} \
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all files related to the project except input?" "" 0 No Yes ] == 1} {
-exec $::env(EMPIREDIR)/scripts/clean $file
+runCmd $::env(EMPIREDIR)/scripts/clean $file
 adjourn .top75}} \
         -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -6067,7 +6121,7 @@ adjourn .top75}} \
     button $site_11_0.cpd72 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec xterm -e cp -i $::env(EMPIREDIR)/scripts/skel.inp $file.inp
+        -command {file copy $::env(EMPIREDIR)/scripts/skel.inp $file.inp
 adjourn .top75
 editFile $file.inp } \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
@@ -6095,11 +6149,11 @@ editFile $file.inp } \
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file}
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file $mat }
-if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file}
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file $mat }
-if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file}
+        -command {if {$cempire == 1 && [file exists $file.inp ]} {runCmd $::env(EMPIREDIR)/scripts/runE $file}
+if {$cformat == 1 && [file exists $file.out ]} {runCmd $::env(EMPIREDIR)/scripts/format $file $mat }
+if {$cverify == 1 && [file exists $file.endf]} {runCmd $::env(EMPIREDIR)/scripts/verify $file}
+if {$cprepro == 1 && [file exists $file.endf]} {runCmd $::env(EMPIREDIR)/scripts/process $file $mat }
+if {$cplot == 1 && [file exists $file-s.endf]} {runCmd $::env(EMPIREDIR)/scripts/plot $file}
 
 # create list of possible ddx plots
 ddlist
@@ -6362,8 +6416,8 @@ exit} \
     button $site_10_0.but73 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {exec rm -r $file-tl
-exec xterm -e $::env(EMPIREDIR)/scripts/run $file
+        -command { file delete -force $file-tl
+runCmd $::env(EMPIREDIR)/scripts/run $file
 adjourn .top75
 # create list of possible ddx plots
 ddlist
@@ -6390,10 +6444,10 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec gvim LSTTAB.INP
-#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
-exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file omp1 1
-exec xterm -e $::env(EMPIREDIR)/scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
+#editFile LSTTAB.INP
+#file move LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+runCmd $::env(EMPIREDIR)/scripts/zvvddx $file omp1 1
+runCmd $::env(EMPIREDIR)/scripts/zvv $file-omp1.zvd $file-omp1R.zvd
 
 
 set ddx $memlist(omp2)
@@ -6419,9 +6473,9 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
-exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file omp2 1
-exec xterm -e $::env(EMPIREDIR)/scripts/zvv $file-omp2.zvd $file-omp2R.zvd &
+#file move LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+runCmd $::env(EMPIREDIR)/scripts/zvvddx $file omp2 1
+runCmd $::env(EMPIREDIR)/scripts/zvv $file-omp2.zvd $file-omp2R.zvd
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
@@ -6434,8 +6488,8 @@ adjourn .top75} \
     button $site_10_0.but71 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {exec mv $file-omp1.zvd $file-omp1R.zvd
-exec mv $file-omp2.zvd $file-omp2R.zvd
+        -command {file rename $file-omp1.zvd $file-omp1R.zvd
+file rename $file-omp2.zvd $file-omp2R.zvd
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -padx 1m \
@@ -6459,7 +6513,7 @@ adjourn .top75} \
     button $site_10_0.cpd81 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #d9d9d9 \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/x4interface $file &
+        -command {runCmd $::env(EMPIREDIR)/scripts/x4interface $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6472,7 +6526,7 @@ adjourn .top75} \
     button $site_10_0.cpd82 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4 $file &
+        -command {runCmd $::env(EMPIREDIR)/scripts/c4 $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6496,7 +6550,7 @@ adjourn .top75} \
     button $site_10_0.cpd84 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/sortc4 $file &
+        -command {runCmd $::env(EMPIREDIR)/scripts/sortc4 $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6572,7 +6626,7 @@ adjourn .top75} \
     set site_8_2 [lindex [$top.tab88 childsite] 2]
     ::iwidgets::scrolledlistbox $site_8_2.scr82 \
         -activebackground #dcdcdc \
-        -dblclickcommand {exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb $file [selection get] &} \
+        -dblclickcommand {runCmd $::env(EMPIREDIR)/scripts/zvcomb $file [selection get] } \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \
@@ -6674,7 +6728,7 @@ adjourn .top75} \
     button $site_9_0.but96 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/zvd $file $mt &
+        -command {runCmd $::env(EMPIREDIR)/scripts/zvd $file $mt
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6690,7 +6744,7 @@ adjourn .top75} \
         -command {if {[tk_dialog .dialogsi Confirm "Confirm deleting all selected files" "" 0 No Yes ] == 1} {
 foreach el $seleczvvlist {
    if {$el == ""} continue
-   exec rm -f $el
+   file delete -force $el
 }
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
@@ -6704,7 +6758,7 @@ adjourn .top75 }} \
     button $site_9_0.but88 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file  &
+        -command {runCmd $::env(EMPIREDIR)/scripts/guizvv.tcl $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6717,7 +6771,7 @@ adjourn .top75} \
     button $site_9_0.but89 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/zvpl $file &
+        -command {runCmd $::env(EMPIREDIR)/scripts/zvpl $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6859,8 +6913,8 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
-exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
+#file rename LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
+runCmd $::env(EMPIREDIR)/scripts/zvvddx $file $multi} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Plot the list } 
     vTcl:DefineAlias "$site_9_0.but81" "Button131" vTcl:WidgetProc "Toplevel1" 1
@@ -7162,8 +7216,8 @@ lappend dd} \
     button $site_9_0.but123 \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #d9d9d9 \
-        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ eval\ exec\ $::env(EMPIREDIR)/scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_errs\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.x42c4_lst\n\ \ \ \ \ \ exec\ rm\ -f\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nset\ work\ \[pwd\]\nset\ detlist\ \"\"\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\n\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"n\"\ \}\ continue\n\ \ \ set\ detl\ \[glob\ -path\ \$work/\$file-tl/\ \$el*\]\n\ \ \ set\ detll\ \[split\ \$detl\ \"\ \"\]\n\ \ \ foreach\ edel\ \$detll\ \{\n\ \ \ file\ delete\ \$edel\n\ \ \ \}\n\}\nif\ \{\$ctldir\ ==\ 1\}\ \{\n\ \ \ file\ delete\ -force\ \$work/\$file-tl\n\}\n\nadjourn\ .top75\n\} \
-        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -command if\ \{\[tk_dialog\ .dialogsi\ Confirm\ \"Are\ you\ sure\ you\ want\ to\ delete\ all\ selected\ files?\"\ \"\"\ 0\ No\ Yes\ \]\ ==\ 1\}\ \{\nset\ delist\ \"\"\nlappend\ delist\ \$cklo\ \$cksh\ \$cklog\ \$ckendf\ \ \$ckplots\ \$ckx4\ \$ckc4\ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckriplomp\ \ \$ckdiromp\ \ \$ckzvv\ \ \$cklev\ \$ckcollev\ \ \\\n\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \$ckinp\ \$ckfisinp\ \n\nforeach\ el\ \$delist\ \{\n\ \ \ if\ \{\$el\ ==\ \"\"\}\ continue\n\ \ \ runCmd\ $::env(EMPIREDIR)/scripts/cleansel\ \$file\ \$el\n\ \ \ if\ \{\$el\ ==\ \$cklog\}\ \{\n\ \ \ \ \ \ file\ delete\ \$file.x42c4_errs\n\ \ \ \ \ \ file\ delete\ \$file.x42c4_lst\n\ \ \ \ \ \ file\ delete\ \$file.war\n\ \ \ \ \ \ \}\n\}\n\nset\ work\ \[pwd\]\nset\ detlist\ \"\"\nlappend\ detlist\ \$ctln\ \$ctlp\ \$ctla\n\nforeach\ el\ \$detlist\ \{\n\ \ \ if\ \{\$el\ ==\ \"n\"\ \}\ continue\n\ \ \ set\ detl\ \[glob\ -path\ \$work/\$file-tl/\ \$el*\]\n\ \ \ set\ detll\ \[split\ \$detl\ \"\ \"\]\n\ \ \ foreach\ edel\ \$detll\ \{\n\ \ \ file\ delete\ \$edel\n\ \ \ \}\n\}\nif\ \{\$ctldir\ ==\ 1\}\ \{\n\ \ \ file\ delete\ -force\ \$work/\$file-tl\n\}\n\nadjourn\ .top75\n\} \
+		-cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -state normal -text {Delete selected files} \
         -wraplength 80 
@@ -7176,7 +7230,7 @@ lappend dd} \
         -activebackground #eccceccceccc -activeforeground Red \
         -background #efefef \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to clean the project?" "" 0 No Yes ] == 1} {
-exec $::env(EMPIREDIR)/scripts/clean $file
+runCmd $::env(EMPIREDIR)/scripts/clean $file
 adjourn .top75
 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
@@ -7190,8 +7244,8 @@ adjourn .top75
     button $site_9_0.but125 \
         -activebackground #ff0000 -activeforeground White -background #efefef \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the project?" "" 0 No Yes ] == 1} {
-exec $::env(EMPIREDIR)/scripts/clean $file
-exec rm -f $file.inp
+runCmd $::env(EMPIREDIR)/scripts/clean $file
+file delete -force $file.inp
 adjourn .top75 }} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -7217,11 +7271,11 @@ if {$exten == ".ps"} {
 } elseif {$exten == ".eps"} {
   pspdfView $selecfile
 } elseif {$exten == ".zvd"} {
-  exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb $selecfile &
+  runCmd $::env(EMPIREDIR)/scripts/zvcomb $selecfile
 } elseif {$exten == ".gnudat"} {
-  exec xterm -e cp $selecfile  corrplot.dat
-  exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.plt
-  exec xterm -e rm corrplot.dat
+  file copy $selecfile  corrplot.dat
+  runCmd gnuplot $::env(EMPIREDIR)/util/kalman/corr.plt
+  file delete corrplot.dat
 } else {
   editFile $selecfile
 }} \
@@ -7282,7 +7336,7 @@ ddlist} \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
 foreach el $selecfilelist {
    if {$el == ""} continue
-   exec rm -f $el
+   file delete -force $el
 }
 set selecfile ""
 
@@ -7349,7 +7403,7 @@ adjourn .top75 }} \
         tk_dialog .msgbox "Error" "Please enter a revision number." info 0 OK
       } else {
         if {[file isdirectory rev$rev1] == 0} {
-          set output [exec svn checkout $repository@$rev1 rev$rev1]
+          set output [runCmd svn checkout $repository@$rev1 rev$rev1]
           set output [split $output "\n"]
           foreach elm $output {
             lappend svnoutput $elm
@@ -7357,15 +7411,15 @@ adjourn .top75 }} \
           refreshsvndirectory
         }
         if {[file isdirectory rev$rev2] == 0} {
-          set output [exec svn checkout $repository@$rev2 rev$rev2]
+          set output [runCmd svn checkout $repository@$rev2 rev$rev2]
           set output [split $output "\n"]
           foreach elm $output {
             lappend svnoutput $elm
           }
           refreshsvndirectory
         }
-        exec $::env(EMPIREDIR)/scripts/mtacomp $mt comp $file rev$rev1 Rev$rev1 rev$rev2/$file-s.endf Rev$rev2
-        exec $::env(EMPIREDIR)/scripts/zvv $file-${mt}comp.zvd &
+        runCmd $::env(EMPIREDIR)/scripts/mtacomp $mt comp $file rev$rev1 Rev$rev1 rev$rev2/$file-s.endf Rev$rev2
+        runCmd $::env(EMPIREDIR)/scripts/zvv $file-${mt}comp.zvd &
       }
     }
         } \
@@ -7383,7 +7437,7 @@ adjourn .top75 }} \
       tk_dialog .msgbox "Error" "Please enter a revision number." info 0 OK
     } else {
       if {$rev1 != ""} {
-        set output [exec svn checkout $repository@$rev1 rev$rev1]
+        set output [runCmd svn checkout $repository@$rev1 rev$rev1]
         set output [split $output "\n"]
         foreach elm $output {
           lappend svnoutput $elm
@@ -7391,7 +7445,7 @@ adjourn .top75 }} \
         refreshsvndirectory
       }
       if {$rev2 != ""} {
-        set output [exec svn checkout $repository@$rev2 rev$rev2]
+        set output [runCmd svn checkout $repository@$rev2 rev$rev2]
         set output [split $output "\n"]
         foreach elm $output {
           lappend svnoutput $elm
@@ -7526,14 +7580,14 @@ adjourn .top75 }} \
         -command {
 #  set addfiles {}
   foreach el $selsvnfilelist {
-      lappend svnoutput [exec svn add $el]
+      lappend svnoutput [runCmd svn add $el]
 #      lappend addfiles $el
   }
 #  set output [open "| svn add $addfiles"]
 #  set svnoutput $svnoutput$output
 
   if {[tk_dialog .dialogsi Confirm "Do you want to commit your changes right now?" "" 0 No Yes ] == 1} {
-    set output [exec svn commit --editor-cmd $editor]
+    set output [runCmd svn commit --editor-cmd $editor]
     set output [split $output "\n"]
     foreach elm $output {
       lappend svnoutput $elm
@@ -7550,7 +7604,7 @@ adjourn .top75 }} \
     button $site_9_0.cpd71 \
         \
         -command {
-    set output [exec svn commit --editor-cmd $editor]
+    set output [runCmd svn commit --editor-cmd $editor]
     set output [split $output "\n"]
     foreach elm $output {
       lappend svnoutput $elm
@@ -7566,7 +7620,7 @@ adjourn .top75 }} \
     button $site_9_0.cpd72 \
         \
         -command {
-    set output [exec svn update]
+    set output [runCmd svn update]
     set output [split $output "\n"]
     foreach elm $output {
       lappend svnoutput $elm
@@ -7608,7 +7662,7 @@ adjourn .top75 }} \
         -command {
     if {[tk_dialog .dialogsi Confirm "Do you really want to delete the selected directories or files?" "" 0 No Yes ] == 1} {
       foreach el $selsvnfilelist {
-        lappend svnoutput [exec rm -rf $el]
+        lappend svnoutput [file delete -force $el]
       }
       refreshsvndirectory
     }
@@ -7696,7 +7750,7 @@ if {$archexten == ".ps"} {
 } elseif {$archexten == ".eps"} {
   pspdfView $archdir/$archfile
 } elseif {$archexten == ".zvd"} {
-  exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb $archdir/$archfile &
+  runCmd $::env(EMPIREDIR)/scripts/zvcomb $archdir/$archfile
 } else {
   editFile $archdir/$archfile
 }} \
@@ -7740,7 +7794,7 @@ set archfile [lindex $selarchfilelist 0]} \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
 foreach el $selarchfilelist {
    if {$el == ""} continue
-   exec rm -f $archdir/$el
+   file delete -force $archdir/$el
 }
 set archfile ""
 adjourn .top75 }} \
@@ -7773,7 +7827,7 @@ adjourn .top75 }} \
     button $site_9_0.but84 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/store $archdir $file
+        -command {runCmd $::env(EMPIREDIR)/scripts/store $archdir $file
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -7785,7 +7839,7 @@ adjourn .top75} \
     button $site_9_0.but86 \
         -activebackground #ff0000 -activeforeground white -background #efefef \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the folder?" "" 0 No Yes ] == 1} {
-exec rm -r -f $archdir
+file delete -force $archdir
 set archdirlist [glob -nocomplain $::env(EMPIREDIR)/*/]
 set archfilelist "" }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
@@ -8191,7 +8245,7 @@ adjourn .top75} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
         -command {cd $::env(EMPIREDIR)/source
-exec xterm -e make
+runCmd make
 cd $workdir} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text Make 
@@ -8204,7 +8258,7 @@ cd $workdir} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
         -command {cd $::env(EMPIREDIR)/
-exec xterm -e make
+runCmd make
 cd $workdir} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc -text {Make all} 
@@ -8352,8 +8406,8 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu92 add command \
-        -command {exec {cp skel.inp
-$file.inp &}} -label {Create input} 
+        -command {file copy skel.inp $file.inp 
+		} -label {Create input} 
     $site_3_0.menu92 add command \
         -command { editFile $file.inp } -label {Edit input} 
     $site_3_0.menu92 add command \
@@ -8381,39 +8435,39 @@ $file.inp &}} -label {Create input}
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/run $file $mat &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/run $file $mat } \
         -label {Full run} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/runE $file } \
         -label EMPIRE 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/format $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/format $file } \
         -label Format 
     $site_3_0.menu93 add command \
         \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/addresonances $file } \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
         \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-elastic $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/rec-elastic $file } \
         -label {Reconstruct elastic} 
     $site_3_0.menu93 add command \
         \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/accept-omp-fit $file } \
         -label {Accept last OMP fit} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/verify $file } \
         -label Verify 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/process $file 1 &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/process $file 1 } \
         -label PreProcess 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/plotlst $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/plotlst $file } \
         -label {Plot list} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/plot $file } \
         -label PLOTC4 
     $site_3_0.menu93 add separator \
         
@@ -8429,12 +8483,11 @@ $file.inp &}} -label {Create input}
   set Zinp [lindex $line 1]
   set ZAinp [expr int($Zinp*1000+$Ainp)]
   set Mass $Ainp
-  exec $::env(EMPIREDIR)/scripts/resonance.tcl $ZAinp $mat $Mass &} \
+  runCmd $::env(EMPIREDIR)/scripts/resonance.tcl $ZAinp $mat $Mass } \
         -label {Resonance Module} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add cascade \
-        -menu "$site_3_0.menu93.men87" \
         -command {} -label {KALMAN for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men87 \
@@ -8442,63 +8495,63 @@ $file.inp &}} -label {Create input}
         -tearoff 1 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 1 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 1 $mat $EXPDAT} \
         -label {Total MT=1} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 2 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 2 $mat $EXPDAT} \
         -label {Elastic MT=2} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 4 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 4 $mat $EXPDAT} \
         -label {Inelastic MT=4} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 16 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 16 $mat $EXPDAT} \
         -label {(z,2n) MT=16} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
         -label {(z,3n) MT=17} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
         -label {(n,g) MT=102} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
         -label {(n,p) MT=103} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
         -label {(n,a) MT=107} 
     $site_4_0.men87 add command \
         \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label {all MTs} 
     $site_3_0.menu93 add command \
         \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/mergeMF33 $file 
-exec xterm -e mv $file-m.endf $file.endf
-exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
+        -command {runCmd $::env(EMPIREDIR)/scripts/mergeMF33 $file 
+file rename $file-m.endf $file.endf
+runCmd $::env(EMPIREDIR)/scripts/stanef $file } \
         -label {Insert covariances} 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/stanef $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/stanef $file } \
         -label STANEF 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/runjoy $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/runjoy $file } \
         -label NJOY 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4 $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/c4 $file } \
         -label X4TOC4 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/sortc4 $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/sortc4 $file } \
         -label SORTC4 
     $top.m88 add cascade \
         -menu "$top.m88.menu94" -command {} -label Outputs 
@@ -8576,7 +8629,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command {exec lyx $file.lyx &} -font {} -label Report 
     $site_3_0.men70 add command \
         \
-        -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
+        -command {editFile $file.war} \
         -font {} -label {EMPIRE warnings} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.empend } -font {} -label {EMPEND Log} 
@@ -8624,13 +8677,13 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/zvpl $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/zvpl $file } \
         -label {Create ZVV plot} 
     $site_3_0.menu95 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/zvcomb } \
         -label {Merge ZVV plots} 
     $site_3_0.menu95 add command \
-        -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/guizvv.tcl $file } \
         -label {Compare ZVV} 
     $site_3_0.menu95 add separator \
         
@@ -8642,12 +8695,12 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     menu $site_3_0.men77 \
         -disabledforeground #a1a4a1 -tearoff 0 
     $site_3_0.men77 add command \
-        -command {exec $::env(EMPIREDIR)/scripts/clean $file &} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/clean $file } \
         -label {Clean project} 
     $site_3_0.men77 add command \
         \
-        -command {exec $::env(EMPIREDIR)/scripts/clean $file
-exec rm -f $file.inp} \
+        -command {runCmd $::env(EMPIREDIR)/scripts/clean $file
+file delete -force $file.inp} \
         -label {Delete project} 
     $top.m88 add cascade \
         -menu "$top.m88.men78" -command {} -label Source 
@@ -8660,7 +8713,7 @@ exec rm -f $file.inp} \
     $site_3_0.men78 add command \
         \
         -command {cd $::env(EMPIREDIR)/source
-exec xterm -e make &
+runCmd make
 cd $workdir} \
         -label Compile 
     $top.m88 add separator \

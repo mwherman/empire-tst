@@ -48,7 +48,8 @@ def main():
     
     # run EMPEND and FIXUP:
     
-    os.system(" %s/scripts/runE %s" % (empire, project) )
+    cmd = os.path.join(empire,'scripts','runE')
+    os.system('"%s" %s' % (cmd, project) )
     #p = Popen(" %s/scripts/runE %s" % (empire, project), shell=True)
     #sts = os.waitpid(p.pid, 0)  # returns (pid, status)
     
@@ -73,7 +74,8 @@ def main():
     for l in o.split('\n'):
         print (l)
     """
-    i,o,e = os.popen3( '%s/scripts/format %s %s' %(empire, project, mat) )
+    cmd = os.path.join(empire,'scripts','format')
+    i,o,e = os.popen3( '"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -86,7 +88,8 @@ def main():
     
     # run ENDF-6 checking codes
     
-    i,o,e = os.popen3('%s/scripts/verify %s %s' %(empire, project, mat) )
+    cmd = os.path.join(empire,'scripts','verify')
+    i,o,e = os.popen3('"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -97,7 +100,8 @@ def main():
     
     # run preprocessing codes in preparation for plotting
     
-    i,o,e = os.popen3('%s/scripts/process %s %s' %(empire, project, mat) )
+    cmd = os.path.join(empire,'scripts','process')
+    i,o,e = os.popen3('"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -173,8 +177,10 @@ def mv(source, target, verbose=True):
     silent on error unless verbose=True
     """
     try:
-        os.rename(source, target)
-    except OSError, e:
+        shutil.move(source, target)
+        #os.rename(source, target)  # no work on Windows
+    #except OSError, e:
+    except IOError, e:
         if verbose:
             print (e)
     """
