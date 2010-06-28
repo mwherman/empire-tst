@@ -379,10 +379,10 @@ int main(int argc, char **argv)
   bool bPrintPotential = false;		// flag to print potential cross sections
   double fScatteringXS = -1 , fdScatteringXS = -1;	// thermal scattering cross section
   double fCaptureXS = -1, fdCaptureXS = -1;		// thermal capture cross section
-  bool bPotential = true;		// flag to take into account potential scattering
   double fGammaFactor = 4;		// factor multiplied to the total width to estimate the resonance area
   double fDefaultScatUnc = .1;		// default scattering width uncertainty
   bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
+  bool bBound = false;			// flag to take bound resonances into account
   int nIteration = 1000;
   double *pSctXS = NULL;		// average scattering cross sections
   double *pCapXS = NULL;		// average capture cross sections
@@ -440,7 +440,7 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "gammafactor")) fGammaFactor = atof(value);
     else if (!strcasecmp(key, "reassignlj")) bReassignLJ = atoi(value);
     else if (!strcasecmp(key, "usearea")) bUseArea = atoi(value);
-    else if (!strcasecmp(key, "potential")) bPotential = atoi(value);
+    else if (!strcasecmp(key, "bound")) bBound = atoi(value);
     else if (!strcasecmp(key, "endffiles")) strcpy(szEndfFiles, value);
     else if (!strcasecmp(key, "printatlas")) bPrintAtlas = atoi(value);
     else if (!strcasecmp(key, "printpotential")) bPrintPotential = atoi(value);
@@ -518,8 +518,8 @@ int main(int argc, char **argv)
     for (int i=0;i<kernel.NoRes();i++) {
       kernel.GetParameter(i, E, dE, J, gGn, Gn, dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea);
       if (dGn == 0) dGn = fDefaultScatUnc * Gn;
-      printf("E=%6.2lf, J=%3.1lf, g=%4.2lf, gGn=%9.3lE+-%9.3lE, Gg=%9.3lE+-%9.3lE, Gf=%9.3lE+-%9.3lE, A=%9.3lE+-%9.3lE, Af=%9.3lE+-%9.3lE\n",
-              E/1000, J, (2*J+1)/(2*(2*kernel.GetSpin()+1)),gGn,(2*J+1)/(2*(2*kernel.GetSpin()+1))*dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea);
+      printf("E=%10.2lf, J=%3.1lf, g=%4.2lf, gGn=%9.3lE+-%9.3lE, Gg=%9.3lE+-%9.3lE, Gf=%9.3lE+-%9.3lE, A=%9.3lE+-%9.3lE, Af=%9.3lE+-%9.3lE\n",
+              E, J, (2*J+1)/(2*(2*kernel.GetSpin()+1)),gGn,(2*J+1)/(2*(2*kernel.GetSpin()+1))*dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea);
     }
   }
 
@@ -644,7 +644,7 @@ int main(int argc, char **argv)
   for (int i=0;i<nIteration;i++) {
     kernel.AssignJ();
     if (bScattering) {
-      kernel.GetXSnUNC(i, SCAT, nScatGroup, pScatGroup, nFirstResScatGroup, pSctXS, pSctUN);
+      kernel.GetXSnUNC(i, SCAT, nScatGroup, pScatGroup, nFirstResScatGroup, pSctXS, pSctUN, bBound?BOUND:0);
       for (int n=0;n<nScatGroup;n++) {
         pCumSctXS[n] += pSctXS[n];
         pCumSctXS2[n] += pSctXS[n]*pSctXS[n];
@@ -652,7 +652,7 @@ int main(int argc, char **argv)
       }
     }
     if (bCapture) {
-      kernel.GetXSnUNC(i, CAPT, nCaptGroup, pCaptGroup, nFirstResCaptGroup, pCapXS, pCapUN, bUseArea);
+      kernel.GetXSnUNC(i, CAPT, nCaptGroup, pCaptGroup, nFirstResCaptGroup, pCapXS, pCapUN, bUseArea?USEAREA:0);
       for (int n=0;n<nCaptGroup;n++) {
         pCumCapXS[n] += pCapXS[n];
         pCumCapXS2[n] += pCapXS[n]*pCapXS[n];
@@ -660,12 +660,18 @@ int main(int argc, char **argv)
       }
     }
     if (bFission) {
-      kernel.GetXSnUNC(i, FISS, nFissGroup, pFissGroup, nFirstResFissGroup, pFisXS, pFisUN);
+      kernel.GetXSnUNC(i, FISS, nFissGroup, pFissGroup, nFirstResFissGroup, pFisXS, pFisUN, bUseArea?USEAREA:0);
       for (int n=0;n<nFissGroup;n++) {
         pCumFisXS[n] += pFisXS[n];
         pCumFisXS2[n] += pFisXS[n]*pFisXS[n];
         pCumFisUN[n] += pFisUN[n];
       }
+    }
+
+    if (i == 0) {
+      WriteMatrix(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
+      WriteEndf(szEndfFiles, fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
+      Plot();
     }
   }
 
@@ -679,7 +685,8 @@ int main(int argc, char **argv)
       } else {
         pCumSctXS[n] /= nIteration;
         xs2 = pCumSctXS[n]*pCumSctXS[n];
-        pCumSctXS2[n] = max(pCumSctXS2[n]/nIteration - xs2, 0.0)/xs2;
+        if (xs2 == 0) pCumSctXS2[n] = 0;
+        else pCumSctXS2[n] = max(pCumSctXS2[n]/nIteration - xs2, 0.0)/xs2;
         pCumSctUN[n] /= nIteration;
         // pCumSctUN[n] = sqrt(pCumSctUN[n]*pCumSctUN[n] + pCumSctXS2[n]);
       }
@@ -694,7 +701,8 @@ int main(int argc, char **argv)
       } else {
         pCumCapXS[n] /= nIteration;
         xs2 = pCumCapXS[n]*pCumCapXS[n];
-        pCumCapXS2[n] = max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2;
+        if (xs2 == 0) pCumCapXS2[n] = 0;
+        else pCumCapXS2[n] = max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2;
         pCumCapUN[n] /= nIteration;
         // pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + pCumCapXS2[n]);
       }
@@ -704,7 +712,8 @@ int main(int argc, char **argv)
     for (int n=0;n<nFissGroup;n++) {
       pCumFisXS[n] /= nIteration;
       xs2 = pCumFisXS[n]*pCumFisXS[n];
-      pCumFisXS2[n] = max(pCumFisXS2[n]/nIteration - xs2,0.0)/xs2;
+      if (xs2 == 0) pCumFisXS2[n] = 0;
+      else pCumFisXS2[n] = max(pCumFisXS2[n]/nIteration - xs2,0.0)/xs2;
       pCumFisUN[n] /= nIteration;
       // pCumFisUN[n] = sqrt(pCumFisUN[n]*pCumFisUN[n] + pCumFisXS2[n]);
     }
@@ -720,7 +729,7 @@ int main(int argc, char **argv)
 // calculate resonance integral and its uncertainty for scattering
   if (bScattering) {
     double sri=0, dsri=0;
-    double u1, u2;
+    double uri1, uri2;
     for (int i=0;i<nScatGroup;i++) {
       if (pScatGroup[i+1] <= 0.5) continue;
       if (pScatGroup[i] < 0.5) {
@@ -730,66 +739,97 @@ int main(int argc, char **argv)
                 0.5, pScatGroup[i+1],
                 pCumSctXS[i]*(pScatGroup[i+1]-0.5)/(pScatGroup[i+1]-pScatGroup[i])/sqrt(0.5*pScatGroup[i+1])*(pScatGroup[i+1]-0.5));
 */
-        u1 = pCumSctUN[i]*pCumSctXS[i]*(pScatGroup[i+1]-0.5)/(pScatGroup[i+1]-pScatGroup[i])/sqrt(0.5*pScatGroup[i+1])*(pScatGroup[i+1]-0.5);
+        uri1 = pCumSctUN[i]*pCumSctXS[i]*(pScatGroup[i+1]-0.5)/(pScatGroup[i+1]-pScatGroup[i])/sqrt(0.5*pScatGroup[i+1])*(pScatGroup[i+1]-0.5);
       } else {
         sri += pCumSctXS[i]/sqrt(pScatGroup[i]*pScatGroup[i+1])*(pScatGroup[i+1]-pScatGroup[i]);
-        u1 = pCumSctUN[i]*pCumSctXS[i]/sqrt(pScatGroup[i]*pScatGroup[i+1])*(pScatGroup[i+1]-pScatGroup[i]);
+        uri1 = pCumSctUN[i]*pCumSctXS[i]/sqrt(pScatGroup[i]*pScatGroup[i+1])*(pScatGroup[i+1]-pScatGroup[i]);
       }
 
       for (int j=0;j<nScatGroup;j++) {
         if (pScatGroup[j+1] <= 0.5) continue;
         if (pScatGroup[j] < 0.5)
-          u2 = pCumSctUN[j]*pCumSctXS[j]*(pScatGroup[j+1]-0.5)/(pScatGroup[j+1]-pScatGroup[j])/sqrt(0.5*pScatGroup[j+1])*(pScatGroup[j+1]-0.5);
+          uri2 = pCumSctUN[j]*pCumSctXS[j]*(pScatGroup[j+1]-0.5)/(pScatGroup[j+1]-pScatGroup[j])/sqrt(0.5*pScatGroup[j+1])*(pScatGroup[j+1]-0.5);
         else
-          u2 = pCumSctUN[j]*pCumSctXS[j]/sqrt(pScatGroup[j]*pScatGroup[j+1])*(pScatGroup[j+1]-pScatGroup[j]);
-        if (i == j) dsri += u1 * u2;
+          uri2 = pCumSctUN[j]*pCumSctXS[j]/sqrt(pScatGroup[j]*pScatGroup[j+1])*(pScatGroup[j+1]-pScatGroup[j]);
+        if (i == j) dsri += uri1 * uri2;
         else {
-          if (i < nFirstResScatGroup && j < nFirstResScatGroup) dsri += u1 * u2;
+          if (i < nFirstResScatGroup && j < nFirstResScatGroup) dsri += uri1 * uri2;
           else if ((i < nFirstResScatGroup && j >= nFirstResScatGroup) ||
-                   (i >= nFirstResScatGroup && j < nFirstResScatGroup)) dsri += fCorrNNRT * u1 * u2;
-          else if (i >= nFirstResScatGroup && j >= nFirstResScatGroup) dsri += fCorrNNB * u1 * u2;
+                   (i >= nFirstResScatGroup && j < nFirstResScatGroup)) dsri += fCorrNNRT * uri1 * uri2;
+          else if (i >= nFirstResScatGroup && j >= nFirstResScatGroup) dsri += fCorrNNB * uri1 * uri2;
         }
       }
     }
     dsri = sqrt(dsri);
-    printf("RI for scattering = %7.2lf +- %7.2lf (%6.2lf %%)\n", sri, dsri, dsri/sri*100);
+    printf("Resonance integral for scattering     = %8.2lE +- %8.2lE (%6.2lf %%)\n", sri, dsri, dsri/sri*100);
   }
 
 // calculate resonance integral and its uncertainty for capture
   if (bCapture) {
     double cri=0, dcri=0;
-    double u1, u2;
+    double cmx=0, dcmx=0;
+    double uri1, uri2;
+    double umx1, umx2;
+    double a = fAwr/(1+fAwr);
     for (int i=0;i<nCaptGroup;i++) {
-      if (pCaptGroup[i+1] <= 0.5) continue;
+      cmx += 2/sqrt(PI)*a*a/9E8*pCumCapXS[i]*.5*(pCaptGroup[i]+pCaptGroup[i+1])*exp(-a*.5*(pCaptGroup[i]+pCaptGroup[i+1])/3E4)*(pCaptGroup[i+1]-pCaptGroup[i]);
+      umx1 = 2/sqrt(PI)*a*a/9E8*pCumCapUN[i]*pCumCapXS[i]*.5*(pCaptGroup[i]+pCaptGroup[i+1])*exp(-a*.5*(pCaptGroup[i]+pCaptGroup[i+1])/3E4)*(pCaptGroup[i+1]-pCaptGroup[i]);
+//      printf("group %d: cmx=%lf\n", i+1, 2/sqrt(PI)*a*a/9E8*pCumCapXS[i]*.5*(pCaptGroup[i]+pCaptGroup[i+1])*exp(-a*.5*(pCaptGroup[i]+pCaptGroup[i+1])/3E4)*(pCaptGroup[i+1]-pCaptGroup[i]));
+      if (pCaptGroup[i+1] <= 0.5 || pCaptGroup[i] >= 1e5) continue;
       if (pCaptGroup[i] < 0.5) {
-        cri += pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i])/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5);
+        cri += pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i]);
 /*
-        printf("%10.4lE - %10.4lE: ri for capt = %8.4lf\n",
+        printf("%10.4lE - %10.4lE: RI for capt = %8.4lf\n",
                 0.5, pCaptGroup[i+1],
-                pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i])/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5));
+                pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i]));
 */
-        u1 = pCumCapUN[i]*pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i])/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5);
+        uri1 = pCumCapUN[i]*pCumCapXS[i]*(pCaptGroup[i+1]-0.5)/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i]);
+//        uri1 = pCumCapUN[i]*pCumCapXS[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5);
+//        uri1 = pCumCapUN[i]*(pCaptGroup[i+1]-0.5)/sqrt(0.5*pCaptGroup[i+1])*(pCaptGroup[i+1]-0.5)/(pCaptGroup[i+1]-pCaptGroup[i]);
+      } else if (pCaptGroup[i+1] > 1e5) {
+        cri += pCumCapXS[i]*(1e5-pCaptGroup[i])/sqrt(pCaptGroup[i]*1e5)*(1e5-pCaptGroup[i])/(pCaptGroup[i+1]-pCaptGroup[i]);
+/*
+        printf("%10.4lE - %10.4lE: RI for capt = %8.4lf\n",
+                pCaptGroup[i+1], 1e5,
+                pCumCapXS[i]*(1e5-pCaptGroup[i])/sqrt(pCaptGroup[i]*1e5)*(1e5-pCaptGroup[i])/(pCaptGroup[i+1]-pCaptGroup[i]));
+*/
+        uri1 = pCumCapUN[i]*pCumCapXS[i]*(1e5-pCaptGroup[i])/sqrt(pCaptGroup[i]*1e5)*(1e5-pCaptGroup[i])/(pCaptGroup[i+1]-pCaptGroup[i]);
       } else {
         cri += pCumCapXS[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-pCaptGroup[i]);
-        u1 = pCumCapUN[i]*pCumCapXS[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-pCaptGroup[i]);
+//        printf("%10.4lE - %10.4lE: unc for capt = %8.4lf ri for capt = %8.4lf\n", pCaptGroup[i], pCaptGroup[i+1], pCumCapUN[i], pCumCapXS[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-pCaptGroup[i]));
+        uri1 = pCumCapUN[i]*pCumCapXS[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-pCaptGroup[i]);
+//        uri1 = pCumCapUN[i]/sqrt(pCaptGroup[i]*pCaptGroup[i+1])*(pCaptGroup[i+1]-pCaptGroup[i]);
       }
       for (int j=0;j<nCaptGroup;j++) {
-        if (pCaptGroup[j+1] <= 0.5) continue;
-        if (pCaptGroup[j] < 0.5)
-          u2 = pCumCapUN[j]*pCumCapXS[j]*(pCaptGroup[j+1]-0.5)/(pCaptGroup[j+1]-pCaptGroup[j])/sqrt(0.5*pCaptGroup[j+1])*(pCaptGroup[j+1]-0.5);
-        else
-          u2 = pCumCapUN[j]*pCumCapXS[j]/sqrt(pCaptGroup[j]*pCaptGroup[j+1])*(pCaptGroup[j+1]-pCaptGroup[j]);
-        if (i == j) dcri += u1 * u2;
+        umx2 = 2/sqrt(PI)*a*a/9E8*pCumCapUN[j]*pCumCapXS[j]*.5*(pCaptGroup[j]+pCaptGroup[j+1])*exp(-a*.5*(pCaptGroup[j]+pCaptGroup[j+1])/3E4)*(pCaptGroup[j+1]-pCaptGroup[j]);
+        if (i == j) dcmx += umx1 * umx2;
         else {
-          if (i < nFirstResCaptGroup && j < nFirstResCaptGroup) dcri += u1 * u2;
+          if (i < nFirstResCaptGroup && j < nFirstResCaptGroup) dcri += umx1 * umx2;
           else if ((i < nFirstResCaptGroup && j >= nFirstResCaptGroup) ||
-                   (i >= nFirstResCaptGroup && j < nFirstResCaptGroup)) dcri += fCorrGGRT * u1 * u2;
-          else if (i >= nFirstResCaptGroup && j >= nFirstResCaptGroup) dcri += fCorrGGB * u1 * u2;
+                   (i >= nFirstResCaptGroup && j < nFirstResCaptGroup)) dcmx += fCorrGGRT * umx1 * umx2;
+          else if (i >= nFirstResCaptGroup && j >= nFirstResCaptGroup) dcmx += fCorrGGB * umx1 * umx2;
+        }
+        if (pCaptGroup[j+1] <= 0.5 || pCaptGroup[j] >= 1e5) continue;
+        if (pCaptGroup[j] < 0.5)
+          uri2 = pCumCapUN[j]*pCumCapXS[j]*(pCaptGroup[j+1]-0.5)/sqrt(0.5*pCaptGroup[j+1])*(pCaptGroup[j+1]-0.5)/(pCaptGroup[j+1]-pCaptGroup[j]);
+//          uri2 = pCumCapUN[j]*pCumCapXS[j]/sqrt(pCaptGroup[j]*pCaptGroup[j+1])*(pCaptGroup[j+1]-0.5);
+//          uri2 = pCumCapUN[j]*(pCaptGroup[j+1]-0.5)/sqrt(0.5*pCaptGroup[j+1])*(pCaptGroup[j+1]-0.5)/(pCaptGroup[j+1]-pCaptGroup[j]);
+        else
+          uri2 = pCumCapUN[j]*pCumCapXS[j]/sqrt(pCaptGroup[j]*pCaptGroup[j+1])*(pCaptGroup[j+1]-pCaptGroup[j]);
+//          uri2 = pCumCapUN[j]/sqrt(pCaptGroup[j]*pCaptGroup[j+1])*(pCaptGroup[j+1]-pCaptGroup[j]);
+        if (i == j) dcri += uri1 * uri2;
+        else {
+          if (i < nFirstResCaptGroup && j < nFirstResCaptGroup) dcri += uri1 * uri2;
+          else if ((i < nFirstResCaptGroup && j >= nFirstResCaptGroup) ||
+                   (i >= nFirstResCaptGroup && j < nFirstResCaptGroup)) dcri += fCorrGGRT * uri1 * uri2;
+          else if (i >= nFirstResCaptGroup && j >= nFirstResCaptGroup) dcri += fCorrGGB * uri1 * uri2;
         }
       }
     }
     dcri = sqrt(dcri);
-    printf("RI for capture    = %7.2lf +- %7.2lf (%6.2lf %%)\n", cri, dcri, dcri/cri*100);
+    dcmx = sqrt(dcmx);
+    printf("Resonance integral for capture        = %8.2lE +- %8.2lE (%6.2lf %%)\n", cri, dcri, dcri/cri*100);
+    printf("30-keV Maxwellian average for capture = %8.2lE +- %8.2lE (%6.2lf %%)\n", cmx, dcmx, dcmx/cmx*100);
   }
 //  printf("first res. group = %d, %d\n", nFirstResScatGroup, nFirstResCaptGroup);
 
@@ -817,12 +857,11 @@ int main(int argc, char **argv)
         i+1, pFissGroup[i], pFissGroup[i+1], pCumFisXS[i], 100.0*sqrt(pCumFisUN[i]*pCumFisUN[i]+pCumFisXS2[i]));
     }
   }
-
+/*
   WriteMatrix(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
-
   WriteEndf(szEndfFiles, fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
-
   Plot();
+*/
 
   if (pScatGroup) delete[] pScatGroup;
   if (pCaptGroup) delete[] pCaptGroup;
@@ -834,8 +873,11 @@ int main(int argc, char **argv)
   if (pCapUN) delete[] pCapUN;
   if (pFisUN) delete[] pFisUN;
   if (pCumSctXS) delete[] pCumSctXS;
+  if (pCumSctXS2) delete[] pCumSctXS2;
   if (pCumCapXS) delete[] pCumCapXS;
+  if (pCumCapXS2) delete[] pCumCapXS2;
   if (pCumFisXS) delete[] pCumFisXS;
+  if (pCumFisXS2) delete[] pCumFisXS2;
   if (pCumSctUN) delete[] pCumSctUN;
   if (pCumCapUN) delete[] pCumCapUN;
   if (pCumFisUN) delete[] pCumFisUN;

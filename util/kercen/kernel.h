@@ -17,6 +17,9 @@
 #define CAPT            1
 #define FISS            2
 
+#define USEAREA		1
+#define BOUND		2
+
 class CKernel : public CAtlas
 {
 public:
@@ -29,16 +32,19 @@ public:
   void SetGammaFactor(double f);
   double GetPotentialXS(double g1, double g2);
   double GetPotentialUnc(double g1, double g2);
-  bool GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int &nFirstResGroup, double *pXS, double *pUN, bool bUseArea=false);
+  bool GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int &nFirstResGroup, double *pXS, double *pUN, int nFlag);
 
 protected:
-  void InitPotential(int nGroup, double *pGroup);
+  void Init(int nGroup, double *pGroup, bool bBound);
   double GetScatXS(int n, double g1, double g2);
   double GetCaptXS(int n, double g1, double g2, bool usearea = false);
   double GetFissXS(int n, double g1, double g2, bool usearea = false);
+  double GetScatXSFrom(double e0, double l, double g, double gn,double gg, double g1, double g2);
 
+  bool m_bInit;
   double *m_pPotXS;
   double *m_pPotUN;
+  double *m_pExtXS;
   double m_fCorrNN;
   double m_fCorrGG;
   double m_fCorrRP;

@@ -152,6 +152,7 @@ int main(int argc, char **argv)
   printf("Z = %d, A = %d\n", nZ, nA);
   printf("EMin = %lf, EMax = %lf\n", fMin, fMax);
   printf("atlas directory: %s\n", szAtlasDir);
+  printf("gamma factor   : %lf\n", fGammaFactor);
  
   if (szAtlasDir[0] == 0) {
     fputs("You should enter the name of the directory containig the Atlas\n", stderr);
