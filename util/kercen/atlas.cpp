@@ -33,6 +33,7 @@ CAtlas::CAtlas()
   m_fD1 = m_fdD1 = 0;
   m_fS0 = m_fdS0 = 0;
   m_fS1 = m_fdS1 = 0;
+  m_fIg = m_fdIg = 0;
   m_szBaseDirectory[0] = 0;
 }
 
@@ -96,6 +97,9 @@ bool CAtlas::ReadProperties(int z, int a)
       } else m_fSpin = atof(v);
     } else if (!strcmp(v, "I_2")) {
       m_fAbundance = ReadDouble(s, 34, 11)/100;
+    } else if (!strcmp(v, "IG ") && m_fIg == 0)	{	// In case that measured and calculated values coexist, measure one (first one) is taken.
+      m_fIg = ReadDouble(s, 34, 11);
+      m_fdIg = ReadDouble(s, 46, 11);
     } else if (!strcmp(v, "GG0")) {
       m_fGg0 = ReadDouble(s, 34, 11);
       m_fdGg0 = ReadDouble(s, 46, 11);
@@ -128,6 +132,7 @@ bool CAtlas::ReadProperties(int z, int a)
   printf("Gg0 = %lf +- %lf\n", m_fGg0, m_fdGg0);
   printf("Gg1 = %lf +- %lf\n", m_fGg1, m_fdGg1);
   printf("Gg2 = %lf +- %lf\n", m_fGg2, m_fdGg2);
+  printf("Ig  = %lf +- %lf\n", m_fIg, m_fdIg);
 
   sprintf(fname, "%sthermal/z%03d.dat", m_szBaseDirectory, z);
   if ((fp = fopen(fname, "r")) == NULL) return false;
@@ -452,6 +457,12 @@ void CAtlas::GetGg2(double &Gg, double &dGg)
 void CAtlas::SetdGg2(double dGg)
 {
   m_fdGg2 = dGg;
+}
+
+void CAtlas::GetIg(double &Ig, double &dIg)
+{
+  Ig = m_fIg;
+  dIg = m_fdIg;
 }
 
 RESDATA *CAtlas::GetParameters(int &n)

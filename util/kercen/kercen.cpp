@@ -380,6 +380,7 @@ int main(int argc, char **argv)
   double fScatteringXS = -1 , fdScatteringXS = -1;	// thermal scattering cross section
   double fCaptureXS = -1, fdCaptureXS = -1;		// thermal capture cross section
   double fGammaFactor = 4;		// factor multiplied to the total width to estimate the resonance area
+  double fDeltaRI = -1;			// uncertainty of radiative capture resonance integral
   double fDefaultScatUnc = .1;		// default scattering width uncertainty
   bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
   bool bBound = false;			// flag to take bound resonances into account
@@ -425,6 +426,7 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "dsxs")) fdScatteringXS = atof(value);
     else if (!strcasecmp(key, "cxs")) fCaptureXS = atof(value);
     else if (!strcasecmp(key, "dcxs")) fdCaptureXS = atof(value);
+    else if (!strcasecmp(key, "deltari")) fDeltaRI = atof(value);
     else if (!strcasecmp(key, "r")) fR = atof(value);
     else if (!strcasecmp(key, "dr")) fdR = atof(value);
     else if (!strcasecmp(key, "atlasdir")) strcpy(szAtlasDir, value);
@@ -525,6 +527,11 @@ int main(int argc, char **argv)
 
   if (fScatteringXS == -1) kernel.GetScatteringXS(fScatteringXS, fdScatteringXS);
   if (fCaptureXS == -1) kernel.GetCaptureXS(fCaptureXS, fdCaptureXS);
+  if (fDeltaRI == -1) {
+    double fIg, fdIg;
+    kernel.GetIg(fIg, fdIg);
+    fDeltaRI = fdIg/fIg;
+  }
   if (fR == -1) fR = kernel.GetR();
   if (fdR == -1) fdR = kernel.GetdR();
 
@@ -667,12 +674,13 @@ int main(int argc, char **argv)
         pCumFisUN[n] += pFisUN[n];
       }
     }
-
+/*
     if (i == 0) {
       WriteMatrix(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
       WriteEndf(szEndfFiles, fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
       Plot();
     }
+*/
   }
 
   double xs2;
@@ -696,8 +704,13 @@ int main(int argc, char **argv)
     for (int n=0;n<nCaptGroup;n++) {
       if (n < nFirstResCaptGroup) {
       // calculate thermal capture cross section
-        pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-        pCumCapUN[n] = fdCaptureXS/fCaptureXS;
+        if (pCaptGroup[n] < 0.5 || fDeltaRI == 0) {
+          pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
+          pCumCapUN[n] = fdCaptureXS/fCaptureXS;
+        } else {
+          pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
+          pCumCapUN[n] = fDeltaRI;
+        }
       } else {
         pCumCapXS[n] /= nIteration;
         xs2 = pCumCapXS[n]*pCumCapXS[n];
@@ -857,11 +870,11 @@ int main(int argc, char **argv)
         i+1, pFissGroup[i], pFissGroup[i+1], pCumFisXS[i], 100.0*sqrt(pCumFisUN[i]*pCumFisUN[i]+pCumFisXS2[i]));
     }
   }
-/*
+
   WriteMatrix(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
   WriteEndf(szEndfFiles, fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
   Plot();
-*/
+
 
   if (pScatGroup) delete[] pScatGroup;
   if (pCaptGroup) delete[] pCaptGroup;

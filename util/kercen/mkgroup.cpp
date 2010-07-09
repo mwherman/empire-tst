@@ -33,7 +33,7 @@ double *Calculate(int &nGroup)
     exit(1);
   }
   pGroup[0] = 1e-5;
-  pGroup[1] = 20;
+  pGroup[1] = 0.5;
   nGroup = 1;
   for (int i=0;i<atlas.NoRes();i++) {
     atlas.GetParameter(i, E, J, gGn, Gn, Gg, Gf, area, farea);
@@ -47,25 +47,30 @@ double *Calculate(int &nGroup)
     if (E - fGammaFactor*(Gn+Gg) < e)			// check again if e is lower than E - 4*(Gn+Gg)
       e = E - fGammaFactor*(Gn+Gg);
   }
-  if (e > 20) pGroup[++nGroup] = e;
+  if (e > 0.5) pGroup[++nGroup] = e;
   double spin = atlas.GetSpin();
   double e1, e2;
   
   for (int i=0;i<atlas.NoRes();i++) {
     atlas.GetParameter(i, E1, J1, gGn1, Gn1, Gg1, Gf1, area1, farea1);
-    if (i+1 == atlas.NoRes()) E2 = 0;
-    else atlas.GetParameter(i+1, E2, J2, gGn2, Gn2, Gg2, Gf2, area2, farea2);
     if (E1 < fMin) continue;
     if (E1 > fMax) break;
+    if (i+1 == atlas.NoRes()) E2 = 0;
+    else {
+      atlas.GetParameter(i+1, E2, J2, gGn2, Gn2, Gg2, Gf2, area2, farea2);
+      if (E2 > fMax) E2 = 0;
+    }
+    printf("E1 = %lf\n", E1);
     e1 = e2 = 0;
     e = floor(E1 + fGammaFactor*(Gn1+Gg1));
     while (1) {
       bool ok = true;
       for (int k=0;k<atlas.NoRes();k++) {
         atlas.GetParameter(k, E, J, gGn, Gn, Gg, Gf, area, farea);
-        if (E > 0 &&
-            ((k <= i && e <= E+fGammaFactor*(Gn+Gg)) ||
-             (k > i && e >= E-fGammaFactor*(Gn+Gg)))) {
+        if (E < fMin) continue;
+        if (E > fMax) break;
+        if (((k <= i && e <= E+fGammaFactor*(Gn+Gg)) ||
+            (k > i && e >= E-fGammaFactor*(Gn+Gg)))) {
           ok = false;
 //          printf("%lf(%lf): %lf,%lf,%lf,%lf,%lf FAILED\n", e, E+fGammaFactor*(Gn+Gg), E, J, Gn, Gg, area);
           break;
@@ -80,16 +85,17 @@ double *Calculate(int &nGroup)
       if (E2 > 0 && e >=  E2 - fGammaFactor*(Gn2+Gg2)) break;
     }
     
-    if (i+1 == atlas.NoRes()) e2 = e1;
+    if (E2 == 0) e2 = e1;
     else {
       e = floor(E2 - fGammaFactor*(Gn2+Gg2));
       while (1) {
         bool ok = true;
         for (int k=0;k<atlas.NoRes();k++) {
           atlas.GetParameter(k, E, J, gGn, Gn, Gg, Gf, area, farea);
-          if (E > 0 &&
-              ((k <= i && e <= E+fGammaFactor*(Gn+Gg)) ||
-               (k > i && e >= E-fGammaFactor*(Gn+Gg)))) {
+          if (E < fMin) continue;
+          if (E > fMax) break;
+          if (((k <= i && e <= E+fGammaFactor*(Gn+Gg)) ||
+              (k > i && e >= E-fGammaFactor*(Gn+Gg)))) {
             ok = false;
             break;
           }
@@ -101,7 +107,9 @@ double *Calculate(int &nGroup)
         if ((e -= 1) <=  E1 + fGammaFactor*(Gn1+Gg1)) break;
       }
     }
+    printf("e1 = %lf, e2 = %lf\n", e1, e2);
     if (e1 != 0 && e2 != 0) {
+      printf("OK: e1 = %lf, e2 = %lf\n", e1, e2);
       pGroup[++nGroup] = (e1+e2)/2;
     }
   }

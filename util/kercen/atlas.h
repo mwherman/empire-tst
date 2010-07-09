@@ -36,6 +36,7 @@ public:
   double GetE(int n);
   int GetL(int n);
   void SetAwr(double awr);
+  void GetIg(double &Ig, double &dIg);
   void GetGg0(double &Gg, double &dGg);
   void SetdGg0(double dGg);
   void GetGg1(double &Gg, double &dGg);
@@ -67,6 +68,7 @@ protected:
   double m_fD1, m_fdD1;
   double m_fS0, m_fdS0;
   double m_fS1, m_fdS1;
+  double m_fIg, m_fdIg;
 
   bool GetSpinProb(int l, double &basej, int &npr, double *pr);
 };
