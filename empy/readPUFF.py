@@ -8,7 +8,17 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 Read multi-group covariance output from PUFF into mgCovars class
 Puff is more verbose than NJOY, has information on RI and Thermal values
-for example
+
+Usage:
+>from empy import readPUFF
+>mg = readPUFF.mgCovars('puff.output')
+
+data now stored in mgCovars class. Access by reaction ID. For example,
+>mg.xsecs['MT1']    # (z,total) cross section
+>mg.corrs['MT1MT1'] # self-correlation matrix for total
+>mg.covars['MT1MT102']  # cross-reaction covariance matrix
+
+see also 'toAscii', 'toBoxr' and 'write33' methods described below
 """
 
 

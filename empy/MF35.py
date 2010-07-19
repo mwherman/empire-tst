@@ -6,9 +6,13 @@ MF35.py
 Created by Caleb Mattoon on 2008-10-09.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
-Class representing a section from ENDF file MF35, x-sec covariances
+Class representing a section from ENDF file MF35, spectra covariances
 Includes functions for manipulating the matrix, 
 and for writing a new MT section
+
+Note that rows and columns of covariance matrix for normalized distribution
+should all sum to zero. May not be the case here for relative covariance
+matrix, however
 """
 
 

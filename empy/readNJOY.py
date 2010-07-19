@@ -6,7 +6,18 @@ readNJOY.py
 Created by Caleb Mattoon on 2008-12-10.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
-Read NJOY ascii multi-group covariance output into class
+Read ascii multi-group covariances (produced by njoycovx) into a class
+
+Usage:
+>from empy import readNJOY
+>mg = readNJOY.mgCovars('corr.matrix')
+
+data now stored in mgCovars class. Access by reaction ID. For example,
+>mg.xsecs['MT1']    # (z,total) cross section
+>mg.corrs['MT1MT1'] # self-correlation matrix for total
+>mg.covars['MT1MT102']  # cross-reaction covariance matrix
+
+see also 'toAscii', 'toBoxr' and 'write33' methods described below
 """
 
 

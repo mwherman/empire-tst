@@ -15,9 +15,12 @@ Usage:
     >io = MF_base.MF_base()
     >io.readENDFline( str )  # str is an 80-column line from an ENDF file
     >io.writeENDFline([... up to 6 values],MAT,MF,MT)
+    
+    # may also read/write more compact INTG format:
     >io.readINTG( str )
     >io.writeINTG()
-    also may write TINIT, SEND, FEND, MEND, TEND
+    
+    includes special methods for writing TINIT, SEND, FEND, MEND, TEND
 
     lines are numbered automatically, disable by setting 
     >io.numberLines=False
@@ -60,8 +63,9 @@ class MF_base:
     
     def readENDFline(self,string):
         """
-        change a whole line of six dense ENDF floats to python floats
-        This won't work for INTG format
+        read values from one line of ENDF-6 format.
+        resulting values (up to 6) converted to ints/floats, stored in
+        python list
         """
         # helper function:
         def treat(string):
@@ -205,7 +209,7 @@ class MF_base:
     
     def readINTG(self, string):
         """
-        read the 'INTG' format from ENDF: integers only, can be very compact.
+        read the 'INTG' format from ENDF: integers only, can be very compact
         self.ndigit determines precision: max value=10**self.ndigit
         
         self.ndigit=2 line holds 18 ints

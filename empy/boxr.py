@@ -7,6 +7,10 @@ Created by Caleb Mattoon on 2008-10-23.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 Extract from "boxr" format, from NJOY
+usage:
+>from empy import boxr
+>mg = boxr.mgCovars('tape28')
+reads tape28 into mgCovars class instance
 
 This can handle ascii or binary output from errorj with:
 MF3 and MF33 (cross-sections and covariances)
@@ -50,6 +54,8 @@ class mgCovars(mgBase):
     
     mg class contains elist (multigroup energies), xsecs for each reaction,
     and matrices in the 'covars' and 'corrs' dictionaries
+    
+    >mg.corrs['MT102MT102'] # gives capture self-correlation
     """
     def __init__(self, filename):
         super(mgCovars,self).__init__()
@@ -126,31 +132,18 @@ class mgCovars(mgBase):
             print "MF%i, MT%i: %i sections" % (MF,MT,nsec)
             
             # read all subsections:
-            self.readMTSection(fin)
+            self.__readMTSection__(fin)
             
         #import time
         #start = time.clock()
         #print ('Create correlation matrices:')
         for key in self.covars.keys():
-            covmat = self.covars[key]
-            
-            rowkey = ('MT'+key.split('MT')[1]) * 2
-            colkey = ('MT'+key.split('MT')[2]) * 2
-            rsd1 = numpy.sqrt( self.covars[rowkey].diagonal() )
-            rsd2 = numpy.sqrt( self.covars[colkey].diagonal() )
-
-            corrmat = self.covars[key].copy()
-            for i in range( ngroups ):
-                corrmat[i,:] /= rsd1[i]
-            for j in range( ngroups ):
-                corrmat[:,j] /= rsd2[j]
-            corrmat[ numpy.isnan(corrmat) ] = 0
-            self.corrs[ key ] = corrmat
+            self.__genCorrsThresholds__( key )
         #stop = time.clock()
         #print ('Elapsed time = %f s\n' % (stop - start) )
     
 
-    def readMTSection(self, fin):
+    def __readMTSection__(self, fin):
         """ helper function for __initFromAscii__ """
         while True:
             # keep going until all subsections are read
@@ -190,7 +183,40 @@ class mgCovars(mgBase):
             key = 'MT%iMT%i' % (rowMT, colMT)
             self.covars[key] = matrix
     
+    
+    def __genCorrsThresholds__(self, key):
+        """
+        starting with covariance matrix, get correlation, uncertainty and
+        threshold values
+        """
+        covmat = self.covars[key]
+        
+        rowkey = ('MT'+key.split('MT')[1]) * 2
+        colkey = ('MT'+key.split('MT')[2]) * 2
+        rsd1 = numpy.sqrt( self.covars[rowkey].diagonal() )
+        rsd2 = numpy.sqrt( self.covars[colkey].diagonal() )
+        
+        if rowkey==colkey:
+            self.uncert[ 'MT'+key.split('MT')[1] ] = rsd1
+            # find first/last non-zero row:
+            zeroRow = list( numpy.all( covmat==0, axis=0 ) )
+            try:
+                first = zeroRow.index(False)+1
+                last = len(zeroRow)-zeroRow[::-1].index(False)
+            except ValueError:
+                first = last = 0
+            self.thresholds[ 'MT'+key.split('MT')[1] ] = (first,last)
 
+
+        corrmat = self.covars[key].copy()
+        for i in range( self.ngroups ):
+            corrmat[i,:] /= rsd1[i]
+        for j in range( self.ngroups ):
+            corrmat[:,j] /= rsd2[j]
+        corrmat[ numpy.isnan(corrmat) ] = 0
+        self.corrs[ key ] = corrmat
+    
+    
     ######  methods for binary files: ######
     
     def __initFromBinary__(self, f):
@@ -203,14 +229,14 @@ class mgCovars(mgBase):
         datlist = []
         try:
             while True:
-                d = self.readSection( f )
+                d = self.__readSection__( f )
                 datlist.append( d )
         except struct.error:
             pass
         
         i = 0
         while True:
-            send,fend,mat,mf,mt,nval = self.parseSection(datlist[i])
+            send,fend,mat,mf,mt,nval = self.__parseSection__(datlist[i])
             if not send and nval > 6:
                     
                 # read x-secs into the dictionary
@@ -235,7 +261,7 @@ class mgCovars(mgBase):
         
         MT = 0
         for d in datlist[i:]:
-            send,fend,mat,mf,mt,nval = self.parseSection(d)
+            send,fend,mat,mf,mt,nval = self.__parseSection__(d)
             if not send:
                 if mt != MT:    # we just hit new MT section
                     #print "new MT section: ", mt
@@ -267,26 +293,14 @@ class mgCovars(mgBase):
         #start = time.clock()
         #print ('Create correlation matrices:')
         for key in self.covars.keys():
-            covmat = self.covars[key]
-            
-            rowkey = ('MT'+key.split('MT')[1]) * 2
-            colkey = ('MT'+key.split('MT')[2]) * 2
-            rsd1 = numpy.sqrt( self.covars[rowkey].diagonal() )
-            rsd2 = numpy.sqrt( self.covars[colkey].diagonal() )
-
-            corrmat = self.covars[key].copy()
-            for i in range( ngroups ):
-                corrmat[i,:] /= rsd1[i]
-            for j in range( ngroups ):
-                corrmat[:,j] /= rsd2[j]
-            self.corrs[ key ] = corrmat
+            self.__genCorrsThresholds__( key )
         #stop = time.clock()
         #print ('Elapsed time = %f s\n' % (stop - start) )
     
 
     # helper functions for __initFromBinary__:
 
-    def readSection( self, fin ):
+    def __readSection__( self, fin ):
         """
         return one section from binary file, including header of 12 ints
         and data w/len specified in header
@@ -300,27 +314,27 @@ class mgCovars(mgBase):
         return header + data
     
 
-    def parseSection( self, sec ):
+    def __parseSection__( self, sec ):
         """
         learn about the contents of each section. Returns:
         (bool)SEND, (bool)FEND, MAT, MF, MT, nvals
         """
-        SEND = self.isSEND( sec )
-        FEND = self.isFEND( sec )
-        MAT, MF, MT = self.getVals( sec )
+        SEND = self.__isSEND__( sec )
+        FEND = self.__isFEND__( sec )
+        MAT, MF, MT = self.__getVals__( sec )
         nvals = sec[10]
         return SEND, FEND, MAT, MF, MT, nvals
     
 
-    def isSEND( self, sec ):
+    def __isSEND__( self, sec ):
         return sec[:2] == ( 352, 88 )
     
 
-    def isFEND( self, sec ):
+    def __isFEND__( self, sec ):
         return sec[:2] == ( 88, 88)
     
 
-    def getVals( self, sec ):
+    def __getVals__( self, sec ):
         """ get MAT, MF, MT """
         return sec[2:8:2]
 
