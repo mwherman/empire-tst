@@ -168,7 +168,8 @@ def runE(proj):
         os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
         if os.path.exists(proj+'-cum.ps'):
             # read preferences from .Xrunrc:
-            prefs = open('../.Xrunrc','r').readlines()
+            prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
+                    ,'r').readlines()
             psviewer = prefs[3].strip()
             # open ps file properly:
             if sys.platform == 'darwin':

@@ -6758,7 +6758,7 @@ adjourn .top75 }} \
     button $site_9_0.but88 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {runCmd $::env(EMPIREDIR)/scripts/guizvv.tcl $file
+        -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -8483,7 +8483,7 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
   set Zinp [lindex $line 1]
   set ZAinp [expr int($Zinp*1000+$Ainp)]
   set Mass $Ainp
-  runCmd $::env(EMPIREDIR)/scripts/resonance.tcl $ZAinp $mat $Mass } \
+  exec $::env(EMPIREDIR)/scripts/resonance.tcl $ZAinp $mat $Mass & } \
         -label {Resonance Module} 
     $site_3_0.menu93 add separator \
         
@@ -8683,7 +8683,7 @@ runCmd $::env(EMPIREDIR)/scripts/stanef $file } \
         -command {runCmd $::env(EMPIREDIR)/scripts/zvcomb } \
         -label {Merge ZVV plots} 
     $site_3_0.menu95 add command \
-        -command {runCmd $::env(EMPIREDIR)/scripts/guizvv.tcl $file } \
+        -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file & } \
         -label {Compare ZVV} 
     $site_3_0.menu95 add separator \
         

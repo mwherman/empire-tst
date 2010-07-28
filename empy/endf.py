@@ -11,9 +11,9 @@ Several basic functions for interacting with an ENDF file
 SEND, MEND etc).
 """
 
-
-import sys
 import os
+import sys
+import shutil
 
     
 def insertMFMT(basefile,mergefile,outfile, MF, MT = '*', MAT = 0):
@@ -100,8 +100,9 @@ def removeMFMT(infile,outfile,MF,MT = '*',MAT = 0,dumpfile = False):
         if flag[0] > 0:
             raise KeyError
     except KeyError:
-        print ("MF %i MAT %i not found in the input file" % (MF,MAT) )
-        return -1
+        print ("MF %i MAT %i not found. Copying original" % (MF,MAT) )
+        shutil.copy(infile, outfile)
+        return
     except IOError:
         print ("Input file could not be found!")
         return -1
