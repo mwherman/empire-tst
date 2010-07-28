@@ -284,8 +284,14 @@ class mgBase:
         bxS += b.writeENDFline([0.0,0.0,self.ngroups,0,self.ngroups+1,0], 
                 self.mat,1,451)
         
+        reversed = False    # do we need to reverse energy order?
+        
         # we want elist from small to big. Need 1e-5 in first place:
-        elist = list(self.elist[::-1])
+        elist = list(self.elist)
+        if not elist==sorted(elist):
+            elist = elist[::-1]
+            reversed = True
+        
         if elist[0] != 1.0e-5:
             elist.insert(0,1.0e-5)
         nline, rem = divmod(len(elist),6)
@@ -306,7 +312,9 @@ class mgBase:
                     self.mat,3,mt)
             key = 'MT%i'%mt
             # switch order:
-            mtXsec = self.xsecs[key][::-1]
+            mtXsec = self.xsecs[key]
+            if reversed:
+                mtXsec = mtXsec[::-1]
             
             nline, rem = divmod( len(mtXsec), 6 )
             
@@ -358,9 +366,13 @@ class mgBase:
                 # once again, reverse order of matrix,
                 # we want low-high energy order rather than default high-low
                 if taketranspose:
-                    matrix = numpy.transpose( self.covars[key] )[::-1,::-1]
+                    matrix = numpy.transpose( self.covars[key] )
                 else:
-                    matrix = self.covars[key][::-1,::-1]
+                    matrix = self.covars[key]
+                
+                if reversed:
+                    matrix = matrix[::-1,::-1]
+                
                 empty = []
                 for idx in range(len(matrix)):
                     line = matrix[idx]
