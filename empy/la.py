@@ -30,7 +30,10 @@ def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
             print "Bad values on diagonal: is this a correlation matrix?"
             return matrix
     
+    niter = 0
     while True:
+        niter += 1
+        
         tmp = matrix.copy()
         P,D,Pinv = diagonalize( matrix )
         assert numpy.allclose( dotproduct( P,D,Pinv ) , matrix )
@@ -56,12 +59,12 @@ def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
             matrix[range(len(matrix)),range(len(matrix))] = diagonal
         
         if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
-            print "fixed"
+            print "fixed, %i iterations" % niter
             return matrix
         if numpy.all( tmp==matrix ):
             print "unsuccessful: iterated without changes"
             return matrix
-        print "iterating again!"
+        #print "iterating again!"
 
 
 def diagonalize( matrix ):
@@ -117,11 +120,37 @@ def dotproduct(*args):
     # py3000 has no built-in reduce function:
     """
     res = args[0]
-    for arr in args[1:]
-    res = numpy.dot(res,arr)
+    for arr in args[1:]:
+        res = numpy.dot(res,arr)
     return res
     """
     return reduce( numpy.dot,args )
+
+
+def hist_interp(supergrid, mat, erows, ecols=None):
+    """
+    'histogram' interpolation of matrix onto a new supergrid:
+    
+    supergrid = energy list to use for new matrix
+    mat = original matrix to be interpolated
+    erows = energy bins for rows/x-axis of original matrix
+    ecols = "  "            columns/y-axis, same as ex by default
+    
+    all points in erows and ecols must also be in supergrid, 
+    or ValueError is raised
+    """
+    if not ecols:
+        ecols = erows[:]
+    
+    nvals = len(supergrid)-1
+    ret_mat = numpy.zeros( (nvals, nvals) )
+    xidx = [ supergrid.index(en) for en in erows ]
+    yidx = [ supergrid.index(en) for en in ecols ]
+    
+    for i in range(1,len(xidx)):
+        for j in range(1,len(yidx)):
+            ret_mat[xidx[i-1]:xidx[i], yidx[j-1]:yidx[j]] = mat[i-1,j-1]
+    return ret_mat
 
 
 if __name__ == '__main__':
