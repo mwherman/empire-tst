@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include "kernel.h"
 
+int sfirst = 1;
+
 CKernel::CKernel()
 {
   m_bInit = false;
@@ -240,31 +242,39 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
   if (nth == 0 && nReaction == SCAT) Init(nGroup, pGroup, nFlag&BOUND);
 
 // calculate average cross section in each energy group
+
   nFirstResGroup = -1;
   int ng = 0;
   for (int i=0;i<NoRes();i++) {
+
     GetParameter(i, E, J, gGn, Gn, Gg, Gf, area, farea);
+
     if (E < m_fMin) continue;
     if (E > m_fMax) break;
+
     if (Gn+Gg == 0) {
       if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %10.2lf... skipped!\n", E);
       continue;
     }
+
     if (E >= pGroup[ng+1]) {
       for (ng++;ng < nGroup && E >= pGroup[ng+1];ng++);
       if (ng == nGroup) break;
     }
+
     if (nFirstResGroup == -1) nFirstResGroup = ng;
 
-//    printf("group %d: E=%lf,Gn=%lf,Gg=%lf,area=%lf\n", ng+1, E, Gn, Gg, area);
+    // printf("group %d: E=%lf,Gn=%lf,Gg=%lf,area=%lf\n", ng+1, E, Gn, Gg, area);
+
     if (nReaction == SCAT) {
       pXS[ng] += GetScatXS(i, pGroup[ng], pGroup[ng+1]);
-//      printf("group %d: %lf from E=%lf, width=%lf\n", ng+1, GetScatXS(i, pGroup[ng], pGroup[ng+1]), E, Gn+Gg);
+      // printf("group %d: %lf from E=%lf, width=%lf\n", ng+1, GetScatXS(i, pGroup[ng], pGroup[ng+1]), E, Gn+Gg);
     } else if (nReaction == CAPT) {
       pXS[ng] += GetCaptXS(i, pGroup[ng], pGroup[ng+1], nFlag&USEAREA);
     } else if (nReaction == FISS) {
       pXS[ng] += GetFissXS(i, pGroup[ng], pGroup[ng+1], nFlag&USEAREA);
     }
+
     for (int l=ng;l>0;l--) {
       if (E-m_fGammaFactor*(Gn+Gg) < pGroup[l]) {
         fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+1, E);
@@ -275,6 +285,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
 */
       }
     }
+
     for (int l=ng;l+2<nGroup;l++) {
       if (E+m_fGammaFactor*(Gn+Gg) >= pGroup[l+1]) {
         fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+2, E);
@@ -285,52 +296,59 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
 */
       }
     }
+
   }
 
-/*
-    if (E < m_fMin) {
-      for (int n=0;n<
-    }
-*/
 
 // calculate uncertainties due to resonance parameters in each energy group
+
   ng = 0;
-  double xs1, xs2;
+  double G1, G2, xs1, xs2, fx, NN, GG, NG;
+
   for (int i=0;i<NoRes();i++) {
+
     GetParameter(i, E, dE, J, gGn, Gn, dGn, Gg, dGg, Gf, dGf, area, darea, farea, dfarea);
-/*
-    printf("E=%4.1lf,J=%3.1lf,g=%5.3lf,2gGn=%10.4lf+-%7.3lf,Gg=%10.3lf+-%6.3lf\n",
-            E/1000, J, (2*J+1)/(2*(2*GetSpin()+1)),2*gGn,2*(2*J+1)/(2*(2*GetSpin()+1))*dGn, Gg, dGg);
-*/
+
+    //if(sfirst == 1) {
+    //printf("E=%4.1lf,J=%3.1lf,g=%5.3lf,2gGn=%10.4lf+-%7.3lf,Gg=%10.3lf+-%6.3lf\n",
+    //        E/1000, J, (2*J+1)/(2*(2*GetSpin()+1)),2*gGn,2*(2*J+1)/(2*(2*GetSpin()+1))*dGn, Gg, dGg);
+    //}
+
     if (E < m_fMin) continue;
     if (E > m_fMax) break;
-    if (Gn+Gg == 0) {
+    G1 = Gn + Gg;
+
+    if (G1 == 0) {
       if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E);
       continue;
     }
+
     if (E >= pGroup[ng+1]) {
       for (ng++;ng < nGroup && E >= pGroup[ng+1];ng++);
       if (ng == nGroup) break;
     }
-    if (nReaction == SCAT && pXS[ng] == 0) {
-      pUN[ng] = 0;
+
+    if (nReaction == SCAT && pXS[ng] == 0.0) {
+      pUN[ng] = 0.0;
       if (nth == 0) fprintf(stderr, "WARNING: average scattering c/s is 0 at group %d... zero uncertainty is assigned!\n", ng+1);
       continue;
-    } else if (nReaction == CAPT && pXS[ng] == 0) {
-      pUN[ng] = 0;
+    } else if (nReaction == CAPT && pXS[ng] == 0.0) {
+      pUN[ng] = 0.0;
       if (nth == 0) fprintf(stderr, "WARNING: average capture c/s is 0 at group %d... zero uncertainty is assigned!\n", ng+1);
       continue;
-    } else if (nReaction == FISS && pXS[ng] == 0) {
-      pUN[ng] = 0;
+    } else if (nReaction == FISS && pXS[ng] == 0.0) {
+      pUN[ng] = 0.0;
       if (nth == 0) fprintf(stderr, "WARNING: average fission c/s is 0 at group %d... zero uncertainty is assigned!\n", ng+1);
       continue;
     }
-    if (Gn == 0) dGn = 0;
+
+    if (Gn == 0.0) dGn = 0.0;
     else {
-      if (dGn == 0) dGn = m_fDefaultScatUnc;
+      if (dGn == 0.0) dGn = m_fDefaultScatUnc;
       else dGn /= Gn;
     }
-    if (Gg == 0) dGg = 0;
+
+    if (Gg == 0.0) dGg = 0.0;
     else dGg /= Gg;
 
     if (nReaction == SCAT) xs1 = GetScatXS(i, pGroup[ng], pGroup[ng+1]);
@@ -338,117 +356,85 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
     else if (nReaction == FISS) xs1 = GetFissXS(i, pGroup[ng], pGroup[ng+1], nFlag&USEAREA);
 
     for (int j=0;j<NoRes();j++) {
+
       GetParameter(j, E2, dE2, J2, gGn2, Gn2, dGn2, Gg2, dGg2, Gf2, dGf2, area2, darea2, farea2, dfarea2);
+
       if (E2 < m_fMin) continue;
       if (E2 > m_fMax) break;
-      if (Gn2+Gg2 == 0) {
+      if (E2 < pGroup[ng]) continue;
+      if (E2 >= pGroup[ng+1]) continue;
+
+      G2 = Gn2 + Gg2;
+
+      if (G2 == 0.0) {
         if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E2);
         continue;
       }
-      if (Gn2 == 0) dGn2 = 0;
+
+      if (Gn2 == 0.0) dGn2 = 0.0;
       else {
-        if (dGn2 == 0) dGn2 = m_fDefaultScatUnc;
+        if (dGn2 == 0.0) dGn2 = m_fDefaultScatUnc;
         else dGn2 /= Gn2;
       }
-      if (Gg2 == 0) dGg2= 0;
+      if (Gg2 == 0.0) dGg2= 0.0;
       else dGg2 /= Gg2;
 
       if (nReaction == SCAT) xs2 = GetScatXS(j, pGroup[ng], pGroup[ng+1]);
       else if (nReaction == CAPT) xs2 = GetCaptXS(j, pGroup[ng], pGroup[ng+1], nFlag&USEAREA);
       else if (nReaction == FISS) xs2 = GetFissXS(j, pGroup[ng], pGroup[ng+1], nFlag&USEAREA);
 
-      if (E2 >= pGroup[ng] && E2 < pGroup[ng+1]) {
-        if (i == j) {
-          if (nReaction == SCAT) pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                                  (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2-(Gn+Gg+Gg)*Gg2*dGn*dGg2*m_fCorrNGS-
-                                  Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*m_fCorrNGS+Gg*Gg2*dGg*dGg2)/
-                                  (Gn+Gg)/(Gn2+Gg2);
-          else if (nReaction == CAPT) {
-            if (nFlag&USEAREA && darea != 0 && darea2 != 0)
-              pUN[ng] += xs1*xs2*darea*darea2/area/area2/(pXS[ng]*pXS[ng]);
-            else
-              pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                           Gg*Gg2*dGn*dGn2+
-                           Gg*Gn2*dGn*dGg2*m_fCorrNGS+Gn*Gg2*dGg*dGn2*m_fCorrNGS+
-                           Gn*Gn2*dGg*dGg2)/
-                           (Gn+Gg)/(Gn2+Gg2);
-          } else if (nReaction == FISS) {
-            if (nFlag&USEAREA && dfarea != 0 && dfarea2 != 0)
-              pUN[ng] += xs1*xs2*dfarea*dfarea2/farea/farea2/(pXS[ng]*pXS[ng]);
-            else
-              pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                           Gf*Gf2*dGn*dGn2+
-                           Gf*Gn2*dGn*dGf2*m_fCorrNGS+Gn*Gf2*dGf*dGn2*m_fCorrNGS+
-                           Gn*Gn2*dGf*dGf2)/
-                           (Gn+Gg+Gf)/(Gn2+Gg2+Gf2);
-          }
-/*
-          if (n==79 && nReaction == SCAT) printf("DEBUG: %5.1lf & %5.1lf: xs1=%9.3lE,xs2=%9.3lE,Gn1+Gg1=%lg,"
-                                     "Gn2+Gg2=%lg,SctXS=%lg,g1=%lg,g2=%lg,value=%lg\n",
-                                     E, E2, xs1, xs2, Gn+Gg, Gn2+Gg2, pXS[ng],pGroup[ng],pGroup[ng+1],
-                                     xs1*xs2/(pXS[ng]*pXS[ng])*(
-                                     (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2-(Gn+Gg+Gg)*Gg2*dGn*dGg2*m_fCorrNGS-
-                                     Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*m_fCorrNGS+Gg*Gg2*dGg*dGg2)/
-                                     (Gn+Gg)/(Gn2+Gg2));
-*/
-        } else {
-          if (nReaction == SCAT) pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                                  (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2*m_fCorrNN-(Gn+Gg+Gg)*Gg2*dGn*dGg2*m_fCorrNG-
-                                  Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*m_fCorrNG+Gg*Gg2*dGg*dGg2*m_fCorrGG)/
-                                  (Gn+Gg)/(Gn2+Gg2);
-          else if (nReaction == CAPT) {
-            if (nFlag&USEAREA && darea != 0 && darea2 != 0)
-              pUN[ng] += m_fCorrGG*xs1*xs2*darea*darea2/area/area2/(pXS[ng]*pXS[ng]);
-            else
-              pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                           Gg*Gg2*dGn*dGn2*m_fCorrNN+Gg*Gn2*dGn*dGg2*m_fCorrNG+
-                           Gn*Gg2*dGg*dGn2*m_fCorrNG+Gn*Gn2*dGg*dGg2*m_fCorrGG)/
-                           (Gn+Gg)/(Gn2+Gg2);
-          } else if (nReaction == FISS) {
-            if (nFlag&USEAREA && dfarea != 0 && dfarea2 != 0)
-              pUN[ng] += m_fCorrGG*xs1*xs2*dfarea*dfarea2/farea/farea2/(pXS[ng]*pXS[ng]);
-            else
-              pUN[ng] += xs1*xs2/(pXS[ng]*pXS[ng])*(
-                           Gf*Gf2*dGn*dGn2*m_fCorrNN+Gf*Gn2*dGn*dGf2*m_fCorrNG+
-                           Gn*Gf2*dGf*dGn2*m_fCorrNG+Gn*Gn2*dGf*dGf2*m_fCorrGG)/
-                           (Gn+Gg+Gf)/(Gn2+Gg2+Gf2);
-          }
-/*
-          if (ng==79 && nReaction == SCAT) printf("DEBUG: %5.1lf & %5.1lf: xs1=%9.3lE,xs2=%9.3lE,Gn1+Gg1=%lg,"
-                                     "Gn2+Gg2=%lg,SctXS=%lg,g1=%lg,g2=%lg,value=%lg\n",
-                                     E, E2, xs1, xs2, Gn+Gg, Gn2+Gg2, pXS[ng],pGroup[ng],pGroup[ng+1],
-                                     xs1*xs2*(
-                                     (Gn+Gg+Gg)*(Gn2+Gg2+Gg2)*dGn*dGn2*m_fCorrNN-(Gn+Gg+Gg)*Gg2*dGn*dGg2*m_fCorrNG-
-                                     Gg*(Gn2+Gg2+Gg2)*dGg*dGn2*m_fCorrNG+Gg*Gg2*dGg*dGg2*m_fCorrGG)/(pXS[ng]*pXS[ng])/
-                                     (Gn+Gg)/(Gn2+Gg2));
-*/
-        }
+      fx = xs1*xs2/(pXS[ng]*pXS[ng]);
+
+      if (i == j) {
+         NN = GG = 1.0;
+         NG = m_fCorrNGS;
+      } else {
+         NN = m_fCorrNN;
+         NG = m_fCorrNG;
+         GG = m_fCorrGG;
       }
+
+      if (nReaction == SCAT) {
+         pUN[ng] += fx*(NN*(G1+Gg)*(G2+Gg2)*dGn*dGn2 + GG*Gg*Gg2*dGg*dGg2
+                 - NG*((G1+Gg)*Gg2*dGn*dGg2 + Gg*(G2+Gg2)*dGg*dGn2))/(G1*G2);
+      } else if (nReaction == CAPT) {
+        if (nFlag&USEAREA && darea != 0 && darea2 != 0)
+          pUN[ng] += GG*fx*darea*darea2/area/area2;
+        else
+          pUN[ng] += fx*(NN*Gg*Gg2*dGn*dGn2 + GG*Gn*Gn2*dGg*dGg2
+                  + NG*(Gg*Gn2*dGn*dGg2 + Gn*Gg2*dGg*dGn2))/(G1*G2);
+      } else if (nReaction == FISS) {
+        if (nFlag&USEAREA && dfarea != 0 && dfarea2 != 0)
+          pUN[ng] += GG*fx*dfarea*dfarea2/farea/farea2;
+        else
+          pUN[ng] += fx*(NN*Gf*Gf2*dGn*dGn2 + GG*Gn*Gn2*dGf*dGf2
+                  + NG*(Gf*Gn2*dGn*dGf2 + Gn*Gf2*dGf*dGn2))/(G1+Gf)/(G2+Gf2);
+      }
+
     }
   }
 
 // calculate overall scattering uncertainties including potential scattering in each energy group
+
   for (int i=0;i<nGroup;i++) {
     if (nReaction == SCAT) {
 //      printf("Sct. Unc. [%d] = %lg\n", i, sqrt(pUN[i]));
       if (i >= nFirstResGroup) {
-        double total = pXS[i]+m_pPotXS[i];
-        if (m_fR == 0) pUN[i] = pUN[i]*pXS[i]*pXS[i]/total/total;
-        else {
-/*
-          pUN[i] = pUN[i]*pXS[i]*pXS[i]/total/total+
-                   4*m_fdR/m_fR*m_fdR/m_fR*m_pPotXS[i]*m_pPotXS[i]/total/total+
-                   m_fCorrRP*2*sqrt(pUN[i])*2*m_fdR/m_fR*pXS[i]*m_pPotXS[i]/total/total;
-*/
-          pUN[i] = pUN[i]*pXS[i]*pXS[i]/total/total+
-                   m_pPotUN[i]*m_pPotUN[i]*m_pPotXS[i]*m_pPotXS[i]/total/total+
-                   2*m_fCorrRP*sqrt(pUN[i])*m_pPotUN[i]*pXS[i]*m_pPotXS[i]/total/total;
-        }
+        double total = pXS[i] + m_pPotXS[i];
+        double tot2 = total*total;
+        if (m_fR == 0)
+          pUN[i] = pUN[i]*pXS[i]*pXS[i]/tot2;
+        else
+          pUN[i] = (pUN[i]*pXS[i]*pXS[i] + m_pPotUN[i]*m_pPotUN[i]*m_pPotXS[i]*m_pPotXS[i] + 2.0*m_fCorrRP*sqrt(pUN[i])*m_pPotUN[i]*pXS[i]*m_pPotXS[i])/tot2;
         pXS[i] += m_pPotXS[i] + m_pExtXS[i];
       }
 //      printf("Sct. Unc. [%d] = %lg\n", i, sqrt(pUN[i]));
     }
     pUN[i] = sqrt(pUN[i]);
   }
+
+  sfirst = 0;
+
   return true;
+
 }

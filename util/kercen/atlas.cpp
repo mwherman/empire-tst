@@ -185,15 +185,25 @@ bool CAtlas::ReadParameters(int z, int a)
   while (fgets(s, 1024, fp)) {
     if (ReadInt(s, 0, 6) != za) continue;
     memset(&m_Res[m_nRes], 0, sizeof(RESDATA));
+
     m_Res[m_nRes].E = ReadDouble(s, 26, 10);
     m_Res[m_nRes].dE = ReadDouble(s, 37, 7);
+
     ReadString(s, 47, 3, v);
     if (!strcmp(v, "   ") || (m_bReassignLJ && s[45] == 'A')) m_Res[m_nRes].J = -1;
     else m_Res[m_nRes].J = atof(v);
     m_Res[m_nRes].nJ = m_Res[m_nRes].J;
+
     ReadString(s, 53, 1, v);
-    if (!strcmp(v, " ") || (m_bReassignLJ && s[51] == 'A')) m_Res[m_nRes].l = -1;
+    if (!strcmp(v, " ") || (m_bReassignLJ && s[51] == 'A')) {
+      //if ((s[45] == 'E') && (m_Res[m_nRes].J == 2.0))
+      if(m_nA == 207)
+        m_Res[m_nRes].l = m_Res[m_nRes].J-1.0;    // temp fixup for Pb207
+      else
+        m_Res[m_nRes].l = -1;
+    }
     else m_Res[m_nRes].l = atoi(v);
+
     if (s[80] == 'C') {
       m_Res[m_nRes].nflag = s[81];
       m_Res[m_nRes].Gn = ReadDouble(s, 86, 9);
@@ -206,10 +216,12 @@ bool CAtlas::ReadParameters(int z, int a)
         else if (m_Res[m_nRes].l == 1) ;
       }
     }
+
     if (s[105] == 'F') {
       m_Res[m_nRes].Gg = ReadDouble(s, 111, 9);
       m_Res[m_nRes].dGg = ReadDouble(s, 121, 8);
     }
+
     if (s[155] == 'I') {
       if (s[156] == 'A') {
         m_Res[m_nRes].area = ReadDouble(s, 161, 9);
@@ -220,14 +232,20 @@ bool CAtlas::ReadParameters(int z, int a)
         m_Res[m_nRes].dGf = ReadDouble(s, 171, 8);
       }
     }
+
     if (s[180] == 'I') {
       if (s[181] == 'F') {
         m_Res[m_nRes].farea = ReadDouble(s, 186, 9);
         m_Res[m_nRes].dfarea = ReadDouble(s, 196, 8);
       }
     }
+
     if (m_Res[m_nRes].l == -1) {
+
+      // ang mom l was not found. We need to assign it here.
+
       double gGn;
+
       if (m_Res[m_nRes].nflag == ' ') gGn = m_Res[m_nRes].Gn/2;
       else if (m_Res[m_nRes].nflag == 'A') gGn = m_Res[m_nRes].Gn;
       else if (m_Res[m_nRes].nflag == 'B' && m_nZ%2 == 1) gGn = 0.5 * m_Res[m_nRes].Gn;
@@ -239,17 +257,26 @@ bool CAtlas::ReadParameters(int z, int a)
         if (facg > 0.99) facg = .99;
         gGn = m_Res[m_nRes].area/(1-facg);
       }
+
       double corr;
-      if (m_fSpin == .5) corr = 2.25/3;
-      else if (m_fSpin >= .999) corr = 2.0/3;
-      else corr = 1.0;
+      if (m_fSpin == 0.0)
+        corr = 1.0;
+      else if (m_fSpin == .5)
+        corr = 2.25/3;
+      else
+        corr = 2.0/3;
       double p1s1 = m_fS1 * GetPenet(1, m_Res[m_nRes].E);
       double bb = p1s1/m_fS0;
       double x = gGn/(2*m_fD0)*sqrt(1/m_Res[m_nRes].E)*(corr/p1s1-1/m_fS0);
-//      printf("%6.2lf %lf,%lf,%lf,%lf,%lf,%lf\n", m_Res[m_nRes].E,corr,gGn,p1s1,bb,x,1.0/(1+.33333*sqrt(bb/corr)*exp(x)));
-      if (x < 50 && 1.0/(1+.33333*sqrt(bb/corr)*exp(x)) > 0.5) m_Res[m_nRes].l = 1;
-      else m_Res[m_nRes].l = 0;
+      // printf("%6.2lf %lf,%lf,%lf,%lf,%lf,%lf\n", m_Res[m_nRes].E,corr,gGn,p1s1,bb,x,1.0/(1+.33333*sqrt(bb/corr)*exp(x)));
+
+      if (x < 50 && 1.0/(1+.33333*sqrt(bb/corr)*exp(x)) > 0.5)
+        m_Res[m_nRes].l = 1;
+      else
+        m_Res[m_nRes].l = 0;
+
     }
+
     if (m_Res[m_nRes].Gn == 0) ++nzerogn;
     if (m_Res[m_nRes].Gg == 0) ++nzerogg;
     if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gn != 0) {
@@ -262,6 +289,7 @@ bool CAtlas::ReadParameters(int z, int a)
         ++ndgn[m_Res[m_nRes].l];
       }
     }
+
     if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gg != 0) {
       ggavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gg;
       ++ngg[m_Res[m_nRes].l];
@@ -344,7 +372,7 @@ void CAtlas::AssignJ()
       if (m_Res[i].J < 0) continue;
       n = int(m_Res[i].J - basej);
       if (n < 0 || n >= npr)
-        fprintf(stderr, "ERROR: pre-assigned J = %lf out of range at E=%lf\n", m_Res[i].J,m_Res[i].E);
+        fprintf(stderr, "ERROR: pre-assigned J = %lf for l = %d out of range at E=%lf\n", m_Res[i].J,m_Res[i].l,m_Res[i].E);
       ++count[n];
     }
     // calculate cdf
@@ -526,6 +554,7 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
                           double &Gf, double &dGf, double &area, double &darea, double &farea, double &dfarea)
 {
   if (n < 0 || n >= m_nRes) return false;
+
   E = m_Res[n].E;
   dE = m_Res[n].dE;
   J = m_Res[n].nJ;
@@ -535,7 +564,9 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
   dGf = m_Res[n].dGf;
   farea = m_Res[n].farea;
   dfarea = m_Res[n].dfarea;
+
   double gfactor = (2*m_Res[n].nJ+1)/(2*(2*m_fSpin+1));
+
   if (m_Res[n].nflag == ' ') {
     gGn = m_Res[n].Gn/2;
     Gn = m_Res[n].Gn/2/gfactor;
@@ -593,9 +624,25 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
 
   if (Gn == 0 && area != 0) {
     double fn;
-    if ((fn = area/(gfactor*Gg)) > 0.99) fn = 0.99;
-    gGn = area/(1-fn);
-    Gn = gGn/gfactor;
+    fn = gfactor*Gg - area;
+    if(fn <= 0.0) ; //fprintf(stderr, "ERROR: bad denominator for %d  %e   %e  %e  %e \n", n, m_Res[n].E, gfactor, Gg, area);
+    else {
+      Gn = Gg*area/fn;
+      gGn = gfactor*Gn;
+    }
+    // if ((fn = area/(gfactor*Gg)) > 0.99) fn = 0.99;
+    // gGn = area/(1-fn);
+    // Gn = gGn/gfactor;
+  }
+
+  if (dGn == 0 && area != 0) {
+    double fn;
+    fn = gfactor*Gg - area;
+    if(fn > 0.0) {
+      double p1 = (fn*area - Gg*area*gfactor)/(fn*fn);
+      double p2 = Gg*(fn + area)/(fn*fn);
+      dGn = sqrt(p1*p1*dGg*dGg + p2*p2*darea*darea);
+    }
   }
 
   return true;
