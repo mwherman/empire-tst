@@ -60,7 +60,6 @@ double *Calculate(int &nGroup)
       atlas.GetParameter(i+1, E2, J2, gGn2, Gn2, Gg2, Gf2, area2, farea2);
       if (E2 > fMax) E2 = 0;
     }
-    printf("E1 = %lf\n", E1);
     e1 = e2 = 0;
     e = floor(E1 + fGammaFactor*(Gn1+Gg1));
     while (1) {
@@ -107,9 +106,7 @@ double *Calculate(int &nGroup)
         if ((e -= 1) <=  E1 + fGammaFactor*(Gn1+Gg1)) break;
       }
     }
-    printf("e1 = %lf, e2 = %lf\n", e1, e2);
     if (e1 != 0 && e2 != 0) {
-      printf("OK: e1 = %lf, e2 = %lf\n", e1, e2);
       pGroup[++nGroup] = (e1+e2)/2;
     }
   }

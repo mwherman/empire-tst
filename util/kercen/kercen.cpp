@@ -377,10 +377,13 @@ int main(int argc, char **argv)
   bool bReassignLJ = false;		// flag to reassign L and J
   bool bPrintAtlas = false;		// flag to print resonance parameters
   bool bPrintPotential = false;		// flag to print potential cross sections
-  double fScatteringXS = -1 , fdScatteringXS = -1;	// thermal scattering cross section
-  double fCaptureXS = -1, fdCaptureXS = -1;		// thermal capture cross section
+  double fScatteringXS = -1;		// thermal scattering cross section
+  double fScatteringUN = -1;		// uncertainty of thermal scattering cross section (E < 0.5 eV)
+  double fScatteringUN2 = -1;		// uncertainty of thermal scattering cross section (E >= 0.5 eV)
+  double fCaptureXS = -1;		// thermal capture cross section
+  double fCaptureUN = -1;		// uncertainty of thermal capture cross section (E < 0.5 eV)
+  double fCaptureUN2 = -1;		// uncertainty of thermal capture cross section (E >= 0.5 eV)
   double fGammaFactor = 4;		// factor multiplied to the total width to estimate the resonance area
-  double fDeltaRI = -1;			// uncertainty of radiative capture resonance integral
   double fDefaultScatUnc = .1;		// default scattering width uncertainty
   bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
   bool bBound = false;			// flag to take bound resonances into account
@@ -402,6 +405,7 @@ int main(int argc, char **argv)
   double fCorrGGB = .5;		// correlation between capture cross sections in different energy bins
   double fCorrNNRT = 0;		// correlation between scattering cross sections in the thermal and resonance regions
   double fCorrGGRT = 0;		// correlation between capture cross sections in the thermal and resonance regions
+  double f1, f2;
 
   if (argc < 2) {
     fputs("usage: kercen inputfile\n", stderr);
@@ -423,10 +427,11 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "awr")) fAwr = atof(value);
     else if (!strcasecmp(key, "iteration")) nIteration = atoi(value);
     else if (!strcasecmp(key, "sxs")) fScatteringXS = atof(value);
-    else if (!strcasecmp(key, "dsxs")) fdScatteringXS = atof(value);
+    else if (!strcasecmp(key, "dsxs")) fScatteringUN = atof(value);
+    else if (!strcasecmp(key, "dsxs2")) fScatteringUN2 = atof(value);
     else if (!strcasecmp(key, "cxs")) fCaptureXS = atof(value);
-    else if (!strcasecmp(key, "dcxs")) fdCaptureXS = atof(value);
-    else if (!strcasecmp(key, "deltari")) fDeltaRI = atof(value);
+    else if (!strcasecmp(key, "dcxs")) fCaptureUN = atof(value);
+    else if (!strcasecmp(key, "dcxs2")) fCaptureUN2 = atof(value);
     else if (!strcasecmp(key, "r")) fR = atof(value);
     else if (!strcasecmp(key, "dr")) fdR = atof(value);
     else if (!strcasecmp(key, "atlasdir")) strcpy(szAtlasDir, value);
@@ -525,13 +530,14 @@ int main(int argc, char **argv)
     }
   }
 
-  if (fScatteringXS == -1) kernel.GetScatteringXS(fScatteringXS, fdScatteringXS);
-  if (fCaptureXS == -1) kernel.GetCaptureXS(fCaptureXS, fdCaptureXS);
-  if (fDeltaRI == -1) {
-    double fIg, fdIg;
-    kernel.GetIg(fIg, fdIg);
-    fDeltaRI = fdIg/fIg;
-  }
+  kernel.GetScatteringXS(f1, f2);
+  if (fScatteringXS == -1) fScatteringXS = f1;
+  if (fScatteringUN == -1) fScatteringUN = f2;
+
+  kernel.GetCaptureXS(f1, f2);
+  if (fCaptureXS == -1) fCaptureXS = f1;
+  if (fCaptureUN == -1) fCaptureUN = f2;
+
   if (fR == -1) fR = kernel.GetR();
   if (fdR == -1) fdR = kernel.GetdR();
 
@@ -543,19 +549,19 @@ int main(int argc, char **argv)
     fputs("ERROR: Scattering radius uncertainty was not assigned\n", stderr);
     exit(1);
   }
-  if (fScatteringXS == -1) {
+  if (fScatteringXS <= 0) {
     fputs("ERROR: Thermal scattering xs was not assigned\n", stderr);
     exit(1);
   }
-  if (fdScatteringXS == -1) {
+  if (fScatteringUN <= 0) {
     fputs("ERROR: Thermal scattering xs uncertainty was not assigned\n", stderr);
     exit(1);
   }
-  if (fCaptureXS == -1) {
+  if (fCaptureXS <= 0) {
     fputs("ERROR: Thermal capture xs was not assigned\n", stderr);
     exit(1);
   }
-  if (fdCaptureXS == -1) {
+  if (fCaptureUN <= 0) {
     fputs("ERROR: Thermal capture xs uncertainty was not assigned\n", stderr);
     exit(1);
   }
@@ -565,8 +571,8 @@ int main(int argc, char **argv)
   puts("###############                                ##############");
   puts("#############################################################");
   printf("R = %lf +- %lf\n", fR, fdR);
-  printf("Thermal scattering xs = %6.3lf += %lf\n", fScatteringXS, fdScatteringXS);
-  printf("Thermal capture xs    = %6.3lf += %lf\n", fCaptureXS, fdCaptureXS);
+  printf("Thermal scattering xs = %6.3lf += %lf\n", fScatteringXS, fScatteringUN);
+  printf("Thermal capture xs    = %6.3lf += %lf\n", fCaptureXS, fCaptureUN);
   printf("Default scattering width uncertainty = %lf %%\n", 100*fDefaultScatUnc);
   printf("CorrNGS = %lf\n", fCorrNGS);
   printf("CorrNN  = %lf, CorrGG  = %lf, CorrNG  = %lf\n", fCorrNN, fCorrGG, fCorrNG);
@@ -578,6 +584,16 @@ int main(int argc, char **argv)
   kernel.SetGammaFactor(fGammaFactor);
   kernel.SetDefaultScatUnc(fDefaultScatUnc);
   kernel.SetCorr(fCorrNN, fCorrGG, fCorrRP, fCorrNG, fCorrNGS);
+
+  fScatteringUN /= fScatteringXS;
+  if (fScatteringUN2 == -1) fScatteringUN2 = 1.5*fScatteringUN;
+  else fScatteringUN2 /= fScatteringXS;
+
+  fCaptureUN /= fCaptureXS;
+  if (fCaptureUN2 == -1) {
+    kernel.GetIg(f1, f2);
+    fCaptureUN2 = f2/f1;
+  } else fCaptureUN2 /= fCaptureXS;
 
   if (bScattering) {
     if ((fp = fopen(szScatGroup, "r")) == NULL) {
@@ -688,8 +704,14 @@ int main(int argc, char **argv)
     for (int n=0;n<nScatGroup;n++) {
       if (n < nFirstResScatGroup) {
       // assign thermal scattering cross section
-        pCumSctXS[n] = fScatteringXS;
-        pCumSctUN[n] = fdScatteringXS/fScatteringXS;
+        if (pCaptGroup[n] < 0.5) {
+          pCumSctXS[n] = fScatteringXS;
+          pCumSctUN[n] = fScatteringUN;
+        } else {
+          pCumSctXS[n] = fScatteringXS;
+          pCumSctUN[n] = fScatteringUN2;
+        }
+        pCumSctXS2[n] = 0;
       } else {
         pCumSctXS[n] /= nIteration;
         xs2 = pCumSctXS[n]*pCumSctXS[n];
@@ -704,13 +726,14 @@ int main(int argc, char **argv)
     for (int n=0;n<nCaptGroup;n++) {
       if (n < nFirstResCaptGroup) {
       // calculate thermal capture cross section
-        if (pCaptGroup[n] < 0.5 || fDeltaRI == 0) {
+        if (pCaptGroup[n] < 0.5) {
           pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-          pCumCapUN[n] = fdCaptureXS/fCaptureXS;
+          pCumCapUN[n] = fCaptureUN;
         } else {
           pCumCapXS[n] = 2*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-          pCumCapUN[n] = fDeltaRI;
+          pCumCapUN[n] = fCaptureUN2;
         }
+        pCumCapXS2[n] = 0;
       } else {
         pCumCapXS[n] /= nIteration;
         xs2 = pCumCapXS[n]*pCumCapXS[n];
