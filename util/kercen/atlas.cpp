@@ -198,7 +198,7 @@ bool CAtlas::ReadParameters(int z, int a)
     if (!strcmp(v, " ") || (m_bReassignLJ && s[51] == 'A')) {
       //if ((s[45] == 'E') && (m_Res[m_nRes].J == 2.0))
       if(m_nA == 207)
-        m_Res[m_nRes].l = m_Res[m_nRes].J-1.0;    // temp fixup for Pb207
+        m_Res[m_nRes].l = int(m_Res[m_nRes].J-1.0);    // temp fixup for Pb207
       else
         m_Res[m_nRes].l = -1;
     }

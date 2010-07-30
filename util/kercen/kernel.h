@@ -30,8 +30,8 @@ public:
   void SetRange(double fMin, double fMax);
   void SetDefaultScatUnc(double f);
   void SetGammaFactor(double f);
-  double GetPotentialXS(double g1, double g2);
-  double GetPotentialUnc(double g1, double g2);
+  void GetPotentialXS(double , double& , double& );
+  // double GetPotentialUnc(double g1, double g2);
   bool GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int &nFirstResGroup, double *pXS, double *pUN, int nFlag);
 
 protected:

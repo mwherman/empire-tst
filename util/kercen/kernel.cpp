@@ -79,6 +79,7 @@ void CKernel::Init(int nGroup, double *pGroup, bool bBound)
 {
   if (m_bInit) return;
   int i;
+  double e;
   m_pPotXS = new double[nGroup];
   m_pPotUN = new double[nGroup];
   m_pExtXS = new double[nGroup];
@@ -86,8 +87,8 @@ void CKernel::Init(int nGroup, double *pGroup, bool bBound)
   memset(m_pExtXS, 0, nGroup*sizeof(double));
 
   for (i=0;i<nGroup;i++) {
-    m_pPotXS[i] = GetPotentialXS(pGroup[i], pGroup[i+1]);
-    m_pPotUN[i] = GetPotentialUnc(pGroup[i], pGroup[i+1]);
+    e = (pGroup[i] + pGroup[i+1])/2.0;
+    GetPotentialXS(e, m_pPotXS[i], m_pPotUN[i]);
   }
 
   if (bBound) {
@@ -153,47 +154,34 @@ double CKernel::GetScatXSFrom(double e0, double l, double g, double gn,double gg
   return sum/49;
 }
 
-double CKernel::GetPotentialXS(double g1, double g2)
+void CKernel::GetPotentialXS(double e, double& pot_xs, double& pot_un)
 {
-  double e = (g1+g2)/2;					// average group energy in eV
   double k = 2.19677e-3*m_nA/(m_nA+1)*sqrt(e);		// k in units of sqrt(barn) = 1.0E-14 m
   double lambda2 = 1/(k*k);				// lambda^2 in 1/barns^2
   double kR = k*m_fR*.1;				// kR. 1fm = 0.1*sqrt(barn)
-/*
-  double fR0_inf = .22;
-  double fR1_inf = .34;
 
-  double phi0 = -kR + asin(kR*fR0_inf);
-  double phi1 = -kR + atan(kR) + asin(kR*kR*kR*fR1_inf/(1+kR*kR));
-*/
   double phi0 = kR;
   double phi1 = kR - atan(kR);
   double phi2 = kR - atan(3*kR/(3-kR*kR));
-/*
-  double T0 = 1-exp(-2*PI*3.79e-4*sqrt(e));
-  double T1 = 1-exp(-2*PI*.5e-4*kR*kR/(1+kR*kR)*sqrt(e));
-  return 4*PI*lambda2*sin(phi0)*sin(phi0)*(1-0.5*T0) +
-         12*PI*lambda2*sin(phi1)*sin(phi1)*(1-.5*T1) +
-*/
-  return 4*PI*lambda2*sin(phi0)*sin(phi0) +
-         12*PI*lambda2*sin(phi1)*sin(phi1) +
-         20*PI*lambda2*sin(phi2)*sin(phi2);
-/*
-  return 4*PI*lambda2*sin(kR)*sin(kR) +
-         12*PI*lambda2*sin(kR-atan(kR))*sin(kR-atan(kR)) +
-         20*PI*lambda2*sin(kR-atan(3*kR/(3-kR*kR)))*sin(kR-atan(3*kR/(3-kR*kR)));
-*/
-}
 
-double CKernel::GetPotentialUnc(double g1, double g2)
-{
-  double e = (g1+g2)/2;
-  double kR = 2.19677e-3*m_nA/(m_nA+1)*sqrt(e)*m_fR*.1;
-  double phi0 = kR;
-  double phi1 = kR-atan(kR);
+  double s0 = sin(phi0);
+  double s1 = sin(phi1);
+  double s2 = sin(phi2);
+  double c0 = cos(phi0);
+  double c1 = cos(phi1);
+  double c2 = cos(phi2);
 
-  return 2*m_fdR/m_fR*kR*(sin(phi0)*cos(phi0)+3*(1-(1/(1+kR*kR)))*sin(phi1)*cos(phi1))/
-         (sin(phi0)*sin(phi0)+3*sin(phi1)*sin(phi1));
+  pot_xs = 4.0*PI*lambda2*(s0*s0 + 3.0*s1*s1 + 5.0*s2*s2);
+  pot_un = 2.0*m_fdR/m_fR*kR*(s0*c0 + 3.0*kR*kR/(1.0+kR*kR)*s1*c1)/(s0*s0 + 3.0*s1*s1);
+
+  //double t1 = 4.0*PI*lambda2*s0*s0;
+  //double t2 = 12.0*PI*lambda2*s1*s1;
+  //double t3 = 20.0*PI*lambda2*s2*s2;
+  //fprintf(stderr, "  Potential at E = %10.2lf  %10.3lf  %10.3lf   %10.3lf \n", e, t1, t2, t3);
+  //double t1 = 2.0*m_fdR/m_fR;
+  //double t2 = kR*(s0*c0 + 3.0*kR*kR/(1.0+kR*kR)*s1*c1)/(s0*s0 + 3.0*s1*s1);
+  //fprintf(stderr, "  Potent  unc at E = %10.2lf  %10.3lf  %10.3lf \n", e, t1, t2);
+
 }
 
 double CKernel::GetScatXS(int n, double g1, double g2)
@@ -277,7 +265,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
 
     for (int l=ng;l>0;l--) {
       if (E-m_fGammaFactor*(Gn+Gg) < pGroup[l]) {
-        fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+1, E);
+//        fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+1, E);
 /*
         if (nReaction == SCAT) pXS[l-1] += GetScatXS(i, pGroup[l-1], pGroup[l]);
         else if (nReaction == CAPT) pXS[l-1] += GetCaptXS(i, pGroup[l-1], pGroup[l], nFlag&USEAREA);
@@ -288,7 +276,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
 
     for (int l=ng;l+2<nGroup;l++) {
       if (E+m_fGammaFactor*(Gn+Gg) >= pGroup[l+1]) {
-        fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+2, E);
+//        fprintf(stderr, "WARNING: group %d: from E = %10.2lf ** RESONANCE OVERLAPPING DETECTED ***\n", l+2, E);
 /*
         if (nReaction == SCAT) pXS[l+1] += GetScatXS(i, pGroup[l+1], pGroup[l+2]);
         else if (nReaction == CAPT) pXS[l+1] += GetCaptXS(i, pGroup[l+1], pGroup[l+2], nFlag&USEAREA);

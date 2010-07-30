@@ -339,9 +339,11 @@ int main(int argc, char **argv)
     puts("###############    POTENTIAL SCATTERING C/S    ##############");
     puts("###############                                ##############");
     puts("#############################################################");
-    for (int i=0;i<nScatGroup;i++)
-      printf("%3d %10.4lE - %10.4lE: %11.5lE\n", i+1, pScatGroup[i], pScatGroup[i+1],
-             kernel.GetPotentialXS(pScatGroup[i], pScatGroup[i+1]));
+    for (int i=0;i<nScatGroup;i++) {
+      double e = (pScatGroup[i] + pScatGroup[i+1])/2.0;
+      kernel.GetPotentialXS(e, f1, f2);
+      printf("%3d %10.4lE - %10.4lE:  %11.5lE +/- %11.5lE\n", i+1, pScatGroup[i], pScatGroup[i+1], f1, f2);
+    }
   }
 
   for (int i=0;i<nIteration;i++) {
