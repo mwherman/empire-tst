@@ -162,7 +162,9 @@ void CKernel::GetPotentialXS(double e, double& pot_xs, double& pot_un)
 
   double phi0 = kR;
   double phi1 = kR - atan(kR);
-  double phi2 = kR - atan(3*kR/(3-kR*kR));
+  double kR2 = kR*kR;
+  double t1 = 3.0 - kR2;
+  double phi2 = kR - atan(3.0*kR/t1);
 
   double s0 = sin(phi0);
   double s1 = sin(phi1);
@@ -171,8 +173,11 @@ void CKernel::GetPotentialXS(double e, double& pot_xs, double& pot_un)
   double c1 = cos(phi1);
   double c2 = cos(phi2);
 
-  pot_xs = 4.0*PI*lambda2*(s0*s0 + 3.0*s1*s1 + 5.0*s2*s2);
-  pot_un = 2.0*m_fdR/m_fR*kR*(s0*c0 + 3.0*kR*kR/(1.0+kR*kR)*s1*c1)/(s0*s0 + 3.0*s1*s1);
+  double x1 = s0*s0 + 3.0*s1*s1 + 5.0*s2*s2;
+  pot_xs = 4.0*PI*lambda2*x1;
+  //pot_un = 2.0*m_fdR/m_fR*kR*(s0*c0 + 3.0*kR2/(1.0+kR2)*s1*c1)/(s0*s0 + 3.0*s1*s1);
+  double x2 = 1.0 - 3.0*(3.0+kR2)/(t1*t1 + 9.0*kR2);
+  pot_un = 2.0*m_fdR/m_fR*kR*(s0*c0 + 3.0*kR2/(1.0+kR2)*s1*c1 + 5.0*s2*c2*x2)/x1;
 
   //double t1 = 4.0*PI*lambda2*s0*s0;
   //double t2 = 12.0*PI*lambda2*s1*s1;
@@ -180,7 +185,7 @@ void CKernel::GetPotentialXS(double e, double& pot_xs, double& pot_un)
   //fprintf(stderr, "  Potential at E = %10.2lf  %10.3lf  %10.3lf   %10.3lf \n", e, t1, t2, t3);
   //double t1 = 2.0*m_fdR/m_fR;
   //double t2 = kR*(s0*c0 + 3.0*kR*kR/(1.0+kR*kR)*s1*c1)/(s0*s0 + 3.0*s1*s1);
-  //fprintf(stderr, "  Potent  unc at E = %10.2lf  %10.3lf  %10.3lf \n", e, t1, t2);
+  //fprintf(stderr, "  Potent  unc at E = %10.2lf  %e  %e \n", e, pot_un, x3);
 
 }
 

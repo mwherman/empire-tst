@@ -11,9 +11,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <algorithm>
 #include <math.h>
 #include "atlas.h"
 #include "util.h"
+
+using namespace std;
 
 CAtlas::CAtlas()
 {
@@ -623,27 +626,38 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
   }
 
   if (Gn == 0 && area != 0) {
-    double fn;
-    fn = gfactor*Gg - area;
-    if(fn <= 0.0) ; //fprintf(stderr, "ERROR: bad denominator for %d  %e   %e  %e  %e \n", n, m_Res[n].E, gfactor, Gg, area);
-    else {
-      Gn = Gg*area/fn;
-      gGn = gfactor*Gn;
-    }
-    // if ((fn = area/(gfactor*Gg)) > 0.99) fn = 0.99;
-    // gGn = area/(1-fn);
-    // Gn = gGn/gfactor;
+    //double fn = gfactor*Gg - area;
+    //if(fn <= 0.0) ; //fprintf(stderr, "ERROR: bad denominator for %d  %e   %e  %e  %e \n", n, m_Res[n].E, gfactor, Gg, area);
+    //else {
+    // Gn = Gg*area/fn;
+    // gGn = gfactor*Gn;
+    //}
+    // Here a value for Gn is determined from area and Gg if both
+    // are known. This becomes difficult to impossible when Gn >> Gg.
+    // therefore, we do not allow the value for fn to exceed 0.99.
+    double fn = min(area/(gfactor*Gg),0.99);
+    gGn = area/(1-fn);
+    Gn = gGn/gfactor;
   }
 
+  // below I tried to propagate the error from Gg and darea
+  // to the error in the calcuated Gn, but this can lead to
+  // very large errors in the resulting kernel when Gn >> Gg.
+  // So for now leave dGn alone and don't try to determine a value
+  // for it if one is not given.
+/*
   if (dGn == 0 && area != 0) {
     double fn;
     fn = gfactor*Gg - area;
+    // fprintf(stderr, " E = %e, Gg = %e, dGg = %e, area = %e, darea = %e\n", E, Gg, dGg, area, darea);
     if(fn > 0.0) {
       double p1 = (fn*area - Gg*area*gfactor)/(fn*fn);
       double p2 = Gg*(fn + area)/(fn*fn);
       dGn = sqrt(p1*p1*dGg*dGg + p2*p2*darea*darea);
+      // fprintf(stderr, "   l = %d, gfac = %e, fn = %e, p1 = %e, p2 = %e, dGn = %e\n", m_Res[n].l, gfactor, fn, p1, p2, dGn);
     }
   }
+*/
 
   return true;
 }
