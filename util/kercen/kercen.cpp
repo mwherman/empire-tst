@@ -74,6 +74,7 @@ int main(int argc, char **argv)
   double *pSctUN = NULL;		// scattering cross section uncertainties
   double *pCapUN = NULL;		// capture cross section uncertainties
   double *pFisUN = NULL;		// fission cross section uncertainties
+  double fGg0 = -1, fGg1 = -1, fGg2 = -1;
   double fdGg0 = -1, fdGg1 = -1, fdGg2 = -1;
   double fCorrNGS = 0;			// correlation between scattering and capture widths of single resonance
   double fCorrNN = .5;			// correlation between scattering widths of different resonances
@@ -116,6 +117,9 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "dr")) fdR = atof(value);
     else if (!strcasecmp(key, "atlasdir")) strcpy(szAtlasDir, value);
     else if (!strcasecmp(key, "defaultscatunc")) fDefaultScatUnc = atof(value);
+    else if (!strcasecmp(key, "gg0")) fGg0 = atof(value);
+    else if (!strcasecmp(key, "gg1")) fGg1 = atof(value);
+    else if (!strcasecmp(key, "gg2")) fGg2 = atof(value);
     else if (!strcasecmp(key, "dgg0")) fdGg0 = atof(value);
     else if (!strcasecmp(key, "dgg1")) fdGg1 = atof(value);
     else if (!strcasecmp(key, "dgg2")) fdGg2 = atof(value);
@@ -186,6 +190,9 @@ int main(int argc, char **argv)
   }
 
   if (bReassignLJ) kernel.ReassignLJ();
+  if (fGg0 != -1) kernel.SetGg0(fGg0);
+  if (fGg1 != -1) kernel.SetGg1(fGg1);
+  if (fGg2 != -1) kernel.SetGg2(fGg2);
   if (fdGg0 != -1) kernel.SetdGg0(fdGg0);
   if (fdGg1 != -1) kernel.SetdGg1(fdGg1);
   if (fdGg2 != -1) kernel.SetdGg2(fdGg2);

@@ -38,10 +38,13 @@ public:
   void SetAwr(double awr);
   void GetIg(double &Ig, double &dIg);
   void GetGg0(double &Gg, double &dGg);
+  void SetGg0(double Gg);
   void SetdGg0(double dGg);
   void GetGg1(double &Gg, double &dGg);
+  void SetGg1(double Gg);
   void SetdGg1(double dGg);
   void GetGg2(double &Gg, double &dGg);
+  void SetGg2(double Gg);
   void SetdGg2(double dGg);
   RESDATA *GetParameters(int &n);
   bool GetParameter(int n, double &E, int &l);

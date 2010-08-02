@@ -463,6 +463,11 @@ void CAtlas::GetGg0(double &Gg, double &dGg)
   dGg = m_fdGg0;
 }
 
+void CAtlas::SetGg0(double Gg)
+{
+  m_fGg0 = Gg;
+}
+
 void CAtlas::SetdGg0(double dGg)
 {
   m_fdGg0 = dGg;
@@ -474,6 +479,11 @@ void CAtlas::GetGg1(double &Gg, double &dGg)
   dGg = m_fdGg1;
 }
 
+void CAtlas::SetGg1(double Gg)
+{
+  m_fGg1 = Gg;
+}
+
 void CAtlas::SetdGg1(double dGg)
 {
   m_fdGg1 = dGg;
@@ -483,6 +493,11 @@ void CAtlas::GetGg2(double &Gg, double &dGg)
 {
   Gg = m_fGg2;
   dGg = m_fdGg2;
+}
+
+void CAtlas::SetGg2(double Gg)
+{
+  m_fGg2 = Gg;
 }
 
 void CAtlas::SetdGg2(double dGg)
