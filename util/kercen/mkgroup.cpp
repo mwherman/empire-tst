@@ -13,6 +13,7 @@
 #include <math.h>
 #include "atlas.h"
 
+#define VERSION		1.0
 #define PI		3.14159
 
 static CAtlas atlas;
@@ -144,7 +145,7 @@ int main(int argc, char **argv)
 
   puts("#############################################################");
   puts("##                                                         ##");
-  puts("##                       MKGROUP v1.0                      ##");
+  printf("##                      MKGROUP v%4.2lf                      ##\n", VERSION);
   puts("##                                                         ##");
   puts("#############################################################");
   puts("");

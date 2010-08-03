@@ -2,7 +2,7 @@
  *
  * Filename: kercen.cpp
  * Purpose : Calculate average cross sections and their uncertainties
- * Author  : Youngsik Cho
+ * Authors : Youngsik Cho, Samuel Hoblit
  *
  ***********************************************************************/
 
@@ -17,6 +17,13 @@
 #include "endf.h"
 
 using namespace std;
+
+#define  VERSION		1.0
+
+typedef struct {
+  int    nBin;
+  double fUnc;
+} BINUNC;
 
 static CKernel kernel;
 static bool bScattering = false;	// flag to calculate scattering cross sections and their uncertainties
@@ -82,10 +89,14 @@ int main(int argc, char **argv)
   double fCorrRP = -.5;			// correlation between resonance and potential scatterings
   double fCorrFF = .5;			// correlation between fission widths of different resonances
   double fCorrNG = 0;			// correlation between scattering and capture widths of different resonances
-  double fCorrNNB = .5;		// correlation between scattering cross sections in different energy bins
-  double fCorrGGB = .5;		// correlation between capture cross sections in different energy bins
-  double fCorrNNRT = 0;		// correlation between scattering cross sections in the thermal and resonance regions
-  double fCorrGGRT = 0;		// correlation between capture cross sections in the thermal and resonance regions
+  double fCorrNNB = .5;			// correlation between scattering cross sections in different energy bins
+  double fCorrGGB = .5;			// correlation between capture cross sections in different energy bins
+  double fCorrNNRT = 0;			// correlation between scattering cross sections in the thermal and resonance regions
+  double fCorrGGRT = 0;			// correlation between capture cross sections in the thermal and resonance regions
+  int    nPreDefSctUN = 0;		// number of predefined scattering uncertainties
+  int    nPreDefCapUN = 0;		// number of predefined capture uncertainties
+  BINUNC *pPreDefSctUN = NULL;		// predefined scattering uncertainties
+  BINUNC *pPreDefCapUN = NULL;		// predefined capture uncertainties
   double f1, f2;
 
   if (argc < 2) {
@@ -145,6 +156,17 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "corrggb")) fCorrGGB = atof(value);
     else if (!strcasecmp(key, "corrnnrt")) fCorrNNRT = atof(value);
     else if (!strcasecmp(key, "corrggrt")) fCorrGGRT = atof(value);
+    else if (!strncasecmp(key, "scatunc", 7)) {
+      pPreDefSctUN = (BINUNC*)realloc(pPreDefSctUN, (nPreDefSctUN+1)*sizeof(BINUNC));
+      pPreDefSctUN[nPreDefSctUN].nBin = atoi(&key[7])-1;
+      pPreDefSctUN[nPreDefSctUN].fUnc = atof(value)/100;
+      ++nPreDefSctUN;
+    } else if (!strncasecmp(key, "captunc", 7)) {
+      pPreDefCapUN = (BINUNC*)realloc(pPreDefCapUN, (nPreDefCapUN+1)*sizeof(BINUNC));
+      pPreDefCapUN[nPreDefCapUN].nBin = atoi(&key[7])-1;
+      pPreDefCapUN[nPreDefCapUN].fUnc = atof(value)/100;
+      ++nPreDefCapUN;
+    }
   }
   fclose(fp);
 
@@ -167,7 +189,7 @@ int main(int argc, char **argv)
 
   puts("#############################################################");
   puts("##                                                         ##");
-  puts("##                        KERCEN v1.0                      ##");
+  printf("##                      KERCEN v%4.2lf                       ##\n", VERSION);
   puts("##                                                         ##");
   puts("#############################################################");
   puts("");
@@ -298,7 +320,7 @@ int main(int argc, char **argv)
     pCumSctXS2 = new double[nScatGroup];
     pCumSctUN = new double[nScatGroup];
     memset(pCumSctXS,  0, nScatGroup*sizeof(double));
-    memset(pCumSctXS2, 0, nCaptGroup*sizeof(double));
+    memset(pCumSctXS2, 0, nScatGroup*sizeof(double));
     memset(pCumSctUN,  0, nScatGroup*sizeof(double));
   }
   if (bCapture) {
@@ -336,7 +358,7 @@ int main(int argc, char **argv)
     pCumFisXS2 = new double[nFissGroup];
     pCumFisUN = new double[nFissGroup];
     memset(pCumFisXS,  0, nFissGroup*sizeof(double));
-    memset(pCumFisXS2, 0, nCaptGroup*sizeof(double));
+    memset(pCumFisXS2, 0, nFissGroup*sizeof(double));
     memset(pCumFisUN,  0, nFissGroup*sizeof(double));
   }
 
@@ -392,7 +414,7 @@ int main(int argc, char **argv)
     for (int n=0;n<nScatGroup;n++) {
       if (n < nFirstResScatGroup) {
       // assign thermal scattering cross section
-        if (pCaptGroup[n] < 0.5) {
+        if (pScatGroup[n] < 0.5) {
           pCumSctXS[n] = fScatteringXS;
           pCumSctUN[n] = fScatteringUN;
         } else {
@@ -407,6 +429,9 @@ int main(int argc, char **argv)
         else pCumSctUN[n] = sqrt(pCumSctUN[n]*pCumSctUN[n] + max(pCumSctXS2[n]/nIteration - xs2, 0.0)/xs2);
       }
     }
+    for (int n=0;n<nPreDefSctUN;n++)
+      if (pPreDefSctUN[n].nBin >= 0 && pPreDefSctUN[n].nBin < nScatGroup)
+        pCumSctUN[pPreDefSctUN[n].nBin] = pPreDefSctUN[n].fUnc;
   }
 
   if (bCapture) {
@@ -427,6 +452,9 @@ int main(int argc, char **argv)
         else pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2);
       }
     }
+    for (int n=0;n<nPreDefCapUN;n++)
+      if (pPreDefCapUN[n].nBin >= 0 && pPreDefCapUN[n].nBin < nCaptGroup)
+        pCumCapUN[pPreDefCapUN[n].nBin] = pPreDefCapUN[n].fUnc;
   }
 
   if (bFission) {
@@ -477,12 +505,12 @@ int main(int argc, char **argv)
 
         if (i == j) corx = 1.0;
         else {
-          if (i < nFirstResCaptGroup) {
-            if (j < nFirstResCaptGroup) corx = 1.0;
-            else corx = fCorrGGRT;
+          if (i < nFirstResScatGroup) {
+            if (j < nFirstResScatGroup) corx = 1.0;
+            else corx = fCorrNNRT;
           } else {
-            if (j < nFirstResCaptGroup) corx = fCorrGGRT;
-            else corx = fCorrGGB;
+            if (j < nFirstResScatGroup) corx = fCorrNNRT;
+            else corx = fCorrNNB;
           }
         }
 
@@ -619,7 +647,8 @@ int main(int argc, char **argv)
   if (pCumSctUN) delete[] pCumSctUN;
   if (pCumCapUN) delete[] pCumCapUN;
   if (pCumFisUN) delete[] pCumFisUN;
-
+  if (pPreDefSctUN) free(pPreDefSctUN);
+  if (pPreDefCapUN) free(pPreDefCapUN);
 }
 
 void Plot()

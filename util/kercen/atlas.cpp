@@ -2,7 +2,7 @@
  *
  * Filename: atlas.cpp
  * Purpose : provides the basic functions for handling ATLAS file
- * Author  : Youngsik Cho
+ * Authors : Youngsik Cho, Samuel Hoblit
  *
  ***********************************************************************/
 

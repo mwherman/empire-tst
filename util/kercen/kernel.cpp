@@ -2,7 +2,7 @@
  *
  * Filename: kernel.cpp
  * Purpose : calculates average c/s based on Atlas
- * Author  : Youngsik Cho
+ * Authors : Youngsik Cho, Samuel Hoblit
  *
  ***********************************************************************/
 

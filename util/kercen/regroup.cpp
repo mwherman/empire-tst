@@ -12,6 +12,8 @@
 #include <string.h>
 #include <math.h>
 
+#define VERSION		1.0
+
 int nGroup = 0, nStart = 0, nNewGroup = 0;
 double *pGroup = NULL;				// original group structure
 double *pNewGroup = NULL;			// new group structure
@@ -189,7 +191,7 @@ int main(int argc, char **argv)
 
   puts("#############################################################");
   puts("##                                                         ##");
-  puts("##                       REGROUP v1.0                      ##");
+  printf("##                      REGROUP v%4.2lf                      ##\n", VERSION);
   puts("##                                                         ##");
   puts("#############################################################");
   puts("");
