@@ -93,6 +93,9 @@ int main(int argc, char **argv)
   double fCorrGGB = .5;			// correlation between capture cross sections in different energy bins
   double fCorrNNRT = 0;			// correlation between scattering cross sections in the thermal and resonance regions
   double fCorrGGRT = 0;			// correlation between capture cross sections in the thermal and resonance regions
+  double fCaptlim = 0.0;		// lower limit on capture % uncertainties
+  double fScatlim = 0.0;		// lower limit on scattering % uncertainties
+  double fFisslim = 0.0;		// lower limit on fission % uncertainties
   int    nPreDefSctUN = 0;		// number of predefined scattering uncertainties
   int    nPreDefCapUN = 0;		// number of predefined capture uncertainties
   BINUNC *pPreDefSctUN = NULL;		// predefined scattering uncertainties
@@ -156,6 +159,9 @@ int main(int argc, char **argv)
     else if (!strcasecmp(key, "corrggb")) fCorrGGB = atof(value);
     else if (!strcasecmp(key, "corrnnrt")) fCorrNNRT = atof(value);
     else if (!strcasecmp(key, "corrggrt")) fCorrGGRT = atof(value);
+    else if (!strcasecmp(key, "captlim")) fCaptlim = atof(value)/100.;
+    else if (!strcasecmp(key, "scatlim")) fScatlim = atof(value)/100.;
+    else if (!strcasecmp(key, "fisslim")) fFisslim = atof(value)/100.;
     else if (!strncasecmp(key, "scatunc", 7)) {
       pPreDefSctUN = (BINUNC*)realloc(pPreDefSctUN, (nPreDefSctUN+1)*sizeof(BINUNC));
       pPreDefSctUN[nPreDefSctUN].nBin = atoi(&key[7])-1;
@@ -427,6 +433,7 @@ int main(int argc, char **argv)
         xs2 = pCumSctXS[n]*pCumSctXS[n];
         if (xs2 == 0.0) pCumSctUN[n] = 0.0;
         else pCumSctUN[n] = sqrt(pCumSctUN[n]*pCumSctUN[n] + max(pCumSctXS2[n]/nIteration - xs2, 0.0)/xs2);
+        pCumSctUN[n] = max(pCumSctUN[n],fScatlim);
       }
     }
     for (int n=0;n<nPreDefSctUN;n++)
@@ -450,6 +457,7 @@ int main(int argc, char **argv)
         xs2 = pCumCapXS[n]*pCumCapXS[n];
         if (xs2 == 0.0) pCumCapUN[n] = 0.0;
         else pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2);
+        pCumCapUN[n] = max(pCumCapUN[n],fCaptlim);
       }
     }
     for (int n=0;n<nPreDefCapUN;n++)
@@ -464,6 +472,7 @@ int main(int argc, char **argv)
       xs2 = pCumFisXS[n]*pCumFisXS[n];
       if (xs2 == 0.0) pCumFisUN[n] = 0.0;
       else pCumFisUN[n] = sqrt(pCumFisUN[n]*pCumFisUN[n] + max(pCumFisXS2[n]/nIteration - xs2,0.0)/xs2);
+      pCumFisUN[n] = max(pCumFisUN[n],fFisslim);
     }
   }
 

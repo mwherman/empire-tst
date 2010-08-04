@@ -246,7 +246,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
     if (E > m_fMax) break;
 
     if (Gn+Gg == 0) {
-      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %10.2lf... skipped!\n", E);
+//      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %10.2lf... skipped!\n", E);
       continue;
     }
 
@@ -312,7 +312,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
     G1 = Gn + Gg;
 
     if (G1 == 0) {
-      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E);
+//      if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E);
       continue;
     }
 
@@ -360,7 +360,7 @@ bool CKernel::GetXSnUNC(int nth, int nReaction, int nGroup, double *pGroup, int 
       G2 = Gn2 + Gg2;
 
       if (G2 == 0.0) {
-        if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E2);
+//        if (nth == 0) fprintf(stderr, "WARNING: total width = 0 at E = %lf... skipped!\n", E2);
         continue;
       }
 
