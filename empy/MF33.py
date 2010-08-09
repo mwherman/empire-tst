@@ -9,6 +9,24 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 Class representing a section from ENDF file MF33, x-sec covariances
 Includes functions for manipulating the matrix, 
 and for writing a new MT section
+
+Use:
+>from empy import MF33
+>m = MF33.MF33("file.endf", 18) # to get the MT18 covariance matrix
+# data stored in class:
+>m.cov_mat
+   corr_mat
+   elist
+   uncert
+   zam
+   awt
+
+# truncate the matrix (to prevent overlapping when merging with 
+# other covariance data:
+>m.truncate( 10000 )    # set to 0 below 10 keV
+
+write new MF33 file:
+>m.writeMF33( "new.endf" )
 """
 
 
@@ -34,7 +52,7 @@ class MF33(MF_base):
             self.initFromENDF(filename,MT)
         else:
             self.cov_mat = numpy.identity(1)
-            self.corrmat = numpy.identity(1)
+            self.corr_mat = numpy.identity(1)
             self.elist = []
             self.uncert = []
             self.MAT, self.MF, self.MT = 0,0,0
@@ -84,7 +102,8 @@ class MF33(MF_base):
         # we only look at first section, ignoring cross-reaction stuff
         CONT = fin.readline()
         XMF1, XLFS1, MAT1, MT1, NC, NI = self.readENDFline(CONT)
-        print ("%i NC and %i NI sub-sections" % (NC, NI))
+        if NC or NI>1:
+            print ("%i NC and %i NI sub-sections" % (NC, NI))
         
         for NCdx in range(NC):
             print "NC subsection %i" % NCdx
@@ -105,9 +124,9 @@ class MF33(MF_base):
         
         vals = []
         for i in range(self.n_subsecs):
-            print ("NI subsection %i header:" % i)
+            #print ("NI subsection %i header:" % i)
             CONT = fin.readline()
-            print (CONT.rstrip())
+            #print (CONT.rstrip())
             dum, dum1, LS, LB, NT, NE = self.readENDFline(CONT)
             
             # is this an upper-diagonal matrix type section?

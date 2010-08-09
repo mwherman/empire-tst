@@ -6,7 +6,13 @@ sg33.py
 Created by Caleb Mattoon on 2010-7-12.
 Copyright (c) 2010 __nndc.bnl.gov__. All rights reserved.
 
-write mgCovars class contents out to sg33 agreed-upon format
+write mgCovars class contents out to WPEC Subgroup 33 agreed-upon format
+
+Use:
+>from empy import readNJOY, sg33
+>mg = readNJOY.mgCovars("corr.matrix")
+>sg33.sg33( mg, "sg33.txt" ) 
+    # translates njoycovx output to sg-33 format, written to 'sg33.txt'
 """
 
 import os
@@ -26,8 +32,8 @@ names = {
         16: ("(n,2n)",  "MF3", "(barn)"),
         17: ("(n,3n)",  "MF3", "(barn)"),
         18: ("Fission", "MF3", "(barn)"),
-        22: ("(z,na)", "MF3", "(barn)"),
-        28: ("(z,np)", "MF3", "(barn)"),
+        22: ("(z,na)",  "MF3", "(barn)"),
+        28: ("(z,np)",  "MF3", "(barn)"),
         37: ("(n,4n)",  "MF3", "(barn)"),
         102: ("(n,gamma)", "MF3", "(barn)"),
         103: ("(n,p)",  "MF3", "(barn)"),

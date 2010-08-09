@@ -7,6 +7,16 @@ Created by Caleb Mattoon on 2010-6-11.
 Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 Class representing ENDF file MF3 cross sections
+>from empy import MF3
+>m = MF3.MF3("file.endf")
+
+All cross sections from MF3 are loaded in self.xsecs:
+>m.xsecs['MT18'] # for fission
+
+Also stored: elist, QM, QI, interpolation table
+
+Write a new MF3 file:
+>m.writeMF3( "output.endf" )
 """
 
 

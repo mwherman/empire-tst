@@ -19,7 +19,13 @@ empy:
     
     **classes inheriting MF_base. Each reads data from ENDF into a
     class structure:** 
-    
+        
+        covEndf.py: read in entire MF33 (plus MF31 if available) covariance
+        sections to 'covEndf' class. No support for writing yet, may be
+        slow for big files
+        
+        # the following deal with only one section (MT #) at a time:
+        
         MF31.py:   class for reading/writing nubar covariances.
         
         MF32.py:   class for resonance parameters. Can read Atlas 
@@ -48,6 +54,9 @@ empy:
         
         boxr.mgCovars: read ascii or binary 'BOXR' format 
             (produced by njoy) into mgBase
+        
+        sg33.sg33:  utility for writing mgCovars class out to format
+            approved by WPEC subgroup 33
        
     
     **other stuff**
