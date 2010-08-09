@@ -5,7 +5,7 @@ covEndf.py
 class representing all covariances in MF33 (and 31 if available)
 
 >from empy import covEndf
->m = covEndf.covEndf("filename.endf")
+>m = covEndf.covEndf("filename.endf")   # takes a while for big endf files
 
 There are then two equivalent ways to access each section:
     > m.MT18.elist
@@ -41,19 +41,28 @@ class section:
     def __init__(self, m, key):
         self.elist = m.elist[key]
         self.uncert = m.uncert.get(key,None)
-        self.covars = m.covars[key]
+        self.cov_mat = m.covars[key]
         
         self.MF = 0
         mts = key.split('MT')
-        self.MT = int(mts[1])
+        self.rowMT = int(mts[1])
         if len(mts)==3:
-            self.MTy = int(mts[2])
+            self.colMT = int(mts[2])
+        else:
+            self.colMT = int(mts[1])
         self.rawData = m.rawData[key]
     
     def __str__(self):
         str = "MF%i MT%i: %ix%i matrix, %i subsections"
         lx, ly = self.covars.shape
         return str % (self.MF, self.MT, lx, ly, len(self.rawData))
+    
+    def corr_mat(self):
+        """
+        correlation matrix is calculated
+        """
+        from la import cov2corr
+        return cov2corr( self.cov_mat )
 
 
 class covEndf(MF_base):

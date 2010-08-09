@@ -222,7 +222,7 @@ def isFEND(string, MAT):
     """
     FEND finishes the MF: '             MAT 0   0   0\n'
     """
-    return string[-15:-1] == ('%i 0  0    0' % MAT)
+    return string[-15:-1] == ('%4i 0  0    0' % MAT)
 
 
 def isMEND(string):

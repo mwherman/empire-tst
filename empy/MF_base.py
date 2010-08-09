@@ -93,14 +93,18 @@ class MF_base:
             """
             faster version of 'treat'
             """
-            if '-' in string.strip()[1:]:
-                loc = string.rfind('-') # position where exp goes
+            loc = string.rfind('-')
+            if loc>0:
+            #if '-' in string.strip()[1:]:
+                #loc = string.rfind('-') # position where exp goes
                 return float( string[:loc]+'e'+string[loc:] )
-            elif '+' in string.strip()[1:]:
-                loc = string.rfind('+')
+            loc = string.rfind('+')
+            if loc>0:
+            #elif '+' in string.strip()[1:]:
+                #loc = string.rfind('+')
                 return float( string[:loc]+'e'+string[loc:] )
-            else:
-                raise ValueError
+            #else:
+            raise ValueError
         
         
         arr = (string[0:11], string[11:22], string[22:33], 
