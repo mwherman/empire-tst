@@ -152,6 +152,8 @@ class mgCovars(mgBase):
         """
         if line.startswith(' material mat-mt='):
             MAT1 = MAT2 = int(line[18:22])
+            if not self.mat:
+                self.mat = MAT1
             colMT = rowMT = int(line[23:26])
         elif line.startswith(' 1st material mat-mt='):
             MAT1, MAT2 = int(line[22:26]), int(line[58:62])

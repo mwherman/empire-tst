@@ -188,7 +188,7 @@ class mgBase:
         
         b = MF_base.MF_base()
         
-        # this writes reactions to MF33, may include nubars etc:
+        # this writes reactions to MF31/33, may include nubars etc:
         mtList = [int(a.strip('MT')) for a in self.xsecs.keys()]
         mtList.sort()
         
@@ -197,39 +197,47 @@ class mgBase:
         
         for mt in mtList:
             key = "MT%i" % mt
+            MF = 33
+            if mt in (452,455,456):
+                MF = 31
             
             # first get covariance matrix with energy in ascending order.
             # just write self-correlations for now
             if self.covars.has_key( key+key ):
-                covmat = self.covars[key+key][::-1,::-1]
+                covmat = self.covars[key+key]
             elif self.corrs.has_key( key+key ):
-                covmat = self.corrs[ key+key ][::-1,::-1] / 1000.
-                for idx in range(self.ngroups):
-                    covmat[idx,:] *= self.uncert[idx]
-                for jdx in range(self.ngroups):
-                    covmat[:,jdx] *= self.uncert[jdx]
+                from empy.la import corr2cov
+                covmat = corr2cov( self.corrs[ key+key ], self.uncert[key] )
             else:
                 print ("missing covariance matrix for reaction "+key)
                 continue
             
+            thr = self.thresholds[key]
+            covmat = covmat[:thr[1]+1,:thr[1]+1] # truncate extra zeros
+            covmat = covmat[::-1,::-1]  # back to 'normal' order
+            
+            # also get elist in range of interest:
+            elist = list(self.elist[:self.thresholds[key][1]+1])
+            elist = [1.e-5] + elist[::-1]
+            
             # right-most in tuple is number of sub-sections:
             str = b.writeENDFline([self.zam,self.awt,0,0,0,1],
-                    self.mat,33,mt)
+                    self.mat,MF,mt)
             fout.write(str)
             # here number of sub-subsections:
-            str = b.writeENDFline(['0.0','0.0',0,mt,0,1],
-                    self.mat,33,mt)
+            str = b.writeENDFline([0.0,0.0,0,mt,0,1],
+                    self.mat,MF,mt)
             fout.write(str)
             
             # CONT with number of energy points:
-            matsize = len(covmat.diagonal())
+            matsize = len(elist)
             ndiag = matsize * (matsize+1) // 2
-            str = b.writeENDFline(['0.0','0.0',1,5,ndiag,matsize],
-                    self.mat,33,mt)
+            #print mt, matsize, ndiag
+            str = b.writeENDFline([0.0,0.0,1,5,ndiag,matsize],
+                    self.mat,MF,mt)
             fout.write(str)
             
             # write the matrix. elist should always start with 1.0e-5
-            elist = [1.e-5] + list(self.elist[:self.thresholds[key][1]][::-1])
             tmplist = elist[:]
             #print tmplist
             for idx in range(len(covmat)):
@@ -237,13 +245,13 @@ class mgBase:
             
             while len(tmplist) >= 6:
                 fout.write( b.writeENDFline( tuple(tmplist[:6]), 
-                    self.mat,33,mt ) )
+                    self.mat,MF,mt ) )
                 tmplist = tmplist[6:]
             if len(tmplist)>0:
                 fout.write( b.writeENDFline( tuple(tmplist), 
-                    self.mat,33,mt ) )
+                    self.mat,MF,mt ) )
             
-            fout.write( b.writeSEND( self.mat, 33 ) )
+            fout.write( b.writeSEND( self.mat, MF ) )
         
         fout.close()
     

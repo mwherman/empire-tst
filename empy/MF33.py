@@ -51,6 +51,7 @@ class MF33(MF_base):
         if filename and MT:
             self.initFromENDF(filename,MT)
         else:
+            print("Initializing empty class")
             self.cov_mat = numpy.identity(1)
             self.corr_mat = numpy.identity(1)
             self.elist = []
