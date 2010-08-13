@@ -202,6 +202,7 @@ double CKernel::GetScatXS(int n, double g1, double g2)
   else phi = kR-atan(3*kR/(3-kR*kR));
 //  printf("E = %lg, phi = %lg, sin(phi) = %lg value = %lg\n", E, phi, sin(phi),
 //         4.089E6*(m_nA+1)*(m_nA+1)/(m_nA*m_nA)*gGn*2*(Gn+Gg)*sin(phi)*sin(phi)/(Gn+Gg)/(E*(g2-g1)));
+
   double sctxs = 4.089E6*(m_nA+1)*(m_nA+1)/(m_nA*m_nA)*gGn*(Gn-2*(Gn+Gg)*sin(phi)*sin(phi))/
                  (Gn+Gg)/(E*(g2-g1));
   if (sctxs < 0) sctxs = 0;

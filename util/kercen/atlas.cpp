@@ -183,82 +183,150 @@ bool CAtlas::ReadParameters(int z, int a)
   sprintf(fname, "%sres-parameters/z%03d.dat", m_szBaseDirectory, z);
   if ((fp = fopen(fname, "r")) == NULL) return false;
   printf("%s... OK\n", fname);
-//  srand(time(NULL));
+
+  // srand(time(NULL));
+
   m_nRes = 0;
+  RESDATA* rp = m_Res;
+
   while (fgets(s, 1024, fp)) {
     if (ReadInt(s, 0, 6) != za) continue;
-    memset(&m_Res[m_nRes], 0, sizeof(RESDATA));
 
-    m_Res[m_nRes].E = ReadDouble(s, 26, 10);
-    m_Res[m_nRes].dE = ReadDouble(s, 37, 7);
+    memset(&m_Res[m_nRes], 0, sizeof(RESDATA));
+    // fill(rp, rp+MAXRES,0);
+
+    rp->E = ReadDouble(s, 26, 10);
+    rp->dE = ReadDouble(s, 37, 7);
 
     ReadString(s, 47, 3, v);
-    if (!strcmp(v, "   ") || (m_bReassignLJ && s[45] == 'A')) m_Res[m_nRes].J = -1;
-    else m_Res[m_nRes].J = atof(v);
-    m_Res[m_nRes].nJ = m_Res[m_nRes].J;
+    if (!strcmp(v, "   ") || (m_bReassignLJ && s[45] == 'A')) {
+      rp->J = -1.0;
+      rp->g = -1.0;
+    } else {
+      rp->J = atof(v);
+      rp->g = (2.0*rp->J + 1.0)/(2.0*(2.0*m_fSpin + 1.0));
+    }
+    rp->nJ = rp->J;
 
     ReadString(s, 53, 1, v);
     if (!strcmp(v, " ") || (m_bReassignLJ && s[51] == 'A')) {
-      //if ((s[45] == 'E') && (m_Res[m_nRes].J == 2.0))
+      //if ((s[45] == 'E') && (rp->J == 2.0))
       if(m_nA == 207)
-        m_Res[m_nRes].l = int(m_Res[m_nRes].J-1.0);    // temp fixup for Pb207
+        rp->l = int(rp->J-1.0);    // temp fixup for Pb207
       else
-        m_Res[m_nRes].l = -1;
+        rp->l = -1;
     }
-    else m_Res[m_nRes].l = atoi(v);
+    else rp->l = atoi(v);
+
+    ReadString(s, 55, 3, v);
+    if (!strcmp(v, "B  ")) {
+      // if this flag is "B  " we have a total width
+      rp->G  = ReadDouble(s, 61, 9);
+      rp->dG = ReadDouble(s, 71, 8);
+    }
 
     if (s[80] == 'C') {
-      m_Res[m_nRes].nflag = s[81];
-      m_Res[m_nRes].Gn = ReadDouble(s, 86, 9);
-      m_Res[m_nRes].dGn = ReadDouble(s, 96, 8);
-    } else m_Res[m_nRes].nflag = ' ';
-    if (m_Res[m_nRes].Gn == 0) {
-      double Gnr = ReadDouble(s, 136, 9);
-      if (Gnr != 0) {
-        if (m_Res[m_nRes].l == 0) m_Res[m_nRes].Gn = Gnr*sqrt(fabs(m_Res[m_nRes].E));
-        else if (m_Res[m_nRes].l == 1) ;
+      rp->nflag = s[81];
+      rp->Gn = ReadDouble(s, 86, 9);
+      rp->dGn = ReadDouble(s, 96, 8);
+    } else
+      rp->nflag = ' ';
+
+    if (rp->Gn == 0) {
+      // if gGn is not specified. See if any reduced neutron widths around.
+      // this is usually found in parameter 4
+      int iof = (4-1)*25 + 55;
+      ReadString(s, iof, 3, v);
+      if(v[1] == 'G') {
+        // G specifies s-wave reduced neutron width
+        if (rp->l == 0) {
+          double se = sqrt(fabs(rp->E));
+          double Gnr  = ReadDouble(s, iof+6, 9);
+          double dGnr = ReadDouble(s, iof+16, 8);
+          double xfc = 0.0;
+          if(v[2] == ' ') {
+            if(rp->g > -1.0) xfc = se/(2.0*rp->g);
+          } else if(v[2] == 'A') {
+            if(rp->g > -1.0) xfc = se/rp->g;
+          } else if(v[2] == 'B') {
+            xfc = se;
+          } else if(v[2] == 'C') {
+            if(rp->g > -1.0) xfc = se/(2.0*m_fAbundance*rp->g);
+          } else if(v[2] == 'D') {
+            if(rp->g > -1.0) xfc = se/(m_fAbundance*rp->g);
+          }
+          rp->Gn  = xfc*Gnr;
+          rp->dGn = xfc*dGnr;
+        } else
+          printf(" S-wave reduced neutron width specified for %d spin state at %lf\n",rp->l,rp->E);
+      } else if(v[1] == 'H') {
+        // H specifies p-wave reduced neutron width
+        if (rp->l == 1) {
+          double se = sqrt(fabs(rp->E));
+          double Gnr  = ReadDouble(s, iof+6, 9);
+          double dGnr = ReadDouble(s, iof+16, 8);
+          double rA = double(m_nA);
+          double xA = rA/(rA+1.0);
+          double kR2 = 8.7953E-08*rp->E*pow(rA,0.6666667)*xA*xA;
+          double xx = se/(1.0 + 1.0/kR2);
+          double xfc = 0.0;
+          if(v[2] == ' ') {
+            if(rp->g > -1.0) xfc = xx/(2.0*rp->g);
+          } else if(v[2] == 'A') {
+            if(rp->g > -1.0) xfc = xx/rp->g;
+          } else if(v[2] == 'B') {
+            xfc = xx;
+          } else if(v[2] == 'C') {
+            if(rp->g > -1.0) xfc = xx/(2.0*m_fAbundance*rp->g);
+          } else if(v[2] == 'D') {
+            if(rp->g > -1.0) xfc = xx/(m_fAbundance*rp->g);
+          }
+          rp->Gn  = xfc*Gnr;
+          rp->dGn = xfc*dGnr;
+        } else
+          printf(" P-wave reduced neutron width specified for %d spin state at %lf\n",rp->l,rp->E);
       }
     }
 
     if (s[105] == 'F') {
-      m_Res[m_nRes].Gg = ReadDouble(s, 111, 9);
-      m_Res[m_nRes].dGg = ReadDouble(s, 121, 8);
+      rp->Gg = ReadDouble(s, 111, 9);
+      rp->dGg = ReadDouble(s, 121, 8);
     }
 
     if (s[155] == 'I') {
       if (s[156] == 'A') {
-        m_Res[m_nRes].area = ReadDouble(s, 161, 9);
-        m_Res[m_nRes].darea = ReadDouble(s, 171, 8);
+        rp->area = ReadDouble(s, 161, 9);
+        rp->darea = ReadDouble(s, 171, 8);
       }
       else if (s[156] == 'I') {
-        m_Res[m_nRes].Gf = ReadDouble(s, 161, 9);
-        m_Res[m_nRes].dGf = ReadDouble(s, 171, 8);
+        rp->Gf = ReadDouble(s, 161, 9);
+        rp->dGf = ReadDouble(s, 171, 8);
       }
     }
 
     if (s[180] == 'I') {
       if (s[181] == 'F') {
-        m_Res[m_nRes].farea = ReadDouble(s, 186, 9);
-        m_Res[m_nRes].dfarea = ReadDouble(s, 196, 8);
+        rp->farea = ReadDouble(s, 186, 9);
+        rp->dfarea = ReadDouble(s, 196, 8);
       }
     }
 
-    if (m_Res[m_nRes].l == -1) {
+    if (rp->l == -1) {
 
       // ang mom l was not found. We need to assign it here.
 
       double gGn;
 
-      if (m_Res[m_nRes].nflag == ' ') gGn = m_Res[m_nRes].Gn/2;
-      else if (m_Res[m_nRes].nflag == 'A') gGn = m_Res[m_nRes].Gn;
-      else if (m_Res[m_nRes].nflag == 'B' && m_nZ%2 == 1) gGn = 0.5 * m_Res[m_nRes].Gn;
-      else if (m_Res[m_nRes].nflag == 'C') gGn = m_Res[m_nRes].Gn/(2*m_fAbundance);
-      else if (m_Res[m_nRes].nflag == 'D') gGn = m_Res[m_nRes].Gn/m_fAbundance;
-      else if (m_Res[m_nRes].nflag == 'E') gGn = m_Res[m_nRes].Gn/(4*m_fAbundance);
+      if (rp->nflag == ' ') gGn = rp->Gn/2;
+      else if (rp->nflag == 'A') gGn = rp->Gn;
+      else if (rp->nflag == 'B' && m_nZ%2 == 1) gGn = 0.5 * rp->Gn;
+      else if (rp->nflag == 'C') gGn = rp->Gn/(2*m_fAbundance);
+      else if (rp->nflag == 'D') gGn = rp->Gn/m_fAbundance;
+      else if (rp->nflag == 'E') gGn = rp->Gn/(4*m_fAbundance);
       if (gGn == 0) {
-        double facg=m_Res[m_nRes].area/(0.5*m_fGg1);
+        double facg=rp->area/(0.5*m_fGg1);
         if (facg > 0.99) facg = .99;
-        gGn = m_Res[m_nRes].area/(1-facg);
+        gGn = rp->area/(1-facg);
       }
 
       double corr;
@@ -268,52 +336,55 @@ bool CAtlas::ReadParameters(int z, int a)
         corr = 2.25/3;
       else
         corr = 2.0/3;
-      double p1s1 = m_fS1 * GetPenet(1, m_Res[m_nRes].E);
+      double p1s1 = m_fS1 * GetPenet(1, rp->E);
       double bb = p1s1/m_fS0;
-      double x = gGn/(2*m_fD0)*sqrt(1/m_Res[m_nRes].E)*(corr/p1s1-1/m_fS0);
-      // printf("%6.2lf %lf,%lf,%lf,%lf,%lf,%lf\n", m_Res[m_nRes].E,corr,gGn,p1s1,bb,x,1.0/(1+.33333*sqrt(bb/corr)*exp(x)));
+      double x = gGn/(2*m_fD0)*sqrt(1/rp->E)*(corr/p1s1-1/m_fS0);
+      // printf("%6.2lf %lf,%lf,%lf,%lf,%lf,%lf\n", rp->E,corr,gGn,p1s1,bb,x,1.0/(1+.33333*sqrt(bb/corr)*exp(x)));
 
       if (x < 50 && 1.0/(1+.33333*sqrt(bb/corr)*exp(x)) > 0.5)
-        m_Res[m_nRes].l = 1;
+        rp->l = 1;
       else
-        m_Res[m_nRes].l = 0;
+        rp->l = 0;
 
     }
 
-    if (m_Res[m_nRes].Gn == 0) ++nzerogn;
-    if (m_Res[m_nRes].Gg == 0) ++nzerogg;
-    if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gn != 0) {
-      gnavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gn;
-      ++ngn[m_Res[m_nRes].l];
-      if (m_Res[m_nRes].dGn != 0) {
-        gnavg2[m_Res[m_nRes].l] += m_Res[m_nRes].Gn;
-        dgnavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGn;
-//        fgnavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGn/m_Res[m_nRes].Gn;
-        ++ndgn[m_Res[m_nRes].l];
+    if (rp->Gn == 0) ++nzerogn;
+    if (rp->Gg == 0) ++nzerogg;
+    if (rp->E > 0 && rp->Gn != 0) {
+      gnavg[rp->l] += rp->Gn;
+      ++ngn[rp->l];
+      if (rp->dGn != 0) {
+        gnavg2[rp->l] += rp->Gn;
+        dgnavg[rp->l] += rp->dGn;
+//        fgnavg[rp->l] += rp->dGn/rp->Gn;
+        ++ndgn[rp->l];
       }
     }
 
-    if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gg != 0) {
-      ggavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gg;
-      ++ngg[m_Res[m_nRes].l];
-      if (m_Res[m_nRes].dGg != 0) {
-        ggavg2[m_Res[m_nRes].l] += m_Res[m_nRes].Gg;
-        dggavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGg;
-//        fggavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGg/m_Res[m_nRes].Gg;
-        ++ndgg[m_Res[m_nRes].l];
+    if (rp->E > 0 && rp->Gg != 0) {
+      ggavg[rp->l] += rp->Gg;
+      ++ngg[rp->l];
+      if (rp->dGg != 0) {
+        ggavg2[rp->l] += rp->Gg;
+        dggavg[rp->l] += rp->dGg;
+//        fggavg[rp->l] += rp->dGg/rp->Gg;
+        ++ndgg[rp->l];
       }
     }
-    if (m_Res[m_nRes].E > 0 && m_Res[m_nRes].Gf != 0) {
-      gfavg[m_Res[m_nRes].l] += m_Res[m_nRes].Gf;
-      ++ngf[m_Res[m_nRes].l];
-      if (m_Res[m_nRes].dGf != 0) {
-        gfavg2[m_Res[m_nRes].l] += m_Res[m_nRes].Gf;
-        dgfavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGf;
-//        fgfavg[m_Res[m_nRes].l] += m_Res[m_nRes].dGf/m_Res[m_nRes].Gf;
-        ++ndgf[m_Res[m_nRes].l];
+    if (rp->E > 0 && rp->Gf != 0) {
+      gfavg[rp->l] += rp->Gf;
+      ++ngf[rp->l];
+      if (rp->dGf != 0) {
+        gfavg2[rp->l] += rp->Gf;
+        dgfavg[rp->l] += rp->dGf;
+//        fgfavg[rp->l] += rp->dGf/rp->Gf;
+        ++ndgf[rp->l];
       }
     }
+
     m_nRes++;
+    rp++;
+
   }
   fclose(fp);
   printf("Number of resonances in the Atlas = %d\n", m_nRes);
@@ -573,59 +644,61 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
 {
   if (n < 0 || n >= m_nRes) return false;
 
-  E = m_Res[n].E;
-  dE = m_Res[n].dE;
-  J = m_Res[n].nJ;
-  area = m_Res[n].area;
-  darea = m_Res[n].darea;
-  Gf = m_Res[n].Gf;
-  dGf = m_Res[n].dGf;
-  farea = m_Res[n].farea;
-  dfarea = m_Res[n].dfarea;
+  RESDATA* rs = &m_Res[n];
 
-  double gfactor = (2*m_Res[n].nJ+1)/(2*(2*m_fSpin+1));
+  E = rs->E;
+  dE = rs->dE;
+  J = rs->nJ;
+  area = rs->area;
+  darea = rs->darea;
+  Gf = rs->Gf;
+  dGf = rs->dGf;
+  farea = rs->farea;
+  dfarea = rs->dfarea;
 
-  if (m_Res[n].nflag == ' ') {
-    gGn = m_Res[n].Gn/2;
-    Gn = m_Res[n].Gn/2/gfactor;
-    dGn = m_Res[n].dGn/2/gfactor;
+  double gfactor = (2*rs->nJ+1)/(2*(2*m_fSpin+1));
+
+  if (rs->nflag == ' ') {
+    gGn = rs->Gn/2;
+    Gn = rs->Gn/2/gfactor;
+    dGn = rs->dGn/2/gfactor;
   }
-  else if (m_Res[n].nflag == 'A') {
-    gGn = m_Res[n].Gn;
-    Gn = m_Res[n].Gn/gfactor;
-    dGn = m_Res[n].dGn/gfactor;
+  else if (rs->nflag == 'A') {
+    gGn = rs->Gn;
+    Gn = rs->Gn/gfactor;
+    dGn = rs->dGn/gfactor;
   }
-  else if (m_Res[n].nflag == 'B') {
-    gGn = m_Res[n].Gn*gfactor;
-    Gn = m_Res[n].Gn;
-    dGn = m_Res[n].dGn;
+  else if (rs->nflag == 'B') {
+    gGn = rs->Gn*gfactor;
+    Gn = rs->Gn;
+    dGn = rs->dGn;
   }
-  else if (m_Res[n].nflag == 'C') {
-    gGn = m_Res[n].Gn/(2*m_fAbundance);
-    Gn = m_Res[n].Gn/(2*m_fAbundance*gfactor);
-    dGn = m_Res[n].dGn/(2*m_fAbundance*gfactor);
+  else if (rs->nflag == 'C') {
+    gGn = rs->Gn/(2*m_fAbundance);
+    Gn = rs->Gn/(2*m_fAbundance*gfactor);
+    dGn = rs->dGn/(2*m_fAbundance*gfactor);
   }
-  else if (m_Res[n].nflag == 'D') {
-    gGn = m_Res[n].Gn/m_fAbundance;
-    Gn = m_Res[n].Gn/(m_fAbundance*gfactor);
-    dGn = m_Res[n].dGn/(m_fAbundance*gfactor);
+  else if (rs->nflag == 'D') {
+    gGn = rs->Gn/m_fAbundance;
+    Gn = rs->Gn/(m_fAbundance*gfactor);
+    dGn = rs->dGn/(m_fAbundance*gfactor);
   }
-  else if (m_Res[n].nflag == 'E') {
-    gGn = m_Res[n].Gn/(4*m_fAbundance);
-    Gn = m_Res[n].Gn/(4*m_fAbundance*gfactor);
-    dGn = m_Res[n].dGn/(4*m_fAbundance*gfactor);
+  else if (rs->nflag == 'E') {
+    gGn = rs->Gn/(4*m_fAbundance);
+    Gn = rs->Gn/(4*m_fAbundance*gfactor);
+    dGn = rs->dGn/(4*m_fAbundance*gfactor);
   } else {
-    fprintf(stderr, "ERROR: unknown neutron flag '%c'\n", m_Res[n].nflag);
+    fprintf(stderr, "ERROR: unknown neutron flag '%c'\n", rs->nflag);
     exit(1);
   }
-  Gg = m_Res[n].Gg;
-  dGg = m_Res[n].dGg;
+  Gg = rs->Gg;
+  dGg = rs->dGg;
 
   if (Gg == 0) {
-    if (m_Res[n].l == 0) {
+    if (rs->l == 0) {
       Gg = m_fGg0;
       dGg = m_fdGg0;
-    } else if (m_Res[n].l == 1) {
+    } else if (rs->l == 1) {
       Gg = m_fGg1;
       dGg = m_fdGg1;
     } else {
@@ -635,14 +708,14 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
   }
 
   if (dGg == 0) {
-    if (m_Res[n].l == 0 && m_fGg0 > 0) dGg = Gg * m_fdGg0/m_fGg0;
-    else if (m_Res[n].l == 1 && m_fGg1 > 0) dGg = Gg * m_fdGg1/m_fGg1;
-    else if (m_Res[n].l > 1 && m_fGg2 > 0) dGg = Gg * m_fdGg2/m_fGg2;
+    if (rs->l == 0 && m_fGg0 > 0) dGg = Gg * m_fdGg0/m_fGg0;
+    else if (rs->l == 1 && m_fGg1 > 0) dGg = Gg * m_fdGg1/m_fGg1;
+    else if (rs->l > 1 && m_fGg2 > 0) dGg = Gg * m_fdGg2/m_fGg2;
   }
 
   if (Gn == 0 && area != 0) {
     //double fn = gfactor*Gg - area;
-    //if(fn <= 0.0) ; //fprintf(stderr, "ERROR: bad denominator for %d  %e   %e  %e  %e \n", n, m_Res[n].E, gfactor, Gg, area);
+    //if(fn <= 0.0) ; //fprintf(stderr, "ERROR: bad denominator for %d  %e   %e  %e  %e \n", n, rs->E, gfactor, Gg, area);
     //else {
     // Gn = Gg*area/fn;
     // gGn = gfactor*Gn;
@@ -669,7 +742,7 @@ bool CAtlas::GetParameter(int n, double &E, double &dE, double &J, double &gGn, 
       double p1 = (fn*area - Gg*area*gfactor)/(fn*fn);
       double p2 = Gg*(fn + area)/(fn*fn);
       dGn = sqrt(p1*p1*dGg*dGg + p2*p2*darea*darea);
-      // fprintf(stderr, "   l = %d, gfac = %e, fn = %e, p1 = %e, p2 = %e, dGn = %e\n", m_Res[n].l, gfactor, fn, p1, p2, dGn);
+      // fprintf(stderr, "   l = %d, gfac = %e, fn = %e, p1 = %e, p2 = %e, dGn = %e\n", rs->l, gfactor, fn, p1, p2, dGn);
     }
   }
 */
