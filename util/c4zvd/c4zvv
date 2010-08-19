@@ -12,5 +12,7 @@ rm tmp.dat c4.zvd end.zvd $file-$MT.zvd
 echo #!zvview.exe >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
+rm c4.zvd end.zvd tmp.dat 2>/dev/null         
 ./zvview.exe $file-$MT.zvd ps01.tit/c
+
 

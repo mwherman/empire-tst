@@ -2,18 +2,19 @@
 C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       implicit none
       integer maxr,maxen
-      parameter(maxr=85,maxen=300)
+      parameter(maxr=100,maxen=500)
       integer nreac,iz,ia,ncol
       integer i,j,nen,toplot(maxr)
       character*2 symb
       character*22 caz
       character*12 creaction(maxr)
-      real*8 e(maxen),cs(maxen,maxr)
+      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr)
 C
 C     Setting defaults plots
 C
       do i=1,maxr
-      toplot(i)=0
+        toplot(i)=0
+	check_cs(i)=0.d0
       enddo
 C#    Total       Elastic     Reaction    Fission   (z,gamma)   (z,n) 
       toplot(3) = 1  ! reaction
@@ -24,19 +25,23 @@ C#    Total       Elastic     Reaction    Fission   (z,gamma)   (z,n)
 C       
       OPEN(10,file='CS2ZVD.INP',STATUS='OLD',ERR=10)
       READ(10,*) ! Skipping column indicator 
-      READ(10,'(1x,85I1)') toplot
+      READ(10,'(1x,100I1)') toplot
       CLOSE(10)
 
 10    OPEN(20,file='XSECTIONS.OUT',STATUS='OLD',ERR=100)
 C       WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+5,
 C    &      int(Z(0)), SYMb(0), int(A(0))       
-        READ(20,'(1x,I3,10x,i3,1x,a2,1x,i3)') ncol,iz,symb,ia
-        nreac = ncol -1 ! energy does not count
-
-C       WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
+      READ(20,'(1x,I3,10x,i3,1x,a2,1x,i3)') ncol,iz,symb,ia
+C     nreac = ncol -1 ! energy does not count
+C     if(nreac.gt.maxr) then
+C	PAUSE 'Increase maxr PARAMETER !' 
+C	STOP 
+C     endif  
+      nreac = 10 ! reading up to 10 reactions only 	
+C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         
-      READ(20,'(12x,(95A12))') (creaction(j),j=1,nreac)
+      READ(20,'(12x,(100A12))') (creaction(j),j=1,nreac)
       creaction(1)='(z,tot)' 
       creaction(2)='(z,nel)'
       creaction(3)='(z,nonel)'
@@ -44,16 +49,26 @@ C    &
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G10.5,1P(95E12.5))',END=20) 
+        READ(20,'(G10.5,1P(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
+        do j=1,nreac
+ 	  check_cs(j)=check_cs(j) + cs(i,j)
+        enddo
         nen = i 
       enddo
  20   CLOSE(20)
- 
-      
+
+      do i=1,nreac
+	if(check_cs(i).le.1.d-12) toplot(i)=0
+      enddo
+       
       do j=1,nreac
-      if(toplot(j).eq.0) cycle ! Skipping plots
-      open(20,file='XS_'//TRIM(creaction(j))//'.zvd')       
+C       Deleting old plots 
+        open(20,file='XS_'//TRIM(creaction(j))//'.zvd')       
+        close(20,status='DELETE')
+C       Skipping plots 
+        if(toplot(j).eq.0) cycle 
+        open(20,file='XS_'//TRIM(creaction(j))//'.zvd')       
         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
      &    iz,symb,ia,TRIM(creaction(j))       
         

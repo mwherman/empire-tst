@@ -26,3 +26,4 @@ if [ "$4" = "" ]; then
 fi
 #next line makes use of the ddx.tit file with plot settings
 $EMPIREDIR/util/c4zvd/zvview.exe -p:tmp $3 ddx.tit </dev/null
+rm tmp.dat pnt.zvd cur.zvd

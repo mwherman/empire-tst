@@ -1,7 +1,7 @@
 #----GNU gfortran FORTRAN compiler
 FC     =  gfortran
 #----flags for production compilation with gfortran
-FFLAGS = -std=legacy -O3
+FFLAGS = -O3
 
 #----GNU g77 FORTRAN compiler
 #FC     =  g77
