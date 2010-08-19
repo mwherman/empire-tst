@@ -3090,7 +3090,7 @@ C             Subtract HMS contribution to CM emission spectrum
           ENDIF
          IF (nspec.gt.0) THEN
           WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of protons (z,x)  ZAP=  1001'
+          WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
           WRITE (12,*) ' '
           WRITE (12,'('' Energy    mb/MeV'')')
           WRITE (12,*) ' '

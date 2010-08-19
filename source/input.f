@@ -701,8 +701,10 @@ C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
 C                 These reactions are assumed to be always exclusive
                   IF(mulem.eq.in .and. in.le.4)
      &               ENDf(nnuc) = 1 ! n,xn
-                  IF(mulem.eq.(in+1)  .and. ip.eq.1  .and. in.le.3)  
-     &               ENDf(nnuc) = 1 ! n,p; n,np; n,2np; n,3np
+C                 IF(mulem.eq.(in+1)  .and. ip.eq.1  .and. in.le.3)  
+C    &               ENDf(nnuc) = 1 ! n,p; n,np; n,2np; n,3np
+                  IF(mulem.eq.(in+1)  .and. ip.eq.1  .and. in.le.1)  
+     &               ENDf(nnuc) = 1 ! n,p; n,np 
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -768,13 +770,13 @@ C                    From n,2n2p   to   n,a
                      ENDF(nnuc) = 1
                   ENDIF
 
-                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
+C                 IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
 C                    From n,3n2p   to   n,an   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 2) = 'an'
-                     iend = iend + 2
-                     ENDF(nnuc) = 1
-                  ENDIF
+C                    iend = iend - 4
+C                    REAction(nnuc)(iend + 1:iend + 2) = 'an'
+C                    iend = iend + 2
+C                    ENDF(nnuc) = 1
+C                 ENDIF
                                   
                   IF (ia.NE.0) THEN
                      WRITE (cnejec,'(I1)') ia
