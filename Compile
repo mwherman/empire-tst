@@ -3,5 +3,7 @@
 #echo "                     !!!!!  Attention !!!!!                    "
 #echo "The 'Compile' script is now deprecated in favor of the Makefile"
 #echo
-#echo "Run 'make' to build empire, or 'make clean' to start from source"
+#echo "Run 'make' or 'make spec' to build empire"
+# 'make' uses default gfortran compiler
+# 'make spec' uses compilers/flags specified by individual projects 
 make
