@@ -1,0 +1,599 @@
+1.  Bug in print.f fixed (R. Capote)
+2.  Correction to the vibrational-rotational input model routine
+    preparing ECIS input inside tl.f (H. Wienke)
+3.  Vibrational enhancement in level densities and its damping corrected
+    (M. Herman)
+4.  Mixed (exclusive/inclusive) ENDF-6 reactions classification implemented
+    (M. Herman)
+5.  Support for NJOY added to GUI (M. Herman)
+6.  Random sampling (among 2+,3-,4+) for high lying levels with unknown
+    spin implemented. These levels could be used for DWBA calculations
+    (R. Capote)
+7.  Kalbach parameterization of double differential emission cross section
+    for all possible combinations of incident/outgoing particles
+    (including gammas) implemented within PCROSS (R. Capote).
+8.  Normalization of the gamma-ray strength function (around 1 keV)
+    to the experimental 2*pi*Gg/D0 value implemented. Gg and D0 are
+    retrieved from the RIPL-2 database (R. Capote)
+    (The first energy point in the calculations must be lower than 40 keV)
+9.  Experimental s and p strength functions are retrieved from the RIPL-2
+    database and compared to calculated values for incident energies
+    below 100 keV (R. Capote)
+10. Automatic retrieval of collective levels extended to include levels in the
+    continuum, using ECDWBA input keyword (R. Capote)
+11. DWBA calculated inelastic scattering cross sections for selected levels
+    could be added to continuum. Corresponding "discrete levels" are marked
+    "cont" in the discrete level file. The inelastic contribution to the
+    continuum is spread over several emission energy bins using Gaussian
+    distribution with sigma given in input (new input keyword RESOLF)
+12. Additional dummy levels can be placed in the discrete level region in the
+    collective level file. The inelastic cross section calculated by DBWA
+    to this level is added to the nearest discrete level (R. Capote)
+13. Detailed printing of the angular distribution for all collective discrete
+    levels implemented in long output (R. Capote)
+14. Particle-hole LD formula employed in PCROSS taken from RIPL-2 LD chapter.
+    Potential depth considered  (R. Capote)
+15. EMPEND algorithm for DDXS fitting improved to accurately fit calculated
+    EMPIRE results for elastic and inelastic XS (A. Trkov)
+16. Separate energy dependent angular grid for elastic scattering implemented,
+    allowing to use any number of points for accurate description of angular 
+    distributions at energies above 10 MeV (R. Capote)
+17. Mixed (exclusive/inclusive) ENDF-6 cross sections and spectra calculations
+    implemented (M. Herman). 
+18. Unitarity problem for DIRECT<>0 cases identified and corrected. Unitarity
+    check introduced (R. Capote).
+19. EMPEND was extended to calculate total production cross section, including 
+    MT=5 contributions (A. Trkov)
+20. PCROSS is given precedence over DEGAS for PE particle emission (M. Herman)
+21. Some  systematics from EAF-3.0 included and made available from 
+    GUI->Outputs->x-sec systematics (M. Herman)
+22. Energy grid in MSD-Tristan increased by factor of 2 to reduce 
+    fluctuations (M. Herman)
+23. Optional parameters can be placed within incident energies (line must 
+    start with $). The change affects only incident energies that come 
+    after (M. Herman).
+24. If TUNE for gammas in CN is not specified calculations are done with
+    0.999 and Gamma_gamma is renormalized to available experimental data; 
+    setting TUNE to 1 turns off normalization (M. Herman).
+25. ENDF utility codes (CHECKR, FIZCON, STANEF, PSYCHE) updated to the 7.02
+    version (M. Herman)
+26. Maximum energy for the HRTW calculations can be controlled from the 
+    optional input (R. Capote)
+26. Automatic fit of Optical Model Parameters added by B. Carlson
+27. Printing of l=2 neutron strength function added (M. Divadeenam)
+28. Response functions for the 5 lowest l transfers in MSD can be normalized 
+    with a single input line RESNOR (no l-value must be specified) (M. Herman)
+29. Effect of ATILNO changed! It renormalizes currently used level density 
+    parameter a-tilde preserving internal normalization set by the average 
+    ratio between systematics and experimental data. Effective renormalization
+    factor is ATILNO*<exp/sys> rather than ATILNO (M. Herman)
+30. Prompt fission neutron spectrum calculation including post-fission neutrons 
+    emitted from fully accelerated fragments (see Kornilov N.V. et al, Physics 
+    of Atomic Nuclei ,62 (1999), pp.173-185) and pre-fission neutrons  emitted 
+    after neutron or proton emission of the fissioning CN. These neutrons are 
+    treated exactly within EMPIRE HF calculation. Implemented algorithm is an 
+    extension of the one by Maslov et al. (Eur. Phys. J. A18 (2003) 93-102) 
+    and allows to go above 20 MeV up to about 150 MeV. Nu-bar is also an extension 
+    of the formalism published by Maslov et al. (Eur. Phys. J. A18 (2003) 93-102) 
+    allowing to extend the energy range from 20 MeV up to about 150 MeV.
+    Both, nu-bar and PFNS calculations are consistent with the calculated fission 
+    cross sections. The implemented model allows for a better description of PFNS 
+    above the emissive threshold than the Los Alamos model. (R. Capote & M. Sin)
+32. Giant Multipole sum rules in the continuum are implemented (considering the 
+    collective states with spin 0,2,3 included in the collective level file). 
+    The results are printed in the long output. Eventually, the new listed resonances 
+    could be manually added to the collective level file to fulfill corresponding 
+    sum rule. If the sum rule is exhausted, then the corresponding deformation  
+    is set to zero. The empirical formulae used for estimation of energies 
+    and widths of Giant Multipole Resonances were taken from the TALYS manual. 
+    No checking is done of the collective strength used in the MSC+MSD calculations.
+    (R. Capote)
+33. DWBA on odd nuclides is implemented under following limitations: (i) No discrete 
+    levels can be calculated with DWBA, for these rigid rotor CC model is 
+    recommended. (ii) Calculated DWBA strength is distributed assuming a Gaussian 
+    resolution function. (iii) No spin coupling is considered. (iv) DWBA calculations
+    are carried out for a neighbour nucleus and collective states included in the 
+    continuum must have even spin!!!(R. Capote)
+34. New input key FISSPE defined. Default value is 0 to supress PFNS calculations.
+    FISSPE = 1 means Los Alamos model is used for calculations of post-fission neutrons
+    FISSPE = 2 means Kornilov's parametrization is used for calculations of post-fission
+             neutrons
+    If FISspe = 1 then additional input files are needed (R. Capote & M. Sin)
+35. ECIS subroutine changed to allow explicit input of the externally calculated 
+    dispersive corrections allowing to use dispersive potentials with different
+    geometry of the imaginary and real parts, for example 2408 OMP. (R Capote) 
+36. Optical model and discrete levels' databases updated using preliminary RIPL-3
+    libraries. (R Capote)
+37. X4TOC4 updated to improve printing of the reference (including Y2K problem)
+    disctionaries largely extended (V. Zerkin)
+38. Extension of the MSD formalism to deformed nuclei (H. Wienke)
+>>>>>>>>>>>>>>>>>NICE-2007<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+39. Non-interactive PostScript plots with ZVView (V. Zerkin, M. Herman)
+40. Access to ZVView configuration file from GUI (V. Zerkin, M. Herman)
+41. Moments of inertia (spin distribution parameter) controlled from the input
+    (R.Capote)
+42. Direct cross sections can be scaled by the factor defined in input 
+    (R. Capote)
+43. Scaling of the direct and total cross-sections automatically considered
+    in the elastic cross section (R. Capote). The obtained ENDF file is consistent.
+    no further adjustment of the elastic channel is required.
+43. Isomeric states automatically detected, their cross sections calculated
+    (also with the ENDF>0 option) and printed (M. Herman and R.Capote)
+44. Long standing problem resulting in incomplete levels' file fixed (R. Capote)
+45. Levels' file automatically updated from the RIPL database when missing nuclei
+    detected (R.Capote).
+46. Number of discrete levels considered in the calculations limited to half of
+    the value recommended in RIPL-3 (and not more than 15) if run with FITLEV>0
+    was not executed (i.e., adjustment of the discrete level range to fit level
+    densities was not done) (M. Herman).
+47. ZVView updated to the 9.74 version (V. Zerkin)
+48. Number of bins automatically adjusted to accomodate reactions with negative
+    Q-values if needed (M. Herman).
+49. EXFOR library updated to January 2007 along with the retrieval system
+    (V. Zerkin).
+50. EMPEND formats isomeric and ground state cross sections in MF=10. All 
+    known compiler warnings cleaned (A. Trkov). 
+51. Plotting of isomeric cross sections added (V. Zerkin)
+52. Cumulative plots of levels improved (M. Herman)
+53. Scattering radius added in EMPEND (A. Trkov)
+54. Improved formatting of radionuclide production in MF=10 (A. Trkov)
+55. Correlated sampling for TOTRED, FUSRED, FCCRED, TUNE and TUNEPE
+    implemented. The random number used in the first appearance of any of
+    these identifiers is stored and subsequently used for all remaining
+    energies of the given run. In this way all scaling goes in the same
+    direction. This patch allows to consider model error as the systematic
+    error in the scaling parameters which is always independent of the model
+    parameters uncertainty.
+56. Uniform or gaussian sampling of the uncertainties implemented (A new
+    input parameter RANDOM added).
+57. New fission model implemented as published in PRC 77 (2008) 054601.
+    Fission input/output routines 
+58. EGSM level density implemented.
+59. RIPL-3 semi-microscopic parity-dependent HFB LD implemented including
+    renormalization tables to fit RIPL-3 D0s.
+60. Renormalization of the capture channel using measured G/D ratio
+    tested.
+61. ZVView plotting of the GS and saddle LD implemented.
+
+        Changes in version 2.19beta24 with respect to 2.18  
+                      Brookhaven, February  2004
+
+1.  Error in the Wilmore-Hodgson omp corrected.
+    VOM(4, Nejc, Nnuc) set to -0.0018 instead of -0.00018. This coefficient
+    was also found to be wrong in the preliminary version of RIPL-2
+    (M. Herman).
+2.  MSD is automatically turned off for non-nucleon incident reactions
+    (M. Herman).
+3.  Internal conversion coefficients included in the gamma cascade
+    between discrete levels (ICC data from RIPL-2)(M. Herman).
+4.  Bug in reading branching ratios from the RIPL-2 file corrected
+    (emission probabilities instead of branching ratios were used
+    in the previous RIPL-2 versions) (R. Capote).
+5.  Bug in DEGAS resulting in lack of the preequilibrium population in
+    the Compound Nucleus continuum corrected (bug has been introduced in
+    version 2.18) (E. Betak).
+6.  ENDRES code and BNL-325 file with resonance parameters added in order
+    to merge resonance parameters into the final ENDF file (also dxsend.f
+    has been updated) (A. Trkov).
+7.  LINEAR and RECENT utility codes added in order to reconstruct cross
+    sections from the resonance parameters and enable plotting
+    (M. Herman & A. Trkov).
+8.  Some potentially empty files removed if actually empty (M. Herman).
+9.  run, runE, format and plot scripts modified to avoid double coding
+    (M. Herman).
+10. Processing with FIXUP split into two runs to avoid redundant data
+    in the final ENDF file (reconstruction of 203 and 207 postponed to the
+    second run) (M. Herman).
+11. Last energy point in the gamma spectra from capture included
+    in the file *.out with energy of the CN excitation energy and
+    respective cross section scaled to preserve spectrum integral.
+12. Option for manual OMP fitting added to the new GUI (M. Herman).
+13. PSYCHE added to the chain of utility codes (M. Herman).
+14. Spectral energies for ENDF formatting printed in F10.5 instead
+    of F9.4 format to improve accuracy (M. Herman).
+15. EMPEND revised to eliminate some undesired entries in the ENDF
+    file (A. Trkov).
+16. Fission with under-barrier effects in terms of optical model for
+    fission implemented (R. Capote, M.Herman, M. Sin, and A. Ventura).
+17. Reactions on excited targets (M. Herman).
+18. PostScript (and eps) files produced from within ZVV viewer are
+    stored in the work directory with a name following standard
+    convention (M. Herman).
+19. 'mb' printed after gamma emission intensity of discrete transitions
+    in oder to be able to plot respective excitation functions directly
+    from the EMPIRE output (*.lst) (M. Herman).
+20. 'zvpl' script for direct plotting from the EMPIRE output modified.
+    Additional window to paste a pattern is being opened. A bit more
+    cumbersome than before but more reliable. Before, many patterns
+    were misunderstood due to skipping blanks in the pattern and garbage
+    plot was produced (M. Herman).
+21. Maximum number of aliases in c4sort.f increased to 200.
+22. 'reaction' and 'titles' files used by X4TOC4 corrected and extended
+    to cover proton induced reactions (still needs a consistent check)
+    (M. Herman).
+23. On-line retrieval of the EXFOR data from the remote database implemented.
+    At the moment works only at nuclear data centers but will be extended
+    to reading from the EXFOR CD-ROM (V. Zerkin & M. Herman).
+24. Spectra for the ENDF formatting printed also for the proton induced
+    reactions (M. Herman).
+25. File 'titles' in x4toc4 modified to treat properly min and max bin
+    energies in the emission spectra (M. Herman).
+26. Correction to DEGAS regarding flux conservation (E. Betak)
+27. X4TOC4 replaced with the version available from ENDVER (version
+    2001-8) (A. Trkov).
+28. sixtab.f and dxsend.f modified to enable processing of more
+    advanced formatting used in the recent LANL evaluations (discrete
+    gamma's are still not processed correctly in such cases) (A. Trkov).
+29. Archives directories moved from inside 'work' to 'empire' to make
+    'work' more manageable (change inside Xrun.tcl) (M. Herman).
+30. Retrieval of EXFOR data from the relational MySQL database - opens
+    access to the periodically updated EXFOR library issued by the IAEA-NDS
+    on CD-ROMs (V. Zerkin M. Herman).
+31. Preequilibrium emission of clusters (Iwamoto-Harada) coded by R. Capote
+    (PCROSS module) and implemented by M. Herman.
+32. Xrun.tcl GUI updated: selective delete, access to fission input, and
+    generation of three piece-wise input templates (M. Herman).
+33. ZVView updated to the zvv97l.exe version (V. Zerkin).
+34. Spectra of recoils calculated using 'ENDF=2 prescrption' instead of a
+    rough approximation used before (M. Herman).
+35. Pre-fission spectra of particles printed in *.out for ENDF formating
+    (M. Herman)
+36. Zerkin's GUI allowing for customized EXFOR retrieval can be started
+    from the EMPIRE GUI (M. Herman)
+37. Confirmation dialogs added to GUI for all 'delete' buttons(M. Herman)
+38. CHECKR added to the chain of utility codes (M. Herman).
+39. FIZCON added to the chain of utility codes (M. Herman).
+40. STANEF added to the chain of utility codes (M. Herman).
+41. Printing particle spectra in the *.out output of EMPIRE rearanged
+    so that transitions to the discrete levels  are printed first with negative
+    energies and end points of the spectra are indicated by repeating the line.
+42. EMPEND adjusted to accept format of p.41 above - improves energy balance
+    above reaction thresholds (A. Trkov).
+43. Suite of gamma-strength functions from RIPL-2 coded by Plujko and
+    implemented by R. Capote and M. Herman.
+44. Reaction/MT-number conversion table for X4TOC4 updated to include gammas
+    in the incident channel (A. Trkov & M. Herman).
+45. Ordering error in ENDF/MF12 corrected in EMPEND (A. Trkov)
+46. Quasideuteron photoabsorption added by B. Carlson
+47. Formating of photonuclear reactions added to EMPEND (A. Trkov)
+48. X4TOC4 updated by A. Trkov.
+49. Fixed energy balance in exclusive spectra by including  missing gamma-ray
+    transitions in the ENDF file (levels without branching ratio assumed to
+    decay to the ground state) (M. Herman).
+50. Scripts moved to the empire/scripts/ directory allowing for multiple
+    working directories (M. Herman)
+51. Run section in the GUI redisigned to allow for free selection of modules
+    to run (m. Herman)
+52. Comparison plots including an arbitrary ENDF-6 file possible also for
+    spectra and double-differential cross sections (M. Herman)
+53. ECIS03 converted into subroutine (R. Capote)
+54. SCAT2 removed (replaced by ECIS03 by R. Capote)
+
+
+
+             Changes in version 2.18 with respect to 2.17.1
+                      Vienna,   September  2002
+1. Bug fixed in reading levels file when preparing collective levels for
+   ECIS (R. Capote).
+2. Bug fixed in reading Coulomb parameters of o.m.p. from the RIPL-2 file
+   (affects charged particle channels)(R. Capote).
+3. Relativistic correction in tl.f removed (gamma=1). It is not needed since
+   SCAT2 and ECIS take care of it (R. Capote).
+4. Bug in EMPEND, which caused skipping the last but one energy point fixed
+   (A. Trkov).
+5. EMPEND formats branching ratios in the ENDF file (A. Trkov).
+6. xterm closes when calculations are done as it was in versions 2.17 and
+   earlier (p.3.iii below removed) since it was inconvenient for running
+   piece-wise and multiple calculations(M. Herman).
+7. gamma-strength function uses a temperature consistent with the current
+   level densities for the final state (not for the initial one as erroneously
+   coded before) (M. Herman).
+8. Beta version of the new GUI (Xrun.tcl) added (M. Herman).
+9. Corrected renormalization of the absorption cross section in DEGAS
+   (E. Betak).
+10.Corrected way of restricting exciton configurations used in DEGAS (E. Betak).
+11.Maximum number of excitons used in DEGAS set to 5 (3 configurations)
+   (M. Herman).
+12.PLOTC4 updated by A. Trkov to produce gamma-spectra (continuum contribution
+   from the capture reaction has not yet been included).
+13.Bugs in PLOTC4 fixed by A. Trkov. PLOTC4 tested on Linux with g77 and
+   Absoft90 ver. 7.0 compilers and on Ms Windows with Lahey 75.
+14.If discrete levels are inconsistent with Gilbert-Cameron level densities
+   and LEVFIT is non-negative calculations are continued using nuclear
+   temperature taken from the systematics. Appropriate massage is printed and
+   cumulative plot displayed (without blocking further calculations)
+   (M. Herman).
+15.Bug in empire-specific level densities at very high energies (close to 200 MeV)
+   when level density exceeds capacity of the 32-bit word has been fixed by
+   ignoring fit to the discrete levels (unfortunately in all nuclei)
+   (M. Herman).
+16.File Ko in tl.f is rewound  to avoid messages that particular omp is not
+   found in the local file (M. Herman).
+17.Number of iterations when fitting discrete levels with Gilbert-Cameron level
+   densities limited to 300 to avoid the possibility of infinite loop
+   (M. Herman).
+18.Z=105 name changed to 'Db'; thanks to Erik Strub for pointing it out
+   (M. Herman).
+19.Problem with the discontinuity of neutron capture cross section when
+   incident energy becomes lower than the integration bin width has been
+   solved. Capture cross sections, even at very low energies (<10 keV) can now
+   be calculated even with as few as 50 energy bins (M. Herman).
+20.All collective levels are used in ECIS calculations with DIRECT=1,2, even if
+   they can not be excited because of the too low incident energy. In the
+   previous versions only open channels were considered and coupling to the
+   closed ones was ignored (R. Capote).
+21.Minor corrections of nuclear masses in EMPEND avoid potentially infinite
+   loop while the ENDF formatted file is processed by SIXTAB (A. Trkov).
+22.Thresholds for particle emission channels corrected in EMPEND (A. Trkov).
+23.Discrete level library updated to the RIPL-2 version of September 24, 2002).
+24.LSTTAB corrected to allow for plotting spectra at 90deg with ZVView (A.Trkov).
+
+Known bugs:
+
+1. Fission is wrong when HRTW is active
+2. Slight inconsistency with DIRECT=1,2,3 option - last coll. level(s) is
+   included in the fusion renormalization but may be excluded from
+   actual calculations as being above the last accepted level.
+
+
+             Changes in version 2.17.1 with respect to 2.17
+                      Vienna,   April  2002
+
+1. EXFOR library converted from DOS to UNIX format.
+2. Bug in reading RIPL discrete levels fixed by R. Capote.
+3. All scripts modified: (i) all links made symbolic to allow for using
+   network drives, (ii) ./ added in front of calls (thus ./ is no longer needed
+   in the PATH), (iii) xterm remains open after calculations are completed
+   so that runtime messages can be inspected (M. Herman).
+4. GUI background color changed to gray (M. Herman).
+5. guizvv.tcl for graphical comparison of up to three calculations/evaluations
+   (already present in 2.17) modified (nonstandard Tcl/Tk widget replaced)
+   (M. Herman).
+
+             Changes in version 2.17 with respect to 2.17beta
+                      Vienna,   February  2002
+
+1. Bug in adding CN contribution to angular distributions for discrete
+   levels corrected. Gammas were added to CSAlev(.,.,0) in HF-comp.f
+   with 0 being out of dimension. Adding of gammas is now blocked. Thanks
+   to V. Plujko for pointing it out.
+2. PLOTC4 updated by A. Trkov to produce spectra (including
+   double-differential ones) for outgoing protons and alphas. Structure
+   of  PostScript files improved.
+3. RIPL files placed in the empire/RIPL-2 directory following RIPL-2
+   structure and naming convention (compatibility with the future RIPL-2 CD-ROM).
+4. Optical model database again updated to the preliminary version form RIPL-2
+5. EXFOR database updated to the version of 18.05.2001 (NOTE: previous EXFOR
+   database will NOT work due to a different directory structure).
+6. File with levels (14) closed at the end.
+7. The new 'setup-emp' script assists installation procedure and allows
+   to use EXFOR library and/or HF-BCS level densities directly from the
+   CD-ROM without copying them onto the hard disk.
+8. EMPIRE manual accessible from the GUI ("Help -> EMPIRE manual" button)
+
+
+             Changes in version 2.17beta with respect to 2.16.2
+                      Vienna,   November  2001
+
+1. Dispersive optical model potential implemented (SCAT2, ECIS, ORION3)
+   (R. Capote)
+2. Optical model database updated to the preliminary version form RIPL-2
+   (including 4 dispersive omp) (R. Capote)
+3. Discrete levels database updated to the preliminary version of RIPL-2
+   (R. Capote)
+4. Number of discrete levels constituting a complete scheme taken from
+   the preliminary version of RIPL-2 (R. Capote)
+5. In all cases elastic is calculated on the 2.5 deg grid while all the
+   rest on the 10 deg grid. Previous inconsistency in elastic transfer
+   when DIRECT>0 was used removed (M. Herman)
+6. GUI starts with gvim editor selected by default (M. Herman)
+7. Two compilation warnings in tl.f fixed (M. Herman)
+8. Cumulative plots of discrete levels created as a PostScript file rather
+   than being dumped onto the screen. Stored as *-cum.ps and available
+   through GUI (M. Herman)
+9. Damping of the rotational level density enhancement below BCS critical
+   energy made consistent with the one above critical energy. Removes
+   discontinuity at critical energy for perfectly spherical nuclei (def=0)
+   (M. Herman)
+10.List of warnings available through GUI (M. Herman)
+11.Tabulated HFBCS levels densities as provided to RIPL-2 by S. Goriely
+   included as additional level density option (M. Herman)
+
+
+             Changes in version 2.16.2 with respect to 2.16
+                      Vienna,   21 August  2001
+
+1. Implementation of the HMS model completed (needs testing)
+2. New version of V. Zerkin viewer (zvv94l.exe) provides eps
+   format and interaction with plot titles (use A + right shift)
+3. Duplicate use of file 33 removed (36 used in lev-dens.f)
+
+
+             Changes in version 2.16 with respect to 2.15
+                      Vienna,   July  2001
+
+1. EXFOR retrieval using FORTRAN instead of UNIX 'grep'
+2. Fission barrier set to 1000 MeV for Z<19
+3. GDR second hump energy set to 0 for spherical nuclei
+4. Temperature in the generalized Lorentzian protected against 0 excitation
+   energy
+5. Plotc4.f improved (A. Trkov) to allow for up to 23 data sets to be drawn
+   on a single plot. Plotc4 input modified to include whole energy range.
+6. Orion calculations performed up to 99% of the maximum energy loss
+   (instead of 90% that happen to cause problems with extrapolation to
+   low outgoing energies)
+7. Plotc4.f improved (A. Trkov) to allow for energy spectra and
+   angular distributions plots.
+8. Legend and lsttab added for future improvements but not fully
+   implemented yet.
+9. ENDF=2 option added (lumped channel representation MT=10 or 5).
+   SO FAR DDX ARE NOT SUPPORTED BY EMPEND!!!!
+10.Exact treatment of recoil spectra with ENDF=2 option.
+11.Call to Monte Carlo preequilibrium model HMS coded by M.B. Chadwick.
+   NO TRANSFER OF THE RESULTS!!!!
+12.Exciton model code DEGAS implemented by P. Oblozinsky
+13.Fixed bug in flux conservation when GST option selected but
+   MSC gamma channel closed.
+14.New version of SCAT2 introduced by R. Capote
+15.Link to ECIS for calculation of the elastic, absorption and cross
+   sections to discrete collective levels within rotational and
+   vibrational CC model.  Includes automatic selection of collective
+   levels (R. Capote).
+16.Link to the omp segment of RIPL introduced by R. Capote. NOTE: change
+   in the format and name of the local file with internal omp. New name
+   is *-omp.int and two columns are added in definition of om potentials
+   (just before radii). RIPL potentials are stored in the file *-omp.ripl.
+17.New version of V. Zerkin viewer (zvv93l.exe)
+18.List of RIPL omp added to the GUI under Help menu
+19.DWBA option  with ECIS added by R. Capote
+20.pol20, pol21 and pol22 variables in SCAT2 initialized with 0.
+21.Bug in ACCUMSD when MSD transitions to continuum were energetically closed
+   fixed (seems had no effect on the results).
+22.Total cross section added to EXFOR retrieval and together with fission to
+   the MT list for ZVView plotting.
+23.'zvpl' script added for plotting excitation function for any cross section
+   from the main EMPIRE output (*.lst)
+24.'run-piece-wise' script added for running up to 3 different inputs for the
+    same case in the 3 non-overlapping energy ranges (incident energies inside
+    and among the 3 ranges must increase monotonically).
+25.Division by 0 in fitting field parameters in MSD-tristan.f protected.
+26.GUI modified to include 'zvpl' script and allow for merging ZVV plots.
+27.Form factor for the l=0 transitions in MSD controlled from the optional
+   input (default: standard surface form factor)
+28.Provision for use of combined preequilibrium models in a single run.
+29.'zvcomb' script added to combine various existing ZVView plots.
+30.Utility code manuals and Frequently Asked Questions (FAQ) added to
+   the GUI under Help menu
+31.Utility code inputs accessible from the GUI Options menu
+32.Utility code c4sort added to sort *.c4 file in ascending energy. Actually,
+   it is disabled (commented) in run and runE scripts as it takes long
+   for large files.
+
+             Changes in version 2.15 with respect to 2.14.1
+                      Vienna,   November    2000
+
+1. plotting of double differential cross sections for neutron production
+   using PLOTC4 (modified by A. Trkov) added. This involves modification
+   of EXFOR retrieval (new REAC_SIG.TXT file, changes in the 'sel' script
+   and input.f), as well as modifications in the util/x4toc4/reaction
+   file.
+2. printout of total and shape elastic cross sections, shape elastic
+   angular distributions, strength functions, and scattering radius from
+   SCAT-2 activated.
+3. minimum Tl set to 1.0E-10 to avoid underflow in the calculations. This
+   limit might be changed in the line 761 of tl.f
+
+             Changes in version 2.14.1 with respect to 2.14
+                      Vienna,   October    2000
+
+1. bug fixes:
+       - flux conservation at very low incident energies (in HRTW)
+       - mismatch of elastic channels for negative parity targets (in HRTW)
+       - division by zero 1p-0h level density in MSC gamma emission
+       - undefined variables in MSC-NVWY.f and MSD-tristan.f defined (KASE
+         in MSD-orion.f still remains undefined, Z1 and Z2 do not make any
+         problem since unused)
+2. MATIN1 replaced by MTXINV in MSC gamma emission
+3. VMS specific statements marked with *-IF VMS in input.f and io.h
+4. print of C.M. incident energy to standard output added in main.f
+
+             Changes in version 2.14 with respect to 2.13
+                      Vienna,   September  2000
+
+1.  second chance preequilibrium emission applying M.B. Chadwick model
+    to the result of the MSD
+2.  bug in clearing the population of discrete levels when ENDF option used
+    fixed
+3.  bug in writing optical model parameters for the incident channel on the
+    ompar file fixed.
+4.  SHC(2)=SHC(1) bug in main.f fixed
+5.  miss-print for 95-Zr in data/ldp.dat(7676) fixed by setting the value to 0
+6.  redundant FLOAT in ORION2 removed
+7.  Collective level densities with a=A/LEVDEN used whenever LEVDEN.GT.2.0
+8.  Star format for recoil mass replaced by the fixed one
+9.  Alphanumeric branching ratios in orsi.liv replaced by numbers and input.f
+    changed appropriately (BCDNUM removed)
+10. HRTW formulation of the statistical model included (width fluctuation
+    correction).
+11. Bug causing use of Weisskopf estimates for gamma strength at all incident
+    energies except the first one fixed.
+12. Bug in passing GDR parameters through input removed.
+13. Zerkin's zvd plotting capability added (through zvd script and tcl/tk GUI).
+14. EXFOR entries for neutron capture coded as SIG,,AV (averaged cross sections)
+    included in plots.
+
+
+             Changes in version 2.13 with respect to 2.12.2
+                      Vienna,   March 2000
+
+1.  general clean-up of the FORTRAN source
+2.  new organization of modules that reflects physical contents
+3.  check whether  MSD cross section is not larger than the fusion
+    cross section
+4.  gamma cascade in the first CN is default if CN excitation
+    energy is below 20 MeV and can be controlled with GCASC
+    in optional input
+5.  l=0 transfer strength in MSD-orion set to the self-consistent
+    value by default (rather than to GMR energy as before)
+6.  fusion cross sections read from the file name.fus are treated as
+    fusion cross sections at subsequent l values (starting with l=0)
+    rather than fusion cross sections to a given spin of CN. Transmission
+    coefficients are calculated from the read values and a proper angular
+    momentum and parity coupling is performed to obtain Compound Nucleus spin
+    distribution.
+7.  error in BCS blocking in TRISTAN removed
+8.  BCS blocking in TRISTAN made automatic (no input required)
+9.  pipe.c replaced with the one by R. Capote
+10. automatic retrieval of EXFOR data
+11. link to EMPEND to create ENDF formatted file
+12. link to X4TOC4 and PLOTC4 to produce plots at the end of the run
+13. fission barriers for Z>102 according to Myers&Swiatecki Phys. Rev. C60 1999
+14. FITLEV creates a whole set of cumulative plots without interaction
+15. Fusion barrier can be read from  input (BFUS)
+16. Bass option for fusion disabled
+17. Distributed fusion barrier model now relies on the CCFUS fusion barrier
+18. OMPAR (.omp) file with optical model parameters produced and used for
+    input
+
+      Changes in version 2.12.2 with respect to 2.12.1
+                      Vienna,  11 April 1999
+
+1. energy shift used to fit low energy discrete levels gradually decreased
+   between Ecut and neutron binding to recover agreement with Dobs.
+2. entire code checked with FTNCHEK and some errors corrected (undefined
+   variables, unreferenced ones removed).
+3. all DO loops given separate endings (END DO, no labels)
+4. entire code consistently indented.
+
+
+      Changes in version 2.12.1 with respect to 2.12
+                      Vienna,  07 Dec. 1998
+
+1. dsource directory added with explicit double precision source (no compiler
+   -r8 option required).
+2. roign.f routine replaced by roemp.f. It fits dynamical level densities
+   (BCS approach below critical energy) to discrete levels by applying an
+   energy shift. ATTENTION: for the time being these shifts destroy agreement
+   with Dobs at neutron binding.
+
+
+      Changes in version 2.12 with respect to 2.11
+                      Vienna,  15 Sept. 1998
+
+1. Error in the determination of pairing corrections in readnix.f (in the
+   case of Gilbert-Cameron) removed.
+
+2. Errors in coding of the dynamical level densities removed.
+
+3. New, EMPIRE specific, systematics of level density parameter 'a' for
+   dynamical level densities introduced and set as default if dynamical
+   level density chosen. This systematics fits Ilijnov-Mebel D-observed
+   using EMPIRE formulae for l.d.  If an experimental value for a given
+   nucleus is present in the ldp.dfat file it is taken. Average normalization
+   factor is calculated for these cases and applied for the remaining ones
+   for which there is no experimental value. All nuclei are treated as deformed
+   as far as the collective enhancement is concerned. Temporarily
+   damping of the collective effects has been removed, i.e. level densities are
+   calculated in the adiabatic approach.
+
+
