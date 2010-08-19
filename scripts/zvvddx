@@ -18,12 +18,15 @@ ln -sf $work/$file-s.endf ENDF.DAT
 ln -sf $work/$file-log.plotc4 PLOTC4.LST
 
 $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
-#rm LSTTAB.INP
+rm LSTTAB.INP 2>/dev/null
 
 # stay in local dir, don't cd to util/c4zvd:
 #make actual plot 
+# Commented to avoiud getting message if zvview windows is closed by pressing X (RCN, Aug 2010)
+#$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
+#    || { echo; echo 'zvview plotting failed!'; read; }
 $EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
-    || { echo; echo 'zvview plotting failed!'; read; }
+    || { echo; echo 'zvview closed'; }
 mv DDXPLOT.zvd $work/$file-$2.zvd
 
 # not needed now: files saved in local dir by default
@@ -36,7 +39,6 @@ mv DDXPLOT.zvd $work/$file-$2.zvd
 #fi
 
 #cd $work
-
-rm LSTTAB.CUR LSTTAB.PNT  2>/dev/null
+rm C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST cur.zvd pnt.zvd tmp.dat 2>/dev/null
 exit
 

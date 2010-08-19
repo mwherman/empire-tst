@@ -31,7 +31,7 @@ $2
 EOF
 $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
-rm EMPEND.INP
+rm EMPEND.INP empmf1.tmp
 
 
 # RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP

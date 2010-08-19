@@ -19,37 +19,39 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
+# To avoid calling FIXUP
+cp $file.endf $work/$file-f2.endf 2>/dev/null
 
 # RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP
 
-rm $file-f2.endf 2>/dev/null
-ln -sf $file.endf OUTPUT.ENDF
-cat >FIXUP.INP <<EOF
-12101011111001                                                              
-OUTPUT.ENDF                                                                        
-FIXUP.ENDF  
-S203=+( 28, 28)+( 41, 41)+(103,103)
-S207=+( 22, 25)+(107,109)+(112,114)
-
- 0.00000+00 0.00000+00          0          0${2}203
-
- 0.00000+00 0.00000+00          0          0${2}207
-
-
-
-
-
-
-
-                                                                 
-EOF
-
-$EMPIREDIR/util/fixup/fixup < FIXUP.INP
-rm OUTPUT.ENDF
-rm FIXUP.INP
-mv FIXUP.ENDF $work/$file-f2.endf
-mv FIXUP.LST $work/$file-log.fixup2
-
+#rm $file-f2.endf 2>/dev/null
+#ln -sf $file.endf OUTPUT.ENDF
+#cat >FIXUP.INP <<EOF
+#12101011111001                                                              
+#OUTPUT.ENDF                                                                        
+#FIXUP.ENDF  
+#S203=+( 28, 28)+( 41, 41)+(103,103)
+#S207=+( 22, 25)+(107,109)+(112,114)
+#
+# 0.00000+00 0.00000+00          0          0${2}203
+#
+# 0.00000+00 0.00000+00          0          0${2}207
+#
+#
+#
+#
+#
+#
+#
+#                                                                 
+#EOF
+#
+#$EMPIREDIR/util/fixup/fixup < FIXUP.INP
+#rm OUTPUT.ENDF
+#rm FIXUP.INP
+#mv FIXUP.ENDF $work/$file-f2.endf
+#mv FIXUP.LST $work/$file-log.fixup2
+#
 
 # RUN LINEAR
 

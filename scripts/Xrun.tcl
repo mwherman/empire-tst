@@ -5310,10 +5310,10 @@ proc ::runCmd {args} {
         set cmd [concat {cmd.exe /c start} $args]
         eval exec $cmd
     } else {
-        #set cmd [concat {xterm -e} $args]
-        #eval exec $cmd
+        set cmd [concat {xterm -e} $args]
+        eval exec $cmd
         # or, if we don't want to open new xterm each time:
-        execpipe $args
+        # execpipe $args
     }
 }
 #############################################################################

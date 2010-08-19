@@ -65,5 +65,5 @@ fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $work/$file-$MT.eps
 fi
-
+rm c4.zvd end.zvd tmp.dat 2>/dev/null
 exit
