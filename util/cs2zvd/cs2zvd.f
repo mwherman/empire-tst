@@ -37,7 +37,7 @@ C     if(nreac.gt.maxr) then
 C	PAUSE 'Increase maxr PARAMETER !' 
 C	STOP 
 C     endif  
-      nreac = 10 ! reading up to 10 reactions only 	
+      nreac = 30 ! reading up to 30 reactions only 	
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         
@@ -46,6 +46,11 @@ C    &
       creaction(2)='(z,nel)'
       creaction(3)='(z,nonel)'
       creaction(4)='(z,f)'
+
+	do j=1,nreac
+	  if(creaction(j).eq.'(z,p)') toplot(j)=1
+	  if(creaction(j).eq.'(z,a)') toplot(j)=1
+	enddo
 
       nen = 0
       do i=1,maxen
