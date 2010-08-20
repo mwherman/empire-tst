@@ -79,7 +79,8 @@ C-V  09/08 - Fix NS in MF12 and again ELFS (see above).
 C-V  09/11 - Process light charged-particle emission data.
 C-V  09/12 - Add total inelastic MT4 as the redundant cross section.
 C-V  10/05 - Trivial format change for isomeric states(column alignment)
-C-V  10/06 - Change reaction (z,na) to (z,an) in EMTCHR
+C-V  10/06 - Change reaction (z,na) to (z,an) in EMTCHR.
+C-V  10/08 - Accept reaction (z,na) &  (z,an)  due to change in EMPIRE.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -999,7 +1000,8 @@ C*        -- Try (z,np)
           END IF
         END IF
 C*
-        IF(PTST.EQ.' (z,an) ') THEN
+C*      -- allow ' (z,an) ' and ' (z,na) ' for backward compatibility
+        IF(PTST.EQ.' (z,an) ' .OR. PTST.EQ.' (z,na) ') THEN
 C*        -- Ignore other particles, they are added to MT5 automatically
           IF     (POUT.EQ.'recoils ' .OR.
      &            POUT.EQ.'gammas  ' .OR.
