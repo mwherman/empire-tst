@@ -1,6 +1,6 @@
-Ccc   * $Author: herman $ 
-Ccc   * $Date: 2006/01/02 06:13:33 $
-Ccc   * $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
+Ccc   * $Author: capote $ 
+Ccc   * $Date: 2010/08/20 $
+Ccc   * $Id: ddhms.f $
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,FHMs,NHMs,Ihistlabr,
@@ -158,12 +158,15 @@ C
      &       etotemiss, event, prec, pxrec, pyrec, pzrec, ra, radius,
      &       rsample, sumav, test,gamx
       REAL*8 gamtot(0:200)
-      DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT,RANG
+C     DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
+
+
+      DOUBLE PRECISION RANG
       INTEGER i, jbin, jsweep, jexist, jtrans, mrecbin, n, nem, nubin
-      INTEGER nebinchan,nebinlab,nth,nthlab,nph,nphlab
-      INTEGER jndx,jstudy,jzdiff,jndiff,j
+      INTEGER nebinchan,nebinlab,nth,nthlab
+      INTEGER jndx,jstudy,jzdiff,jndiff
       INTEGER indx(0:200)
-      INTEGER INT, NINT, MIN
+C     INTEGER INT, NINT, MIN
 C
       avradius = 0
       sumav = 0
@@ -539,10 +542,9 @@ C***********************************************************************
 C
 C Local variables
 C
-      INTEGER  jstudy, jsweep, jexist, jwarning
-      INTEGER INT
-      REAL*8 RANG
-      REAl FLOAT
+      INTEGER  jstudy, jsweep, jwarning
+C     INTEGER INT
+C     REAl FLOAT
 C
 C This subroutine does the bookkeeping for a particle emission.
 
@@ -656,11 +658,9 @@ C***********************************************************************
 C
 C Local variables
 C
-      REAL*8 damprate, emrate, epart, pair, zran
-      INTEGER jflagem, jstudy, jwarning, n,
-     &        nhresid, nph, nphlab, npresid, nth, nthlab
-      INTEGER INT
-      REAL*8 RANG
+      REAL*8 damprate, emrate, epart, pair 
+      INTEGER jstudy, jwarning, nhresid, npresid 
+C     INTEGER INT
 
       NTOt = NTOt + 2
 
@@ -1382,10 +1382,9 @@ C
 C
 C Local variables
 C
-      INTEGER ne
       REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pauli, r0,
-     &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z, de, rhop
-      DOUBLE PRECISION DEXP, DLOG, DSQRT, DABS
+     &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z
+C     DOUBLE PRECISION DEXP, DLOG, DSQRT, DABS
 C
 C     followed Blann's prescription
 C
@@ -1501,7 +1500,7 @@ C
 C Local variables
 C
       REAL*8 c, e, eg2, phi, px, pz, epart
-      DOUBLE PRECISION DACOS, DSQRT
+C     DOUBLE PRECISION DACOS, DSQRT
       REAL*8 RANG
       INTEGER jwarning, npresid, nhresid
 C
@@ -1882,13 +1881,13 @@ C
 C
 C Local variables
 C
-      REAL*8 anorm, dph, dth, ecount(0:10), restot, tht, thet,
+      REAL*8 anorm, dth, ecount(0:10), restot, thet,
      &        zjadd, anormrec, dxang, angnorm
-      DOUBLE PRECISION DSIN, DCOS
-      REAL FLOAT
-      INTEGER INT, NINT
+C     DOUBLE PRECISION DSIN, DCOS
+C     REAL FLOAT
+C     INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
-     &        nemax, norder, nph, nth, nu, numax,iwritxddx
+     &        nemax, norder, nth, nu, numax,iwritxddx
 
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
@@ -2674,7 +2673,7 @@ C
 C Local variables
 C
       REAL*8 amproj, sepejecn, sepejecp
-      INTEGER japroj, jn, jsp, jz, jzproj, mem, nen, nph, nth
+      INTEGER japroj, jn, jsp, jz, jzproj, mem, nen, nth
       INTEGER NINT
       IF (Icalled.EQ.0) THEN
 
@@ -2926,9 +2925,9 @@ C
 C Local variables
 C
       INTEGER ne
-      REAL*8 an, de, eav, zeta, eax
-      DOUBLE PRECISION DSQRT
-      REAL FLOAT
+      REAL*8 an, de, eav, zeta
+C     DOUBLE PRECISION DSQRT
+C     REAL FLOAT
 C     calculates a-value in my Ang dis theory. Determines extent of
 C     forward-peaking See my PRC 57,233 (1998) paper. Use for final 1p1h,1h,2h
 C     states.
@@ -3099,9 +3098,9 @@ C
 C Local variables
 C
       REAL*8 aa, arg, eemchan, er, ph1, ph2, ph2rem, r, rotphi,
-     &       rottheta, th1, th2, th2rem, zkinit, zkrem2, de
-      DOUBLE PRECISION DABS, DACOS, DCOS, DEXP, DLOG, DSIN, DSQRT
-      INTEGER nh, np, ne
+     &       rottheta, th1, th2, th2rem, zkinit, zkrem2
+C     DOUBLE PRECISION DABS, DACOS, DCOS, DEXP, DLOG, DSIN, DSQRT
+      INTEGER nh, np
       REAL*8 RANG
 C     for a given particle-hole state, a particle has been selected with energy
 C     epart relative to the Fermi level.
@@ -3855,7 +3854,7 @@ C
 
          ee = detab*ne
 
-         ex = DMAX1(0.,ee-vdep)
+         ex = DMAX1(0.d0,ee-vdep)
          eps = ex
          de = (ee - ex)/nintmx
          eh = ABS(vdep - ee + eps)
@@ -3908,7 +3907,7 @@ C
            eps = de3*n3
            erem = ee - eps
 
-           ex =  DMAX1(0., erem - vdep)
+           ex =  DMAX1(0.d0, erem - vdep)
            de = (erem - ex)/nintmx
            eh = ABS(vdep - erem + ex)
            ep = vdep + ex
@@ -4734,15 +4733,15 @@ C Local variables
 C
       REAL*8 adum(5,7), csfit(NDANGecis), qq(5)
       DOUBLE PRECISION auxin(NDIM_EBINS + 1,NDIM_JBINS + 1),
-     &                 auxout(NDEX,NDIM_JBINS + 1),difcon,elf,auxsum,
+     &                 auxout(NDEX,NDIM_JBINS + 1),difcon,elf,
      &                 auxrec1(NDIM_RECBINS + 1,NDIM_EBINS + 1), sumcon,
      &                 xmre, xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
-      REAL FLOAT
-      DOUBLE PRECISION DCOS
+C     REAL FLOAT
+C     DOUBLE PRECISION DCOS
       INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre,
-     &        mrec, na, ndiscmax, ne, nejc, nspec,
-     &        nnur, nth, nu, nucn, nucnhi, nucnlo, ip
-      INTEGER INT
+     &        mrec, na, ndiscmax, ne, nspec,
+     &        nnur, nth, nu, nucn, nucnhi, nucnlo
+C     INTEGER INT
 C
 C-----Nemax max number of energy bins in HMS
 C
@@ -6087,4 +6086,3 @@ C  nk must be odd and nph must even (Simpson)
       ENDDO
       QDPH = am*dsigkn/(pn*pp)
       END
-

@@ -1169,9 +1169,9 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ABS, MIN
+C     DOUBLE PRECISION ABS, MIN
       INTEGER nn, mm, ll, it 
-      INTEGER INT, MAX
+C     INTEGER INT, MAX
       DOUBLE PRECISION En, Em, E
 C-----Check ranges and steps
       IF (Emin - Xo .LT. -0.0001) THEN

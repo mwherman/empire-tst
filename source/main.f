@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2010-01-04 17:35:30 $
-Ccc   * $Id: main.f,v 1.211 2010-01-04 17:35:30 pigni Exp $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2010-08-20 $
+Ccc   * $Id: main.f $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
@@ -84,7 +84,7 @@ C
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
-     &                 totemis, weight, xcse, xizat, xnhms, xnl, xnor,
+     &                 totemis, weight, xcse, xizat, xnl, xnor,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
      &                 emiss_en(NDEPFN),post_fisn(NDEPFN), tequiv0,
@@ -267,7 +267,7 @@ C--------Get and add inelastic cross sections (including double-differential)
             ilv = ICOller(i)
 C           IF ( (ilv.LE.NLV(nnurec)) .and.
 C           RCN 2010 
-	      IF(ilv.LE.NLV(nnurec)) then
+          IF(ilv.LE.NLV(nnurec)) then
 C           IF ( (ilv.LT.NLV(nnurec)) .and.
 C           For odd nuclides, collective states in continuum have different spin than the ground state
 C    &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN

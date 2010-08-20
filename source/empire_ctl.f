@@ -1044,13 +1044,15 @@ C
      &                  icala(mxind),idnt(mxind),idang(mxind),nnde
       LINUX = .TRUE.
 
+      tmp=emin  ! dummy statement
+
       IF(egrid(0).LT.1.5) THEN
 C--- The case in which the energy mesh is defined by the FITGRD keyword.
         ngr=2*mxind
-       ELSE
+      ELSE
 C--- The case in which the energy mesh is defined by the input grid.
         ngr=egrid(0)
-       ENDIF
+      ENDIF
 
 C--- Initialize parameters used in writing the energy grid.
       ntangs=0
