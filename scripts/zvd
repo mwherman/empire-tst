@@ -1,6 +1,6 @@
 #! /bin/sh -
 #script to  display exp. and calculated data with ZVView by V. Zerkin
-#export DISPLAY=:0
+export DISPLAY=:0
 file=$1
 MT=$2
 work=`pwd`
