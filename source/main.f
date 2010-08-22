@@ -1795,15 +1795,16 @@ c                 ENDDO
               CSFis = CSFis + CSFism(m)
            ENDDO
          ENDIF
-         IF (IOUt.GT.0) THEN
-           DO m = 1, INT(FISmod(nnuc)) + 1
+	   WFIsm=0.D0
+         IF (CSFis.NE.0.0D0) THEN
+           IF (IOUt.GT.0) THEN
+            DO m = 1, INT(FISmod(nnuc)) + 1
               WFIsm(m) = 0.d0
               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
               WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
-           ENDDO
-           WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
-         ENDIF
-         IF (CSFis.NE.0.0D0) THEN
+            ENDDO
+            WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
+           ENDIF
            CSPfis(nnuc) = CSFis
            WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
