@@ -7,7 +7,12 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
+XWIN=`uname`
+if [ "$XWIN" = "Darwin" ] 
+then
 export DISPLAY=:0
+fi
+
 
 MT=$1
 suf=$2

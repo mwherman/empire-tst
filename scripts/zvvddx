@@ -1,6 +1,12 @@
 #! /bin/sh -
 #SCRIPT TO PLOT ANG. DISTR. AND DOUBLE-DIFFERENTIAL CROSS SECTIONS
+
+XWIN=`uname`
+if [ "$XWIN" = "Darwin" ] 
+then
 export DISPLAY=:0
+fi
+
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."

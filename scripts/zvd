@@ -1,6 +1,11 @@
 #! /bin/sh -
 #script to  display exp. and calculated data with ZVView by V. Zerkin
+
+XWIN=`uname`
+if [ "$XWIN" = "Darwin" ] 
+then
 export DISPLAY=:0
+fi
 file=$1
 MT=$2
 work=`pwd`

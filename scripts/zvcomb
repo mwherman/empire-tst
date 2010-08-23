@@ -6,7 +6,12 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
+XWIN=`uname`
+if [ "$XWIN" = "Darwin" ] 
+then
 export DISPLAY=:0
+fi
+
 set -x
 echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
