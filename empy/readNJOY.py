@@ -159,7 +159,8 @@ class mgCovars(mgBase):
             MAT1, MAT2 = int(line[22:26]), int(line[58:62])
             colMT, rowMT = int(line[27:30]), int(line[63:66])
         else:
-            raise ValueError, ("Can't understand line:\n%s" % line )
+            raise ValueError, ("Can't understand line:\n%s" % line +
+                    "in %s" % self.filename)
         return MAT1, colMT, MAT2, rowMT
     
     

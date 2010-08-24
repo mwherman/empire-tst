@@ -199,7 +199,7 @@ class mgCovars(mgBase):
         if rowkey==colkey:
             self.uncert[ 'MT'+key.split('MT')[1] ] = rsd1
             # find first/last non-zero row:
-            zeroRow = list( numpy.all( covmat==0, axis=0 ) )
+            zeroRow = list( numpy.alltrue( covmat==0, axis=0 ) )
             try:
                 first = zeroRow.index(False)+1
                 last = len(zeroRow)-zeroRow[::-1].index(False)
@@ -272,7 +272,7 @@ class mgCovars(mgBase):
                         xmt = d[-3]
                         #print 'compare: ', mt, xmt
                         name2 = 'MT'+repr( int(xmt) )
-                        covmat = numpy.zeros( (ngroups,ngroups) )
+                        covmat = numpy.zeros( (ngroups,ngroups), dtype=float )
                         
                     if nval > 6:
                         start = d[12:18][3] - 1 
@@ -282,8 +282,8 @@ class mgCovars(mgBase):
                         end = start+len(data)
                         covmat[row, start:end] = data
                         
-                        if (row == ngroups-1 and 
-                                        numpy.max(numpy.abs(covmat))!=0):
+                        if (row == ngroups-1 and not
+                                        numpy.all(covmat==0)):
                             # matrices will have names like 'MT1MT2'
                             self.covars[ name1+name2 ] = covmat
                             
