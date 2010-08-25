@@ -24,8 +24,10 @@ C
 C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1, NCHr
-      CHARACTER*10 PROjec 
+      CHARACTER*10 PROjec, RESidue(NDNUC), TARget
       INTEGER*4 INDexf, INDexb, BUFfer(250)
+      COMMON /EXFOR / TARget, PROjec, RESidue
+      COMMON /IEXFOR/ NCHr
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
       COMMON /MLOCOM2/ KEYload, KZZ, KAA
       COMMON /R250COM/ INDexf,INDexb,BUFfer
@@ -35,8 +37,9 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &                 qtmp, xfis, zclu, zres, ztmp, culbar
-      CHARACTER*1 cnejec
-C     DOUBLE PRECISION DATAN, DMAX1, DSQRT
+      CHARACTER*3 atar, ca1
+      CHARACTER*1 cnejec, proj
+      DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT, SNGL
       LOGICAL gexist, nonzero, fexist
@@ -45,9 +48,11 @@ C     DOUBLE PRECISION DATAN, DMAX1, DSQRT
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin
       INTEGER IFINDCOLL
-      INTEGER INT, ISEED, NINT
+      INTEGER INDEX, INT, ISEED, NINT
+      INTEGER*4 iwin
+      INTEGER*4 PIPE
       CHARACTER*2 SMAT
-
+      CHARACTER*132 x4string
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -516,6 +521,22 @@ C--------target
          ELV(1,0) = 0.0
          QCC(1) = -e2p
          QCC(2) = -e3m
+C--------set target  for EXFOR retrieval
+         TARget = '          '
+         TARget(1:1) = '<'
+         TARget(2:3) = SYMb(0)
+         iend = INDEX(TARget,' ') - 1
+         TARget(iend + 1:iend + 2) = '-'
+         iend = iend + 1
+         WRITE (ca1,'(I3)') ia
+         IF (ia.LT.10) THEN
+            TARget(iend + 1:iend + 2) = ca1(3:3)
+         ELSEIF (ia.LT.100) THEN
+            TARget(iend + 1:iend + 3) = ca1(2:3)
+         ELSE
+            TARget(iend + 1:iend + 4) = ca1(1:3)
+         ENDIF
+C--------target ******  done  ********
 C--------projectile
          READ (5,*) AEJc(0), ZEJc(0)
          IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
@@ -598,6 +619,21 @@ C--------compound nucleus 1
          ENDf(1) = 1.0 ! Jan 2009
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
+C--------set CN  for EXFOR retrieval
+         RESidue(nnuc) = '          '
+         RESidue(nnuc)(1:1) = '>'
+         RESidue(nnuc)(2:3) = SYMb(nnuc)
+         iend = INDEX(RESidue(nnuc),' ') - 1
+         RESidue(nnuc)(iend + 1:iend + 2) = '-'
+         iend = iend + 1
+         WRITE (ca1,'(I3)') ia
+         IF (ia.LT.10) THEN
+            RESidue(nnuc)(iend + 1:iend + 2) = ca1(3:3)
+         ELSEIF (ia.LT.100) THEN
+            RESidue(nnuc)(iend + 1:iend + 3) = ca1(2:3)
+         ELSE
+            RESidue(nnuc)(iend + 1:iend + 4) = ca1(1:3)
+         ENDIF
 C--------other decaying nuclei
 C
 C--------NNUcd number of decaying nuclei
@@ -627,173 +663,186 @@ C
          DO ip = 0, nemp
          DO in = 0, nemn
            mulem = iac + ih + it + id + ia + ip + in
-           IF (mulem.EQ.0) CYCLE
+           IF (mulem.NE.0) THEN
+             atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+     &                   - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4) 
+     &                   - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
 
+             IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
 
-           atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-     &                 - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4) 
-     &                 - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
+             ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2) 
+     &                   - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
+     &                   - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
 
-           IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
+             IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
 
-           ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2) 
-     &                 - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-     &                 - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-
-           IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
-
-C          residues must be heavier than alpha !! (RCN)
-           if(atmp.le.4 . or. ztmp.le.2) cycle
-           izatmp = INT(1000*ztmp + atmp)
-           CALL WHERE(izatmp,nnuc,iloc)
-           IF (iloc.EQ.1) THEN
-             A(nnuc) = atmp
+C            residues must be heavier than alpha !! (RCN)
+             if(atmp.le.4 . or. ztmp.le.2) cycle
+             izatmp = INT(1000*ztmp + atmp)
+             CALL WHERE(izatmp,nnuc,iloc)
+             IF (iloc.EQ.1) THEN
+                  A(nnuc) = atmp
 C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
-             AMAss(nnuc) = atmp
-             Z(nnuc) = ztmp                                                                             
-             XN(nnuc) = A(nnuc) - Z(nnuc)
-             IZA(nnuc) = izatmp
-             iia = INT(A(nnuc))
-             iz = INT(Z(nnuc))
-             SYMb(nnuc) = SMAT(iz)
-             HIS(nnuc) = -1.
-             IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5)) HIS(nnuc) = -0.5
-C            These reactions are assumed to be always exclusive
-             IF(mulem.eq.in .and. in.le.4) ENDf(nnuc) = 1 ! n,xn
-C------------set reaction string
-             REAction(nnuc) = '(z,'
-             iend = 3
-             IF (in.NE.0) THEN
-               IF(in.le.9) then
-                 WRITE (cnejec,'(I1)') in
-                 IF (in.GT.1) THEN
-                   REAction(nnuc)(iend + 1:iend + 1) = cnejec
-                   iend = iend + 1
-                 ENDIF
-                 REAction(nnuc)(iend + 1:iend + 1) = 'n'
-                 iend = iend + 1
-               ELSE
-                 WRITE (cnejec2,'(I2)') in
-                 REAction(nnuc)(iend + 1:iend + 2) = cnejec2
-                 iend = iend + 2
-                 REAction(nnuc)(iend + 1:iend + 1) = 'n'
-                 iend = iend + 1
-               ENDIF
-             ENDIF
+                  AMAss(nnuc) = atmp
+                  Z(nnuc) = ztmp
+                  XN(nnuc) = A(nnuc) - Z(nnuc)
+                  IZA(nnuc) = izatmp
+                  iia = INT(A(nnuc))
+                  iz = INT(Z(nnuc))
+                  SYMb(nnuc) = SMAT(iz)
+                  HIS(nnuc) = -1.
+                  IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
+     &                HIS(nnuc) = -0.5
+C                 These reactions are assumed to be always exclusive
+                  IF(mulem.eq.in .and. in.le.4) ENDf(nnuc) = 1 ! n,xn
+C-----------------set reaction string
+                  REAction(nnuc) = '(z,'
+                  iend = 3
+                  IF (in.NE.0) THEN
+                   IF(in.le.9) then
+                     WRITE (cnejec,'(I1)') in
+                     IF (in.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 'n'
+                     iend = iend + 1
+                   ELSE
+                     WRITE (cnejec2,'(I2)') in
+                     REAction(nnuc)(iend + 1:iend + 2)
+     &                     = cnejec2
+                        iend = iend + 2
+                     REAction(nnuc)(iend + 1:iend + 1) = 'n'
+                     iend = iend + 1
+                   ENDIF
+                  ENDIF
+                  IF (ip.NE.0) THEN
+                     WRITE (cnejec,'(I1)') ip
+                     IF (ip.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 'p'
+                     iend = iend + 1
+                  ENDIF
 
-             IF (ip.NE.0) THEN
-               WRITE (cnejec,'(I1)') ip
-               IF (ip.GT.1) THEN      
+                  IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
+C                    From n,np   to   n,d   
+                     iend = iend - 2
+                     REAction(nnuc)(iend + 1:iend + 1) = 'd'
+                     iend = iend + 1
+                     ENDF(nnuc) = 1
+                  ENDIF
 
+                  IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
+C                    From n,2np   to   n,t   
+                     iend = iend - 3
+                     REAction(nnuc)(iend + 1:iend + 1) = 't'
+                     iend = iend + 1
+                     ENDF(nnuc) = 1
+                  ENDIF
 
-                  REAction(nnuc)(iend + 1:iend + 1) = cnejec
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 1) = 'p'
-               iend = iend + 1
-             ENDIF
+                  IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
+C                    From n,n2p   to   n,he3   
+                     iend = iend - 3
+                     REAction(nnuc)(iend + 1:iend + 1) = 'h'
+                     iend = iend + 1
+                     ENDF(nnuc) = 1
+                  ENDIF
 
-             IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
-C              From n,np   to   n,d   
-               iend = iend - 2
-               REAction(nnuc)(iend + 1:iend + 1) = 'd'
-               iend = iend + 1
-               ENDF(nnuc) = 1
-             ENDIF
+                  IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
+C                    From n,2n2p   to   n,a   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 1) = 'a'
+                     iend = iend + 1
+                     ENDF(nnuc) = 1
+                  ENDIF
 
-             IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
-C              From n,2np   to   n,t   
-               iend = iend - 3
-               REAction(nnuc)(iend + 1:iend + 1) = 't'
-               iend = iend + 1
-               ENDF(nnuc) = 1
-             ENDIF
-
-             IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
-C              From n,n2p   to   n,he3   
-               iend = iend - 3
-               REAction(nnuc)(iend + 1:iend + 1) = 'h'
-               iend = iend + 1
-               ENDF(nnuc) = 1
-             ENDIF
-
-             IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
-C              From n,2n2p   to   n,a   
-               iend = iend - 4
-               REAction(nnuc)(iend + 1:iend + 1) = 'a'
-               iend = iend + 1
-               ENDF(nnuc) = 1
-             ENDIF
-
-             IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
-C              From n,3n2p   to   n,na   
-               iend = iend - 4
-               REAction(nnuc)(iend + 1:iend + 2) = 'na'
-               iend = iend + 2
-C              ENDF(nnuc) = 1
-             ENDIF
-                                 
-             IF (ia.NE.0) THEN
-               WRITE (cnejec,'(I1)') ia
-               IF (ia.GT.1) THEN
-                 REAction(nnuc)(iend + 1:iend + 1) = cnejec
-
-
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 1) = 'a'
-               iend = iend + 1
-             ENDIF
+                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
+C                    From n,3n2p   to   n,na   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 2) = 'na'
+                     iend = iend + 2
+                     ENDF(nnuc) = 1
+                  ENDIF
+                                  
+                  IF (ia.NE.0) THEN
+                     WRITE (cnejec,'(I1)') ia
+                     IF (ia.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 'a'
+                     iend = iend + 1
+                  ENDIF
                   
-             IF (id.NE.0) THEN
-               WRITE (cnejec,'(I1)') id
-               IF (id.GT.1) THEN
-                 REAction(nnuc)(iend + 1:iend + 1) = cnejec
+                  IF (id.NE.0) THEN
+                     WRITE (cnejec,'(I1)') id
+                     IF (id.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 'd'
+                     iend = iend + 1
+                  ENDIF
 
+                  IF (it.NE.0) THEN
+                     WRITE (cnejec,'(I1)') it
+                     IF (it.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 't'
+                     iend = iend + 1
+                  ENDIF
 
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 1) = 'd'
-               iend = iend + 1
+                  IF (ih.NE.0) THEN
+                     WRITE (cnejec,'(I1)') ih
+                     IF (ih.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 1) = 'h'
+                     iend = iend + 1
+                  ENDIF
+
+                  IF (NDEJC.GT.6 .AND. iac.NE.0) THEN
+                     WRITE (cnejec,'(I1)') iac
+                     IF (iac.GT.1) THEN
+                        REAction(nnuc)(iend + 1:iend + 1)
+     &                     = cnejec
+                        iend = iend + 1
+                     ENDIF
+                     REAction(nnuc)(iend + 1:iend + 2) = 'li'
+                     iend = iend + 2
+                  ENDIF
+                  REAction(nnuc)(iend + 1:iend + 1) = ')'
+                  REAction(nnuc)(iend + 2:iend + 4) = '   '
+C-----------------set residues to be used for EXFOR retrieval
+                  RESidue(nnuc) = '          '
+                  RESidue(nnuc)(1:1) = '>'
+                  RESidue(nnuc)(2:3) = SYMb(nnuc)
+                  iend = INDEX(RESidue(nnuc),' ') - 1
+                  WRITE (ca1,'(I3)') iia
+                  RESidue(nnuc)(iend + 1:iend + 2) = '-'
+                  iend = iend + 1
+                  IF (iia.LT.10) THEN
+                     RESidue(nnuc)(iend + 1:iend + 2)
+     &                  = ca1(3:3)
+                  ELSEIF (iia.LT.100) THEN
+                     RESidue(nnuc)(iend + 1:iend + 3)
+     &                  = ca1(2:3)
+                  ELSE
+                     RESidue(nnuc)(iend + 1:iend + 4)
+     &                  = ca1(1:3)
+                  ENDIF
              ENDIF
-
-             IF (it.NE.0) THEN
-               WRITE (cnejec,'(I1)') it
-               IF (it.GT.1) THEN
-                 REAction(nnuc)(iend + 1:iend + 1) = cnejec
-
-
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 1) = 't'
-               iend = iend + 1
-             ENDIF
-
-             IF (ih.NE.0) THEN
-               WRITE (cnejec,'(I1)') ih
-               IF (ih.GT.1) THEN
-                 REAction(nnuc)(iend + 1:iend + 1) = cnejec
-
-
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 1) = 'h'
-               iend = iend + 1
-             ENDIF
-
-             IF (NDEJC.GT.6 .AND. iac.NE.0) THEN
-               WRITE (cnejec,'(I1)') iac
-               IF (iac.GT.1) THEN
-                 REAction(nnuc)(iend + 1:iend + 1) = cnejec
-
-
-                 iend = iend + 1
-               ENDIF
-               REAction(nnuc)(iend + 1:iend + 2) = 'li'
-               iend = iend + 2
-             ENDIF
-             REAction(nnuc)(iend + 1:iend + 1) = ')'
-             REAction(nnuc)(iend + 2:iend + 4) = '   '
            ENDIF
          ENDDO
          ENDDO
@@ -802,9 +851,73 @@ C              ENDF(nnuc) = 1
          ENDDO
          ENDDO
          ENDDO
-
-
-
+C--------retrieve EXFOR data
+         INQUIRE (FILE = 'EXFOR.dat',EXIST = gexist)
+         IF (.NOT.gexist) THEN
+            IF (IX4ret.EQ.3) CALL RETRIEVE
+                                         !retrieval from the local database
+            IF (IX4ret.EQ.1 .OR. IX4ret.EQ.2) THEN
+C--------------on-line EXFOR retrieval from the remote database
+               WRITE (atar,'(I3)') INT(A(0))
+               IF (atar(1:1).EQ.' ') THEN
+                  atar(1:1) = atar(2:2)
+                  atar(2:2) = atar(3:3)
+                  atar(3:3) = ' '
+               ENDIF
+               IF (atar(1:1).EQ.' ') THEN
+                  atar(1:1) = atar(2:2)
+                  atar(2:2) = ' '
+               ENDIF
+C--------------set projectile  for EXFOR retrieval
+               proj = ' '
+               IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0) proj = 'n'
+               IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 'p'
+               IF (AEJc(0).EQ.4.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'a'
+               IF (AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 'd'
+               IF (AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0) proj = 'g'
+               IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'h'
+               IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 't'
+C--------------retrieval from the remote database
+               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.2) THEN
+                  x4string =
+     &'~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.jar: x4retr x -targe
+     &t:"'//SYMb(0)(1:1)//'-'//atar//';'//SYMb(0)(1:1)
+     &//'-0" -Rea ct:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
+               ELSEIF (IX4ret.EQ.2) THEN
+                  x4string =
+     &'~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.jar: x4retr x -targe
+     &t:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -React:"'//proj//
+     &',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
+               ENDIF
+C--------------retrieval from the local MySQL database
+C--------------including data for the natural element
+c              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
+c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
+c    &                       //SYMb(0)(1:1)//
+c    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
+c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+c              ELSEIF(IX4ret.EQ.1)THEN
+c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
+c    &                       //SYMb(0)//'-0'//
+c    &                       ';'//SYMb(0)//'-'//atar//'" '//
+c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
+c              ENDIF
+C--------------data for the target isotope only
+               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
+                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
+     &                       //SYMb(0)(1:1)
+     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+     &                       '"'//proj//',*"#'
+               ELSEIF (IX4ret.EQ.1) THEN
+                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
+     &                       //SYMb(0)
+     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
+     &                       '"'//proj//',*"#'
+               ENDIF
+               iwin = PIPE(x4string)
+            ENDIF
+         ENDIF
+C--------retrieve of EXFOR data *** done ***
          NNUcd = nnuc
          NNUct = NNUcd
          DO nnuc = 1, NNUcd
@@ -871,7 +984,7 @@ C-----------(McFadden global potential 9100 could be used)
 
          DO i = 1, NDNUC
             KTRlom(1,i) = 2405
-            KTRlom(2,i) = 5405
+              KTRlom(2,i) = 5405
             KTRlom(3,i) = 9600
             KTRlom(4,i) = 6200
             KTRlom(5,i) = 7100
@@ -884,7 +997,6 @@ C--------inteligent defaults *** done ***
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
-
 
 
 C--------Set exclusive and inclusive ENDF formatting flags
@@ -900,8 +1012,7 @@ C-----------We fix below target ENDf flag since it escapes normal setting
             DO ip = 0, nemp
             DO in = 0, nemn
               mulem = iac + ia + ip + in + id + it + ih
-
-              IF (mulem.EQ.0) CYCLE
+              if(mulem.eq.0) cycle
 
 
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
@@ -911,7 +1022,9 @@ C-----------We fix below target ENDf flag since it escapes normal setting
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
 
 
+
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
+
 
 
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2) 
@@ -919,6 +1032,7 @@ C-----------We fix below target ENDf flag since it escapes normal setting
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
 
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
+
 
 
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
@@ -929,23 +1043,17 @@ C             residues must be heavier than alpha
               izatmp = INT(1000*ztmp + atmp)
               CALL WHERE(izatmp,nnuc,iloc)
 
-
-              IF (iloc.ne.0) cycle
-
-
               IF(mulem.LE.NENdf) THEN
                 IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
               ELSE
-C             Comment the following block and uncommment the line after the block for all-exclusive spectra
+C               Comment the following block and uncommment the line after the block for all-exclusive spectra
                 IF (ENDf(nnuc).EQ.0) THEN
                   ENDf(nnuc) = 2
                   EXClusiv = .FALSE.
                 ENDIF
 C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
-
-
               ENDIF
-
+                        
               IF (ENDf(nnuc).EQ.1) THEN
                 NEXclusive = NEXclusive + 1
                 IF(NEXclusive.GT.NDExclus) THEN
@@ -963,7 +1071,7 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             ENDDO
-            WRITE(8,*) 'Number of exclusive reaction paths :',NEXclusive
+            WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
          ENDIF
 C
 C--------check input for consistency
@@ -7077,7 +7185,115 @@ C
       b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
       Bnd = b2 + b3 - b1
       END
+C
+C
+      SUBROUTINE RETRIEVE
+Ccc   ******************************************************************
+Ccc   *                                                       class:iou*
+Ccc   *                     R E T R I E V E                            *
+Ccc   *                                                                *
+Ccc   *          Retrieves EXFOR entries relevant to EMPIRE run        *
+Ccc   *                                                                *
+Ccc   *                                                                *
+Ccc   * input: none                                                    *
+Ccc   *                                                                *
+Ccc   *                                                                *
+Ccc   * output: none                                                   *
+Ccc   *                                                                *
+Ccc   *                                                                *
+Ccc   * calls: none                                                    *
+Ccc   *                                                                *
+Ccc   *                                                                *
+Ccc   * author: M.Herman                                               *
+Ccc   * date:   23.Oct.1999                                            *
+Ccc   * revision:     by:                         on:                  *
+Ccc   *                                                                *
+Ccc   ******************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+C
+C COMMON variables
+C
+      CHARACTER*64 empiredir
+      INTEGER NCHr
+      CHARACTER*10 PROjec, RESidue(NDNUC), TARget
+      COMMON /EXFOR / TARget, PROjec, RESidue
+      COMMON /IEXFOR/ NCHr
+      COMMON /GLOBAL_E/ EMPiredir
+C
+C Local variables
+C
+      CHARACTER*80 exforec
+      CHARACTER*36 filename, toplast, topname
+      CHARACTER*115 indexrec
+      INTEGER nnuc
+      CHARACTER*5 quantity(5)
+      CHARACTER*10 reaction(2)
+      CHARACTER*8 subent
 
+C-----constant parameters for EXFOR retrieval
+      DATA reaction/'N,F       ', 'N,TOT     '/
+      DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
+C-----open local file for storing retrieved EXFOR data
+      OPEN (UNIT = 19,FILE = 'EXFOR.dat',STATUS = 'NEW',ERR = 99999)
+C-----open EXFOR index
+      OPEN (UNIT = 20,FILE = trim(empiredir)//'/EXFOR/X4-INDEX.TXT'
+     &      ,STATUS = 'OLD')
+C
+C-----scan EXFOR index for relevant subentries
+C
+  100 READ (20,'(A115)',END = 500) indexrec
+      IF (indexrec(1:10).NE.TARget) GOTO 100
+      IF (NCHr.EQ.2 .AND. indexrec(11:12).NE.PROjec(1:2)) GOTO 100
+      IF (NCHr.EQ.4 .AND. indexrec(11:14).NE.PROjec(1:4)) GOTO 100
+      DO nnuc = 1, NDNUC
+         IF (indexrec(25:34).EQ.RESidue(nnuc)) GOTO 200
+      ENDDO
+      IF (indexrec(25:34).NE.'>NN-1     ') THEN
+         IF (indexrec(11:20).NE.reaction(1)) THEN
+            IF (indexrec(11:20).NE.reaction(2)) GOTO 100
+         ENDIF
+      ENDIF
+  200 IF (indexrec(41:45).NE.quantity(1)) THEN
+         IF (indexrec(41:45).NE.quantity(2)) THEN
+            IF (indexrec(41:45).NE.quantity(3)) THEN
+               IF (indexrec(41:45).NE.quantity(4)) THEN
+                  IF (indexrec(41:45).NE.quantity(5)) GOTO 100
+               ENDIF
+            ENDIF
+         ENDIF
+      ENDIF
+      subent = indexrec(70:77)
+C
+C-----retrive EXFOR entry including top subentry 001
+C
+      toplast = ' '
+      filename = '/EXFOR/subent'//'/'
+     &     //subent(1:2)//'/'//subent(1:4)//'/'//subent(1:8)//'.txt'
+      topname =  '/EXFOR/subent'//'/'//subent(1:2)
+     &     //'/'//subent(1:4)//'/'//subent(1:5)//'001.txt'
+      IF (topname.NE.toplast) THEN
+         OPEN (UNIT = 22,FILE = trim(empiredir)//topname,
+     &         ERR = 600,STATUS = 'OLD')
+  250    READ (22,99005,END = 300) exforec
+         WRITE (19,99005) exforec
+         GOTO 250
+      ENDIF
+  300 toplast = topname
+      CLOSE (22,ERR = 600)
+      OPEN (UNIT = 22,FILE = trim(empiredir)//filename,
+     &         ERR = 600,STATUS = 'OLD')
+  400 READ (22,99005,END = 100) exforec
+      WRITE (19,99005) exforec
+      GOTO 400
+  500 CLOSE (19,ERR = 600)
+      RETURN
+  600 WRITE (8,*) 'Not found EXFOR subentry ', subent
+      GOTO 100
+99005 FORMAT (A80)
+99999 END
+C
+C
       INTEGER FUNCTION IFINDCOLL()
 Ccc
 Ccc   ********************************************************************
@@ -7269,7 +7485,7 @@ C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
-           if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
+            if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
 
 C
 C           For covariance calculation of dynamical deformation
