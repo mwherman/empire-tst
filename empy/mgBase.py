@@ -62,7 +62,7 @@ class mgBase:
         # some data should already be identical:
         for data in ('ngroups', 'elist', 'mat', 'zam', 'awt'):
             if not getattr(self, data) == getattr(other, data):
-                print ("\n%s is not identical:" % data
+                print ("\n%s is not identical:" % data)
                 print self.filename
                 print other.filename
                 raise
