@@ -1,6 +1,6 @@
 Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-15 17:48:15 $
-Ccc   * $Id: HF-comp.f,v 1.100 2009-01-15 17:48:15 Capote Exp $
+Ccc   * $Date: 2009/01/15 17:48:15 $
+Ccc   * $Id: HF-comp.f,v 1.100 2009/01/15 17:48:15 Capote Exp $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -98,14 +98,36 @@ C--------between the nearest spectrum bins (inversely proportional to the
 C--------distance of the actual energy to the bin energy
 C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
 
+    
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
      &       Nejc.EQ.0) THEN
-            xcse = eemi/DE + 1.0001
+C
+C           goto 123 (to skip primary gamma emission for debugging purposes)
+C
+            IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
+C
+C           Primary gammas from the CN: Nnuc=1, Nejc=0 
+C           Originate from the primary excitation energy bin: Iec = NEX(1)
+C
+              xcse = eemi/DE + 1.0001
+              icsl = min(NINT(xcse),NDECSE-1)
+              ENPG(il) = eemi
+              CSPGE(il)  = CSPGE(il) + pop1
+C
+              CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
+
+              CYCLE ! for primary gammas no further processing is needed 
+            
+            ENDIF
+ 123        xcse = eemi/DE + 1.0001
             icsl = min(INT(xcse),NDECSE-1)
             icsh = icsl + 1
             popl = pop1*(FLOAT(icsh) - xcse)/DE
             popll = popl            !we also need popl not multiplied by 2
             IF (icsl.EQ.1) popl = 2.0*popl
+C
+C           Addition of discrete gamma to spectra 
+C
             poph = pop1*(xcse - FLOAT(icsl))/DE
             CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
@@ -124,8 +146,9 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
                ENDIF
             ENDIF
          ENDIF
+
 C--------Add isotropic CN contribution to direct ang. distributions
-         IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
+1234     IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
             pop1 = pop1/4.0/PI
             DO na = 1, NDANG

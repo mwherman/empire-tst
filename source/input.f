@@ -219,8 +219,8 @@ C        ENDf(0) = 0.0
          DEFgw = 10.
          DEFgp = 40.
          ADIv = 0.0
-         NEX(1) = 50
-         NEXreq = 50
+         NEX(1) = 60
+         NEXreq = 60
          FITlev = 0.0
          GCAsc = -1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
@@ -752,6 +752,9 @@ C                    From n,n2p   to   n,he3
                      ENDF(nnuc) = 1
                   ENDIF
 
+
+
+
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
 C                    From n,2n2p   to   n,a   
                      iend = iend - 4
@@ -999,6 +1002,9 @@ C
          CALL READIN(Irun)   !optional part of the input
 
 
+
+
+
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
@@ -1015,11 +1021,26 @@ C-----------We fix below target ENDf flag since it escapes normal setting
               if(mulem.eq.0) cycle
 
 
+
+
+
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+
+
+
 
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4) 
 
+
+
+
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
+
+
+
+
+
+
 
 
 
@@ -1027,15 +1048,36 @@ C-----------We fix below target ENDf flag since it escapes normal setting
 
 
 
+
+
+
+
+
+
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2) 
 
+
+
+
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
+
+
+
 
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
 
 
 
+
+
+
+
+
+
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
+
+
+
 
 
 C             residues must be heavier than alpha
@@ -1534,12 +1576,6 @@ C-----set giant resonance parameters for target
       GMRpar(8,0) = 0.0
 C-----compound nucleus 1
       nnuc = 1
-      IF (NEXreq.GT.NDEX) THEN
-       WRITE (8,*)
-         WRITE (8,*) ' NUMBER OF ENERGY BINS IN COMP. NUCL. SET TO',
-     &               NDEX
-         NEXreq = MAX(NDEX - 2,2)
-      ENDIF
 C-----determination of discrete levels and pairing shift for cn
       write(8,*)
       CALL LEVREAD(nnuc)
@@ -1652,7 +1688,15 @@ C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
 C-----check whether spectrum array can accommodate capture with this DE
 C     CALL CHECK_DE(EMAx(1),NDECSE)
-      CALL CHECK_DE(EMAx(1),NDEX)
+C     CALL CHECK_DE(EMAx(1),NDEX)
+
+
+      CALL CHECK_DE(EMAx(1),NEXreq)
+
+
+
+
+
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
       ichanmin = -1
@@ -1666,7 +1710,12 @@ C-----check whether any residue excitation is higher than CN
       CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
 C-----check whether population array can accommodate the reaction with the largest
 C-----continuum using current DE, if not adjust DE
-      CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+C     CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+
+
+      CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NEXreq)
+
+
 C-----check whether spectra array can accommodate the reaction with the largest
 C-----continuum using current DE, if not adjust DE
 C     CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
@@ -1820,12 +1869,14 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
      &         /(1.3d0*(AEJc(Nejc)**0.3333334 + A(Nnur)**0.3333334))
 
-            IF (NEX(nnur).GT.NDEX) THEN
+            IF (NEX(nnur).GT.NEXreq) THEN
                WRITE (8,*)
                WRITE (8,'('' WARNING: NUMBER OF BINS '',I3,
      &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
-     &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
-     &         '-',SYMb(nnur),NDEX
+     &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3)')  
+
+
+     &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
                WRITE (8,
      &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
      &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
@@ -1836,7 +1887,7 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
      &          '         TO CONSIDER IT, YOU HAVE TO DECREASE ',
      &          ' NEX IN THE INPUT '
                WRITE (8,*)
-     &          '         OR INCREASE NDEX PARAMETER IN dimension.h'
+     &          '        AND INCREASE NDEX PARAMETER IN dimension.h'
                WRITE (8,'('' WARNING: EMAXr : '',F7.2,
      &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
                WRITE (8,*)
@@ -2552,13 +2603,29 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '   MT=102 Capture                               '
         WRITE (12,*) '   MT=16   (n,2n)                               '
         WRITE (12,*) '   MT=17   (n,3n)                               '
+
+
         WRITE (12,*) '   MT=18   (n,f)                                '
         WRITE (12,*) '   MT=22   (n,na)                               '
         WRITE (12,*) '   MT=24   (n,2na)                              '
-        WRITE (12,*) '   MT=28   (n,np)                               '
+        WRITE (12,*) '   MT=28   (n,np+pn)                            '
+        WRITE (12,*) '   MT=37   (n,4n)                               '
+
+
         WRITE (12,*) '   MT=45   (n,npa)                              '
         WRITE (12,*) '   MT=103, 600-649 (n,p)                        '
+        WRITE (12,*) '   MT=104, (n,d)                                '
+
+
+        WRITE (12,*) '   MT=105, (n,t)                                '
+
+
+        WRITE (12,*) '   MT=106, (n,He-3)                             '
+
+
         WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
+
+
         WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=4 Angular distributions of secondary neutrons'
@@ -2567,30 +2634,83 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
+
+
+        WRITE (12,*) '     Primary capture gammas are entered as      '
+
+
+        WRITE (12,*) '     discrete lines                             '
+
+
+        WRITE (12,*) '                                                '
+
+
         WRITE (12,*) 'MF=12 Transition probability arrays for photon  '
-        WRITE (12,*) '      production; taken from the RIPL-2         '
+        WRITE (12,*) '      production; taken from the RIPL library   '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=14 Photon angular distributions              '
         WRITE (12,*) '      isotropic distributions were assumed      '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'REFERENCES                                      '
         WRITE (12,*) '                                                '
-        WRITE (12,*) '[EMP] M. Herman, R. Capote, B. Carlson,         '
-        WRITE (12,*) '      P. Oblozinsky, M. Sin, A. Trkov,          '
-        WRITE (12,*) '      H. Wienke and V. Zerkin                   '
-        WRITE (12,*) '  "EMPIRE: Nuclear Reaction Model Code System   '
-        WRITE (12,*) '           for data evaluation"                 '
-        WRITE (12,*) '   Nuclear Data Sheets 108 (2007) 2655-2715     '
+        WRITE (12,*) '[EMP]                                           '
+
+
+        WRITE (12,*) '  M.Herman, R.Capote, B.Carlson, P.Oblozinsky,  '
+        WRITE (12,*) '  M.Sin, A.Trkov, H.Wienke and V.Zerkin         '
         WRITE (12,*) '                                                '
+
+
+        WRITE (12,*) ' "EMPIRE: Nuclear Reaction Model Code System    '
+        WRITE (12,*) '           for data evaluation"                 '
+        WRITE (12,*) '  Nuclear Data Sheets 108 (2007) 2655-2715      '
+        WRITE (12,*) '                                                '
+
+
         WRITE (12,*) '[RIPL]                                          '
-        WRITE (12,*) '   T.Belgya, O.Bersillon, R.Capote, T.Fukahori, '
-        WRITE (12,*) '   G.Zhigang, S.Goriely, M.Herman, A.V.Ignatyuk,'
-        WRITE (12,*) '   S.Kailas, A.Koning, P.Oblozinsky, V.Plujko   '
-        WRITE (12,*) '   and P.Young; "Handbook for calculations of   '
-        WRITE (12,*) '   nuclear reaction data: Reference Input       '
-        WRITE (12,*) '   Parameter Library II.", IAEA-TECDOC-1506,    '
-        WRITE (12,*) '   Vienna, Austria 2005. Available online at    '
-        WRITE (12,*) '   http://www-nds.iaea.org/RIPL-2/              '
+
+
+        WRITE (12,*) '  R.Capote, M.Herman, P.Oblozinsky, P.G.Young,  '
+
+
+        WRITE (12,*) '  S.Goriely, T.Belgya, A.V.Ignatyuk, A.J.Koning,'
+
+
+        WRITE (12,*) '  S.Hilaire, V.A.Plujko, M.Avrigeanu,           '
+
+
+        WRITE (12,*) '  Zhigang Ge, Yinlu Han, S.Kailas, J.Kopecky,   '                    
+
+
+        WRITE (12,*) '  V.M.Maslov, G.Reffo, M.Sin,                   '     
+
+
+        WRITE (12,*) '  E.Sh.Soukhovitskii and P. Talou               '
+
+
+        WRITE (12,*) '                                                '
+
+
+        WRITE (12,*) ' "RIPL - Reference Input Parameter Library for  '
+
+
+        WRITE (12,*) '         Calculation of Nuclear Reactions and   '                 
+
+
+        WRITE (12,*) '         Nuclear Data Evaluations",             '                  
+
+
+        WRITE (12,*) '                                                '
+
+
+        WRITE (12,*) '  Nuclear Data Sheets 110 (2009) 3107-3214      '
+
+
+        WRITE (12,*) '                                                '
+
+
+        WRITE (12,*) '  Data available online at                      '
+        WRITE (12,*) '   http://www-nds.iaea.org/RIPL-3/              '
         WRITE (12,*) '                                                '
         WRITE (12,*) '************************************************'
         WRITE (12,*) '                                                '
@@ -2992,10 +3112,9 @@ C     GOTO 10
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-3 beta2  by     '
-      WRITE (12,*) 'M. Herman et al [EMP]. This code integrates into a '
-      WRITE (12,*) 'single system a number of important modules and    '
-      WRITE (12,*) 'features:                                          '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-3 by M. Herman  '
+      WRITE (12,*) 'et al [EMP]. This code integrates into a single    '
+      WRITE (12,*) 'system a number of important modules and features: '                                         '
       WRITE (12,*) '                                                   '
       WRITE (12,*) '- Spherical and deformed Optical Model including   '
       WRITE (12,*) '  coupled-channels (ECIS06 by J. Raynal)           '
@@ -3012,10 +3131,10 @@ C     GOTO 10
       WRITE (12,*) '- Complete gamma-ray cascade after emission of     '
       WRITE (12,*) '  each particle, including realistic treatment of  '
       WRITE (12,*) '  discrete transitions                             '
-      WRITE (12,*) '- Access to OM segment of the RIPL-2 library [RIPL]'
+      WRITE (12,*) '- Access to OM segment of the RIPL library [RIPL]  '
       WRITE (12,*) '- Built-in input parameter files, such as masses,  '
       WRITE (12,*) '  level density, discrete levels, fission barriers '
-      WRITE (12,*) '  and gamma strength functions based on the RIPL-2 '
+      WRITE (12,*) '  and gamma strength functions based on the RIPL   '
       WRITE (12,*) '  library [RIPL]                                   '
       WRITE (12,*) '- Automatic retrieval of experimental data from the'
       WRITE (12,*) '  EXFOR/CSISRS library                             '
@@ -3819,6 +3938,11 @@ C-----
 C-----
          IF (name.EQ.'NEX   ') THEN
             NEXreq = val
+
+
+            IF (val.GT.NDEX-1) NEXreq = NDEX-1
+
+
             WRITE (8,
      &'('' Number of energy steps in the integration set to '',
      &I3)') NEXreq

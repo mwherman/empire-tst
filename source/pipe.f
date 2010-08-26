@@ -23,12 +23,13 @@ C/* Do not use default declaration please, they are    */
 C/* compiler and system dependent !!!!                 */
 C
       INTEGER*4 FUNCTION PIPE(Stringp)
-      
+C     for MSFORTRAN
+C     USE PORTLIB
+     
       CHARACTER*(*) STRINGP
 
-C     for MSFORTRAN:
-C     USE PORTLIB
-C     pipe = call SYSTEM (stringp)
+C     for MSFORTRAN
+C     pipe = SYSTEM(stringp)
 
 C     for LAHEY, ifort, etc:
       pipe=0
