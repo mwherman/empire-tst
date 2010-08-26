@@ -51,7 +51,27 @@ class mgBase:
         self.zam = 0
         self.awt = 0
     
-
+    
+    def __iadd__(self, other):
+        """
+        permits adding extra information:
+        >mg = mgCovars('filename')
+        >mg += mg.Covars('secondfile')
+        so mg holds all data from both files
+        """
+        # some data should already be identical:
+        for data in ('ngroups', 'elist', 'mat', 'zam', 'awt'):
+            if not getattr(self, data) == getattr(other, data):
+                print ("\n%s is not identical:" % data
+                print self.filename
+                print other.filename
+                raise
+        for data in ('xsecs', 'uncert', 'corrs', 'covars', 'thresholds'):
+            getattr(self, data).update( getattr(other, data) )
+        self.filename += " " + other.filename
+        return self
+    
+    
     def toAscii(self, filename):
         """
         write contents of mgCovars class out to njoycovx-style ascii file

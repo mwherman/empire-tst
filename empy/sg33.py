@@ -25,23 +25,55 @@ from mgBase import *
 
 names = {
         # translate mt # to string
+        # comment out reactions to keep from being translated to sg33:
         1:  ("Total",   "MF3", "(barn)"),
         2:  ("Elastic", "MF3", "(barn)"),
         3:  ("Reaction", "MF3", "(barn)"),
         4:  ("Inelastic", "MF3", "(barn)"),
-        16: ("(n,2n)",  "MF3", "(barn)"),
-        17: ("(n,3n)",  "MF3", "(barn)"),
+        5:  ("(z,any)", "MF3", "(barn)"),
+        10: ("(z,cont)", "MF3", "(barn)"),
+        11: ("(z,2nd)", "MF3", "(barn)"),
+        16: ("(z,2n)",  "MF3", "(barn)"),
+        17: ("(z,3n)",  "MF3", "(barn)"),
         18: ("Fission", "MF3", "(barn)"),
+        19: ("1stFiss", "MF3", "(barn)"),
+        20: ("2ndFiss", "MF3", "(barn)"),
+        21: ("3rdFiss", "MF3", "(barn)"),
         22: ("(z,na)",  "MF3", "(barn)"),
+        23: ("(z,n3a)",  "MF3", "(barn)"),
+        24: ("(z,2na)",  "MF3", "(barn)"),
+        25: ("(z,3na)",  "MF3", "(barn)"),
         28: ("(z,np)",  "MF3", "(barn)"),
-        37: ("(n,4n)",  "MF3", "(barn)"),
-        102: ("(n,gamma)", "MF3", "(barn)"),
-        103: ("(n,p)",  "MF3", "(barn)"),
-        104: ("(n,d)",  "MF3", "(barn)"),
-        105: ("(n,t)",  "MF3", "(barn)"),
-        106: ("(n,He-3)", "MF3", "(barn)"),
-        107: ("(n,alpha)", "MF3", "(barn)"),
+        29: ("(z,n2a)",  "MF3", "(barn)"),
+        30: ("(z,2n2a)",  "MF3", "(barn)"),
+        32: ("(z,nd)",  "MF3", "(barn)"),
+        33: ("(z,nt)",  "MF3", "(barn)"),
+        34: ("(z,n3He)",  "MF3", "(barn)"),
+        35: ("(z,nd2a)",  "MF3", "(barn)"),
+        36: ("(z,nt2a)",  "MF3", "(barn)"),
+        37: ("(z,4n)",  "MF3", "(barn)"),
+        38: ("(z,3nf)",  "MF3", "(barn)"),
+        41: ("(z,2np)",  "MF3", "(barn)"),
+        42: ("(z,3np)",  "MF3", "(barn)"),
+        44: ("(z,n2p)",  "MF3", "(barn)"),
+        45: ("(z,npa)",  "MF3", "(barn)"),
+        102: ("(z,gamma)", "MF3", "(barn)"),
+        103: ("(z,p)",  "MF3", "(barn)"),
+        104: ("(z,d)",  "MF3", "(barn)"),
+        105: ("(z,t)",  "MF3", "(barn)"),
+        106: ("(z,He-3)", "MF3", "(barn)"),
+        107: ("(z,alpha)", "MF3", "(barn)"),
+        108: ("(z,2a)", "MF3", "(barn)"),
+        109: ("(z,3a)", "MF3", "(barn)"),
+        111: ("(z,2p)", "MF3", "(barn)"),
+        112: ("(z,pa)", "MF3", "(barn)"),
+        113: ("(z,t2a)", "MF3", "(barn)"),
+        114: ("(z,d2a)", "MF3", "(barn)"),
+        115: ("(z,pd)", "MF3", "(barn)"),
+        116: ("(z,pt)", "MF3", "(barn)"),
+        117: ("(z,da)", "MF3", "(barn)"),
         181: ("Fiss. Spec.", "MF5", "(no-dim)"),
+        251: ("Mubar",  "MF4", "(no-dim)"),
         452: ("Nu-t",   "MF1", "(no-dim)"),
         455: ("Nu-d",   "MF1", "(no-dim)"),
         456: ("Nu-p",   "MF1", "(no-dim)"),
@@ -62,6 +94,8 @@ names[699] = ("(n,d-cont)", "MF3", "(barn)")
 names[749] = ("(n,t-cont)", "MF3", "(barn)")
 names[799] = ("(n,3He-cont)", "MF3", "(barn)")
 names[849] = ("(n,a-cont)", "MF3", "(barn)")
+for i in range(20):
+    names[i+851] = ("(n,lump%i)" % i, "MF3", "(barn)")
 
 
 def writeHeader():
@@ -173,7 +207,9 @@ def sg33( mg, filename ):
     mg is mgCovars class instance (from readNJOY, readPUFF or boxr)
     write to WPEC subgroup 33 format
     """
-    mg.isotope = raw_input("Enter isotope name: ")
+    print filename
+    if not getattr(mg,'isotope',False):
+        mg.isotope = raw_input("Enter isotope name: ")
     
     fout = open(filename,"w")
     fout.writelines( writeHeader() )
