@@ -31,6 +31,10 @@ def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
             return matrix
     
     niter = 0
+    # may need to reduce off-diagonal. reduce to 0.999, then 0.998, etc:
+    thresh = 1.0
+    delta = 1./10**ndigit
+    
     while True:
         niter += 1
         
@@ -61,9 +65,14 @@ def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
         if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
             print "fixed, %i iterations" % niter
             return matrix
+        
         if numpy.all( tmp==matrix ):
-            print "unsuccessful: iterated without changes"
-            return matrix
+            thresh -= delta
+            print ("Reducing off-diagonal part to %f" % thresh)
+            rsd = numpy.sqrt( matrix.diagonal() )
+            corr_mat = cov2corr( matrix )
+            corr_mat = reduceOffDiag( corr_mat, thresh )
+            matrix = corr2cov( corr_mat, rsd )
         #print "iterating again!"
 
 
@@ -93,6 +102,18 @@ def corr2cov( matrix, rsd ):
     """convert to relative covariance matrix"""
     rsd = numpy.array( rsd )
     return matrix * rsd * rsd[:,numpy.newaxis]
+
+
+def reduceOffDiag( corr_mat, thresh ):
+    """
+    sometimes easiest way to eliminate negative eigenvalues is to 
+    reduce off-diagonal portion of the correlation matrix
+    """
+    corr_mat_new = corr_mat[:,:]
+    tmp = corr_mat[ offdiag(corr_mat) ]
+    tmp[ tmp>thresh ] = thresh
+    corr_mat_new[ offdiag(corr_mat_new) ] = tmp
+    return corr_mat_new
 
 
 def offdiag( matrix ):
