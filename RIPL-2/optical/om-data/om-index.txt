@@ -336,6 +336,7 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 2601   n    CC rig.  no   yes  90-94  232-242   0.0-200.0    94  E.Soukhovitski
 2602   n    CC soft  no   yes  12-50   24-124   0.0-200.0    95  E.Soukhovitski
 2700   n    spher.   no   no   20-83   40-210   0.0-155.0    96  C.A.Engelbrecht
+
 4000   p    spher.   no   no   25-26   54- 56   0.0- 28.0     7  E.D.Arthur
 4001   p    spher.   no   no   26-27   59- 59   0.0- 23.0    97  E.D.Arthur
 4002   p    spher.   no   no   38-38   88- 89   0.0- 21.0    98  E.D.Arthur
@@ -466,6 +467,7 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 5600   p    CC rig.  no   yes  90-94  232-242   0.0-200.0    94  E.Soukhovitski
 5601   p    CC rig.  no   yes  90-94  232-242   0.0-200.0    94  E.Soukhovitski
 5602   p    CC soft  no   yes  12-50   24-124   0.0-200.0    95  E.Soukhovitski
+
 6100   d    spher.   no   no   20-83   40-209   8.0- 13.0   118  J.M.Lohr
 6101   d    spher.   no   no   20-82   40-208  11.0- 27.0   119  C.M.Perey
 6112   d    spher.   no   no   20-20   40- 40  11.8- 90.0   120  W.W.Daehnick
@@ -479,11 +481,14 @@ Lib.  Inc.  Model   Disp  Rel Z-Range  A-Range    E-Range    Ref.   First
 6203   d    spher.   no   no    4- 4    8- 10   1.0-200.0   123  Yinlu
 6204   d    spher.   no   no    6- 6   11- 13   1.0-200.0   123  Yinlu
 6400   d    spher.   no   no    6-82   12-208  20.0-100.0   124  J.Bojowald
+
 7100   t    spher.   no   no   20-82   40-208   1.0- 40.0   125  F.D.Becchetti
 7200   t    spher.   no   no   13-90   27-232   1.0- 40.0   126  Xiaohua
+
 8100  3He   spher.   no   no   20-82   40-208   1.0- 40.0   125  F.D.Becchetti
 8101  3He   spher.   no   no   20-20   40- 40  21.0- 84.0   127  H.H.Chang
 8102  3He   spher.   no   no   28-28   58- 58  22.0- 84.0   127  H.H.Chang
+
 9000  4He   spher.   no   no   13-26   27- 56   1.0-100.0   128  E.D.Arthur
 9001  4He   spher.   no   no   27-27   59- 59   1.0-100.0   129  E.D.Arthur
 9018  4He   spher.   no   no   13-13   27- 27   0.1- 20.0    13  R.C.Harper
