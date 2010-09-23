@@ -91,7 +91,7 @@ class mgBase:
         # get ordered list of mt #'s:
         mtList = [int(a.strip('MT')) for a in self.xsecs.keys()]
         mtList.sort()
-        print mtList
+        #print mtList
         
         # string for ascii file:
         asc = ''

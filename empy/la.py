@@ -9,37 +9,55 @@ import sys
 import numpy
 
 
-def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
+def eliminateNegEigenvals( matrix, **kwargs ):
     """start with correlation/covariance matrix, 
     try to reduce negative eigenvalues
     1) get eigenvalues/vectors, check if any are negative
     2) generate new matrix after setting negative eigenvalues to zero
     3) truncate result to 'ndigit' significant digits: beware precision loss!
     May have to iterate these steps
+    
+    optional input: 
+        ndigit=integer, number of sig.figs to preserve
+        corrmat=True/False: is this a correlation matrix?
+        verbose=True/False: control verbosity
     """
+    ndigit = kwargs.get('ndigit', 3)
+    corrmat = kwargs.get('corrmat', True)
+    verbose = kwargs.get('verbose', True)
+    
     if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
-        print "No negative eigenvalues"
+        if verbose:
+            print "No negative eigenvalues"
         return matrix
     
-    print "negative eigenvalues encountered"
+    if verbose:
+        print ("negative eigenvalues encountered")
     
     if corrmat:
         # save the original diagonal (should have only zeros/ones):
         diagonal = matrix.diagonal().copy()
         if numpy.any( (diagonal!=0)*(diagonal!=1) ):
-            print "Bad values on diagonal: is this a correlation matrix?"
-            return matrix
+            raise ValueError, ("Bad values on diagonal: "+
+                "is this a correlation matrix?")
     
     niter = 0
     # may need to reduce off-diagonal. reduce to 0.999, then 0.998, etc:
     thresh = 1.0
     delta = 1./10**ndigit
     
+    original = matrix.copy()
+    
     while True:
         niter += 1
         
         tmp = matrix.copy()
-        P,D,Pinv = diagonalize( matrix )
+        try:
+            P,D,Pinv = diagonalize( matrix )
+        except numpy.linalg.linalg.LinAlgError:
+            # try reducing off-diagonal a bit:
+            matrix = reduceOffDiag( matrix, thresh-delta )
+            P,D,Pinv = diagonalize(matrix)
         assert numpy.allclose( dotproduct( P,D,Pinv ) , matrix )
         
         # toss out negative eigenvalues:
@@ -54,21 +72,28 @@ def eliminateNegEigenvals( matrix, ndigit=3, corrmat=True ):
         matrix = matrix.astype(int).astype(float)
         matrix /= 10**ndigit
         
+        if numpy.max(numpy.abs( original-matrix )) > 1./(ndigit-1):
+            raise RuntimeError, ("Matrix changed by more than %f" 
+                % 1./(ndigit-1) )
+        
         assert numpy.all( matrix==matrix.T ), "non-symmetric matrix %s"%key
         
         # correlation matrix diagonal elements should be 0 or 1:
         if corrmat and numpy.any( (matrix.diagonal()!=1.0) * 
                 (matrix.diagonal()!=0) ):
-            print "Warning: diagonal was modified, reverting to original!"
+            if verbose:
+                print "Warning: diagonal was modified, reverting to original!"
             matrix[range(len(matrix)),range(len(matrix))] = diagonal
         
         if not numpy.any( numpy.linalg.eigvals(matrix)<0 ):
-            print "fixed, %i iterations" % niter
+            if verbose:
+                print ("fixed, %i iterations" % niter)
             return matrix
         
         if numpy.all( tmp==matrix ):
             thresh -= delta
-            print ("Reducing off-diagonal part to %f" % thresh)
+            if verbose:
+                print ("Reducing off-diagonal part to %f" % thresh)
             rsd = numpy.sqrt( matrix.diagonal() )
             corr_mat = cov2corr( matrix )
             corr_mat = reduceOffDiag( corr_mat, thresh )
