@@ -280,7 +280,9 @@ C
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
-            IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
+C           Found bug that decreased PE contribution, thanks to A Voinov 
+C    	       Oct 1, 2010 MH & RC, next line was commented to correct the bug
+C           IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
 C
 C           Defining well depth for p-h LD calculations
