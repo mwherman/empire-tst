@@ -445,14 +445,14 @@ C                 Only Legendre elastic expansion is needed
                ENDIF
 C--------------Inelastic cross section (incident.ics)
                OPEN (45,FILE = 'dwba.ICS',STATUS = 'OLD',ERR = 220)
-               OPEN (46,FILE = 'ccm.ICS',STATUS = 'OLD',ERR = 220)
+               OPEN (46,FILE = 'ccm.ICS' ,STATUS = 'OLD',ERR = 220)
                OPEN (47,FILE = 'INCIDENT.ICS',STATUS = 'UNKNOWN')
-               READ (45,'(A80)',END = 220) rstring
-               READ (46,'(A80)',END = 210) ! first line is taken from dwba
+               READ (45,'(A80)',END = 220,ERR = 220) rstring
+               READ (46,'(A80)',END = 210,ERR = 210) ! first line is taken from dwba
   210          WRITE (47,'(A80)') rstring
                DO i = 2, ND_nlv
-                  READ (45,'(A80)',END = 220) rstring
-                  READ (46,'(A80)',END = 215) rstring
+                  READ (45,'(A80)',END = 220,ERR = 220) rstring
+                  READ (46,'(A80)',END = 215,ERR = 215) rstring
   215             WRITE (47,'(A80)') rstring
                ENDDO
   220          CLOSE (45,STATUS = 'DELETE')
@@ -460,9 +460,9 @@ C--------------Inelastic cross section (incident.ics)
                CLOSE (47)
 C--------------Angular distribution (incident.ang)
                OPEN (45,FILE = 'dwba.ANG',STATUS = 'OLD',ERR = 240)
-               READ (45,'(A80)',END = 240) rstring
-               OPEN (46,FILE = 'ccm.ANG',STATUS = 'OLD',ERR = 240)
-               READ (46,'(A80)',END = 230) ! first line is taken from dwba
+               READ (45,'(A80)',ERR = 240, END = 240) rstring
+               OPEN (46,FILE = 'ccm.ANG' ,STATUS = 'OLD',ERR = 240)
+               READ (46,'(A80)',ERR = 230, END = 230) ! first line is taken from dwba
   230          OPEN (47,FILE = 'INCIDENT.ANG',STATUS = 'UNKNOWN')
                WRITE (47,'(A80)') rstring
                DO i = 1, ND_nlv
@@ -471,10 +471,10 @@ C                 READ (45,'(5x,F5.1,A1,4x,i5)',END = 240) stmp1, ctmp1,
 C    &                  nang
 C                 READ (45,'(5x,F5.1,A1,i4,i5)',END = 240) stmp1, ctmp1,
 C    &                  itmp2, nang
-                  READ (45,'(i5,6x,i4,i5)',END = 240) 
+                  READ (45,'(i5,6x,i4,i5)',END = 240,ERR = 240) 
      &                 istat1, itmp2, nang
 C                 READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
-                  READ (46,'(i5)',END = 235) istat2
+                  READ (46,'(i5)',END = 235,ERR = 235) istat2
 C-----------------checking the correspondence of the excited states for even-even targets
                   IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   
 C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
@@ -484,14 +484,14 @@ C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN
      &            ' WARNING: DWBA and CCM state order do not coincide'
                   ENDIF
                   BACKSPACE (46)
-                  READ (46,'(A80)',END = 235) rstring
+                  READ (46,'(A80)',ERR = 235, END = 235) rstring
                   GOTO 2351 
   235             BACKSPACE (45)
-                  READ (45,'(A80)',END = 240) rstring
+                  READ (45,'(A80)',ERR = 240, END = 240) rstring
  2351             WRITE (47,'(A80)') rstring
                   DO j = 1, itmp2*nang ! ecis06
-                     READ (45,'(A80)',END = 240) rstring
-                     READ (46,'(A80)',END = 236) rstring
+                     READ (45,'(A80)',ERR = 240,END = 240) rstring
+                     READ (46,'(A80)',ERR = 236,END = 236) rstring
   236                WRITE (47,'(A80)') rstring
                   ENDDO
                ENDDO
