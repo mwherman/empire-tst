@@ -3,7 +3,8 @@
 """
 runE.py
 
-modified by Caleb Mattoon on 2008-12-19.
+modified by Roberto Capote on 2010-10-01.
+author Caleb Mattoon
 
 script to run EMPIRE (only X-sec calculations)
 ported to python, some error checking
@@ -192,12 +193,12 @@ def runE(proj):
     
     # move files, no warning if files DNE:
     mv('EXFOR.dat',proj+'.exf',0)
-    mv('ECIS_ROT.out',proj+'-ecis.out',0)
-    mv('ECIS_VIB.out',proj+'-ecis.out',0)
-    mv('ECIS_VIBROT.out',proj+'-ecis.out',0)
-    mv('ecVIB.inp',proj+'-ecis.in',0)
-    mv('ecROT.inp',proj+'-ecis.in',0)
-    mv('ecVIBROT.inp',proj+'-ecis.in',0)
+    mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
+    mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
+    mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
+    mv('ecVIB.inp',proj+'-ecis-vib.in',0)
+    mv('ecROT.inp',proj+'-ecis-rot.in',0)
+    mv('ecVIBROT.inp',proj+'-ecis-vibrot.in',0)
     mv('FISSION.OUT',proj+'-fiss.out',0)
     mv('R250SEED.DAT',proj+'.rng',0)
     mv('PFNM.OUT',proj+'-pfnm.out',0)
@@ -220,7 +221,7 @@ def runE(proj):
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
-    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT','TARGET_COLL_RIPL.DAT')
+    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl') )
     rm('TARGET.LEV')
     rm('EXFOR.datp')
@@ -303,7 +304,7 @@ def splashscreen():
     '          E      M    M  P      I  R  R   E              3 '+'\n'+
     '          EEEEE  M    M  P      I  R   R  EEEEE      33333 '+'\n'+
     '                                                           '+'\n'+
-    '                     A R C O L E (beta 1)                  '+'\n'+
+    '                     A R C O L E (Sept 2010)               '+'\n'+
     '                                                           '+'\n'+
     '                                                           '+'\n']
     return splash[0]
