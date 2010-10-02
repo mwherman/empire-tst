@@ -1986,22 +1986,20 @@ C------------Residual nuclei must be heavier than alpha
              IF(iloc.EQ.1) CYCLE
 C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
 
-
              IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
-
 
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (IOUt.GT.3 .and. ENDf(nnuc).EQ.1 .and. FIRst_ein)
+             IF (IOUt.GT.0 .and. ENDf(nnuc).EQ.1 .and. FIRst_ein)
      &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
-             IF (IOUt.GT.2) CALL AUERST(nnuc,nejc)
+             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc)
              IF (IOUt.GT.0) WRITE (8,
      &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
+
 C------------Print residual nucleus population
              IF (IOUt.EQ.4) THEN
-
 
                ia = INT(A(nnur))
                WRITE (8,*) ' '
@@ -2029,94 +2027,37 @@ C------------Print residual nucleus population
                enddo
                WRITE (8,'('' '')')
 
-
              ENDIF
 
-
-
-
-
              poptot = 0.0
-
-
              DO j = 1, NLW
-
-
                DO i = 1, NEX(nnur)
-
-
                  poptot = poptot + POP(i,j,1,nnur) + POP(i,j,2,nnur)
-
-
                ENDDO
-
-
                poptot = poptot 
-
-
      &                - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
-
-
      &                - 0.5*(POP(NEX(nnur),j,1,nnur) 
-
-
      &                +      POP(NEX(nnur),j,2,nnur))
 
-
              ENDDO
-
 
              poptot = poptot*DE
-
-
              poplev = 0.0
-
-
              DO i = 1, NLV(nnur)
-
-
                poplev = poplev + POPlv(i,nnur)
-
-
              ENDDO
 
-
-
-
-
              WRITE (12,
-
-
      &            '(13x,   '' total popul.continuum '',G12.5,''  mb'')')
-
-
      &            poptot
-
-
              WRITE (12,
-
-
      &            '(13x,   '' total popul.disc.lev. '',G12.5,''  mb'')')
-
-
      &            poplev
-
-
              WRITE (12,
-
-
      &            '(13x,   '' total population      '',G12.5,''  mb'')')
-
-
      &            poplev + poptot
 
-
-
-
-
              IF (IOUt.GE.4) THEN
-
-
                WRITE (8,*) ' '
                WRITE (8,
      &         '(1x,''    Total popul.continuum '',G12.5,'' mb'')')
@@ -2131,6 +2072,9 @@ C------------Print residual nucleus population
              ENDIF
            ENDDO   !over ejectiles
          WRITE (12,
+     &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
+     &               checkprd
+         WRITE ( 8,
      &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
      &               checkprd
          xcross(NDEJC+3,jz,jn) = checkprd
@@ -2166,12 +2110,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
-C     WRITE((),'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
-C    &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
-C    &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
-C    &     TOTcsfis, CSPrd(1), csinel,
-C    &     (CSPrd(nnuc),nnuc=3,NNUcd)
-C
+
       IF(TOTcsfis.gt.0.d0)
      &  WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
@@ -2358,46 +2297,18 @@ C                   ENDDO
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                     ENDDO
 
-
-
-
-
                     totspec = 0.d0
-
-
                     DO ie = 1, nspec+1
-
-
                       totspec  = totspec  + CSE(ie,nejc,nnur)
-
-
                     ENDDO
-
-
                     totspec = totspec -  0.5d0*
-
-
      &                      (CSE(1,nejc,nnur) + CSE(nspec+1,nejc,nnur))
-
-
                     totspec = totspec*DE 
-
-
-                      WRITE (12,*) ' '    
-
-
+                    WRITE (12,*) ' '    
                     WRITE (12,
-
-
      &                '(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &                totspec      
-
-
-                      WRITE (12,*) ' '    
-
-
+                    WRITE (12,*) ' '    
 
                   ELSE ! LHMS.NE.0
 C-------------------Remaining n- or p-emissions (continuum)
@@ -2427,48 +2338,22 @@ C                   ENDDO
                                       ! exact DDX spectrum endpoint
                       WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                        EMAx(nnuc)*recorp,
-C!     &                        EMAx(nnuc)/recorp,
      &                     (max(cseaprnt(ie,nang),0.d0),nang = 1,NDANG)
                     ENDDO
 
-
-
                     totspec = 0.d0
-
-
                     DO ie = 1, nspec
-
-
                       totspec  = totspec  + CSE(ie,nejc,nnur)
-
-
                     ENDDO
-
-
                     totspec = totspec -  0.5d0*
-
-
      &                      (CSE(1,nejc,nnur) + CSE(nspec,nejc,nnur))
-
-
                     totspec = totspec*DE 
-
-
-                      WRITE (12,*) ' '    
-
-
+                    WRITE (12,*) ' '    
                     WRITE (12,
-
-
      &                '(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &                totspec      
-
-
-                      WRITE (12,*) ' '    
-
-
+                    WRITE (12,*) ' '    
+		    
                   ENDIF ! LHMS.EQ.0
                  ELSE !  then (nejc.GE.1 .AND. nejc.LE.2)
 C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
@@ -2518,55 +2403,27 @@ c                   ELSE
      &                     max(0.d0,CSE(nspec-1,nejc,nnur))*recorp
 
                     WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 0.d0
+
                     totspec = 0.d0
-
-
                     DO ie = 1, nspec + 1
-
-
                       totspec  = totspec  + CSE(ie,nejc,nnur)
-
-
                     ENDDO
-
-
                     totspec = totspec -  0.5d0*
-
-
      &                      (CSE(1,nejc,nnur) + CSE(nspec+1,nejc,nnur))
-
-
                     totspec = totspec*DE 
 
-
-                      WRITE (12,*) ' '    
-
-
+                    WRITE (12,*) ' '    
                     WRITE (12,
-
-
      &                '(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &                totspec      
+                    WRITE (12,*) ' '    
 
-
-                      WRITE (12,*) ' '    
-
-
-c                   ENDIF
                  ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
  1530          ENDDO   ! over ejectiles
               IF (nnuc.NE.1  .AND. RECoil.GT.0)
      &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
-
-
-
-
-
-
 C
 C--------Prompt fission spectra of neutrons and gammas
 C        for a given decaying nucleus
@@ -3277,37 +3134,17 @@ C--------Exact endpoint
          WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec,0,0))
          WRITE (12,'(F9.4,E15.5)') EMAx(1), 0.d0
 
-
          totspec = 0.d0
-
-
          DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,0,0)
-
-
          ENDDO
-
-
          totspec = totspec - 0.5d0*(CSE(1,0,0) + CSE(nspec-1,0,0))
-
-
          totspec = totspec*DE 
 
-
          WRITE (12,*) ' '    
-
-
          WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
          WRITE (12,*) ' '    
-
-
 
 C--------Print inclusive spectra of ejectiles
 C--------neutrons
@@ -3356,37 +3193,19 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,1,0))
             WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(1,1)), 0.d0
 
-
           ENDIF
+
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,1,0)
-
-
           ENDDO
-
-
           totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,1,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
-
+          WRITE (12,*) ' '    
 
 C---------------Inclusive DDX spectrum (neutrons)
           IF(LHMs.NE.0) THEN
@@ -3456,35 +3275,19 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,2,0))
             WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(2,1)), 0.d0
           ENDIF
+
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,2,0)
-
-
           ENDDO
 
-
           totspec = totspec - 0.5d0*(CSE(1,2,0) + CSE(nspec-1,2,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
-
+          WRITE (12,*) ' '    
 
 C---------------Inclusive DDX spectrum (protons)
           IF(LHMs.NE.0) THEN
@@ -3518,47 +3321,26 @@ C--------alphas
           WRITE (12,'(''   Energy    mb/MeV'')')
           WRITE (12,*) ' '
 
-
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,3,0))
-
-
           ENDDO
 C---------Exact endpoint
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1),
      &                              max(0.d0,CSE(nspec,3,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(3,1), 0.d0
 
-
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,3,0)
-
-
           ENDDO
-
-
           totspec = totspec - 0.5d0*(CSE(1,3,0) + CSE(nspec-1,3,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
+          WRITE (12,*) ' '    
 
 
          ENDIF
@@ -3580,34 +3362,18 @@ C---------Exact endpoint
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(4,1),
      &                              max(0.d0,CSE(nspec,4,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(4,1), 0.d0
+
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,4,0)
-
-
           ENDDO
-
-
           totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,4,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
+          WRITE (12,*) ' '    
 
 
          ENDIF
@@ -3630,37 +3396,18 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,5,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(5,1), 0.d0
 
-
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,5,0)
-
-
           ENDDO
-
-
           totspec = totspec - 0.5d0*(CSE(1,5,0) + CSE(nspec-1,5,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
+	  
          ENDIF
 
 C--------helium-3
@@ -3681,34 +3428,16 @@ C---------Exact endpoint
      &                              max(0.d0,CSE(nspec,6,0))
           WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(6,1), 0.d0
           totspec = 0.d0
-
-
           DO ie = 1, nspec - 1
-
-
            totspec  = totspec  + CSE(ie,6,0)
-
-
           ENDDO
-
-
           totspec = totspec - 0.5d0*(CSE(1,6,0) + CSE(nspec-1,6,0))
-
-
           totspec = totspec*DE 
 
-
-            WRITE (12,*) ' '    
-
-
+          WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-            WRITE (12,*) ' '    
-
+          WRITE (12,*) ' '    
 
          ENDIF
 
@@ -3733,44 +3462,24 @@ C------------exact endpoint
      &                                 max(0.d0,CSE(nspec,NDEJC,0))
              WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(NDEJC,1), 0.d0
 
-
              totspec = 0.d0
-
-
              DO ie = 1, nspec - 1
-
-
                totspec  = totspec  + CSE(ie,NDEJC,0)
-
-
              ENDDO
-
-
              totspec = totspec - 
-
-
      &                 0.5d0*(CSE(1,NDEJC,0) + CSE(nspec-1,NDEJC,0))
-
-
              totspec = totspec*DE 
 
-
              WRITE (12,*) ' '    
-
-
              WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-
-
      &          totspec      
-
-
-               WRITE (12,*) ' '    
-
+             WRITE (12,*) ' '    
 
            ENDIF
          ENDIF
         WRITE (12,*) ' '
        ENDIF
+
 C  Summary of exclusive emission cross sections
       jnmx = 0
       jzmx = 0
@@ -3781,10 +3490,11 @@ C  Summary of exclusive emission cross sections
           IF(xcross(NDEJC+2,jz,jn).GT.0.01d0) THEN
             jnmx = MAX(jnmx,jn)
             jzmx = MAX(jzmx,jz)
-           ENDIF
-         ENDDO
-       ENDDO
-      IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
+          ENDIF
+        ENDDO
+      ENDDO
+C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
+      IF(jnmx.gt.1 .AND. jzmx.gt.1) THEN
         iz = INT(Z(1))
         ia = INT(A(1))-iz
         WRITE (12,*) ' '
@@ -3793,7 +3503,7 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(0,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Neutron emission cross sections (mb) ZAP=    1'
@@ -3801,7 +3511,7 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(1,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Proton emission cross sections (mb) ZAP= 1001'
@@ -3809,7 +3519,7 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(2,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Alpha emission cross sections (mb) ZAP= 2004'
@@ -3817,7 +3527,7 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(3,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Deuteron emission cross sections (mb) ZAP= 1002'
@@ -3825,7 +3535,7 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(4,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Triton emission cross sections (mb) ZAP= 1003'
@@ -3833,16 +3543,19 @@ C  Summary of exclusive emission cross sections
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(5,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
+
         WRITE (12,*) ' '
         WRITE (12,*) ' '
         WRITE (12,*) ' Helium-3 emission cross sections (mb) ZAP= 2003'
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
+
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(6,jz,jn), jn = 0,jnmx)
-         ENDDO
+        ENDDO
         WRITE (12,*) ' '
+
         IF(NDEJC.EQ.7) THEN
           WRITE (12,*) ' '
           WRITE (12,
@@ -3878,23 +3591,13 @@ C  Summary of exclusive emission cross sections
         ENDDO
         WRITE (12,*) ' '
         WRITE (12,*) ' '
+
         totsum=0.d0
-
-
         DO jz = 0, jzmx 
-
-
           DO jn = 0, jnmx
-
-
             totsum = totsum + xcross(NDEJC+2,jz,jn)
-
-
           ENDDO
-
-
         ENDDO
-
 
         WRITE (12,*) ' Total production cross sections (mb) :', totsum
         WRITE (12,*) ' '
