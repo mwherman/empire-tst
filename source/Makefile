@@ -2,8 +2,8 @@
 FC     =  gfortran
 CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -pg -std=legacy 
-#FFLAGS = -std=legacy
+#FFLAGS = -O3 -pg -std=legacy 
+FFLAGS = -O3 -std=legacy
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check 
 
@@ -75,7 +75,8 @@ empire:   $(OBJF) ecis
 	$(FC) -o $@ $(OBJF) $(OBJE)
 
 ecis:	
-	$(FC) -O0 -pg -std=legacy -c subecis06m.f
+	$(FC) -O3 -std=legacy -c subecis06m.f
+#	$(FC) -O0 -pg -std=legacy -c subecis06m.f
 
 #for profiling (also turn on -pg option for each -o file above):
 #empire:   $(OBJF) $(OBJE)
