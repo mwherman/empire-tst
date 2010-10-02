@@ -66,10 +66,21 @@ C
          ENDIF
          IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99025)
-99025 FORMAT (1X,///,1X,54('*'),1X,'alpha  spectrum  ',54('*'),//)
+99025 FORMAT (1X,///,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
          ENDIF
-         IF ( AEJc(Nejc).GT.1.0D0 .AND.
-     &    .NOT.(AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) ) THEN
+         IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
+           WRITE (8,99025)
+99026 FORMAT (1X,///,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
+         ENDIF
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
+           WRITE (8,99025)
+99027 FORMAT (1X,///,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
+         ENDIF
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
+           WRITE (8,99025)
+99028 FORMAT (1X,///,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
+         ENDIF
+         IF ( AEJc(Nejc).GT.4.0D0) THEN
           WRITE (8,99010) ia, SYMbe(Nejc)
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
@@ -190,11 +201,11 @@ C
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
         write(caz,'(I2.2,A1,A1,I3.3,A1,A1,A4)')
-     &      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
+     &   int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
      &      '_',part(Nejc),'.zvd'
       else
         write(caz,'(I2.2,A2,I3.3,A1,A1,A4)')
-     &      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
+     &   int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
      &      '_',part(Nejc),'.zvd'
       endif
 
