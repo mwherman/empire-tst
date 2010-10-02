@@ -161,7 +161,7 @@ def runE(proj):
             tfile.close()
         else:
             if not isEmpty('TARGET_COLL.DAT'):
-                cp('TARGET_COLL.DAT',proj+'-lev.col')
+                mv('TARGET_COLL.DAT',proj+'-lev.col')
     
     # beware, these commands make assumptions about the system:
     if not isEmpty('CUMULPLOT.PS'):
@@ -221,7 +221,7 @@ def runE(proj):
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
-    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT TARGET_COLL_RIPL.DAT')
+    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl') )
     rm('TARGET.LEV')
     rm('EXFOR.datp')
