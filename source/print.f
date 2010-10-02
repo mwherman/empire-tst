@@ -182,7 +182,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec
       INTEGER i, kmax
-      CHARACTER*13 caz 
+      CHARACTER*16 caz 
       CHARACTER*31 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
@@ -200,13 +200,13 @@ C
       kmax = MIN0(kmax,NDECSE)
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-        write(caz,'(I2.2,A1,A1,I3.3,A1,A1,A4)')
-     &   int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc)),
-     &      '_',part(Nejc),'.zvd'
+        write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
+     &   'sp_',int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',
+     &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
       else
-        write(caz,'(I2.2,A2,I3.3,A1,A1,A4)')
-     &   int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc)),
-     &      '_',part(Nejc),'.zvd'
+        write(caz,'(A3,I2.2,A2,I3.3,A1,A1,A4)')
+     &   'sp_',int(Z(Nnuc)), SYMb(Nnuc), 
+     &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
       endif
 
       OPEN(36,file=caz,status='unknown')
