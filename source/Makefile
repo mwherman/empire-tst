@@ -2,8 +2,9 @@
 FC     =  gfortran
 CC     =  gcc
 #----flags for production compilation with gfortran
-#FFLAGS = -O3 -pg -std=legacy 
 FFLAGS = -O3 -std=legacy
+# -pg shoudl be added for profiling
+#FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check 
 
@@ -66,16 +67,20 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
-            systematics.o
+            systematics.o     subecis06m.o
 
 # ECIS must not be optimized:
-OBJE =      subecis06m.o
+#OBJE =      subecis06m.o
 
-empire:   $(OBJF) ecis
-	$(FC) -o $@ $(OBJF) $(OBJE)
+empire:   $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
-ecis:	
-	$(FC) -O3 -std=legacy -c subecis06m.f
+#empire:   $(OBJF) ecis
+#	$(FC) -o $@ $(OBJF) $(OBJE)
+
+#ecis:	
+#	$(FC) -O3 -std=legacy -c subecis06m.f
+#        -pg should be included for profiling
 #	$(FC) -O0 -pg -std=legacy -c subecis06m.f
 
 #for profiling (also turn on -pg option for each -o file above):
