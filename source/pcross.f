@@ -37,6 +37,9 @@ C
 
       DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
       COMMON /PEXS/ cross, spec
+
+      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
+      COMMON /PFACT / FA, LFA
 C
 C Dummy arguments
 C
@@ -65,7 +68,7 @@ C
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
 C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls 	
-      SAVE r, /KALB/, callpcross
+      SAVE r, /KALB/, callpcross, /PFACT/
 
 C
 C
@@ -89,7 +92,7 @@ C
 C     Parametrization of the well depth for p-h LD calculations
 C     According to TALYS manual,v.0.64 (2004) A.Koning et al,
 C
-      vvf = 38.d0
+      vvf   = 38.d0
       IF(ap.eq.1 .and. zp.eq.1) vsurf = 22.d0 +
      &   16.d0*EINl**4/(EINL**4+(450.d0/FLOAT(ac)**0.333333d0)**4)
       IF(ap.eq.1 .and. zp.eq.0) vsurf = 12.d0 +
@@ -328,11 +331,14 @@ C--------------PREEQ CLUSTER EMISSION
                   ENDDO
 C--------------PREEQ GAMMA EMISSION
                ELSEIF (nejc.EQ.0) THEN
-                  hlp1 = DENSW(gc,pc,p,hh,er)*DBLE(p + hh)
-     &                   /(DBLE(p + hh) + eee*gc)
-                  IF (hh.GE.1) hlp1 = hlp1 +
+	          hlp1=0.d0
+		  if(ap.le.1) then
+                    wda = DENSW(gc,pc,p,hh,er)
+                    hlp1 = wda*DBLE(p + hh)/(DBLE(p + hh) + eee*gc)
+                    IF (hh.GE.1) hlp1 = hlp1 +
      &                                gc*eee*DENSW(gc,pc,p - 1,hh - 1,
      &                                er)/(DBLE(p + hh - 2) + eee*gc)
+                  endif
                ENDIF
                IF (hlp1.EQ.0.) GOTO 20
                ff3 = hlp1*eee*sg
@@ -343,6 +349,8 @@ C--------------PREEQ GAMMA EMISSION
                icon3 = ienerg
                eint(icon) = eee
                fint(icon) = ff
+C              write(8,'(1x,3i3,1x,7(d12.6,1x))')
+C    &             nejc,h1,ienerg,hlp1,sg,eee,wda,ff1,ff2,ff3
    20       ENDDO
 C-----------END OF EMISSION ENERGY LOOP
 C
@@ -1158,10 +1166,13 @@ C
       DO j = 0,H
         fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
         u = G*(E - D - j*VV) - a
-        IF (u.LE.0.) GOTO 100
+C       Changed Sept. 2010	
+        IF (u.LE.0.) cycle
+C       IF (u.LE.0.) GOTO 100
         sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
-       ENDDO
-100   DENSW = sum
+      ENDDO
+100   if(sum.lt.0.d0) return
+      DENSW = sum
       RETURN
       END
 
