@@ -69,15 +69,15 @@ C
 99025 FORMAT (1X,///,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
-           WRITE (8,99025)
+           WRITE (8,99026)
 99026 FORMAT (1X,///,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
-           WRITE (8,99025)
+           WRITE (8,99027)
 99027 FORMAT (1X,///,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
-           WRITE (8,99025)
+           WRITE (8,99028)
 99028 FORMAT (1X,///,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
          ENDIF
          IF ( AEJc(Nejc).GT.4.0D0) THEN
