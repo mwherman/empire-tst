@@ -59,7 +59,7 @@ C
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
 99015 FORMAT (1X,///,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
-          ENDIF
+         ENDIF
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99020)
 99020 FORMAT (1X,///,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
