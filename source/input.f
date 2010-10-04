@@ -752,9 +752,6 @@ C                    From n,n2p   to   n,he3
                      ENDF(nnuc) = 1
                   ENDIF
 
-
-
-
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
 C                    From n,2n2p   to   n,a   
                      iend = iend - 4
@@ -1001,10 +998,6 @@ C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 
-
-
-
-
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 0
          IF(NENdf.GT.0) THEN
@@ -1019,66 +1012,16 @@ C-----------We fix below target ENDf flag since it escapes normal setting
             DO in = 0, nemn
               mulem = iac + ia + ip + in + id + it + ih
               if(mulem.eq.0) cycle
-
-
-
-
-
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-
-
-
-
-     &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4) 
-
-
-
-
+     &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
 
-
-
-
-
-
-
-
-
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
-
-
-
-
-
-
-
-
-
-              ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2) 
-
-
-
-
+              ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-
-
-
-
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
 
-
-
-
-
-
-
-
-
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
-
-
-
-
 
 C             residues must be heavier than alpha
               if(atmp.le.4 . or. ztmp.le.2) cycle
@@ -2506,7 +2449,8 @@ C
       INTEGER IFIX
       REAL SNGL
 
-      IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
+C     IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
+      IF (FIRst_ein) THEN
         WRITE (12,*) ' '
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
      &     'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
@@ -2746,32 +2690,33 @@ C        DO i = 1, NNUct
          ENDDO
       ENDIF
 
+      IF (FIRst_ein) THEN
       IF (KTRompcc.GT.0 .AND. DIRect.GT.0) THEN
         WRITE (8,*)
         WRITE (8,*) ' Inelastic o. m. parameters: RIPL catalog number ',
      &            KTRompcc
-        WRITE (8,*) ' Neutron   o. m. parameters: RIPL catalog number ',
+      ENDIF 
+      WRITE (8,*) ' Neutron   o. m. parameters: RIPL catalog number ',
      &            KTRlom(1,1)
-        WRITE (8,*) ' Proton    o. m. parameters: RIPL catalog number ',
+      WRITE (8,*) ' Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-        if(ABS(KTRlom(3,1)).ne.9602) then
+      if(ABS(KTRlom(3,1)).ne.9602) then
         WRITE (8,*) ' Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
-        else
+      else
         WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
-        endif
-        WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
+      endif
+      WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
      &            KTRlom(4,1)
-        WRITE (8,*) ' Triton    o. m. parameters: RIPL catalog number ',
+      WRITE (8,*) ' Triton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(5,1)
-        WRITE (8,*) ' He-3      o. m. parameters: RIPL catalog number ',
+      WRITE (8,*) ' He-3      o. m. parameters: RIPL catalog number ',
      &            KTRlom(6,1)
-        IF (NEMc.GT.0) WRITE (8,*)
+      IF (NEMc.GT.0) WRITE (8,*)
      &            ' Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)
-      ENDIF
       WRITE (8,*)
-
+      ENDIF  
       WRITE (12,*) ' '
       WRITE (12,*) ' '
 C-----WRITE heading on FILE12
