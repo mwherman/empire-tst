@@ -2691,31 +2691,30 @@ C        DO i = 1, NNUct
       ENDIF
 
       IF (FIRst_ein) THEN
-      IF (KTRompcc.GT.0 .AND. DIRect.GT.0) THEN
         WRITE (8,*)
-        WRITE (8,*) ' Inelastic o. m. parameters: RIPL catalog number ',
+        IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (8,*)
+     &   ' Inelastic o. m. parameters: RIPL catalog number ',
      &            KTRompcc
-      ENDIF 
-      WRITE (8,*) ' Neutron   o. m. parameters: RIPL catalog number ',
+        WRITE (8,*) ' Neutron   o. m. parameters: RIPL catalog number ',
      &            KTRlom(1,1)
-      WRITE (8,*) ' Proton    o. m. parameters: RIPL catalog number ',
+        WRITE (8,*) ' Proton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(2,1)
-      if(ABS(KTRlom(3,1)).ne.9602) then
-        WRITE (8,*) ' Alpha     o. m. parameters: RIPL catalog number ',
+        if(ABS(KTRlom(3,1)).ne.9602) then
+         WRITE (8,*)' Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
-      else
-        WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
-      endif
-      WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
+        else
+         WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
+        endif
+        WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
      &            KTRlom(4,1)
-      WRITE (8,*) ' Triton    o. m. parameters: RIPL catalog number ',
+        WRITE (8,*) ' Triton    o. m. parameters: RIPL catalog number ',
      &            KTRlom(5,1)
-      WRITE (8,*) ' He-3      o. m. parameters: RIPL catalog number ',
+        WRITE (8,*) ' He-3      o. m. parameters: RIPL catalog number ',
      &            KTRlom(6,1)
-      IF (NEMc.GT.0) WRITE (8,*)
+        IF (NEMc.GT.0) WRITE (8,*)
      &            ' Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)
-      WRITE (8,*)
+        WRITE (8,*)
       ENDIF  
       WRITE (12,*) ' '
       WRITE (12,*) ' '
@@ -3035,12 +3034,12 @@ C     GOTO 10
    11 CONTINUE
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
-      WRITE (8,*)'                        ______ ______________________'
-      WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |  E M P I R E  -  3 beta 3  |'
-      WRITE (8,*)'                       |                            |'
-      WRITE (8,*)'                       |    ARCOLE, Aug. 2009       |'
-      WRITE (8,*)'                       |____________________________|'
+      WRITE (8,*)'                        __________________________'
+      WRITE (8,*)'                       |                          |'
+      WRITE (8,*)'                       |    E M P I R E  -  3     |'
+      WRITE (8,*)'                       |                          |'
+      WRITE (8,*)'                       |    ARCOLE, Sept. 2010    |'
+      WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
