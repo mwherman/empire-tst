@@ -74,6 +74,7 @@ C-----
          IF (popt.NE.0.0D+0) THEN
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
+	    CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
             IF (ENDf(Nnuc).EQ.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -131,6 +132,10 @@ C
             poph = pop1*(xcse - FLOAT(icsl))/DE
             CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
+C
+            CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
+            CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
+	    
             IF (popll.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
