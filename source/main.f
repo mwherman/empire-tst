@@ -290,6 +290,10 @@ C--------------Add direct transition to the spectrum
                poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
+
+               CSEt(icsl,nejcec) = CSEt(icsl,nejcec) + popl
+               CSEt(icsh,nejcec) = CSEt(icsh,nejcec) + poph
+
                IF (ICAlangs.GT.0) THEN
                 IF (i.LE.ICAlangs) THEN
                   READ (45,*,END = 1400)     ! Skipping level identifier line
@@ -861,33 +865,15 @@ C----------Add PE contribution to energy spectra (angle int.)
            ftmp = 0.d0
            DO ie = 1, NDEcse
               CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
+              CSEt(ie,nejc ) = CSEt(ie,nejc ) + CSEmsd(ie,nejc)	      
               ftmp = ftmp + DE*CSEmsd(ie,nejc)
            ENDDO
 C----------Add PE contribution to the total NEJC emission
            CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
          ENDDO
-C        Skipping all emitted but neutrons and protons
-C        Secondary emission was not tested for proton induced reactions
-         nnur = NREs(nejcec)
-         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.0
-     &                         .and. nnur.GE.0) THEN
-C----------Second chance preequilibrium emission after MSD emission
-C----------Neutron emission
-           izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
-           CALL WHERE(izares,nnurn,iloc)
-!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
-           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,1)
-         ENDIF
-         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.1
-     &                         .and. nnur.GE.0) THEN
-C----------Second chance preequilibrium emission after MSD emission
-C----------Proton emission
-           izares = INT(1000.0*(Z(nnur)-1) + A(nnur) - 1)
-           CALL WHERE(izares,nnurp,iloc)
-!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurp,2,0)
-           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,2)
-         ENDIF
-C--------Second chance preequilibrium *** done ***
+C        
+C        Secondary PE emission is neglected (except in HMS)
+C
       ENDIF
 
 C***************** OLD *************************************
@@ -1330,9 +1316,7 @@ C--------
             IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
             IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
             IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
-            IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0) 
-
-
+            IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0)
      &        CALL AUERST(1,NDEjc)
          ENDIF
 C--------
@@ -1347,12 +1331,13 @@ C--------Turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
 C--------in the first CN
          kemin = 1
          IF (nnuc.EQ.1) THEN
+C--------Turn  off (kemin=NEX(NNUC)) if gamma cascade is not requested
             IF (GCAsc.EQ.0.0D0) kemin = NEX(nnuc)
             IF (GCAsc.EQ. - 1.0D0 .AND. EXCn.GT.20.0D0)
      &          kemin = NEX(nnuc)
          ENDIF
 C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
-C        IF (FITomp.NE.0) kemin = NEX(nnuc)
+         IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
 C--------Account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
@@ -1726,12 +1711,13 @@ C--------Integrating exclusive population spectra (ENDF)
          dcs = 0
          tcs = 0
          hcs = 0
-         IF ( ENDf(nnuc).EQ.1 .AND. INExc(nnuc).GE.0)     THEN
-           DO ispec = 1, min(NEX(1) + 10,ndecsed)
+C        IF ( ENDf(nnuc).EQ.1 .AND. INExc(nnuc).GE.0)     THEN
+C        Write(12,*) '******** POPULATION' 
+         DO ispec = 1, min(NEX(1) + 10,ndecsed)
             gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
             gcs = gcs + CSE(ispec,0,nnuc)*DE
-c           Write(12,*) nnuc,ispec,'g: ',POPcse(0,0,ispec,INExc(nnuc)),
-c     &                                  CSE(ispec,0,nnuc) 
+C           Write(12,*) nnuc,ispec,'g: ',POPcse(0,0,ispec,INExc(nnuc)),
+C     &                                  CSE(ispec,0,nnuc) 
             xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
             ncs = ncs + CSE(ispec,1,nnuc)*DE
 c          Write(12,*) nnuc,ispec,'n: ',POPcse(0,1,ispec,INExc(nnuc)),
@@ -1765,7 +1751,7 @@ c     &                                  CSE(ispec,6,nnuc)
             emedh = emedh+POPcse(0,6,ispec,INExc(nnuc))*DE*(ispec-1)*DE
             IF (NDEJC.EQ.7) THEN
                ctotsp = ctotsp + POPcse(0,NDEJC,ispec,INExc(nnuc))*DE
-               emedc = emedc + POPcse(0,NDEJC,ispec,INExc(nnuc))
+               emedc  = emedc  + POPcse(0,NDEJC,ispec,INExc(nnuc))
      &                    *DE*(ispec - 1)*DE
             ENDIF
            ENDDO
@@ -1790,7 +1776,7 @@ c     &                                 ,tcs
            POPcs(6,INExc(nnuc)) = htotsp
 c           Write(12,*) nnuc, 'h: ',POPcs(6,INExc(nnuc)),CSEmis(6,nnuc) 
 c     &                                 ,hcs 
-           IF (NDEJC.EQ.7) POPcs(NDEJC,INExc(nnuc)) = htotsp
+           IF (NDEJC.EQ.7) POPcs(NDEJC,INExc(nnuc)) = ctotsp
            IF (gtotsp.NE.0) emedg = emedg/gtotsp
            IF (xtotsp.NE.0) emedn = emedn/xtotsp
            IF (ptotsp.NE.0) emedp = emedp/ptotsp
@@ -1806,7 +1792,7 @@ C--------------(merely for checking purpose)
                   nejc = 1
                   WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') xtotsp
-                  xtotsp = CSDirlev(1,nejc)
+                  xtotsp = xtotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
@@ -1814,7 +1800,7 @@ c                 ENDDO
                   nejc = 2
                   WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') ptotsp
-                  ptotsp = CSDirlev(1,nejc)
+                  ptotsp = ptotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
@@ -1822,14 +1808,14 @@ c                 ENDDO
                   nejc = 3
                   WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
      &                '' mb  '')') atotsp
-                  atotsp = CSDirlev(1,nejc)
+                  atotsp = atotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
                ENDIF
                WRITE (8,*) ' '
-           ENDIF
          ENDIF
+C        ENDIF
          IF (FISmod(nnuc).GT.0) THEN
            CSFis  = 0.d0 ! RCN Jan 2006
            DO m = 1, INT(FISmod(nnuc)) + 1
@@ -1838,28 +1824,13 @@ c                 ENDDO
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
            IF (IOUt.GT.0) THEN
-
-
              DO m = 1, INT(FISmod(nnuc)) + 1
-
-
               WFIsm(m) = 0.d0
-
-
               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-
-
               WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
-
-
              ENDDO
-
-
              WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
-
-
            ENDIF
-
 
            CSPfis(nnuc) = CSFis
            WRITE (8,
@@ -1907,14 +1878,6 @@ C----------CN contribution to elastic ddx
            WRITE (8,*)
          ENDIF
 
-
-
-
-
-
-
-
-
          checkXS = checkXS + CSPrd(nnuc)
          WRITE (12,*) ' '
          WRITE (12,
@@ -1957,15 +1920,10 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &          CSEmis(0,nnuc)
 
            if(nnuc.eq.1) then
-
            WRITE (8,'(2x,
-
      &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
-
            WRITE (12,'(2x,
-
      &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
-
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
@@ -1991,7 +1949,7 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (IOUt.GT.0 .and. ENDf(nnuc).EQ.1 .and. FIRst_ein)
+             IF (ENDf(nnuc).EQ.1 .and. FIRst_ein)
      &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc)
              IF (IOUt.GT.0) WRITE (8,
@@ -3093,12 +3051,21 @@ C     ENDDO
          IF (csemax.GT.0.D0) THEN
             IF (.NOT.EXClusiv) THEN
               WRITE (8,'(//,11X,''**************************'')')
-              WRITE (8,'(   11x,'' Inclusive spectra (C.M.)'')')
-              WRITE (8,'(   11x,''**************************''/)')
+              WRITE (8,'(11x,'' Non-exclusive spectra (C.M.)'')')
+              WRITE (8,'(11x,''**************************''/)')
               DO nejc = 0, NEJcm
                 CALL AUERST(0,nejc)
               ENDDO
             ENDIF
+	    IF (FIRst_ein) then
+              WRITE (8,'(//,11X,''********************************'')')
+              WRITE (8,'(11x,'' Total inclusive spectra (C.M.)'')')
+              WRITE (8,'(11x,''********************************''/)')
+              DO nejc = 0, NEJcm
+                CALL Print_Total_Inclusive(nejc)	
+                CALL PLOT_INCLUSIVE_EMIS_SPECTRA(nejc)
+              ENDDO   
+	    ENDIF  
          ENDIF
       ENDIF
 C-----
@@ -3374,7 +3341,6 @@ C---------Exact endpoint
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec      
           WRITE (12,*) ' '    
-
 
          ENDIF
 
