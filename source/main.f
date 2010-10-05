@@ -1,6 +1,6 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2010-01-04 17:35:30 $
-Ccc   * $Id: main.f,v 1.211 2010-01-04 17:35:30 pigni Exp $
+Ccc   * $Rev: 1861 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 07:40:42 +0200 (Di, 05 Okt 2010) $
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
