@@ -40,11 +40,11 @@ C
       CSEfis = 0.d0
       CSMsc  = 0.d0
 
-
       ENPG   = 0.d0
       CSPGE  = 0.d0
 
       CSE    = 0.d0
+      CSEt   = 0.d0
       CSEmsd = 0.d0
       CSEhms = 0.d0
       CSEhmslab = 0.d0
