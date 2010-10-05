@@ -1,6 +1,7 @@
-Ccc
-Ccc   * $Date: 2010-01-04 17:43:10 $
-Ccc   * $Id: input.f,v 1.313 2010-01-04 17:43:10 pigni Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C
       SUBROUTINE INPUT
 Ccc

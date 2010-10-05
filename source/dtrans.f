@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-01-19 00:00:32 $
-Ccc   * $Id: dtrans.f,v 1.10 2009-01-19 00:00:32 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 
       SUBROUTINE DTRANS(iemin,iemax)
 C
@@ -14,7 +15,7 @@ C
 C
       INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
       DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
-	COMMON /PEXS/ cross, spec
+      COMMON /PEXS/ cross, spec
 C
 C     Local variables
 C
@@ -40,11 +41,11 @@ C-----gdel is the single-particle density for neutrons
         write(8,*) 
         write(8,*) ' EMISSION SPECTRA : DIRECT reactions'
         write(8,*) 
-	ENDIF
+      ENDIF
       do ip=2,irea,2
          IF(IOUt.GE.3 .and. ip.eq.2) write(8,*)'(d,p) break-up reaction'
          IF(IOUt.GE.3 .and. ip.eq.4) write(8,*)'(d,t) pick-up  reaction'
-	   ab = jno(ip)+jpo(ip)
+         ab = jno(ip)+jpo(ip)
          ares  = A(1) - ab
          zres  = Z(1) - jpo(ip)
 C        residual nuclei must be heavier than alpha

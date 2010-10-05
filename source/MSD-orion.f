@@ -1,8 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-03-09 23:49:28 $
-Ccc   * $Id: MSD-orion.f,v 1.24 2009-03-09 23:49:28 Capote Exp $
-C
-C
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)

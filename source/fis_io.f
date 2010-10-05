@@ -1,6 +1,7 @@
-Ccc   * $Author: mattoon $
-Ccc   * $Date: 2009-08-03 14:50:19 $
-Ccc   * $Id: fis_io.f,v 1.12 2009-08-03 14:50:19 mattoon Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission

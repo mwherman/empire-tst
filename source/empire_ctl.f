@@ -1,6 +1,7 @@
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2010-01-04 17:43:10 $
-Ccc   * $Id: empire_ctl.f,v 1.35 2010-01-04 17:43:10 pigni Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
       PROGRAM EMPIRE_CTL
 C
 C--- Controls execution of EMPIRE: (i) normal calculations, (ii) omp fitting,

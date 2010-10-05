@@ -1,3 +1,7 @@
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
       SUBROUTINE KUNIEDA(izat)
       IMPLICIT REAL*8(A-H,O-Z)
       common /omp/VR0,VR1,VR2,VR3,VRLA,ALAVR,

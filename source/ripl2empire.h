@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $ 
-Ccc   * $Date: 2008-09-13 16:17:05 $
-Ccc   * $Id: ripl2empire.h,v 1.5 2008-09-13 16:17:05 Capote Exp $
+Ccc   * $Rev: 1862 $ 
+Ccc   * $Author: mherman $ 
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Id$
             
 
       INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7

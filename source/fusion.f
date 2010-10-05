@@ -1,6 +1,7 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-15 19:07:10 $
-Ccc   * $Id: fusion.f,v 1.77 2009-05-15 19:07:10 herman Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C
       SUBROUTINE MARENG(Npro,Ntrg)
 Ccc

@@ -1,6 +1,7 @@
-Ccc   * $Author: herman $
-Ccc   * $Date: 2009-05-15 19:09:34 $
-Ccc   * $Id: ph-lev-dens.f,v 1.13 2009-05-15 19:09:34 herman Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C

@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-06-15 21:52:21 $
-Ccc   * $Id: fitbarrier.f,v 1.7 2009-06-15 21:52:21 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'

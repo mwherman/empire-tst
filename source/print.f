@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-04-02 09:19:06 $
-Ccc   * $Id: print.f,v 1.22 2009-04-02 09:19:06 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C
       SUBROUTINE Print_Total_Inclusive(Nejc)
 Ccc

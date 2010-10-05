@@ -1,4 +1,4 @@
-c CVS Version Management $Revision: 1.8 $
+c CVS Version Management $Revision: 1862 $
 c $Id: ddhms.cmb,v 1.8 2007/09/03 14:20:29 Capote Exp $
 c 
 	integer ndim_ebins

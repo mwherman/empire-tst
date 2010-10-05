@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-21 09:13:02 $
-Ccc   * $Id: subecis06m.f,v 1.3 2009-08-21 09:13:02 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
 C     20. Aug. 2008

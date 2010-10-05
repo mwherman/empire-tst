@@ -1,6 +1,7 @@
-Ccc
-Ccc   * $Date: 2009-06-29 18:35:27 $
-Ccc   * $Id: pfns.f,v 1.6 2009-06-29 18:35:27 herman Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
 C    Following Malinovskii 

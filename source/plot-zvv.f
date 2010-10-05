@@ -1,3 +1,6 @@
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'

@@ -1,6 +1,7 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-08-02 23:58:34 $
-Ccc   * $Id: pipe.f,v 1.8 2009-08-02 23:58:34 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+
 C/*
 C/* Note, RCN, July 2009
 C/* This routine is only used by WINDOWS implementation

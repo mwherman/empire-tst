@@ -1,3 +1,7 @@
+#$Rev: 1862 $
+#$Author: mherman $
+#$Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+#
 #----GNU gfortran FORTRAN compiler
 FC     =  gfortran
 CC     =  gcc

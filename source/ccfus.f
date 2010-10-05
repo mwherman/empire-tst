@@ -1,5 +1,6 @@
-Ccc   * $Date: 2008-10-14 21:32:19 $
-Ccc   * $Id: ccfus.f,v 1.12 2008-10-14 21:32:19 Capote Exp $
+Ccc   * $Rev: 1862 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
 C
       SUBROUTINE CCFUS(Stl)
 C
