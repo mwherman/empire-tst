@@ -81,7 +81,7 @@ C     INITIALIZATION
 C     Projectile mass and charge number
       ap = AEJc(NPRoject)
       if(NPRoject.eq.0) ap=0
-      zp = ZEJc(NPRoject)
+      zp = ZEJc(NPRoject)     
       cme = MFPp/1.4D21
 C-----Excitation energy (MeV)
       ec = EXCn
@@ -280,12 +280,13 @@ C        EMPIRE tuning factor is used (important to describe capture) RCN, june 
 C
 C--------PARTICLE-HOLE LOOP
 C
+
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
 C           Found bug that decreased PE contribution, thanks to A Voinov 
 C    	       Oct 1, 2010 MH & RC, next line was commented to correct the bug
-C           IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
+            IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
 C
 C           Defining well depth for p-h LD calculations
@@ -297,7 +298,7 @@ C           if (hh.eq.1) VV = vsurf
             if (hh.le.1) VV = vsurf
 C
             ff2 = DENSW(gc,pc,p,hh,ec)
-            IF (ff2.EQ.0.) GOTO 50
+            IF (ff2.EQ.0.) GOTO 50    
 C
 C-----------PRIMARY ENERGY CYCLE
 C
@@ -331,14 +332,11 @@ C--------------PREEQ CLUSTER EMISSION
                   ENDDO
 C--------------PREEQ GAMMA EMISSION
                ELSEIF (nejc.EQ.0) THEN
-	          hlp1=0.d0
-		  if(ap.le.1) then
-                    wda = DENSW(gc,pc,p,hh,er)
-                    hlp1 = wda*DBLE(p + hh)/(DBLE(p + hh) + eee*gc)
-                    IF (hh.GE.1) hlp1 = hlp1 +
-     &                                gc*eee*DENSW(gc,pc,p - 1,hh - 1,
-     &                                er)/(DBLE(p + hh - 2) + eee*gc)
-                  endif
+                  wda = DENSW(gc,pc,p,hh,er)
+                  hlp1 = wda*DBLE(p + hh)/(DBLE(p + hh) + eee*gc)
+		  if(ap.le.1 .and. hh.GE.1) hlp1 = hlp1 +
+     &                     gc*eee*DENSW(gc,pc,p - 1,hh - 1,er)/
+     &                            (DBLE(p + hh - 2) + eee*gc)
                ENDIF
                IF (hlp1.EQ.0.) GOTO 20
                ff3 = hlp1*eee*sg
@@ -454,7 +452,7 @@ C         WRITE(8, *)'==========================='
         WRITE (8,99014) Xsinl, totemis, fr
       ENDIF
 C
-      write(8,*) 'Middle of PCROSS :',totemis,xsinl
+C     write(8,*) 'Middle of PCROSS :',totemis,xsinl
 C
 99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
      &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
@@ -524,10 +522,11 @@ C           fmsd set to 0.d0 means isotropic distribution
          ENDDO
        ENDDO
 C
-       write(8,*) 'End of PCROSS :',totemis,Xsinl
+C      write(8,*) 'End of PCROSS :',totemis,Xsinl
 C
 cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr
+      write(8,*) 
       WRITE (8,99020)
 99020 FORMAT (/' ',57('-')/)
       END
@@ -917,7 +916,7 @@ C--------NEVER COME BACK ASUMPTION
 C-----------------------------------------
          ls(h1) = Cme*ln(h1) + LP(h1) + LM(h1)
       ENDDO
-      IF (IOUt.GE.3 .AND. NEJcm.LE.6) WRITE (8,99005)
+      IF (IOUt.GE.3 .AND. NEJcm.LE.7) WRITE (8,99005)
 99005 FORMAT (/2X,'N',5X,'T r a n s i t i o n   r a t e s   ',
      &        '        E  m  i  s  s  i  o  n     r  a  t  e  s',//,5X,
      &'   plus     minus     TOTAL              TOTAL     gammas   neutr
@@ -1155,7 +1154,7 @@ C
       REAL*8 a, fac, u, sum
       DOUBLE PRECISION DEXP, DLOG
       INTEGER*4 n, j
-      DENSW = 0.D0
+      DENSW= 0.D0
       n = P + H
       IF (n.LE.0) RETURN
 C
@@ -1168,11 +1167,54 @@ C
         u = G*(E - D - j*VV) - a
 C       Changed Sept. 2010	
         IF (u.LE.0.) cycle
-C       IF (u.LE.0.) GOTO 100
         sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
       ENDDO
-100   if(sum.lt.0.d0) return
+      if(sum.lt.0.d0) return
       DENSW = sum
+      RETURN
+      END
+
+      FUNCTION DENSW_WILL(G,D,P,H,E)
+C
+C  RIPL-2 FORMULATION
+C
+C  G - LEVEL DENSITY PARAMETER
+C  D - PAIRING CORRECTION
+C  P(H) - PARTICLE(HOLE) NUMBER
+C  E - EXCITATION ENERGY
+C
+C PARAMETER definitions
+C
+      INTEGER*4 PMAX
+      PARAMETER (PMAX = 50)
+C
+C COMMON variables
+C
+      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3), VV
+      COMMON /PFACT / FA, LFA
+C
+C Dummy arguments
+C
+      REAL*8 D, E, G
+      INTEGER*4 H, P
+      REAL*8 DENSW_WILL
+C
+C Local variables
+C
+      REAL*8 a, fac, u
+      DOUBLE PRECISION DEXP, DLOG
+      INTEGER*4 n
+      DENSW_WILL = 0.D0
+      n = P + H
+      IF (n.LE.0) RETURN
+
+      a = .5D0*(P*P + H*H)
+
+      fac = LFA(P + 3) + LFA(n + 2) + LFA(H + 3)
+      u = G*(E - D) - a
+      IF (u.LE.0.) return
+      DENSW_WILL =  G*(DEXP((n-1)*DLOG(u) - fac))
+
       RETURN
       END
 
