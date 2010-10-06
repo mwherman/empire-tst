@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 1867 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2010-10-06 08:18:41 +0200 (Mi, 06 Okt 2010) $
 
 C
 C
@@ -612,6 +612,8 @@ C-----can not be taken into account (RORed=0)
          ENDIF
          defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
      &           /(NDEX - 1)
+C--------Try using fixed DE to avoid any dependence on NDEX        
+         defit = DE
          nplot = (ELV(NLV(Nnuc),Nnuc) + FITlev)/defit
   150    rocumul = 1.0
          iter = iter + 1
@@ -765,7 +767,7 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          CLOSE (36)
          CLOSE (34)
          IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35#')
+            iwin = PIPE('gnuplot fort.35')
             CLOSE (35)
          ENDIF
       ENDIF
