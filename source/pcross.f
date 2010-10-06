@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1864 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2010-10-06 02:37:34 +0200 (Mi, 06 Okt 2010) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -94,6 +94,7 @@ C     Parametrization of the well depth for p-h LD calculations
 C     According to TALYS manual,v.0.64 (2004) A.Koning et al,
 C
       vvf   = 38.d0
+	vsurf = vvf
       IF(ap.eq.1 .and. zp.eq.1) vsurf = 22.d0 +
      &   16.d0*EINl**4/(EINL**4+(450.d0/FLOAT(ac)**0.333333d0)**4)
       IF(ap.eq.1 .and. zp.eq.0) vsurf = 12.d0 +
@@ -281,13 +282,12 @@ C        EMPIRE tuning factor is used (important to describe capture) RCN, june 
 C
 C--------PARTICLE-HOLE LOOP
 C
-
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
 C           Found bug that decreased PE contribution, thanks to A Voinov 
-C    	       Oct 1, 2010 MH & RC, next line was commented to correct the bug
-            IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
+C  	      Oct 1, 2010 MH & RC, next line was commented to correct the bug
+C           IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
 C
 C           Defining well depth for p-h LD calculations
@@ -296,7 +296,8 @@ C
 C           hh .eq. 1 is recommended in the TALYS manual
 C           I use hh .LE. 1 to enhance PE photon emission
 C           if (hh.eq.1) VV = vsurf
-            if (hh.le.1) VV = vsurf
+            if (hh.eq.1 .and. nejc.le.2) VV = vsurf
+C
 C
             ff2 = DENSW(gc,pc,p,hh,ec)
             IF (ff2.EQ.0.) GOTO 50    
@@ -335,7 +336,7 @@ C--------------PREEQ GAMMA EMISSION
                ELSEIF (nejc.EQ.0) THEN
                   wda = DENSW(gc,pc,p,hh,er)
                   hlp1 = wda*DBLE(p + hh)/(DBLE(p + hh) + eee*gc)
-		  if(ap.le.1 .and. hh.GE.1) hlp1 = hlp1 +
+		        if(ap.le.1 .and. hh.GE.1) hlp1 = hlp1 +
      &                     gc*eee*DENSW(gc,pc,p - 1,hh - 1,er)/
      &                            (DBLE(p + hh - 2) + eee*gc)
                ENDIF
@@ -1124,7 +1125,7 @@ C-----ALPHA PARTICLES (M=4)
       END
 
 
-      FUNCTION DENSW(G,D,P,H,E)
+      REAL*8 FUNCTION DENSW(G,D,P,H,E)
 C
 C  RIPL-2 FORMULATION
 C
@@ -1148,16 +1149,19 @@ C Dummy arguments
 C
       REAL*8 D, E, G
       INTEGER*4 H, P
-      REAL*8 DENSW
 C
 C Local variables
 C
       REAL*8 a, fac, u, sum
       DOUBLE PRECISION DEXP, DLOG
-      INTEGER*4 n, j
-      DENSW= 0.D0
+      INTEGER*4 n, j, jmax
+
+      DENSW = 0.D0
       n = P + H
       IF (n.LE.0) RETURN
+
+	jmax = H
+	IF(VV.LE.0.d0) jmax=0
 C
 C     Following RIPL-2 TECDOC (LD chapter)
 C
@@ -1175,7 +1179,7 @@ C       Changed Sept. 2010
       RETURN
       END
 
-      FUNCTION DENSW_WILL(G,D,P,H,E)
+      REAL*8 FUNCTION DENSW1(G,D,P,H,E)
 C
 C  RIPL-2 FORMULATION
 C
@@ -1191,21 +1195,20 @@ C
 C
 C COMMON variables
 C
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3), VV
+      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
       COMMON /PFACT / FA, LFA
 C
 C Dummy arguments
 C
       REAL*8 D, E, G
       INTEGER*4 H, P
-      REAL*8 DENSW_WILL
 C
 C Local variables
 C
       REAL*8 a, fac, u
       DOUBLE PRECISION DEXP, DLOG
       INTEGER*4 n
-      DENSW_WILL = 0.D0
+      DENSW1 = 0.D0
       n = P + H
       IF (n.LE.0) RETURN
 
@@ -1214,7 +1217,7 @@ C
       fac = LFA(P + 3) + LFA(n + 2) + LFA(H + 3)
       u = G*(E - D) - a
       IF (u.LE.0.) return
-      DENSW_WILL =  G*(DEXP((n-1)*DLOG(u) - fac))
+      DENSW1 =  G*(DEXP((n-1)*DLOG(u) - fac))
 
       RETURN
       END
