@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1867 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-06 08:18:41 +0200 (Mi, 06 Okt 2010) $
+Ccc   * $Rev: 1868 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2010-10-06 22:55:49 +0200 (Mi, 06 Okt 2010) $
 
 C
 C
@@ -610,11 +610,14 @@ C-----can not be taken into account (RORed=0)
             WRITE (8,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
      &                  ' MeV'
          ENDIF
-         defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
-     &           /(NDEX - 1)
+C        defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
+         defit = (ELV(NLV(Nnuc),Nnuc) + 4.d0)
+     &           /(NEXreq - 1)	  
+C    &           /(NDEX - 1)
 C--------Try using fixed DE to avoid any dependence on NDEX        
-         defit = DE
-         nplot = (ELV(NLV(Nnuc),Nnuc) + FITlev)/defit
+C        defit = DE
+         nplot = (ELV(NLV(Nnuc),Nnuc) + 4.d0)/defit
+C        nplot = (ELV(NLV(Nnuc),Nnuc) + FITlev)/defit
   150    rocumul = 1.0
          iter = iter + 1
          kkl = 0
@@ -698,8 +701,9 @@ C--------cumulative plot of levels to the zvd
          CALL OPEN_ZVV(36,caz,title)
          rocumul = 1.D0
          WRITE (36,*) '0.0 1.0'
-         DO kk = 2, NEX(Nnuc)
-            if(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
+	 DO kk = 2, NEX(Nnuc)
+C           if(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
+            if(defit*(kk - 1) .gt. Q(1,Nnuc)+1.d0) exit
 C-----------Integration over energy. There should be factor 2 because of the
 C-----------parity but it cancels with the 1/2 steming from the trapezoid
 C-----------integration
