@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1863 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2010-10-06 02:34:36 +0200 (Mi, 06 Okt 2010) $
 
 C
       SUBROUTINE INPUT
@@ -382,7 +382,7 @@ C--------set options for DEGAS (exciton preequilibrium)
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQc = 0.0
          MFPp = 1.3
-         CHMax = 0.d0 ! set default to 0.2 inside PCROSS
+         CHMax = 0.d0 ! set default to 0.54 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 1
          EHRtw = 5.d0
@@ -449,7 +449,7 @@ C--------ejectile he-3
          iz = INT(ZEJc(6))
          SYMbe(6) = SMAT(iz)
          SEJc(6) = 0.5
-
+C
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
          KEY_shape = 0
@@ -2548,29 +2548,17 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '   MT=102 Capture                               '
         WRITE (12,*) '   MT=16   (n,2n)                               '
         WRITE (12,*) '   MT=17   (n,3n)                               '
-
-
         WRITE (12,*) '   MT=18   (n,f)                                '
         WRITE (12,*) '   MT=22   (n,na)                               '
         WRITE (12,*) '   MT=24   (n,2na)                              '
         WRITE (12,*) '   MT=28   (n,np+pn)                            '
         WRITE (12,*) '   MT=37   (n,4n)                               '
-
-
         WRITE (12,*) '   MT=45   (n,npa)                              '
         WRITE (12,*) '   MT=103, 600-649 (n,p)                        '
         WRITE (12,*) '   MT=104, (n,d)                                '
-
-
         WRITE (12,*) '   MT=105, (n,t)                                '
-
-
         WRITE (12,*) '   MT=106, (n,He-3)                             '
-
-
         WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
-
-
         WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=4 Angular distributions of secondary neutrons'
@@ -2579,17 +2567,9 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) '     Primary capture gammas are entered as      '
-
-
         WRITE (12,*) '     discrete lines                             '
-
-
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) 'MF=12 Transition probability arrays for photon  '
         WRITE (12,*) '      production; taken from the RIPL library   '
         WRITE (12,*) '                                                '
@@ -2599,61 +2579,27 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) 'REFERENCES                                      '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[EMP]                                           '
-
-
         WRITE (12,*) '  M.Herman, R.Capote, B.Carlson, P.Oblozinsky,  '
         WRITE (12,*) '  M.Sin, A.Trkov, H.Wienke and V.Zerkin         '
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) ' "EMPIRE: Nuclear Reaction Model Code System    '
         WRITE (12,*) '           for data evaluation"                 '
         WRITE (12,*) '  Nuclear Data Sheets 108 (2007) 2655-2715      '
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) '[RIPL]                                          '
-
-
         WRITE (12,*) '  R.Capote, M.Herman, P.Oblozinsky, P.G.Young,  '
-
-
         WRITE (12,*) '  S.Goriely, T.Belgya, A.V.Ignatyuk, A.J.Koning,'
-
-
         WRITE (12,*) '  S.Hilaire, V.A.Plujko, M.Avrigeanu,           '
-
-
-        WRITE (12,*) '  Zhigang Ge, Yinlu Han, S.Kailas, J.Kopecky,   '                    
-
-
-        WRITE (12,*) '  V.M.Maslov, G.Reffo, M.Sin,                   '     
-
-
+        WRITE (12,*) '  Zhigang Ge, Yinlu Han, S.Kailas, J.Kopecky,   '
+        WRITE (12,*) '  V.M.Maslov, G.Reffo, M.Sin,                   '
         WRITE (12,*) '  E.Sh.Soukhovitskii and P. Talou               '
-
-
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) ' "RIPL - Reference Input Parameter Library for  '
-
-
-        WRITE (12,*) '         Calculation of Nuclear Reactions and   '                 
-
-
-        WRITE (12,*) '         Nuclear Data Evaluations",             '                  
-
-
+        WRITE (12,*) '         Calculation of Nuclear Reactions and   '          
+        WRITE (12,*) '         Nuclear Data Evaluations",             '
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) '  Nuclear Data Sheets 110 (2009) 3107-3214      '
-
-
         WRITE (12,*) '                                                '
-
-
         WRITE (12,*) '  Data available online at                      '
         WRITE (12,*) '   http://www-nds.iaea.org/RIPL-3/              '
         WRITE (12,*) '                                                '
@@ -3288,7 +3234,7 @@ C--------PCROSS input
             GOTO 100
          ENDIF
          IF (name.EQ.'MAXHOL') THEN
-            CHMax = 0.2
+            CHMax = 0.54
             IF (val.GE.0.1 .AND. val.LE.1.5D0) THEN
               CHMax = val
               WRITE (8,
