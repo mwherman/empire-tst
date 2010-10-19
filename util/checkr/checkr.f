@@ -28,6 +28,10 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.06   October 2010    A. Trkov
+!-V                        Fix test on ISR
+!-V         Version 8.05   June 2010    A. Trkov
+!-V                        Add test on ISR
 !-V         Version 8.04   January 2010    A. Trkov
 !-V                        Remove checking NRB (not prescribed in ENDF-6)
 !-V         Version 8.03   June 2009    A. Trkov
@@ -212,9 +216,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !---MDC---
 !
 !     Define variable precision
@@ -4486,7 +4490,7 @@
 !
       INTEGER(KIND=I4) :: LRF,LRFM,NRO,NAPS,NAPSM,NIT
       INTEGER(KIND=I4) :: NLS,NRS,NUM,NSRS,NLRS,NJS
-      INTEGER(KIND=I4) :: MPAR,MPARM,LCOMP
+      INTEGER(KIND=I4) :: MPAR,MPARM,LCOMP,ISR
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
       INTEGER(KIND=I4) :: LB,LT,NE,NE2,NPM,NTT,NEC
       INTEGER(KIND=I4) :: I1,I3,NL,J
@@ -4571,19 +4575,44 @@
          IF(NAPS.NE.2.AND.NRO.EQ.1)  CALL TEST2F(AP,0.0,'AP')
       END IF
 !
-!     Check LCOMP
+!     Check LCOMP and scattering radius uncertainty ISR
 !
       LCOMP = L2H
+      ISR   = N2H
+      NLS   = N1H
       IF(NFOR.GE.6)  THEN
          CALL TEST1(LCOMP,0,2,'LCOMP',2)
+         IF(IERX.GE.1)   GO TO 100
+         CALL TEST1(ISR,0,1,'ISR',2)
          IF(IERX.GE.1)   GO TO 100
       ELSE
          CALL TEST2(LCOMP,0,'LCOMP')
       END IF
 !
+!     Check for scattering radius uncertainty
+!
+      IF(ISR.EQ.1) THEN
+        IF(LCOMP.EQ.0) THEN
+          CALL RDCONT
+        ELSE IF(LCOMP.EQ.1 .OR. LCOMP.EQ.2) THEN
+          IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+            CALL RDCONT
+          ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+            CALL RDLIST
+          ELSE
+!           Not programmed for other values of LRF
+            WRITE(EMESS,'(A,I2,A)') 'LRF=',LRF,' NOT ALLOWED WITH ISR=1'
+                     CALL ERROR_MESSAGE(NSEQP1)
+          END IF
+        ELSE
+!         Not programmed for LCOMP>2
+          WRITE(EMESS,'(A,I2,A)') 'LCOMP=',LCOMP,' NOT ALLOWED IF ISR=1'
+                   CALL ERROR_MESSAGE(NSEQP1)
+        END IF
+      END IF
+!
 !     CHECK NUMBER OF PARTIAL WAVES (L-VALUES)
 !
-      NLS = N1H
       IF(LCOMP.EQ.0)  THEN
          CALL TEST1(NLS,1,NLSMAX,'NLS',1)
       ELSE IF(LCOMP.EQ.1) THEN
@@ -6122,7 +6151,7 @@
       INTEGER(KIND=I4) :: N,NA,NB
       INTEGER(KIND=I4) :: IERR
 !
-!     If LB > N > NA, OK
+!     If NA =< N =< NB, OK
 !
       IERX=0
       IF(N.LT.NA.OR.N.GT.NB) THEN
