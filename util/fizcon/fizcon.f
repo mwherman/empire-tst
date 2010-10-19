@@ -28,6 +28,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.04   October 2010    A. Trkov
+!-V                        Fix test on ISR
 !-V         Version 8.03   June 2009   A. Trkov
 !-V                        1. Make error printout conditional for IZAPT>0 in MF10
 !-V                        2. Skip test on QM in MF10 for MT5
@@ -198,9 +200,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -7196,8 +7198,8 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NIS,NER,LRU,NROO,NIT,LCOMP,NLS,NSRS,NLRS
-      INTEGER(KIND=I4) :: NLSA,NDIGIT
+      INTEGER(KIND=I4) :: NIS,NER,LRU,LRF,NROO,NIT,LCOMP,ISR,NLS
+      INTEGER(KIND=I4) :: NSRS,NLRS,NLSA,NDIGIT
       INTEGER(KIND=I4) :: NI,N,NN,I1,NM,NNN
 !
 !     CHECK THAT SECTION IS IN THE INDEX
@@ -7216,6 +7218,7 @@
          DO N=1,NER
             CALL RDCONT
             LRU = L1H
+            LRF = L2H
 !
 !           RESOLVED ENERGY REGION
 !
@@ -7236,16 +7239,23 @@
 !
                CALL RDCONT
                LCOMP = L2H
-               NLS = N1H
+               ISR   = N2H
+               NLS   = N1H
 !
 !              ENDF-5 FORMAT
 !
                IF(LCOMP.EQ.0)  THEN
+                  IF(ISR.EQ.1) CALL RDCONT
                   CALL CKF32_V5(NLS)
 !
 !              ENDF-6 FORMAT
 !
                ELSE IF(LCOMP.EQ.1) THEN
+                  IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                    CALL RDCONT
+                  ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                    CALL RDLIST
+                  END IF
                   CALL RDCONT
                   NSRS = N1H
                   NLRS = N2H
@@ -7271,6 +7281,11 @@
 !
                ELSE IF(LCOMP.EQ.2) THEN
                  NLSA=N1H
+                 IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                   CALL RDCONT
+                 ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                   CALL RDLIST
+                 END IF
                  CALL RDLIST
                  CALL RDCONT
                  NDIGIT=L1H
