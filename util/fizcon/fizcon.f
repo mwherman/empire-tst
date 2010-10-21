@@ -7251,10 +7251,12 @@
 !              ENDF-6 FORMAT
 !
                ELSE IF(LCOMP.EQ.1) THEN
-                  IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
-                    CALL RDCONT
-                  ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
-                    CALL RDLIST
+                  IF(ISR.EQ.1) THEN
+                    IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                      CALL RDCONT
+                    ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                      CALL RDLIST
+                    END IF
                   END IF
                   CALL RDCONT
                   NSRS = N1H
