@@ -7245,12 +7245,14 @@
 !              ENDF-5 FORMAT
 !
                IF(LCOMP.EQ.0)  THEN
+!                 Process scattering radius uncertainty for LCOMP=0
                   IF(ISR.EQ.1) CALL RDCONT
                   CALL CKF32_V5(NLS)
 !
 !              ENDF-6 FORMAT
 !
                ELSE IF(LCOMP.EQ.1) THEN
+!                 Process scattering radius uncertainty for LCOMP=1
                   IF(ISR.EQ.1) THEN
                     IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
                       CALL RDCONT
@@ -7283,10 +7285,13 @@
 !
                ELSE IF(LCOMP.EQ.2) THEN
                  NLSA=N1H
-                 IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
-                   CALL RDCONT
-                 ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
-                   CALL RDLIST
+!                Process scattering radius uncertainty for LCOMP=2
+                 IF(ISR.EQ.1) THEN
+                   IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                     CALL RDCONT
+                   ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                     CALL RDLIST
+                   END IF
                  END IF
                  CALL RDLIST
                  CALL RDCONT
