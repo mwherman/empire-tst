@@ -29,6 +29,8 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.01   October  2010     A. Trkov
+!-V                        Cosmetic changes.
 !-V         Version 8.00   August  2008     A. Trkov
 !-V                        1. Major updating of the code.
 !-V                        2. Further reduction of non-essential output.
@@ -146,9 +148,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -440,7 +442,7 @@
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
-      CALL RUN_psyche
+      CALL RUN_PSYCHE
 !
 !     TERMINATE JOB
 !
@@ -498,15 +500,15 @@
 !
    20 IF(IERX.EQ.2) THEN
          IF(IMDC.LT.4) THEN
-            WRITE(IOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
-     &                      'TEND RECORD FOUND!'
+            WRITE(IOUT,'(//5X,2A)')  'PSYCHE ERROR - END OF FILE ',     &       
+     &                      'ENCOUNTERED BEFORE TEND RECORD FOUND!'
          END IF
          IF(NOUT.NE.IOUT)   THEN
-            WRITE(NOUT,'(//5X,2A)')  'END OF FILE ENCOUNTERED BEFORE ', &       
-     &                      'TEND RECORD FOUND!'
+            WRITE(IOUT,'(//5X,2A)')  'PSYCHE ERROR - END OF FILE ',     &       
+     &                      'ENCOUNTERED BEFORE TEND RECORD FOUND!'
          END IF
          IF(NOUT.NE.IOUT) THEN
-           WRITE(NOUT,'(A)') ' Done FIZCON'
+           WRITE(NOUT,'(A)') ' Done PSYCHE'
            CLOSE(UNIT=NOUT)
          END IF
          CLOSE(UNIT=JIN)
