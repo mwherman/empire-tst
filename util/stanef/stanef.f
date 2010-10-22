@@ -2571,7 +2571,7 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP
+      INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP,ISR
       INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
 !trkov    start
       INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN
@@ -2606,23 +2606,28 @@
                      CALL CANT(C1,C2,L1,L2,N1,N2)
                   END DO
                END IF
-               CALL CONT(C1,C2,L1,LCOMP,NLS,N2)
+               CALL CONT(C1,C2,L1,LCOMP,NLS,ISR)
 !
 !              SINGLE AND MULTILEVEL BREIT-WIGNER ENDF-5 STYLE
 !
                IF(LCOMP.EQ.0)   THEN
+!                 Process scattering radius uncertainty for LCOMP=0
+                  IF(ISR.EQ.1) CALL CONT(C1,C2,L1,L2,N1,N2)
                   DO N=1,NLS
                      CALL CANT(C1,C2,L1,L2,N1,N2)
                   END DO
 !
 !              NEW STYLE FORMATS
 !
-!original start
-!              ELSE
-!original end
-!trkov    start
                ELSE IF(LCOMP.EQ.1) THEN
-!trkov    end
+!                 Process scattering radius uncertainty for LCOMP=1
+                  IF(ISR.EQ.1) THEN
+                    IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                      CALL CONT(C1,C2,L1,L2,N1,N2)
+                    ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                      CALL CANT(C1,C2,L1,L2,N1,N2)
+                    END IF
+                  END IF
                   CALL CONT(C1,C2,L1,L2,NSRS,NLRS)
                   IF(NSRS.GT.0)  THEN
                      DO I2=1,NSRS
@@ -2634,8 +2639,15 @@
                         CALL CANT(C1,C2,L1,L2,N1,N2)
                      END DO
                   END IF
-!trkov    start
                ELSE IF(LCOMP.EQ.2) THEN
+!                 Process scattering radius uncertainty for LCOMP=2
+                  IF(ISR.EQ.1) THEN
+                    IF(LRF.EQ.1 .OR. LRF.EQ.2) THEN
+                      CALL CONT(C1,C2,L1,L2,N1,N2)
+                    ELSE IF(LRF.EQ.3 .OR. LRF.EQ.7) THEN
+                      CALL CANT(C1,C2,L1,L2,N1,N2)
+                    END IF
+                  END IF
                   IF((LRF.GE.1 .AND. LRF.LE.3) .OR. LRF.EQ.7) THEN
                      CALL CANT(C1,C2,L1, L2,NRSA12,NRSA)
                      CALL CONT(C1,C2,L1,NNN,    NM,  N2)
@@ -2644,11 +2656,10 @@
                      END DO
                   ELSE
                      WRITE(*,*) 'Illegal LRF',LRF
-                     STOP 'ERROR IN FILE32 - Unsupported LRF'
+                     STOP 'STANEF ERROR IN FILE32 - Unsupported LRF'
                   END IF
                ELSE
-                  STOP 'ERROR IN FILE32 - Illegal LCOMP'
-!trkov    end
+                  STOP 'STANEF ERROR IN FILE32 - Illegal LCOMP'
                END IF
 !
 !           UNRESOLVED RESONANCE PARAMETERS
