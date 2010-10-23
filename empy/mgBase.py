@@ -106,7 +106,12 @@ class mgBase:
                     # this combination not present
                     continue
                 
-                # if we're here, this matrix is present. 
+                # if we're here, this matrix is present.
+                # cmattoon, 10/23/2010: check if matrix is all zero:
+                if numpy.all( self.corrs[key] == 0.0 ):
+                    # ignore the matrix
+                    continue
+                
                 # Is it self or cross-correlation?
                 if mt==colMT:
         
