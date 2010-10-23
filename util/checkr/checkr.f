@@ -28,6 +28,13 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.07   October 2010    M.A. Kellett, IAEA
+!-V                        1. In CHK_RAD, added consistency check on STABLE
+!-V                           flags STA (MF1) and NST (MF8).
+!-V                        2. In CHK_RAD, check NDKT > 0 when NST = 0.
+!-V                        3. In CKS451, disable check on MAT no. for NSUB=4
+!-V                           - Radioactive Decay Data - from ENDF/B-VII,
+!-V                           ENDF/A-VII and JEFF-3.0 onwards.
 !-V         Version 8.06   October 2010    A. Trkov
 !-V                        Fix test on ISR
 !-V         Version 8.05   June 2010    A. Trkov
@@ -1074,7 +1081,7 @@
          CASE (6)
             IF(NFOR.LT.6) THEN
                EMESS = 'MF=6 NOT ALLOWED PRIOR TO ENDF-6'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(NSEQP)
             END IF
             IF(ISUBTP.NE.0) THEN
                CALL MF_ERRORS(2)
@@ -1215,15 +1222,8 @@
       IF(IPATH.EQ.2) THEN
          WRITE(EMESSP(23:28),'(I6)') NSUB
       END IF
-
-      PRINT *,'MF',MF
-      PRINT *,'EMESSP','"',EMESSP,'"'
-
       WRITE(EMESS,'(A4,I3,1X,A)') 'FILE',MF,EMESSP
-
-      PRINT *,EMESS
-
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(NSEQP)
 !
       RETURN
       END SUBROUTINE MF_ERRORS
@@ -1567,7 +1567,7 @@
             IF(NUREP.NE.0.AND.NUREP.NE.L2H)  THEN
                WRITE(EMESS,'(A,I2,A)') 'LNU =',L2H,                     &       
      &          ' IN MT = 455 REQUIRES THAT LNU IN MT = 452 BE THE SAME'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(NSEQP)
             END IF
             IF(L1H.EQ.0) THEN
                CALL RDLIST
@@ -1588,7 +1588,7 @@
             IF(NUREP.NE.0.AND.NUREP.NE.L2H)  THEN
                WRITE(EMESS,'(A,I2,A)') 'LNU =',L2H,                     &       
      &          ' IN MT = 456 REQUIRES THAT LNU IN MT = 452 BE THE SAME'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(NSEQP)
             END IF
 !
          CASE (458)          ! ENERGY RELEASE IN FISSION
@@ -1792,16 +1792,24 @@
          ELSE
             GO TO 10
          END IF
-         IF(MATCHK.NE.MAT) THEN
-            IF(MATCHK.EQ.0)  THEN
-               WRITE(EMESS,'(A,I4,A,F8.1,A,I2)')                        &       
-     &               'ASSIGNED MATERIAL NUMBER (MAT=',MAT,              &       
-     &               ') NOT CONSISTENT WITH ZA = ',ZA,' LISO =',LISO
-               CALL ERROR_MESSAGE(0)
-            ELSE
-               WRITE(EMESS,'(A,I5)')                                    &       
-     &                '    MATERIAL NUMBER SHOULD BE',MATCHK
-               CALL WARNING_MESSAGE(0)
+!
+!     Disable MAT no. check for NSUB=4, RADIOACTIVE DECAY DATA library,
+!     for ENDF/A or /B-VII (NLIB=0,1) and JEFF-3.0 (NLIB=2) onwards
+!                       M.A. Kellett, IAEA, October 2010
+!
+         IF ((NSUB.NE.4).AND.(.NOT.((NLIB.LE.1.AND.NVER.GE.7).OR.       &       
+     &              (NLIB.EQ.2.AND.NVER.GE.30)))) THEN
+            IF(MATCHK.NE.MAT) THEN
+               IF(MATCHK.EQ.0)  THEN
+                  WRITE(EMESS,'(A,I4,A,F8.1,A,I2)')                     &       
+     &                  'ASSIGNED MATERIAL NUMBER (MAT=',MAT,           &       
+     &                  ') NOT CONSISTENT WITH ZA = ',ZA,' LISO =',LISO
+                  CALL ERROR_MESSAGE(NSEQP)
+               ELSE
+                  WRITE(EMESS,'(A,I5)')                                 &       
+     &                   '    MATERIAL NUMBER SHOULD BE',MATCHK
+                  CALL WARNING_MESSAGE(NSEQP)
+               END IF
             END IF
          END IF
       END IF
@@ -1981,6 +1989,7 @@
      &   180,185,184,191,190,197,196,203,204,209,206,203,211,212,223,   &       
      &   225,227,229,234,230,235,235,240,240,240,241,240,245,248,252/)
 !
+!     Assign MAT numbers for IZ [100-103]
       INTEGER(KIND=I4), DIMENSION(4) :: ISP
       DATA ISP /9920,9945,9965,9980/
 !
@@ -1992,7 +2001,7 @@
 !     Initialize
 !
       MATCHK = 0
-      IF(IZ.LT.0.OR.IA.LT.0)   GO TO 100
+      IF(IZ.LT.0.OR.IZ.GT.103.OR.IA.LT.0)   GO TO 100
       IF(IZ.EQ.0)  GO TO 50
 !     Only ground state and two levels allowed
       IF(LIS0.LT.0.OR.LIS0.GT.2)   GO TO 100
@@ -2188,7 +2197,7 @@
             CALL ERROR_MESSAGE(0)
             EMESS = '    SCATTERING IS GIVEN IN FILE 2 FOR ALL '//      &       
      &              'ISOTOPES.'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
       ELSE
          IF(LRP.EQ.0)  THEN
@@ -2196,7 +2205,7 @@
      &              'RESONANCE '
             CALL ERROR_MESSAGE(0)
             EMESS = 'PARAMETERS ARE GIVEN FOR AT LEAST ONE ISOTOPE.'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
       END IF
 !
@@ -2206,7 +2215,7 @@
          IF(JPOT.EQ.1.AND.MLRP.EQ.0)  THEN
             EMESS = 'THERE MUST BE RESONANCE PARAMETERS GIVEN FOR '//   &       
      &          'AT LEAST ONE ISOTOPE.'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
       END IF
 !
@@ -2270,11 +2279,11 @@
          IF(NLIB.NE.0)  THEN
             EMESS = 'LRF = 5, GENERALIZED R-MATRIX '//                  &       
      &            'REPRESENTATION NOT YET IMPLEMENTED'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          ELSE
             EMESS = 'LRF = 5, GENERALIZED R-MATRIX '//                  &       
      &             'REPRESENTATION NOT ALLOWED IN ENDF/B-VI'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
          IERX = 1
          GO TO 100
@@ -2317,7 +2326,7 @@
             IF(NFOR.LE.5.AND.NLIB.EQ.0)  THEN
                EMESS = 'LRF = 3, REICH-MOORE REPRESENTATION NOT '//     &       
      &             'ALLOWED IN ENDF/B-V'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(NSEQP)
             END IF
             CALL CHECK_BW(NLS,LRF)
          CASE (4)
@@ -2815,12 +2824,12 @@
   100 IF(NIRE.NE.MTSUM(1)) THEN
          EMESS = 'NIRE DOES NOT EQUAL THE NUMBER OF COMPETITIVE '//     &       
      &         'INELASTIC REACTIONS'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(NSEQP)
       END IF
       IF(NCRE.NE.MTSUM(2)) THEN
          EMESS = 'NCRE DOES NOT EQUAL THE NUMBER OF COMPETITIVE '//     &       
      &         'CHARGED PARTICLE REACTIONS'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(NSEQP)
       END IF
 !
       RETURN
@@ -3391,7 +3400,7 @@
       IF(LTHR.EQ.0)   THEN
          IF(MT.NE.4)  THEN
             EMESS = 'INELASTIC SCATTERING SHOULD BE IN MT=4'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
          LAT = L2H
          CALL TEST1(LAT,0,1,'LAT',1)
@@ -3427,7 +3436,7 @@
                      CALL RDLIST
                      IF(C1L.LE.T)   THEN
                         EMESS = 'TEMPERATURES NOT IN INCREASING ORDER'
-                        CALL ERROR_MESSAGE(0)
+                        CALL ERROR_MESSAGE(NSEQP)
                      ELSE
                         T = C1L
                      END IF
@@ -3454,7 +3463,7 @@
       ELSE
          IF(MT.NE.2)   THEN
             EMESS = 'ELASTIC SCATTERING SHOULD BE IN MT=2'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(NSEQP)
          END IF
 !
 !        COHERENT ELASTIC SCATTERING
@@ -3617,7 +3626,7 @@
 !
       REAL(KIND=R4), INTRINSIC :: FLOAT
 !
-      INTEGER(KIND=I4) :: NSP,NST
+      INTEGER(KIND=I4) :: NSP,NST,ISTA
       INTEGER(KIND=I4) :: NDKT
       INTEGER(KIND=I4) :: NUM
       INTEGER(KIND=I4) :: ISTP,IS
@@ -3636,6 +3645,18 @@
       NST = N1H
       CALL TEST1(NST,0,1,'NST',1)
 !
+!     CHECK IF STA IN MF1 MT451 AND NST IN MF8 MT457 ARE CONSISTENT
+!     Valid entries: (STA=0, NST=1) or (STA=1, NST=0) --> STA+NST=1
+!                    M.A. Kellett, IAEA, October 2010
+!
+      ISTA=NINT(STA)
+      IF((ISTA.EQ.0.AND.NST.NE.1).OR.(ISTA.EQ.1.AND.NST.NE.0)) THEN
+          WRITE(EMESS,'(A,I1,A,F3.1)')                                  &       
+     &          'STABLE FLAG (NST = ',NST,                              &       
+     &               ') NOT CONSISTENT WITH STA = ',STA
+               CALL ERROR_MESSAGE(NSEQP)
+      END IF
+!
 !     PROCESS AVERAGE DECAY ENERGIES
 !
       CALL RDLIST
@@ -3652,11 +3673,21 @@
 !
       CALL RDLIST
       NDKT = N2L
-      IF(NDKT.LE.0.AND.STA.EQ.1.0) THEN
+!
+!     Check also NDKT > 0 for NST=0 - M.A. Kellett, IAEA, Oct 2010
+!
+      IF((NDKT.LE.0.AND.ISTA.EQ.1).OR.(NDKT.LE.0.AND.NST.EQ.0)) THEN
          EMESS = 'NO DECAY MODES GIVEN'
          CALL ERROR_MESSAGE(NSEQP)
          IERX = 1
          GO TO 100
+      END IF
+!
+!     New check: NDKT=0 for STA=0.0 or NST=1 - M.A. Kellett, IAEA, Oct 2010
+!
+      IF((NDKT.GT.0.AND.ISTA.EQ.0).OR.(NDKT.GT.0.AND.NST.EQ.1)) THEN
+         EMESS = 'DECAY MODES GIVEN FOR STABLE MATERIAL'
+         CALL ERROR_MESSAGE(NSEQP)
       END IF
       IF(NST.EQ.0) THEN
          NUM = NPL/NREP6
@@ -3702,7 +3733,7 @@
                IF(IS.NE.6.AND.IS.NE.7) THEN
                   WRITE(EMESS,'(A,I1,A,F4.1)')  'LCON=',LCON,           &       
      &               ' AND NER=0 NOT ALLOWED FOR STYPE = ',STYPE
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(NSEQP)
                   GO TO 30
                END IF
             END IF
@@ -4843,7 +4874,7 @@
             EMESS = '    COVARIANCE SECTION FOR MT = MTL '//            &       
      &             'IS MISSING'
             CALL ERROR_MESSAGE(0)
-            NERROR=NERROR+1
+         NERROR=NERROR+1
          END IF
 !
 !        CHECK SEQUENCING OF MTL-VALUES
@@ -6191,7 +6222,7 @@ c        END IF
 !
       SUBROUTINE TEST1F(F,FMIN,FMAX,KXXX)
 !
-!     ROUTINE TO TEST RANGE OF AN FLOATING POINT NUMBER
+!     ROUTINE TO TEST RANGE OF A FLOATING POINT NUMBER
 !
       IMPLICIT NONE
 !
@@ -6470,7 +6501,7 @@ c        END IF
             IF(NFOR.LT.6)   THEN
                WRITE(EMESS,'(A,I2,A)')                                  &       
      &            'MT=',MTT,' NOT ALLOWED PRIOR TO ENDF-6'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(NSEQP)
             END IF
             MTCAT = 5
          ELSE IF(MT3.GE.6.AND.MT3.LE.9) THEN
@@ -6743,7 +6774,7 @@ c        END IF
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &             'SECTION',MF1,'/',MT1,' NOT IN DIRECTORY'
       END IF
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(1)
       GO TO 100
 !
 !     Section in directory so flag it as found
