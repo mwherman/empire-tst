@@ -459,6 +459,8 @@ int main(int argc, char **argv)
         else pCumCapUN[n] = sqrt(pCumCapUN[n]*pCumCapUN[n] + max(pCumCapXS2[n]/nIteration - xs2, 0.0)/xs2);
         pCumCapUN[n] = max(pCumCapUN[n],fCaptlim);
       }
+      // the following line is for Pb208 only:
+      // if(pCaptGroup[n+1] < 1.0E+06) pCumCapUN[n] = max(0.5,pCumCapUN[n]);
     }
     for (int n=0;n<nPreDefCapUN;n++)
       if (pPreDefCapUN[n].nBin >= 0 && pPreDefCapUN[n].nBin < nCaptGroup)
