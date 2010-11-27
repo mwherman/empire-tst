@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1863 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2010-10-06 02:34:36 +0200 (Mi, 06 Okt 2010) $
+Ccc   * $Rev: 1882 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
 
 C
       SUBROUTINE INPUT

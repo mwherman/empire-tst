@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1864 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2010-10-06 02:37:34 +0200 (Mi, 06 Okt 2010) $
+Ccc   * $Rev: 1882 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -94,7 +94,7 @@ C     Parametrization of the well depth for p-h LD calculations
 C     According to TALYS manual,v.0.64 (2004) A.Koning et al,
 C
       vvf   = 38.d0
-	vsurf = vvf
+      vsurf = vvf
       IF(ap.eq.1 .and. zp.eq.1) vsurf = 22.d0 +
      &   16.d0*EINl**4/(EINL**4+(450.d0/FLOAT(ac)**0.333333d0)**4)
       IF(ap.eq.1 .and. zp.eq.0) vsurf = 12.d0 +
@@ -336,7 +336,7 @@ C--------------PREEQ GAMMA EMISSION
                ELSEIF (nejc.EQ.0) THEN
                   wda = DENSW(gc,pc,p,hh,er)
                   hlp1 = wda*DBLE(p + hh)/(DBLE(p + hh) + eee*gc)
-		        if(ap.le.1 .and. hh.GE.1) hlp1 = hlp1 +
+                  if(ap.le.1 .and. hh.GE.1) hlp1 = hlp1 +
      &                     gc*eee*DENSW(gc,pc,p - 1,hh - 1,er)/
      &                            (DBLE(p + hh - 2) + eee*gc)
                ENDIF
@@ -1160,8 +1160,8 @@ C
       n = P + H
       IF (n.LE.0) RETURN
 
-	jmax = H
-	IF(VV.LE.0.d0) jmax=0
+      jmax = H
+      IF(VV.LE.0.d0) jmax=0
 C
 C     Following RIPL-2 TECDOC (LD chapter)
 C

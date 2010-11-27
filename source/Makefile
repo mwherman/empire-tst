@@ -1,12 +1,12 @@
-#$Rev: 1862 $
+#$Rev: 1882 $
 #$Author: mherman $
-#$Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+#$Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
 #
 #----GNU gfortran FORTRAN compiler
-FC     =  gfortran
-CC     =  gcc
+#FC     =  gfortran
+#CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -std=legacy
+#FFLAGS = -O3 -std=legacy
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
@@ -36,14 +36,15 @@ FFLAGS = -O3 -std=legacy
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-#FC     =  ifort
+FC     =  ifort
 #----flags for optimalization using ifort
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #FFLAGS = -arch pn4 -O3 -ipo
+#FFLAGS = -arch pn4 -ipo
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
+FFLAGS =  -C -ftrapuv -g -debug all
 #FFLAGS =  -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
