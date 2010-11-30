@@ -28,6 +28,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.08   November 2010   A. Trkov
+!-V                        1. Added MT's for Activation files
+!-V                        2. Fix checking of MPAR in MF32 for LRP=1,2
 !-V         Version 8.07   October 2010    M.A. Kellett, IAEA
 !-V                        1. In CHK_RAD, added consistency check on STABLE
 !-V                           flags STA (MF1) and NST (MF8).
@@ -223,9 +226,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !---MDC---
 !
 !     Define variable precision
@@ -4678,7 +4681,7 @@
             DO I1=1,NSRS
                CALL RDLIST
                MPAR = L1L
-               IF     (LRF.EQ.3) THEN
+               IF     (LRF.LE.3) THEN
                   MPARM = 5
                ELSE IF(LRF.EQ.4) THEN
                   MPARM = 8
@@ -6391,7 +6394,7 @@ c        END IF
 !       2  Resonance parameters
 !       3  Special reactions
 !       5  Particle production
-!       .
+!       6  Activation reactions
 !       .
 !       .
 !
@@ -6405,7 +6408,7 @@ c        END IF
 !
       MTCAT = 0
       MT3 = MTT
-      IF(MTT.LE.150)     GO TO 50
+      IF(MTT.LE.150 .OR. (MTT.GE.152.AND.MTT.LE.200))     GO TO 50
 !
 !     RESONANCE PARAMETERS  151 - 200
 !
@@ -6557,6 +6560,11 @@ c        END IF
          ELSE
             GO TO 100
          END IF
+!
+!     MT'S BETWEEN 152-200 (ACTIVATION REACTIONS)
+!
+      ELSE IF(MT3.GE.151.AND.MT3.LE.200) THEN
+         MTCAT = 6
       END IF
 !
 !     ALL VALID ENERGY DEPOSIT REACTIONS ARE MTCAT = 3
