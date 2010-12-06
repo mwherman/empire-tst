@@ -28,6 +28,10 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.05   December 2010    A. Trkov
+!-V                        1. Disable testing for file completeness
+!-V                           in derived files (LDRV>0)
+!-V                        2. Fix bug reading/writing scratch files.
 !-V         Version 8.04   October 2010    A. Trkov
 !-V                        Fix test on ISR
 !-V         Version 8.03   June 2009   A. Trkov
@@ -200,9 +204,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -1075,7 +1079,7 @@
          ELSE
             MFN = MF - 1
          END IF
-         CALL EFTEST(MFO,MFN)
+         IF(LDRV.EQ.0) CALL EFTEST(MFO,MFN)
       END IF
 !
 !     CHECK END OF TAPE FLAG
@@ -1797,6 +1801,7 @@
 !     PROCESS LAST CONTROL RECORD
 !
    10 CALL RDCONT
+      LDRV= L1H
 !
 !     READ IN COMMENT RECORDS
 !
@@ -1829,6 +1834,10 @@
          CALL RDCONT
          IF(L1H.EQ.9.OR.L1H.EQ.10)  THEN
             NISSEC = NISSEC + 1
+!
+            IF(NISSEC.GT.SZLMF)
+     &         STOP 'FIZCON ERROR - SZLMF limit exceeded'
+!
             MTISO(NISSEC) = L2H
          END IF
          N1 = N1 + 1
@@ -3056,6 +3065,9 @@
 !     SAVE SECTION IF NEEDED FOR FILE 9 AND 10 TESTS
 !
    20 IF(NISSEC.NE.0)   THEN
+!
+         IF(NISSEC.GT.SZLMF) STOP 'FIZCON ERROR - SZLMF limit exceeded'
+!
          DO NNN=1,NISSEC
             IF(MTISO(NNN).EQ.MT)  THEN
               CALL RDWRIT(ISCRU2,2)
@@ -9748,7 +9760,7 @@
       DO I=1,NP,12
          DO J=1,12
             K = I - 1 + J
-            IF(I.LE.NP)  THEN
+            IF(K.LE.NP)  THEN
                X1(J) = X(K)
                Y1(J) = Y(K)
             ELSE
