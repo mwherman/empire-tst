@@ -28,6 +28,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.09   December 2010   A. Trkov
+!-V                        1. Allow ZAP=0 for MT18 in MF8
 !-V         Version 8.08   November 2010   A. Trkov
 !-V                        1. Added MT's for Activation files
 !-V                        2. Fix checking of MPAR in MF32 for LRP=1,2
@@ -226,9 +228,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !---MDC---
 !
 !     Define variable precision
@@ -3592,8 +3594,8 @@
             END IF
             LFSP = LFSO
             JZAP = JZAO
-!***********CHECK THAT ZAP IS NOT ZERO
-            IF(ZAP.EQ.0.0) THEN
+!***********CHECK THAT ZAP IS NOT ZERO (except if MF=18; A. Trkov)
+            IF(ZAP.EQ.0.0 .AND. MT.NE.18) THEN
                EMESS = 'ZAP CANNOT BE 0.0'
                CALL ERROR_MESSAGE(NSEQP1)
             ENDIF
