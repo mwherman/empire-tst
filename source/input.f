@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1882 $
+Ccc   * $Rev: 1887 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
+Ccc   * $Date: 2010-12-08 07:34:10 +0100 (Mi, 08 Dez 2010) $
 
 C
       SUBROUTINE INPUT
@@ -2985,7 +2985,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, Sept. 2010    |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1887 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
