@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1865 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2010-10-06 02:40:08 +0200 (Mi, 06 Okt 2010) $
+Ccc   * $Rev: 1886 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2010-12-08 06:39:51 +0100 (Mi, 08 Dez 2010) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -854,7 +854,7 @@ C----------Add PE contribution to energy spectra (angle int.)
            ftmp = 0.d0
            DO ie = 1, NDEcse
               CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
-              CSEt(ie,nejc ) = CSEt(ie,nejc ) + CSEmsd(ie,nejc)	      
+              CSEt(ie,nejc ) = CSEt(ie,nejc ) + CSEmsd(ie,nejc)      
               ftmp = ftmp + DE*CSEmsd(ie,nejc)
            ENDDO
 C----------Add PE contribution to the total NEJC emission
@@ -2013,17 +2013,18 @@ C------------Print residual nucleus population
              ENDIF
 
              poptot = 0.0
-             DO j = 1, NLW
-               DO i = 1, NEX(nnur)
-                 poptot = poptot + POP(i,j,1,nnur) + POP(i,j,2,nnur)
-               ENDDO
-               poptot = poptot 
-     &                - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
-     &                - 0.5*(POP(NEX(nnur),j,1,nnur) 
-     &                +      POP(NEX(nnur),j,2,nnur))
-
-             ENDDO
-
+             IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
+                DO j = 1, NLW
+                  DO i = 1, NEX(nnur)
+                    poptot = poptot + POP(i,j,1,nnur) + POP(i,j,2,nnur)
+                  ENDDO
+                  poptot = poptot 
+     &                   - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
+     &                   - 0.5*(POP(NEX(nnur),j,1,nnur) 
+     &                   +      POP(NEX(nnur),j,2,nnur))
+               
+                ENDDO
+             ENDIF 
              poptot = poptot*DE
              poplev = 0.0
              DO i = 1, NLV(nnur)
@@ -2331,7 +2332,7 @@ C                   ENDDO
      &                '(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &                totspec      
                     WRITE (12,*) ' '    
-		    
+   
                   ENDIF ! LHMS.EQ.0
                  ELSE !  then (nejc.GE.1 .AND. nejc.LE.2)
 C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
@@ -3077,15 +3078,15 @@ C     ENDDO
                 CALL AUERST(0,nejc)
               ENDDO
             ENDIF
-	    IF (FIRst_ein) then
+            IF (FIRst_ein) then
               WRITE (8,'(//,11X,''********************************'')')
               WRITE (8,'(   11x,'' Total inclusive spectra (C.M.)'')')
               WRITE (8,'(11x,''********************************''/)')
               DO nejc = 0, NEJcm
-                CALL Print_Total_Inclusive(nejc)	
+                CALL Print_Total_Inclusive(nejc)
                 CALL PLOT_INCLUSIVE_EMIS_SPECTRA(nejc)
               ENDDO   
-	    ENDIF  
+            ENDIF  
          ENDIF
       ENDIF
 C-----
@@ -3394,7 +3395,7 @@ C---------Exact endpoint
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec      
           WRITE (12,*) ' '    
-	  
+ 
          ENDIF
 
 C--------helium-3
