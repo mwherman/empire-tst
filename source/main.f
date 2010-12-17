@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1886 $
+Ccc   * $Rev: 1889 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-12-08 06:39:51 +0100 (Mi, 08 Dez 2010) $
+Ccc   * $Date: 2010-12-17 23:40:32 +0100 (Fr, 17 Dez 2010) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1841,6 +1841,19 @@ c                 ENDDO
 
          ENDIF
 
+         IF (csemist.NE.0.0D0 .and. IOUt.GT.0) THEN
+C----------Calculate average total life-time and width
+           taut = stauc*6.589E-22*2.0*PI/csemist
+           WRITE(8,'(/''  Average total   life-time'',G12.5,'' s'')')
+     &       taut
+           gamt = sgamc/2.0/PI/csemist
+           WRITE(8,'(''  Average total   width    '',G12.5,'' MeV'')')
+     &                gamt
+C          TAUT=6.589E-22/GAMT
+C          WRITE(8,'('' Average total life-time 1/width'',g12.5,
+C    &               '' s'')') TAUT
+         ENDIF
+
          IF (FISmod(nnuc).GT.0) THEN
            CSFis  = 0.d0 ! RCN Jan 2006
            DO m = 1, INT(FISmod(nnuc)) + 1
@@ -1871,18 +1884,6 @@ C-------------Calculate average fission life-time and width
      &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
               WRITE (8,*) ' '
            ENDIF
-         ENDIF
-         IF (csemist.NE.0.0D0 .and. IOUt.GT.0) THEN
-C----------Calculate average total life-time and width
-           taut = stauc*6.589E-22*2.0*PI/csemist
-           WRITE(8,'(/''  Average total   life-time'',G12.5,'' s'')')
-     &       taut
-           gamt = sgamc/2.0/PI/csemist
-           WRITE(8,'(''  Average total   width    '',G12.5,'' MeV'')')
-     &                gamt
-C          TAUT=6.589E-22/GAMT
-C          WRITE(8,'('' Average total life-time 1/width'',g12.5,
-C    &               '' s'')') TAUT
          ENDIF
          TOTcsfis = TOTcsfis + CSFis
 C--------Add compound elastic to shape elastic before everything falls
