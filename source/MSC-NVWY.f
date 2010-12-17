@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 1888 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2010-12-17 23:34:33 +0100 (Fr, 17 Dez 2010) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -806,8 +806,8 @@ C-----
          ie1 = 2
          IF (i.EQ.2) ie1 = 1
          DO j = 1, NLW, LTUrbo
+            emis = 0.0
             IF (POP(NEX(1),j,i,1).NE.0.0D0) THEN
-               emis = 0.0
                DO ix = 1, NDMSCS
                   DO jx = 1, NDMSCS
                      PIM(ix,jx) = 0.0
