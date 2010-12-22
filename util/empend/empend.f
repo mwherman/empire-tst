@@ -1,6 +1,6 @@
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2009/11/06 20:15:57 $ 
-Ccc   * $Id: empend.f,v 1.61 2010/05/10 16:49:57 trkov Exp $ 
+Ccc   * $Rev:  $
+Ccc   * $Author:  $
+Ccc   * $Date: $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
