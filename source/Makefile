@@ -1,6 +1,6 @@
-#$Rev: 1882 $
+#$Rev: 1893 $
 #$Author: mherman $
-#$Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
+#$Date: 2010-12-27 08:20:58 +0100 (Mo, 27 Dez 2010) $
 #
 #----GNU gfortran FORTRAN compiler
 #FC     =  gfortran
@@ -44,8 +44,8 @@ FC     =  ifort
 #FFLAGS = -arch pn4 -O3 -ipo -parallel
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
-FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
+#FFLAGS =  -C -ftrapuv -g -debug all
+FFLAGS =  -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
@@ -63,6 +63,21 @@ FFLAGS =  -C -ftrapuv -g -debug all
 #FFLAGS = -g --chk
 #----flag for Lahey/Fujitsu parallel
 #FFLAGS = --parallel
+
+#----From http://www.macresearch.org/best-fortran-compiler-leaopard
+#----For Debugging under gfortran:
+#gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none\
+#-fno-automatic
+#----For optimized code under gfortran:
+#gfortran -O3 -ftree-vectorize
+#----For Debugging under ifort:
+#FFLAGS = -m64 -g -debug all -check all -warn unused\
+#-fp-stack-check -heap-arrays -ftrapuv -check pointers\
+#-check bounds
+#----For optimized code under ifort
+#ifort -m64 -fast
+#Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
+
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\

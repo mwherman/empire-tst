@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 1893 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2010-12-27 08:20:58 +0100 (Mo, 27 Dez 2010) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -74,7 +74,7 @@ C-----
          IF (popt.NE.0.0D+0) THEN
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
-	    CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
+            CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
             IF (ENDf(Nnuc).EQ.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -104,6 +104,7 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
      &       Nejc.EQ.0) THEN
 C
 C           goto 123 (to skip primary gamma emission for debugging purposes)
+            GOTO 123
 C
             IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
 C
@@ -135,7 +136,7 @@ C
 C
             CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
-	    
+   
             IF (popll.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
