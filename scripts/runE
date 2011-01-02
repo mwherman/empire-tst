@@ -59,6 +59,9 @@ def runE(proj):
     cp(proj+'.inp', 'INPUT.DAT')
     
     # check if the file exists and has size > 0, if so keep it
+    if not isEmpty(proj+'-s.endf'):
+        cp(proj+'-s.endf', proj+'-prev.endf')
+        print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
     if not isEmpty(proj+'.lev'):
         cp(proj+'.lev', 'LEVELS')
         print ('Using existing file with levels: %s' % proj+'.lev')
