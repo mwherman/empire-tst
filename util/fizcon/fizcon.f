@@ -1,6 +1,6 @@
-! $Rev: 1898 $                                                         |
-! $Date: 2010-12-29 21:58:06 +0100 (Mi, 29 Dez 2010) $                                                     
-! $Author: mherman $                                                  
+! $Rev: 1903 $                                                         |
+! $Date: 2011-01-04 13:05:49 +0100 (Di, 04 Jän 2011) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.06   January 2011    A. Trkov
+!-V                        Implement resolved resonance option LRF=7
 !-V         Version 8.05   December 2010    A. Trkov
 !-V                        1. Disable testing for file completeness
 !-V                           in derived files (LDRV>0)
@@ -206,9 +208,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -2174,6 +2176,8 @@
                   CALL CHKAA
                ELSE IF(LRF.EQ.6) THEN
                  CALL CHKHR
+               ELSE IF(LRF.EQ.7) THEN
+                 CALL CHKRL
                END IF
             ELSE IF(LRU.EQ.2)   THEN
                CALL CHKUR(LRF,LFW)
@@ -2580,6 +2584,41 @@
 !
       RETURN
       END SUBROUTINE CHKHR
+!
+!***********************************************************************
+!
+      SUBROUTINE CHKRL
+!
+!     CHECK R-MATRIX-LIMITED REPRESENTATION
+!
+      IMPLICIT NONE
+      INTEGER(KIND=I4) :: J,NJS,NPP,IZA,IA1,IB1
+!
+!     Read and test energy dependent scattering radius
+!
+      IF(NRO.NE.0)   THEN
+         CALL RDTAB1
+      END IF
+      CALL RDCONT
+      NJS=N1H
+      CALL RDLIST
+      NPP=L1L
+      IZA=ZA
+!     Checking of the contents of the LIST records
+      DO J=1,NPP
+!         Check charge conservation
+          IA1=Y((J-1)*12+3)
+          IB1=Y((J-1)*12+4)
+          CALL TEST3(IZA/1000,IA1+IB1,'Charge sum')
+      END DO
+!
+      DO J=1,NJS
+         CALL RDLIST
+         CALL RDLIST
+      END DO
+!
+      RETURN
+      END SUBROUTINE CHKRL
 !
 !***********************************************************************
 !
@@ -7214,7 +7253,7 @@
 !
       INTEGER(KIND=I4) :: NIS,NER,LRU,LRF,NROO,NIT,LCOMP,ISR,NLS
       INTEGER(KIND=I4) :: NSRS,NLRS,NLSA,NDIGIT
-      INTEGER(KIND=I4) :: NI,N,NN,I1,NM,NNN
+      INTEGER(KIND=I4) :: NI,N,NN,I1,NM,NNN,NJSX,I3
 !
 !     CHECK THAT SECTION IS IN THE INDEX
 !
@@ -7282,7 +7321,16 @@
 !
                   IF(NSRS.NE.0)  THEN
                      DO I1=1,NSRS
-                        CALL RDLIST
+                        IF(LRF.EQ.7) THEN
+                            CALL RDCONT
+                            NJSX=L1H
+                            DO I3=1,NJSX
+                                CALL RDLIST
+                            END DO
+                            CALL RDLIST
+                        ELSE
+                            CALL RDLIST
+                        END IF
                      END DO
 !
 !                 LONG RANGE CORRELATIONS
