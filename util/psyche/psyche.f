@@ -1,4 +1,6 @@
-! *
+! $Rev: 1903 $                                                         |
+! $Date: 2011-01-04 13:05:49 +0100 (tor, 04 jan 2011) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,6 +31,9 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.02   October  2011     A. Trkov
+!-V                        Implement resolved resonance option LRF=7
+!-V                        (no extensive checking of parameters is done).
 !-V         Version 8.01   October  2010     A. Trkov
 !-V                        Cosmetic changes.
 !-V         Version 8.00   August  2008     A. Trkov
@@ -148,9 +153,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -1598,6 +1603,15 @@
      &                     12*NRS,NRS,EL,EU,LRF)
                END DO
             END DO
+         END DO
+!
+!     R-matrix-limited
+!
+      ELSE IF(LRF.EQ.7) THEN
+         CALL RDLIST
+         DO NJ=1,NLS
+            CALL RDLIST
+            CALL RDLIST
          END DO
       END IF
 !
