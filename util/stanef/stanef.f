@@ -1,6 +1,6 @@
-! $Rev: 1897 $                                                        
-! $Date: 2010-12-29 21:55:51 +0100 (Mi, 29 Dez 2010) $
-! $Author: mherman $
+! $Rev: 1902 $                                                        
+! $Date: 2011-01-04 12:27:22 +0100 (Di, 04 Jän 2011) $
+! $Author: atrkov $
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,6 +29,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.03   January 2011     A. Trkov
+!-V                        Implement resolved resonance option LRF=7
 !-V         Version 8.02   January 2010     A. Trkov
 !-V                        Allow long LIST records (ASCII only).
 !-V         Version 8.01   November 2008     A. Trkov
@@ -168,9 +170,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -1685,6 +1687,7 @@
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LBK,LPS
       INTEGER(KIND=I4) :: I,II,J,N,NCR,LIL,NL,NS,NJ
+      INTEGER(KIND=I4) :: IFG,KRM,KRL
       REAL(KIND=R4) :: C1,C2
 !
       CALL OUT_STATUS
@@ -1758,7 +1761,13 @@
                               END DO
                            END DO
                         END DO
-!
+                     CASE (7)      ! R-Matrix Limited
+                        NJS=NLS
+                        CALL CANT(C1,C2,L1,L2,N1,N2)
+                        DO N=1,NJS
+                            CALL CANT(C1,C2,L1,L2,N1,N2)
+                            CALL CANT(C1,C2,L1,L2,N1,N2)
+                        END DO
                   END SELECT
 !
 !              UNRESOLVED RESONANCE PARAMETERS
@@ -2576,7 +2585,7 @@
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP,ISR
       INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
 !trkov    start
-      INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN
+      INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN,NJSX,I3
 !trkov    end
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,II,I2,N,NN
@@ -2633,6 +2642,12 @@
                   CALL CONT(C1,C2,L1,L2,NSRS,NLRS)
                   IF(NSRS.GT.0)  THEN
                      DO I2=1,NSRS
+                        IF(LRF.EQ.7) THEN
+                          CALL CONT(C1,C2,NJSX,L2,N1,N2)
+                          DO I3=1,NJSX
+                            CALL CANT(C1,C2,L1,L2,N1,N2)
+                          END DO
+                        END IF
                         CALL CANT(C1,C2,L1,L2,N1,N2)
                      END DO
                   END IF
