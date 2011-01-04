@@ -1,6 +1,6 @@
-! $Rev: 1899 $                                                          | 
-! $Date: 2010-12-29 21:58:43 +0100 (Mi, 29 Dez 2010) $                                                     
-! $Author: mherman $                                                  
+! $Rev: 1904 $                                                          | 
+! $Date: 2011-01-04 13:09:15 +0100 (Di, 04 Jän 2011) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -30,6 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.10   January 2011   A. Trkov
+!-V                        Improved checking of MF32 LRF=7 option
 !-V         Version 8.09   December 2010   A. Trkov
 !-V                        1. Allow ZAP=0 for MT18 in MF8
 !-V         Version 8.08   November 2010   A. Trkov
@@ -230,9 +232,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
 !---MDC---
 !
 !     Define variable precision
@@ -2564,14 +2566,27 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: IFG,KRM,NJS,KRL
+      INTEGER(KIND=I4) :: IFG,KRM,NJS,KRL,NPP
       INTEGER(KIND=I4) :: J
 !
       IFG = L1H
       KRM = L2H
       NJS = N1H
       KRL = N2H
+!     Test flag for the definition of GAM
+      CALL TEST1(IFG,0,1,'IFG',1)
+!     Test flag for the R-matrix formula
+      CALL TEST1(KRM,1,4,'KRM',1)
+!     Test flag for kinematics (classical or relativistic)
+      CALL TEST1(KRL,0,1,'KRL',1)
+!
       CALL RDLIST
+!     Number of particle pairs must be bigger than zero
+      NPP=L1L
+      CALL TEST1(NPP,1,9999,'NPP',1)
+!     Check consistency of parameters of the LIST record
+      CALL TEST2(NPL,12*NPP,'NPL')
+      CALL TEST2(N2L, 2*NPP,'N2L')
 !
       DO J=1,NJS
          CALL RDLIST
@@ -4532,7 +4547,7 @@
       INTEGER(KIND=I4) :: NRB,NCOUNT,NVS,IDP,IDPM
       INTEGER(KIND=I4) :: LB,LT,NE,NE2,NPM,NTT,NEC
       INTEGER(KIND=I4) :: I1,I3,NL,J
-      INTEGER(KIND=I4) :: NDIGIT,NNN,NM
+      INTEGER(KIND=I4) :: NDIGIT,NNN,NM,NJSX
       REAL(KIND=R4) :: AP
 !
       LRF = L2H
@@ -4683,16 +4698,26 @@
 !   
          IF(NSRS.GT.0)  THEN
             DO I1=1,NSRS
-               CALL RDLIST
-               MPAR = L1L
                IF     (LRF.LE.3) THEN
+!                 Breit-Wigner and Reich-Moore
                   MPARM = 5
                ELSE IF(LRF.EQ.4) THEN
+!                 Adler-Adler
                   MPARM = 8
-               ELSE IF(LRF.EQ.7) THEN
+               ELSE
+!                R-Matrix Limited (LRF=7) and other
 !                Checking coding not implemented
+                 CALL RDCONT
+                 NJSX=L1H
+                 DO I3=1,NJSX
+                     CALL RDLIST
+                 END DO
+                 CALL RDLIST
+!                IERX=1
                  GO TO 100
                ENDIF
+               CALL RDLIST
+               MPAR = L1L
                CALL TEST1(MPAR,1,MPARM,'MPAR',1)
                NRB = N2L
 ! WARNING: Limit on NRB is not prescribed by ENDF but may give
@@ -4708,6 +4733,7 @@
 !   
 !        LONG RANGE CORRELATIONS
 !   
+            IF(LRF.EQ.7) CALL TEST2(NLRS,0,'NLRS')
             DO I1=1,NLRS
                CALL RDLIST
 !              Check IDP flag
