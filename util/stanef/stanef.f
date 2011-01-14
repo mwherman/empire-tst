@@ -1,5 +1,5 @@
-! $Rev: 1902 $                                                        
-! $Date: 2011-01-04 12:27:22 +0100 (Di, 04 Jän 2011) $
+! $Rev: 1906 $                                                        
+! $Date: 2011-01-14 23:05:28 +0100 (Fr, 14 Jän 2011) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -29,6 +29,9 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.04   January 2011     A. Trkov
+!-V                        1. Read data in double-precision to avoid underflow
+!-V                        2. Fix processing of MF32, LCOMP=2, LRF=7
 !-V         Version 8.03   January 2011     A. Trkov
 !-V                        Implement resolved resonance option LRF=7
 !-V         Version 8.02   January 2010     A. Trkov
@@ -170,9 +173,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.03'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -265,7 +268,7 @@
 !     CONTENTS OF FIELDS ON A HEAD/CONT RECORD
 !
       INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
-      REAL(KIND=R4)    :: C1H,C2H
+      REAL(KIND=R8)    :: C1H,C2H
 !
 !     TEXT PORTION OF A MT=451 RECORD
 !
@@ -279,7 +282,7 @@
 !trkov    start
       INTEGER(KIND=I4), PARAMETER :: POINTSMAX=250000
 !trkov    end
-      REAL(KIND=R4), DIMENSION(POINTSMAX) :: X,Y
+      REAL(KIND=R8), DIMENSION(POINTSMAX) :: XP,YP
 !
 !     TAGS ON CURRENT RECORD
 !
@@ -985,7 +988,7 @@
       INTEGER(KIND=I4) :: NOFF,NFREV,NCC,MODC
       INTEGER(KIND=I4) :: MFTC,MFC,MTC
       INTEGER(KIND=I4) :: K,N,NN
-      REAL(KIND=R4) :: C1,C2,ZA
+      REAL(KIND=R8) :: C1,C2,ZA
       REAL(KIND=4) ::ZZA
 !
       INTEGER(KIND=I4), PARAMETER :: NSECMAX=1000
@@ -1610,7 +1613,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2,N,NE
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
    10 CALL OUT_STATUS
 !
@@ -1688,7 +1691,7 @@
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LBK,LPS
       INTEGER(KIND=I4) :: I,II,J,N,NCR,LIL,NL,NS,NJ
       INTEGER(KIND=I4) :: IFG,KRM,KRL
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       CALL OUT_STATUS
 !
@@ -1827,7 +1830,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS IN FILE 3
 !
@@ -1862,7 +1865,7 @@
       INTEGER(KIND=I4) :: LTT,LI,NE
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS IN FILE 4
 !
@@ -1940,7 +1943,7 @@
       INTEGER(KIND=I4) :: NK,NE,LF
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2003,7 +2006,7 @@
       INTEGER(KIND=I4) :: NK,NE,LF,NMU
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,J,N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2076,7 +2079,7 @@
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,N,NN
       REAL(KIND=R4), DIMENSION(4) :: CFLAG
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2095,7 +2098,7 @@
                CALL CANT(C1,C2,L1,L2,N1,N2)
                NS = N2
                DO NN=1,NS+1
-                  CFLAG(NN) = Y(6*(NN-1)+1)
+                  CFLAG(NN) = YP(6*(NN-1)+1)
                END DO
                IF(CFLAG(1).NE.0.) THEN
                   CALL CANT2(C1,C2,L1,L2,N1,NB)
@@ -2164,7 +2167,7 @@
       INTEGER(KIND=I4) :: LEP1,NSP,LCON,LCOV,NER,NO,NS
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N,NN
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2254,7 +2257,7 @@
       INTEGER(KIND=I4) :: NS
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2292,7 +2295,7 @@
       INTEGER(KIND=I4) :: LO,NK
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2340,7 +2343,7 @@
       INTEGER(KIND=I4) :: LI,LTT,NI,NK,NKL,NE
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: K,N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2418,7 +2421,7 @@
       INTEGER(KIND=I4) :: NC,NE
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N,NN
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2458,7 +2461,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2491,7 +2494,7 @@
       INTEGER(KIND=I4) :: NK,LAW,NE
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2544,7 +2547,7 @@
       INTEGER(KIND=I4) :: NSS
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2584,12 +2587,10 @@
 !
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LCOMP,ISR
       INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
-!trkov    start
       INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN,NJSX,I3
-!trkov    end
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,II,I2,N,NN
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       CALL OUT_STATUS
 !
@@ -2667,6 +2668,12 @@
                   END IF
                   IF((LRF.GE.1 .AND. LRF.LE.3) .OR. LRF.EQ.7) THEN
                      CALL CANT(C1,C2,L1, L2,NRSA12,NRSA)
+                     IF(LRF.EQ.7) THEN
+                        DO I2=1,NLS
+                           CALL CANT(C1,C2,L1,L2,N1,N2)
+                           CALL CANT(C1,C2,L1,L2,N1,N2)
+                        END DO
+                     END IF
                      CALL CONT(C1,C2,L1,NNN,    NM,  N2)
                      DO I2=1,NM
                         CALL TEXTR(1)
@@ -2718,7 +2725,7 @@
       INTEGER(KIND=I4) :: MTL,NL,NC,NI
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: I,J,N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2779,7 +2786,7 @@
       INTEGER(KIND=I4) :: NI,NMT1,NL,NL1,NSS
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: J,N,NN
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2834,7 +2841,7 @@
       INTEGER(KIND=I4) :: NK
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: N
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2872,7 +2879,7 @@
       INTEGER(KIND=I4) :: NS,NL,NC,NI
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: J,N,NN
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
 !     PROCESS ALL SECTIONS
 !
@@ -2959,7 +2966,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
@@ -3025,7 +3032,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2,I1,I2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
@@ -3060,7 +3067,7 @@
          I2=MIN(6*(POINTSMAX/6),N1)
 !
          DO WHILE(I1.LE.N1)
-           READ(ITAPE,'(6E11.4)') (Y(N-I1+1),N=I1,I2)
+           READ(ITAPE,'(6E11.4)') (YP(N-I1+1),N=I1,I2)
 !
 !          OUTPUT THE RECORD
 !
@@ -3072,14 +3079,14 @@
                 STOP 'STANEF ERRORR - LIST too big for binary output'
               END IF
 !
-              WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,(Y(N),N=1,N1)
+              WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,(YP(N),N=1,N1)
            ELSE
               MM = 1
               DO N=I1,I2,6
                  NU = MIN0(6,I2+1-N)
                  DO M=1,6
                     IF(M.LE.NU)   THEN
-                       CALL NORMAL(Y(MM),FLOATS(M))
+                       CALL NORMAL(YP(MM),FLOATS(M))
                     ELSE
                        FLOATS(M) = ' '
                     END IF
@@ -3110,7 +3117,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
@@ -3130,7 +3137,7 @@
 !     READ IN DATA ARRAY
 !
       NP = N2
-      READ(ITAPE,'(6E11.4)')  (X(N),Y(N),N=1,NP)
+      READ(ITAPE,'(6E11.4)')  (XP(N),YP(N),N=1,NP)
 !
 !     OUTPUT RECORD
 !
@@ -3139,7 +3146,7 @@
 !        BINARY MODE
 !
          WRITE(OTAPE) MAT,MF,MT,C1,C2,L1,L2,N1,N2,                      &       
-     &           (NBT(N),INTRP(N),N=1,N1),(X(N),Y(N),N=1,NP)
+     &           (NBT(N),INTRP(N),N=1,N1),(XP(N),YP(N),N=1,NP)
 !
 !        FORMAT THE FLOATING POINT NUMBERS
 !
@@ -3153,8 +3160,8 @@
                   FLOATS(MM) = ' '
                   FLOATS(MM+1) = ' '
                ELSE
-                  CALL NORMAL(X(NN),FLOATS(MM))
-                  CALL NORMAL(Y(NN),FLOATS(MM+1))
+                  CALL NORMAL(XP(NN),FLOATS(MM))
+                  CALL NORMAL(YP(NN),FLOATS(MM+1))
                END IF
                MM = MM + 2
             END DO
@@ -3178,7 +3185,7 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      REAL(KIND=R4) :: C1,C2
+      REAL(KIND=R8) :: C1,C2
 !
       INTEGER(KIND=I4), INTRINSIC :: MIN0
 !
@@ -3244,7 +3251,7 @@
       IMPLICIT NONE
 !
       CHARACTER(LEN=11) :: CX
-      REAL(KIND=R4) :: X
+      REAL(KIND=R8) :: X
 !
       INTEGER(KIND=I4), INTRINSIC :: IFIX, IABS
       REAL(KIND=R4), INTRINSIC :: ABS
@@ -3252,12 +3259,13 @@
       CHARACTER(LEN=1) :: CSIGN
       INTEGER(KIND=I4) :: IPOW
       REAL(KIND=R4) :: POWER
-      REAL(KIND=R8) :: FNUM
+      REAL(KIND=R8) :: FNUM,ZERO
       REAL(KIND=4) :: SPOWER
 !
 !     INITIALIZE
 !
-      IF(X.NE.0.0)   THEN
+      ZERO=0
+      IF(X.NE.ZERO)   THEN
 !
 !        FIND POWER OF NUMBER
 !
@@ -3273,7 +3281,7 @@
 !
 !        FIND NORMALIZED MANTISSA
 !
-         FNUM = DBLE(X)*(10.0D00**(-IPOW))
+         FNUM = X*(10.0D00**(-IPOW))
          IPOW = IABS(IPOW)
 !
 !        CHECK THE EXPONENT
