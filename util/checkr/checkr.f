@@ -1,5 +1,5 @@
-! $Rev: 1904 $                                                          | 
-! $Date: 2011-01-04 13:09:15 +0100 (Di, 04 Jän 2011) $                                                     
+! $Rev: 1907 $                                                          | 
+! $Date: 2011-01-16 05:04:01 +0100 (So, 16 Jän 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.11   January 2011   A. Trkov
+!-V                        Fix test for sequence when it flips over 99999
+!-V                        Correct checking of final states in MF40
 !-V         Version 8.10   January 2011   A. Trkov
 !-V                        Improved checking of MF32 LRF=7 option
 !-V         Version 8.09   December 2010   A. Trkov
@@ -232,9 +235,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
 !---MDC---
 !
 !     Define variable precision
@@ -5210,7 +5213,7 @@
 !
       INTEGER(KIND=I4) :: NS,NL
       INTEGER(KIND=I4) :: NC,NI
-      INTEGER(KIND=I4) :: LFS,LFSP
+      INTEGER(KIND=I4) :: LFS,LFSP,MATP,MATPP
       INTEGER(KIND=I4) :: MAT1,MF1,MT1,LFS1
       INTEGER(KIND=I4) :: MAT1B,MF1B,MT1B,LFS1B
       INTEGER(KIND=I4) :: IE,ISET
@@ -5237,20 +5240,23 @@
 !     CHECK NUMBER OF EXCITED STATES
 !
       NS = N1H
-      CALL TEST1(NS,1,NSUBSMAX,'NS',1)
+!     *** This test is deactivated because the limit is not in the manual
+!     CALL TEST1(NS,1,NSUBSMAX,'NS',1)
 !
 !     PROCESS EACH EXCITED FINAL STATE
 !
       LFSP = -1
+      MATPP= -1
       DO N=1,NS
          CALL RDCONT
+         MATP= L1H
          LFS = L2H
-         IF (LFS.LE.LFSP) THEN
+         IF (MATP.EQ.MATPP .AND. LFS.LE.LFSP) THEN
             EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING LFS'
             CALL ERROR_MESSAGE(NSEQP1)
-         ELSE
-            LFSP = LFS
          END IF
+         MATPP= MATP
+         LFSP = LFS
 !
 !     PROCESS EACH COVARIANCE MATRIX
 !
@@ -6194,7 +6200,7 @@
 !     CHECK SEQUENCE NUMBER
 !
       IF(NSEQP.NE.NSEQ+1.AND.ASEQ.NE.' ' .AND.
-     &   NSEQP.LT.99999)  THEN
+     &   NSEQ .LT.99999)  THEN
          EMESS = 'OUT OF SEQUENCE AT'
          CALL ERROR_MESSAGE(NSEQP)
       END IF
