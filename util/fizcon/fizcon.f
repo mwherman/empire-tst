@@ -1,5 +1,5 @@
-! $Rev: 1903 $                                                         |
-! $Date: 2011-01-04 13:05:49 +0100 (Di, 04 Jän 2011) $                                                     
+! $Rev: 1908 $                                                         |
+! $Date: 2011-01-16 05:04:36 +0100 (So, 16 Jän 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.07   January 2011    A. Trkov
+!-V                        Fix option LRF=7, LCOMP=2
 !-V         Version 8.06   January 2011    A. Trkov
 !-V                        Implement resolved resonance option LRF=7
 !-V         Version 8.05   December 2010    A. Trkov
@@ -208,9 +210,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -2604,13 +2606,13 @@
       CALL RDLIST
       NPP=L1L
       IZA=ZA
-!     Checking of the contents of the LIST records
-      DO J=1,NPP
-!         Check charge conservation
-          IA1=Y((J-1)*12+3)
-          IB1=Y((J-1)*12+4)
-          CALL TEST3(IZA/1000,IA1+IB1,'Charge sum')
-      END DO
+!     Checking of the contents of the LIST records ???
+!      DO J=1,NPP
+!!         Check charge conservation
+!          IA1=Y((J-1)*12+3)
+!          IB1=Y((J-1)*12+4)
+!          CALL TEST3(IA1+IB1,IZA/1000,'Charge sum')
+!      END DO
 !
       DO J=1,NJS
          CALL RDLIST
@@ -7292,8 +7294,8 @@
 !
                CALL RDCONT
                LCOMP = L2H
-               ISR   = N2H
                NLS   = N1H
+               ISR   = N2H
 !
 !              ENDF-5 FORMAT
 !
@@ -7356,6 +7358,12 @@
                    END IF
                  END IF
                  CALL RDLIST
+                 IF(LRF.EQ.7) THEN
+                    DO I1=1,NLS
+                       CALL RDLIST
+                       CALL RDLIST
+                    END DO
+                 END IF
                  CALL RDCONT
                  NDIGIT=L1H
 !                If undefined, assume NDIGIT=2 to conform 
