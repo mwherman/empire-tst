@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1912 $
+Ccc   * $Rev: 1913 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-17 22:39:48 +0100 (Mo, 17 Jän 2011) $
+Ccc   * $Date: 2011-01-18 00:09:55 +0100 (Di, 18 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1359,11 +1359,8 @@ C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay
 C--------
          popleft = 0.d0
-C--------Ensure that full gamma cascade in the first CN is
-C--------accounted for in the case of ENDF calculations
-         IF (ENDf(1).GT.0.0D0) GCAsc = 1.0
 C--------Turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
-C--------in the first CN
+C--------in the first CN, it is preferred to use input parameter GCASC (0=OFF,1=ON) 
          kemin = 1
          IF (nnuc.EQ.1) THEN
 C--------Turn  off (kemin=NEX(NNUC)) if gamma cascade is not requested
@@ -1381,7 +1378,6 @@ C--------Account for widths fluctuations (HRTW)
             IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
      &        CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
             kemax = max(NEX(nnuc) - 1,1)
-            GCAsc = 1.0
             IF (FISsil(nnuc)) THEN
                IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
      &             ' mb'

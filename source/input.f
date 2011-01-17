@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1912 $
+Ccc   * $Rev: 1913 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-17 22:39:48 +0100 (Mo, 17 Jän 2011) $
+Ccc   * $Date: 2011-01-18 00:09:55 +0100 (Di, 18 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -223,7 +223,10 @@ C        ENDf(0) = 0.0
          NEX(1) = 60
          NEXreq = 60
          FITlev = 0.0
-         GCAsc = -1.0
+C--------Full gamma cascade becomes the default setting  (Jan 2011)
+C--------Use GCASC input parameter to turn it off
+C        GCAsc = -1.0
+         GCAsc =  1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
          BETav = 4.0
@@ -284,7 +287,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (default)
@@ -1058,100 +1061,52 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
-
-         ELSE
-
+	   ELSE
 C
-
 C           ENDF=0
-
 C
 C-----------We fix below target ENDf flag since it escapes normal setting
-
             IF (ENDf(0).EQ.0) ENDf(0) = 1
-
             DO iac = 0, NEMc
-
             DO ih = 0, nemh
-
             DO it = 0, nemt
-
             DO id = 0, nemd
-
             DO ia = 0, nema
-
             DO ip = 0, nemp
-
             DO in = 0, nemn
-
               mulem = iac + ia + ip + in + id + it + ih
-
               if(mulem.eq.0) cycle
-
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
-
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
 
-
-
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
-
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-
-
 
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
 
-
-
 C             residues must be heavier than alpha
-
               if(atmp.le.4 . or. ztmp.le.2) cycle
-
               izatmp = INT(1000*ztmp + atmp)
-
               CALL WHERE(izatmp,nnuc,iloc)
 
-
-
 C             Comment the following block and uncommment the line after the block for all-exclusive spectra
-
               ENDf(nnuc) = 0
-
               EXClusiv = .TRUE.
 
-
-
             ENDDO
-
             ENDDO
-
             ENDDO
-
             ENDDO
-
             ENDDO
-
             ENDDO
-
             ENDDO
-
             ENDf(0) = 0
-
-            ENDf(1) = 0
-
-
+C           ENDf(1) = 0
 
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
-
-
-
 
 
          ENDIF
@@ -1177,7 +1132,9 @@ C
             WRITE (8,*) ' '
          ENDIF
          IF (DEGa.GT.0) GCAsc = 1.
-         IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
+C        Commented in Jan 2011
+C        IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
+C
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
             WRITE (8,*) ' '
@@ -1492,7 +1449,7 @@ C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
             IOUt = 1
             NEXreq = MIN(NEXreq,30)
-            GCAsc = 1
+C           GCAsc = 1      ! already set as default in Jan 2011
             MSD = 0
             MSC = 0
             LHMs = 0
@@ -3081,7 +3038,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1912 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1913 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -4884,27 +4841,20 @@ C             Setting ENDF for all emission loops
               NENdf = INT(val)
               IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
-
                  WRITE (8,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
-
                  WRITE (12,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                      GOTO 100
               ENDIF
               IF(NENdf.EQ.0) THEN
-
                  WRITE ( 8,'('' ENDF formatting disabled'')')
-
                  WRITE (12,'('' ENDF formatting disabled'')')
-
                  GOTO 100
-
               ENDIF
-
              ENDIF
              IF(val.LT.0) THEN
                WRITE (8,'('' WRONG ENDF value in input'',I3)')
@@ -5936,12 +5886,12 @@ C--------TRISTAN (MSD) input **** done ****
 C-----
          IF (name.EQ.'GCASC ') THEN
             GCAsc = val
-            IF (GCAsc.NE.0.0D0) WRITE (8,
-     &              '('' Full gamma cascade in the first CN selected'')'
-     &              )
+            IF (GCAsc.GT.0.0D0) WRITE (8,
+     &       '('' Full gamma cascade in the first CN selected'')')
             IF (GCAsc.EQ.0.0D0) WRITE (8,
-     &             '('' Only primary gammas in the first CN selected'')'
-     &             )
+     &       '(''  Full gamma cascade is not followed'')')
+            IF (GCAsc.LT.0.0D0) WRITE (8,
+     &       '(''   Full gamma cascade is not followed above 20 MeV'')')
             GOTO 100
          ENDIF
 C-----
