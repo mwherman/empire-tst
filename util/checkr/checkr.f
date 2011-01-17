@@ -1,5 +1,5 @@
-! $Rev: 1907 $                                                          | 
-! $Date: 2011-01-16 05:04:01 +0100 (So, 16 Jän 2011) $                                                     
+! $Rev: 1911 $                                                          | 
+! $Date: 2011-01-17 20:44:45 +0100 (Mo, 17 Jän 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.12   January 2011   A. Trkov
+!-V                        Improve testing of lumped reaction MTL
 !-V         Version 8.11   January 2011   A. Trkov
 !-V                        Fix test for sequence when it flips over 99999
 !-V                        Correct checking of final states in MF40
@@ -235,9 +237,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
 !---MDC---
 !
 !     Define variable precision
@@ -4915,13 +4917,12 @@
 !
 !        CHECK SEQUENCING OF MTL-VALUES
 !
-         IF(MTL.EQ.(MTLP+1).OR.MTL.EQ.MTLP) THEN
-            MTLP = MTL
-         ELSE
-            WRITE(EMESS,'(A,I3,A)')                                     &       
-     &         'MTL=',MTL,' IS ASSIGNED OUT OF ORDER'
+         IF(MTL.GT.(MTLP+1)) THEN
+            WRITE(EMESS,'(A,I3,A,I3)')                                  &       
+     &         'MTL=',MTL,' IS ASSIGNED OUT OF ORDER',MTLP
             CALL ERROR_MESSAGE(NSEQP)
          END IF
+         MTLP = MAX(MTL,MTLP)
          GO TO 100
       END IF
 !
