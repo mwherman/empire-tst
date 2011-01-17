@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1914 $
+Ccc   * $Rev: 1915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 00:27:17 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-18 00:49:15 +0100 (Di, 18 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1068,82 +1068,48 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
 
 
          ELSE
-
 C
-
 C           ENDF=0
-
 C
 C-----------We fix below target ENDf flag since it escapes normal setting
-
             IF (ENDf(0).EQ.0) ENDf(0) = 1
-
             DO iac = 0, NEMc
-
             DO ih = 0, nemh
-
             DO it = 0, nemt
-
             DO id = 0, nemd
-
             DO ia = 0, nema
-
             DO ip = 0, nemp
-
             DO in = 0, nemn
-
               mulem = iac + ia + ip + in + id + it + ih
-
               if(mulem.eq.0) cycle
-
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
-
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
-
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
 
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
 
-
 C             residues must be heavier than alpha
-
               if(atmp.le.4 . or. ztmp.le.2) cycle
-
               izatmp = INT(1000*ztmp + atmp)
 
-
               CALL WHERE(izatmp,nnuc,iloc)
-
               ENDf(nnuc) = 0
-
               EXClusiv = .TRUE.
 
-
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
             ENDDO
 
-            ENDDO
-
-            ENDDO
-
-            ENDDO
-
-            ENDDO
-
-            ENDDO
-
-            ENDDO
-
-
-C           ENDf(0) = 0
-
+            ENDf(0) = 0
+            ENDf(1) = 0
 
          ENDIF
 C
@@ -1169,12 +1135,8 @@ C
          ENDIF
          IF (DEGa.GT.0) GCAsc = 1.
 C        Commented in Jan 2011
-
-
 C        IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
 C
-
-
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
             WRITE (8,*) ' '
@@ -3078,7 +3040,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1914 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1915 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
