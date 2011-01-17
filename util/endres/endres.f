@@ -1,3 +1,7 @@
+Ccc   * $Author: Capote $
+Ccc   * $Date: 2009-11-01 01:01:20 $
+Ccc   * $Id: auxiliary.f,v 1.42 2009-11-01 01:01:20 Capote Exp $
+
       PROGRAM ENDRES
 C-Title  : Program ENDRES
 C-Purpose: Insert resonance data into an ENDF file
