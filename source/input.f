@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1887 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-12-08 07:34:10 +0100 (Mi, 08 Dez 2010) $
+Ccc   * $Rev: 1912 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-17 22:39:48 +0100 (Mo, 17 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -695,7 +695,7 @@ C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
                   IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                HIS(nnuc) = -0.5
 C                 These reactions are assumed to be always exclusive
-                  IF(mulem.eq.in .and. in.le.4) ENDf(nnuc) = 1 ! n,xn
+C                 IF(mulem.eq.in .and. in.le.4) ENDf(nnuc) = 1 ! n,xn
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -1000,7 +1000,7 @@ C
          CALL READIN(Irun)   !optional part of the input
 
 C--------Set exclusive and inclusive ENDF formatting flags
-         NEXclusive = 0
+8         NEXclusive = 0
          IF(NENdf.GT.0) THEN
 C-----------We fix below target ENDf flag since it escapes normal setting
             IF (ENDf(0).EQ.0) ENDf(0) = 1
@@ -1058,6 +1058,102 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+
+         ELSE
+
+C
+
+C           ENDF=0
+
+C
+C-----------We fix below target ENDf flag since it escapes normal setting
+
+            IF (ENDf(0).EQ.0) ENDf(0) = 1
+
+            DO iac = 0, NEMc
+
+            DO ih = 0, nemh
+
+            DO it = 0, nemt
+
+            DO id = 0, nemd
+
+            DO ia = 0, nema
+
+            DO ip = 0, nemp
+
+            DO in = 0, nemn
+
+              mulem = iac + ia + ip + in + id + it + ih
+
+              if(mulem.eq.0) cycle
+
+              atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+
+     &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
+
+     &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
+
+
+
+              IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
+
+              ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+
+     &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
+
+     &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
+
+
+
+              IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
+
+
+
+C             residues must be heavier than alpha
+
+              if(atmp.le.4 . or. ztmp.le.2) cycle
+
+              izatmp = INT(1000*ztmp + atmp)
+
+              CALL WHERE(izatmp,nnuc,iloc)
+
+
+
+C             Comment the following block and uncommment the line after the block for all-exclusive spectra
+
+              ENDf(nnuc) = 0
+
+              EXClusiv = .TRUE.
+
+
+
+            ENDDO
+
+            ENDDO
+
+            ENDDO
+
+            ENDDO
+
+            ENDDO
+
+            ENDDO
+
+            ENDDO
+
+            ENDf(0) = 0
+
+            ENDf(1) = 0
+
+
+
+            WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+
+
+
+
+
          ENDIF
 C
 C--------check input for consistency
@@ -2985,7 +3081,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1887 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1912 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -4788,14 +4884,27 @@ C             Setting ENDF for all emission loops
               NENdf = INT(val)
               IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
+
                  WRITE (8,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
+                 WRITE (12,'('' ENDF formatting enabled'')')
+
                  WRITE (12,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                      GOTO 100
               ENDIF
+              IF(NENdf.EQ.0) THEN
+
+                 WRITE ( 8,'('' ENDF formatting disabled'')')
+
+                 WRITE (12,'('' ENDF formatting disabled'')')
+
+                 GOTO 100
+
+              ENDIF
+
              ENDIF
              IF(val.LT.0) THEN
                WRITE (8,'('' WRONG ENDF value in input'',I3)')

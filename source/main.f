@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1893 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-12-27 08:20:58 +0100 (Mo, 27 Dez 2010) $
+Ccc   * $Rev: 1912 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-17 22:39:48 +0100 (Mo, 17 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -80,11 +80,11 @@ C
      &                 dang, debinhms, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
-     &                 espmax, epre, ftmp, gamfis, gamt, gang, grand,
+     &                 espmax, epre, ftmp, gang, grand,
      &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
-     &                 step, sum, sumfis, sumfism(NFMOD), tauf, taut,
+     &                 step, sum, sumfis, sumfism(NFMOD), 
      &                 totemis, weight, xcse, xizat, xnl, xnor,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
@@ -98,6 +98,8 @@ C                      Total PF angular distribution defined only for neutrons
      &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
      &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor,checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg
+C     For lifetime calculation, now commented (RCN/MH Jan 2011)
+C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
@@ -1285,9 +1287,10 @@ C--------
             xnhms = NHMs
             debinhms = DE
             IF (debinhms.LT.1.0D0) debinhms = 1.0
-            CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
-     &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
-     &                 icalled)
+
+C           CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
+C    &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
+C    &                 icalled)
             icalled = 1
             CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
             CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
@@ -1842,6 +1845,9 @@ c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ENDIF
+
+
+
              WRITE (8,*) ' '
              WRITE (8,*) ' '
              WRITE (8,*)
@@ -1904,16 +1910,19 @@ c                 ENDDO
            WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
-           IF (IOUt.GT.0) THEN
+C
+C          GAMT should be defined if lifetime is going to be calculated 
+C
+C          IF (IOUt.GT.0) THEN
 C-------------Calculate average fission life-time and width
-              tauf = stauc*6.589E-22*2.0*PI/CSFis
-              WRITE(8,
-     &         '(''  Average fission life-time'',G12.5,'' s'')') tauf
-               gamfis = gamt*CSFis/csemist
-              WRITE (8,
-     &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
-              WRITE (8,*) ' '
-           ENDIF
+C             tauf = stauc*6.589E-22*2.0*PI/CSFis
+C             WRITE(8,
+C    &         '(''  Average fission life-time'',G12.5,'' s'')') tauf
+C              gamfis = gamt*CSFis/csemist
+C             WRITE (8,
+C    &        '(''  Average fission width    '',G12.5,'' MeV'')') gamfis
+C             WRITE (8,*) ' '
+C          ENDIF
          ENDIF
          TOTcsfis = TOTcsfis + CSFis
 C--------Add compound elastic to shape elastic before everything falls
@@ -3128,7 +3137,8 @@ C     ENDDO
             ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
-            IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
+C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
+            IF (.NOT.EXClusiv) THEN
               WRITE (8,'(//,11X,''******************************'')')
               WRITE (8,'(11x,   '' Non-exclusive spectra (C.M.)'')')
               WRITE (8,'(11x,   ''******************************''/)')
