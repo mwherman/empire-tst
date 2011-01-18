@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1920 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-18 06:03:33 +0100 (Di, 18 Jän 2011) $
 
 C
       SUBROUTINE Print_Total_Inclusive(Nejc)
@@ -96,8 +96,8 @@ C
         DO i = 1, kmax
            totspec  = totspec  + CSEt(i,Nejc)
         ENDDO
-        totspec = totspec - 
-     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+C       totspec = totspec - 
+C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
         totspec = totspec*DE     
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
      &          totspec      
@@ -142,7 +142,7 @@ C
   150    WRITE (8,99040) e, CSEt(i,Nejc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
@@ -243,8 +243,9 @@ C
         DO i = 1, kmax
            totspec  = totspec  + CSE(i,Nejc,Nnuc)
         ENDDO
-        totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+C       Tested on Jan 2011 to be wrong
+C       totspec = totspec - 
+C    &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
         totspec = totspec*DE     
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
      &          totspec      
@@ -289,7 +290,8 @@ C
   150    WRITE (8,99040) e, CSE(i,Nejc,Nnuc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+C     Tested on Jan 2011 to be wrong
+C     totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
@@ -361,7 +363,7 @@ C
       DO i = 1, kmax
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+C     totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
 
       write(title,
@@ -434,7 +436,7 @@ C
       DO i = 1, kmax
          totspec  = totspec  + CSEt(i,Nejc)
       ENDDO
-      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
 
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')

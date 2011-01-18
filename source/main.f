@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1917 $
+Ccc   * $Rev: 1920 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 02:16:31 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-18 06:03:33 +0100 (Di, 18 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -99,7 +99,9 @@ C                      Total PF angular distribution defined only for neutrons
      &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor,checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
+
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
+
       DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
@@ -1266,6 +1268,7 @@ C--------
             debinhms = DE
             IF (debinhms.LT.1.0D0) debinhms = 1.0
 
+
 C           CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
 C    &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
 C    &                 icalled)
@@ -1820,8 +1823,6 @@ c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ENDIF
 
-
-
              WRITE (8,*) ' '
              WRITE (8,*) ' '
              WRITE (8,*)
@@ -1885,8 +1886,11 @@ c                 ENDDO
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
 C
+
 C          GAMT should be defined if lifetime is going to be calculated 
+
 C
+
 C          IF (IOUt.GT.0) THEN
 C-------------Calculate average fission life-time and width
 C             tauf = stauc*6.589E-22*2.0*PI/CSFis
@@ -3112,7 +3116,9 @@ C     ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
 C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
+
             IF (.NOT.EXClusiv) THEN
+
               WRITE (8,'(//,11X,''******************************'')')
               WRITE (8,'(11x,   '' Non-exclusive spectra (C.M.)'')')
               WRITE (8,'(11x,   ''******************************''/)')
@@ -3121,9 +3127,12 @@ C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
               ENDDO
             ENDIF
             IF (FIRst_ein) then
-              WRITE (8,'(//,11X,''********************************'')')
-              WRITE (8,'(   11x,'' Total inclusive spectra (C.M.)'')')
-              WRITE (8,'(11x,''********************************''/)')
+              WRITE (8,'(//,11X,''**********************'')')
+C             WRITE (8,'(   11x,'' Total inclusive spectra (C.M.)'')')
+
+              WRITE (8,'(   11x,'' Total spectra (C.M.)'')')
+
+              WRITE (8,'(11x,   ''**********************''/)')
               DO nejc = 0, NEJcm
                 CALL Print_Total_Inclusive(nejc)
                 CALL PLOT_INCLUSIVE_EMIS_SPECTRA(nejc)
