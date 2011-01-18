@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1913 $
+Ccc   * $Rev: 1917 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 00:09:55 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-18 02:16:31 +0100 (Di, 18 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -862,28 +862,6 @@ C----------Add PE contribution to energy spectra (angle int.)
 C----------Add PE contribution to the total NEJC emission
            CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
          ENDDO
-C        Skipping all emitted but neutrons and protons
-C        Secondary emission was not tested for proton induced reactions
-         nnur = NREs(nejcec)
-         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.0
-     &                         .and. nnur.GE.0) THEN
-C----------Second chance preequilibrium emission after MSD emission
-C----------Neutron emission
-           izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
-           CALL WHERE(izares,nnurn,iloc)
-!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurn,1,0)
-           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,1)
-         ENDIF
-         IF( AEJc(nejcec).eq.1 .and. ZEJc(nejcec).eq.1
-     &                         .and. nnur.GE.0) THEN
-C----------Second chance preequilibrium emission after MSD emission
-C----------Proton emission
-           izares = INT(1000.0*(Z(nnur)-1) + A(nnur) - 1)
-           CALL WHERE(izares,nnurp,iloc)
-!           IF (iloc.EQ.0) CALL SCNDPREEQ(nnur,nnurp,2,0)
-           IF (iloc.EQ.0 .AND. IOUt.GE.3) CALL AUERST(nnur,2)
-         ENDIF
-C--------Second chance preequilibrium *** done ***
       ENDIF
 
 C***************** OLD *************************************
