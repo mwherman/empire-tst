@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1920 $
+Ccc   * $Rev: 1921 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 06:03:33 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-18 06:28:56 +0100 (Di, 18 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -99,9 +99,7 @@ C                      Total PF angular distribution defined only for neutrons
      &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor,checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
-
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
-
       DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
@@ -886,13 +884,13 @@ C--------neutron emission
 c        izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
 c        CALL WHERE(izares, nnurn, iloc)
 c        IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
-c        IF(iloc.EQ.0 .AND. IOUt.GT.3)CALL AUERST(nnur, 1)
+c        IF(iloc.EQ.0 .AND. IOUt.GT.3)CALL AUERST(nnur, 1,0)
 C--------proton emission
 c        izares = izares - 1000
 c        CALL WHERE(izares, nnurp, iloc)
 c        IF(iloc.EQ.0)THEN
 c           CALL SCNDPREEQ(nnur, nnurp, 2, 1)
-c           IF(IOUt.GT.3)CALL AUERST(nnur, 2)
+c           IF(IOUt.GT.3)CALL AUERST(nnur, 2,0)
 c        ELSE
 c           CALL SCNDPREEQ(nnur, nnurp, 2, 2)
 c        ENDIF
@@ -1268,7 +1266,6 @@ C--------
             debinhms = DE
             IF (debinhms.LT.1.0D0) debinhms = 1.0
 
-
 C           CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
 C    &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
 C    &                 icalled)
@@ -1326,15 +1323,15 @@ C--------
             WRITE (8,*) ' '
             WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
-            IF(CSEmis(0,1).GT.0) CALL AUERST(1,0)
-            IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
-            IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
-            IF(CSEmis(3,1).GT.0) CALL AUERST(1,3)
-            IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
-            IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
-            IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
+            IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,0)
+            IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,0)
+            IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,0)
+            IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,0)
+            IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,0)
+            IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,0)
+            IF(CSEmis(6,1).GT.0) CALL AUERST(1,6,0)
             IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0)
-     &        CALL AUERST(1,NDEjc)
+     &        CALL AUERST(1,NDEjc,0)
          ENDIF
 C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay
@@ -1823,6 +1820,8 @@ c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ENDIF
 
+
+
              WRITE (8,*) ' '
              WRITE (8,*) ' '
              WRITE (8,*)
@@ -1886,11 +1885,8 @@ c                 ENDDO
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
 C
-
 C          GAMT should be defined if lifetime is going to be calculated 
-
 C
-
 C          IF (IOUt.GT.0) THEN
 C-------------Calculate average fission life-time and width
 C             tauf = stauc*6.589E-22*2.0*PI/CSFis
@@ -1954,7 +1950,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0.) THEN
-           IF(IOUt.GT.2) CALL AUERST(nnuc,0)
+           IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
            WRITE (8,'(''  g  emission cross section'',G12.5,'' mb'')')
      &          CSEmis(0,nnuc)
            WRITE (12,'(10x,
@@ -1993,7 +1989,7 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.3)
      &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
-             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc)
+             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
              IF (IOUt.GT.0) WRITE (8,
      &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
@@ -3116,22 +3112,18 @@ C     ENDDO
          ENDDO
          IF (csemax.GT.0.D0) THEN
 C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
-
             IF (.NOT.EXClusiv) THEN
-
               WRITE (8,'(//,11X,''******************************'')')
               WRITE (8,'(11x,   '' Non-exclusive spectra (C.M.)'')')
               WRITE (8,'(11x,   ''******************************''/)')
               DO nejc = 0, NEJcm
-                CALL AUERST(0,nejc)
+                CALL AUERST(0,nejc,1)
               ENDDO
             ENDIF
             IF (FIRst_ein) then
               WRITE (8,'(//,11X,''**********************'')')
 C             WRITE (8,'(   11x,'' Total inclusive spectra (C.M.)'')')
-
               WRITE (8,'(   11x,'' Total spectra (C.M.)'')')
-
               WRITE (8,'(11x,   ''**********************''/)')
               DO nejc = 0, NEJcm
                 CALL Print_Total_Inclusive(nejc)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1920 $
+Ccc   * $Rev: 1921 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 06:03:33 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-18 06:28:56 +0100 (Di, 18 Jän 2011) $
 
 C
       SUBROUTINE Print_Total_Inclusive(Nejc)
@@ -96,8 +96,8 @@ C
         DO i = 1, kmax
            totspec  = totspec  + CSEt(i,Nejc)
         ENDDO
-C       totspec = totspec - 
-C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+        totspec = totspec - 
+     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
         totspec = totspec*DE     
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
      &          totspec      
@@ -142,7 +142,7 @@ C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
   150    WRITE (8,99040) e, CSEt(i,Nejc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
@@ -150,7 +150,7 @@ C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
 99045 FORMAT (24X,93('-'))
       END
 
-      SUBROUTINE AUERST(Nnuc,Nejc)
+      SUBROUTINE AUERST(Nnuc,Nejc,Iflag)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -160,9 +160,9 @@ Ccc   *   Prints histogram of NEJC-spectrum emitted from nucleus NNUC    *
 Ccc   *   and prints  energy integrated cross section for this emission. *
 Ccc   *                                                                  *
 Ccc   * input:NNUC-decaying nucleus index                                *
-Ccc   *       NNUR-residual nucleus index                                *
 Ccc   *       NEJC-ejectile index                                        *
-Ccc   *                                                                  *
+Ccc   *       Iflag=1 for integral of inclusive spectra (special case)   *
+Ccc   *               Usually Iflag=0 for normal exclusive spectra       *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
@@ -178,7 +178,7 @@ Ccc
 C
 C Dummy arguments
 C
-      INTEGER Nejc, Nnuc
+      INTEGER Nejc, Nnuc, Iflag
 C
 C Local variables
 C
@@ -189,6 +189,7 @@ C
       INTEGER i, ia, ij, kmax, l, n
       INTEGER IFIX, MIN0
       DATA hstar, haha/'*', ' '/
+
       csemax = 0.
       kmax = 1
       DO i = 1, NDECSE
@@ -243,9 +244,8 @@ C
         DO i = 1, kmax
            totspec  = totspec  + CSE(i,Nejc,Nnuc)
         ENDDO
-C       Tested on Jan 2011 to be wrong
-C       totspec = totspec - 
-C    &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+        if(Iflag.eq.0) totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
         totspec = totspec*DE     
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
      &          totspec      
@@ -290,8 +290,8 @@ C    &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
   150    WRITE (8,99040) e, CSE(i,Nejc,Nnuc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-C     Tested on Jan 2011 to be wrong
-C     totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      if(Iflag.eq.0) totspec = totspec - 
+     &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
@@ -363,7 +363,7 @@ C
       DO i = 1, kmax
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-C     totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
 
       write(title,
@@ -436,7 +436,7 @@ C
       DO i = 1, kmax
          totspec  = totspec  + CSEt(i,Nejc)
       ENDDO
-C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
 
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
