@@ -17,7 +17,7 @@ ls *out
 echo ' '
 echo -n 'Choose one of the above (without .out extention!): '
 read file
-fi                          
+fi
 
 #run EMPEND to format EMPIRE output into ENDF
 
@@ -33,16 +33,13 @@ $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
 
-
-# RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
-# careful, looks like fixup has fixed-form input
+# RECONSTRUCT (N,P) AND (N,A) REACTIONS WITH FIXUP
 
 rm $file-f.endf 2>/dev/null
-ln -sf $file-e.endf OUTPUT.ENDF
 cat >FIXUP.INP <<EOF
-12101011111001                                                              
-OUTPUT.ENDF                                                                        
-FIXUP.ENDF  
+12101011111001
+$file-e.endf
+$work/$file-f.endf
 S  4=+( 50, 91)
 S103=+(600,649)
 S104=+(650,699)
@@ -52,59 +49,45 @@ S107=+(800,849)
 S  3=+(  4,  5)+( 11, 18)+( 22, 26)+(28, 37)+( 41, 45)+(102,117)
 S  2=+(  1,  1)-(  3,  3)
 
- 0.00000+00 0.00000+00          0          0${2}  4
-
  0.00000+00 0.00000+00          0          0${2}103
 
  0.00000+00 0.00000+00          0          0${2}107
 
 
 
-
-
-
-
-                                                                      
-                                                                      
 EOF
-#cp FIXUP1.INP FIXUP.INP
 $EMPIREDIR/util/fixup/fixup < FIXUP.INP
-rm OUTPUT.ENDF
 rm FIXUP.INP
-mv FIXUP.ENDF $work/$file-f.endf
 mv FIXUP.LST $work/$file-log.fixup
 
+# RUN ENDRES (IF RESONANCE FILE IS PRESENT)
+cp $file-f.endf $file-endres.endf
+if [ -s $file-res.endf ]; then
+   rm $file.endf 2>/dev/null
+   cat >ENDRES.INP <<EOF
+$file-f.endf
+$file-res.endf
+$file-endres.endf
+0
+EOF
 
-# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2), currently disabled:
-# second input line should point to file containing MF2 (and 32?)
-
-#rm $file.endf 2>/dev/null
-#cat >ENDRES.INP <<EOF
-#$file-f.endf
-#$file-resonances.endf
-#endf.dat
-#0
-#EOF
-#
-#../util/endres/endres < ENDRES.INP
-#mv endf.dat $file.endf
-#mv endres.lst $file-log.endres
-
-# $work/$file.endf is the final ENDF output file
-mv $file-f.endf $file.endf
+   ../util/endres/endres < ENDRES.INP
+   mv endres.lst $file-log.endres
+fi
 
 # RUN STANEF
 
-rm -f INPUT
+rm -f INPUT 2>/dev/null
 cat >INPUT <<EOF
+$file-endres.endf
 $file.endf
-$file-stan.endf
 0
 
 DONE
 EOF
 $EMPIREDIR/util/stanef/stanef <INPUT
-mv $file-stan.endf $file.endf
+
+#$work/$file.endf is the final ENDF output file
 
 # remove left-over files
 rm INPUT 2>/dev/null
