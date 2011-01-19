@@ -539,10 +539,7 @@ GDRWEI  relative contributions of the GDR and Weisskopf estimates to the
 
 GCASC  = 0 no full gamma-cascade in the first Compound Nucleus
            (only primary transitions),
-       = 1 full \gamma -cascade in the first Compound Nucleus
-           (default: full gamma-cascade in the first Compound Nucleus if the
-           initial excitation energy is less or equal to 20 MeV,
-           otherwise primary transitions only).
+       = 1 full gamma-cascade in the first Compound Nucleus (default)
 
 Photo-absorption
 ----------------
