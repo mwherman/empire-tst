@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1924 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
+Ccc   * $Rev: 1925 $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2011-01-19 23:37:57 +0100 (Mi, 19 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -185,6 +185,7 @@ C-----------set level density parameters
             ROPar(4,nnuc) = 0.
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
+            LDShif(Nnuc) = 0.d0
             SHLlnor(nnuc) = 1.
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
@@ -3035,7 +3036,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1924 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1925 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -5207,6 +5208,35 @@ C-----
      &        ) i2, SYMb(nnuc), val
             endif
 
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'LDSHIF') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+               DO nnuc = 1, NDNUC
+                  LDShif(nnuc) = val
+               ENDDO
+               WRITE (8,'('' LDSHIFT  in all nuclei set to '',F6.3)')
+     &                val
+               WRITE (12,'('' LDSHIFT  in all nuclei set to '',F6.3)')
+     &                val
+               GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,'('' FISBAR SETTING IGNORED'')')
+               GOTO 100
+            ENDIF
+            LDShif(nnuc) = val
+            WRITE (8,
+     &           '('' LDSHIFT  in '',I3,A2,'' set to ''          ,F6.3)'
+     &            ) i2, SYMb(nnuc), val
+            WRITE (12,
+     &           '('' LDSHIFT  in '',I3,A2,'' set to ''          ,F6.3)'
+     &            ) i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----

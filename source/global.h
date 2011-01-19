@@ -1,6 +1,6 @@
-C $Rev: 1862 $
-C $Author: mherman $
-C $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+C $Rev: 1925 $
+C $Author: pigni $
+C $Date: 2011-01-19 23:37:57 +0100 (Mi, 19 Jän 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -47,7 +47,7 @@ C
      &                 FNasomp(0:ndejc,0:ndnuc),
      &                 FNrvomp(0:ndejc,0:ndnuc),
      &                 FNrwvomp(0:ndejc,0:ndnuc),
-     &                 FNrsomp(0:ndejc,0:ndnuc)
+     &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc)
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -164,7 +164,7 @@ c
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp,  FNwvomp, FNwsomp, FNasomp,
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta, 
-     &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred,
+     &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd, ATIlnoz, DXSred,SHLlnor
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
