@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1913 $
+Ccc   * $Rev: 1924 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 00:09:55 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
 C
 C
       SUBROUTINE HRTW
@@ -52,15 +52,7 @@ C-----reset variables
       csemist = 0.d0
       CSFis = 0.d0
       sumfis = 0.d0
-C-----assure that full gamma cascade in the first CN is
-C-----accounted for when width fluctuation (HRTW) is selected
-      if(GCAsc.LE.0.d0) THEN
-        WRITE(8,*)
-        WRITE (8,'(
-     &'' WARNING: Full gamma cascade forced due to HRTW'')')
-        WRITE(8,*)
-        GCAsc = 1.0
-      endif
+C
       ke = NEX(nnuc)
 C-----
 C-----start CN nucleus decay

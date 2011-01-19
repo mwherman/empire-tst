@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1921 $
+Ccc   * $Rev: 1924 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 06:28:56 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -152,7 +152,7 @@ C-----Print results of the systematics
 C-----
       IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 C-----Clear CN elastic cross section (1/4*pi)
-      elcncs = 0.0D+0
+      elcncs = 0.0D+0			
 C-----
 C-----Open file 41 with tabulated cross sections
 C-----
@@ -290,7 +290,8 @@ C--------------Add direct transition to the spectrum
                   READ (45,*,END = 1400)     ! Skipping level identifier line
                   DO iang = 1, NANgela
                     READ (45,'(24x,E12.5)',END = 1400) ftmp
-                  CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)+ftmp
+                    CSAlev(iang,ilv,nejcec) = 
+     >              CSAlev(iang,ilv,nejcec) + ftmp
                   ENDDO
                  ENDIF
                 ELSE
@@ -1340,12 +1341,7 @@ C--------
 C--------Turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
 C--------in the first CN, it is preferred to use input parameter GCASC (0=OFF,1=ON) 
          kemin = 1
-         IF (nnuc.EQ.1) THEN
-C--------Turn  off (kemin=NEX(NNUC)) if gamma cascade is not requested
-            IF (GCAsc.EQ.0.0D0) kemin = NEX(nnuc)
-            IF (GCAsc.EQ. - 1.0D0 .AND. EXCn.GT.20.0D0)
-     &          kemin = NEX(nnuc)
-         ENDIF
+         IF (nnuc.EQ.1 .and. GCAsc.EQ.0.0D0) kemin = NEX(nnuc)
 C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
@@ -1949,6 +1945,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &          CSFis
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
+
          IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
            WRITE (8,'(''  g  emission cross section'',G12.5,'' mb'')')
@@ -1965,6 +1962,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
+
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.d0) THEN
            DO nejc = 1, NEJcm
@@ -1990,38 +1988,10 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.3)
      &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
-             IF (IOUt.GT.0) WRITE (8,
-     &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
-     &             SYMbe(nejc), CSEmis(nejc,nnuc)
+C            IF (IOUt.GT.0) WRITE (8,
+C    &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
+C    &             SYMbe(nejc), CSEmis(nejc,nnuc)
 C------------Print residual nucleus population
-             IF (IOUt.EQ.4) THEN
-               ia = INT(A(nnur))
-               WRITE (8,*) ' '
-               WRITE (8,*) '**************************** '
-               WRITE (8,'('' Residual nucleus '',I3,''-'',A2,/)') ia,
-     &                SYMb(nnur)
-               WRITE (8,'('' Positive parities population'',/)')
-               do i = NEX(nnur),1,-1
-                 ftmp = 0.0
-                 do j = 1,12
-                   ftmp = ftmp + POP(i,j,1,nnur)
-                 enddo
-                 if(ftmp.gt.0.0)
-     &             WRITE (8,99075) EX(i,nnur),(POP(i,j,1,nnur),j = 1,12)
-               enddo
-               WRITE (8,*) ' '
-               WRITE (8,'('' Negative parities population'',/)')
-               do i = NEX(nnur),1,-1
-                 ftmp = 0.0
-                 do j = 1,12
-                   ftmp = ftmp + POP(i,j,2,nnur)
-                 enddo
-                 if(ftmp.gt.0.0)
-     &             WRITE (8,99075) EX(i,nnur),(POP(i,j,2,nnur),j = 1,12)
-               enddo
-               WRITE (8,'('' '')')
-
-             ENDIF
 
              poptot = 0.0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
@@ -2052,27 +2022,57 @@ C------------Print residual nucleus population
      &            '(13x,   '' total population      '',G12.5,''  mb'')')
      &            poplev + poptot
 
-             IF (IOUt.GE.4) THEN
-               WRITE (8,*) ' '
-               WRITE (8,
-     &         '(1x,''    Total popul.continuum '',G12.5,'' mb'')')
+             if(ENDF(Nnur).eq.1) WRITE (8,
+     &         '(1x,''    Total popul.continuum '',G12.5,''  mb'')')
      &          poptot
-               WRITE (8,
-     &         '(1x,''    Total popul.disc.lev. '',G12.5,'' mb'')')
+             if(ENDF(Nnur).eq.1) WRITE (8,
+     &         '(1x,''    Total popul.disc.lev. '',G12.5,''  mb'')')
      &          poplev
-               WRITE (8,
-     &         '(1x,''    Total population      '',G12.5,'' mb'')')
+             if(ENDF(Nnur).eq.1) WRITE (8,
+     &         '(1x,''    Total population      '',G12.5,''  mb'')')
      &          poplev + poptot
+             WRITE (8,
+     &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
+     &             SYMbe(nejc), CSEmis(nejc,nnuc)
+             WRITE (8,*) ' '
+
+             IF (IOUt.EQ.4) THEN
+               ia = INT(A(nnur))
                WRITE (8,*) ' '
+               WRITE (8,*) '**************************** '
+               WRITE (8,'('' Residual nucleus '',I3,''-'',A2,/)') ia,
+     &                SYMb(nnur)
+               WRITE (8,'('' Positive parities population'',/)')
+               do i = NEX(nnur),1,-1
+                 ftmp = 0.0
+                 do j = 1,12
+                   ftmp = ftmp + POP(i,j,1,nnur)
+                 enddo
+                 if(ftmp.gt.0.0)
+     &             WRITE (8,99075) EX(i,nnur),(POP(i,j,1,nnur),j = 1,12)
+               enddo
+               WRITE (8,*) ' '
+               WRITE (8,'('' Negative parities population'',/)')
+               do i = NEX(nnur),1,-1
+                 ftmp = 0.0
+                 do j = 1,12
+                   ftmp = ftmp + POP(i,j,2,nnur)
+                 enddo
+                 if(ftmp.gt.0.0)
+     &             WRITE (8,99075) EX(i,nnur),(POP(i,j,2,nnur),j = 1,12)
+               enddo
+               WRITE (8,'('' '')')
+
              ENDIF
+
            ENDDO   !over ejectiles
-         WRITE (12,
+           WRITE (12,
      &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
      &               checkprd
-         WRITE ( 8,
-     &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
-     &               checkprd
-         xcross(NDEJC+3,jz,jn) = checkprd
+C          WRITE ( 8,
+C    &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
+C    &               checkprd
+           xcross(NDEJC+3,jz,jn) = checkprd
 
          ENDIF ! if CSProd > 0
 C--------
@@ -2084,12 +2084,8 @@ ccccccccccccccccccccccccccccccccccccccccccccccccc
 C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       eps=1.d-8
       csinel=CSPrd(2)-4.*PI*ELCncs
-      if (CSPrd(1).lt.eps) then
-       CSPrd(1)=0.d0
-      endif
-      if (csinel.lt.eps) then
-       csinel=0.d0
-      endif
+      if (CSPrd(1).lt.eps) CSPrd(1)=0.d0
+      if (csinel.lt.eps)   csinel=0.d0
       i=0
       do nnuc=3,NNUcd
         if (CSPrd(nnuc).lt.eps) CSPrd(nnuc)=0.d0
@@ -3113,21 +3109,20 @@ C     ENDDO
          IF (csemax.GT.0.D0) THEN
 C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
             IF (.NOT.EXClusiv) THEN
-              WRITE (8,'(//,11X,''******************************'')')
-              WRITE (8,'(11x,   '' Non-exclusive spectra (C.M.)'')')
-              WRITE (8,'(11x,   ''******************************''/)')
+              WRITE (8,'(//,11X,''**************************'')')
+              WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
+              WRITE (8,'(11x,   ''**************************''/)')
               DO nejc = 0, NEJcm
                 CALL AUERST(0,nejc,1)
               ENDDO
             ENDIF
             IF (FIRst_ein) then
               WRITE (8,'(//,11X,''**********************'')')
-C             WRITE (8,'(   11x,'' Total inclusive spectra (C.M.)'')')
               WRITE (8,'(   11x,'' Total spectra (C.M.)'')')
               WRITE (8,'(11x,   ''**********************''/)')
               DO nejc = 0, NEJcm
-                CALL Print_Total_Inclusive(nejc)
-                CALL PLOT_INCLUSIVE_EMIS_SPECTRA(nejc)
+                CALL Print_Total(nejc)
+                CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
               ENDDO   
             ENDIF  
          ENDIF

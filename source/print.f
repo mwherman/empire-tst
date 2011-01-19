@@ -1,9 +1,9 @@
-Ccc   * $Rev: 1921 $
+Ccc   * $Rev: 1924 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 06:28:56 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
 
 C
-      SUBROUTINE Print_Total_Inclusive(Nejc)
+      SUBROUTINE Print_Total(Nejc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -247,8 +247,13 @@ C
         if(Iflag.eq.0) totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
         totspec = totspec*DE     
-        WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
+C      if(ENDF(Nnuc).gt.0 .and. Iflag.eq.0 ) then
+C         WRITE (8,'(1x,''    Integr.cont.spectrum  '',G12.5,''  mb'')')
+C    &          totspec      
+C       else
+          WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
      &          totspec      
+C       endif
         RETURN
       ENDIF
       
@@ -294,8 +299,13 @@ C
      &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
       WRITE (8,99045)
-      WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
-     &          totspec 
+C     if(ENDF(Nnuc).gt.0 .and. Iflag.eq.0 ) then
+C       WRITE (8,'(1x,''    Integr.cont.spectrum  '',G12.5,''  mb'')')
+C    &          totspec      
+C     else
+        WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
+     &          totspec      
+C     endif
 99045 FORMAT (24X,93('-'))
       END
 
@@ -381,7 +391,7 @@ C
       RETURN
       END
 
-      SUBROUTINE PLOT_INCLUSIVE_EMIS_SPECTRA(Nejc)
+      SUBROUTINE PLOT_TOTAL_EMIS_SPECTRA(Nejc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -440,7 +450,7 @@ C
       totspec = totspec*DE
 
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
-     & 'tit: Spectra ',part(Nejc),totspec
+     & 'tit: Total Emission Spectra ',part(Nejc),totspec
 
       CALL OPEN_ZVV(36,'sp_'//part(Nejc),title)
       DO i = 1, kmax
