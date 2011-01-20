@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1926 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-20 05:15:21 +0100 (Do, 20 Jän 2011) $
 
 
       SUBROUTINE HITL(Stl)
@@ -3967,7 +3967,7 @@ c       Only one energy range
         j=1
 c       Real surface contribution from Dispersive relation
         DWS=0.d0
-	  DerDWS=0.d0
+        DerDWS=0.d0
         if(jrange(i).gt.0 .and. pot(4,1,24).ne.0) then
           As=b(i,j,8)
           Bs=b(i,j,10)
@@ -4272,6 +4272,9 @@ C--------Relativistic kinematics
 C
 C     AUTHOR: Dr. Roberto Capote Noy
 C
+C     LOG(eplus) -> LOG(DABS(eplus)) as E+ could be a negative quantity
+C     Jan 2011, M Pigni and R Capote
+C
 C     e-mail: r.capotenoy@iaea.org; rcapotenoy@yahoo.com
 C
 C     DISPERSIVE OPTICAL MODEL POTENTIAL PACKAGE
@@ -4317,7 +4320,7 @@ C
      &          /(emin**N + Bv**N)**2
       reseplus = -eplus**N/(eplus**N + Bv**N)
       dereplus = -eplus**(N - 1)
-     &           *(eplus**N + Bv**N*(1.D0 + N*LOG(eplus)))
+     &           *(eplus**N + Bv**N*(1.D0 + N*LOG(DABS(eplus))))
      &           /(eplus**N + Bv**N)**2
 C----------------------------------
 C-----Complex arithmetic follows
@@ -4337,7 +4340,7 @@ C-----Complex arithmetic follows
       IF (ABS(IMAG(ds)).GT.1.E-4) STOP '(D) Too big imag part in Wv'
       rds = REAL(ds)
 C----------------------------------
-      DOM_INT_WV = -Av/pi*(rs/N + reseplus*LOG(eplus)
+      DOM_INT_WV = -Av/pi*(rs/N + reseplus*LOG(DABS(eplus))
      &             + resemin*LOG(DABS(emin)))
       Derivintwv = -Av/pi*(rds/N + dereplus + deremin)
       END
