@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1930 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-21 17:12:26 +0100 (Fr, 21 Jän 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'
@@ -59,38 +59,57 @@ C
           rolowint2 = rolowint2 + RO(kk,j,2,Nnuc)
         ENDDO
         IF(rolowint1+rolowint2.gt.1e30) exit
-        WRITE (36,'(G10.3,2X,1P(90E12.5))')
+C
+C       Avoiding printing the first point 
+C       as LDs are defined above the discrete levels  
+C
+        IF(rolowint1+rolowint2.gt.0.d0) 
+     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1+rolowint2
       ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
-      
-      write(caz,'(A7)') 'Pos_GS+'
-      CALL OPEN_ZVV(36,caz,' ')
-      DO kk = 1, NEX(Nnuc)
+
+      IF(LEVDEN.EQ.3) then      
+       CALL CLOSE_ZVV(36,' ',' ')
+       write(caz,'(A7)') 'Pos_GS+'
+       CALL OPEN_ZVV(36,caz,' ')
+       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint1 = 0.D0
         DO j = 1, NLWst
           rolowint1 = rolowint1 + RO(kk,j,1,Nnuc)
         ENDDO
         IF(rolowint1.gt.1e30) exit
-        WRITE (36,'(G10.3,2X,1P(90E12.5))')
+C
+C       Avoiding printing the first point 
+C       as LDs are defined above the discrete levels  
+C
+        IF(rolowint1.gt.0.d0) 
+     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1
-      ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
+       ENDDO
+       CALL CLOSE_ZVV(36,' ',' ')
 
-      write(caz,'(A7)') 'Neg_GS-'
-      CALL OPEN_ZVV(36,caz,' ')
-      DO kk = 1, NEX(Nnuc)
+       write(caz,'(A7)') 'Neg_GS-'
+       CALL OPEN_ZVV(36,caz,' ')
+       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint2 = 0.D0
         DO j = 1, NLWst
           rolowint2 = rolowint2 + RO(kk,j,2,Nnuc)
         ENDDO
         IF(rolowint2.gt.1e30) exit
-        WRITE (36,'(G10.3,2X,1P(90E12.5))')
+C
+C       Avoiding printing the first point 
+C       as LDs are defined above the discrete levels  
+C
+        IF(rolowint2.gt.0.d0) 
+     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint2
-      ENDDO
-      CALL CLOSE_ZVV(36,' ','GS Level Density')
+       ENDDO
+       CALL CLOSE_ZVV(36,' ','GS Level Density')
+
+      ENDIF
+  
       CLOSE (36)
       return
       end
