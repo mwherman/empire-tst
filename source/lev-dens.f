@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1868 $
+Ccc   * $Rev: 1927 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2010-10-06 22:55:49 +0200 (Mi, 06 Okt 2010) $
+Ccc   * $Date: 2011-01-21 17:05:29 +0100 (Fr, 21 Jän 2011) $
 
 C
 C
@@ -612,7 +612,7 @@ C-----can not be taken into account (RORed=0)
          ENDIF
 C        defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
          defit = (ELV(NLV(Nnuc),Nnuc) + 4.d0)
-     &           /(NEXreq - 1)	  
+     &           /(NEXreq - 1)        
 C    &           /(NDEX - 1)
 C--------Try using fixed DE to avoid any dependence on NDEX        
 C        defit = DE
@@ -675,7 +675,9 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          ENDIF
       ENDIF
 
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) then
+      IF(IOUt.eq.6 .and. NLV(Nnuc).GT.3 .and.
+     &  defit*(NEX(Nnuc) - 1) .gt. 0.5*ELV(NLV(Nnuc),Nnuc) ) then
+
 C--------cumulative plot of levels to the zvd
          if(SYMb(Nnuc)(2:2).eq.' ') then
            write(caz,'(I2.2,A1,A1,I3.3)')
@@ -688,7 +690,9 @@ C--------cumulative plot of levels to the zvd
          write(ctmp1,'(A20)') caz//fname
          write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+
          OPEN (36, FILE=ctmp1, STATUS='unknown')
+
          write(caz,'(A7)') 'Exp_Lev'
          CALL OPEN_ZVV(36,caz,title)
          WRITE (36,*) '0.0 1.0'
@@ -697,13 +701,14 @@ C--------cumulative plot of levels to the zvd
            WRITE (36,*) ELV(kk,Nnuc)*1d6,FLOAT(kk)
          ENDDO
          CALL CLOSE_ZVV(36,' ',' ')
+
          write(caz,'(A7)') 'Cum_Tot'
          CALL OPEN_ZVV(36,caz,title)
          rocumul = 1.D0
          WRITE (36,*) '0.0 1.0'
-	 DO kk = 2, NEX(Nnuc)
+         DO kk = 2, NEX(Nnuc)
 C           if(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
-            if(defit*(kk - 1) .gt. Q(1,Nnuc)+1.d0) exit
+C           if(defit*(kk - 1) .gt. Q(1,Nnuc)+1.d0) exit
 C-----------Integration over energy. There should be factor 2 because of the
 C-----------parity but it cancels with the 1/2 steming from the trapezoid
 C-----------integration
@@ -717,7 +722,9 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
             WRITE (36,*) defit*(kk - 1)*1.d6, rocumul
          ENDDO
          CALL CLOSE_ZVV(36,' ','NUMBER OF LEVELS ')
+
          close(36)
+
       ENDIF
 
 C--------cumulative plot of levels along with the l.d. formula
