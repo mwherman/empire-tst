@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1924 $
+Ccc   * $Rev: 1929 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
+Ccc   * $Date: 2011-01-21 17:10:29 +0100 (Fr, 21 Jän 2011) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -42,14 +42,31 @@ C
       INTEGER i, ia, ij, kmax, l, n
       INTEGER IFIX, MIN0
       DATA hstar, haha/'*', ' '/
+
       csemax = 0.
       kmax = 1
       DO i = 1, NDECSE
          IF (CSEt(i,Nejc).GT.0.d0) kmax = i
          csemax = DMAX1(CSEt(i,Nejc),csemax)
       ENDDO
+C
+C     Stringest test to avoid plotting problems.
+C     Cross sections smaller than 1.d-4 mb are not relevant at all.  
+C
+      IF (csemax.LE.1.d-5) return
+
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
+
+      totspec = 0.d0
+      DO i = 1, kmax
+        totspec  = totspec  + CSEt(i,Nejc)
+      ENDDO
+      totspec = totspec - 
+     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+      totspec = totspec*DE     
+
+      IF (totspec.LE.1.d-4) RETURN
 
       ia = AEJc(Nejc)
 
@@ -86,30 +103,12 @@ C
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
       ENDIF
-C
-C     RCN, Aug.30, 2007. 
-C     Stringest test to avoid plotting problems.
-C     Cross sections smaller than 0.01 mb are not relevant at all.  
-C
-      IF (csemax.LE.1.d-5) THEN
-        totspec = 0.d0
-        DO i = 1, kmax
-           totspec  = totspec  + CSEt(i,Nejc)
-        ENDDO
-        totspec = totspec - 
-     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
-        totspec = totspec*DE     
-        WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
-     &          totspec      
-        RETURN
-      ENDIF
       
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
       s1 = s2*0.1
       s0 = s1*0.1
-
 
       WRITE (8,99030) s0, s1, s2, s3
 99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
@@ -146,6 +145,7 @@ C
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
+
      &          totspec 
 99045 FORMAT (24X,93('-'))
       END
@@ -162,6 +162,7 @@ Ccc   *                                                                  *
 Ccc   * input:NNUC-decaying nucleus index                                *
 Ccc   *       NEJC-ejectile index                                        *
 Ccc   *       Iflag=1 for integral of inclusive spectra (special case)   *
+
 Ccc   *               Usually Iflag=0 for normal exclusive spectra       *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
@@ -196,8 +197,24 @@ C
          IF (CSE(i,Nejc,Nnuc).GT.0.d0) kmax = i
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
+C
+C     Stringest test to avoid plotting problems.
+C     Cross sections smaller than 0.05 mb are not relevant at all.  
+C
+      IF (csemax.LE.1.d-5) return
+
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
+
+      totspec = 0.d0
+      DO i = 1, kmax
+        totspec  = totspec  + CSE(i,Nejc,Nnuc)
+      ENDDO
+      if(Iflag.eq.0) totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      totspec = totspec*DE     
+
+      IF (totspec.LE.1.d-4) RETURN
 
       ia = AEJc(Nejc)
 
@@ -234,35 +251,12 @@ C
 99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
       ENDIF
-C
-C     RCN, Aug.30, 2007. 
-C     Stringest test to avoid plotting problems.
-C     Cross sections smaller than 0.01 mb are not relevant at all.  
-C
-      IF (csemax.LE.1.d-5) THEN
-        totspec = 0.d0
-        DO i = 1, kmax
-           totspec  = totspec  + CSE(i,Nejc,Nnuc)
-        ENDDO
-        if(Iflag.eq.0) totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-        totspec = totspec*DE     
-C      if(ENDF(Nnuc).gt.0 .and. Iflag.eq.0 ) then
-C         WRITE (8,'(1x,''    Integr.cont.spectrum  '',G12.5,''  mb'')')
-C    &          totspec      
-C       else
-          WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
-     &          totspec      
-C       endif
-        RETURN
-      ENDIF
       
       n = IFIX(SNGL(LOG10(csemax) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
       s1 = s2*0.1
       s0 = s1*0.1
-
 
       WRITE (8,99030) s0, s1, s2, s3
 99030 FORMAT (1X,'Ener. ',5X,'Spectr. ',4X,E6.1,25X,E6.1,25X,E6.1,25X,
@@ -295,7 +289,9 @@ C       endif
   150    WRITE (8,99040) e, CSE(i,Nejc,Nnuc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
+
       if(Iflag.eq.0) totspec = totspec - 
+
      &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
       WRITE (8,99045)
@@ -304,8 +300,11 @@ C       WRITE (8,'(1x,''    Integr.cont.spectrum  '',G12.5,''  mb'')')
 C    &          totspec      
 C     else
         WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
-     &          totspec      
+     &          totspec  
 C     endif
+
+      RETURN
+
 99045 FORMAT (24X,93('-'))
       END
 
@@ -357,6 +356,15 @@ C
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 
+      totspec = 0.0
+      DO i = 1, kmax
+         totspec  = totspec  + CSE(i,Nejc,Nnuc)
+      ENDDO
+      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      totspec = totspec*DE
+
+      IF (totspec.LE.1.d-4) RETURN
+
       if(SYMb(Nnuc)(2:2).eq.' ') then
         write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
      &   'sp_',int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',
@@ -368,13 +376,6 @@ C
       endif
 
       OPEN(36,file=caz,status='unknown')
-
-      totspec = 0.0
-      DO i = 1, kmax
-         totspec  = totspec  + CSE(i,Nejc,Nnuc)
-      ENDDO
-      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-      totspec = totspec*DE
 
       write(title,
      & '(a5, i2,1h-,A2,1h-,I3,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
@@ -438,16 +439,18 @@ C
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 
-      write(caz,'(A3,A1,A4)') 'sp_',part(Nejc),'.zvd'
-
-      OPEN(36,file=caz,status='unknown')
-
       totspec = 0.0
       DO i = 1, kmax
          totspec  = totspec  + CSEt(i,Nejc)
       ENDDO
       totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
+
+      IF (totspec.LE.1.d-4) RETURN
+
+      write(caz,'(A3,A1,A4)') 'sp_',part(Nejc),'.zvd'
+
+      OPEN(36,file=caz,status='unknown')
 
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: Total Emission Spectra ',part(Nejc),totspec
@@ -462,4 +465,3 @@ C
       CLOSE(36)
       RETURN
       END
-
