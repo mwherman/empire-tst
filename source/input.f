@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1925 $
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2011-01-19 23:37:57 +0100 (Mi, 19 Jän 2011) $
+Ccc   * $Rev: 1932 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-21 17:19:43 +0100 (Fr, 21 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1003,7 +1003,7 @@ C
          CALL READIN(Irun)   !optional part of the input
 
 C--------Set exclusive and inclusive ENDF formatting flags
-8         NEXclusive = 0
+         NEXclusive = 1  ! CN is always exclusive
          IF(NENdf.GT.0) THEN
 C-----------We fix below target ENDf flag since it escapes normal setting
             IF (ENDf(0).EQ.0) ENDf(0) = 1
@@ -1060,6 +1060,7 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             ENDDO
+
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
  
          ELSE
@@ -2008,7 +2009,9 @@ C-----------determination of etl matrix and transmission coeff.--done
          ENDDO     !over ejectiles (nejc)
       ENDDO     !over nuclei (nnuc)
       WRITE (8,*) ' '
-      WRITE (8,*) 'Total number of nuclei considered ', NNUct
+      WRITE (8,*) 'Total number of nuclei considered :', NNUct
+      IF(ENDF(1).GT.0)
+     &  WRITE (8,*) 'Number of exclusive nuclei :',NEXclusive
       WRITE (8,*) ' '
 C-----calculate residual nucleus level density
       DO nnur = 2, NNUct
@@ -3036,7 +3039,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1925 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1932 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
