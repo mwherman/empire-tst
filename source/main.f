@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1924 $
+Ccc   * $Rev: 1931 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
+Ccc   * $Date: 2011-01-21 17:16:14 +0100 (Fr, 21 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1526,6 +1526,9 @@ C--------Printout of results for the decay of NNUC nucleus
            dtmp = dtmp + POPlv(il,nnuc)
          ENDDO
          IF(dtmp.LE.0.d0) GOTO 1525
+         IF (ENDF(nnuc).gt.0) WRITE (8,
+     &'(10X,''WARNING: due to ENDF option discrete levels contribution 
+     &was not included in emission spectra'')')
          IF (IOUt.GT.0) WRITE (8,
      &                        '(1X,/,10X,''Discrete level population'')'
      &                        )
@@ -1536,8 +1539,8 @@ C--------Printout of results for the decay of NNUC nucleus
          IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0.0D0 .AND.
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (8,
-     &'(10X,''NOTE: due to ENDF option direct particle contribution was
-     & shifted to the g.s.'')')
+     &'(10X,''WARNING: due to ENDF option direct particle contribution 
+     &was shifted to the g.s.'')')
          IF (IOUt.GT.0) WRITE (8,'(1X,/,10X,40(1H-),/)')
 C        Primary gamma printout -----------------------
 C        IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN   !original
@@ -1948,7 +1951,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
 
          IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
-           WRITE (8,'(''  g  emission cross section'',G12.5,'' mb'')')
+           WRITE (8,'(''  g  emission cross section'',G12.5,''  mb'')')
      &          CSEmis(0,nnuc)
            WRITE (12,'(10x,
      &                 '' g  emission cross section'',G12.5,''  mb'')')
@@ -1985,8 +1988,8 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.3)
-     &            CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
+             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.0)
+     &                      CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
 C            IF (IOUt.GT.0) WRITE (8,
 C    &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
@@ -2022,18 +2025,18 @@ C------------Print residual nucleus population
      &            '(13x,   '' total population      '',G12.5,''  mb'')')
      &            poplev + poptot
 
-             if(ENDF(Nnur).eq.1) WRITE (8,
+             if(ENDF(Nnur).GT.0) WRITE (8,
      &         '(1x,''    Total popul.continuum '',G12.5,''  mb'')')
      &          poptot
-             if(ENDF(Nnur).eq.1) WRITE (8,
+             if(ENDF(Nnur).GT.0) WRITE (8,
      &         '(1x,''    Total popul.disc.lev. '',G12.5,''  mb'')')
      &          poplev
-             if(ENDF(Nnur).eq.1) WRITE (8,
+             if(ENDF(Nnur).GT.0) WRITE (8,
      &         '(1x,''    Total population      '',G12.5,''  mb'')')
      &          poplev + poptot
              WRITE (8,
-     &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
-     &             SYMbe(nejc), CSEmis(nejc,nnuc)
+     &         '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
+     &          SYMbe(nejc), CSEmis(nejc,nnuc)
              WRITE (8,*) ' '
 
              IF (IOUt.EQ.4) THEN
@@ -3106,17 +3109,22 @@ C     ENDDO
                csemax = DMAX1(CSE(i,nejc,0),csemax)
             ENDDO
          ENDDO
-         IF (csemax.GT.0.D0) THEN
-C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
-            IF (.NOT.EXClusiv) THEN
-              WRITE (8,'(//,11X,''**************************'')')
-              WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
-              WRITE (8,'(11x,   ''**************************''/)')
-              DO nejc = 0, NEJcm
-                CALL AUERST(0,nejc,1)
+         IF (.NOT.EXClusiv .AND. csemax.GT.0.D0 ) THEN
+            WRITE (8,'(//,11X,''**************************'')')
+            WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
+            WRITE (8,'(11x,   ''**************************''/)')
+            DO nejc = 0, NEJcm
+              CALL AUERST(0,nejc,1)
+            ENDDO
+         ENDIF
+         IF (FIRst_ein) then
+            csemax = 0.
+            DO nejc = 0, NEJcm
+              DO i = 1, NDEX
+                csemax = DMAX1(CSEt(i,nejc),csemax)
               ENDDO
-            ENDIF
-            IF (FIRst_ein) then
+            ENDDO
+            IF (csemax.GT.0.D0 ) THEN
               WRITE (8,'(//,11X,''**********************'')')
               WRITE (8,'(   11x,'' Total spectra (C.M.)'')')
               WRITE (8,'(11x,   ''**********************''/)')
@@ -3124,8 +3132,8 @@ C           IF (.NOT.EXClusiv .AND. IOUT.GT.4) THEN
                 CALL Print_Total(nejc)
                 CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
               ENDDO   
-            ENDIF  
-         ENDIF
+            ENDIF
+         ENDIF  
       ENDIF
 C-----
 C-----ENDF spectra printout (inclusive representation)
