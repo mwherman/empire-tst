@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1893 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-12-27 08:20:58 +0100 (Mo, 27 Dez 2010) $
+Ccc   * $Rev: 1928 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-21 17:08:47 +0100 (Fr, 21 Jän 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -688,6 +688,9 @@ C-----------Well... let it go down to the ground state
             egd = ELV(l,Nnuc)
             icse = min(INT(2.0001 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
+
+            CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
+
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
             IF (ENDf(Nnuc).EQ.1) THEN
@@ -747,6 +750,10 @@ C-----------Normal level with branching ratios
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
                   icse = min(INT(2.0001 + egd/DE),ndecse)
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
+
+                  CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
+
+
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
