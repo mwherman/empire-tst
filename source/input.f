@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1932 $
+Ccc   * $Rev: 1933 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-21 17:19:43 +0100 (Fr, 21 Jän 2011) $
+Ccc   * $Date: 2011-01-22 07:08:31 +0100 (Sa, 22 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -275,6 +275,7 @@ C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
          JCUtcoll = 2.
 C
+
 C--------set fission defaults
          DO nnuc = 1, NDNUC
            FISbar(nnuc) = 3     ! RIPL-3 HFB barriers are default.
@@ -1004,9 +1005,12 @@ C
 
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 1  ! CN is always exclusive
+         INExc(1) = 1    ! CN is always exclusive
+
+C--------We fix below target ENDf flag since it escapes normal setting
+         IF (ENDf(0).EQ.0) ENDf(0) = 1
+
          IF(NENdf.GT.0) THEN
-C-----------We fix below target ENDf flag since it escapes normal setting
-            IF (ENDf(0).EQ.0) ENDf(0) = 1
             DO iac = 0, NEMc
             DO ih = 0, nemh
             DO it = 0, nemt
@@ -1062,13 +1066,11 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
 
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
- 
+
          ELSE
 C
 C           ENDF=0
 C
-C-----------We fix below target ENDf flag since it escapes normal setting
-            IF (ENDf(0).EQ.0) ENDf(0) = 1
             DO iac = 0, NEMc
             DO ih = 0, nemh
             DO it = 0, nemt
@@ -1078,6 +1080,7 @@ C-----------We fix below target ENDf flag since it escapes normal setting
             DO in = 0, nemn
               mulem = iac + ia + ip + in + id + it + ih
               if(mulem.eq.0) cycle
+
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
@@ -1090,10 +1093,11 @@ C-----------We fix below target ENDf flag since it escapes normal setting
 
 C             residues must be heavier than alpha
               if(atmp.le.4 . or. ztmp.le.2) cycle
-              izatmp = INT(1000*ztmp + atmp)
 
+              izatmp = INT(1000*ztmp + atmp)
               CALL WHERE(izatmp,nnuc,iloc)
               ENDf(nnuc) = 0
+
               EXClusiv = .TRUE.
 
             ENDDO
@@ -1131,7 +1135,6 @@ C
          ENDIF
 C        IF (DEGa.GT.0) GCAsc = 1.
 C        Commented in Jan 2011
-
 C        IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
 C
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
@@ -2010,7 +2013,9 @@ C-----------determination of etl matrix and transmission coeff.--done
       ENDDO     !over nuclei (nnuc)
       WRITE (8,*) ' '
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
+
       IF(ENDF(1).GT.0)
+
      &  WRITE (8,*) 'Number of exclusive nuclei :',NEXclusive
       WRITE (8,*) ' '
 C-----calculate residual nucleus level density
@@ -3039,7 +3044,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1932 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1933 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -4847,10 +4852,12 @@ C             Setting ENDF for all emission loops
 
 
 
+
                  WRITE (8,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
+
 
 
 
@@ -4867,7 +4874,9 @@ C             Setting ENDF for all emission loops
 
 
 
+
                  WRITE ( 8,'('' ENDF formatting disabled'')')
+
 
 
 
@@ -4879,13 +4888,16 @@ C             Setting ENDF for all emission loops
 
 
 
+
                  GOTO 100
 
 
 
 
 
+
               ENDIF
+
 
 
 
@@ -5955,6 +5967,7 @@ C-----
      &       '('' Full gamma cascade in the first CN selected'')')
             IF (GCAsc.EQ.0.0D0) WRITE (8,
      &       '('' Full gamma cascade is not followed'')')
+
             GOTO 100
          ENDIF
 C-----
