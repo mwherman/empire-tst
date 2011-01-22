@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1931 $
+Ccc   * $Rev: 1934 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-21 17:16:14 +0100 (Fr, 21 Jän 2011) $
+Ccc   * $Date: 2011-01-23 00:26:02 +0100 (So, 23 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1527,7 +1527,7 @@ C--------Printout of results for the decay of NNUC nucleus
          ENDDO
          IF(dtmp.LE.0.d0) GOTO 1525
          IF (ENDF(nnuc).gt.0) WRITE (8,
-     &'(10X,''WARNING: due to ENDF option discrete levels contribution 
+     &'(3X,''NOTE: due to ENDF option discrete levels contribution 
      &was not included in emission spectra'')')
          IF (IOUt.GT.0) WRITE (8,
      &                        '(1X,/,10X,''Discrete level population'')'
@@ -1539,7 +1539,7 @@ C--------Printout of results for the decay of NNUC nucleus
          IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0.0D0 .AND.
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (8,
-     &'(10X,''WARNING: due to ENDF option direct particle contribution 
+     &'(3X,''NOTE: due to ENDF option direct particle contribution 
      &was shifted to the g.s.'')')
          IF (IOUt.GT.0) WRITE (8,'(1X,/,10X,40(1H-),/)')
 C        Primary gamma printout -----------------------
@@ -2015,25 +2015,29 @@ C------------Print residual nucleus population
                poplev = poplev + POPlv(i,nnur)
              ENDDO
 
-             WRITE (12,
+             if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
+     &                          .and. ENDF(nnuc).gt.0) then
+               WRITE (12,
      &            '(13x,   '' total popul.continuum '',G12.5,''  mb'')')
      &            poptot
-             WRITE (12,
+               WRITE (12,
      &            '(13x,   '' total popul.disc.lev. '',G12.5,''  mb'')')
      &            poplev
-             WRITE (12,
+               WRITE (12,
      &            '(13x,   '' total population      '',G12.5,''  mb'')')
      &            poplev + poptot
 
-             if(ENDF(Nnur).GT.0) WRITE (8,
+               WRITE (8,
      &         '(1x,''    Total popul.continuum '',G12.5,''  mb'')')
      &          poptot
-             if(ENDF(Nnur).GT.0) WRITE (8,
+               WRITE (8,
      &         '(1x,''    Total popul.disc.lev. '',G12.5,''  mb'')')
      &          poplev
-             if(ENDF(Nnur).GT.0) WRITE (8,
+               WRITE (8,
      &         '(1x,''    Total population      '',G12.5,''  mb'')')
      &          poplev + poptot
+             endif
+
              WRITE (8,
      &         '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
      &          SYMbe(nejc), CSEmis(nejc,nnuc)

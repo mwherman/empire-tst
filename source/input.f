@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1933 $
+Ccc   * $Rev: 1934 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-22 07:08:31 +0100 (Sa, 22 Jän 2011) $
+Ccc   * $Date: 2011-01-23 00:26:02 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -288,7 +288,7 @@ C--------set fission defaults
 C
 C        IOPSYS = 0 LINUX
 C        IOPSYS = 1 WINDOWS
-         IOPsys = 0
+         IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (default)
@@ -3044,7 +3044,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1933 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1934 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
