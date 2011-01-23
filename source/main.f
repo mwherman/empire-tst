@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1935 $
+Ccc   * $Rev: 1937 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 01:30:44 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 02:37:35 +0100 (So, 23 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3014,71 +3014,74 @@ C     ENDDO
       WRITE (8,*) ' '
       checkXS = checkXS + TOTcsfis
       IF(ABScs.GT.0.) THEN
-        WRITE (8,'('' *******************************************'',
+        WRITE (8,'('' ********************************************'',
      &           23(1H*))')
         WRITE (8,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
         IF (INT(ZEJc(0)).EQ.0) THEN
           if(TOTred.ne.1.)
-     &    WRITE (8,'('' * Total cross section scaled by '',G12.5)')
+     &    WRITE (8,'('' * Total cross section scaled by '',G13.6)')
      &    TOTred
           WRITE (8,
-     &  '('' * Optical model total cross section              '',G12.5,
+     &  '('' * Optical model total cross section              '',G13.6,
      &              '' mb  '')') TOTcs*TOTred
           WRITE (8,
-     &  '('' * Calculated total cross section                 '',G12.5,
+     &  '('' * Calculated total cross section                 '',G13.6,
      &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
      &   SINlcont + ElasticCorr + ELAcs
         ENDIF
-      WRITE (8,
-     &  '('' * Optical model nonelastic cross section (ABScs) '',G12.5,
+        WRITE (8,
+     &  '('' * Optical model nonelastic cross section (ABScs) '',G13.6,
      &              '' mb  '')')
      &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
      &   + (SINl+SINlcc)*FCCred + SINlcont
           WRITE (8,
-     &  '('' * Calculated nonelastic cross section            '',G12.5,
+     &  '('' * Calculated nonelastic cross section            '',G13.6,
      &              '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
         WRITE (8,
      &  '('' * Production cross section (incl.fission)        '',
-     &           G12.5,'' mb'')')  checkXS
-        WRITE (8,'('' * Difference: '', F9.5,'' %'')')
+     &           G13.6,'' mb'')')  checkXS
+        WRITE (8,'('' * Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
+     &    abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS),
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
         IF (INT(ZEJc(0)).GT.0) WRITE (8,
-     &    '('' * Compound elastic cross section (CE) '',G12.5,
+     &    '('' * Compound elastic cross section (CE) '',G13.6,
      &              '' mb  '')') 4.*PI*ELCncs
         if(FUSred.ne.1.)
-     &  WRITE (8,'('' * CN formation cross section scaled by '',G12.5
+     &  WRITE (8,'('' * CN formation cross section scaled by '',G13.6
      &  )') FUSred
         if(FCCred.ne.1.)
      &  WRITE (8,'('' * Direct collective cross section scaled by '',
      &  G12.5)') FCCred
-         WRITE (8,'('' *******************************************'',
+         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
         IF (INT(ZEJc(0)).EQ.0) THEN
+         WRITE (*,*)
          WRITE (*,
      &  '(''   Calculated total cross section                 '',
-     &        G12.5, '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
+     &        G13.6, '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
      &   SINlcont + ElasticCorr + ELAcs
         ENDIF
         WRITE (*,
      &  '(''   Calculated nonelastic cross section            '',
-     &        G12.5, '' mb  '')')
+     &        G13.6, '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
 
         WRITE (*,
      &  '(''   Production cross section (incl.fission)        '',
-     &           G12.5,'' mb'')')  checkXS
-        WRITE (*,'(''   Difference: '', F9.5,'' %'')')
+     &           G13.6,'' mb'')')  checkXS
+        WRITE (*,'(''   Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
+     &    abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS),
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
         IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) THEN
           WRITE (*,'(''   Compound elastic cross section (CE) '',
-     &     G12.5,'' mb  ''/)') 4.*PI*ELCncs
+     &     G13.6,'' mb  ''/)') 4.*PI*ELCncs
         ELSE
           WRITE (*,*)
       ENDIF
@@ -3090,7 +3093,7 @@ C     ENDDO
         WRITE (8,'('' WARNING: Sum of production XS(incl.fission)'')')
         WRITE (8,'('' WARNING: is not equal reaction cross section'')')
         IF((CSFus + (SINl+SINlcc)*FCCred + SINlcont).NE.0.d0)
-     &  WRITE (8,'('' WARNING:     difference: '', F9.5,'' %'')')
+     &  WRITE (8,'('' WARNING:     difference: '', F6.2,'' %'')')
      &   100.d0*
      &   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)/
      &                (CSFus + (SINl+SINlcc)*FCCred + SINlcont)
@@ -3101,7 +3104,7 @@ C     ENDDO
         WRITE (8,*)
         WRITE (8,'('' WARNING: Total XS is not equal'')')
         WRITE (8,'('' WARNING: Elastic + Absorption cross section'')')
-        WRITE (8,'('' WARNING:     difference: '', F9.5,'' %'')')
+        WRITE (8,'('' WARNING:     difference: '', F6.2,'' %'')')
      & 100.d0*abs(ABScs + ElasticCorr  + ELAcs - TOTred*TOTcs)/
      &                 (TOTred*TOTcs)
       ENDIF
