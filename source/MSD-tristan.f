@@ -1,6 +1,7 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+$DEBUG
+Ccc   * $Rev: 1942 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3062,7 +3063,8 @@ C Local variables
 C
       DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
-     &                 wght(NDLV), xj, xnor
+     &                 wght(NDLV), xj, xnor, ddxs(NDAngecis)
+      DOUBLE PRECISION csmtot,csm1,csm2,xnn,eee
       REAL FLOAT
       INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
       INTEGER INT
@@ -3156,12 +3158,6 @@ C
 C
                   ENDDO
    20          ENDDO
-            ELSE
-               DO ie = 1, nexrt
-                  DO na = 1, nangle
-c  should do something here
-                  ENDDO
-               ENDDO
             ENDIF
 
          ENDIF
@@ -3174,9 +3170,16 @@ C
 C     Discrete levels not used for alpha (please do not include levels into
 C                   continuum for alpha emission)
 C
-      IF (Nejc.eq.0 .or. Nejc.gt.2) return
-      IF (Nejc.eq.1 .and. IDNa(1,2).EQ.0) return
-      IF (Nejc.eq.2 .and. IDNa(3,2).EQ.0) return
+C     IF (Nejc.eq.0 .or. Nejc.gt.2) return
+
+      IF (Nejc.eq.1 .and. IDNa(1,2).EQ.0 .and. IDNa(1,6).EQ.0 ) return
+      IF (Nejc.eq.2 .and. IDNa(3,2).EQ.0 .and. IDNa(3,6).EQ.0 ) return
+
+      IF (Nejc.eq.0 .and. IDNa(1,2).EQ.0 ) return ! Skipping discrete gammas if MSC not active 
+      IF (Nejc.eq.3 .and. IDNa(11,6).EQ.0 ) return
+      IF (Nejc.eq.4 .and. IDNa(12,6).EQ.0 ) return
+      IF (Nejc.eq.5 .and. IDNa(13,6).EQ.0 ) return
+      IF (Nejc.eq.6 .and. IDNa(14,6).EQ.0 ) return
 C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
@@ -3200,21 +3203,44 @@ C-----(NOTE: it is usually negative in such a case)
             ENDDO
    50    ENDDO
       ENDIF
-C-----distribution of the MSD contribution to discrete levels
+C-----distribution of the MSD/PCROSS contribution to discrete levels
 C-----
-C-----MSD contribution is integrated over the discrete level region and
-C-----distributed among 2+, 3- and 4+ levels (or those close to such for
-C-----noninteger spin nuclei) using arbitrary weights (most to 2+ and very
-C-----little to 4+). Angular distributions for these levels are those
-C-----provided by TRISTAN at the closest bin.
-      csmsdl = 0.0
-      DO ie = nexrt, next
+      IF(Nejc.eq.NPRoject) then
+C
+C      Inelastic channel 
+C
+	 csm1 = 0.d0
+       DO ie = nexrt, next
+         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
+       ENDDO
+       csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
+       csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
+       xnn = 0.d0
+	 if(csm1.gt.0.d0) xnn = csm2/csm1
+
+C------MSD/PCROSS contribution is integrated over the discrete level region and
+C------distributed among 2+, 3- and 4+ levels (or those close to such for
+C------noninteger spin nuclei) using arbitrary weights (most to 2+ and very
+C------little to 4+). Angular distributions for these levels are those
+C------provided by TRISTAN or PCROSS at the closest bin.
+C
+       csmsdl = 0.0
+       DO ie = nexrt, next
          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-      ENDDO
-      csmsdl = csmsdl - 0.5*CSEmsd(nexrt,Nejc)*DE
-      csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
-      swght = 0.0
-      DO il = 2, NLV(Nnur)
+C        Setting it to zero to delete discrete spectra before redistributing 
+C        if( IDNa(1,6).GT.0 .and. Nejc.eq.1 ) CSEmsd(ie,Nejc) = 0.d0
+C        if( IDNa(3,6).GT.0 .and. Nejc.eq.2 ) CSEmsd(ie,Nejc) = 0.d0
+C        if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
+       ENDDO
+       csmsdl = csmsdl - 0.5*CSEmsd(nexrt,Nejc)*DE
+       csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
+C
+C
+C      Inelastic channel
+C
+	 csmtot = 0.d0
+       swght = 0.0
+       DO il = 2, NLV(Nnur)
          wght(il) = 0.0
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) GOTO 100
@@ -3236,8 +3262,8 @@ C-----provided by TRISTAN at the closest bin.
             wght(il) = wght(il)**2
             swght = swght + wght(il)
          ENDIF
-      ENDDO
-  100 IF (swght.EQ.0.0D0) THEN
+       ENDDO
+  100  IF (swght.EQ.0.0D0) THEN
          WRITE (8,*) ' WARNING:'
          WRITE (8,*) ' WARNING: No level to put msd level contribution '
      &               , csmsdl, ' mb'
@@ -3246,11 +3272,12 @@ C-----provided by TRISTAN at the closest bin.
          WRITE (8,*) ' WARNING:'
          POPlv(1,Nnur) = POPlv(1,Nnur) + csmsdl
          RETURN
-      ENDIF
-      csmsdl = csmsdl/swght
-      DO il = 2, NLV(Nnur)
+       ENDIF
+       csmsdl = csmsdl/swght
+       DO il = 2, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
+         csmtot = csmtot + csmsdl*wght(il)
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*wght(il)
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*wght(il)
 C--------Store ang. distr. for discrete levels. For each level shape of the closest CSEa
@@ -3262,20 +3289,91 @@ C--------Normalization factor
          IF (CSEmsd(ie,Nejc).NE.0) THEN
             xnor = csmsdl*wght(il)/CSEmsd(ie,Nejc)
          ELSE
-            xnor = 0.0
+            xnor = 0.d0
          ENDIF
-C--------Add MSD transitions to discrete levels to the population spectrum
-C--------used for the ENDF exclusive spectra
-C--------This is actually not needed since MSD contribution to discrete levels
-C--------is done through the CSDirlev and CSAlev
-C        POPcse(0,nejc,ie,INExc(Nnur)) = POPcse(0,nejc,ie,INExc(Nnur)) +
-C    &                            csmsdl*wght(il)/DE
 C--------Store ang. dist.
          DO na = 1, NDANG
             CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc)
      &                           + xnor*CSEa(ie,na,Nejc,1)
+C           Deleting the corresponding angular distribution
+C           CSEa(ie,na,Nejc,1) = 0.d0
          ENDDO
-      ENDDO
+       ENDDO
+
+	 IF(csm2-csmtot.gt.0.1d0) then
+	   write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+         write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
+	 ENDIF
+C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
+
+      ELSE
+C
+C     Other channels (not the inelastic)
+C
+       csm1 = 0.d0
+       DO ie = nexrt, next
+         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
+       ENDDO
+       csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
+       csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
+       xnn = 0.d0
+	 if(csm1.gt.0.d0) xnn = csm2/csm1
+
+       istart = nexrt
+    	 csmtot = 0.d0
+       xnor = 0.d0
+
+       DO il = NLV(Nnur),1,-1
+         eemi = excnq - ELV(il,Nnur)
+         IF (eemi.LT.0.0D0) EXIT
+
+	   xnor = CSEmsd(istart,Nejc)*DE*xnn
+C
+C        Assigning angular distribution of the first continuum bin "istart"
+C        to the angular distribution of the discrete level "il"
+C                                                    
+	   do na=1,NDAng 
+           ddxs(na) =	CSEa(istart,na,Nejc,1)*xnn
+         enddo
+         csmsdl = 0.d0
+
+         DO ie = istart, next
+           eee = DE*(ie - 1)
+           IF (eee.GT.eemi) EXIT 
+           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
+C          Deleting the corresponding XS from the continuum
+C            as it is moved to discrete spectra
+C          CSEmsd(ie,Nejc) = 0.d0
+C          Deleting the corresponding angular distribution
+C	     do na=1,NDAng 
+C	       CSEa(ie,na,Nejc,1) = 0.d0
+C          enddo
+	     istart = ie + 1
+         ENDDO
+         POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*xnn
+         CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*xnn
+         csmtot = csmtot + csmsdl*xnn
+C--------Normalization factor
+         IF (xnor.GT.0) THEN
+            xnor = csmsdl/xnor
+         ELSE
+            xnor = 0.d0
+         ENDIF
+C--------Store ang. dist.
+         DO na = 1, NDANG
+           CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xnor*ddxs(na)
+         ENDDO
+       ENDDO
+       IF(csm2-csmtot.gt.0.1d0) then
+	   write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+         write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
+ 	 ENDIF
+C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
+      ENDIF
+
+      RETURN
       END
       Subroutine Nilsson(d,e0,als, HOMega,n,k,v, BETa2,all)
 CCC

@@ -1,6 +1,6 @@
-C $Rev: 1925 $
-C $Author: pigni $
-C $Date: 2011-01-19 23:37:57 +0100 (Mi, 19 Jän 2011) $
+C $Rev: 1942 $
+C $Author: rcapote $
+C $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -87,7 +87,7 @@ C
      &                 HIS(0:ndnuc), HJ(ndnuc,nfparab), LQDfac, HHBarc,
      &                 MFPp, MOMortcrt, MOMparcrt,HCOnt(nfparab),
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),
-     &                 PEQc, PI, POP(ndex,ndlw,2,ndnuc),
+     &                 PEQc, PEQcont, PI, POP(ndex,ndlw,2,ndnuc),
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
@@ -166,7 +166,7 @@ c
      &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta, 
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd, ATIlnoz, DXSred,SHLlnor
+     &                 EMInmsd, ATIlnoz, DXSred, SHLlnor, PEQcont
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,

@@ -1,6 +1,7 @@
-Ccc   * $Rev: 1882 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
+$DEBUG
+Ccc   * $Rev: 1942 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -54,7 +55,7 @@ C
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
      &       dbreak, dpickup
 
-      DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn,
+      DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
@@ -70,7 +71,6 @@ C
       CHARACTER*12 status
 C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls 	
       SAVE r, /KALB/, callpcross, /PFACT/
-
 C
 C
       DATA callpcross/.FALSE./
@@ -116,14 +116,14 @@ C
       gc = FLOAT(ac)/ggg*GTIlnor(1)
 c     pc = ROPar(3,1)
 c     IF(pc.eq.0.) then
-        ftmp = 0.
-        IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
-        pc = ftmp                                             ! odd
-        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
-        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
+C       ftmp = 0.
+C       IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
+C       pc = ftmp                                             ! odd
+C       IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
+C       IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
 c     ENDIF
-C     Empirically found that it is better not to use pairing correction
-C     pc = 0.d0
+C     We supress pairing as it is considered in discrete levels
+      pc = 0.d0
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -159,6 +159,7 @@ C-----ZERO ARRAY INITIALIZATION
              L(nejc,hh) = 0.D0
          ENDDO
       ENDDO
+	pair = 0
 
 C
 C-----NEJcm is the maximum number of particles emitted
@@ -169,21 +170,43 @@ C
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
          g(nejc) = FLOAT(ar)/ggg*GTIlnor(nnur)
-         ftmp = 0.
-         IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
-         pair(nejc) = ftmp
-         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
+C        ftmp = 0.
+C        IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
+C        pair(nejc) = ftmp
+C        We supress pairing as it is considered in discrete levels
+C        pair(nejc) = 0.d0
+C        IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
+C        IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
 C--------Maximum and minimum energy bin
-         excnq = EXCn -Q(nejc,1)
-C--------last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
-         nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 2.0001),1)
+         excnq = EXCn - Q(nejc,1)
+C
+C        Assuming PE calculates over discrete levels' region as well
+         nexrt = MAX(INT(excnq/DE + 1.0001),1)
+
+C        IDNa(1,6) = 0  ! discrete N is included even with ECIS active
+C        IDNa(3,6) = 0  ! discrete P is included even with ECIS active
+C        IDNa(5,6) = 1  ! gammas
+C        IDNa(11,6) = 0  ! discrete A is included even with ECIS active
+C        IDNa(12,6) = 0  ! discrete D is included even with ECIS active
+C        IDNa(13,6) = 0  ! discrete T is included even with ECIS active
+C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
+         if(nejc.eq.1 .and. IDNa(1,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         if(nejc.eq.2 .and. IDNa(3,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         if(nejc.eq.3 .and. IDNa(11,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         if(nejc.eq.4 .and. IDNa(12,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         if(nejc.eq.5 .and. IDNa(13,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+         if(nejc.eq.6 .and. IDNa(14,6).eq.0) 
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+
+         iemax(nejc) = nexrt
          DO ienerg = 2, nexrt
-C        DO ienerg = 2, NEX(nnur)
             eee = DE*(ienerg - 1)
             IF (EMAx(nnur).GT.eee) iemax(nejc) = ienerg
-C-----------Limiting iemax(nejc) to last continuum energy bin , RCN 11/2004
-            IF (iemax(nejc).GE.nexrt) iemax(nejc) = nexrt
             IF (ETL(5,nejc,nnur).EQ.0) THEN
                sg = SIGabs(ienerg + 5,nejc,nnur)
             ELSE
@@ -241,13 +264,11 @@ C
 
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
-C-----Last continuum energy bin is calculated, RCN 11/2004 (Added + 1, 10/2005)
-      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 2.0001),1)
-      DO ienerg = 2, NDEX
-         eee = DE*(ienerg - 1)
-         IF (ec.GT.eee) iemax(0) = ienerg
-         IF (iemax(0).GE.nexrt) iemax(0) = nexrt
-      ENDDO
+C     No PE contribution to discrete for gammas
+      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
+C     Assuming PE calculates over discrete levels' region as well
+C     nexrt = MAX(INT(EXCn/DE + 1.0001),1)
+      iemax(0) = nexrt
 
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
@@ -386,6 +407,24 @@ C
 C-----MASTER EQUATION SOLUTION
 C
       CALL RESOL(em,ihmax,ap,cme)
+
+C--------setup model matrix (IDNa) defining which model is used where
+C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C                        1     2     3      4      5      6
+C        1 neut. disc.   x     x     0      0      x      x
+C        2 neut. cont.   0     x     x      x      x      x
+C        3 prot. disc.   x     x     0      0      x      x
+C        4 prot. cont.   0     x     x      x      x      x
+C        5 gamma         0     0     x      x      0      x
+C        6 alpha. cont.  0     0     0      0      0      x
+C        7 deut . cont.  0     0     0      0      0      x
+C        8 trit . cont.  0     0     0      0      0      x
+C        9 He-3 . cont.  0     0     0      0      0      x
+C       10 LI   . cont.  0     0     0      0      0      x
+C       11 alpha. cont.  0     0     0      0      0      x
+C       12 deut . cont.  0     0     0      0      0      x
+C       13 trit . cont.  0     0     0      0      0      x
+C       14 He-3 . cont.  0     0     0      0      0      x
 C
 C-----PARTICLE LOOP FOR EMISSION SPECTRA CALCULATIONS
 C
@@ -403,10 +442,13 @@ C
          ENDDO
          cross(nejc) = hlp1 + cross(nejc)
 C        Skipping cross sections if MSD and MSC active
-         IF (nejc.gt.0 .and. nejc.le.3) then
-           IF(IDNa(2*nejc,6).EQ.0) CYCLE
-           IF(IDNa(5     ,6).EQ.0) CYCLE
-         ENDIF
+         IF(nejc.eq.0 .and. IDNa(5,6).EQ.0) CYCLE
+         IF(nejc.eq.1 .and. IDNa(2,6).EQ.0) CYCLE
+         IF(nejc.eq.2 .and. IDNa(4,6).EQ.0) CYCLE
+         IF(nejc.eq.3 .and. IDNa(6,6).EQ.0) CYCLE
+         IF(nejc.eq.4 .and. IDNa(7,6).EQ.0) CYCLE
+         IF(nejc.eq.5 .and. IDNa(8,6).EQ.0) CYCLE
+         IF(nejc.eq.6 .and. IDNa(9,6).EQ.0) CYCLE
          totemis = totemis + cross(nejc)
       ENDDO
 
@@ -422,7 +464,11 @@ C        Skipping cross sections if MSD and MSC active
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSEIF (nejc.ge.4) THEN !complex particle
-               status = "  (accepted)"
+               IF (IDNa(3 + nejc,6).EQ.0) THEN
+                  status = "  (ignored) "
+               ELSE
+                  status = "  (accepted)"
+               ENDIF
                WRITE (8,
      &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
@@ -501,12 +547,14 @@ C     Note, that PCROSS only calculates emission into the continuum
             ebind = 0.d0
          ENDIF
          CSMsd(nejc) = CSMsd(nejc) + cross(nejc)
+C        CSMsd(nejc) = cross(nejc)
          totemis = totemis + cross(nejc)
          DO ie = iemin(nejc), iemax(nejc)
             eee = DE*(ie - 1)
             ftmp = spec(nejc,ie)
             if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
+C           CSEmsd(ie,nejc) = ftmp
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
             ENDDO

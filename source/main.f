@@ -1,6 +1,7 @@
-Ccc   * $Rev: 1937 $
+$DEBUG
+Ccc   * $Rev: 1942 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 02:37:35 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -750,7 +751,10 @@ C-------------Maximum and minimum energy bin
               echannel = EX(NEX(1),1) - Q(nejc,1)
 C-------------Last continuum energy bin is calculated (+ 1 added, 10, 2005)
 C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
-              DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 2.0001),1)
+C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 2.0001),1)
+C
+C             Following changes in PCROSS to cover discrete levels , Jan 2011
+              DO i = 1, MAX(INT(echannel/DE + 1.0001),1)
                 WRITE (8,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
      &           (max(CSEa(i,iang,nejc,1),0.d0),iang = iad,iam)
               ENDDO
@@ -1310,29 +1314,63 @@ C--------Heidelberg Multistep Compound calculations
 C--------
          IF (nnuc.EQ.1 .AND. MSC.NE.0) THEN
             CALL HMSC(nvwful)
-            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)
+            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)				  
             CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
             CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
             WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             IF (nvwful) GOTO 1500
          ENDIF
 
-         IF (nnuc.EQ.1 .AND. IOUt.GT.4 .AND.
+         IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
      &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
-     &                  + CSEmis(3,1) + CSEmis(4,1))
+     &                  + CSEmis(3,1) + CSEmis(4,1)
+     &                  + CSEmis(5,1) + CSEmis(6,1))
      &       .NE.0) THEN
             WRITE (8,*) ' '
             WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
-            IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,0)
-            IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,0)
-            IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,0)
-            IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,0)
-            IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,0)
-            IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,0)
-            IF(CSEmis(6,1).GT.0) CALL AUERST(1,6,0)
-            IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0)
-     &        CALL AUERST(1,NDEjc,0)
+            IF(CSEmis(0,1).GT.0) THEN
+		    CALL AUERST(1,0,0)
+              WRITE (8,*) 
+     &          '  g PE emiss cross sect  ',CSEmis(0,1), ' mb'
+	      ENDIF
+            IF(CSEmis(1,1).GT.0) THEN
+		    CALL AUERST(1,1,0)
+              WRITE (8,*) 
+     &          '  n PE emiss cross sect  ',CSEmis(1,1), ' mb'
+	      ENDIF
+            IF(CSEmis(2,1).GT.0) THEN
+		    CALL AUERST(1,2,0)
+              WRITE (8,*) 
+     &          '  p PE emiss cross sect  ',CSEmis(2,1), ' mb'
+	      ENDIF
+            IF(CSEmis(3,1).GT.0) THEN
+		    CALL AUERST(1,3,0)
+              WRITE (8,*) 
+     &          '  a PE emiss cross sect  ',CSEmis(3,1), ' mb'
+	      ENDIF
+            IF(CSEmis(4,1).GT.0) THEN
+		    CALL AUERST(1,4,0)
+              WRITE (8,*) 
+     &          '  d PE emiss cross sect  ',CSEmis(4,1), ' mb'
+	      ENDIF
+            IF(CSEmis(5,1).GT.0) THEN
+		    CALL AUERST(1,5,0)
+              WRITE (8,*) 
+     &          '  t PE emiss cross sect  ',CSEmis(5,1), ' mb'
+	      ENDIF
+            IF(CSEmis(6,1).GT.0) THEN
+		    CALL AUERST(1,6,0)
+              WRITE (8,*) 
+     &          '  h PE emiss cross sect  ',CSEmis(6,1), ' mb'
+	      ENDIF
+            IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0) THEN
+		    CALL AUERST(1,7,0)
+              WRITE (8,*) 
+     &          ' LI PE emiss cross sect  ',CSEmis(NDEjc,1), ' mb'
+	      ENDIF
+            WRITE (8,*) 
+            WRITE (8,*) 
          ENDIF
 C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay
@@ -3043,7 +3081,7 @@ C     ENDDO
      &  '('' * Production cross section (incl.fission)        '',
      &           G13.6,'' mb'')')  checkXS
         WRITE (8,'('' * Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &    abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS),
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS,
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
@@ -3075,7 +3113,7 @@ C     ENDDO
      &  '(''   Production cross section (incl.fission)        '',
      &           G13.6,'' mb'')')  checkXS
         WRITE (*,'(''   Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &    abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS),
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS,
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
