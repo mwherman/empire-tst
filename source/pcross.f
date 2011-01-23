@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1944 $
+Ccc   * $Rev: 1945 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:13:10 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:58:15 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -113,16 +113,17 @@ C
       ggg = GDIV
       if(GDIV.eq.0) ggg=13.d0
       gc = FLOAT(ac)/ggg*GTIlnor(1)
-c     pc = ROPar(3,1)
-c     IF(pc.eq.0.) then
-C       ftmp = 0.
-C       IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
-C       pc = ftmp                                             ! odd
-C       IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
-C       IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
-c     ENDIF
-C     We supress pairing as it is considered in discrete levels
       pc = 0.d0
+c     pc = ROPar(3,1)
+      IF(pc.eq.0.) then
+        ftmp = 0.
+        IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
+        pc = ftmp                                             ! odd
+        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
+        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
+      ENDIF
+C     We supress pairing as it is considered in discrete levels
+C     pc = 0.d0
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -168,13 +169,13 @@ C
          nnur = NREs(nejc)
          if (nnur.lt.0) cycle
          g(nejc) = FLOAT(ar)/ggg*GTIlnor(nnur)
-C        ftmp = 0.
-C        IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
-C        pair(nejc) = ftmp
+         ftmp = 0.
+         IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
+         pair(nejc) = ftmp
 C        We supress pairing as it is considered in discrete levels
 C        pair(nejc) = 0.d0
-C        IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-C        IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
+         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
+         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
 C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C
