@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1945 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:58:15 +0100 (So, 23 Jän 2011) $
+Ccc   * $Rev: 1946 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-01-24 00:23:39 +0100 (Mo, 24 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1103,170 +1103,43 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             ENDDO
-
-
-
-
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
-
-
-
-
          ELSE
-
-
-
 C
 C           ENDF=0
-
-
-
 C
             DO iac = 0, NEMc
-
-
-
             DO ih = 0, nemh
-
-
-
             DO it = 0, nemt
-
-
-
             DO id = 0, nemd
-
-
-
             DO ia = 0, nema
-
-
-
             DO ip = 0, nemp
-
-
-
             DO in = 0, nemn
-
-
-
               mulem = iac + ia + ip + in + id + it + ih
-
-
-
               if(mulem.eq.0) cycle
-
-
-
-
               atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-
-
-
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
-
-
-
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
-
-
-
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
-
-
-
-
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-
-
-
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-
-
-
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-
-
-
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
-
-
-
-
 C             residues must be heavier than alpha
-
-
-
               if(atmp.le.4 . or. ztmp.le.2) cycle
-
-
-
-
-
-
-
               izatmp = INT(1000*ztmp + atmp)
-
-
-
               CALL WHERE(izatmp,nnuc,iloc)
-
-
-
               ENDf(nnuc) = 0
-
-
-
-
-
-
-
               EXClusiv = .TRUE.
-
-
-
-
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
             ENDDO
-
-
-
-
             ENDf(0) = 0
-
-
-
             ENDf(1) = 0
-
-
-
-
          ENDIF
 C
 C--------check input for consistency
@@ -3274,7 +3147,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1945 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1946 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -3525,7 +3398,7 @@ C--------PCROSS input
 C
          IF (name.EQ.'PEDISC') THEN
             PEQcont = 0
-            IF (val.GE.0) THEN
+            IF (val.GE.0.1) THEN
               PEQcont = 1
               WRITE (8,
      &'('' Discrete levels included in PCROSS calculations'')')

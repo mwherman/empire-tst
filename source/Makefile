@@ -1,6 +1,6 @@
-#$Rev: 1893 $
+#$Rev: 1946 $
 #$Author: mherman $
-#$Date: 2010-12-27 08:20:58 +0100 (Mo, 27 Dez 2010) $
+#$Date: 2011-01-24 00:23:39 +0100 (Mo, 24 Jän 2011) $
 #
 #----GNU gfortran FORTRAN compiler
 #FC     =  gfortran
@@ -45,7 +45,7 @@ FC     =  ifort
 #----flags for debuging using ifort compiler
 #FFLAGS =  -g -C
 #FFLAGS =  -C -ftrapuv -g -debug all
-FFLAGS =  -O3
+#FFLAGS =  -O3
 #----flags for automatic parallelization
 #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
 
