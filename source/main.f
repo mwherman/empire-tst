@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1934 $
+Ccc   * $Rev: 1935 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 00:26:02 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 01:30:44 +0100 (So, 23 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2073,9 +2073,9 @@ C------------Print residual nucleus population
              ENDIF
 
            ENDDO   !over ejectiles
-           WRITE (12,
-     &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
-     &               checkprd
+C          WRITE (12,
+C    &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
+C    &               checkprd
 C          WRITE ( 8,
 C    &       '(9x,'' Tot prod+emi cross section'',G12.5,''  mb'')')
 C    &               checkprd
