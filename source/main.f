@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 1942 $
+Ccc   * $Rev: 1943 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:06:46 +0100 (So, 23 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -153,7 +152,7 @@ C-----Print results of the systematics
 C-----
       IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 C-----Clear CN elastic cross section (1/4*pi)
-      elcncs = 0.0D+0			
+      elcncs = 0.0D+0           
 C-----
 C-----Open file 41 with tabulated cross sections
 C-----
@@ -1270,7 +1269,6 @@ C--------
             xnhms = NHMs
             debinhms = DE
             IF (debinhms.LT.1.0D0) debinhms = 1.0
-
 C           CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
 C    &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
 C    &                 icalled)
@@ -1314,7 +1312,7 @@ C--------Heidelberg Multistep Compound calculations
 C--------
          IF (nnuc.EQ.1 .AND. MSC.NE.0) THEN
             CALL HMSC(nvwful)
-            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)				  
+            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)                  
             CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
             CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
             WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
@@ -1330,45 +1328,45 @@ C--------
             WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
             IF(CSEmis(0,1).GT.0) THEN
-		    CALL AUERST(1,0,0)
+            CALL AUERST(1,0,0)
               WRITE (8,*) 
      &          '  g PE emiss cross sect  ',CSEmis(0,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(1,1).GT.0) THEN
-		    CALL AUERST(1,1,0)
+            CALL AUERST(1,1,0)
               WRITE (8,*) 
      &          '  n PE emiss cross sect  ',CSEmis(1,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(2,1).GT.0) THEN
-		    CALL AUERST(1,2,0)
+            CALL AUERST(1,2,0)
               WRITE (8,*) 
      &          '  p PE emiss cross sect  ',CSEmis(2,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(3,1).GT.0) THEN
-		    CALL AUERST(1,3,0)
+            CALL AUERST(1,3,0)
               WRITE (8,*) 
      &          '  a PE emiss cross sect  ',CSEmis(3,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(4,1).GT.0) THEN
-		    CALL AUERST(1,4,0)
+            CALL AUERST(1,4,0)
               WRITE (8,*) 
      &          '  d PE emiss cross sect  ',CSEmis(4,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(5,1).GT.0) THEN
-		    CALL AUERST(1,5,0)
+            CALL AUERST(1,5,0)
               WRITE (8,*) 
      &          '  t PE emiss cross sect  ',CSEmis(5,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(CSEmis(6,1).GT.0) THEN
-		    CALL AUERST(1,6,0)
+            CALL AUERST(1,6,0)
               WRITE (8,*) 
      &          '  h PE emiss cross sect  ',CSEmis(6,1), ' mb'
-	      ENDIF
+          ENDIF
             IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0) THEN
-		    CALL AUERST(1,7,0)
+            CALL AUERST(1,7,0)
               WRITE (8,*) 
      &          ' LI PE emiss cross sect  ',CSEmis(NDEjc,1), ' mb'
-	      ENDIF
+          ENDIF
             WRITE (8,*) 
             WRITE (8,*) 
          ENDIF
@@ -1986,7 +1984,6 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &          CSFis
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
-
          IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
            WRITE (8,'(''  g  emission cross section'',G12.5,''  mb'')')
@@ -2003,7 +2000,6 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
-
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.d0) THEN
            DO nejc = 1, NEJcm
@@ -2033,7 +2029,6 @@ C            IF (IOUt.GT.0) WRITE (8,
 C    &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
 C    &             SYMbe(nejc), CSEmis(nejc,nnuc)
 C------------Print residual nucleus population
-
              poptot = 0.0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
                 DO j = 1, NLW

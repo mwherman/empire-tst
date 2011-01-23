@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 1942 $
+Ccc   * $Rev: 1943 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:03:15 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:06:46 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -69,7 +68,7 @@ C
       INTEGER INT, NINT
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
-C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls 	
+C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls   
       SAVE r, /KALB/, callpcross, /PFACT/
 C
 C
@@ -159,8 +158,7 @@ C-----ZERO ARRAY INITIALIZATION
              L(nejc,hh) = 0.D0
          ENDDO
       ENDDO
-	pair = 0
-
+    pair = 0
 C
 C-----NEJcm is the maximum number of particles emitted
 C
@@ -307,7 +305,7 @@ C
             icon = 0
             hh = h1 - 1
 C           Found bug that decreased PE contribution, thanks to A Voinov 
-C  	      Oct 1, 2010 MH & RC, next line was commented to correct the bug
+C         Oct 1, 2010 MH & RC, next line was commented to correct the bug
 C           IF (hh.EQ.0 .AND. nejc.NE.0) GOTO 50
             p = hh + ap
 C
@@ -1218,7 +1216,7 @@ C
       DO j = 0,H
         fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
         u = G*(E - D - j*VV) - a
-C       Changed Sept. 2010	
+C       Changed Sept. 2010  
         IF (u.LE.0.) cycle
         sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
       ENDDO
