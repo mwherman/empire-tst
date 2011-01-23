@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1943 $
+Ccc   * $Rev: 1944 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:06:46 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:13:10 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -158,7 +158,7 @@ C-----ZERO ARRAY INITIALIZATION
              L(nejc,hh) = 0.D0
          ENDDO
       ENDDO
-    pair = 0
+      pair = 0
 C
 C-----NEJcm is the maximum number of particles emitted
 C

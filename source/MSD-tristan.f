@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1943 $
+Ccc   * $Rev: 1944 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:06:46 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 23:13:10 +0100 (So, 23 Jän 2011) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3207,14 +3207,14 @@ C-----
 C
 C      Inelastic channel 
 C
-     csm1 = 0.d0
+       csm1 = 0.d0
        DO ie = nexrt, next
          csm1 = csm1 + CSEmsd(ie,Nejc)*DE
        ENDDO
        csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
        csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
        xnn = 0.d0
-     if(csm1.gt.0.d0) xnn = csm2/csm1
+       if(csm1.gt.0.d0) xnn = csm2/csm1
 
 C------MSD/PCROSS contribution is integrated over the discrete level region and
 C------distributed among 2+, 3- and 4+ levels (or those close to such for
@@ -3236,7 +3236,7 @@ C
 C
 C      Inelastic channel
 C
-     csmtot = 0.d0
+       csmtot = 0.d0
        swght = 0.0
        DO il = 2, NLV(Nnur)
          wght(il) = 0.0
@@ -3298,10 +3298,10 @@ C           CSEa(ie,na,Nejc,1) = 0.d0
          ENDDO
        ENDDO
 
-     IF(csm2-csmtot.gt.0.1d0) then
-       write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+       IF(csm2-csmtot.gt.0.1d0) then
+         write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
          write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
-     ENDIF
+       ENDIF
 C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
 C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
 
@@ -3316,7 +3316,7 @@ C
        csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
        csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
        xnn = 0.d0
-     if(csm1.gt.0.d0) xnn = csm2/csm1
+       if(csm1.gt.0.d0) xnn = csm2/csm1
 
        istart = nexrt
          csmtot = 0.d0
@@ -3364,9 +3364,9 @@ C--------Store ang. dist.
          ENDDO
        ENDDO
        IF(csm2-csmtot.gt.0.1d0) then
-       write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
+         write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
          write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
-     ENDIF
+       ENDIF
 C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
 C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
       ENDIF
