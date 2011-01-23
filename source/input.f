@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1934 $
+Ccc   * $Rev: 1936 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 00:26:02 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-23 01:33:15 +0100 (So, 23 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -26,6 +26,7 @@ C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1, NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
+	CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /EXFOR / TARget, PROjec, RESidue
       COMMON /IEXFOR/ NCHr
@@ -286,9 +287,10 @@ C--------set fission defaults
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
 C
-C        IOPSYS = 0 LINUX
-C        IOPSYS = 1 WINDOWS
-         IOPsys = 1
+         IOPSYS = 0 !   LINUX	- Default
+C        IOPSYS = 1 !   WINDOWS
+         CALL GETENV ('OS', empireos)
+	   if(empireos(1:3). eq. 'Win') IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 local MySQL server (default)
@@ -3044,7 +3046,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1934 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1936 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
