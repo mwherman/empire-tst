@@ -356,6 +356,15 @@ PCROSS  Controls calculations with PCROSS
        > 0.8 and < 3 PCROSS enabled with mean free path multiplier
             set to VAL (Note: recommended value is 1.3)
 
+PEDISC  Controls discrete levels' calculations with PCROSS
+       = 0 no discrete levels considered in PCROSS (default)
+       > 0    discrete levels considered in PCROSS 
+              Strength distributed among available levels
+
+MAXHOL  Controls maximum equilibrium exciton number in PCROSS calculations
+       = 0.54 recommended default     
+       < 0.54 (should be > 0.1) reduced PE emission as NHEq is lower
+
 GTILNO  Single particle level density parameter g (in PCROSS) multiplied 
         by VAL
         
