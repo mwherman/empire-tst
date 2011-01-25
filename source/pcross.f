@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1945 $
+Ccc   * $Rev: 1948 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:58:15 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -115,15 +115,16 @@ C
       gc = FLOAT(ac)/ggg*GTIlnor(1)
       pc = 0.d0
 c     pc = ROPar(3,1)
-      IF(pc.eq.0.) then
+      IF(pc.eq.0.d0) then
         ftmp = 0.
         IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
         pc = ftmp                                             ! odd
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
-        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0       ! o-o
+        IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0.d0    ! o-o
       ENDIF
-C     We supress pairing as it is considered in discrete levels
-C     pc = 0.d0
+C     We supress pairing if requested in input
+C     Pairing is implicitly considered in the distribution of discrete levels
+      if(NPAirpe.eq.0) pc = 0.d0
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -172,10 +173,11 @@ C
          ftmp = 0.
          IF (ar.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ar)))
          pair(nejc) = ftmp
-C        We supress pairing as it is considered in discrete levels
-C        pair(nejc) = 0.d0
          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
-         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0
+         IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0.d0
+C        We supress pairing if requested in input
+C        Pairing is implicitly considered in the distribution of discrete levels
+         if(NPAirpe.eq.0) pair(nejc) = 0.d0
 C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C

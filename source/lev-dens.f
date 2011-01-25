@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1927 $
+Ccc   * $Rev: 1948 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-21 17:05:29 +0100 (Fr, 21 Jän 2011) $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 
 C
 C
@@ -496,7 +496,7 @@ C Local variables
 C
       REAL*8 aj, ar, defit, dshi, dshif, dshift, ellq, exkk,
      &                 pi2, rocumd, rocumu, rocumul, rolev,
-     &                 rotemp, xr
+     &                 rotemp, xr, Ecrt
       CHARACTER*7 caz
       CHARACTER*13 fname
       CHARACTER*20 ctmp1
@@ -504,10 +504,8 @@ C
 
       REAL FLOAT
       REAL*8 FSHELL
-      INTEGER i, ia, ij, il, in, iter, ix, iz, kk, kkl, kku, nplot
+      INTEGER i, ia, ij, in, iter, ix, iz, kk, kkl, kku, nplot
       INTEGER INT
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
 
       pi2 = PI*PI
       BF = 1.0
@@ -597,7 +595,9 @@ C-----get neutron binding energy  if not yet defined
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
 C-----get distance between Qn and the last level
-      ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
+C     ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
+C-----get distance between Qn and UCRt
+      ellq = Q(1,Nnuc) - UCRt 
       dshift = 0.0
       iter = 0
 C-----we are not going to fit discrete levels if there are not more
@@ -610,14 +610,9 @@ C-----can not be taken into account (RORed=0)
             WRITE (8,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
      &                  ' MeV'
          ENDIF
-C        defit = (ELV(NLV(Nnuc),Nnuc) + MAX(FITlev,4.0D0))
-         defit = (ELV(NLV(Nnuc),Nnuc) + 4.d0)
-     &           /(NEXreq - 1)        
-C    &           /(NDEX - 1)
-C--------Try using fixed DE to avoid any dependence on NDEX        
-C        defit = DE
+         defit = (ELV(NLV(Nnuc),Nnuc) + 4.d0)	/(NEXreq - 1)
+C                                             /(NDEX   - 1)
          nplot = (ELV(NLV(Nnuc),Nnuc) + 4.d0)/defit
-C        nplot = (ELV(NLV(Nnuc),Nnuc) + FITlev)/defit
   150    rocumul = 1.0
          iter = iter + 1
          kkl = 0
@@ -632,10 +627,13 @@ C-----------clean RO matrix
             ENDIF
 C-----------decrease energy shift above the last level to become 0 at Qn
             exkk = (kk - 1)*defit
-            IF (exkk.LE.ELV(NLV(Nnuc),Nnuc)) THEN
+C           IF (exkk.LE.ELV(NLV(Nnuc),Nnuc)) THEN
+            IF (exkk.LE.UCRt) THEN
                dshif = dshift
             ELSEIF (exkk.LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
                dshif = dshift*(Q(1,Nnuc) - exkk)/ellq
+C           ELSEIF (exkk.LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+C              dshif = dshift*(Q(1,Nnuc) - exkk)/ellq
             ELSE
                dshif = 0.0
             ENDIF
@@ -668,11 +666,16 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          dshi = (kkl - 1 + dshi)*defit
          dshi = dshi - ELV(NLV(Nnuc),Nnuc)
          dshift = dshift + dshi
-         IF (FITlev.GT.0.0D0) WRITE (8,'(I3,4X,3G12.5)') iter, dshi,
-     &                               dshift
-         IF (ABS(dshi).GT.0.01D0) THEN
-            IF (iter.LE.20) GOTO 150
-         ENDIF
+         IF (FITlev.GT.0.0D0) then 
+          Ecrt = UCRt - DEL - dshift
+          WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
+     &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
+     &    ' DEL = ',DEL 		 
+          WRITE (8,'(A5,I3,4X,G12.5,A15,2(G12.5,1x))') 
+     &    'It # ', iter, dshi, ' Final shift = ',dshift
+	    write(8,*)
+	   ENDIF
+         IF (ABS(dshi).GT.0.01D0 .and. iter.LE.20) GOTO 150
       ENDIF
 
       IF(IOUt.eq.6 .and. NLV(Nnuc).GT.3 .and.
@@ -727,61 +730,6 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
 
       ENDIF
 
-C--------cumulative plot of levels along with the l.d. formula
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0) THEN
-         WRITE (8,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                   ATIlnor(Nnuc), ATIl, NLV(Nnuc)
-99005    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,' norm=',F6.4,
-     &           ' atil=',F4.1,' Ncut=',I3)
-         OPEN (35,FILE = 'fort.35')
-         WRITE (35,*) 'set terminal postscript enhanced color lw 2
-     & solid "Helvetica" 20'
-         WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
-         WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                    dshift, UCRt - DEL - dshift, DEF(1,Nnuc),
-     &                    ATIl, NLV(Nnuc)
-99010    FORMAT ('set title "',I3,'-',A2,'-',I3,
-     &           '   Ushift = ',F6.3,' Ucrt = ',F5.2,' Def = ',F6.2,
-     &           ' atil=',F4.1,' Ncut=',I3,'"')
-         WRITE (35,*) 'set logscale y'
-         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
-         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
-         WRITE (35,*) 'set style line 1 lt 1 lw 2'
-         WRITE (35,*) 'set style line 2 lt 5 lw 2'
-         WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
-     &els", "fort.34" w l ls 1 t "Level density" '')')
-         CLOSE (35)
-         OPEN (34,FILE = 'fort.34')
-         OPEN (36,FILE = 'fort.36')
-         WRITE (36,*) '0.0 1.0'
-         DO il = 2, NLV(Nnuc)
-            WRITE (36,*) ELV(il,Nnuc), REAL(il - 1)
-            WRITE (36,*) ELV(il,Nnuc), REAL(il)
-         ENDDO
-         rocumul = 1.0
-         WRITE (34,*) '0.0  ', rocumul
-         DO kk = 2, nplot
-C-----------Integration over energy. There should be factor 2 because of the
-C-----------parity but it cancels with the 1/2 steming from the trapezoid
-C-----------integration
-            DO ij = 1, NLWst
-C              rocumul = rocumul + (RO(kk - 1,ij,Nnuc) + RO(kk,ij,Nnuc))
-C    &                   *defit/RORed
-C-----------integration over energy. Parity dependence explicitly considered.
-C-----------There is a factor 1/2 steming from the trapezoid integration
-               rocumul = rocumul + 0.5d0*defit/RORed*
-     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
-     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
-            ENDDO
-            WRITE (34,*) defit*(kk - 1), rocumul
-         ENDDO
-         CLOSE (36)
-         CLOSE (34)
-         IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35')
-            CLOSE (35)
-         ENDIF
-      ENDIF
 C--------plotting fit of the levels with low energy formula  ***done***
 C
 C--------fitting discrete levels ---- done ------
@@ -792,8 +740,9 @@ C--------
          REWIND (25)
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
-      ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
-c      dshift = 0.d0
+C     ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
+      Ecrt = UCRt - DEL - dshift
+      ellq = Q(1,Nnuc) - Ecrt
       DO kk = 1, NEX(Nnuc)
 C-----------clean RO matrix
          IF (BF.NE.0.0D0) THEN
@@ -803,12 +752,20 @@ C-----------clean RO matrix
             ENDDO
          ENDIF
          IF (FITlev.LE.0.0D0 .OR. EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc))
-     &       THEN
-            IF (EX(kk,Nnuc).LE.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+     &      THEN
+C        IF (FITlev.LE.0.0D0 .OR. EX(kk,Nnuc).GE.UCRt) THEN
+            IF (EX(kk,Nnuc).LE.Ecrt) THEN
+               dshif = dshift
+            ELSEIF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
                dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
             ELSE
-               dshif = 0.d0
+               dshif = 0.0
             ENDIF
+C           IF (EX(kk,Nnuc).LE.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+C              dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
+C           ELSE
+C              dshif = 0.d0
+C           ENDIF
             CALL DAMIRO(kk,Nnuc,dshif,0.0D0,Asaf,rotemp,aj)
          ENDIF
       ENDDO
@@ -885,8 +842,11 @@ C-----determination of U for normal states
          ELSE
             bcs = .TRUE.
          ENDIF
+         IF (Destep.eq.0.0D0 .and. FITLEV.GT.0
+     &      .and. EX(kk,Nnuc).LE. Q(1,NNuc)+1.d0) 
+     &     write(8,*) '***  E=',sngl(EX(kk,Nnuc)),
+     &        ' U= ',sngl(u),' shift(E)=',sngl(dshif) 
       ENDIF
-
 C-----
 C-----do loop over angular momentum
 C
@@ -994,6 +954,7 @@ cc            goto 345
 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2)*RORed
+C           IF (Destep.eq.0.D0) Rotemp = 0.d0
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
@@ -1164,6 +1125,11 @@ C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta ! Commented to avoid using wrong
      &             segnor = segs/(aj*(aj + 1)/(2.0*momort))
                IF (j - 1.GT.ldstab) segs = aj*(aj + 1)/(2.0*momort)
      &             *segnor
+C
+C              Yrast states redefined for normal states to avoid discontinuities
+C              as proposed by MS 
+C
+               segs = aj*(aj + 1)/(2.0*momort)   ! Jan 2011
             ELSE
 C--------------out of the BARFIT range of applicability;
 C--------------fission barrier spin dependence is assumed to be  that of
@@ -1174,6 +1140,7 @@ C--------------Swiatecki (SB0)
                sb = sb*sbnor
                segs = aj*(aj + 1)/(2.0*momort)
             ENDIF
+
             YRAst(j,Nnuc) = segs
             SHCjf(j,Nnuc) = SHCFADE(j - 1,SHRj,SHRd)
             FISb(j,Nnuc) = sb*QFIs + segs

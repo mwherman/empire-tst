@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1946 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-01-24 00:23:39 +0100 (Mo, 24 Jän 2011) $
+Ccc   * $Rev: 1948 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -26,8 +26,6 @@ C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1, NCHr
       CHARACTER*10 PROjec, RESidue(NDNUC), TARget
-
-
 
       CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
@@ -215,8 +213,7 @@ C--------set gamma-strength parameters
             GDRpar(7,nnuc) = 1.0
          ENDDO
          IZA(0) = 0
-C        ENDf(0) = 0.0
-         ENDf(0) = 1.0  ! Jan 2009
+         ENDf(0) = 1.0  
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
@@ -229,16 +226,8 @@ C        ENDf(0) = 0.0
          NEXreq = 60
          FITlev = 0.0
 C--------Full gamma cascade becomes the default setting  (Jan 2011)
-
-
-
 C--------Use GCASC input parameter to turn it off
-
-
-
          GCAsc =  1.0
-
-
 
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
@@ -266,6 +255,7 @@ C
          DIRect = 0
          KTRompcc = 0
          CCCalc = .FALSE.
+         NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
          IOMwritecc = 0
          MODelecis = 0
@@ -276,7 +266,7 @@ C        WIDcoll = 0.d0
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
-         RECoil = 1.d0
+         RECoil = 1.d0     ! Default 
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
 C        IOPran = 1 ! Default gaussian 1 sigma error
          IOPran = 0 ! MC sampling off by default, 'RANDOM' turns it on
@@ -287,10 +277,6 @@ C--------Maximum energy to assume all levels are collective for DWBA calculation
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
          JCUtcoll = 2.
-C
-
-
-
 
 C--------set fission defaults
          DO nnuc = 1, NDNUC
@@ -406,8 +392,9 @@ C--------set options for DEGAS (exciton preequilibrium)
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0
          PEQc = 0.0
+         NPAirpe = 1  ! default is to include pairing corrections in PCROSS/DEGAS 
          MFPp = 1.3
-         CHMax = 0.d0 ! set default to 0.54 inside PCROSS
+         CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 1
          EHRtw = 5.d0
@@ -1026,28 +1013,10 @@ C
 
 C--------Set exclusive and inclusive ENDF formatting flags
          NEXclusive = 1  ! CN is always exclusive
-
-
-
          INExc(1) = 1    ! CN is always exclusive
 
-
-
-
-
-
-
 C--------We fix below target ENDf flag since it escapes normal setting
-
-
-
          IF (ENDf(0).EQ.0) ENDf(0) = 1
-
-
-
-
-
-
 
          IF(NENdf.GT.0) THEN
             DO iac = 0, NEMc
@@ -1103,7 +1072,9 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
             ENDDO
+ 
             WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+ 
          ELSE
 C
 C           ENDF=0
@@ -1121,10 +1092,12 @@ C
      &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
      &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
               IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
+
               ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
      &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
      &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
               IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
+
 C             residues must be heavier than alpha
               if(atmp.le.4 . or. ztmp.le.2) cycle
               izatmp = INT(1000*ztmp + atmp)
@@ -1138,8 +1111,10 @@ C             residues must be heavier than alpha
             ENDDO
             ENDDO
             ENDDO
+
             ENDf(0) = 0
             ENDf(1) = 0
+
          ENDIF
 C
 C--------check input for consistency
@@ -1409,19 +1384,34 @@ C-----------stop HMS inelastic scattering if MSC and/or MSD active
                ENDIF
             ENDIF
          ENDIF
+
+         IF (NENdf.eq.0) THEN          
+            NPRIm_g = 0
+            WRITE (8,
+     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
+              WRITE (12,
+     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
+            RECoil = 0.d0
+            WRITE (8,
+     &'('' Recoils are not calculated as ENDF formatting is turned off''
+     &)')
+              WRITE (12,
+     &'('' Recoils are not calculated as ENDF formatting is turned off''
+     &)')
+         ENDIF 
+C
 C--------check if PCROSS active
 C
-         IF (PEQc.eq.0) THEN
+         IF (PEQc.eq.0.d0) THEN
 C--------dismiss discrete levels key as PCROSS is not active
-            PEQcont = 0
+            PEQcont = 0.d0
             WRITE (8,
      &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
               WRITE (12,
      &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
          ENDIF
 C--------set PCROSS  (.,6) cluster emission
-C
-         IF (PEQc.GT.0) THEN
+         IF (PEQc.GT.0.d0) THEN
             IF(PEQcont.gt.0) IDNa(1,6) = 1  ! discrete N is included even with ECIS active
             IDNa(2,6) = 1
             IF(PEQcont.gt.0) IDNa(3,6) = 1  ! discrete P is included even with ECIS active
@@ -1432,26 +1422,15 @@ C
             IDNa(8,6) = 1  ! cont T 
             IDNa(9,6) = 1  ! cont H 
             IDNa(10,6) = 0 ! cont LI
-
 C
-
 C           It could be calculated but probably not formatted 
-
 C
-
-           
-
-          IF(PEQcont.gt.0) then
-
+            IF(PEQcont.gt.0) then
               IDNa(11,6) = 1 ! alpha discrete
-
               IDNa(12,6) = 1 ! deut  discrete
-
               IDNa(13,6) = 1 ! trit  discrete
-
               IDNa(14,6) = 1 ! He-3  discrete
-
-          ENDIF
+            ENDIF
 C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
@@ -1489,7 +1468,6 @@ C--------print IDNa matrix
          WRITE (8,*) 'Exit channel      ECIS    MSD    MSC',
 
      &              '   DEGAS   HMS   PCROSS'
-
          WRITE (8,*) ' '
          WRITE (8,'('' neut. disc. '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
          WRITE (8,'('' neut. cont. '',8I7)')(IDNa(2,j),j = 1,NDMODELS)
@@ -1502,13 +1480,9 @@ C--------print IDNa matrix
          WRITE (8,'('' He-3  cont. '',8I7)')(IDNa(9,j),j = 1,NDMODELS)
          WRITE (8,'('' LI    cont. '',8I7)')(IDNa(10,j),j= 1,NDMODELS)
          WRITE (8,'('' alpha disc. '',8I7)')(IDNa(11,j),j= 1,NDMODELS)
-
          WRITE (8,'('' deut. disc. '',8I7)')(IDNa(12,j),j= 1,NDMODELS)
-
          WRITE (8,'('' trit. disc. '',8I7)')(IDNa(13,j),j= 1,NDMODELS)
-
          WRITE (8,'('' He-3  disc. '',8I7)')(IDNa(14,j),j= 1,NDMODELS)
-
          WRITE (8,*) ' '
 
          WRITE(12,*) ' '
@@ -1526,20 +1500,13 @@ C--------print IDNa matrix
          WRITE(12,'('' p to continuum'',8I7)')(IDNa(4,j),j = 1,NDMODELS)
          WRITE(12,'('' gammas        '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
          WRITE(12,'('' a to continuum'',8I7)')(IDNa(6,j),j = 1,NDMODELS)
-
          WRITE(12,'('' d to continuum'',8I7)')(IDNa(7,j),j = 1,NDMODELS)
-
          WRITE(12,'('' t to continuum'',8I7)')(IDNa(8,j),j = 1,NDMODELS)
-
          WRITE(12,'('' h to continuum'',8I7)')(IDNa(9,j),j = 1,NDMODELS)
-
          WRITE(12,'(''LI to continuum'',8I7)')(IDNa(10,j),j= 1,NDMODELS)
          WRITE(12,'('' a to levels   '',8I7)')(IDNa(11,j),j= 1,NDMODELS)
-
          WRITE(12,'('' d to levels   '',8I7)')(IDNa(12,j),j= 1,NDMODELS)
-
          WRITE(12,'('' t to levels   '',8I7)')(IDNa(13,j),j= 1,NDMODELS)
-
          WRITE(12,'('' h to levels   '',8I7)')(IDNa(14,j),j= 1,NDMODELS)
 
          WRITE(12,*) ' '
@@ -3147,7 +3114,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1946 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1948 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -3404,6 +3371,29 @@ C
      &'('' Discrete levels included in PCROSS calculations'')')
               WRITE (12,
      &'('' Discrete levels included in PCROSS calculations'')')
+	       ELSE
+              WRITE (8,
+     &'('' Discrete levels not included in PCROSS calculations'')')
+              WRITE (12,
+     &'('' Discrete levels not included in PCROSS calculations'')')
+             ENDIF
+            GOTO 100
+         ENDIF
+C
+         IF (name.EQ.'PEPAIR') THEN
+            IF (val.LE.0) THEN
+              Npairpe = 0
+              WRITE (8,
+     &'('' Pairing corrections are not considered in PCROSS/DEGAS calcul
+     &ations'')')
+              WRITE (12,
+     &'('' Pairing corrections are not considered in PCROSS/DEGAS calcul
+     &ations'')')
+	       ELSE
+              WRITE (8,
+     &'('' Pairing corrections are considered in exciton model LDs'')')
+              WRITE (12,
+     &'('' Pairing corrections are considered in exciton model LDs'')')
              ENDIF
             GOTO 100
          ENDIF
@@ -3451,6 +3441,7 @@ C
              KTRompcc = INT(val)
              GOTO 100
          ENDIF
+
          IF (name.EQ.'DIRECT') THEN
             DIRect = val
             IF (DIRect.EQ.3) WRITE (8,
@@ -3502,6 +3493,18 @@ C
 C
 C--------ECIS input  *** done ***
 C
+         IF (name.EQ.'PRGAMM') THEN
+            IF(val.gt.0.d0) THEN
+              NPRIm_g = 1
+              WRITE (8 ,'('' Primary gammas calculated and stored'')')
+              WRITE (12,'('' Primary gammas calculated and stored'')')
+	       ELSE
+              WRITE (8 ,'('' Primary gammas not stored'')')
+              WRITE (12,'('' Primary gammas not stored'')')
+             ENDIF
+            GOTO 100
+         ENDIF
+
          IF (name.EQ.'RELKIN') THEN
             IF (val.NE.0.) THEN
                RELkin = .TRUE.
@@ -3513,6 +3516,7 @@ C
             ENDIF
             GOTO 100
          ENDIF
+
          IF (name.EQ.'BFUS  ') THEN
             BFUs = val
             WRITE (8,'('' Fusion barrier set to '',F7.2,'' MeV'')') BFUs
@@ -4963,83 +4967,20 @@ C             Setting ENDF for all emission loops
               NENdf = INT(val)
               IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
-
-
-
-
-
-
-
-
-
                  WRITE (8,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
-
-
-
-
-
-
-
-
-
                  WRITE (12,'(
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                      GOTO 100
               ENDIF
               IF(NENdf.EQ.0) THEN
-
-
-
-
-
-
-
-
-
                  WRITE ( 8,'('' ENDF formatting disabled'')')
-
-
-
-
-
-
-
-
-
                  WRITE (12,'('' ENDF formatting disabled'')')
-
-
-
-
-
-
-
-
-
                  GOTO 100
-
-
-
-
-
-
-
-
-
               ENDIF
-
-
-
-
-
-
-
-
-
              ENDIF
              IF(val.LT.0) THEN
                WRITE (8,'('' WRONG ENDF value in input'',I3)')
@@ -6583,7 +6524,8 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'RECOIL') THEN
             RECoil = val
-            IF (RECOIL.LT.0.d0) RECoil = 1.d0
+C           IF (RECOIL.LT.0.d0) RECoil = 1.d0
+            IF (RECOIL.NE.0.d0) RECoil = 1.d0
             IF (RECOIL.eq.0.d0)
      &      WRITE (8,'('' Recoils are not calculated'')')
             GOTO 100

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1948 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 
             
       SUBROUTINE EMPIREDEGAS
@@ -199,9 +199,18 @@ C     ! Incident proton
          GGDegas(3) = A(3)/13.0
       ENDIF
       IF (GDIvp.GT.1.0) GGDegas(3) = A(3)/GDIvp
-      DDDegas(1) = delz(IZDegas) + deln(INDegas)     ! Pairing for CN
-      DDDegas(2) = delz(IZDegas) + deln(INDegas - 1) ! Pairing for CN-n
-      DDDegas(3) = delz(IZDegas - 1) + deln(INDegas) ! Pairing for CN-p
+C
+C     We supress pairing if requested in input
+C     Pairing is implicitly considered in the distribution of discrete levels
+      DDDegas(1) = 0.d0
+      DDDegas(2) = 0.d0
+      DDDegas(3) = 0.d0
+      if(NPAirpe.gt.0) then
+        DDDegas(1) = delz(IZDegas) + deln(INDegas)     ! Pairing for CN
+        DDDegas(2) = delz(IZDegas) + deln(INDegas - 1) ! Pairing for CN-n
+        DDDegas(3) = delz(IZDegas - 1) + deln(INDegas) ! Pairing for CN-p
+      endif
+
       IATdegas = INDegas + IZDegas
       IF (IATdegas.LE.0) STOP
       IACdegas = IATdegas

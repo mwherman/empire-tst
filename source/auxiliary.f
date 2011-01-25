@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1948 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -40,8 +40,8 @@ C
       CSEfis = 0.d0
       CSMsc  = 0.d0
 
-      ENPG   = 0.d0
-      CSPGE  = 0.d0
+      ENPg   = 0.d0
+      CSEpg  = 0.d0
 
       CSE    = 0.d0
       CSEt   = 0.d0

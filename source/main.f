@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1943 $
+Ccc   * $Rev: 1948 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:06:46 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1563,8 +1563,8 @@ C--------Printout of results for the decay of NNUC nucleus
          ENDDO
          IF(dtmp.LE.0.d0) GOTO 1525
          IF (ENDF(nnuc).gt.0) WRITE (8,
-     &'(3X,''NOTE: due to ENDF option discrete levels contribution 
-     &was not included in emission spectra'')')
+     &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
+     &     ''NOTE:   was not included in emission spectra'')')
          IF (IOUt.GT.0) WRITE (8,
      &                        '(1X,/,10X,''Discrete level population'')'
      &                        )
@@ -1575,15 +1575,16 @@ C--------Printout of results for the decay of NNUC nucleus
          IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0.0D0 .AND.
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (8,
-     &'(3X,''NOTE: due to ENDF option direct particle contribution 
-     &was shifted to the g.s.'')')
+     &'(3X,''NOTE: due to ENDF option direct particle contribution was s 
+     &hifted to the g.s.'')')
          IF (IOUt.GT.0) WRITE (8,'(1X,/,10X,40(1H-),/)')
+C
 C        Primary gamma printout -----------------------
-C        IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN   !original
-         IF (ENDf(nnuc).EQ.-10 .AND. nnuc.EQ.1) THEN   !block primary gamma printout
+C
+         IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
            cspg = 0.d0
            DO il = 1, NLV(nnuc)
-             cspg = cspg + CSPGE(il) 
+             cspg = cspg + CSEpg(il) 
            ENDDO
            IF(cspg.gt.0.d0) then
              WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1596,7 +1597,7 @@ C        IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN   !original
              WRITE (12,*) ' '
              DO il = 1, NLV(nnuc)
                WRITE (12,99910) il, ELV(il,nnuc), LVP(il,nnuc),
-     &          XJLv(il,nnuc), CSPGE(il), CSPGE(il)/cspg*100., ENPG(il) 
+     &          XJLv(il,nnuc), CSEpg(il), CSEpg(il)/cspg*100., ENPg(il) 
 99910          FORMAT (I12,F10.5,I5,F8.1,G15.6,1x,F6.2,1x,F10.5)
              ENDDO
              WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1611,7 +1612,7 @@ C        IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN   !original
              WRITE (8,*) ' '
              DO il = 1, NLV(nnuc)
                WRITE (8,99910) il, ELV(il,nnuc), LVP(il,nnuc),
-     &          XJLv(il,nnuc), CSPGE(il), CSPGE(il)/cspg*100., ENPG(il) 
+     &          XJLv(il,nnuc), CSEpg(il), CSEpg(il)/cspg*100., ENPg(il) 
              ENDDO
              WRITE (8,'(1X,/,10X,40(1H-),/)')
 
@@ -2237,7 +2238,7 @@ C    &                                POPcse(0, nejc, 1, INExc(nnur))*2
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.0
-                IF (nejc.GT.0 .AND. RECoil.EQ.1) 
+                IF (nejc.GT.0 .AND. RECoil.GT.0) 
      &             recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 C 1529
                 IF (LHMs.EQ.0 .OR. nejc.LT.1 .OR. nejc.GT.2) THEN
@@ -3307,7 +3308,7 @@ C---------------Inclusive DDX spectrum (neutrons)
          ENDIF
 C--------protons
          recorp = 1.0d0
-         IF(RECoil.gt.0) recorp = (1. + EJMass(2)/AMAss(1))
+         IF(RECoil.GT.0) recorp = (1. + EJMass(2)/AMAss(1))
          IF(LHMS.GT.0) THEN
            nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(2,1))/DE) + 2)
            DO ie = 1, nspec + 1
