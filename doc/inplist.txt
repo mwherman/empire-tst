@@ -43,9 +43,9 @@ ENDF     Controls output for ENDF formatting and exclusive/inclusive emission,
                      the rest are inclusive (lumped into MT=5)
             etc.  
 
-RECOIL   Controls calculations of recoils if ENDF > 0
-        = 0 recoils are not calculated 
-        = 1 reacoils are calculated (defualt)
+RECOIL   Controls calculations of recoils 
+        = 0 recoils are not calculated (default if ENDF > 0, ENDF formatting)
+        = 1 recoils are calculated     (default if ENDF = 0, no ENDF formatting)
         
 Output control
 --------------
@@ -549,6 +549,12 @@ GDRWEI  relative contributions of the GDR and Weisskopf estimates to the
 GCASC  = 0 no full gamma-cascade in the first Compound Nucleus
            (only primary transitions),
        = 1 full gamma-cascade in the first Compound Nucleus (default)
+
+PRGAMM = 0 no primary gammas are stored (default)
+       = 1 Primary gammas (only primary transitions) are stored 
+       
+PEPAIR = 0 no LD pairing corrections are considered in PCROSS/DEGAS
+       = 1    LD pairing corrections are considered in PCROSS/DEGAS (default)
 
 Photo-absorption
 ----------------
