@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
+Ccc   * $Rev: 1949 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Date: 2011-01-26 07:38:53 +0100 (Mi, 26 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1043,7 +1043,6 @@ C             residues must be heavier than alpha
               if(atmp.le.4 . or. ztmp.le.2) cycle
               izatmp = INT(1000*ztmp + atmp)
               CALL WHERE(izatmp,nnuc,iloc)
-
               IF(mulem.LE.NENdf) THEN
                 IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
               ELSE
@@ -1054,7 +1053,6 @@ C               Comment the following block and uncommment the line after the bl
                 ENDIF
 C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
               ENDIF
-                        
               IF (ENDf(nnuc).EQ.1) THEN
                 NEXclusive = NEXclusive + 1
                 IF(NEXclusive.GT.NDExclus) THEN
@@ -1073,7 +1071,12 @@ C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
             ENDDO
             ENDDO
  
-            WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+C           IF(EXClusiv) then
+C             WRITE(8,*) 'All spectra are exclusive' 
+C           ELSE
+C             WRITE(8,*) 'Marked with > spectra are exclusive' 
+C	        ENDIF
+C           WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
  
          ELSE
 C
@@ -1753,12 +1756,7 @@ C-----check whether spectrum array can accommodate capture with this DE
 C     CALL CHECK_DE(EMAx(1),NDECSE)
 C     CALL CHECK_DE(EMAx(1),NDEX)
 
-
       CALL CHECK_DE(EMAx(1),NEXreq)
-
-
-
-
 
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
@@ -1775,9 +1773,7 @@ C-----check whether population array can accommodate the reaction with the large
 C-----continuum using current DE, if not adjust DE
 C     CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 
-
       CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NEXreq)
-
 
 C-----check whether spectra array can accommodate the reaction with the largest
 C-----continuum using current DE, if not adjust DE
@@ -2078,15 +2074,15 @@ C-----------determination of etl matrix and transmission coeff.--done
       WRITE (8,*) ' '
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
 
+      IF(ENDF(1).GT.0) THEN
+        IF(EXClusiv) then
+          WRITE(8,*) 'All spectra are exclusive' 
+        ELSE
+          WRITE(8,*) 'Marked with > spectra are exclusive' 
+        ENDIF
+        WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+	  ENDIF
 
-
-
-      IF(ENDF(1).GT.0)
-
-
-
-
-     &  WRITE (8,*) 'Number of exclusive nuclei :',NEXclusive
       WRITE (8,*) ' '
 C-----calculate residual nucleus level density
       DO nnur = 2, NNUct
@@ -3114,7 +3110,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1948 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1949 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
