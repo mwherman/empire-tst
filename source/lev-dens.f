@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
+Ccc   * $Rev: 1952 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Date: 2011-01-26 07:59:07 +0100 (Mi, 26 Jän 2011) $
 
 C
 C
@@ -3111,11 +3111,47 @@ Cccc  * EGSM level density systematics fitted to Do from RIPL-3.         *
 Cccc  *                                                                  *
 Cccc  * Set coefficients in the level-density-parameter formula          *
 Cccc  * used in the EMPIRE-specific (EGSM) model:                        *
-Cccc  * atil = ap1*A(Nnuc) + ap2*A(nnuc)**2/3                            *
-Cccc  * gamma = gam/A(nnuc)**1/3                                         *
+Cccc  * atil = ap1*A(Nnuc) + gamma (gam/A(nnuc)**1/3)                    *
 Cccc  *                                                                  *
 Cccc  * Using liquid drop vibrational enhancement factor (EMPIRE-2.19)   *
 Cccc  *                                                                  *
+Cccc  * EGSM level density systematics fitted to Do from RIPL-3.         *
+Cccc  *                                                                  *
+Cccc  * author: M. Herman                                                *
+Cccc  * date:   December 2008                                            *
+Cccc  * rev 1 : R. Capote                                                *
+Cccc  * date:   January 2011                                             *
+Cccc  ********************************************************************
+      REAL*8 ap1, ap2, gam
+Cccc  * MINUIT fit results:                                              
+C-----parameters of Dec 4, 2008
+C     frm=1.70   Chi**2=36 (per degree of freedom)                    
+C     ap1 = 0.74055E-01
+C     ap2 = 0.28598E-03
+C     gam = 0.57248
+C-----parameters of Jan 23, 2011
+C     ap1 =  0.76122d-01
+C     ap2 = -0.45559d-02
+C     gam =  0.58269d0
+C	frms  = 1.687
+C	Chi-2 =	34.6
+C-----parameters of Jan 26, 2011
+C  Do-fit using RIPL-3 database, 2.19 vibr enhancement (MINUIT)       
+C     alpha 0=  .0750000 delta alpha= .500000D-01
+C     gam   0=  .5750000 delta gam  = .500000D-02
+C ---------------------------------
+C alpha=   7.488729E-02 gam=   5.697688E-01
+C frm=       1.687021929004768 Chi^2=      27.301609174895010
+C
+      ap1 =  7.488729d-02
+      ap2 =  0.d0
+      gam =  5.697688D-01
+
+      RETURN
+      END
+
+
+
 Cccc  * MINUIT fit results:                                              *
 Cccc  * EXT PARAMETER                                                    *
 Cccc  * NO.   NAME        VALUE                                          *
@@ -3146,3 +3182,4 @@ Cccc  ********************************************************************
 
       RETURN
       END
+
