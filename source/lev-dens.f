@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1952 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-26 07:59:07 +0100 (Mi, 26 Jän 2011) $
+Ccc   * $Rev: 1953 $
+Ccc   * $Author: pigni $
+Ccc   * $Date: 2011-01-26 16:34:22 +0100 (Mi, 26 Jän 2011) $
 
 C
 C
@@ -3146,39 +3146,6 @@ C
       ap1 =  7.488729d-02
       ap2 =  0.d0
       gam =  5.697688D-01
-
-      RETURN
-      END
-
-
-
-Cccc  * MINUIT fit results:                                              *
-Cccc  * EXT PARAMETER                                                    *
-Cccc  * NO.   NAME        VALUE                                          *
-Cccc  *  1     A1        0.74055E-01                                     *
-Cccc  *  2     A2        0.28598E-03                                     *
-Cccc  *  3     gam       0.57248                                         *
-Cccc  *                                                                  *
-Cccc  *  frm=1.70   Chi**2=36 (per degree of freedom)                    *
-Cccc  *                                                                  *
-Cccc  * author: M.Herman                                                 *
-Cccc  * date:   December 2008                                            *
-Cccc  ********************************************************************
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-      REAL*8 ap1, ap2, gam, gamma, del, delp
-
-      del = 0.d0
-      delp = 12./SQRT(A(nnuc))
-      IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
-      IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
-      ap1 = 0.74055E-01
-      ap2 = 0.28598E-03
-      gam = 0.57248
-      gamma = gam/A(Nnuc)**0.333333
-      IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
-      ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
-      ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
 
       RETURN
       END
