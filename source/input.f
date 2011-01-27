@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1957 $
+Ccc   * $Rev: 1961 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 03:13:10 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3112,7 +3112,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1957 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1961 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -6877,13 +6877,22 @@ C--------------Print resulting level density parameters
                   WRITE (8,*) ' '
                   WRITE (8,*) 'Nucleus A=', INT(A(nnuc)), ' Z=',
      &                        INT(Z(nnuc))
-                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) WRITE (8,*)
-     &                 'SHC=', SHC(nnuc), ' U=', uexc, ' DELTA=', del,
-     &                ' asys=', asys, ' aexp=', aroc,' Dobs=',dob
-                  IF (ADIv.EQ.2.0D0) WRITE (8,*) 'SHC=', SHC(nnuc),
-     &                ' U=', uexc, ' DELTA=', del, ' asys=', asys,
-     &                ' aexp=', arogc
-               ELSE
+                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) then 
+                     WRITE (8,*)
+     &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
+                     WRITE (8,*) 
+     &                 ' DELTA=', sngl(del),' asys=', sngl(asys)
+                     WRITE (8,*) 
+     &                 ' aexp=', sngl(aroc),' Dobs=',sngl(dob)
+	            ENDIF
+                  IF (ADIv.EQ.2.0D0) then
+                     WRITE (8,*)
+     &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
+                     WRITE (8,*) 
+     &                 ' DELTA=', sngl(del),' asys=', sngl(asys)
+                     WRITE (8,*) 
+     &                 ' aexp=', sngl(aroc),' Dobs=',sngl(dob)
+                  ENDIF
                   IF (ADIv.EQ.0.0D0)
      &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),

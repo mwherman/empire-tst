@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1956 $
+Ccc   * $Rev: 1961 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 03:09:55 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
 
 C
 C
@@ -177,7 +177,7 @@ C
       DATA m0, pi, r0, ht/1.044, 3.14159259, 1.26, 6.589/
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
+      Vibrk = DEXP(1.7*cost**(2./3.)*T**(4./3.))
 C-----vibrational enhancement factor (up to EMPIRE-2.19)
 C     VIBRK=EXP(4.7957*A**(2./3.)*T**(4./3.)/100.)
       END
@@ -544,10 +544,11 @@ C-----set Ignatyuk type energy dependence for 'a'
          WRITE (8,*)
      &     ' WARNING: Search for critical a-parameter has not converged
      & for A=',A(nnuc),' Z=',Z(nnuc)
-         WRITE (8,*) ' WARNING: Last iteration has given acrt=', ACRt
-         WRITE (8,*) ' WARNING: Setting Acrt to 0, execution continues'
+         WRITE (8,*)' WARNING: Last iteration has given acrt=', ACRt
+         WRITE (8,*)' WARNING: Setting Acrt to 0.1, execution continues'
+         ACRt = max(ACRt,0.1d0)
       ENDIF
-  100 IF (ACRt.LT.0.0D0) ACRt = 0.0
+  100 IF (ACRt.LT.0.1D0) ACRt = 0.1d0
       ECOnd = 1.5*ACRt*DELp**2/pi2
       UCRt = ACRt*TCRt**2 + ECOnd
 C-----45.84 stands for (12/SQRT(pi))**2
@@ -585,8 +586,9 @@ C-----get neutron binding energy  if not yet defined
       ENDIF
 C-----get distance between Qn and the last level
 C     ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
+      ellq = Q(1,Nnuc) -( ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc) )
 C-----get distance between Qn and UCRt
-      ellq = Q(1,Nnuc) - UCRt 
+C     ellq = Q(1,Nnuc) - UCRt 
       dshift = 0.0
       iter = 0
 C-----we are not going to fit discrete levels if there are not more
@@ -599,9 +601,9 @@ C-----can not be taken into account (RORed=0)
             WRITE (8,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
      &                  ' MeV'
          ENDIF
-         defit = (ELV(NLV(Nnuc),Nnuc) + 4.d0)	/(NEXreq - 1)
+         defit = (ELV(NLV(Nnuc),Nnuc)+LDShif(Nnuc)+4.d0)/(NEXreq - 1)
 C                                             /(NDEX   - 1)
-         nplot = (ELV(NLV(Nnuc),Nnuc) + 4.d0)/defit
+         nplot = (ELV(NLV(Nnuc),Nnuc)+LDShif(Nnuc)+4.d0)/defit
   150    rocumul = 1.0
          iter = iter + 1
          kkl = 0
@@ -616,8 +618,8 @@ C-----------clean RO matrix
             ENDIF
 C-----------decrease energy shift above the last level to become 0 at Qn
             exkk = (kk - 1)*defit
-C           IF (exkk.LE.ELV(NLV(Nnuc),Nnuc)) THEN
-            IF (exkk.LE.UCRt) THEN
+            IF (exkk.LE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)) THEN
+C           IF (exkk.LE.UCRt) THEN
                dshif = dshift
             ELSEIF (exkk.LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
                dshif = dshift*(Q(1,Nnuc) - exkk)/ellq
@@ -653,10 +655,14 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          rolev = LOG(REAL(NLV(Nnuc)))
          dshi = (rolev - rocumd)/(rocumu - rocumd)
          dshi = (kkl - 1 + dshi)*defit
-         dshi = dshi - ELV(NLV(Nnuc),Nnuc)
+         dshi = dshi - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
          dshift = dshift + dshi
          IF (FITlev.GT.0.0D0) then 
           Ecrt = UCRt - DEL - dshift
+	    write(8,*)
+	    WRITE (8,*) '*****   A=',nint(A(nnuc)),
+     &	 ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
+     &     ' LDshif=',LDShif(nnuc)
           WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
      &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
      &    ' DEL = ',DEL 		 
@@ -729,9 +735,9 @@ C--------
          REWIND (25)
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
-C     ellq = Q(1,Nnuc) - ELV(NLV(Nnuc),Nnuc)
+      ellq = Q(1,Nnuc) - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
       Ecrt = UCRt - DEL - dshift
-      ellq = Q(1,Nnuc) - Ecrt
+C     ellq = Q(1,Nnuc) - Ecrt
       DO kk = 1, NEX(Nnuc)
 C-----------clean RO matrix
          IF (BF.NE.0.0D0) THEN
@@ -740,21 +746,23 @@ C-----------clean RO matrix
                RO(kk,i,2,Nnuc) = 0.d0
             ENDDO
          ENDIF
-         IF (FITlev.LE.0.0D0 .OR. EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc))
+         IF (FITlev.LE.0.0D0 .OR. 
+     &       EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc))
      &      THEN
 C        IF (FITlev.LE.0.0D0 .OR. EX(kk,Nnuc).GE.UCRt) THEN
-            IF (EX(kk,Nnuc).LE.Ecrt) THEN
-               dshif = dshift
-            ELSEIF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
-               dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
-            ELSE
-               dshif = 0.0
-            ENDIF
-C           IF (EX(kk,Nnuc).LE.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+C           Changed from UCRt  
+C           IF (EX(kk,Nnuc).LE.Ecrt) THEN
+C              dshif = dshift
+C           ELSEIF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
 C              dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
 C           ELSE
-C              dshif = 0.d0
+C              dshif = 0.0
 C           ENDIF
+            IF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+               dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
+            ELSE
+               dshif = 0.d0
+            ENDIF
             CALL DAMIRO(kk,Nnuc,dshif,0.0D0,Asaf,rotemp,aj)
          ENDIF
       ENDDO
@@ -1676,6 +1684,11 @@ C           RECTANGULAR INTEGRATION (no 1/2)
       ENDIF
       ROPar(4,Nnuc) = eo
       ROPar(2,Nnuc) = ux
+
+C-----plot of the l.d. formula
+      IF(IOUt.eq.6 .and. NLV(Nnuc).GT.3) CALL PLOT_ZVV_GSLD(2,Nnuc)
+
+	RETURN
       END
 C
 C
@@ -2152,21 +2165,22 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
          RETURN
       ENDIF
       IF (Yrast .LT. 0.0D0) RETURN !Should not happen
-      IF (Ac.EQ.0.0D0) THEN
-         WRITE (8,'('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
-         STOP
-      ENDIF
+      IF (Ac.LE.0.1D0) RETURN 
+C     IF (Ac.LE.0.0D0) THEN
+C        WRITE (8,'('' FATAL: LEVEL DENS. PARAMETER a<0.05 IN RODEF'')')
+C        STOP
+C     ENDIF
       seff = 1.0/Mompar - 1.0/Momort
       IF (Bf.EQ.0.0D0) THEN
          e1 = E
       ELSE
          e1 = E - Yrast
-         IF (e1.LE.0.0D0) RETURN
       ENDIF
+      IF (e1.LE.0.0D0) RETURN
       t = SQRT(e1/Ac)
       con = const/Ac**0.25/SQRT(Mompar*t)
 C-----vibrational enhancement factor (EMPIRE-2.19)
-        CALL VIBR(A,t,vibrk)
+      CALL VIBR(A,t,vibrk)
 C-----damping of vibrational effects
         CALL DAMPV(t,qv)
         IF (qv.GE.0.999D0) vibrk = 1.0
@@ -3144,7 +3158,7 @@ C
       ap2 =  0.d0
       gam =  5.697688D-01
       gamma = gam/A(Nnuc)**0.333333
-c      IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
+      IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
       ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
       ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
 c      write(*,*)'atilnoz',ATIlnoz(INT(Z(nnuc)))

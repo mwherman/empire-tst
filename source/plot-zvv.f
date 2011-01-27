@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1930 $
+Ccc   * $Rev: 1961 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-21 17:12:26 +0100 (Fr, 21 Jän 2011) $
+Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'
@@ -37,6 +37,12 @@ C
         write(fname,'(A13)') '_GS_EMPLD.zvd'
         write(ctmp,'(A20)') caz//fname
         write(caz,'(A7)') 'EMP_GS_'
+      ENDIF
+
+      IF(LEVden.eq.2) then
+        write(fname,'(A13)') '_GS_GCMLD.zvd'
+        write(ctmp,'(A20)') caz//fname
+        write(caz,'(A7)') 'GCM_GS_'
       ENDIF
 
       IF(LEVden.eq.3) then
