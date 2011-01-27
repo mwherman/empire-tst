@@ -322,7 +322,7 @@ LEVDEN  Selects level density approach,
        = 2 Gilbert-Cameron level densities, adjusted to experimental
            a values and to discrete levels,
        = 3 microscopic HF-BCS level densities,
-       > 2 Fermi gas with deformation-dependent collective effects 
+       > 3 Fermi gas with deformation-dependent collective effects 
            and a=A/VAL.
 
 ATILNO  systematics value of the level density parameter \widetilde{a}
