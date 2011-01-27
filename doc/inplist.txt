@@ -70,7 +70,9 @@ Fusion
 
 FUSRED  Fusion cross section will be multiplied by VAL (default: 1.).
 
-FCCRED  Direct cross section will be multiplied by VAL (default: 1.).
+FCCRED  Direct cross section to coupled channels will be multiplied by VAL (default: 1.).
+
+FDWRED  Direct cross section to continuum will be multiplied by VAL (default: 1.).
 
 TOTRED  Total cross section will be multiplied by VAL (default: 1.).
 
