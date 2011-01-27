@@ -181,72 +181,6 @@ DEFNUC Deformation of the nucleus set to VAL.
        you can use this parameter with a value less than 0.1
        this parameter also affects the deformation used in MSD calculations        
 
-Multi-step Direct
------------------
-
-MSD     Controls Multi-step Direct calculations ,
-       = 0 no MSD calculations (default),
-       = 1 MSD calculations selected - ORION + TRISTAN will be executed,
-           (contribution to discrete levels disregarded if CC or DWBA
-           calculations selected (DIRECT > 0))
-       = 2 MSD calculations selected - ORION + TRISTAN will be executed
-           including contribution to discrete levels regardless of the 
-           DIRECT option (option to be used only with the CC rotational 
-           model)
-
-COMPFF  Controls form factor for l=0 transfer 
-       = 0 surface form factor (default)
-       = 1 compressional form factor
-
-WIDEX   Experimental energy resolution set to VAL (default: 0.2).
-
-GAPP    Proton pairing gap for target set to VAL (default: 12/\sqrt{A} ).
-
-GAPN    Neutron pairing gap for target set to VAL (default: 12/\sqrt{A} ).
-
-HOMEGA  \hbar\omega  oscillator energy (default: 41.47/A^{1/3} MeV ).
-
-EFIT    Coupling constants of multi-polarity I1 fitted to the level at
-        energy VAL (defaults: -1 for \lambda=0, E_{GDR} for \lambda=1,
-        energies of the first low-lying 2+, 3-, and 4+ levels for
-        \lambda=2,\,3,\,4, respectively).
-
-RESNOR  Response function for multi-polarity I1 will be normalized by
-        factor VAL (default: 1).
-
-ALS     spin-orbit coupling strength in the harmonic oscillator 
-        (default: 1.5).
-
-Multi-step Compound
--------------------
-
-MSC     Controls Multi-step Compound calculations,
-       = 0 no MSC calculations (default),
-       = 1 MSC calculations selected.
-
-XNI     Initial exciton number set to VAL (default set internally
-        depending on the case, 3 for nucleon induced reactions).
-
-GDIV    Single particle level densities in MSC set to A/VAL (default: 13.0).
-
-TORY    Ratio of unlike to like nucleon-nucleon interaction cross section
-        set to VAL.  Used for the determination of the relative share
-        between neutron and protons in the exciton configurations
-        (default: 4.).
-
-EX1     Initial number of excitons that are neutrons set to VAL (default
-        set internally depending on the case and on TORY).
-
-EX2     Initial number of excitons that are protons set to VAL (default
-        set internally depending on the case and on TORY).
-
-D1FRA   Ratio of the spreading GDR width to the total GDR width set to
-        VAL (default: 0.8).
-
-GST     Controls \gamma -emission in MSC,
-       = 0 no \gamma -emission in MSC (default),
-       = 1 \gamma -emission in MSC selected.
-
 Multi-step direct
 -----------------          
 
@@ -393,7 +327,18 @@ LEVDEN  Selects level density approach,
 
 ATILNO  systematics value of the level density parameter \widetilde{a}
         will be multiplied by VAL for the nucleus with Z=I1 and
-        A=I2. 
+        A=I2 (default 1 for all nuclei). 
+        
+LDSHIF  low energy shift VAL of the level density (in MeV) built in such
+        a way as to become zero at the binding energy for the nucleus with
+        Z=I1 and A=I2 (default 0 for all nuclei). 
+
+FITLEV > 0 cumulative plots of discrete levels will be displayed. The energy range
+           of the plot will extend VAL MeV above the last discrete level,
+       = 0 no cumulative plots (default).
+
+NIXSH  = 0 shell-corrections calculated according to Myers-Swiatecki (default),
+       = 1 shell-corrections according to Nix-Moller tables.
 
 GCROA   Level density parameter a in Gilbert-Cameron approach
        >  0 parameter a in nucleus Z=I1, A=I2 set to VAL ,
@@ -414,13 +359,6 @@ GCROE0  Level density parameter E_{0} in Gilbert-Cameron approach for nucleus Z=
 
 GCROT   Level density parameter T in Gilbert-Cameron approach for nucleus Z=I1, A=I2 set to VAL
         (default calculated internally).
-
-FITLEV > 0 cumulative plots of discrete levels will be displayed. The energy range
-           of the plot will extend VAL MeV above the last discrete level,
-       = 0 no cumulative plots (default).
-
-NIXSH  = 0 shell-corrections calculated according to Myers-Swiatecki (default),
-       = 1 shell-corrections according to Nix-Moller tables.
 
 Fission
 -------
