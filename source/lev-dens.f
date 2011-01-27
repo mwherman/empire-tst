@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1953 $
-Ccc   * $Author: pigni $
-Ccc   * $Date: 2011-01-26 16:34:22 +0100 (Mi, 26 Jän 2011) $
+Ccc   * $Rev: 1955 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-01-27 02:37:34 +0100 (Do, 27 Jän 2011) $
 
 C
 C
@@ -81,14 +81,6 @@ C-----next call prepares for lev. dens. calculations
       DEL = ROPar(3,Nnuc)
       rbmsph = 0.01448*A(Nnuc)**1.66667
       ac = A(Nnuc)/ADIv
-      IF (Gcc.EQ.2.D0) THEN
-          WRITE (8,*) ' '
-          WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-          WRITE (8,*) ' OPTION GCC=2 ONSOLETE  '
-          WRITE (8,*) ' EXECUTION TERMINATED !!'
-          WRITE (8,*) ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-          WRITE (8,*) ' '
-      ENDIF
       DO kk = 1, NEX(Nnuc)
          u = EX(kk,Nnuc) - DEL
          UEXcit(kk,Nnuc) = MAX(u,0.D0)
