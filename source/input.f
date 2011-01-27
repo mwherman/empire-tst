@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1949 $
+Ccc   * $Rev: 1957 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-26 07:38:53 +0100 (Mi, 26 Jän 2011) $
+Ccc   * $Date: 2011-01-27 03:13:10 +0100 (Do, 27 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -243,9 +243,11 @@ C--------fusion parameters
          DFUs = 1.
          FUSred = 1.d0
          FCCred = 1.d0
+         FDWred = 1.d0
          TOTred = 1.d0
          rFUSred = 1.d0
          rFCCred = 1.d0
+         rFDWred = 1.d0
          rTOTred = 1.d0
          REDsef = 1.d0
          LEVtarg = 1
@@ -1805,10 +1807,10 @@ C-----setting irec=1 below practically removes CM motion energy from recoils
 C-----calculate compound nucleus level density
       ARGred = -1.
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
-      IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,0.0D0,2.D0)
+C     IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,0.0D0,2.D0) ! to do a fitting
       IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
-      IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0,1.D0)
+      IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
          IF (ADIv.LT.3.0D0) THEN
@@ -2088,12 +2090,12 @@ C-----calculate residual nucleus level density
       DO nnur = 2, NNUct
          IF (NEX(nnur).GE.1 .OR. FITlev.GT.0) THEN
             IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-            IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)
+C           IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)	 ! to fit LDs
 C-----------<m2> could be added to the input ( to use 0.124 if needed)
             IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
 C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
-            IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0,1.D0)
+            IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0)
             IF (IOUt.EQ.6) THEN
               ia = INT(A(nnur))
               IF (ADIv.LT.3.0D0) THEN
@@ -3110,7 +3112,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1949 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1957 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -3739,6 +3741,37 @@ C-----
                 WRITE (12,
      &      '('' Direct cross section was scaled by factor '',
      &           F6.3)') FCCred
+            endif
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'FDWRED') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+                WRITE (8,
+     &          '('' Direct cross section uncertainty '',
+     &          '' to the continuum is equal to '',i2,'' %'')') i1
+                 sigma = val*i1*0.01
+                IF(IOPran.gt.0) then
+                  IF(rFDWred.eq.1.d0) rFDWred = grand()
+                  FDWred = val + rFDWred*sigma
+                ELSE
+                  IF(rFDWred.eq.1.d0) rFDWred = drand()
+                  FDWred = val + 1.732d0*(2*rFDWred-1.)*sigma
+                ENDIF
+                WRITE (8,'('' Direct cross section to the'',
+     &                     '' continuum was scaled by factor ''
+     &          ,f6.3)') FDWred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, FDWred, INDexf,INDexb
+            else
+                FDWred = val
+                WRITE (8, '('' Direct cross section to the'',
+     &                      '' continuum was scaled by factor ''
+     &          ,f6.3)') FDWred
+                WRITE (12,'('' Direct cross section to the'',
+     &                      '' continuum was scaled by factor ''
+     &          ,f6.3)') FDWred
             endif
             GOTO 100
          ENDIF
