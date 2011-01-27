@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
+Ccc   * $Rev: 1956 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Date: 2011-01-27 03:09:55 +0100 (Do, 27 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1226,8 +1226,8 @@ C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
                IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,1.D0,0.0D0)
-               IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,1.D0,2.D0)
-               IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,1.D0,1.D0)
+C              IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,1.D0,2.D0) !  fitting
+               IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,1.D0)
                IF (ADIv.EQ.2.0D0) WRITE (8,*)
      &  ' MUST NOT USE GILBERT-CAMERON LEVEL DENSITIES FOR SADDLE POINT'
                IF (IOUt.EQ.6) THEN
@@ -2316,18 +2316,6 @@ C-----------------------(continuum part)
      &                        EMAx(nnuc)/recorp,
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                     ENDDO
-
-                    totspec = 0.d0
-                    DO ie = 1, nspec+1
-                      totspec  = totspec  + CSE(ie,nejc,nnur)
-                    ENDDO
-                    totspec = totspec -  0.5d0*
-     &                      (CSE(1,nejc,nnur) + CSE(nspec+1,nejc,nnur))
-                    totspec = totspec*DE 
-                    WRITE (12,*) ' '    
-                    WRITE (12,
-     &      '(1x,'' Integrated inclusive spectrum   '',G12.5,'' mb'')')
-     &                totspec      
                     WRITE (12,*) ' '    
 
                   ELSE ! LHMS.NE.0
@@ -2413,19 +2401,6 @@ C                     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
 C    &                        EMAx(nnuc)*recorp,
 C    &                     (max(cseaprnt(ie,nang),0.d0),nang = 1,NDANG)
 C                   ENDDO
-C-------------------Calculate and print integral of the inclusive spectrum
-C-------------------emitted from the nucleus nnur
-                    totspec = 0.d0
-                    DO ie = 1, nspec
-                      totspec  = totspec  + CSE(ie,nejc,nnur)
-                    ENDDO
-                    totspec = totspec -  0.5d0*
-     &                      (CSE(1,nejc,nnur) + CSE(nspec,nejc,nnur))
-                    totspec = totspec*DE 
-                    WRITE (12,*) ' '    
-                    WRITE (12,
-     &                '(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &                totspec      
                     WRITE (12,*) ' '    
    
                   ENDIF ! LHMS.EQ.0

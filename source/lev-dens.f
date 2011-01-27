@@ -1,10 +1,10 @@
-Ccc   * $Rev: 1955 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-01-27 02:37:34 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Rev: 1956 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-27 03:09:55 +0100 (Do, 27 Jän 2011) $
 
 C
 C
-      SUBROUTINE ROCOL(Nnuc,Cf,Gcc)
+      SUBROUTINE ROCOL(Nnuc,Cf)
 CCC
 CCC   *********************************************************************
 CCC   *                                                         CLASS:PPU *
@@ -30,9 +30,6 @@ CCC   *                                                                   *
 CCC   *  INPUT:                                                           *
 CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
 CCC   *  CF   - 1. FOR THE SADDLE POINT, 0. OTHERWISE                     *
-CCC   *  GCC  - CONTROLS A-PARAMETER DETERMINATION;                       *
-CCC   *         GCC=1 A/ADIV TAKEN                ,                       *
-CCC   *         GCC=2 FIT                         ,                       *
 CCC   *                                                                   *
 CCC   *  BF CONTROLS SHAPE OF THE NUCLEUS                                 *
 CCC   *     BF=0. STANDS FOR THE SADDLE POINT (CF=1)                      *
@@ -61,7 +58,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Cf, Gcc
+      REAL*8 Cf
       INTEGER Nnuc
 C
 C Local variables
@@ -3114,7 +3111,15 @@ Cccc  * date:   December 2008                                            *
 Cccc  * rev 1 : R. Capote                                                *
 Cccc  * date:   January 2011                                             *
 Cccc  ********************************************************************
-      REAL*8 ap1, ap2, gam
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      REAL*8 ap1, ap2, gam, gamma, del, delp
+
+      del = 0.d0
+      delp = 12./SQRT(A(nnuc))
+      IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
+      IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
+
 Cccc  * MINUIT fit results:                                              
 C-----parameters of Dec 4, 2008
 C     frm=1.70   Chi**2=36 (per degree of freedom)                    
@@ -3138,7 +3143,10 @@ C
       ap1 =  7.488729d-02
       ap2 =  0.d0
       gam =  5.697688D-01
-
+      gamma = gam/A(Nnuc)**0.333333
+c      IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
+      ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
+      ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
+c      write(*,*)'atilnoz',ATIlnoz(INT(Z(nnuc)))
       RETURN
       END
-
