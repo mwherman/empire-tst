@@ -1,6 +1,6 @@
-C $Rev: 1948 $
+C $Rev: 1958 $
 C $Author: rcapote $
-C $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+C $Date: 2011-01-27 03:19:40 +0100 (Do, 27 Jän 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -78,7 +78,7 @@ C
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
-     &                 FISshi(ndnuc), FITlev, FLAm(ndcc), FCCred,
+     &                 FISshi(ndnuc), FITlev, FLAm(ndcc),FCCred,FDWred,
      &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv, GDIvp,
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn, DXSred,
@@ -131,7 +131,8 @@ C
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED, rFCCRED, rFUSRED, rTUNEfi(0:ndnuc)
+      DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED 
+	  DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
 c
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
@@ -162,11 +163,11 @@ c
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
-     &                 FNvvomp, FNavomp,  FNwvomp, FNwsomp, FNasomp,
-     &                 FNrvomp, FNrwvomp, FNrsomp, DEFdyn, DEFsta, 
+     &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,
+     &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,rFDWred, 
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd, ATIlnoz, DXSred, SHLlnor, PEQcont
+     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,FDWred         
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
