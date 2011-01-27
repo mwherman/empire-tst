@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1959 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-27 03:49:42 +0100 (Do, 27 Jän 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -723,10 +723,12 @@ C
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
       ElasticCorr = 0.d0
-      IF(TOTred.ne.0.d0 .or. FUSred.ne.0.d0)
+      IF(TOTred.ne.1.d0 .or. FUSred.ne.1.d0 
+     &                  .or. FCCred.ne.1.d0 .or. FDWred.ne.1.d0 )
      &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
      &              + (1.d0 - FUSred)*CSFus   ! Here CSFus is not scaled yet 
      &              + (1.d0 - FCCred)*(SINl + SINlcc)
+     &              + (1.d0 - FDWred)*SINlcont
 
       IF (EINl.LT.0.3D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = FUSred * stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
