@@ -1,6 +1,6 @@
-#$Rev: 1946 $
-#$Author: mherman $
-#$Date: 2011-01-24 00:23:39 +0100 (Mo, 24 Jän 2011) $
+#$Rev: 1962 $
+#$Author: rcapote $
+#$Date: 2011-01-27 23:59:21 +0100 (Do, 27 Jän 2011) $
 #
 #----GNU gfortran FORTRAN compiler
 #FC     =  gfortran
@@ -83,7 +83,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
             gamma-strgth.o    input.o           lev-dens.o    main.o\
             ph-lev-dens.o     pipe.o            print.o       \
-            tl.o              scnd-preeq.o      HRTW-comp.o   ddhms.o\
+            tl.o              HRTW-comp.o   	ddhms.o\
             degas.o           pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
