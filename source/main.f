@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1968 $
+Ccc   * $Rev: 1969 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 Jän 2011) $
+Ccc   * $Date: 2011-01-28 05:33:12 +0100 (Fr, 28 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1468,6 +1468,12 @@ C-----------------Distribute yrast population over discrete levels
      & '('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='',   G12.5)'
      & ) ke, FLOAT(ip)*(FLOAT(jcn) + HIS(nnur)), POP(ke,jcn,ipar,nnuc)
      &   *ded
+C
+C                    Corrected on Jan 2011, Previously missed gamma XSs
+C
+                     CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + 
+     &                         POP(ke,jcn,ipar,nnuc)*ded
+
 C--------------------Look for the discrete level with the closest spin
                      xnl = 1.0
                      spdiff = 100.
