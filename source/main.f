@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1956 $
+Ccc   * $Rev: 1968 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 03:09:55 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3056,8 +3056,8 @@ C     ENDDO
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS ) )/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont)
-        IF (INT(ZEJc(0)).GT.0) WRITE (8,
-     &    '('' * Compound elastic cross section (CE) '',G13.6,
+        IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) WRITE (8,
+     &  '('' * Compound elastic cross section (CE) '',G13.6,
      &              '' mb  '')') 4.*PI*ELCncs
         if(FUSred.ne.1.)
      &  WRITE (8,'('' * CN formation cross section scaled by '',G13.6
@@ -3093,7 +3093,7 @@ C     ENDDO
      &     G13.6,'' mb  ''/)') 4.*PI*ELCncs
         ELSE
           WRITE (*,*)
-      ENDIF
+        ENDIF
 
       ENDIF
       IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)

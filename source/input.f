@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1961 $
+Ccc   * $Rev: 1968 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -177,7 +177,7 @@ C--------------Surface imaginary potential:
          ENDDO
 C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
 C--------to turn off normalization to experimental Gg
-         TUNe(0,1) = 0.999
+         TUNe(0,1) = 0.999d0
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
 C-----------set level density parameters
@@ -3112,7 +3112,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1961 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1968 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1924 $
+Ccc   * $Rev: 1968 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-19 05:27:30 +0100 (Mi, 19 Jän 2011) $
+Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 Jän 2011) $
 C
 C
       SUBROUTINE HRTW
@@ -283,18 +283,24 @@ C
               IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
                 TUNe(0, Nnuc) = tgexper/sumtg
                 WRITE(8 ,
-     &       '(1x,''Gamma emission width multiplied by '',F7.3)')
+     &         '(1x,''Gamma emission width normalized ''/
+     &           1x,''internally by a factor '',F7.3)')
      &         TUNe(0, Nnuc)
                WRITE(8,*)
               ELSE
                 WRITE(8 ,
-     &       '(1x,''Gamma emission is not normalized'')')
+     &       '(1x,''Gamma emission width is not normalized to Do'')')
               ENDIF
             ELSE
-              WRITE(8,
-     &         '(1x,''Gamma emission is not normalized''/
-     &           1x,''TUNE(0,Nnuc) set in input to '',F7.3)')
+              IF(ABS(TUNe(0, Nnuc)-1.d0).LT.0.00001D+0) THEN
+                 WRITE(8 ,
+     &       '(1x,''Gamma emission width is not normalized to Do'')')
+              ELSE
+                 WRITE(8,
+     &         '(1x,''Gamma emission width normalized ''/
+     &           1x,''by setting TUNE in input to '',F7.3)')
      &         TUNe(0, Nnuc)
+              ENDIF
             ENDIF
             WRITE(8,*)
          ENDIF
