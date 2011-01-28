@@ -31,7 +31,10 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
-!-V         Version 8.02   October  2011     A. Trkov
+!-V         Version 8.03   January  2011     A. Trkov
+!-V                        Correct the format for printing energy balance
+!-V                        of MT5.
+!-V         Version 8.02   January  2011     A. Trkov
 !-V                        Implement resolved resonance option LRF=7
 !-V                        (no extensive checking of parameters is done).
 !-V         Version 8.01   October  2010     A. Trkov
@@ -3336,7 +3339,7 @@
       DO IK=1,NK
          CALL RDTAB1
          IZAP = IFIX(C1)
-         IF(IK.LE.25) WRITE(HL(IK),'(I8.5,A2)')  IZAP,'  '
+         IF(IK.LE.NPOUTMAX) WRITE(HL(IK),'(I8.5,A2)')  IZAP,'  '
          NIK(IK) = 0
          NREGS = NR
          DO I=1,NREGS
@@ -3362,7 +3365,7 @@
             INT2 = L22
             NE = NP2
             IFP = 1
-            IF(IK.LE.50) THEN
+            IF(IK.LE.NPOUTMAX) THEN
                LIK(IK) = LL
                NIK(IK) = NE
             END IF
@@ -3495,7 +3498,7 @@
             IF(IZAP.EQ.0) NOG = 0
             NE = NP2
             IFP = 1
-            IF(IK.LE.50) THEN
+            IF(IK.LE.NPOUTMAX) THEN
                LIK(IK) = LL
                NIK(IK) = NE
             END IF
@@ -3565,7 +3568,7 @@
          CALL ERROR_MESSAGE(0)
       END IF
       IF(NOC.EQ.1.OR.EMIN.EQ.1.0E+10)   GO TO 90
-      IF (NK.GT.25) THEN
+      IF (NK.GT.NPOUTMAX) THEN
          WRITE(EMESS,'(A,I4,A)')                                        &       
      &           'TOO MANY SUBSECTIONS, NK = ',NK,                      &       
      &           ' --UNION CHECK SUPRESSED'
@@ -3608,7 +3611,8 @@
    40 FORMAT(/9X,'ENERGY BALANCE SUMMARY: Q = ',1PE13.5//               &       
      &     23X,'TOTAL SECONDARY ENERGY BY EMITTED PARTICLE')
       IF (NK.GT.1) THEN
-         WRITE(NOUT,'(2A10,A7,(10A10))')HE,HA,HP,HS,(HL(I),I=1,NK)
+         WRITE(NOUT,'(2A10,A7,10A10:/1(37X, 9A10))')                    &
+     &         HE,HA,HP,HS,(HL(I),I=1,NK)
          IF(NK.GT.12) WRITE(NOUT,'(A)') ' '
       ELSE IF (NK.EQ.1) THEN
          WRITE(NOUT,'(2A10,A7,(10A10))')HE,HA,HP,HL(1)
@@ -3647,19 +3651,21 @@
          END IF
          IF(MT.EQ.5)   THEN
             IF(NK.EQ.1) THEN
-               WRITE(NOUT,'(1PE10.2,17X,(10(1PE10.2)))')  E,VAL(1)
+               WRITE(NOUT,'(1P,E10.2,17X,(10E10.2))')  E,VAL(1)
             ELSE
-               WRITE(NOUT,'(1PE10.2,17X,(10(1PE10.2)))')                &       
+               WRITE(NOUT,'(1P,E10.2,17X,10E10.2:/1(37X, 9E10.2))')     &       
      &                E,SSUM,(VAL(I),I=1,NK)
                IF(NK.GT.12) WRITE(NOUT,'(A)') ' '
             END IF
          ELSE
             IF(PERR.LT.999.99) THEN
                IF(NK.EQ.1) THEN
-                  WRITE(NOUT,'(2(1PE10.2),0PF7.2,(10(1PE10.2)))')       &       
+                  WRITE(NOUT,'(1P,2E10.2,0P,F7.2,1P,10E10.2:/
+     &                        (37X, 9E10.2))')                          &       
      &                     E,EAVAIL,PERR,VAL(1)
                ELSE
-                  WRITE(NOUT,'(2(1PE10.2),0PF7.2,(10(1PE10.2)))')       &       
+                  WRITE(NOUT,'(1P,2E10.2,0P,F7.2,1P,10E10.2:/
+     &                        (37X, 9E10.2))')                          &       
      &                     E,EAVAIL,PERR,SSUM,(VAL(I),I=1,NK)
                   IF(NK.GT.12) WRITE(NOUT,'(A)') ' '
                END IF
