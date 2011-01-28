@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1961 $
+Ccc   * $Rev: 1965 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-28 02:01:00 +0100 (Fr, 28 Jän 2011) $
 
 C
 C
@@ -608,14 +608,16 @@ C                                             /(NDEX   - 1)
          iter = iter + 1
          kkl = 0
          kku = 0
-         DO kk = 1, NDEX
-C-----------clean RO matrix
-            IF (BF.NE.0.0D0) THEN
-               DO i = 1, NDLW
-                  RO(kk,i,1,Nnuc) = 0.d0
-                  RO(kk,i,2,Nnuc) = 0.d0
-               ENDDO
-            ENDIF
+         IF (BF.NE.0.0D0) THEN
+           DO kk = 1, NDEX
+C------------clean RO matrix
+             DO i = 1, NDLW
+               RO(kk,i,1,Nnuc) = 0.d0
+               RO(kk,i,2,Nnuc) = 0.d0
+             ENDDO
+           ENDDO
+         ENDIF
+         DO kk = 1, NEXreq
 C-----------decrease energy shift above the last level to become 0 at Qn
             exkk = (kk - 1)*defit
             IF (exkk.LE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)) THEN
