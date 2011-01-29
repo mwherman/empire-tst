@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1926 $
+Ccc   * $Rev: 1971 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-20 05:15:21 +0100 (Do, 20 Jän 2011) $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
 
 
       SUBROUTINE HITL(Stl)
@@ -626,8 +626,10 @@ C
       OMEmin(Nejc,Nnuc) = EEMin
       OMEmax(Nejc,Nnuc) = EEMax
 C     IRElat(Nejc,Nnuc) = IREl
-      xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+C     xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+      xmas_nejc = AEJc(Nejc) + XMAss_ej(Nejc)/AMUmev
+      xmas_nnuc = A(Nnuc)    + XMAss(Nnuc)/AMUmev
 C
 C-----INITIALIZING /RIPLXX
 C

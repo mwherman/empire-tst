@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1882 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
+Ccc   * $Rev: 1971 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 1882 $
+C CVS Version Management $Revision: 1971 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -1967,7 +1967,7 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 1882 $')
+99005 FORMAT ('  ddhms version: $Revision: 1971 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $')
 C
@@ -4771,7 +4771,9 @@ C
          STOP
        ENDIF
 C Estimate maximum lab energy as elf*Ecm_max
-      elf = 1. + EJMass(1)/AMAss(1) 
+C     elf = 1. + EJMass(1)/AMAss(1)   
+      elf = 1. + EJMass(0)/AMAss(1)   
+C Changed to EJMass(0) which is the mass of the incident particle (Jan 2011, RCN)
 C
 C------convert HMS angular histograms to point data
        dth = PI_g/NDAnghms1

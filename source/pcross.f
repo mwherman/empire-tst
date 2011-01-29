@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
+Ccc   * $Rev: 1971 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -286,10 +286,20 @@ C
             zo = ZEJc(nejc)
             ar = ac - ao
             zr = zc - zo
+
+C              mn    neutron mass  1.008 665 amu 
+C              mp    proton mass   1.007 276 amu 
+C              ma    4He mass      4.001 506 amu 
+C              md    deuteron mass 2.013 553 amu 
+C              mt    triton mass   3.015 501 amu 
+C              m3He  3He mass      3.014 932 amu 
+
+C              me    electron mass 5.485 799�10-4 amu 
+
+C           ff1 = (2*Sin+1)*redmass
             IF (ao.EQ.1 .AND. zo.EQ.0) ff1 = 2.0173*ar/(ar + 1.0087) ! n
             IF (ao.EQ.1 .AND. zo.EQ.1) ff1 = 2.0145*ar/(ar + 1.0073) ! p
             IF (ao.EQ.4 .AND. zo.EQ.2) ff1 = 4.0015*ar/(ar + 4.0015) ! alpha
-            IF (ao.EQ.3 .AND. zo.EQ.2) ff1 = 6.0298*ar/(ar + 3.0149) ! He-3
             IF (ao.EQ.2 .AND. zo.EQ.1) ff1 = 6.0408*ar/(ar + 2.0136) ! d
             IF (ao.EQ.3 .AND. zo.EQ.1) ff1 = 6.0312*ar/(ar + 3.0156) ! t
          ELSE

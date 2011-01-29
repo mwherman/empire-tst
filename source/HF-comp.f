@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1969 $
+Ccc   * $Rev: 1971 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 05:33:12 +0100 (Fr, 28 Jän 2011) $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -115,7 +115,7 @@ C
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
 C
-                CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
+C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
 
                 CYCLE ! for primary gammas no further processing is needed 
             
@@ -686,8 +686,11 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.0
             egd = ELV(l,Nnuc)
-            icse = min(INT(2.0001 + egd/DE),ndecse)   ! Jan 2011
-C           icse = min(INT(1.0001 + egd/DE),ndecse)
+C
+C           Xs should be stored in the second bin to avoid losing 
+C           discrete level XS which should be accounted for entirely
+C
+            icse = min(INT(2.0001 + egd/DE),ndecse)  
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
 
             CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
@@ -749,12 +752,14 @@ C-----------Normal level with branching ratios
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-                  icse = min(INT(2.0001 + egd/DE),ndecse)        ! Jan 2011
-C                 icse = min(INT(1.0001 + egd/DE),ndecse)
+C
+C                 Xs should be stored in the second bin to avoid losing 
+C                 discrete level XS which should be accounted for entirely
+C
+                  icse = min(INT(2.0001 + egd/DE),ndecse)    
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
 
                   CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
-
 
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum

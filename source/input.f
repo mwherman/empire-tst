@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1968 $
+Ccc   * $Rev: 1971 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 JÃ¤n 2011) $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 JÃ¤n 2011) $
 
 C
       SUBROUTINE INPUT
@@ -101,7 +101,7 @@ C-----AND ALPHA, AS GIVEN IN THE EUROPEAN PHYSICAL JOURNAL, PAGE 73, VOLUME
 C-----15 (2000) REFERRING FOR THESE VALUES TO THE 1998 CODATA SET WHICH MAY
 C-----BE FOUND AT http://physics.nist.gov/constants
 C-----CM=931.494013 +/- 0.000037 MeV
-C-----The above value is the one used also in the ENDF-6 manual (April 2001)
+C-----The above value is the one used also in the ENDF-6 manual (April 2001, 2009)
       AMUmev = 9.31494013D+02
 C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
       HHBarc = 197.3269601D0
@@ -118,7 +118,16 @@ C-----Neutron mass = 1.008 664 915 60(55) u
 C-----Proton mass = 1.007 276 466 88(13) u
       AMUpro = 1.007276D0
 C-----Electron mass = 5.485 799 0945 x 10-4 u
-      AMUele = 5.4857990945D-4
+      AMUele = 0.00054857990945D0
+C
+C mn    neutron mass  1.008 664 915 78 amu 
+C me    electron mass 5.485 799 110 ×10-4 amu 
+C mp    proton mass   1.007 276 466 88 amu 
+C md    deuteron mass 2.013 553 212 71 amu 1
+C mt    triton mass   3.015 500 713 amu 3
+C m3He  3He mass      3.014 932 234 69 amu 1
+C ma    4He mass      4.001 506 1747 amu 1
+C
 
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
@@ -1539,11 +1548,34 @@ C Set number of angles to minimum for first energy of automatic search
          ENDIF
 C--------READ nuclear deformations and masses
          CALL READNIX
+
 C--------set projectile/ejectile masses
-         DO nejc = 0, NDEJC
-            EJMass(nejc) = (AEJc(nejc)*AMUmev
-     &                     -ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
+C
+C        Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
+C        ions have to be calculated separately
+C 
+         DO nejc = 1, min(6,NDEJC)
+C          Setting projectile/ejectiles mass 
+C          these are nuclear masses following ENDF Manual 2009, so electron mass is not considered
+C          EJMass(nejc) = (AEJc(nejc)*AMUmev - ZEJc(nejc)*AMUele +
+C    &                   XMAss_ej(nejc))/AMUmev
+           EJMass(nejc) = AEJc(nejc) + XMAss_ej(nejc)/AMUmev
          ENDDO
+C
+C        Light ion nuclear mass estimated from mass excess table
+C
+         IF(NDEJC.gt.6)  EJMass(NDEJC) = 
+     &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele +
+     &                   XMAss_ej(NDEJC))/AMUmev
+
+C        Setting projectile mass
+         DO nejc = 1, NDEJC
+           IF (ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc)) then
+             EJMass(0) = EJMass(nejc)
+             exit
+           ENDIF
+         ENDDO
+C
 C--------READ shell corrections of RIPL-2/3
          CALL READ_SHELL_CORR
 C--------Read number of reasonably known levels and level density parameter 'a'
@@ -2080,7 +2112,7 @@ C-----------determination of etl matrix and transmission coeff.--done
         IF(EXClusiv) then
           WRITE(8,*) 'All spectra are exclusive' 
         ELSE
-          WRITE(8,*) 'Marked with > spectra are exclusive' 
+          WRITE(8,*) 'Spectra marked with < are inclusive' 
         ENDIF
         WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
 	  ENDIF
@@ -2603,6 +2635,13 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         IF (NEMc.GT.0) WRITE (12,*)
      &               'Cluster   o. m. parameters: RIPL catalog number ',
      &            KTRlom(NDEJC,1)
+
+        WRITE (12,*)
+        WRITE (12,99060)
+        WRITE (12,*)
+        WRITE (12,99007) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+        WRITE (12,*)
+        WRITE (12,99012) (EJMass(j),j = 1,NEJcm)
         WRITE (12,*)
         WRITE (12,99050)
         WRITE (12,*)
@@ -2612,9 +2651,21 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
       ENDIF
 
 99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
+99007 FORMAT ('              ',12(6X,I2,A2))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F10.3)
+99012 FORMAT (1X,10x,4X,12(F10.6,1x))
 
+99045 FORMAT(1X,I3,'-',A2,'-',I3,4X,10F12.3)
+99050 FORMAT(25x,'B i n d i n g    e n e r g i e s [MeV]')
+99060 FORMAT(25x,'E j e c t i l e    m a s s e s   [amu]')
+
+      WRITE (8,*)
+      WRITE (8,99060)
+      WRITE (8,*)
+      WRITE (8,99007) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+      WRITE (8,*)
+      WRITE (8,99012) (EJMass(j),j = 1,NEJcm)
       WRITE (8,*)
       WRITE (8,*)
       WRITE (8,99050)
@@ -2810,8 +2861,6 @@ C-----WRITE heading on FILE12
       WRITE (12,*)
 
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
-99045 FORMAT (1X,I3,'-',A2,'-',I3,4X,10F12.3)
-99050 FORMAT (10X,'B i n d i n g    e n e r g i e s')
       END
 C
 C
@@ -3112,7 +3161,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1968 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1971 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -6694,10 +6743,34 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             ENDIF
          ELSE
             DO ii = 0, NDEJC
-               IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
-                  DEFprj = beta2x(k)
-                  XMAss_ej(ii) = EXCessmass(iz,ia)
-               ENDIF
+             IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
+              DEFprj = beta2x(k)
+              XMAss_ej(ii) = EXCessmass(iz,ia)
+C
+C             Rounded ENDF values of nuclear masses
+C
+C              mn    neutron mass  1.008 665 amu 
+C              mp    proton mass   1.007 276 amu 
+C              ma    4He mass      4.001 506 amu 
+C              md    deuteron mass 2.013 553 amu 
+C              mt    triton mass   3.015 501 amu 
+C              m3He  3He mass      3.014 932 amu 
+
+C              me    electron mass 5.485 799×10-4 amu 
+C
+               IF (nixa.EQ.1 .AND. nixz.EQ.0)
+     >           XMAss_ej(ii)=(AMUneu-1.d0)*AMUmev
+               IF (nixa.EQ.1 .AND. nixz.EQ.1)
+     >           XMAss_ej(ii)=(AMUpro-1.d0)*AMUmev
+               IF (nixa.EQ.4 .AND. nixz.EQ.2)
+     &           XMAss_ej(ii)=(4.001506d0-4.d0)*AMUmev  ! he4
+               IF (nixa.EQ.2 .AND. nixz.EQ.1)
+     &           XMAss_ej(ii)=(2.013553d0-2.d0)*AMUmev  ! deut
+               IF (nixa.EQ.3 .AND. nixz.EQ.1)
+     &           XMAss_ej(ii)=(3.015501d0-3.d0)*AMUmev  ! triton 
+               IF (nixa.EQ.3 .AND. nixz.EQ.2)
+     &           XMAss_ej(ii)=(3.014932d0-3.d0)*AMUmev  ! he3
+             ENDIF
             ENDDO
          ENDIF
       ENDDO
@@ -7468,7 +7541,19 @@ C
       ar = A(Nnuc) - AEJc(Nejc)
       b1 = A(Nnuc)*AMUmev + EXCessmass(zc,ac)
       b2 = ar*AMUmev + EXCessmass(zr,ar)
+C
+C     This binding energy correspond to the use
+C     of atomic masses both for ejectiles and residuals
+C
       b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
+C	btained Q-values consistent with all available calculators (NUDAT, LUND, etc)
+C
+C     This binding energy correspond to the use
+C     of atomic masses for residuals and
+C     nuclear masses for ejectiles (ENDF)
+C
+C     b3 = AEJc(nejc)*AMUmev + XMAss_ej(nejc)
+
       Bnd = b2 + b3 - b1
       END
 C

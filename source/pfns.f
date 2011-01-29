@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 1971 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 JÃ¤n 2011) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
@@ -736,8 +736,23 @@ c--------------------------------------------------------------------c
 c     call mass10(nn,nz,e)
 c     exc=nz*7.28903+nn*8.07138-e
 c     bind = dble(e)
+
+C     Rounded values
+C
+C mn    neutron mass  1.008 665 amu 
+C me    electron mass 5.485 799×10-4 amu 
+C mp    proton mass   1.007 276 amu 
+C md    deuteron mass 2.013 553 amu 1
+C mt    triton mass   3.015 501 amu 3
+C m3He  3He mass      3.014 932 amu 1
+C ma    4He mass      4.001 506 amu 1
+
+
       exc = EXCessmass(nz,nz+nn)
-      bind = dble(nz*7.28903+nn*8.07138 - exc)
+C     bind = dble(nz*7.28903+nn*8.07138 - exc)
+C     Corrected values
+      
+      bind = dble(nz*AMUpro+nn*AMUneu - exc)
 C     print *, ' N=',nn,' Z=',nz,' B.E.=',e,' MassExcess=', exc
       return
       end

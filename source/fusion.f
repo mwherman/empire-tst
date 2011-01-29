@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1959 $
+Ccc   * $Rev: 1971 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 03:49:42 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -69,8 +69,9 @@ C
 C-----Reduced mass corrected for proper mass values
 C
 C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
-      xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
-      xmas_npro = EJMass(Npro)
+C     xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
+      xmas_npro = AEJc(Npro) + XMAss_ej(Npro)/AMUmev
+      xmas_ntrg = A(Ntrg) + XMAss(Ntrg)/AMUmev
       el = EINl
       ecms = EIN
       S1 = 0.5
