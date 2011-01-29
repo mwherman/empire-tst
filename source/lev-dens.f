@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1965 $
+Ccc   * $Rev: 1972 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 02:01:00 +0100 (Fr, 28 Jän 2011) $
+Ccc   * $Date: 2011-01-29 17:50:53 +0100 (Sa, 29 Jän 2011) $
 
 C
 C
@@ -495,6 +495,8 @@ C
       REAL*8 FSHELL
       INTEGER i, ia, ij, in, iter, ix, iz, kk, kkl, kku, nplot
       INTEGER INT
+      INTEGER*4 PIPE
+      INTEGER*4 iwin
 
       pi2 = PI*PI
       BF = 1.0
@@ -514,15 +516,6 @@ C
 
       CALL PRERO(Nnuc)
 
-C-----determination of the pairing shift DEL according to Moeller-Nix (Nucl. Phys. A536 (1992) 20)
-!       DELn = 4.8/FLOAT(in)**0.333333
-!       DELp = 4.8/FLOAT(iz)**0.333333
-!       DEL = MOD(in,2)*DELn + MOD(iz,2)*DELp
-!       DELp = 0.5*(DELn + DELp) !reuse DELp symbol to keep previous notation
-! !       DELp = DELn*0.72
-! !       DEL = DEL*0.72
-C-----determination of the pairing shift --- done -----
-C
 C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
       CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -727,6 +720,62 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
 
       ENDIF
 
+C--------cumulative plot of levels along with the l.d. formula
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3  
+     &   .AND. RORed.GT.0 .AND. IOPSYS.NE.1) THEN
+         WRITE (8,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &                   ATIlnor(Nnuc), ATIl, NLV(Nnuc)
+99005    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,' norm=',F6.4,
+     &           ' atil=',F4.1,' Ncut=',I3)
+         OPEN (35,FILE = 'fort.35')
+         WRITE (35,*) 'set terminal postscript enhanced color lw 2
+     & solid "Helvetica" 20'
+         WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
+         WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
+     &                    dshift, UCRt, Ecrt,
+     &                    DEF(1,Nnuc),  ATIl, NLV(Nnuc)
+99010    FORMAT ('set title "',I3,'-',A2,'-',I3,
+     &           '   Ushift = ',F6.3,' Ucrt = ',F5.2,' Ecrt = ',F5.2,
+     &    ' Def = ',F6.2,' atil=',F4.1,' Ncut=',I3,'"')
+         WRITE (35,*) 'set logscale y'
+         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
+         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+         WRITE (35,*) 'set style line 1 lt 1 lw 2'
+         WRITE (35,*) 'set style line 2 lt 5 lw 2'
+         WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
+     &els", "fort.34" w l ls 1 t "Level density" '')')
+         CLOSE (35)
+         OPEN (34,FILE = 'fort.34')
+         OPEN (36,FILE = 'fort.36')
+         WRITE (36,*) '0.0 1.0'
+         DO il = 2, NLV(Nnuc)
+            WRITE (36,*) ELV(il,Nnuc), REAL(il - 1)
+            WRITE (36,*) ELV(il,Nnuc), REAL(il)
+         ENDDO
+         rocumul = 1.0
+         WRITE (34,*) '0.0  ', rocumul
+         DO kk = 2, nplot
+C-----------Integration over energy. There should be factor 2 because of the
+C-----------parity but it cancels with the 1/2 steming from the trapezoid
+C-----------integration
+            DO ij = 1, NLWst
+C              rocumul = rocumul + (RO(kk - 1,ij,Nnuc) + RO(kk,ij,Nnuc))
+C    &                   *defit/RORed
+C-----------integration over energy. Parity dependence explicitly considered.
+C-----------There is a factor 1/2 steming from the trapezoid integration
+               rocumul = rocumul + 0.5d0*defit/RORed*
+     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
+            ENDDO
+            WRITE (34,*) defit*(kk - 1), rocumul
+         ENDDO
+         CLOSE (36)
+         CLOSE (34)
+         IF (IOPsys.EQ.0) THEN
+            iwin = PIPE('gnuplot fort.35#')
+            CLOSE (35)
+         ENDIF
+      ENDIF
 C--------plotting fit of the levels with low energy formula  ***done***
 C
 C--------fitting discrete levels ---- done ------

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1971 $
+Ccc   * $Rev: 1972 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Date: 2011-01-29 17:50:53 +0100 (Sa, 29 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3161,7 +3161,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1971 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1972 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -6873,7 +6873,15 @@ c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
    95    CONTINUE
          CLOSE(31)
       ENDIF
-      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) THEN
+
+      IF (ADIv.GE.3.0D0 .and. FITLEV.LE.0.1) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(1X)')
+         WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  n
+     & o r m a l i z a t i o n'')')
+         WRITE(8,'(4X,54(''-''))')
+      ENDIF
+      IF ((ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) .and. FITLEV.EQ.0) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
          WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a
@@ -6883,6 +6891,13 @@ c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          WRITE(8,'(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
      &               ''ext. nor. a_final'')')
          WRITE(8,'(1X)')
+      ENDIF
+      IF (FITLEV.GT.0) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(1X)')
+         WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  f
+     & i t'')')
+         WRITE(8,'(4X,54(''-''))')
       ENDIF
 C
 C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
@@ -6948,24 +6963,32 @@ C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCR
 C--------------Print resulting level density parameters
                IF (FITlev.GT.0.0D0) THEN
                   WRITE (8,*) ' '
-                  WRITE (8,*) 'Nucleus A=', INT(A(nnuc)), ' Z=',
-     &                        INT(Z(nnuc))
+                  WRITE(8,'(1X)')
+             WRITE(8,'(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
+     &               ''ext. nor. a_final'')')
+                  IF (ADIv.EQ.0.0D0)
+     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+                  IF (ADIv.EQ.2.0D0)
+     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+                  WRITE(8,*)
                   IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) then 
                      WRITE (8,*)
      &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
                      WRITE (8,*) 
-     &                 ' DELTA=', sngl(del),' asys=', sngl(asys)
-                     WRITE (8,*) 
-     &                 ' aexp=', sngl(aroc),' Dobs=',sngl(dob)
+     &                 ' DELTA=', sngl(del),' Dobs=',sngl(dob)
 	            ENDIF
                   IF (ADIv.EQ.2.0D0) then
                      WRITE (8,*)
      &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
                      WRITE (8,*) 
-     &                 ' DELTA=', sngl(del),' asys=', sngl(asys)
-                     WRITE (8,*) 
-     &                 ' aexp=', sngl(aroc),' Dobs=',sngl(dob)
+     &                 ' DELTA=', sngl(del),' Dobs=',sngl(dob)
                   ENDIF
+                  WRITE(8,*) '========================'
+               ELSE
                   IF (ADIv.EQ.0.0D0)
      &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
