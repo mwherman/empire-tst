@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1972 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 17:50:53 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Rev: 1974 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-01-30 04:16:09 +0100 (So, 30 Jän 2011) $
 
 C
 C
@@ -772,7 +772,7 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          CLOSE (36)
          CLOSE (34)
          IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35#')
+            iwin = PIPE('gnuplot fort.35')
             CLOSE (35)
          ENDIF
       ENDIF
@@ -1545,7 +1545,7 @@ C-----------------2 because of the parity
                CLOSE (36)
                CLOSE (34)
                IF (IOPsys.EQ.0) THEN
-                  iwin = PIPE('gnuplot fort.35#')
+                  iwin = PIPE('gnuplot fort.35')
                   CLOSE (35)
                ENDIF
             ENDIF
@@ -1634,7 +1634,7 @@ C-----------Integration over energy.
          CLOSE (36)
          CLOSE (34)
          IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35#')
+            iwin = PIPE('gnuplot fort.35')
             CLOSE (35)
          ENDIF
       ENDIF
@@ -2159,7 +2159,7 @@ C           DO ij = 1, NFISJ1
          CLOSE (36)
          CLOSE (34)
          IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35#')
+            iwin = PIPE('gnuplot fort.35')
             CLOSE (35)
          ENDIF
       ENDIF
