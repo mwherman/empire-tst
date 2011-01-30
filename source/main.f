@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1969 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 05:33:12 +0100 (Fr, 28 Jän 2011) $
+Ccc   * $Rev: 1973 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-01-30 04:14:40 +0100 (So, 30 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1329,7 +1329,7 @@ C--------
      &        ' Preequilibrium + Direct spectra (sum of all models):'
             IF(CSEmis(0,1).GT.0) THEN
             CALL AUERST(1,0,0)
-              WRITE (8,*) 
+              WRITE (8,*)
      &          '  g PE emiss cross sect  ',CSEmis(0,1), ' mb'
           ENDIF
             IF(CSEmis(1,1).GT.0) THEN
