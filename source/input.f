@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1972 $
+Ccc   * $Rev: 1976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 17:50:53 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3161,7 +3161,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1972 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1976 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7565,16 +7565,13 @@ C
       b1 = A(Nnuc)*AMUmev + EXCessmass(zc,ac)
       b2 = ar*AMUmev + EXCessmass(zr,ar)
 C
-C     This binding energy correspond to the use
-C     of atomic masses both for ejectiles and residuals
-C
+C     The calculated ejectile mass below correspond to the use
+C     of atomic masses 
+C	Obtained Q-values consistent with all available calculators (NUDAT, LUND, etc)
       b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
-C	btained Q-values consistent with all available calculators (NUDAT, LUND, etc)
 C
-C     This binding energy correspond to the use
-C     of atomic masses for residuals and
-C     nuclear masses for ejectiles (ENDF)
-C
+C     The calculated ejectile mass below correspond to the use
+C     of nuclear masses dtripped of electrons (as recom in ENDF manual) 
 C     b3 = AEJc(nejc)*AMUmev + XMAss_ej(nejc)
 
       Bnd = b2 + b3 - b1

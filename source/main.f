@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1973 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-01-30 04:14:40 +0100 (So, 30 Jän 2011) $
+Ccc   * $Rev: 1976 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -725,8 +725,7 @@ C        xsinl is calculated by MSD
 C--------Print inelastic PE double differential cross sections
          nejc = nejcec
          nnur = NREs(nejc)
-C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
-         IF (IOUt.GE.3) THEN
+         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
             DO its = 1, itimes
               iad = 1 + (its - 1)*11
@@ -738,8 +737,7 @@ C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
      &                '(//30X,''     P  R  O  T  O  N  S ''/)')
               IF(nejc.eq.3) WRITE (8,
      &                '(//30X,''     A  L  P  H  A  S ''/)')
-              IF(nejc.eq.4) WRITE (8,
-     &                '(//30X,''     L  I  G  H  T    I  O  N''/)')
+              IF(nejc.gt.3) cycle 
               WRITE (8,
      &                '(30X,''A      n      g      l      e      s '')')
               WRITE (8,*) ' '
@@ -748,9 +746,6 @@ C        IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
               WRITE (8,*) ' '
 C-------------Maximum and minimum energy bin
               echannel = EX(NEX(1),1) - Q(nejc,1)
-C-------------Last continuum energy bin is calculated (+ 1 added, 10, 2005)
-C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 1.0001),1)
-C             DO i = 1, MAX(INT((echannel-ECUt(nnur))/DE + 2.0001),1)
 C
 C             Following changes in PCROSS to cover discrete levels , Jan 2011
               DO i = 1, MAX(INT(echannel/DE + 1.0001),1)
@@ -767,7 +762,7 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
          else
             SINlcont =  0.d0
          endif
-               WRITE (8,*)
+         WRITE (8,*)
          if(CSMsd(0).gt.0.) WRITE (8,*)
      &       ' g PE emission cross section ', CSMsd(0), ' mb'
          if(CSMsd(1).gt.0.) WRITE (8,*)
@@ -787,11 +782,14 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
          WRITE (8,*) ' '
 C--------Correct CN population for PE continuum emission
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
+C        write(*,*) ' CSFus=',sngl(CSFus)
+C    &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+
          IF (corrmsd.LT.0.0D0) THEN
-            write(8,*)
-     &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
-            write(*,*)
-     &       ' CSFus=',CSFus,' xsinl=',xsinl,' PCROSS=',totemis
+            write(8,*) ' CSFus=',sngl(CSFus)
+     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+            write(*,*) ' CSFus=',sngl(CSFus)
+     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
             totemis = CSFus - xsinl
             corrmsd = 0.d0
 
@@ -839,14 +837,17 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             POP(NEX(1),i,2,1) = POP(NEX(1),i,2,1)*corrmsd
          ENDDO
          WRITE (8,*) ' '
-         WRITE (8,*) ' Total CN population            ',ftmp
-         WRITE (8,*) ' Reaction cross section         ',CSFus
-         WRITE (8,*) ' PE + Direct reduction factor   ',1.d0-corrmsd
-         WRITE (8,*) ' MSD contribution               ',xsinl/CSFus
-         WRITE (8,*) ' PCROSS contribution            ',totemis/CSFus
+         WRITE (8,*) ' Total CN population            ',sngl(ftmp)
+         WRITE (8,*) ' Reaction cross section         ',sngl(CSFus)
+         WRITE (8,*) 
+     &     ' PE + Direct reduction factor   ',sngl(1.d0-corrmsd)
+         WRITE (8,*) 
+     &     ' MSD contribution               ',sngl(xsinl/CSFus)
+         WRITE (8,*) 
+     &     ' PCROSS contribution            ',sngl(totemis/CSFus)
 
          if(xsinlcont.gt.0) write(8,*)
-     &               ' DWBA to continuum XS (inel)    ',SINlcont/CSFus
+     &     ' DWBA to continuum XS (inel)    ',sngl(SINlcont/CSFus)
 
          WRITE (8,*) ' '
 C--------TRISTAN *** done ***
@@ -884,7 +885,7 @@ c           STOP
 c        ENDIF
 
 C--------second chance preequilibrium emission after MSD emission
-C--------neutron emission
+C--------neutron emission (probably could be used for HMS implementation)
 c        izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
 c        CALL WHERE(izares, nnurn, iloc)
 c        IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
@@ -1324,51 +1325,53 @@ C--------
      &                  + CSEmis(3,1) + CSEmis(4,1)
      &                  + CSEmis(5,1) + CSEmis(6,1))
      &       .NE.0) THEN
-            WRITE (8,*) ' '
-            WRITE (8,*)
+          WRITE (8,*) ' '
+          WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
-            IF(CSEmis(0,1).GT.0) THEN
+          IF(CSEmis(0,1).GT.0) THEN
             CALL AUERST(1,0,0)
-              WRITE (8,*)
-     &          '  g PE emiss cross sect  ',CSEmis(0,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' g PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(0,1)
           ENDIF
-            IF(CSEmis(1,1).GT.0) THEN
+          IF(CSEmis(1,1).GT.0) THEN
             CALL AUERST(1,1,0)
-              WRITE (8,*) 
-     &          '  n PE emiss cross sect  ',CSEmis(1,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' n PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(1,1)
           ENDIF
-            IF(CSEmis(2,1).GT.0) THEN
+          IF(CSEmis(2,1).GT.0) THEN
             CALL AUERST(1,2,0)
-              WRITE (8,*) 
-     &          '  p PE emiss cross sect  ',CSEmis(2,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' p PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(2,1)
           ENDIF
-            IF(CSEmis(3,1).GT.0) THEN
+          IF(CSEmis(3,1).GT.0) THEN
             CALL AUERST(1,3,0)
-              WRITE (8,*) 
-     &          '  a PE emiss cross sect  ',CSEmis(3,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' a PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(3,1)
           ENDIF
             IF(CSEmis(4,1).GT.0) THEN
             CALL AUERST(1,4,0)
-              WRITE (8,*) 
-     &          '  d PE emiss cross sect  ',CSEmis(4,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' d PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(4,1)
           ENDIF
-            IF(CSEmis(5,1).GT.0) THEN
+          IF(CSEmis(5,1).GT.0) THEN
             CALL AUERST(1,5,0)
-              WRITE (8,*) 
-     &          '  t PE emiss cross sect  ',CSEmis(5,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' t PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(5,1)
           ENDIF
-            IF(CSEmis(6,1).GT.0) THEN
+          IF(CSEmis(6,1).GT.0) THEN
             CALL AUERST(1,6,0)
-              WRITE (8,*) 
-     &          '  h PE emiss cross sect  ',CSEmis(6,1), ' mb'
+            WRITE (8,
+     &       '(2x,'' h PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(6,1)
           ENDIF
-            IF(NDEjc.eq.7 .AND. CSemis(NDEjc,1).GT.0) THEN
-            CALL AUERST(1,7,0)
-              WRITE (8,*) 
-     &          ' LI PE emiss cross sect  ',CSEmis(NDEjc,1), ' mb'
-          ENDIF
-            WRITE (8,*) 
-            WRITE (8,*) 
+          WRITE (8,*) 
+          WRITE (8,*) 
          ENDIF
 C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay

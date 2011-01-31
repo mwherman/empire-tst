@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1971 $
+Ccc   * $Rev: 1976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -52,7 +52,7 @@ C
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
-     &       dbreak, dpickup
+     &       dbreak, dpickup, step
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
@@ -441,17 +441,6 @@ C-----PARTICLE LOOP FOR EMISSION SPECTRA CALCULATIONS
 C
 60    totemis = 0.D0
       DO nejc = 0, NEJcm
-         hlp1 = 0.D0
-         DO ienerg = iemin(nejc), iemax(nejc)
-            emis = 0.D0
-            DO h1 = 1, ihmax
-               wb = we(nejc,h1,ienerg)
-               IF (wb.GT.0.) emis = emis + wb*em(h1)
-            ENDDO
-            spec(nejc,ienerg) = spec(nejc,ienerg) + scompn*emis
-            hlp1 = hlp1 + scompn*emis*DE
-         ENDDO
-         cross(nejc) = hlp1 + cross(nejc)
 C        Skipping cross sections if MSD and MSC active
          IF(nejc.eq.0 .and. IDNa(5,6).EQ.0) CYCLE
          IF(nejc.eq.1 .and. IDNa(2,6).EQ.0) CYCLE
@@ -460,6 +449,22 @@ C        Skipping cross sections if MSD and MSC active
          IF(nejc.eq.4 .and. IDNa(7,6).EQ.0) CYCLE
          IF(nejc.eq.5 .and. IDNa(8,6).EQ.0) CYCLE
          IF(nejc.eq.6 .and. IDNa(9,6).EQ.0) CYCLE
+
+         hlp1 = 0.D0
+         DO ienerg = iemin(nejc), iemax(nejc)
+            emis = 0.D0
+            DO h1 = 1, ihmax
+               wb = we(nejc,h1,ienerg)
+               IF (wb.GT.0.) emis = emis + wb*em(h1)
+            ENDDO          
+            step = 1.d0
+            if(ienerg.eq.iemin(nejc) .OR.
+     >         ienerg.eq.iemax(nejc) ) step=0.5d0
+            spec(nejc,ienerg) = spec(nejc,ienerg) + 
+     >                          scompn*emis*step
+            hlp1 = hlp1 + scompn*emis*DE*step
+         ENDDO
+         cross(nejc) = hlp1 + cross(nejc)  
          totemis = totemis + cross(nejc)
       ENDDO
 
@@ -511,7 +516,8 @@ C         WRITE(8, *)'==========================='
         WRITE (8,99014) Xsinl, totemis, fr
       ENDIF
 C
-C     write(8,*) 'Middle of PCROSS :',totemis,xsinl
+C     write(*,*) 'Middle of PCROSS :',
+C    >            sngl(totemis),sngl(xsinl),sngl(SIGr)
 C
 99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
      &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
@@ -528,7 +534,6 @@ C
       ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
-C     Note, that PCROSS only calculates emission into the continuum
       do i=1,NDAng
          theta=DBLE(i-1)/DBLE(NDAng-1)*pi
          xcos(i)=cos(theta)
@@ -557,15 +562,14 @@ C     Note, that PCROSS only calculates emission into the continuum
             excnq = EXCn
             ebind = 0.d0
          ENDIF
+
          CSMsd(nejc) = CSMsd(nejc) + cross(nejc)
-C        CSMsd(nejc) = cross(nejc)
          totemis = totemis + cross(nejc)
          DO ie = iemin(nejc), iemax(nejc)
             eee = DE*(ie - 1)
             ftmp = spec(nejc,ie)
             if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
-C           CSEmsd(ie,nejc) = ftmp
             DO iang = 1, NDANG
                ddxs(iang) = 0.d0
             ENDDO
@@ -583,7 +587,8 @@ C           fmsd set to 0.d0 means isotropic distribution
          ENDDO
        ENDDO
 C
-C      write(8,*) 'End of PCROSS :',totemis,Xsinl
+C      write(8,*) 'End of PCROSS    :',sngl(totemis),sngl(Xsinl)
+C      write(*,*) 'End of PCROSS    :',sngl(totemis),sngl(Xsinl)
 C
 cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr

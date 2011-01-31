@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1944 $
+Ccc   * $Rev: 1976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-23 23:13:10 +0100 (So, 23 Jän 2011) $
+Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3063,7 +3063,7 @@ C
       DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis)
-      DOUBLE PRECISION csmtot,csm1,csm2,xnn,eee
+      DOUBLE PRECISION csmtot,csm1,csm2,eee
       REAL FLOAT
       INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
       INTEGER INT
@@ -3094,7 +3094,7 @@ C-----calculate spin distribution for 1p-1h states
          phdj(j) = 0.0
          w = (xj + 1.0)*xj/2./SIG
          IF (w.LE.50.D0) THEN
-            phdj(j) = (2*xj + 1.)*EXP(( - w))
+            phdj(j) = (2*xj + 1.)*DEXP( - w)
             somj = somj + phdj(j)
          ENDIF
       ENDDO
@@ -3106,28 +3106,41 @@ C-----ground state target spin XJLV(1,0)
             xnor = 0.5*phdj(j)/somj
             DO ie = 1, nexrt
                pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
+C
+C              Population increased to preserve total flux
+C              as calculated by PCROSS/MSD+MSC
+C
+               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+C
                POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
                POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
             ENDDO
          ENDDO
+
 C--------add MSD contribution to the population spectra
 C--------used for ENDF exclusive spectra
          IF (ENDf(1).GT.0) THEN
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
-C--------------DE
+C
+C              Population increased to preserve total flux
+C              as calculated by PCROSS/MSD+MSC
+C
+               pops = CSEmsd(icsp,Nejc)
+               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
-     &            POPcse(ie,Nejc,icsp,INExc(Nnur))
-     &            + CSEmsd(icsp,Nejc)
+     &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
                IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
      &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
      &             - 0.5*CSEmsd(icsp,Nejc)
+
 C--------------DDX using portions
                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
-               POPbin(ie,Nnur) = CSEmsd(icsp,Nejc)
+               POPbin(ie,Nnur) = pops
             ENDDO
          ENDIF
 C--------storing continuum recoils
@@ -3208,13 +3221,11 @@ C
 C      Inelastic channel 
 C
        csm1 = 0.d0
-       DO ie = nexrt, next
+       istart = nexrt + 1 
+       DO ie = istart, next
          csm1 = csm1 + CSEmsd(ie,Nejc)*DE
        ENDDO
-       csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
-       csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
-       xnn = 0.d0
-       if(csm1.gt.0.d0) xnn = csm2/csm1
+       csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
 
 C------MSD/PCROSS contribution is integrated over the discrete level region and
 C------distributed among 2+, 3- and 4+ levels (or those close to such for
@@ -3223,14 +3234,13 @@ C------little to 4+). Angular distributions for these levels are those
 C------provided by TRISTAN or PCROSS at the closest bin.
 C
        csmsdl = 0.0
-       DO ie = nexrt, next
+       DO ie = istart, next
          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
 C        Setting it to zero to delete discrete spectra before redistributing 
 C        if( IDNa(1,6).GT.0 .and. Nejc.eq.1 ) CSEmsd(ie,Nejc) = 0.d0
 C        if( IDNa(3,6).GT.0 .and. Nejc.eq.2 ) CSEmsd(ie,Nejc) = 0.d0
 C        if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
        ENDDO
-       csmsdl = csmsdl - 0.5*CSEmsd(nexrt,Nejc)*DE
        csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
 C
 C
@@ -3298,41 +3308,31 @@ C           CSEa(ie,na,Nejc,1) = 0.d0
          ENDDO
        ENDDO
 
-       IF(csm2-csmtot.gt.0.1d0) then
-         write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
-         write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
-       ENDIF
-C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
-C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
-
       ELSE
 C
 C     Other channels (not the inelastic)
 C
        csm1 = 0.d0
-       DO ie = nexrt, next
+       istart = nexrt +1
+       DO ie = istart, next
          csm1 = csm1 + CSEmsd(ie,Nejc)*DE
        ENDDO
-       csm2 = csm1 - 0.5*CSEmsd(nexrt,Nejc)*DE
-       csm2 = csm2 - 0.5*CSEmsd(next,Nejc)*DE
-       xnn = 0.d0
-       if(csm1.gt.0.d0) xnn = csm2/csm1
+       csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
 
-       istart = nexrt
-         csmtot = 0.d0
+       csmtot = 0.d0
        xnor = 0.d0
 
        DO il = NLV(Nnur),1,-1
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) EXIT
 
-       xnor = CSEmsd(istart,Nejc)*DE*xnn
+         xnor = CSEmsd(istart,Nejc)*DE
 C
 C        Assigning angular distribution of the first continuum bin "istart"
 C        to the angular distribution of the discrete level "il"
 C                                                    
-       do na=1,NDAng 
-           ddxs(na) =   CSEa(istart,na,Nejc,1)*xnn
+         do na=1,NDAng 
+           ddxs(na) =   CSEa(istart,na,Nejc,1)
          enddo
          csmsdl = 0.d0
 
@@ -3344,14 +3344,14 @@ C          Deleting the corresponding XS from the continuum
 C            as it is moved to discrete spectra
 C          CSEmsd(ie,Nejc) = 0.d0
 C          Deleting the corresponding angular distribution
-C        do na=1,NDAng 
-C          CSEa(ie,na,Nejc,1) = 0.d0
+C          do na=1,NDAng 
+C            CSEa(ie,na,Nejc,1) = 0.d0
 C          enddo
-         istart = ie + 1
+           istart = ie + 1
          ENDDO
-         POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*xnn
-         CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*xnn
-         csmtot = csmtot + csmsdl*xnn
+         POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl
+         CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl
+         csmtot = csmtot + csmsdl
 C--------Normalization factor
          IF (xnor.GT.0) THEN
             xnor = csmsdl/xnor
@@ -3363,12 +3363,15 @@ C--------Store ang. dist.
            CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xnor*ddxs(na)
          ENDDO
        ENDDO
-       IF(csm2-csmtot.gt.0.1d0) then
-         write(8,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
-         write(8,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
-       ENDIF
-C      write(*,*) 'WARNING: Discrete levels in PCROSS for nejc=',nejc
-C      write(*,*) 'WARNING: Difference in in/out XS =',csm2-csmtot
+      ENDIF
+
+      IF(csm2-csmtot.gt.0.1d0) then
+       write(8,*) 'WARNING: PE discrete levels for nejc=',nejc
+       write(8,*) 'WARNING: Difference in in/out flux =',
+     &             sngl(csm2-csmtot)
+      ELSE
+       write(8,*) ' PE XS to discrete levels   ',sngl(csmtot),
+     >              ' for nejc =',nejc
       ENDIF
       RETURN
       END
