@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1976 $
+Ccc   * $Rev: 1977 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
+Ccc   * $Date: 2011-01-31 02:38:10 +0100 (Mo, 31 Jän 2011) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3237,11 +3237,21 @@ C
        DO ie = istart, next
          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
 C        Setting it to zero to delete discrete spectra before redistributing 
-C        if( IDNa(1,6).GT.0 .and. Nejc.eq.1 ) CSEmsd(ie,Nejc) = 0.d0
-C        if( IDNa(3,6).GT.0 .and. Nejc.eq.2 ) CSEmsd(ie,Nejc) = 0.d0
-C        if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
+         IF (ENDf(1).GT.0) then
+           if( IDNa(1,6).GT.0 .and. Nejc.eq.1 ) CSEmsd(ie,Nejc) = 0.d0
+           if( IDNa(3,6).GT.0 .and. Nejc.eq.2 ) CSEmsd(ie,Nejc) = 0.d0
+           if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
+	   ENDIF
        ENDDO
        csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
+
+C      IF (ENDf(1).GT.0) then
+C        if( IDNa(Nejc,6).GT.0 .and. Nejc.le.2 ) 
+C    &     CSmsd(Nejc) = CSmsd(Nejc) -  csmsdl
+C        if( Nejc.gt.2 ) 
+C    &     CSmsd(Nejc) = CSmsd(Nejc) -  csmsdl
+C      ENDIF
+
 C
 C
 C      Inelastic channel
@@ -3304,7 +3314,7 @@ C--------Store ang. dist.
             CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc)
      &                           + xnor*CSEa(ie,na,Nejc,1)
 C           Deleting the corresponding angular distribution
-C           CSEa(ie,na,Nejc,1) = 0.d0
+            IF (ENDf(1).GT.0) CSEa(ie,na,Nejc,1) = 0.d0
          ENDDO
        ENDDO
 
@@ -3340,17 +3350,27 @@ C
            eee = DE*(ie - 1)
            IF (eee.GT.eemi) EXIT 
            csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-C          Deleting the corresponding XS from the continuum
-C            as it is moved to discrete spectra
-C          CSEmsd(ie,Nejc) = 0.d0
-C          Deleting the corresponding angular distribution
-C          do na=1,NDAng 
-C            CSEa(ie,na,Nejc,1) = 0.d0
-C          enddo
+	     IF(ENDF(1).gt.0.d0) then
+C            Deleting the corresponding XS from the continuum
+C              as it is moved to discrete spectra
+             CSEmsd(ie,Nejc) = 0.d0
+C            Deleting the corresponding angular distribution
+             do na=1,NDAng 
+               CSEa(ie,na,Nejc,1) = 0.d0
+             enddo
+	     ENDIF
            istart = ie + 1
          ENDDO
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl
+ 
+C	     IF(ENDF(1).gt.0.d0) then
+C          if( IDNa(Nejc,6).GT.0 .and. Nejc.le.2 ) 
+C    &       CSmsd(Nejc) = CSmsd(Nejc) -  csmsdl
+C          if( Nejc.gt.2 ) 
+C    &       CSmsd(Nejc) = CSmsd(Nejc) -  csmsdl
+C        ENDIF
+
          csmtot = csmtot + csmsdl
 C--------Normalization factor
          IF (xnor.GT.0) THEN
