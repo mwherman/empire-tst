@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1976 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
+Ccc   * $Rev: 1978 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-02-01 16:30:58 +0100 (Di, 01 Feb 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3161,7 +3161,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1976 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1978 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -5386,7 +5386,7 @@ C-----
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
-                  LDShif(nnuc) = val
+                  LDShif(nnuc) = val - 1.0
                ENDDO
                WRITE (8,'('' LDSHIFT  in all nuclei set to '',F6.3)')
      &                val
@@ -5401,7 +5401,7 @@ C-----
                WRITE (8,'('' FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
-            LDShif(nnuc) = val
+            LDShif(nnuc) = val - 1.0
             WRITE (8,
      &           '('' LDSHIFT  in '',I3,A2,'' set to ''          ,F6.3)'
      &            ) i2, SYMb(nnuc), val

@@ -22,7 +22,7 @@ value.  Anything below this line will be ignored by the code.
 
 *) Any  line starting  with !, #,  or *  is treated as  comment. There
 might be an arbitrary number of comments line in the optional(!) input.
-
+D
 -------------------
 
 NEX       Maximum number of energy steps in the integration set to VAL
@@ -329,9 +329,13 @@ ATILNO  systematics value of the level density parameter \widetilde{a}
         will be multiplied by VAL for the nucleus with Z=I1 and
         A=I2 (default 1 for all nuclei). 
         
-LDSHIF  low energy shift VAL of the level density (in MeV) built in such
-        a way as to become zero at the binding energy for the nucleus with
-        Z=I1 and A=I2 (default 0 for all nuclei). 
+LDSHIF  Low energy shift of the level density adjusting the shift
+        calculated internally by EMPIRE for the nucleus with Z=I1 and A=I2. 
+        NOTE: THIS SHIFT IS USED INTERNALLY AS (VAL-1.),
+        = 1 internally calculated shift (default)
+        > 1 internally calculated shift increased by VAL-1.0 (MeV)
+        < 1 internally calculated shift decreased by VAL-1.0 (MeV)
+        NOTE: This additional fit will upset fitting dicrete levels with FITLEV option.
 
 FITLEV > 0 cumulative plots of discrete levels will be displayed. The energy range
            of the plot will extend VAL MeV above the last discrete level,
