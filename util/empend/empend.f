@@ -190,8 +190,8 @@ C* MXI - Length of the integer work array IWO.
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
-C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
-      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
+C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
+      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
       DIMENSION    EIN(MXE),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),IWO(MXI),LVLF(MLV),LVMT(MLV),LVIZ(MLV)
 c     DATA RWO/MXR*0./
@@ -215,12 +215,13 @@ C...  AW3 = 3.014932235
 C...  AWA = 4.001506175
 C* AMDC Audi-Wapstra mass tables 2003 "http://www-nds.iaea.org/amdc/"
 C* Subtract electron mass and add ionisation energy defect
+      AWE = 0.00054857991
       AWN = 1.008664916
-      AWH = 1.007825032 -   0.00054857991 + 0.000000015
-      AWD = 2.014101778 -   0.00054857991 + 0.000000015
-      AWT = 3.016049278 -   0.00054857991 + 0.000000015
-      AW3 = 3.016029319 - 2*0.00054857991 + 0.000000085
-      AWA = 4.002603254 - 2*0.00054857991 + 0.000000085
+      AWH = 1.007825032 -   AWE + 0.000000015
+      AWD = 2.014101778 -   AWE + 0.000000015
+      AWT = 3.016049278 -   AWE + 0.000000015
+      AW3 = 3.016029319 - 2*AWE + 0.000000085
+      AWA = 4.002603254 - 2*AWE + 0.000000085
 C* Define the test printout control parameters
 C... Hardwired specifications
       IPRNT=0
@@ -334,6 +335,13 @@ c...
       WRITE(LTT,991) ' Initial list of MT numbers for MF3     '
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
 c...
+
+      WRITE(LTT, * ) ' '
+      WRITE(LTT,'(A)') '        MT       QM          QI'
+      DO J=1,NXS
+        WRITE(LTT,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
+      END DO
+
 C*
 C* Redefine lower energy limit to first point, if not a neutron file
       IF(IZI.NE.1) EMIN=EIN(1)
@@ -421,6 +429,13 @@ C*
       WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
+
+      WRITE(LER, * ) ' '
+      WRITE(LER,'(A)') '        MT       QM          QI'
+      DO J=1,NXS
+        WRITE(LER,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
+      END DO
+
 C*
 C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 880
@@ -1253,66 +1268,216 @@ c...
       IF(MEQ.GT.4) MT=0
       RETURN
       END
-      SUBROUTINE QVALUE(IMT,MT,IZA,IZB,BEN,QQM)
+      SUBROUTINE QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQM)
 C-Title  : Subroutine QVALUE
 C-Purpose: Reconstruct Q-value from reaction and binding energies
-      DIMENSION  IZB(IMT),BEN(3,IMT)
-      QQM=0
+C-Description:
+C-D  IMT  Number of tabulated residuals
+C-D  MT   Reaction number for which Q-value is calculated
+C-D  IZA  ZA of the target
+C-D  IZI  ZA of the projectile
+C-D  JZA  ZA of the residual
+C-D  IZB  Table of residuals for last-particle binding energies
+C-D  BEN  Binding energies of the last particle for residuals in IZB
+C-D         BEN(1,i)  neutrons
+C-D         BEN(2,i)  protons
+C-D         BEN(3,i)  alpha particles
+C-D         BEN(4,i)  deuterons
+C-D         BEN(5,i)  tritons
+C-D         BEN(6,i)  He-3 particles
+C-
+      DIMENSION  IZB(IMT),BEN(6,IMT)
+      DOUBLE PRECISION QQ
+      QQ=0
+C* If target equals residual, no action needed
+      IF(IZA.EQ.JZA) RETURN
+C* Loop over all residuals
       IF(IMT.LE.0) RETURN
-        DO I=1,IMT
-          KZA=IZB(I)
-C* Consider the radiative capture reaction
-          IF(MT.EQ. 102 .AND. KZA.EQ.IZA+1) QQM=1.E6*BEN(1,I)
-C* Consider reactions after first neutron emission:
-          IF(KZA.EQ.IZA) THEN
-C*      Neutron emission: (n,2n) (n,3n) (n,2n+a) (n,2n+p)
-            IF(MT.EQ.16 .OR. MT.EQ.17 .OR. MT.EQ.24 .OR. MT.EQ.41)
-     1        QQM=QQM-1.E6*BEN(1,I)
-C*      Proton emission (n,n+p) (n,n+p+a)
-            IF(MT.EQ.28 .OR. MT.EQ.45)
-     1        QQM=QQM-1.E6*BEN(2,I)
-C*      Alpha emission (n,n+a)
-            IF(MT.EQ.22)
-     1        QQM=QQM-1.E6*BEN(3,I)
-C* Consider reactions after two-neutrons emission:
-          ELSE IF(KZA.EQ.IZA-1) THEN
-C*      Neutron emission: (n,3n)
-            IF(MT.EQ.17)
-     1        QQM=QQM-1.E6*BEN(1,I)
-C*      Proton emission (n,2n+p)
-            IF(MT.EQ.41)
-     1        QQM=QQM-1.E6*BEN(2,I)
-C*      Alpha emission (n,2n+a)
-            IF(MT.EQ.24)
-     1        QQM=QQM-1.E6*BEN(3,I)
-C* Consider reactions after three-neutrons emission:
-          ELSE IF(KZA.EQ.IZA-2) THEN
-C*      Neutron emission: (n,4n)
-            IF(MT.EQ.37)
-     1        QQM=QQM-1.E6*BEN(1,I)
-C*      Proton emission: (n,3n+p)
-            IF(MT.EQ.42)
-     1        QQM=QQM-1.E6*BEN(2,I)
-C*      Alpha emission: (n,3n+a)
-            IF(MT.EQ.23)
-     1        QQM=QQM-1.E6*BEN(3,I)
-C* Consider reactions after neutron and proton emission:
-          ELSE IF(KZA.EQ.IZA-1001) THEN
-C*      Alpha emission: (n,n+p+a)
-            IF(MT.EQ.45)
-     1        QQM=QQM-1.E6*BEN(3,I)
-C* Consider reactions after neutron capture:
-          ELSE IF(KZA.EQ.IZA+1) THEN
-C*      Proton emission (n,p) (n,p+a)
-            IF(MT.EQ.103 .OR. MT.EQ.112)
-     1        QQM=QQM-1.E6*BEN(2,I)
-C* Consider reactions after neutron capture and proton emission:
-          ELSE IF(KZA.EQ.IZA+1-1001) THEN
-C*      Alpha emission (n,p+a)
-            IF(MT.EQ.112)
-     1        QQM=QQM+1.E6*(BEN(1,I)-BEN(3,I))
+      DO I=1,IMT
+        KZA=IZB(I)
+        IF(KZA.EQ.IZA+IZI) THEN
+C*        -- Add binding energy brought in by the projectile
+          IF     (IZI.EQ.   1) THEN
+            QQ=QQ+DBLE(BEN(1,I))*1000000
+          ELSE IF(IZI.EQ.1001) THEN
+            QQ=QQ+DBLE(BEN(2,I))*1000000
+          ELSE IF(IZI.EQ.1002) THEN
+            QQ=QQ+DBLE(BEN(4,I))*1000000
+          ELSE IF(IZI.EQ.1003) THEN
+            QQ=QQ+DBLE(BEN(5,I))*1000000
+          ELSE IF(IZI.EQ.2003) THEN
+            QQ=QQ+DBLE(BEN(6,I))*1000000
+          ELSE IF(IZI.EQ.2004) THEN
+            QQ=QQ+DBLE(BEN(3,I))*1000000
+          ELSE
+            STOP 'EMPEND ERROR - Unknown projectile in QVAL'
           END IF
-        END DO
+C*        -- First neutron emission
+          IF(MT.EQ.11 .OR. MT.EQ. 16 .OR. MT.EQ.17 .OR.
+     &      (MT.GE.22 .AND. MT.LE.25) .OR.
+     &      (MT.GE.28 .AND. MT.LE.30) .OR.
+     &      (MT.GE.32 .AND. MT.LE.37) .OR.
+     &      (MT.GE.41 .AND. MT.LE.42) .OR.
+     &      (MT.GE.44 .AND. MT.LE.45) .OR.
+     &       MT.EQ.91) THEN
+            QQ=QQ-DBLE(BEN(1,I))*1000000
+            IF(MT.EQ.91) GO TO 100
+C* (z,x+) direct particle emission reactions
+C*        -- First proton emission
+          ELSE IF(MT.EQ.103 .OR. MT.EQ.111 .OR. MT.EQ. 112 .OR.
+     &            MT.EQ.115 .OR. MT.EQ.116 .OR.
+     &           (MT.GE.600 .AND. MT.LE.649) ) THEN
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            IF(MT.EQ.103.OR.(MT.GE.600 .AND. MT.LE.649)) GO TO 100
+          ELSE IF(MT.EQ.104) THEN
+C*        -- First deuteron emission
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.105) THEN
+C*        -- First triton emission
+            QQ=QQ-DBLE(BEN(5,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.106) THEN
+C*        -- First He-3 emission
+            QQ=QQ-DBLE(BEN(6,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.107 .OR. MT.EQ.108 .OR.
+     &      (MT.GE.800 .AND. MT.LE.849) ) THEN
+C*        -- First alpha emission
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            IF(MT.NE.108) GO TO 100
+          END IF
+        ELSE IF(KZA.EQ.IZI+IZA-   1) THEN
+C* (z,n+x) reactions
+C*        -- Neutron + second neutron emission
+          IF(MT.EQ.16 .OR. MT.EQ.17 .OR. MT.EQ.24 .OR. MT.EQ. 25 .OR.
+     &       MT.EQ.30 .OR. MT.EQ.37 .OR. MT.EQ.41 .OR. MT.EQ.42) THEN
+            QQ=QQ-DBLE(BEN(1,I))*1000000
+            IF(MT.EQ.16) GO TO 100
+          ELSE IF(MT.EQ.28 .OR. MT.EQ.44 .OR. MT.EQ.45) THEN
+C*        -- Neutron + proton emission
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            IF(MT.EQ.28) GO TO 100
+          ELSE IF(MT.EQ.32) THEN
+C*        -- Neutron + deuteron emission
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.33) THEN
+C*        -- Neutron + triton emission
+            QQ=QQ-DBLE(BEN(5,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.34) THEN
+C*        -- Neutron + He-3 emission
+            QQ=QQ-DBLE(BEN(6,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.22) THEN
+C*        -- Neutron + alpha emission
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            GO TO 100
+          END IF
+        ELSE IF(KZA.EQ.IZI+IZA-   2) THEN
+C* (z,2n+x) reactions
+C*        -- Two-neutron + third neutron emission
+          IF(MT.EQ.11 .OR. MT.EQ.17 .OR. MT.EQ.37 .OR. MT.EQ.42) THEN
+            QQ=QQ-DBLE(BEN(1,I))*1000000
+            IF(MT.EQ.17) GO TO 100
+          ELSE IF(MT.EQ.41) THEN
+C*        -- Two neutron + proton emission
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.24) THEN
+C*        -- Two neutron + alpha emission
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            GO TO 100
+          ELSE IF(MT/10 .EQ. IZI+IZA-2-1002) THEN
+C*        -- Two neutron + deuteron emission
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+          ELSE IF(MT/10 .EQ. IZI+IZA-2-1003) THEN
+C*        -- Two neutron + triton emission
+            QQ=QQ-DBLE(BEN(5,I))*1000000
+            GO TO 100
+          ELSE IF(MT/10 .EQ. IZI+IZA-2-2003) THEN
+C*        -- Two neutron + He-3 emission
+            QQ=QQ-DBLE(BEN(6,I))*1000000
+            GO TO 100
+          END IF
+        ELSE IF(KZA.EQ.IZI+IZA-   3) THEN
+C* (z,3n+x) reactions
+C*        -- Three-neutron + fourth neutron emission
+C...      IF(MT.EQ.37 .OR. MT/10.EQ.IZI+IZA-4) THEN
+          IF(MT.EQ.37) THEN
+            QQ=QQ-DBLE(BEN(1,I))*1000000
+            GO TO 100
+C*        -- Three-neutron + proton emission
+          ELSE IF(MT.EQ.42) THEN
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            GO TO 100
+C*        -- Three-neutron + alpha emission
+          ELSE IF(MT.EQ.25) THEN
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            GO TO 100
+C*        -- Three-neutron + deuteron emission
+          ELSE IF(MT/10 .EQ. IZI+IZA-3-1002) THEN
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+C*        -- Three-neutron + triton emission
+          ELSE IF(MT/10 .EQ. IZI+IZA-3-1003) THEN
+            QQ=QQ-DBLE(BEN(5,I))*1000000
+            GO TO 100
+C*        -- Three-neutron + He-3 emission
+          ELSE IF(MT/10 .EQ. IZI+IZA-3-2003) THEN
+            QQ=QQ-DBLE(BEN(6,I))*1000000
+            GO TO 100
+          END IF
+        ELSE IF(KZA.EQ.IZI+IZA-1002) THEN
+C* (z,n+p+x) reactions
+C*        -- Neutron + proton + second proton emission
+          IF(MT.EQ.44) THEN
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            GO TO 100
+C*        -- Neutron + proton + deuteron emission
+C*           including (z,2d), which is not accounted for separately
+          ELSE IF(MT/10.EQ.IZI+IZA-2004) THEN
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.117) THEN
+C*        -- Approximate (z,d+a) by (z,n+p+a)
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            GO TO 100
+          END IF
+        ELSE IF(KZA.EQ.IZI+IZA-1001) THEN
+C* (z,p+x) reactions
+C*        -- Proton + second proton emission
+          IF(MT.EQ.111) THEN
+            QQ=QQ-DBLE(BEN(2,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.115) THEN
+C*        -- Proton + deuteron emission
+            QQ=QQ-DBLE(BEN(4,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.116) THEN
+C*        -- Proton + triton emission
+            QQ=QQ-DBLE(BEN(5,I))*1000000
+            GO TO 100
+          ELSE IF(MT.EQ.112) THEN
+C*        -- Proton + alpha emission
+            QQ=QQ-DBLE(BEN(3,I))*1000000
+            GO TO 100
+          END IF
+        END IF
+      END DO
+C*
+C* Case: All residuals scanned but no final state found - skip
+      QQ=0
+C*
+  100 CONTINUE
+      IF(QQ.NE.0) THEN
+c...
+c...    print *,mt,iza,QQM,QQ
+c...
+        QQM=QQ
+      END IF
       RETURN
       END
       SUBROUTINE POUCHR(PTST,KZAK,AWP)
@@ -1328,8 +1493,8 @@ C-D    KZAP=999999  for recoils (data must be define externally)
 C-D    KZAP<0       for unrecognised particles.
 C-
       CHARACTER*8  PTST
-C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
-      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
+C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
+      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
 C*
       IZAK=KZAK
       IF      (PTST.EQ.'neutrons' .OR. IZAK.EQ.   1) THEN
@@ -2828,10 +2993,10 @@ C* Declare XS,XC,XI,XX double precision to avoid underflow on reading
 C...There seems to be a bug in Lahey compiler - next statement helps
       SAVE QI
       DIMENSION    EIN(MXE),XSC(MXE,MXT),XSG(MXE,MXT),QQM(MXT),QQI(MXT)
-     1            ,MTH(MXT),IZB(MXM),BEN(3,MXM)
+     1            ,MTH(MXT),IZB(MXM),BEN(6,MXM)
      &            ,XPOP(8)
-C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
-      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
+C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
+      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
 C* Search for the reaction header cards
 C*   NEN counts the Number of energy points
 C*   NXS counts the Number of reaction types
@@ -2896,7 +3061,7 @@ C* (Omission allowed in new files where Q values are specified explicitly)
         IMT=0
   118   IMT=IMT+1
         IF(IMT.GT.MXM) STOP 'EMPEND ERROR - MXM limit exceeded'
-        READ (LIN,804) JZ,CH,JA,BEN(1,IMT),BEN(2,IMT),BEN(3,IMT)
+        READ (LIN,804) JZ,CH,JA,(BEN(J,IMT),J=1,6)
         JZA=JZ*1000+JA
         IZB(IMT)=JZA
         IF(JZA.NE.0) GO TO 118
@@ -3119,29 +3284,30 @@ C* Next entry should be population or production cross section
 C* Read the cross section
   311 READ (REC,803) XS
       IF(XS.LE.0) GO TO 110
-      XG=-1
-C* Reconstruct Q-values from MT and the binding energies
-      IF(QQ.EQ.0 .AND. JZA.NE.IZA) THEN
-        CALL QVALUE(IMT,MT,IZA,IZB,BEN,QQ)
-        QI=QQ
-      END IF
+      XG =-1
 C* Test for multiple reactions leading to the same residual
   312 XSPROD=XS
       XSSUM =0
   314 CONTINUE
       IF(IPOP.GT.0) THEN
         CALL XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XS,XG)
+        IF(XS.LE.0) GO TO 322
+C*      -- Check for significant differences
         IF(ABS(XSPROD-XS).GT.XSPROD/1000) THEN
           WRITE(LTT,'(A,1P,E10.3,A,E10.3,A,I6,A,E10.3)')
      &        ' Ein',EE,' eV Prod.x.s',XSPROD
      &       ,' redefined to MT',MT,' x.s.',XS
         END IF
-        IF(XS.LE.0) GO TO 322
         XSSUM=XSSUM+XS
-
-        print *,'mt,e,qm,qi,xs',mt,ee,qq,qi,xs
-
+C...
+C...    print *,'mt,e,qm,qi,xs',mt,ee,qq,qi,xs
+C...
       END IF
+C* Reconstruct Q-values from MT and the binding energies
+      QQ0=QQ
+      EL =QI-QQ
+      CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
+      QI =QQ+EL
 C* Test if reaction is already registered
 C*  - ENDF MT-numbers <999
 C*  - 10*ZA+LFS for isomer production
@@ -3167,9 +3333,16 @@ C*            -- If level energy different, increment the MT
       END IF
       NXS=NXS+1
       IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
+C...
+C...  print *,'New MT/Q',MT,QQ,QI ,ipop
+C...
+      IF(ABS(QQ0-QQ) .GT. ABS(QQ)/10000) THEN
+        WRITE(LTT,'(A,I7,1P,E11.3,A,E11.3)')
+     &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ
+      END IF
       IXS=NXS
-      MTH(IXS)=MT
 C* Save Q-values and cross section for this reaction
+      MTH(IXS)=MT
       QQM(IXS)=QQ
       QQI(IXS)=QI
       IF(NOQV.NE.0) THEN
@@ -3435,7 +3608,7 @@ C* Error traps
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   803 FORMAT(37X,F12.0)
-  804 FORMAT(1X,I3,1X,A2,1X,I3,4X,3F10.0)
+  804 FORMAT(1X,I3,1X,A2,1X,I3,4X,6F10.0)
   805 FORMAT(I12,F10.0,I5,F8.0,3X,F12.0,I3)
   806 FORMAT(BN,8X,8F15.0)
   808 FORMAT(24X,F12.0)
@@ -3464,8 +3637,9 @@ C-D IZI   Projectile ZA
 C-D IZA   Target ZA
 C-D JZA   Residual ZA
 C-D MT    reaction designation
-C-D XS    cross-section (output)
-C-D XG    gamma-production cross section
+C-D XSPROD total residual production cross section (mb)
+C-D XS    cross-section (output) (mb)
+C-D XG    gamma-production cross section (mb)
 C-
       DOUBLE PRECISION XPOP,XSPROD,XS,ZERO
       DIMENSION XPOP(8)
@@ -3558,8 +3732,8 @@ C* No.of input angles MXA, fine grid angles MXZ, particles/reaction MXP
       CHARACTER*8   POUT(MXP),PTST
       CHARACTER*40  FL92,FLPT,FLCU
       CHARACTER*136 REC
-C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha)
-      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA
+C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
+      COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
       DIMENSION     EIN(NE3),XSC(MXE,*),XSG(MXE,*)
      1             ,EIS(*),YLD(*),QQM(NXS),QQI(NXS)
      1             ,RWO(MXR),ANG(MXA),MTH(NXS)
@@ -4114,16 +4288,17 @@ C* In case of gammas, replace the spectrum integral by the
 C* previously stored gamma production cross section.
 C* Test gamma yield consistency, but exclude reactions
 C* producing the same residual (gamma-spectra are lumped by residual)
-      IF(ZAP.EQ.0 .AND. XG3.GT.0
-     &  .AND.(MT.NE. 28.AND.MT.NE.104)
-     &  .AND.(MT.NE. 41.AND.MT.NE. 32.AND.MT.NE.105)
-     &  .AND.(MT.NE. 44.AND.MT.NE.115.AND.MT.NE.106)) THEN
-        DXG=100*(SPC/XG3-1)
-        IF(ABS(DXG).GT.2) THEN
-          IF(DXG.GT. 999) DXG= 999
-          IF(DXG.LT.-999) DXG=-999
-          WRITE(LTT,909) JT6,EE,XG3,DXG
-          WRITE(LER,909) JT6,EE,XG3,DXG
+      IF(ZAP.EQ.0 .AND. XG3.GT.0) THEN
+        IF((MT.NE. 28.AND.MT.NE.104) .AND.
+     &     (MT.NE. 41.AND.MT.NE. 32.AND.MT.NE.105) .AND.
+     &     (MT.NE. 44.AND.MT.NE.115.AND.MT.NE.106)) THEN
+          DXG=100*(SPC/XG3-1)
+          IF(ABS(DXG).GT.2) THEN
+            IF(DXG.GT. 999) DXG= 999
+            IF(DXG.LT.-999) DXG=-999
+            WRITE(LTT,909) JT6,EE,XG3,DXG
+            WRITE(LER,909) JT6,EE,XG3,DXG
+          END IF
         END IF
         SPC=XG3
       END IF
