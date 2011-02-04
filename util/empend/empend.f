@@ -84,6 +84,7 @@ C-V  10/08 - Accept reaction (z,na) &  (z,an)  due to change in EMPIRE.
 C-V        - Fix cases of undefined variables
 C-V  11/01 - Redo complex reaction identification based on new printout
 C-V          of population cross sections
+C-V  11/02 Restore printout of pseudo-resonance data.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -2401,7 +2402,7 @@ C*             spurious values at lower energies
           END IF
         END DO
 C*      -- Eliminate cross sections with a single non-zero value
-        IF(NPT.LT.2) NPT=0
+        IF(NPT.LT.2 .AND. MTH(I).NE.9151 ) NPT=0
 C*
 C* Repack the array, removing All-zero cross section from the list
         IF(NPT.GT.0) THEN
@@ -3113,24 +3114,37 @@ C*
       IF(NEN.GT.MXE) STOP 'EMPEND ERROR - MXE limit exceeded'
       EIN(NEN)=EE
       CHEN=REC(51:80)
+      MT=0
   207 READ (LIN,891) REC
-C* Read the scattering radius
+c...
+c...  print *,'"',REC(1:60),'"'
+c...
       IF(REC( 1:26).EQ.'       Scattering radius ='  ) THEN
+C*      -- Read the scattering radius
         QQ=0
         QI=0
         MT=9151
         READ(REC(27:33),'(F7.0)') XS
         XG=-1
-        GO TO 312
-      END IF
-      IF(REC( 1:26).EQ.'       Calc. Strength func'  ) THEN
+c...
+c...    print *,'read scatt.rad',xs
+c...
+      ELSE IF(REC( 1:26).EQ.'       Calc. Strength func'  ) THEN
+C*      -- Read the strength function
         READ(REC(37:42),'(F6.0)') STF0
         STF0=STF0/10000
 c...
-c...        print *,'STF0',STF0
+c...    print *,'STF0',STF0
 c...
+      ELSE IF(REC(1:23).EQ.' FUSION CROSS SECTION =') THEN
+C*      -- End of data block - check if data were found
+        IF(MT.GT.0) THEN
+          GO TO 312
+        ELSE
+          GO TO 110
+        END IF
       END IF
-      IF(REC(1:20).EQ.' FUSION CROSS SECTIO') GO TO 110
+C*      -- Loop to next record
       GO TO 207
 C*
 C* Next product nucleus data
