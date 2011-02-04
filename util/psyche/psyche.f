@@ -31,6 +31,8 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.04   February 2011     A. Trkov
+!-V                        Add sign to energy balance printout
 !-V         Version 8.03   January  2011     A. Trkov
 !-V                        Correct the format for printing energy balance
 !-V                        of MT5.
@@ -3647,7 +3649,7 @@
                PERR = 999.99
             END IF
          ELSE
-            PERR = 100.*ABS(SSUM-EAVAIL)/EAVAIL
+            PERR = 100.*(SSUM-EAVAIL)/EAVAIL
          END IF
          IF(MT.EQ.5)   THEN
             IF(NK.EQ.1) THEN
@@ -3658,7 +3660,7 @@
                IF(NK.GT.12) WRITE(NOUT,'(A)') ' '
             END IF
          ELSE
-            IF(PERR.LT.999.99) THEN
+            IF(ABS(PERR).LT.999.99) THEN
                IF(NK.EQ.1) THEN
                   WRITE(NOUT,'(1P,2E10.2,0P,F7.2,1P,10E10.2:/
      &                        (37X, 9E10.2))')                          &       
