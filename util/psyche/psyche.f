@@ -31,6 +31,9 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.05   February 2011     A. Trkov
+!-V                        Fix energy balance calculation depending on
+!-V                        on the value of the LCT flag in MF6.
 !-V         Version 8.04   February 2011     A. Trkov
 !-V                        Add sign to energy balance printout
 !-V         Version 8.03   January  2011     A. Trkov
@@ -158,9 +161,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -3609,9 +3612,13 @@
       DO IK=1,NK
          JIK(IK) = 2
       END DO
-      WRITE(NOUT,40) Q
+      IF(LCT.EQ.1) THEN
+        WRITE(NOUT,40) Q,'(Lab)'
+      ELSE
+        WRITE(NOUT,40) Q,'(CM) '
+      END IF
    40 FORMAT(/9X,'ENERGY BALANCE SUMMARY: Q = ',1PE13.5//               &       
-     &     23X,'TOTAL SECONDARY ENERGY BY EMITTED PARTICLE')
+     &     20X,'TOTAL SECONDARY ENERGY BY EMITTED PARTICLE ',A5)
       IF (NK.GT.1) THEN
          WRITE(NOUT,'(2A10,A7,10A10:/1(37X, 9A10))')                    &
      &         HE,HA,HP,HS,(HL(I),I=1,NK)
@@ -3631,14 +3638,21 @@
                GO TO 45
    50          CALL TERP1(EGRID(L-1),AEBAR(L-1),EGRID(L),AEBAR(L),      &       
      &              E,ANS,INT1)
-               VAL(IK) = ANS
+               IF(LCT.EQ.3) THEN
+C                Subtract CM energy from recoils if given in Lab
+                 READ(HL(IK),'(I8)',ERR=52) IZAP
+                 IF(IZAP.GT.2004) ANS=ANS-E/(AWR+1)**2
+               END IF
+   52          VAL(IK) = ANS
                SSUM = SSUM + ANS
             END IF
          END DO
-         IF(LCT.EQ.2) THEN
-            QK = E*AWR/(AWR+1.)
-         ELSE
+         IF(LCT.EQ.1) THEN
+C           Work in Lab coordinate system for LCT=1
             QK = E
+         ELSE
+C           Work in CM coordinate system for LCT=2,3
+            QK = E*AWR/(AWR+1.)
          END IF
          EAVAIL = Q + QK
          IF(EAVAIL.LE.0.) THEN
@@ -3650,6 +3664,7 @@
             END IF
          ELSE
             PERR = 100.*(SSUM-EAVAIL)/EAVAIL
+            IF(PERR.GT.999.99) PERR=999.99
          END IF
          IF(MT.EQ.5)   THEN
             IF(NK.EQ.1) THEN
