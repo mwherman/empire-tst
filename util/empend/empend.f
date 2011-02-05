@@ -84,7 +84,8 @@ C-V  10/08 - Accept reaction (z,na) &  (z,an)  due to change in EMPIRE.
 C-V        - Fix cases of undefined variables
 C-V  11/01 - Redo complex reaction identification based on new printout
 C-V          of population cross sections
-C-V  11/02 Restore printout of pseudo-resonance data.
+C-V  11/02 - Restore printout of pseudo-resonance data.
+C-V        - Refine tolerance for matching energies of discrete levels.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3445,12 +3446,11 @@ C* Test for last level (IL=0 for reading blank line)
       IF(IL.LE.0 ) GO TO 351
       EL=EL*1.E6
       XI=XI+XS
-c...
-c...  if(izi.eq.1 .and. nint(el/1000).eq.nint(qq/1000))
-c... 1    print *,' discrete level il,el,xs,jl',il,xs,jl,qq
-c...
 C* Exclude level that results in the same energy state (=elastic by def.)
-      IF(IZI.EQ.1 .AND. NINT(EL/1000).EQ.NINT(QQ/1000)) THEN
+      IF(IZI.EQ.1 .AND. NINT(EL/100).EQ.NINT(QQ/100)) THEN
+c...
+c...    print *,' Exclude discrete level il,el,xs,jl',il,el,xs,jl,qq
+c...
         XL0=XS
         GO TO 352
       END IF
