@@ -34,6 +34,9 @@
 !-V         Version 8.05   February 2011     A. Trkov
 !-V                        Fix energy balance calculation depending on
 !-V                        on the value of the LCT flag in MF6.
+!-v                        LCT=3 is treated as CM, assuming that other 
+!-V                        particles fly off in different directions,
+!-V                        leaving the residual approximately in the CM.
 !-V         Version 8.04   February 2011     A. Trkov
 !-V                        Add sign to energy balance printout
 !-V         Version 8.03   January  2011     A. Trkov
@@ -3614,8 +3617,13 @@
       END DO
       IF(LCT.EQ.1) THEN
         WRITE(NOUT,40) Q,'(Lab)'
-      ELSE
+      ELSE IF(LCT.EQ.2 .OR. LCT.EQ.3) THEN
         WRITE(NOUT,40) Q,'(CM) '
+      ELSE
+        WRITE(NOUT,'(9X,A,I3,A)') 'Unknown coordinate frame',LCT
+     &                           ,' (treated as CM)'
+        WRITE(NOUT,40) Q,'(CM) '
+        LCT=3
       END IF
    40 FORMAT(/9X,'ENERGY BALANCE SUMMARY: Q = ',1PE13.5//               &       
      &     20X,'TOTAL SECONDARY ENERGY BY EMITTED PARTICLE ',A5)
@@ -3638,12 +3646,7 @@
                GO TO 45
    50          CALL TERP1(EGRID(L-1),AEBAR(L-1),EGRID(L),AEBAR(L),      &       
      &              E,ANS,INT1)
-               IF(LCT.EQ.3) THEN
-C                Subtract CM energy from recoils if given in Lab
-                 READ(HL(IK),'(I8)',ERR=52) IZAP
-                 IF(IZAP.GT.2004) ANS=ANS-E/(AWR+1)**2
-               END IF
-   52          VAL(IK) = ANS
+               VAL(IK) = ANS
                SSUM = SSUM + ANS
             END IF
          END DO
