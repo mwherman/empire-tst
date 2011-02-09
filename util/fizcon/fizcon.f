@@ -1,5 +1,5 @@
-! $Rev: 1908 $                                                         |
-! $Date: 2011-01-16 05:04:36 +0100 (So, 16 Jän 2011) $                                                     
+! $Rev: 1985 $                                                         |
+! $Date: 2011-02-10 00:10:53 +0100 (Do, 10 Feb 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.08   February 2011   A. Trkov
+!-V                        Improve testing of cross-reaction covariances
 !-V         Version 8.07   January 2011    A. Trkov
 !-V                        Fix option LRF=7, LCOMP=2
 !-V         Version 8.06   January 2011    A. Trkov
@@ -210,9 +212,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -7441,10 +7443,10 @@
                      IF(VAR(I).LT.0..OR.VAR(I).GT.BIGNO) THEN
                         NSEQP2 = NSEQP1 + (LOC+5)/6
                         EMESS = 'VARIANCE INCORRECT'
-                        CALL ERROR_MESSAGE(NSEQP2)
+                        CALL WARNING_MESSAGE(NSEQP2)
                         WRITE(EMESS,'(4X,3A,1PE12.5,A,1PE12.5)')        &       
      &                        'VAR(',NAME(I),')=',VAR(I),'  ER=',ER
-                        CALL ERROR_MESSAGE(0)
+                        CALL WARNING_MESSAGE(0)
                      END IF
                   END IF
                END DO
@@ -7495,10 +7497,10 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NL,MAT1,MT1,NC,NI
+      INTEGER(KIND=I4) :: NL,MAT1,MT1,NC,NI,MTL
       INTEGER(KIND=I4) :: ILB8,IMIN
       INTEGER(KIND=I4) :: I,I1,I2,I3,J
-      REAL(KIND=R4) :: EL,ER
+      REAL(KIND=R4) :: EL,ER,QI
 !
       INTEGER(KIND=I4) :: IFRST
       DATA IFRST/1/
@@ -7514,9 +7516,10 @@
 !
       CALL TESTD(1000*MF+MT)
 !
-!     PROCESS NON LUMPED MT
+!     PROCESS NON-LUMPED MT
 !
-      IF(L2H.EQ.0) THEN
+      MTL=L2H
+      IF(MTL.EQ.0) THEN
 !
 !        LOOP OVER SUBSECTIONS
 !
@@ -7581,6 +7584,26 @@
 !              EMESS = 'REQUIRED SUB-SUBSECTION WITH LB=8 IS MISSING'
 !              CALL ERROR_MESSAGE( 0)
 !        END IF
+      ELSE
+!
+!     PROCESS CONTRIBUTORS TO LUMPED MT
+!
+!       Check if MTL is in the reaction index list - add if needed
+        DO I=1,NMT3
+          IF(MT .EQ.MT3(I)) THEN
+            QI=QVAL(I)
+          END IF
+          IF(MTL.EQ.MT3(I)) THEN
+!           Set Q-value as the largest of the contributing reactions
+            QVAL(I)=MAX(QI,QVAL(I))
+            GOTO 100
+          END IF
+        END DO
+!       Add MTL and its Q-value to the reaction list
+        NMT3=NMT3+1
+        MT3(NMT3)=MTL
+        QVAL(NMT3)=QI
+  100   CONTINUE
       END IF
 !
       NCXLAS = NCX
@@ -7943,18 +7966,23 @@
       INTEGER(KIND=I4) :: NSTEP,N,N1,N2,JMIN
       INTEGER(KIND=I4) :: NSEQP2,NSEQP3
       INTEGER(KIND=I4) :: NMTX,J,I
-      REAL(KIND=R4) :: ENIMIN,Q,YN,YNP,ELAST,ENEXT,VRR,VRI,VRJ,YLOC,CORR
+      REAL(KIND=R4) :: ENIMIN,ENJMIN,Q,YN,YNP
+      REAL(KIND=R4) :: ELAST,ENEXT,VRR,VRI,VRJ,YLOC,CORR
 !
       REAL(KIND=R4), PARAMETER :: CRIT=1.0E+4,ZERO=0.
 !
 !     GET MF=3 Q VALUE FOR THIS REACTION
 !
-      ENIMIN = ENMIN
+      ENIMIN =-1
+      ENJMIN =-1
       DO NMTX=1,NMT3
          IF(MT.EQ.MT3(NMTX))   THEN
             Q = QVAL(NMTX)
-            ENIMIN = -Q*(AWR+1.)/AWR
-            GO TO 10
+            ENIMIN = MAX(ENMIN,-Q*(AWR+1.)/AWR)
+         ELSE IF(MT1.EQ.MT3(NMTX))   THEN
+            Q = QVAL(NMTX)
+            ENJMIN = MAX(ENMIN,-Q*(AWR+1.)/AWR)
+C...        GO TO 10
          END IF
       END DO
 !
@@ -8010,14 +8038,29 @@
 !
 !     CHECK FOR CORRECT FIRST ENERGY.
 !
-      IF(NEN.EQ.1.OR.NEN.EQ.(N1+1)) THEN
+      IF(NEN.EQ.1) THEN
          ELAST = YN
-         IF(ABS(YN-ENMIN).GT.(CRIT*ENMIN)) THEN
-            IF(ABS(YN-ENIMIN).GT.(CRIT*ENIMIN)) THEN
+         IF(ABS(YN-ENMIN).GT.(CRIT*ENMIN) .AND. ENMIN.GT.0) THEN
+            IF(ABS(YN-ENIMIN).GT.(CRIT*ENIMIN) .AND. ENIMIN.GT.0) THEN
                EMESS = 'ENERGY INCORRECT'
                CALL ERROR_MESSAGE(NSEQP2)
                WRITE (EMESS,'(4X,A,1PE12.5,A,1PE12.5)')                 &       
      &              'EXPECT ',ENIMIN,', FIND ',YN
+               CALL ERROR_MESSAGE(0)
+               NBAD = NBAD + 1
+            END IF
+         END IF
+         GO TO 25
+      END IF
+      IF(NEN.EQ.(N1+1)) THEN
+         ELAST = YN
+         IF(ABS(YN-ENMIN).GT.(CRIT*ENMIN)
+     &      .AND. ENMIN.GT.0 .AND. MAT1.EQ.0) THEN
+            IF(ABS(YN-ENJMIN).GT.(CRIT*ENJMIN) .AND. ENJMIN.GT.0) THEN
+               EMESS = 'ENERGY INCORRECT'
+               CALL ERROR_MESSAGE(NSEQP2)
+               WRITE (EMESS,'(4X,A,1PE12.5,A,1PE12.5)')                 &       
+     &              'EXPECT ',ENJMIN,', FIND ',YN
                CALL ERROR_MESSAGE(0)
                NBAD = NBAD + 1
             END IF
@@ -8108,10 +8151,10 @@
       IF(VRR.LT.0..OR.VRR.GT.1.0E+04) THEN
          NSEQP2 = NSEQP1 + (N+5)/6
          EMESS = 'VARIANCE INCORRECT'
-         CALL ERROR_MESSAGE(NSEQP2)
+         CALL WARNING_MESSAGE(NSEQP2)
          WRITE (EMESS,'(4X,A,1PE12.5,A,I4)')                            &       
      &         'VAR=',VRR,' AT LIST LOCATION',N
-         CALL ERROR_MESSAGE(0)
+         CALL WARNING_MESSAGE(0)
          NBAD = NBAD + 1
          IF(NBAD.GT.100)    GO TO 100
       ELSE
@@ -11866,6 +11909,8 @@
       END IF
       IF(JSEQ.NE.0) THEN
          WRITE(NOUT,'(5X,2A,I6)')  EMESS(1:49),'SEQUENCE NUMBER',JSEQ
+!        Increment count for errors
+         NERROR=NERROR+1
       ELSE
          IF(EMESS.EQ.' ') THEN
             NEMES = 1
@@ -11874,8 +11919,6 @@
          END IF
          WRITE(NOUT,'(5X,A)')  EMESS(1:NEMES)
       END IF
-!     Increment count for errors
-      NERROR=NERROR+1
       RETURN
       END SUBROUTINE ERROR_MESSAGE
 !
