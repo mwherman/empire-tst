@@ -86,6 +86,7 @@ C-V  11/01 - Redo complex reaction identification based on new printout
 C-V          of population cross sections
 C-V  11/02 - Restore printout of pseudo-resonance data.
 C-V        - Refine tolerance for matching energies of discrete levels.
+C-V        - Fix number of photons in MF14 to match MF12.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -254,7 +255,9 @@ c...  NMOD= 0
       STF0=0
       GAMG=0
       D0LV=0
-      LRP = 0
+      LRP =0
+      I600=0
+      I800=0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -418,7 +421,11 @@ C* Write the ENDF file-3 data
           WRITE(LTT,995) '       Cross section too small for MT : ',JT
           WRITE(LER,995) '       Cross section too small for MT : ',JT
         END IF
+C*      -- Flag the presence of discrete level proton and alpha production
+        IF(JT.GE.600 .AND. JT.LE.649) I600=1
+        IF(JT.GE.800 .AND. JT.LE.849) I800=1
       END DO
+      IWO(LBI+NT6)=999
       ELO=EIN(1)
 C*
       WRITE(LTT,991)
@@ -431,13 +438,13 @@ C*
       WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
-
+C...
       WRITE(LER, * ) ' '
       WRITE(LER,'(A)') '        MT       QM          QI'
       DO J=1,NXS
         WRITE(LER,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
       END DO
-
+C...
 C*
 C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 880
@@ -453,6 +460,28 @@ C*
 C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
       MT6=IWO(LBI-1+JT6)
+C*    -- Check angular distributions (if none, purely isotropic, -LCT)
+      IF(MT6.EQ.649) I600=0
+      IF(MT6.EQ.849) I800=0
+      IF(MT6.GT.649 .AND. I600.EQ.1) THEN
+        JT6 =JT6-1
+        MT6 =649
+        MT4 =600
+        I600=0
+        LCT =-2
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 420
+      ELSE IF(MT6.GT.849 .AND. I800.EQ.1) THEN
+        JT6 =JT6-1
+        MT6 =849
+        MT4 =800
+        I800=0
+        LCT =-2
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 420
+      END IF
 C* Process discrete levels if continuum reactions present
       IF(MT6.NE.  2 .AND.
      1   MT6.NE. 91 .AND.
@@ -474,27 +503,31 @@ c...
 C* Reading angular distributions - MF6 flagged negative
       KT6=-MT6
 c...
-c...      print *,'processing MT',MT6
+c...  print *,'processing MT',MT6
 c...
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
      1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
      1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT
      2           ,MXE,LX,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
+c...
+c...  print *,'Done reamf6 MT,ier',MT6,ier
+c...
       IF(IER.LT.0) GO TO 870
       IF(NK.LE.0) GO TO 490
 C* Write the ENDF file-4 data
       MT4=2
   420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
      1           ,MT4,MAT,IZA,IZI,AWR,LCT,NS)
-      IF(MT4.LE.0) GO TO 490
-      WRITE(LTT,995) ' Processed angular distrib. for MT    : ',MT4
-      WRITE(LTT,991)
-      WRITE(LER,995) ' Processed angular distrib. for MT    : ',MT4
-      WRITE(LER,991)
-      JT4=JT4+1
-      MT4=MT4+1
-      GO TO 420
-  490 IF(JT6.LT.NT6) GO TO 400
+      IF(MT4.GT.0) THEN
+        WRITE(LTT,995) ' Processed angular distrib. for MT    : ',MT4
+        WRITE(LER,995) ' Processed angular distrib. for MT    : ',MT4
+        JT4=JT4+1
+        MT4=MT4+1
+        GO TO 420
+      END IF
+      WRITE(LTT,995) BLNK
+      WRITE(LER,995) BLNK
+  490 IF(JT6.LT.NT6 .OR. I800.EQ.1) GO TO 400
 C* Angular distribution data processed
       IF(JT4.GT.0) THEN
         NS=0
@@ -593,7 +626,8 @@ C*   MXLJ - maximum number of transitions from a level
       MXLJ=20
       JPP=0
       LNB=LBI
-      LLB=LNB+MXLI
+      LNB0=LNB
+      LLB=LNB+MXLI*MLV
       IF(LLB+MXLI*MXLJ.GT.MXI)
      1STOP 'EMPEND ERROR - MXI limit exceeded'
       LEL=LBE
@@ -625,6 +659,7 @@ C* Count levels of the MT800 series, set mt and IZP
         END IF
       END DO
 C* Process selecte discrete level reactions
+      LNB=LNB0
       DO L=1,MLV
         IF(LVLF(L).GT.0) THEN
           JZA=IZA+IZI-LVIZ(L)
@@ -650,6 +685,7 @@ C* Process selecte discrete level reactions
      1               ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NBL)
           IF(NLV.GT.0) JPP=JPP+1
         END IF
+        LNB=LNB+MXLI
       END DO
 C* Photon production data from discrete levels processed
       IF(JPP.GT.0) THEN
@@ -658,14 +694,16 @@ C* Photon production data from discrete levels processed
       END IF
 C* Process photon angular distribution for discrete levels (isotropic)
       JPP  =0
+      LNB=LNB0+1
       DO L=1,MLV
         IF(LVLF(L).GT.0) THEN
           JZA=IZA+IZI-LVIZ(L)
           MT0=LVMT(L)
           JLV=LVLF(L)
-          CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JLV ,NS)
+          CALL WRMF14(LOU,MAT,MT0,IZA,AWR,JLV,IWO(LNB) ,NS)
           JPP=JPP+1
         END IF
+        LNB=LNB+MXLI
       END DO
 C* Photon angular distributions from discrete levels processed
       IF(JPP.GT.0) THEN
@@ -5159,12 +5197,12 @@ C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INT(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
-      DATA DLVL/1.E3/
+      DATA DLVL/1.E2/
 C*
       DATA ZRO/0./
       DATA PTST/'        '/
 C*
-      LCT=LCT0
+      LCT=ABS(LCT0)
       IF(LCT.GT.2) LCT=2
 C*
       CALL POUCHR(PTST,IZI,AWI)
@@ -5173,7 +5211,9 @@ C* Find the appropriate discrete level MT number
      1   MT6.EQ.  5) MT=MAX(MT, 50)
       IF(MT6.EQ.649) MT=MAX(MT,600)
       IF(MT6.EQ.849) MT=MAX(MT,800)
-      IF(IZI.EQ.1 .AND. MT.EQ.50) MT=MT+1
+      IF(IZI.EQ.   1 .AND. MT.EQ. 50) MT=MT+1
+      IF(IZI.EQ.1001 .AND. MT.EQ.600) MT=MT+1
+      IF(IZI.EQ.2004 .AND. MT.EQ.800) MT=MT+1
       DO JT=1,NXS
         IT=JT
         IF(ABS(MTH(IT)).EQ.MT ) GO TO 22
@@ -5183,6 +5223,14 @@ C*
 C* Write file MF4 angular distributions (first outgoing particle)
    22 MF =4
       ZA =IZA
+      IF(LCT0.LT.0) THEN
+C*      -- No data given, assume purely isotropic
+        LI=1
+        CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,  0, 0, 0)
+        CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR,LI,LCT, 0,NM)
+        J2=1
+        GO TO 50
+      END IF
       LTTE=1
       LVT=0
       LI =0
@@ -5412,7 +5460,7 @@ C* One energy point processed
    38 LL  =LL+NW
       J2  =J2+1
    40 CONTINUE
-      IF(J2.GT.0) THEN
+   50 IF(J2.GT.0) THEN
         NS=99998
         CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
         NS=0
@@ -6060,13 +6108,10 @@ C* Loop over all discrete levels
 C* Number of levels below the present one
         NBL=NL1+LL-2
 C* Define reaction type MT number
-C...    MT=MT0+NBL
         MT=MT0+LL-1
 C* Energy of the level
-C...    ES=ENL(NBL+1)
         ES=ENL(LL)
 C* Number of levels with non-zero branching ratio
-C...    NT=NBR(NBL+1)
         NT=NBR(LL)
         IF(NT.GT.0) THEN
 C* Head record
@@ -6074,9 +6119,6 @@ C* Head record
 C* List record
           DO JT=1,NT
 C* Determine the energy level of the final state (sort in descending order)
-c... Level energies sorted in descending order (fix error that reappeared?)
-c...        LE=LBR(NT+1-JT,LL)
-C...        LE=LBR(JT,NBL+1)
             LE=LBR(JT,LL)
 C...
 C...        print *,'jt,ll,le',jt,ll,le
@@ -6084,8 +6126,6 @@ C...        print *,'       E',enl(le)
 C...
             RWO(1,JT)=ENL(LE)
 C* Determine the branching fraction for this level
-c...        RWO(2,JT)=BRR(NT+1-JT,LL)
-C...        RWO(2,JT)=BRR(JT,NBL+1)
             RWO(2,JT)=BRR(JT,LL)
           END DO
           CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
@@ -6098,23 +6138,26 @@ C*
       END DO
       RETURN
       END
-      SUBROUTINE WRMF14(LOU,MAT,MT0,IZA,AWR,NLV,NS)
+      SUBROUTINE WRMF14(LOU,MAT,MT0,IZA,AWR,NLV,NKI,NS)
 C-Title  : WRMF14 Subroutine
 C-Purpose: Write MF 14 data in ENDF-6 format
+      DIMENSION NKI(NLV)
       ZRO=0
       ZA =IZA
       MF =14
 C* Loop over all discrete levels
-      DO 140 LL=1,NLV
-C* Define reaction type MT number
-      MT=MT0+LL-1
-C* Assume isotropic photon distribution
-      CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 1, 0, 1, 0)
-C* Section end
-      NS=99998
-      CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
-      NS=0
-  140 CONTINUE
+      DO LL=1,NLV
+C*      Define reaction type MT number
+        MT=MT0+LL-1
+C*      -- Number of gamma-rays
+        NK=NKI(LL)
+C*      Assume isotropic photon distribution
+           CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 1, 0,NK, 0)
+C*      Section end
+           NS=99998
+           CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+           NS=0
+      END DO
       RETURN
       END
       SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
