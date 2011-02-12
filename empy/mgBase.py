@@ -281,7 +281,7 @@ class mgBase:
         fout.close()
     
     
-    def toBoxr(self,filename):
+    def toBoxr(self,filename, MF=3, covarianceMF=33):
         """
         write all x-sections and matrices to "boxr" format
         We can then run njoycovx and covr modules from njoy,
@@ -342,7 +342,7 @@ class mgBase:
         # write all x-sections, "MF-3"
         for mt in mtList:
             bxS += b.writeENDFline([0.0,0.0, 0,0,self.ngroups,0], 
-                    self.mat,3,mt)
+                    self.mat,MF,mt)
             key = 'MT%i'%mt
             # switch order:
             mtXsec = self.xsecs[key]
@@ -353,12 +353,12 @@ class mgBase:
             
             for jdx in range(nline):
                 bxS += b.writeENDFline( mtXsec[6*jdx:6*jdx+6], 
-                        self.mat,3,mt)
+                        self.mat,MF,mt)
             if rem>0:
                 bxS += b.writeENDFline( mtXsec[6*nline:6*nline+6], 
-                        self.mat,3,mt)
+                        self.mat,MF,mt)
             
-            bxS += b.writeSEND( self.mat, 3 )
+            bxS += b.writeSEND( self.mat, MF )
         
         # done with MF-3:
         bxS += b.writeFEND( self.mat )
@@ -373,13 +373,13 @@ class mgBase:
             covarsThisMT = mtList[mtdx:]
             
             bxS += b.writeENDFline([self.zam,self.awt,0,0,0,len(covarsThisMT)], 
-                    self.mat,33, mt)
+                    self.mat,covarianceMF, mt)
             
             for colMT in covarsThisMT:
                 taketranspose = False
                 
                 bxS += b.writeENDFline([0.0,0.0,self.mat,colMT,0,self.ngroups], 
-                        self.mat,33,mt)
+                        self.mat,covarianceMF,mt)
                 
                 # must try both 'MTxMTy' and 'MTyMTx':
                 key = 'MT%iMT%i' % (mt,colMT)
@@ -391,7 +391,7 @@ class mgBase:
                     # ok, not present, so write blank section:
                     bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
                         self.ngroups], self.mat,33,mt)
-                    bxS += b.writeENDFline([0.0], self.mat,33,mt)
+                    bxS += b.writeENDFline([0.0], self.mat,covarianceMF,mt)
                     
                     continue
     
@@ -424,24 +424,24 @@ class mgBase:
                     line = line[start:end]
                     
                     bxS += b.writeENDFline([0.0,0.0,len(line),start+1,
-                        len(line),idx+1], self.mat,33,mt)
+                        len(line),idx+1], self.mat,covarianceMF,mt)
                     nline, rem = divmod( len(line), 6 )
                     
                     for jdx in range(nline):
                         bxS += b.writeENDFline( line[6*jdx:6*jdx+6], 
-                                self.mat,33,mt)
+                                self.mat,covarianceMF,mt)
                     if rem>0:
                         bxS += b.writeENDFline( line[6*nline:6*nline+6], 
-                                self.mat,33,mt)
+                                self.mat,covarianceMF,mt)
                 
                 if len(empty)>0 and empty[-1] == self.ngroups-1:
                     # the matrix has zeros at high energy, write a footer
                     # to complete the section
                     bxS += b.writeENDFline([0.0,0.0,1,self.ngroups,1,
-                        self.ngroups], self.mat,33,mt)
-                    bxS += b.writeENDFline([0.0], self.mat,33,mt)
+                        self.ngroups], self.mat,covarianceMF,mt)
+                    bxS += b.writeENDFline([0.0], self.mat,covarianceMF,mt)
             
-            bxS += b.writeSEND( self.mat, 33 )
+            bxS += b.writeSEND( self.mat, covarianceMF )
         
         # end of file:
         bxS += b.writeFEND( self.mat )
