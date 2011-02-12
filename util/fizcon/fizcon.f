@@ -1,5 +1,5 @@
-! $Rev: 1985 $                                                         |
-! $Date: 2011-02-10 00:10:53 +0100 (Do, 10 Feb 2011) $                                                     
+! $Rev: 1988 $                                                         |
+! $Date: 2011-02-12 05:06:52 +0100 (Sa, 12 Feb 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -509,12 +509,12 @@
       INTEGER(KIND=I4) :: MT458
       REAL(KIND=R4) :: ERQ
 !
-!     DISCRETE GAMMA RAYS SEEN IN FILES 12 AND/OR 13
+!     DISCRETE GAMMA RAYS SEEN IN FILES 12 AND/OR 13 AND 14
 !
       INTEGER(KIND=I4), PARAMETER :: SZGAM=500
       REAL(KIND=R4), DIMENSION(SZGAM) :: EGAM
-      INTEGER(KIND=I4), DIMENSION(SZGAM) :: MTGAM
-      INTEGER(KIND=I4) :: NMTGAM
+      INTEGER(KIND=I4), DIMENSION(SZGAM) :: MTGAM,MMGAM,NNGAM
+      INTEGER(KIND=I4) :: NMTGAM,MMTGAM
 !
 !     STORES FLAG FOR MT'S SEEN IN FILE 12 AND/OR 13
 !
@@ -989,6 +989,7 @@
          NMT3 = 0
          NLMF = 0
          NMTGAM = 0
+         MMTGAM = 0
          NISSEC = 0
          NCKF5 = 0
          NCKF6 = 0
@@ -6375,6 +6376,12 @@
 !
       NK = N1H
 !
+!     Save the number of photons
+!
+      MMTGAM=MMTGAM+1
+      MMGAM(MMTGAM)=MT
+      NNGAM(MMTGAM)=NK
+!
 !     INITIALIZE SUMUP TEST
 !
       IF(FIZCON_DATA%ISUM.NE.0.AND.NK.GT.1)  CALL SUMPAR(-1)
@@ -6462,6 +6469,15 @@
       CALL RDLIST
       X2(1) = C1L
 !
+!     Save the number of gamma transitions
+!
+!
+!     Save the number of photons
+!
+      MMTGAM=MMTGAM+1
+      MMGAM(MMTGAM)=MT
+      NNGAM(MMTGAM)=N2L
+!
 !     COMPARE HIGHEST LEVEL ENERGY WITH Q VALUE
 !
       EST = ELEVI
@@ -6543,9 +6559,24 @@
 !
       CALL TESTD(1000*MF+MT)
 !
+!     Check that the number of gammas matches the number in MF12
+!
+      NK = N1H
+      DO J=1,MMTGAM
+        IF(MMGAM(J).EQ.MT) THEN
+          IF(NNGAM(J).NE.NK) THEN
+            CALL TEST3(NK,NNGAM(J),'NK')
+          END IF
+          GO TO 20
+        END IF
+      END DO
+!     Complementary MT not found in MF12/MF13
+      EMESS = 'Complementary section not found in MF12,13'
+      CALL ERROR_MESSAGE(NSEQP1)
+!
 !     BRANCH IF ALL DISTRIBUTIONS FOR ALL GAMMAS ARE ISOTROPIC
 !
-      LI = L1H
+   20 LI = L1H
       IF(LI.EQ.1) GO TO 60
 !
 !     INITIALIZE
