@@ -1,5 +1,5 @@
-! $Rev: 1911 $                                                          | 
-! $Date: 2011-01-17 20:44:45 +0100 (Mo, 17 Jän 2011) $                                                     
+! $Rev: 1987 $                                                          | 
+! $Date: 2011-02-12 05:01:29 +0100 (Sa, 12 Feb 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.13   February 2011   A. Trkov
+!-V                        Require EMAX=0 for spontaneous FP yield data
+!-V                        (suggested by E. Dupont)
 !-V         Version 8.12   January 2011   A. Trkov
 !-V                        Improve testing of lumped reaction MTL
 !-V         Version 8.11   January 2011   A. Trkov
@@ -237,9 +240,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
 !---MDC---
 !
 !     Define variable precision
@@ -1790,7 +1793,7 @@
             CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
-         CASE (4,6)
+         CASE (4,5,6)
             CALL TEST2F(EMAX,0.,'EMAX')
          CASE DEFAULT
             CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
