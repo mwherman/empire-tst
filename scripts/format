@@ -63,16 +63,14 @@ mv FIXUP.LST $work/$file-log.fixup
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
 cp $file-f.endf $file-endres.endf
 if [ -s $file-res.endf ]; then
+   ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
    rm $file.endf 2>/dev/null
-   cat >ENDRES.INP <<EOF
-$file-f.endf
-$file-res.endf
-$file-endres.endf
-0
-EOF
-
-   ../util/endres/endres < ENDRES.INP
+   ln -sf $file-f.endf empire.end
+   ln -sf $file-res.endf ENDRES.DAT
+   $EMPIREDIR/util/endres/endres < ENDRES.INP
+   mv endf.dat $file-endres.endf
    mv endres.lst $file-log.endres
+   rm ENDRES.INP empire.end ENDRES.DAT
 fi
 
 # RUN STANEF
