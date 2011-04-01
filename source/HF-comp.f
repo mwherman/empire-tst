@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1971 $
+Ccc   * $Rev: 1994 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1288,7 +1288,6 @@ C
       DOUBLE PRECISION accn, ampl, atil, ekin, ekinm, erest, fisba,
      &                 fric, gamma, gpart, htom, shredt, sum1, sum2,
      &                 sum3, sumf, sumgs, sumr, tau, temp
-      REAL FLOAT
       INTEGER kn, knm
       DOUBLE PRECISION TLF
 C
@@ -1296,10 +1295,15 @@ C
 
       Sumfis = 0.0
       IF (EX(Iec,Nnuc).EQ.0.0D0) RETURN
+C-----set level density parameter systematics
+C-----EMPIRE-3.0-dependence
+      CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+C-----set Ignatyuk type energy dependence for 'a'
+      ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
+      ATIl = ATIl*ATIlnor(Nnuc)
 C-----temperature fade-out of the shell correction
       temp = 0.
-      atil = 0.073*A(Nnuc) + 0.115*A(Nnuc)**0.666667
-      gamma = 0.40/A(Nnuc)**0.33333
+
       accn = atil*(1 + SHC(Nnuc)*(1 - EXP((-gamma*EX(Iec,Nnuc))))
      &       /EX(Iec,Nnuc))
       IF (EX(Iec,Nnuc).GE.YRAst(Jc,Nnuc))

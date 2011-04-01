@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1971 $
+Ccc   * $Rev: 1994 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -40,7 +40,7 @@ C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, 
      &                 e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, wf
+     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
@@ -67,11 +67,9 @@ C
       ldbwacalc = .FALSE.
 C
 C-----Reduced mass corrected for proper mass values
-C
-C     xmas_npro = (AEJc(Npro)*AMUmev + XMAss_ej(Npro))/AMUmev
-C     xmas_ntrg = (A(Ntrg)*AMUmev + XMAss(Ntrg))/AMUmev
       xmas_npro = AEJc(Npro) + XMAss_ej(Npro)/AMUmev
       xmas_ntrg = A(Ntrg) + XMAss(Ntrg)/AMUmev
+
       el = EINl
       ecms = EIN
       S1 = 0.5
@@ -288,24 +286,48 @@ C--------if FUSREAD true read l distribution of fusion cross section
 C--------and calculate transmission coefficients
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
-         wf = ak2/10.D0
-         DO j = 1, NDLW
+         coef=1.d0
+         IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
+     &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+
+         CSFus = 0.d0
+         DO il = 1, NDLW
             READ (11,*,END = 150) csvalue
-            stl(j) = csvalue*wf/PI/(2*j - 1)
-            IF (stl(j).GT.1.0D0) THEN
-               WRITE (8,*) ' '
+            stl(il) = csvalue
+            CSFus = CSFus + csvalue*(2*(il-1)+1)*coef
+            IF (stl(il).GT.1.0D0) THEN
                WRITE (8,
-     &'(''TOO LARGE INPUT FUSION CROSS SECTION'',              '' FOR l=
-     &'',I3,'' RESULTING Tl>1'')') j - 1
+     &'(''WARNING: INPUT FUSION TRANSMISSION > 1'', '' FOR l='',
+     &I3)') j - 1
                WRITE (8,*) ' EXECUTION STOPPED!!!'
                STOP
             ENDIF
          ENDDO
-  150    NLW = j - 1
-         CSFus = 0.d0
-         DO j = 1, NLW
-            CSFus = CSFus + (2*j - 1)*stl(j)
-         ENDDO
+
+  150    NLW = il - 1
+C--------if FUSREAD true read l distribution of fusion cross section
+C--------and calculate transmission coefficients
+C        el = EINl
+C        CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
+C        wf = ak2/10.D0
+C        DO j = 1, NDLW
+C           READ (11,*,END = 150) csvalue
+C           stl(j) = csvalue*wf/PI/(2*j - 1)
+C           IF (stl(j).GT.1.0D0) THEN
+C              WRITE (6,*) ' '
+C              WRITE (6,
+C    &'(''TOO LARGE INPUT FUSION CROSS SECTION'',              '' FOR l=
+C    &'',I3,'' RESULTING Tl>1'')') j - 1
+C              WRITE (6,*) ' EXECUTION STOPPED!!!'
+C              STOP
+C           ENDIF
+C        ENDDO
+C 150    NLW = j - 1
+C        CSFus = 0.d0
+C        DO j = 1, NLW
+C           CSFus = CSFus + (2*j - 1)*stl(j)
+C        ENDDO
+
          maxlw = NLW
          ABScs = CSFus
          SINlcc=0.d0
@@ -315,6 +337,10 @@ C--------and calculate transmission coefficients
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (8,*)
      &          ' (all previous instructions concerning fusion ignored)'
+         WRITE (8,*) 'Maximum angular momentum :',maxlw
+         WRITE (8,*) 'Fusion cros section      :',CSFus
+         WRITE (8,*) 
+
 C--------calculation of o.m. transmission coefficients for absorption
       ELSEIF (KTRlom(Npro,Ntrg).GT.0) THEN
          einlab = -EINl
@@ -929,8 +955,6 @@ C-----is still stable
       RETURN
       END
 
-
-
       SUBROUTINE BASS(Ein,Zp,Ap,Zt,At,Bfus,E1,Crl,Csfus)
 Ccc
 Ccc   *********************************************************************
@@ -1010,13 +1034,17 @@ C
          ENDIF
    50    IF (Ein.GT.ee2) Crl = le2
          IF (Ein.LT.E1) Crl = Crl + (Ein - vmax)/(vmm - vmax)
-      ELSE
-         WRITE (8,'(1X,''Incident energy below fusion barrier'')')
-         STOP
-      ENDIF
-      Csfus = 657.*(Ap + At)*Crl**2/(Ap*At*Ein)
-      END
 
+         Csfus = 657.*(Ap + At)*Crl**2/(Ap*At*Ein)
+      ELSE
+         WRITE (8,'(1X,
+
+     >  ''WARNING: Incident energy below fusion barrier'')')
+
+         Csfus = 0.d0
+      ENDIF
+      RETURN
+      END
 
       SUBROUTINE FINDA(Zp,Zt,Crl,Vm)
 Ccc
@@ -1185,10 +1213,9 @@ C
          EROt = EROt/2.0
          CALL INTGRS(xlow,xmax,G,prob)
          Stl(j) = prob/dintf
-         IF (Stl(j).gt.1.e-10) Nlw = j
+         IF (Stl(j).gt.1.d-10) Nlw = j
       ENDDO
       END
-
 
       DOUBLE PRECISION FUNCTION F(X)
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
@@ -1228,7 +1255,6 @@ C
       IF (ABS(arg).LE.74.D0) G = F(X)
      &                           /(1 + EXP((-2.*pi*(E-X-EROt)/htom)))
       END
-
 
       SUBROUTINE PROCESS_ECIS(Iopsys,Outname,Length,Iret,ICAlangs)
 C
@@ -1282,5 +1308,3 @@ C--------WINDOWS
          iwin = PIPE(ctmp)
       ENDIF
       END
-
-

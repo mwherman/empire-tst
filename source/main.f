@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1976 $
+Ccc   * $Rev: 1994 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1391,7 +1391,7 @@ C--------Account for widths fluctuations (HRTW)
             IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
      &        CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
             kemax = max(NEX(nnuc) - 1,1)
-            IF (FISsil(nnuc)) THEN
+            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0) THEN
                IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
      &             ' mb'
                IF (FISmod(nnuc).GT.0.) THEN
@@ -1546,7 +1546,7 @@ C           if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
 
             IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
-            IF (FISsil(nnuc)) THEN
+            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0) THEN
                IF (FISmod(nnuc).EQ.0. .and. .not. skip_fiss)
      &              WRITE (80,*) 'csfis=', CSFis,
      &              ' mb', '   fisxse=', dtmp1, ' mb'
@@ -1921,9 +1921,11 @@ c                 ENDDO
              DO m = 1, INT(FISmod(nnuc)) + 1
               WFIsm(m) = 0.d0
               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-              WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
+	        IF(FISShi(nnuc).ne.1.d0)
+     >          WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
            ENDDO
-           WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
+           IF(FISShi(nnuc).ne.1.d0)
+     >       WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
          ENDIF
            CSPfis(nnuc) = CSFis
            WRITE (8,
@@ -2032,8 +2034,9 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.0)
-     &                      CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
+             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.0 .and.
+     &           AEJc(0).LE.4.)  ! excluding HI reactions
+     &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
 C            IF (IOUt.GT.0) WRITE (8,
 C    &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
@@ -2149,7 +2152,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
-      IF(TOTcsfis.gt.0.d0)
+      IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
      &  WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)

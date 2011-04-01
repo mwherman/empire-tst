@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1978 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-02-01 16:30:58 +0100 (Di, 01 Feb 2011) $
+Ccc   * $Rev: 1994 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -24,13 +24,10 @@ Ccc
 C
 C COMMON variables
 C
-      INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1, NCHr
-      CHARACTER*10 PROjec, RESidue(NDNUC), TARget
+      INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
 
       CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
-      COMMON /EXFOR / TARget, PROjec, RESidue
-      COMMON /IEXFOR/ NCHr
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
       COMMON /MLOCOM2/ KEYload, KZZ, KAA
       COMMON /R250COM/ INDexf,INDexb,BUFfer
@@ -38,24 +35,20 @@ C
 C Local variables
 C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
-     &                 deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
-     &                 qtmp, xfis, zclu, zres, ztmp, culbar
-      CHARACTER*3 atar, ca1
-      CHARACTER*1 cnejec, proj
+     &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
+     &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej
+      CHARACTER*1 cnejec
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT, SNGL
-      LOGICAL gexist, nonzero, fexist
+      LOGICAL gexist, nonzero, fexist, calc_fiss
 
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin
-      INTEGER IFINDCOLL
-      INTEGER INDEX, INT, ISEED, NINT
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
+      INTEGER IFINDCOLL,IFINDCOLL_CCFUS
+      INTEGER INT, ISEED, NINT
       CHARACTER*2 SMAT
-      CHARACTER*132 x4string
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -240,9 +233,9 @@ C--------Use GCASC input parameter to turn it off
 
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
-         BETav = 4.0
+         BETav = 4.0           ! viscosity parameter
          SHRj = 24.0
-         SHRd = 2.5
+         SHRd = 2.5            ! diffuness of the shell correction damping
 C--------fusion parameters
          CSRead = -2.0
          SIG = 0.0
@@ -303,8 +296,6 @@ C
 C        IOPSYS = 1 !   WINDOWS
          CALL GETENV ('OS', empireos)
 
-
-
          if(empireos(1:3). eq. 'Win') IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
@@ -312,22 +303,22 @@ C        IX4ret = 1 local MySQL server (default)
 C        IX4ret = 2 remote SYBASE server
 C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
          IX4ret = 0
-C        IF(IOPSYS.EQ.0) IX4ret = 1
-C--------CCFUF parameters
+C--------CCFUS parameters
          DV = 10.
          FCC = 1.
          NACc = 0
 C        By default only target deformation is considered
-         NSCc = 2
-C        Default deformation values, they are changed in ifindcoll()
-         BETcc(1) = 0.15
-         BETcc(2) = 0.05
-         BETcc(3) = 0.15
-         BETcc(4) = 0.05
-         FLAm(1) = 2.
-         FLAm(2) = 3.
-         FLAm(3) = -2.
-         FLAm(4) = -3.
+C        NSCc = 2
+         NSCc = 4
+C        Default deformation values, they are changed in ifindcoll(),ifindcoll_CCFUS()
+         BETcc(1) = 0.15d0
+         BETcc(2) = 0.05d0
+         BETcc(3) = 0.15d0
+         BETcc(4) = 0.05d0
+         FLAm(1) = 2.d0
+         FLAm(2) = 3.d0
+         FLAm(3) = -2.d0
+         FLAm(4) = -3.d0
 C--------set accelleration option
          LTUrbo = 1
          TURbo = FLOAT(LTUrbo)
@@ -407,7 +398,7 @@ C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          MFPp = 1.3
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
-         LHRtw = 1
+         LHRtw = 0
          EHRtw = 5.d0
 C--------ENDF global setting initialized to zero (no formatting)
          Nendf = 0
@@ -442,9 +433,9 @@ C--------ejectile alpha
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
            WRITE (8,*)
-     >    ' WARNING: this version of EMPIRe is prepared to emit complex'
+     >    ' WARNING: this version of EMPIRE is prepared to emit complex'
            WRITE (8,*)
-     >    ' WARNING: complex particles, NDEjc must be 6 in dimension.h '
+     >    ' WARNING: particles, NDEjc must be >= 6 in dimension.h '
           STOP 'You have to increase NDEjc in dimension.h (set NDEjc=6)'
          ENDIF
 
@@ -535,7 +526,22 @@ C--------target
             WRITE (8,*) 'FATAL: Z > A, please correct input file'
             STOP 'FATAL: Z > A, please correct input file'
          ENDIF
-         CALL PTLEVSET(A(0),Z(0),XJLv(1,0),LVP(1,0),e2p,e3m)
+
+C--------projectile
+         READ (5,*) AEJc(0), ZEJc(0)
+         IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
+C-----------GAMMA EMISSION
+            SEJc(0) = 1
+            lpar = -1
+            e2pej = 0.d0
+            e3mej = 0.d0
+         ELSE
+            CALL PTLEVSET(AEJc(0),ZEJc(0),SEJc(0),lpar,e2pej,e3mej)
+         ENDIF
+
+C        CALL PTLEVSET(A(0),Z(0),XJLv(1,0),LVP(1,0),e2p,e3m)
+         CALL PTLEVSET(A(0),Z(0),XJLv(LEVtarg,0),LVP(LEVtarg,0),e2p,e3m)
+
          XN(0) = A(0) - Z(0)
          IZA(0) = INT(1000*Z(0) + A(0))
          ia = INT(A(0))
@@ -545,31 +551,7 @@ C--------target
          ELV(1,0) = 0.0
          QCC(1) = -e2p
          QCC(2) = -e3m
-C--------set target  for EXFOR retrieval
-         TARget = '          '
-         TARget(1:1) = '<'
-         TARget(2:3) = SYMb(0)
-         iend = INDEX(TARget,' ') - 1
-         TARget(iend + 1:iend + 2) = '-'
-         iend = iend + 1
-         WRITE (ca1,'(I3)') ia
-         IF (ia.LT.10) THEN
-            TARget(iend + 1:iend + 2) = ca1(3:3)
-         ELSEIF (ia.LT.100) THEN
-            TARget(iend + 1:iend + 3) = ca1(2:3)
-         ELSE
-            TARget(iend + 1:iend + 4) = ca1(1:3)
-         ENDIF
-C--------target ******  done  ********
-C--------projectile
-         READ (5,*) AEJc(0), ZEJc(0)
-         IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
-C-----------GAMMA EMISSION
-            SEJc(0) = 1
-            lpar = -1
-         ELSE
-            CALL PTLEVSET(AEJc(0),ZEJc(0),SEJc(0),lpar,e2p,e3m)
-         ENDIF
+
 C--------product of target and projectile parities
 C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
 C        RCN, We assume is only the target parity !!!
@@ -577,22 +559,10 @@ C        RCN, We assume is only the target parity !!!
          IZAejc(0) = INT(1000.*ZEJc(0) + AEJc(0))
          iz = INT(ZEJc(0))
          SYMbe(0) = SMAT(iz)
-         QCC(3) = -e2p
-         QCC(4) = -e3m
-C--------set projectile  for EXFOR retrieval
-         PROjec = '          '
-         NCHr = 2
-         IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0) PROjec = 'N,'
-         IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.1.0D0) PROjec = 'P,'
-         IF (AEJc(0).EQ.4.0D0 .AND. ZEJc(0).EQ.2.0D0) PROjec = 'A,'
-         IF (AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0) PROjec = 'D,'
-         IF (AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0) PROjec = 'G,'
-         IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0) PROjec = 'T,'
-         IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.2.0D0) THEN
-            PROjec = 'HE3,'
-            NCHr = 4
-         ENDIF
+         QCC(3) = -e2pej
+         QCC(4) = -e3mej
 C--------***** done ********
+C
 C--------NEMN  number of neutrons emitted
          READ (5,*) nemn
 C--------NEMP  number of protons  emitted
@@ -643,21 +613,6 @@ C--------compound nucleus 1
          ENDf(1) = 1.0 ! Jan 2009
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
-C--------set CN  for EXFOR retrieval
-         RESidue(nnuc) = '          '
-         RESidue(nnuc)(1:1) = '>'
-         RESidue(nnuc)(2:3) = SYMb(nnuc)
-         iend = INDEX(RESidue(nnuc),' ') - 1
-         RESidue(nnuc)(iend + 1:iend + 2) = '-'
-         iend = iend + 1
-         WRITE (ca1,'(I3)') ia
-         IF (ia.LT.10) THEN
-            RESidue(nnuc)(iend + 1:iend + 2) = ca1(3:3)
-         ELSEIF (ia.LT.100) THEN
-            RESidue(nnuc)(iend + 1:iend + 3) = ca1(2:3)
-         ELSE
-            RESidue(nnuc)(iend + 1:iend + 4) = ca1(1:3)
-         ENDIF
 C--------other decaying nuclei
 C
 C--------NNUcd number of decaying nuclei
@@ -848,24 +803,6 @@ C                    ENDF(nnuc) = 1
                   ENDIF
                   REAction(nnuc)(iend + 1:iend + 1) = ')'
                   REAction(nnuc)(iend + 2:iend + 4) = '   '
-C-----------------set residues to be used for EXFOR retrieval
-                  RESidue(nnuc) = '          '
-                  RESidue(nnuc)(1:1) = '>'
-                  RESidue(nnuc)(2:3) = SYMb(nnuc)
-                  iend = INDEX(RESidue(nnuc),' ') - 1
-                  WRITE (ca1,'(I3)') iia
-                  RESidue(nnuc)(iend + 1:iend + 2) = '-'
-                  iend = iend + 1
-                  IF (iia.LT.10) THEN
-                     RESidue(nnuc)(iend + 1:iend + 2)
-     &                  = ca1(3:3)
-                  ELSEIF (iia.LT.100) THEN
-                     RESidue(nnuc)(iend + 1:iend + 3)
-     &                  = ca1(2:3)
-                  ELSE
-                     RESidue(nnuc)(iend + 1:iend + 4)
-     &                  = ca1(1:3)
-                  ENDIF
              ENDIF
            ENDIF
          ENDDO
@@ -875,73 +812,7 @@ C-----------------set residues to be used for EXFOR retrieval
          ENDDO
          ENDDO
          ENDDO
-C--------retrieve EXFOR data
-         INQUIRE (FILE = 'EXFOR.dat',EXIST = gexist)
-         IF (.NOT.gexist) THEN
-            IF (IX4ret.EQ.3) CALL RETRIEVE
-                                         !retrieval from the local database
-            IF (IX4ret.EQ.1 .OR. IX4ret.EQ.2) THEN
-C--------------on-line EXFOR retrieval from the remote database
-               WRITE (atar,'(I3)') INT(A(0))
-               IF (atar(1:1).EQ.' ') THEN
-                  atar(1:1) = atar(2:2)
-                  atar(2:2) = atar(3:3)
-                  atar(3:3) = ' '
-               ENDIF
-               IF (atar(1:1).EQ.' ') THEN
-                  atar(1:1) = atar(2:2)
-                  atar(2:2) = ' '
-               ENDIF
-C--------------set projectile  for EXFOR retrieval
-               proj = ' '
-               IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.0.0D0) proj = 'n'
-               IF (AEJc(0).EQ.1.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 'p'
-               IF (AEJc(0).EQ.4.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'a'
-               IF (AEJc(0).EQ.2.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 'd'
-               IF (AEJc(0).EQ.0.0D0 .AND. ZEJc(0).EQ.0.0D0) proj = 'g'
-               IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.2.0D0) proj = 'h'
-               IF (AEJc(0).EQ.3.0D0 .AND. ZEJc(0).EQ.1.0D0) proj = 't'
-C--------------retrieval from the remote database
-               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.2) THEN
-                  x4string =
-     &'~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.jar: x4retr x -targe
-     &t:"'//SYMb(0)(1:1)//'-'//atar//';'//SYMb(0)(1:1)
-     &//'-0" -Rea ct:"'//proj//',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
-               ELSEIF (IX4ret.EQ.2) THEN
-                  x4string =
-     &'~/X4Cinda/jre/bin/java -cp jconn2.jar:x4retr.jar: x4retr x -targe
-     &t:"'//SYMb(0)//'-'//atar//';'//SYMb(0)//'-0" -React:"'//proj//
-     &',*"'//' -quant:"CS;DA;DAE;DE;CSP"#'
-               ENDIF
-C--------------retrieval from the local MySQL database
-C--------------including data for the natural element
-c              IF(SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1)THEN
-c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
-c    &                       //SYMb(0)(1:1)//
-c    &                       '-0'//';'//SYMb(0)(1:1)//'-'//atar//'" '//
-c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-c              ELSEIF(IX4ret.EQ.1)THEN
-c                 x4string = trim(empiredir)//'/scripts/X4retrieve "'
-c    &                       //SYMb(0)//'-0'//
-c    &                       ';'//SYMb(0)//'-'//atar//'" '//
-c    &                       '"CS;DA;DAE;DE;CSP" '//'"'//proj//',*"#'
-c              ENDIF
-C--------------data for the target isotope only
-               IF (SYMb(0)(2:2).EQ.' ' .AND. IX4ret.EQ.1) THEN
-                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
-     &                       //SYMb(0)(1:1)
-     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-     &                       '"'//proj//',*"#'
-               ELSEIF (IX4ret.EQ.1) THEN
-                  x4string = trim(empiredir)//'/scripts/X4retrieve "'
-     &                       //SYMb(0)
-     &                       //'-'//atar//'" '//'"CS;DA;DAE;DE;CSP" '//
-     &                       '"'//proj//',*"#'
-               ENDIF
-               iwin = PIPE(x4string)
-            ENDIF
-         ENDIF
-C--------retrieve of EXFOR data *** done ***
+
          NNUcd = nnuc
          NNUct = NNUcd
          DO nnuc = 1, NNUcd
@@ -1008,7 +879,7 @@ C-----------(McFadden global potential 9100 could be used)
 
          DO i = 1, NDNUC
             KTRlom(1,i) = 2405
-              KTRlom(2,i) = 5405
+            KTRlom(2,i) = 5405
             KTRlom(3,i) = 9600
             KTRlom(4,i) = 6200
             KTRlom(5,i) = 7100
@@ -1086,7 +957,7 @@ C           IF(EXClusiv) then
 C             WRITE(8,*) 'All spectra are exclusive' 
 C           ELSE
 C             WRITE(8,*) 'Marked with > spectra are exclusive' 
-C	        ENDIF
+C             ENDIF
 C           WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
  
          ELSE
@@ -1134,6 +1005,12 @@ C
 C--------check input for consistency
 C
          WRITE (8,*)
+         IF(AEJc(0).gt.4 .and. NDLW.LT.100)
+            WRITE (8,*)
+     &'WARNING: For HI induced reactions it is recommended Lmax>=100'
+            WRITE (8,*)
+     &'WARNING: Increase NDLW parameter in dimension.h and recompile'
+         ENDIF
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
      &      WRITE (8,*)
      &'Uncertainty samp.-gaussian pdf. Interval: [-3*sig,3*sig]'
@@ -1156,7 +1033,6 @@ C        Commented in Jan 2011
 
 C        IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
 C
-
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
             WRITE (8,*) ' '
@@ -1554,7 +1430,7 @@ C
 C        Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
 C        ions have to be calculated separately
 C 
-         DO nejc = 1, min(6,NDEJC)
+         DO nejc = 0, min(6,NDEJC)
 C          Setting projectile/ejectiles mass 
 C          these are nuclear masses following ENDF Manual 2009, so electron mass is not considered
 C          EJMass(nejc) = (AEJc(nejc)*AMUmev - ZEJc(nejc)*AMUele +
@@ -1568,27 +1444,22 @@ C
      &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele +
      &                   XMAss_ej(NDEJC))/AMUmev
 
-C        Setting projectile mass
-         DO nejc = 1, NDEJC
-           IF (ZEJc(0).EQ.ZEJc(nejc) .AND. AEJc(0).EQ.AEJc(nejc)) then
-             EJMass(0) = EJMass(nejc)
-             exit
-           ENDIF
-         ENDDO
-C
 C--------READ shell corrections of RIPL-2/3
          CALL READ_SHELL_CORR
 C--------Read number of reasonably known levels and level density parameter 'a'
          CALL READLDP
 C--------fix-up deformations for CCFUS coupled channels
          IF (CSRead.EQ.( - 2.0D0) .AND. AEJc(0).GT.4.0D0) THEN
+C-----------fix-up deformations and discrete levels for CCFUS
+            ierr = IFindColl_CCFUS()
+
             DO j = 1, NSCc
                IF (QCC(j).EQ.0.0D0) THEN
                   IF (FLAm(j).GE.0.0D0) WRITE (8,*)
      &                ' Collective state ', ABS(FLAm(j)),
      &                ' in target (sequence number', j,
      &                ') has excitation energy of 0 MeV'
-                  IF (FLAm(j).LE.0.0D0) WRITE (8,*)
+                  IF (FLAm(j).LT.0.0D0) WRITE (8,*)
      &                ' Collective state ', ABS(FLAm(j)),
      &                ' in projectile (sequence number', j,
      &                ') has excitation energy of 0 MeV'
@@ -1600,7 +1471,7 @@ C--------fix-up deformations for CCFUS coupled channels
                ENDIF
                IF (BETcc(j).EQ.0.0D0) THEN
                   IF (FLAm(j).LT.0.0D0) BETcc(j) = DEFprj
-                  IF (FLAm(j).GT.0.0D0) BETcc(j) = DEF(1,0)
+                  IF (FLAm(j).GE.0.0D0) BETcc(j) = DEF(1,0)
                ENDIF
             ENDDO
             IF (iccerr.EQ.1) STOP 'CCFUS STATE MISSING'
@@ -1720,7 +1591,9 @@ C-----set giant resonance parameters for CN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
 
-      IF (DIRect.GT.0 .AND. FIRst_ein) THEN
+
+
+      IF (DIRect.GT.0 .AND. FIRst_ein  .AND. AEJc(0).LE.4 ) THEN
                               ! Inelastic scattering by DWBA for all particles
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
@@ -2115,14 +1988,14 @@ C-----------determination of etl matrix and transmission coeff.--done
           WRITE(8,*) 'Spectra marked with < are inclusive' 
         ENDIF
         WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
-	  ENDIF
+        ENDIF
 
       WRITE (8,*) ' '
 C-----calculate residual nucleus level density
       DO nnur = 2, NNUct
          IF (NEX(nnur).GE.1 .OR. FITlev.GT.0) THEN
             IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-C           IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)	 ! to fit LDs
+C           IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)    ! to fit LDs
 C-----------<m2> could be added to the input ( to use 0.124 if needed)
             IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
 C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
@@ -2197,19 +2070,30 @@ C--------OMPAR.RIPL
          ENDIF
       ENDIF
 C---- fission input is created if it does not exist and FISSHI=0
+C
+C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
          IF (FISshi(nnuc).EQ.0. .AND.
-     &       (Z(nnuc).LT.78. .OR. A(nnuc).LT.200.)) FISsil(nnuc)
-     &       = .FALSE.
+     &       (Z(nnuc).LT.78. .OR. A(nnuc).LT.200.)) THEN
+            FISsil(nnuc)= .FALSE.
+         ENDIF
          IF (FISshi(nnuc).EQ.1.) THEN
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)
             IF (xfis.LT.0.3D0) FISsil(nnuc) = .FALSE.
          ENDIF
          IF (FISshi(nnuc).EQ.2.) FISsil(nnuc) = .FALSE.
       ENDDO
+      calc_fiss=.FALSE.
+      DO nnuc = 1, NNUct
+       IF (FISsil(nnuc)) then
+         calc_fiss=.TRUE.
+         if(AEJc(0).Gt.4. .and. FISshi(nnuc).le.0.d0) FISshi(nnuc)=1.d0
+       ENDIF
+      ENDDO
+
       INQUIRE (FILE = 'FISSION.INP',EXIST = gexist)
-      IF (.NOT.gexist) THEN
+      IF (.NOT.gexist .and. calc_fiss) THEN
          OPEN (79,FILE = 'FISSION.INP',STATUS = 'NEW')
          DO nnuc = 1, NNUcd
             IF (FISsil(nnuc) .AND. FISshi(nnuc).EQ.0) CALL INPFIS(nnuc)
@@ -2798,8 +2682,8 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 99030    FORMAT ('              ',6X,'  (J=0)       (J=0)    ',
      &           '    (J=0)')
          WRITE (8,*)
-         DO i = 1, NNUcd
-C        DO i = 1, NNUct
+C        DO i = 1, NNUcd
+         DO i = 1, NNUct
             IF (EMAx(i).NE.0.0D0) WRITE (8,99045) IFIX(SNGL(Z(i))),
      &          SYMb(i), IFIX(SNGL(A(i))), SHC(i), DEF(1,i), FISb(1,i)
          ENDDO
@@ -2917,7 +2801,7 @@ C
       E2p = 0.D0
       E3m = 0.D0
 C-----Avoiding searching of collective levels of the incident particle
-      IF (Ia.EQ.AEJc(0)) GOTO 300
+      IF (Ia.EQ.AEJc(0) .and. Ia.le.4) GOTO 300
 C-----First try to find 2+ and 3- states in the RIPL om-deformations file
       OPEN (47,FILE = trim(empiredir)//'/RIPL-2/optical/om-data'
      &      //'/om-deformations.dat',STATUS = 'old',ERR = 100)
@@ -3161,7 +3045,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1978 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1994 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -3418,7 +3302,7 @@ C
      &'('' Discrete levels included in PCROSS calculations'')')
               WRITE (12,
      &'('' Discrete levels included in PCROSS calculations'')')
-	       ELSE
+             ELSE
               WRITE (8,
      &'('' Discrete levels not included in PCROSS calculations'')')
               WRITE (12,
@@ -3436,7 +3320,7 @@ C
               WRITE (12,
      &'('' Pairing corrections are not considered in PCROSS/DEGAS calcul
      &ations'')')
-	       ELSE
+             ELSE
               WRITE (8,
      &'('' Pairing corrections are considered in exciton model LDs'')')
               WRITE (12,
@@ -3545,7 +3429,7 @@ C
               NPRIm_g = 1
               WRITE (8 ,'('' Primary gammas calculated and stored'')')
               WRITE (12,'('' Primary gammas calculated and stored'')')
-	       ELSE
+             ELSE
               WRITE (8 ,'('' Primary gammas not stored'')')
               WRITE (12,'('' Primary gammas not stored'')')
              ENDIF
@@ -3918,6 +3802,9 @@ C-----
             IF (CSRead.EQ.( - 2.0D0)) WRITE (8,
      &'('' Fusion cross section will be calculated using CCFUS simplifie
      &d coupled channel approach'')')
+            IF (CSRead.EQ.( - 3.0D0)) WRITE (8,
+     &'('' Fusion cross section will be calculated using CCFUS uncoupled
+     & barriers'')')
             GOTO 100
          ENDIF
 C-----
@@ -6980,7 +6867,7 @@ C--------------Print resulting level density parameters
      &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
                      WRITE (8,*) 
      &                 ' DELTA=', sngl(del),' Dobs=',sngl(dob)
-	            ENDIF
+                  ENDIF
                   IF (ADIv.EQ.2.0D0) then
                      WRITE (8,*)
      &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
@@ -7567,7 +7454,7 @@ C
 C
 C     The calculated ejectile mass below correspond to the use
 C     of atomic masses 
-C	Obtained Q-values consistent with all available calculators (NUDAT, LUND, etc)
+C     Obtained Q-values consistent with all available calculators (NUDAT, LUND, etc)
       b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
 C
 C     The calculated ejectile mass below correspond to the use
@@ -7685,6 +7572,257 @@ C
 99999 END
 C
 C
+      INTEGER FUNCTION IFindColl_CCFUS()
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:ipu*
+Ccc   *                    F I N D C O L L _ C C F U S                   *
+Ccc   *                                                                  *
+Ccc   *  Reads from the file 13 ground state spin and parity and first   *
+Ccc   *  collective energies (the latter to be used by ECIS).            *
+Ccc   *  Reads from the file 25 g.s. deformation to define               *
+Ccc   *    nucleus structure, which is important for CCFUS code          *
+Ccc   *                                                                  *
+Ccc   *  Uses unit 32 temporarily                                        *
+Ccc   *  Some output to UNIT=6 is done                                   *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * input:IA   - A of the nucleus (through COMMON)                   *
+Ccc   *       IZ   - Z of the nucleus (through COMMON)                   *
+Ccc   *                                                                  *
+Ccc   * output: (through COMMON)                                         *
+Ccc   * return:                                                          *
+Ccc   *   IFindColl = 0 (ALL POSSIBLE LEVELS FOUND)                      *
+Ccc   *   IFindColl = 1 WARNING: (SOME COLLECTIVE LEVELS NOT FOUND)      *
+Ccc   *   IFindColl = 2 ERROR: NO DISCRETE LEVEL INFORMATION AVAILABLE   *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Local variables
+C
+      DOUBLE PRECISION beta2, beta3, betatmp, etmp, jtmp
+      INTEGER i, ia, ierr, iptmp, iz, natmp, nztmp, iccfus
+      CHARACTER*6 reftmp
+
+
+      ierr = 0
+
+      iccfus = 0
+
+
+
+      ia = A(0)
+      iz = Z(0)
+
+      beta2 = 0.D0
+      beta3 = 0.D0
+      OPEN (84,FILE = trim(empiredir)//
+     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+     &      STATUS = 'old',ERR = 200)
+      READ (84,'(///)')    ! Skipping first 4 title lines
+      DO i = 1, 1700
+         READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 250,
+     &         ERR = 250) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
+     &                    reftmp
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
+     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+
+             iccfus = iccfus + 1
+             beta2 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta2
+             FLAm(iccfus) = 2
+             QCC(iccfus) = -etmp
+             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
+
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+
+     &           'BETA (2+) =',beta2
+
+         ENDIF
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
+     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
+             iccfus = iccfus + 1
+
+             beta3 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta3
+             FLAm(iccfus) = 3
+             QCC(iccfus) = -etmp
+             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
+
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+
+     &           'BETA (3-) =',beta3
+
+         ENDIF
+      ENDDO
+
+ 250  IF (beta2.EQ.0.D0) THEN
+
+       ierr = 1
+
+         WRITE (8,*) ' WARNING: ',
+
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
+
+         WRITE (8,*) ' WARNING: ',
+
+     &       'Default dynamical deformations 0.15 (2+) used'
+
+      ENDIF
+
+      IF (beta3.EQ.0.D0) THEN
+
+       ierr = 1
+
+         WRITE (8,*) ' WARNING: ',
+
+     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+
+         WRITE (8,*) ' WARNING: ',
+
+     &       'Default dynamical deformations 0.05 (3-) used'
+
+      ENDIF
+
+      
+
+    IF(AEJc(0).LE.4) GOTO 350
+
+      ia = AEJc(0)
+
+      iz = ZEJc(0)
+
+    close(84)
+
+
+
+      beta2 = 0.D0
+
+      beta3 = 0.D0
+
+      OPEN (84,FILE = trim(empiredir)//
+
+     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+
+     &      STATUS = 'old',ERR = 200)
+
+      READ (84,'(///)')    ! Skipping first 4 title lines
+
+      DO i = 1, 1700
+
+         READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
+
+     &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
+
+     &                    reftmp
+
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
+
+     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+
+             iccfus = iccfus + 1
+
+             beta2 = betatmp
+
+c            CCFUS deformations
+
+             BETcc(iccfus) = beta2
+
+             FLAm(iccfus) = -2
+
+             QCC(iccfus) = -etmp
+
+             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+
+     &           'BETA (2+) =',beta2
+
+         ENDIF
+
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
+
+     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
+
+             iccfus = iccfus + 1
+
+             beta3 = betatmp
+
+c            CCFUS deformations
+
+             BETcc(iccfus) = beta3
+
+             FLAm(iccfus) = -3
+
+             QCC(iccfus) = -etmp
+
+             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+
+     &           'BETA (3-) =',beta3
+
+         ENDIF
+
+      ENDDO
+
+ 300  IF (beta2.EQ.0.D0) THEN
+
+       ierr = 1
+
+         WRITE (8,*) ' WARNING: ',
+
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
+
+         WRITE (8,*) ' WARNING: ',
+
+     &       'Default dynamical deformations 0.15 (2+) used'
+
+      ENDIF
+
+      IF (beta3.EQ.0.D0) THEN
+
+       ierr = 1
+
+         WRITE (8,*) ' WARNING: ',
+
+     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+
+         WRITE (8,*) ' WARNING: ',
+
+     &       'Default dynamical deformations 0.05 (3-) used'
+
+      ENDIF
+
+    GOTO 350
+
+
+  200 WRITE (8,*) ' WARNING: ',
+     &   'empire/RIPL-2/optical/om-data/om-deformations.dat not found '
+      WRITE (8,*) ' WARNING: ',
+
+     &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+
+    ierr = 2
+
+      GOTO 400
+
+
+  350 CLOSE (84)
+      NScc = max(iccfus,NScc,0)
+
+  400 IFINDCOLL_CCFUS = ierr
+
+      RETURN
+      END
+      
       INTEGER FUNCTION IFINDCOLL()
 Ccc
 Ccc   ********************************************************************
@@ -7751,7 +7889,7 @@ C
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, ilv, iptmp,
      &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
-     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, iccfus, ncont
+     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, ncont
       INTEGER NINT
       CHARACTER*6 reftmp
 
@@ -8038,8 +8176,6 @@ C-----levels for target NNUC copied to file TARGET.lev
          ENDDO
       ENDDO
 
-      iccfus = 1
-
       beta2 = 0.D0
       beta3 = 0.D0
       OPEN (84,FILE = trim(empiredir)//
@@ -8053,20 +8189,10 @@ C-----levels for target NNUC copied to file TARGET.lev
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
              beta2 = betatmp
-c            CCFUS deformations
-             BETcc(iccfus) = beta2
-             FLAm(iccfus) = 2
-             QCC(iccfus) = -etmp
-             iccfus = iccfus + 1
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              beta3 = betatmp
-c            CCFUS deformations
-             BETcc(iccfus) = beta3
-             FLAm(iccfus) = 3
-             QCC(iccfus) = -etmp
-             iccfus = iccfus + 1
          ENDIF
       ENDDO
       GOTO 300
@@ -8106,7 +8232,8 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
      &            'Default dynamical deformations 0.05(3-) will be used'
          beta3 = 0.05
       ENDIF
-      NScc = max(iccfus-1,NScc,0)
+
+
 
   400 DO ilv = 1, nlvs
          READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') itmp, elvr,

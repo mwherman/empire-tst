@@ -1,7 +1,6 @@
-Ccc   * $Rev: 1971 $
+Ccc   * $Rev: 1994 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
-
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -34,6 +33,7 @@ C
 C
 C Local variables
 C
+      DOUBLE PRECISION bfu, ecrit1, critl
       DOUBLE PRECISION arg, clf, homega, ra, rb, rbar, rred, xfu, xfum
       LOGICAL distrb
       INTEGER i
@@ -41,17 +41,38 @@ C
       distrb = .FALSE.
 C-----if critical l given in input jump directly to Tl calculations
       IF (CRL.LE.0.D0) THEN
-C-----CCFUS calculations
+C-----CCFUS calculations (coupled barriers)
          IF (CSRead.EQ.( - 2.D0)) THEN
-            CALL CCFUS(Stl)
+            CALL CCFUS(Stl,CSRead)
             RETURN
          ENDIF
+
+C-----CCFUS calculations (uncoupled barriers)
+         IF (CSRead.EQ.( - 3.D0)) THEN
+            CALL CCFUS(Stl,CSRead)
+            RETURN
+         ENDIF
+
 C--------CCFUS calculations  *** done ****
 C--------check for distribution barrier
          IF (CSRead.EQ.( - 1.D0)) distrb = .TRUE.
 C--------calculate projectile+target binding energy if not done already
          IF (Q(0,1).EQ.0.D0) CALL BNDG(0,1,Q(0,1))
          IF (distrb) THEN
+            CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,
+     &          ecrit1,critl,csfus)
+            WRITE (8,*) ' '
+            WRITE (8,*)
+     &' Fusion cross section calculated using Bass model as a reference'
+            WRITE (8,*) ' see Nucl. Phys. A231(1974)45'
+            WRITE (8,*) 
+     &            ' Nuclear potential from Phys. Rev. Lett. 39(1977)265'
+            WRITE (8,*) ' '
+            WRITE (8,*) ' Bass Barr    =',sngl(bfu)
+            WRITE (8,*) ' Bass crit. L =',sngl(critl)
+            WRITE (8,*) ' Bass XS   =',Csfus,' mb'
+            WRITE (8,*) '------------------ '
+
             IF (BFUs.EQ.0.0D0) THEN
 C--------------calculate fusion barrier using CCFUS routine BAR
                ra = 1.233*AEJc(0)**(1./3.) - 0.978/AEJc(0)**(1./3.)
@@ -66,8 +87,12 @@ C--------------calculate fusion barrier using CCFUS routine BAR
                A0R = 0.63
                ETAk = 1.43997*ZEJc(0)*Z(0)
                CALL BAR(rbar,BFUs,homega)
-               WRITE (8,*) 'Fusion barrier is ', BFUs, ' MeV'
+               WRITE (8,*) 'CCFUS fusion barrier is ', BFUs, ' MeV'
             ENDIF
+
+C           IF distributed barrier, then BASS barriers are used
+            IF (BFUs.LT.0.0D0) BFUs = bfu
+
             IF (SIG.EQ.0.0D0) SIG = 0.05*BFUs
             IF (IOUt.GT.0) THEN
                WRITE (8,*) 'Distributed fusion barrier with extra push='
@@ -81,6 +106,7 @@ C--------------calculate fusion barrier using CCFUS routine BAR
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model
 C        *** done ***
+
 C--------prepare starting values for searching critical l
          IF (CSRead.LE.0.0D0) THEN
             clf = CRL - 2.0*DFUs
@@ -108,7 +134,6 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          Stl(i) = 1.0/(1.0 + EXP((-arg)))
       ENDDO
       END
-
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
       INCLUDE 'dimension.h'
@@ -702,7 +727,6 @@ C-----****
       AWSo(Nejc,Nnuc) = alib(6)
       END
 
-
       SUBROUTINE OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,Komp,Ikey)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -976,7 +1000,6 @@ C
       WRITE (Komp,'(A8)') '++++++++'
       END
 
-
       SUBROUTINE READ_OMPAR_RIPL(Ko,Ierr,Irelout)
       INCLUDE 'ripl2empire.h'
 C
@@ -1201,7 +1224,6 @@ C
   100 Ieof = 1
 99005 FORMAT (80A1)
       END
-
 
       SUBROUTINE SUMPRT(Ko)
 C

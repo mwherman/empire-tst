@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1974 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-01-30 04:16:09 +0100 (So, 30 Jän 2011) $
+Ccc   * $Rev: 1994 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
 
 C
 C
@@ -654,17 +654,17 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          dshift = dshift + dshi
          IF (FITlev.GT.0.0D0) then 
           Ecrt = UCRt - DEL - dshift
-	    write(8,*)
-	    WRITE (8,*) '*****   A=',nint(A(nnuc)),
-     &	 ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
+          write(8,*)
+          WRITE (8,*) '*****   A=',nint(A(nnuc)),
+     &       ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
      &     ' LDshif=',LDShif(nnuc)
           WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
      &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
-     &    ' DEL = ',DEL 		 
+     &    ' DEL = ',DEL              
           WRITE (8,'(A5,I3,4X,G12.5,A15,2(G12.5,1x))') 
      &    'It # ', iter, dshi, ' Final shift = ',dshift
-	    write(8,*)
-	   ENDIF
+          write(8,*)
+         ENDIF
          IF (ABS(dshi).GT.0.01D0 .and. iter.LE.20) GOTO 150
       ENDIF
 
@@ -1121,7 +1121,7 @@ C-----determination of the LD rotational stability limit LDSTAB
 C-----set fission barrier at sky (just in case it is not calculated)
       sb0 = 1000.
       sb = 1000.
-      IF (iz.GT.19 .AND. iz.LT.102) THEN
+      IF (iz.GT.19 .AND. iz.LE.102) THEN
          CALL BARFIT(iz,ia,0,sb0,segs,stab)
          ldstab = stab
       ELSE
@@ -1135,7 +1135,7 @@ C-----set fission barrier at sky (just in case it is not calculated)
       IF (FISb(1,Nnuc).EQ.0.0D0) THEN
 C-----determination of the fission barrier at J=0 (for Z.GE.102)
 C-----according to Myers&Swiatecki, Phys. Rev. C60(1999)014606
-         IF (iz.GE.102) THEN
+         IF (iz.GT.102) THEN
             x0 = 48.5428
             x1 = 34.15
             xi = (A(Nnuc) - 2*Z(Nnuc))/A(Nnuc)
@@ -1158,6 +1158,9 @@ C--------do loop over angular momentum
          segnor = 1.0
          sbnor = 1.0
          jstabf = 0
+
+ 
+
          DO j = 1, NDLW
             aj = FLOAT(j - 1)
             CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,0.0D0,15.0D0,
@@ -1165,7 +1168,7 @@ C--------do loop over angular momentum
 C           CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,0.0D0,15.0D0,
 C    &                  aj,mompar,momort,beta,stab,cigor)
 C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta ! Commented to avoid using wrong beta out from SIGMAK
-            IF (iz.GT.19 .AND. iz.LT.102) THEN
+            IF (iz.GT.19 .AND. iz.LE.102) THEN
                sb = 0.0
                IF (j - 1.LE.ldstab)
      &             CALL BARFIT(iz,ia,j - 1,sb,segs,selmax)
@@ -1174,10 +1177,13 @@ C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta ! Commented to avoid using wrong
                IF (j - 1.GT.ldstab) segs = aj*(aj + 1)/(2.0*momort)
      &             *segnor
 C
+C              write(*,*) segs,aj*(aj + 1)/(2.0*momort)
+
 C              Yrast states redefined for normal states to avoid discontinuities
-C              as proposed by MS 
-C
-               segs = aj*(aj + 1)/(2.0*momort)   ! Jan 2011
+
+C              as proposed by MS, except for HI induced reactions (AJEc(0)>4)
+
+               if(AEJc(0).LE.4.) segs = aj*(aj + 1)/(2.0*momort)   ! Jan 2011
             ELSE
 C--------------out of the BARFIT range of applicability;
 C--------------fission barrier spin dependence is assumed to be  that of
@@ -1199,7 +1205,9 @@ C-----------determination of stability limit including shell correction
          ENDDO
    50    IF (JSTab(Nnuc).EQ.0) JSTab(Nnuc) = jstabf
       ENDIF
-      IF (JSTab(Nnuc).EQ.0) NLWst = MIN0(JSTab(Nnuc),NLWst)
+C     IF (JSTab(Nnuc).EQ.0) NLWst = MIN0(JSTab(Nnuc),NLWst)
+
+      NLWst = MIN0(JSTab(Nnuc),NLWst)
 C-----yrast and saddle point energies ----- done ---------------
 C-----setting overall level density scaling factor ------------------
       IF (ARGred.LT.0.0D0) THEN
@@ -1214,7 +1222,7 @@ C-----setting overall level density scaling factor ------------------
             IF (ARGred.LT.EXPmax) THEN
                RORed = EXP( - ARGred)
             ELSE
-               RORed = 0.0
+               RORed = 0.d0
             ENDIF
          ENDIF
       ENDIF
@@ -1223,10 +1231,10 @@ C-----set to 0 level density array
       DO i = 1, NDEX
          DO k = 1, NDLW
             IF (BF.NE.0.0D0) THEN
-               RO(i,k,1,Nnuc) = 0.0
-               RO(i,k,2,Nnuc) = 0.0
+               RO(i,k,1,Nnuc) = 0.d0
+               RO(i,k,2,Nnuc) = 0.d0
             ELSE
-               ROF(i,k,Nnuc) = 0.0
+               ROF(i,k,Nnuc) = 0.d0
             ENDIF
          ENDDO
       ENDDO
@@ -1739,7 +1747,7 @@ C           RECTANGULAR INTEGRATION (no 1/2)
 C-----plot of the l.d. formula
       IF(IOUt.eq.6 .and. NLV(Nnuc).GT.3) CALL PLOT_ZVV_GSLD(2,Nnuc)
 
-	RETURN
+      RETURN
       END
 C
 C
@@ -1805,14 +1813,14 @@ C
       CHARACTER*2 dum
 
 C-----Reading MS shell corrections and deformation energies
-      OPEN(11,FILE=trim(empiredir)//'/RIPL-2/densities/shellcor-ms.dat',
+      OPEN(85,FILE=trim(empiredir)//'/RIPL-2/densities/shellcor-ms.dat',
      &    STATUS='old')
 C-----Skipping header lines
-      READ(11,*)
-      READ(11,*)
-      READ(11,*)
-      READ(11,*)
-  40  READ(11,98,END=50,ERR=60)
+      READ(85,*)
+      READ(85,*)
+      READ(85,*)
+      READ(85,*)
+  40  READ(85,98,END=50,ERR=60)
      &    nz, na, dum, shelMSr, defcorr
   98  FORMAT(2(i4),1x,a2,2x,f7.3,1x,f8.3)
       CALL WHERE(nz*1000+na,nnuc,iloc)
@@ -1827,7 +1835,7 @@ C        SHC(0) = shelMSr - defcorr
       ENDIF
       GO TO 40
   60  STOP 'Error reading shell correction file'
-  50  CLOSE(11)
+  50  CLOSE(85)
       RETURN
       END
 C
@@ -3195,8 +3203,8 @@ C-----parameters of Jan 23, 2011
 C     ap1 =  0.76122d-01
 C     ap2 = -0.45559d-02
 C     gam =  0.58269d0
-C	frms  = 1.687
-C	Chi-2 =	34.6
+C     frms  = 1.687
+C     Chi-2 =     34.6
 C-----parameters of Jan 26, 2011
 C  Do-fit using RIPL-3 database, 2.19 vibr enhancement (MINUIT)       
 C     alpha 0=  .0750000 delta alpha= .500000D-01
