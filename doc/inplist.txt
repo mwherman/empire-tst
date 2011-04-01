@@ -83,6 +83,7 @@ CSREAD  Controls HI fusion cross section determination,
        > 0 HI fusion cross section is set to VAL [in mb],
        = -1 distributed barrier model used ,
        = -2 Coupled-Channels CCFUS-code used (default for HI).
+       = -3 Coupled-Channels CCFUS-code used with one level
        Note: CSREAD has no effect if .fus file (FUSION in manual
        mode) exists.
 
