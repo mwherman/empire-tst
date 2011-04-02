@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 1995 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-04-02 02:30:59 +0200 (Sa, 02 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1005,7 +1005,7 @@ C
 C--------check input for consistency
 C
          WRITE (8,*)
-         IF(AEJc(0).gt.4 .and. NDLW.LT.100)
+         IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
      &'WARNING: For HI induced reactions it is recommended Lmax>=100'
             WRITE (8,*)
@@ -3045,7 +3045,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1994 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1995 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7615,7 +7615,6 @@ C
       iccfus = 0
 
 
-
       ia = A(0)
       iz = Z(0)
 
@@ -7631,6 +7630,7 @@ C
      &                    reftmp
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+
 
              iccfus = iccfus + 1
              beta2 = betatmp
@@ -7649,6 +7649,7 @@ c            CCFUS deformations
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
 
+
              beta3 = betatmp
 c            CCFUS deformations
              BETcc(iccfus) = beta3
@@ -7663,9 +7664,10 @@ c            CCFUS deformations
          ENDIF
       ENDDO
 
+
  250  IF (beta2.EQ.0.D0) THEN
 
-       ierr = 1
+         ierr = 1
 
          WRITE (8,*) ' WARNING: ',
 
@@ -7677,9 +7679,10 @@ c            CCFUS deformations
 
       ENDIF
 
+
       IF (beta3.EQ.0.D0) THEN
 
-       ierr = 1
+         ierr = 1
 
          WRITE (8,*) ' WARNING: ',
 
@@ -7691,16 +7694,18 @@ c            CCFUS deformations
 
       ENDIF
 
-      
+     
 
-    IF(AEJc(0).LE.4) GOTO 350
+
+      IF(AEJc(0).LE.4) GOTO 350
 
       ia = AEJc(0)
 
       iz = ZEJc(0)
 
-    close(84)
+  
 
+      close(84)
 
 
       beta2 = 0.D0
@@ -7747,6 +7752,7 @@ c            CCFUS deformations
 
          ENDIF
 
+
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
 
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
@@ -7771,11 +7777,13 @@ c            CCFUS deformations
 
          ENDIF
 
+
       ENDDO
+
 
  300  IF (beta2.EQ.0.D0) THEN
 
-       ierr = 1
+         ierr = 1
 
          WRITE (8,*) ' WARNING: ',
 
@@ -7787,9 +7795,10 @@ c            CCFUS deformations
 
       ENDIF
 
+
       IF (beta3.EQ.0.D0) THEN
 
-       ierr = 1
+         ierr = 1
 
          WRITE (8,*) ' WARNING: ',
 
@@ -7801,7 +7810,8 @@ c            CCFUS deformations
 
       ENDIF
 
-    GOTO 350
+
+      GOTO 350
 
 
   200 WRITE (8,*) ' WARNING: ',
@@ -7810,10 +7820,10 @@ c            CCFUS deformations
 
      &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
 
-    ierr = 2
+      ierr = 2
+
 
       GOTO 400
-
 
   350 CLOSE (84)
       NScc = max(iccfus,NScc,0)
