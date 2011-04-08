@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1995 $
+Ccc   * $Rev: 1997 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 02:30:59 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-04-08 14:39:17 +0200 (Fr, 08 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3045,7 +3045,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1995 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1997 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7609,11 +7609,8 @@ C
       INTEGER i, ia, ierr, iptmp, iz, natmp, nztmp, iccfus
       CHARACTER*6 reftmp
 
-
       ierr = 0
-
       iccfus = 0
-
 
       ia = A(0)
       iz = Z(0)
@@ -7631,7 +7628,6 @@ C
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
 
-
              iccfus = iccfus + 1
              beta2 = betatmp
 c            CCFUS deformations
@@ -7639,195 +7635,106 @@ c            CCFUS deformations
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (2+) =',beta2
-
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
-
-
              beta3 = betatmp
 c            CCFUS deformations
              BETcc(iccfus) = beta3
              FLAm(iccfus) = 3
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (3-) =',beta3
-
          ENDIF
       ENDDO
-
 
  250  IF (beta2.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15 (2+) used'
-
       ENDIF
-
 
       IF (beta3.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &        'E(3-) level not found in Kibedi database (RIPL-2)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.05 (3-) used'
-
       ENDIF
-
-     
-
 
       IF(AEJc(0).LE.4) GOTO 350
-
       ia = AEJc(0)
-
       iz = ZEJc(0)
-
-  
-
       close(84)
-
-
       beta2 = 0.D0
-
       beta3 = 0.D0
-
       OPEN (84,FILE = trim(empiredir)//
-
      &      '/RIPL-2/optical/om-data/om-deformations.dat',
-
      &      STATUS = 'old',ERR = 200)
-
       READ (84,'(///)')    ! Skipping first 4 title lines
-
       DO i = 1, 1700
-
          READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
-
      &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
-
      &                    reftmp
-
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
-
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
-
              iccfus = iccfus + 1
-
              beta2 = betatmp
-
 c            CCFUS deformations
-
              BETcc(iccfus) = beta2
-
              FLAm(iccfus) = -2
-
              QCC(iccfus) = -etmp
-
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-
      &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (2+) =',beta2
-
          ENDIF
-
 
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
-
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
-
              iccfus = iccfus + 1
-
              beta3 = betatmp
-
 c            CCFUS deformations
-
              BETcc(iccfus) = beta3
-
              FLAm(iccfus) = -3
-
              QCC(iccfus) = -etmp
-
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-
      &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (3-) =',beta3
-
          ENDIF
 
-
       ENDDO
-
-
  300  IF (beta2.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15 (2+) used'
-
       ENDIF
-
 
       IF (beta3.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &        'E(3-) level not found in Kibedi database (RIPL-2)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.05 (3-) used'
-
       ENDIF
 
-
       GOTO 350
-
-
   200 WRITE (8,*) ' WARNING: ',
      &   'empire/RIPL-2/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
-
       ierr = 2
 
-
       GOTO 400
-
   350 CLOSE (84)
       NScc = max(iccfus,NScc,0)
-
   400 IFINDCOLL_CCFUS = ierr
 
       RETURN
