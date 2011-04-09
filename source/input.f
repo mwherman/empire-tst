@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1997 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-08 14:39:17 +0200 (Fr, 08 Apr 2011) $
+Ccc   * $Rev: 1998 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-04-09 16:05:43 +0200 (Sa, 09 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3045,7 +3045,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1997 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 1998 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7465,6 +7465,7 @@ C     b3 = AEJc(nejc)*AMUmev + XMAss_ej(nejc)
       END
 C
 C
+C
       SUBROUTINE RETRIEVE
 Ccc   ******************************************************************
 Ccc   *                                                       class:iou*
@@ -7474,102 +7475,65 @@ Ccc   *          Retrieves EXFOR entries relevant to EMPIRE run        *
 Ccc   *                                                                *
 Ccc   *                                                                *
 Ccc   * input: none                                                    *
-Ccc   *                                                                *
-Ccc   *                                                                *
 Ccc   * output: none                                                   *
 Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   * calls: none                                                    *
+Ccc   * calls: pipe                                                    *
 Ccc   *                                                                *
 Ccc   *                                                                *
 Ccc   * author: M.Herman                                               *
-Ccc   * date:   23.Oct.1999                                            *
+Ccc   * date:   09.Apr.2011                                            *
 Ccc   * revision:     by:                         on:                  *
 Ccc   *                                                                *
 Ccc   ******************************************************************
 Ccc
       INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 C
 C COMMON variables
 C
       CHARACTER*64 empiredir
-      INTEGER NCHr
-      CHARACTER*10 PROjec, RESidue(NDNUC), TARget
-      COMMON /EXFOR / TARget, PROjec, RESidue
-      COMMON /IEXFOR/ NCHr
       COMMON /GLOBAL_E/ EMPiredir
 C
 C Local variables
 C
-      CHARACTER*80 exforec
-      CHARACTER*36 filename, toplast, topname
+      CHARACTER*13 caz
+      CHARACTER*64 filename, toplast, topname
       CHARACTER*115 indexrec
-      INTEGER nnuc
-      CHARACTER*5 quantity(5)
-      CHARACTER*10 reaction(2)
-      CHARACTER*8 subent
+      INTEGER*4 pipe
+      INTEGER*4 iwin
+      CHARACTER*132 ctmp
 
-C-----constant parameters for EXFOR retrieval
-      DATA reaction/'N,F       ', 'N,TOT     '/
-      DATA quantity/'CS   ', 'DAE  ', 'DA   ', 'DE   ', 'SP   '/
-C-----open local file for storing retrieved EXFOR data
-      OPEN (UNIT = 19,FILE = 'EXFOR.dat',STATUS = 'NEW',ERR = 99999)
-C-----open EXFOR index
-      OPEN (UNIT = 20,FILE = trim(empiredir)//'/EXFOR/X4-INDEX.TXT'
-     &      ,STATUS = 'OLD')
 C
-C-----scan EXFOR index for relevant subentries
+C-----define target file name
 C
-  100 READ (20,'(A115)',END = 500) indexrec
-      IF (indexrec(1:10).NE.TARget) GOTO 100
-      IF (NCHr.EQ.2 .AND. indexrec(11:12).NE.PROjec(1:2)) GOTO 100
-      IF (NCHr.EQ.4 .AND. indexrec(11:14).NE.PROjec(1:4)) GOTO 100
-      DO nnuc = 1, NDNUC
-         IF (indexrec(25:34).EQ.RESidue(nnuc)) GOTO 200
-      ENDDO
-      IF (indexrec(25:34).NE.'>NN-1     ') THEN
-         IF (indexrec(11:20).NE.reaction(1)) THEN
-            IF (indexrec(11:20).NE.reaction(2)) GOTO 100
-         ENDIF
-      ENDIF
-  200 IF (indexrec(41:45).NE.quantity(1)) THEN
-         IF (indexrec(41:45).NE.quantity(2)) THEN
-            IF (indexrec(41:45).NE.quantity(3)) THEN
-               IF (indexrec(41:45).NE.quantity(4)) THEN
-                  IF (indexrec(41:45).NE.quantity(5)) GOTO 100
-               ENDIF
-            ENDIF
-         ENDIF
-      ENDIF
-      subent = indexrec(70:77)
+      if(SYMb(0)(2:2).eq.' ') then
+        write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
+     &   int(Z(0)),'_',SYMb(0)(1:1),'_', int(A(0)),'.c4'
+      else
+        write(caz,'(A3,I2.2,A2,I3.3,A1,A1,A4)')
+     &   int(Z(0)),'_',SYMb(0)(1:2),'_', int(A(0)),'.c4'
+      endif
+      write(6,*)caz
+      
+C-----concatenate file name with the projectile path
+      IF(IZAejc(0) .EQ. 1) THEN
+      filename = '/EXFOR/neutrons'//'/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 1001) THEN
+      filename = '/EXFOR/protons'//'/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 0) THEN
+      filename = '/EXFOR/gammas'//'/'//trim(caz)
+
+C-----Create full command string
+      IF(IOPsys .EQ. 0) then  !Linux, Mac
+         ctmp = 'cp ',trim(empiredir),//,caz,' C4.dat',
+      ELSE                    !Windows
+         ctmp = 'copy ',trim(empiredir),//,caz,' C4.dat',
+      ENDIF 
+
+C-----copy EXFOR file to the working directory
+      I = pipe(ctmp) 
+      END
 C
-C-----retrive EXFOR entry including top subentry 001
-C
-      toplast = ' '
-      filename = '/EXFOR/subent'//'/'
-     &     //subent(1:2)//'/'//subent(1:4)//'/'//subent(1:8)//'.txt'
-      topname =  '/EXFOR/subent'//'/'//subent(1:2)
-     &     //'/'//subent(1:4)//'/'//subent(1:5)//'001.txt'
-      IF (topname.NE.toplast) THEN
-         OPEN (UNIT = 22,FILE = trim(empiredir)//topname,
-     &         ERR = 600,STATUS = 'OLD')
-  250    READ (22,99005,END = 300) exforec
-         WRITE (19,99005) exforec
-         GOTO 250
-      ENDIF
-  300 toplast = topname
-      CLOSE (22,ERR = 600)
-      OPEN (UNIT = 22,FILE = trim(empiredir)//filename,
-     &         ERR = 600,STATUS = 'OLD')
-  400 READ (22,99005,END = 100) exforec
-      WRITE (19,99005) exforec
-      GOTO 400
-  500 CLOSE (19,ERR = 600)
-      RETURN
-  600 WRITE (8,*) 'Not found EXFOR subentry ', subent
-      GOTO 100
-99005 FORMAT (A80)
-99999 END
 C
 C
       INTEGER FUNCTION IFindColl_CCFUS()
