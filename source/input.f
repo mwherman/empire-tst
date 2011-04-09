@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1998 $
+Ccc   * $Rev: 2010 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-04-09 16:05:43 +0200 (Sa, 09 Apr 2011) $
+Ccc   * $Date: 2011-04-09 21:16:24 +0200 (Sa, 09 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -299,10 +299,8 @@ C        IOPSYS = 1 !   WINDOWS
          if(empireos(1:3). eq. 'Win') IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
-C        IX4ret = 1 local MySQL server (default)
-C        IX4ret = 2 remote SYBASE server
-C        IX4ret = 3 local EXFOR files (as in 2.18 and before)
-         IX4ret = 0
+C        IX4ret = 1 copy C4 file
+         IX4ret = 1
 C--------CCFUS parameters
          DV = 10.
          FCC = 1.
@@ -812,7 +810,12 @@ C                    ENDF(nnuc) = 1
          ENDDO
          ENDDO
          ENDDO
-
+C
+C--------Retrieve C4 experimental data 
+C
+         INQUIRE (FILE = 'C4.DAT', EXIST = gexist)
+         IF (.NOT. gexist .AND. IX4ret.EQ.1) CALL RETRIEVE
+C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
          NNUct = NNUcd
          DO nnuc = 1, NNUcd
@@ -3045,7 +3048,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 1998 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2010 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7489,11 +7492,6 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
-C
-      CHARACTER*64 empiredir
-      COMMON /GLOBAL_E/ EMPiredir
-C
 C Local variables
 C
       CHARACTER*13 caz
@@ -7502,36 +7500,62 @@ C
       INTEGER*4 pipe
       INTEGER*4 iwin
       CHARACTER*132 ctmp
+      LOGICAL fexist
 
 C
 C-----define target file name
 C
       if(SYMb(0)(2:2).eq.' ') then
-        write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
+        write(caz,'(I3.3,3A1,I3.3,A3)')
      &   int(Z(0)),'_',SYMb(0)(1:1),'_', int(A(0)),'.c4'
       else
-        write(caz,'(A3,I2.2,A2,I3.3,A1,A1,A4)')
+        write(caz,'(I3.3,A1,A2,A1,I3.3,A3)')
      &   int(Z(0)),'_',SYMb(0)(1:2),'_', int(A(0)),'.c4'
       endif
-      write(6,*)caz
       
 C-----concatenate file name with the projectile path
       IF(IZAejc(0) .EQ. 1) THEN
-      filename = '/EXFOR/neutrons'//'/'//trim(caz)
+         filename = '/EXFOR/neutrons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 1001) THEN
-      filename = '/EXFOR/protons'//'/'//trim(caz)
+         filename = '/EXFOR/protons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 0) THEN
-      filename = '/EXFOR/gammas'//'/'//trim(caz)
+         filename = '/EXFOR/gammas/'//trim(caz)
+      ELSE
+         WRITE (8,
+     & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
+         RETURN
+      ENDIF
+      write(6,*)trim(empiredir)//trim(filename)
+      INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
+      IF (.NOT. fexist) THEN
+        WRITE (8,
+     & '(''WARNING: No experimental data in EXFOR-C4'')')
+         RETURN 
+      ENDIF
 
 C-----Create full command string
       IF(IOPsys .EQ. 0) then  !Linux, Mac
-         ctmp = 'cp ',trim(empiredir),//,caz,' C4.dat',
+         ctmp = 'cp '//trim(empiredir)//trim(filename)//' TMP.c4'
       ELSE                    !Windows
-         ctmp = 'copy ',trim(empiredir),//,caz,' C4.dat',
+         ctmp = 'copy '//trim(empiredir)//trim(filename)//' TMP.c4'
       ENDIF 
-
 C-----copy EXFOR file to the working directory
-      I = pipe(ctmp) 
+      write(8,*)ctmp
+      iwin = pipe(ctmp) 
+
+      IF(IOPsys .EQ. 0) then  !Linux, Mac
+         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
+      ELSE                    !Windows
+         ctmp = trim(empiredir)//'/scripts/sortc4.bat TMP'
+      ENDIF 
+      iwin = pipe(ctmp) 
+
+      IF(IOPsys .EQ. 0) then  !Linux, Mac
+         ctmp = 'mv TMP.c4 C4.DAT'
+      ELSE                    !Windows
+         ctmp = 'move TMP.c4 C4.DAT'
+      ENDIF 
+      iwin = pipe(ctmp) 
       END
 C
 C
