@@ -998,9 +998,9 @@ proc ::LoadVars {} {
     puts [format "Error: Local resonance parameter table '%s' not found" $atlasfn]
   }
 
-  if {[file exists $m_szFile.exf]} { exec cp $m_szFile.exf EXFOR.dat }
+  if {[file exists $m_szFile.exf]} { exec cp $m_szFile.exf EXFOR.DAT }
   exec xterm -T readx4 -e sh -c "$m_szCodeDir/readx4 $m_nZA $m_szBaseDir"
-  if {[file exists "EXFOR.dat"]} { exec mv EXFOR.dat $m_szFile.exf }
+  if {[file exists "EXFOR.DAT"]} { exec mv EXFOR.DAT $m_szFile.exf }
   if {[file exists $m_szFile.exf]} {
     if {[file exists $m_szFile.c4] != 1} {
 #     RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
@@ -1009,7 +1009,7 @@ proc ::LoadVars {} {
       exec xterm -T sortc4 -e sh -c "$m_szBaseDir/scripts/sortc4 $m_szFile"
     }
   }
-  exec rm -f EXFOR.dat EXFOR.datp
+  exec rm -f EXFOR.DAT EXFOR.DATP
 }
 #############################################################################
 ## Procedure:  Cleanup
