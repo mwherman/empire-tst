@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2010 $
+Ccc   * $Rev: 2011 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-04-09 21:16:24 +0200 (Sa, 09 Apr 2011) $
+Ccc   * $Date: 2011-04-09 21:34:48 +0200 (Sa, 09 Apr 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3048,7 +3048,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2010 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2011 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7495,8 +7495,7 @@ C
 C Local variables
 C
       CHARACTER*13 caz
-      CHARACTER*64 filename, toplast, topname
-      CHARACTER*115 indexrec
+      CHARACTER*64 filename
       INTEGER*4 pipe
       INTEGER*4 iwin
       CHARACTER*132 ctmp
@@ -7543,6 +7542,7 @@ C-----copy EXFOR file to the working directory
       write(8,*)ctmp
       iwin = pipe(ctmp) 
 
+C-----run C4SORT
       IF(IOPsys .EQ. 0) then  !Linux, Mac
          ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
       ELSE                    !Windows
