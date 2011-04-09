@@ -196,6 +196,7 @@ def runE(proj):
     
     # move files, no warning if files DNE:
     mv('EXFOR.DAT',proj+'.exf',0)
+    mv('C4.DAT',proj+'.c4',0)
     mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
     mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
     mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
@@ -228,6 +229,9 @@ def runE(proj):
     rm( glob('TARGET-*.tl') )
     rm('TARGET.LEV')
     rm('EXFOR.DAT')
+    rm('C4SORTM.INP')    
+    rm('C4SORT.TMP')        
+    rm('TMP.c4')        
     rm('INPUT')
     rm('INPUT.DAT')
     rm('FISSION.INP')
@@ -246,7 +250,6 @@ def runE(proj):
             'ecis06.tlj','ecis06.leg','ecis06.esp','ecis06.inp')
     rm('ecSPH.inp')
     rm('ECIS_SPH.out')
-    rm('C4.DAT')
     rm('FITIN.DAT')
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
