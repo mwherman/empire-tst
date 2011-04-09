@@ -1,0 +1,34 @@
+$* C4SORT
+          Sort the EXFOR file in C4 format NOT overwriting the original file
+   FLC4IN C4.DAT
+   FLC4OU C4.SRT
+   DPATH  $EMPIREDIR/RIPL-2/levels/
+
+   ALIAS       14000    3    1     14028    3    1
+   ALIAS       14000    5 9000     14028    5 9000
+   ALIAS       14000    6 9000     14028    6 9000
+
+   ALIAS       26000    3    1     26056    3    1
+   ALIAS       26000    4    2     26056    4    2
+   ALIAS       26000    5 9000     26056    5 9000
+   ALIAS       26000    6 9000     26056    6 9000
+
+   ALIAS       32000    3    1     32070    3    1
+   ALIAS       32000    4    2     32070    4    2
+   ALIAS       32000    5 9000     32070    5 9000
+   ALIAS       32000    6 9000     32070    6 9000
+
+   ENDC4S
+
+$* END
+
+
+Lines below '$* END' are not read by SORTC4.
+In the input above, ALIAS lines
+instruct SORTC4 to treat data for the natural element as taken on a specified
+isotop (in the example above data on natural Fe and Si will be denoted in C4
+file as if were measured on 56-Fe and 28-Si respectively). Conversion is only applied to MF and MT
+numbers following target specification. The above aliases have no effect on other
+elements, thus can be kept as an example.
+
+
