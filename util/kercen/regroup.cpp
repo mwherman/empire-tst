@@ -2,7 +2,8 @@
  *
  * Filename: regroup.cpp
  * Purpose : Determine the optimum energy group structure for resonance region
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

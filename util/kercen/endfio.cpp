@@ -2,7 +2,8 @@
  *
  * Filename: endfio.cpp
  * Purpose : provides the basic functions for handling ENDF file
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

@@ -2,7 +2,9 @@
  *
  * Filename: atlas.cpp
  * Purpose : provides the basic functions for handling ATLAS file
- * Authors : Youngsik Cho, Samuel Hoblit
+ *
+ * Written by Youngsik Cho
+ * Modified by Samuel Hoblit
  *
  ***********************************************************************/
 
@@ -23,6 +25,7 @@ CAtlas::CAtlas()
   m_nRes = 0;
   m_nZ = m_nA = -1;
   m_bReassignLJ = false;
+  m_nLS = 0;
   m_fSpin = -1;
   m_fAbundance = 1.0;
   m_fAwt = -1;
@@ -347,6 +350,8 @@ bool CAtlas::ReadParameters(int z, int a)
         rp->l = 0;
 
     }
+
+    if (rp->l > m_nLS) m_nLS = rp->l;
 
     if (rp->Gn == 0) ++nzerogn;
     if (rp->Gg == 0) ++nzerogg;

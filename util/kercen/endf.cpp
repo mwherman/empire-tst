@@ -2,7 +2,8 @@
  *
  * Filename: endf.cpp
  * Purpose : provides the extended functions for handling ENDF file
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

@@ -2,7 +2,8 @@
  *
  * Filename: util.cpp
  * Purpose : provides the utility functions
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

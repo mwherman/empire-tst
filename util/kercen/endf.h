@@ -2,7 +2,8 @@
  *
  * Filename: endf.h
  * Purpose : declares the extended functions for handling ENDF file
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

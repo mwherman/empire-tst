@@ -2,7 +2,8 @@
  *
  * Filename: util.h
  * Purpose : head file for util.cpp providing the utility functions
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 

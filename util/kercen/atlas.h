@@ -1,13 +1,17 @@
 /***********************************************************************
  *
- * Filename: atlas.cpp
+ * Filename: atlas.h
  * Purpose : declares the basic data and functions for handling ATLAS file
- * Authors : Youngsik Cho, Samuel Hoblit
+ *
+ * Written by Youngsik Cho
+ * Modifyed by Samuel Hoblit
  *
  ***********************************************************************/
 
 #if !defined(_ATLAS_H_)
 #define _ATLAS_H_
+
+#define PI              3.141592653589793238462643383279
 
 #define MAXRES		2000
 #define MAXL		2
@@ -30,6 +34,7 @@ public:
   double GetSpin();
   double GetR();
   double GetdR();
+  int GetNLS() { return m_nLS+1; }
   void GetCaptureXS(double &xs, double &dxs);
   void GetScatteringXS(double &xs, double &dxs);
   int NoRes();
@@ -58,6 +63,7 @@ protected:
   RESDATA m_Res[MAXRES];
   int m_nZ, m_nA;
   bool m_bReassignLJ;
+  double m_nLS;
   double m_fSpin;
   double m_fAbundance;
   double m_fAwt;

@@ -2,7 +2,8 @@
  *
  * Filename: mkgroup.cpp
  * Purpose : Determine the rough energy group structure for resonance region
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 
@@ -14,7 +15,6 @@
 #include "atlas.h"
 
 #define VERSION		1.0
-#define PI		3.14159
 
 static CAtlas atlas;
 static int nZ, nA;

@@ -2,7 +2,8 @@
  *
  * Filename: basedata.h
  * Purpose : declares the basic data structures
- * Author  : Youngsik Cho
+ *
+ * Written by Youngsik Cho
  *
  ***********************************************************************/
 
