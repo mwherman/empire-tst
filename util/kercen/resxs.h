@@ -14,8 +14,6 @@
 #include "atlas.h"
 #include "link.h"
 
-#define NSTDGROUP	33
-
 #define TOTL            0
 #define SCAT            1
 #define CAPT            2
@@ -23,9 +21,6 @@
 
 #define USEAREA		1
 #define BOUND		2
-#define USESTDGROUP	4
-
-extern double m_pStdGroup[NSTDGROUP+1];
 
 class CResXS : public CAtlas
 {
@@ -40,14 +35,12 @@ public:
   void GetPotentialXS(double , double& , double& );
   double GetPotentialXS(double e);
   double GetPotentialUN(double e);
-  // double GetPotentialUnc(double g1, double g2);
   int GetFirstResGroup(int nGroup, double *pGroup);
   bool GetAvgResXS(int nReaction, int nGroup, double *pGroup, double *pXS, int nFlag);
   bool GetAbsResUN(int nReaction, int nGroup, double *pGroup, double *pUN, int nFlag);
   bool AddPotentialXS(int nFirstResGroup, int nGroup, double *pGroup, double *pXS);
   bool AddPotentialUN(int nFirstResGroup, int nGroup, double *pGroup, double *pUN);
-//  int GetStdGroupXSnUN(int nGroup, double *pGroup, double *pXS, double *pUN, double **pNewGroup, double **pNewXS, double **pNewUN);
-  int GetStdGroupXSnUN(int nGroup, double *pGroup, int nSubGroup, double *pSubGroup, double *pXS, double *pUN, double **pNewUN);
+  void GetSubGroupXSnUN(int nGroup, double *pGroup, int nSubGroup, double *pSubGroup, double *pXS, double *pUN, double *pNewUN, int *pIndex);
   void GetXS(double e, double *xs);
   void SetupEnergyGrid();
   void AddEnergyPoints(int n, double *e);
@@ -63,14 +56,7 @@ protected:
   void CalcFactor();
 
   bool m_bInitScat;
-  double *m_pPotXS;
-  double *m_pPotUN;
   double *m_pExtXS;
-  double *m_pStdPotXS;
-  double *m_pStdPotUN;
-  double *m_pStdExtXS;
-  double *m_pStdXS;
-  double *m_pStdUN;
   double *m_pTmpUN;
   double m_fCorrNN;
   double m_fCorrGG;

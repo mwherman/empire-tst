@@ -23,16 +23,6 @@
 
 using namespace std;
 
-double m_pStdGroup[NSTDGROUP+1] = {
-  1.0000E-05, 1.0000E-01, 5.4000E-01, 4.0000E+00, 8.3153E+00,
-  1.3710E+01, 2.2603E+01, 4.0169E+01, 6.7904E+01, 9.1661E+01,
-  1.4863E+02, 3.0433E+02, 4.5400E+02, 7.4852E+02, 1.2341E+03,
-  2.0347E+03, 3.3546E+03, 5.5308E+03, 9.1188E+03, 1.5034E+04,
-  2.4788E+04, 4.0868E+04, 6.7380E+04, 1.1109E+05, 1.8316E+05,
-  3.0197E+05, 4.9787E+05, 8.2085E+05, 1.3534E+06, 2.2313E+06,
-  3.6788E+06, 6.0653E+06, 1.0000E+07, 1.9640E+07
-};
-
 static bool bWarning = true;
 
 CResXS::CResXS()
@@ -49,11 +39,6 @@ CResXS::CResXS()
   m_fMax = 1e38;
   m_fDefaultScatUnc = .1;
   m_fGammaFactor = 4;
-  m_pStdXS = new double[NSTDGROUP];
-  m_pStdUN = new double[NSTDGROUP];
-  m_pStdPotXS = new double[NSTDGROUP];
-  m_pStdPotUN = new double[NSTDGROUP];
-  m_pStdExtXS = new double[NSTDGROUP];
   m_pPf = NULL;
   m_pSf = NULL;
 }
@@ -61,11 +46,6 @@ CResXS::CResXS()
 CResXS::~CResXS()
 {
   if (m_pExtXS) delete[] m_pExtXS;
-  if (m_pStdPotXS) delete[] m_pStdPotXS;
-  if (m_pStdPotUN) delete[] m_pStdPotUN;
-  if (m_pStdExtXS) delete[] m_pStdExtXS;
-  if (m_pStdXS) delete[] m_pStdXS;
-  if (m_pStdUN) delete[] m_pStdUN;
   if (m_pPf) delete[] m_pPf;
   if (m_pSf) delete[] m_pSf;
 }
@@ -107,21 +87,9 @@ void CResXS::InitScat(int nGroup, double *pGroup, bool bBound)
   int i;
   double e;
 
-  m_pPotXS = new double[nGroup];
-  m_pPotUN = new double[nGroup];
   m_pExtXS = new double[nGroup];
 
   memset(m_pExtXS, 0, nGroup*sizeof(double));
-
-  for (i=0;i<nGroup;i++) {
-    e = (pGroup[i] + pGroup[i+1])/2.0;
-    GetPotentialXS(e, m_pPotXS[i], m_pPotUN[i]);
-  }
-
-  for (i=0;i<NSTDGROUP;i++) {
-    e = (m_pStdGroup[i] + m_pStdGroup[i+1])/2.0;
-    GetPotentialXS(e, m_pStdPotXS[i], m_pStdPotUN[i]);
-  }
 
   if (bBound) {
     double E, J, gGn, Gn, Gg, Gf, area, farea;
@@ -140,23 +108,6 @@ void CResXS::InitScat(int nGroup, double *pGroup, bool bBound)
       for (int n=nFirst;n<nGroup;n++) {
         m_pExtXS[n] += GetScatXSFrom(E, GetL(i), (2*J+1)/(2*(2*m_fSpin+1)), Gn, Gg, pGroup[n], pGroup[n+1]);
 //        printf("Ext. XS = %lf\n", m_pExtXS[n]);
-      }
-    }    
-
-    for (i=0;i<NoRes();i++) {
-      E = GetE(i);
-      if (E > 0) {
-       for (nFirst=0; nFirst < NSTDGROUP && E >= m_pStdGroup[nFirst+1]; nFirst++);
-       break;
-      }
-    }
-//    printf("nFirst = %d\n", nFirst);
-    for (i=0;i<NoRes();i++) {
-      GetParameter(i, E, J, gGn, Gn, Gg, Gf, area, farea);
-      if (E >= 0) break;
-      for (int n=nFirst;n<NSTDGROUP;n++) {
-        m_pStdExtXS[n] += GetScatXSFrom(E, GetL(i), (2*J+1)/(2*(2*m_fSpin+1)), Gn, Gg, m_pStdGroup[n], m_pStdGroup[n+1]);
-//        printf("Ext. XS = %lf\n", m_pStdExtXS[n]);
       }
     }    
   }
@@ -526,55 +477,22 @@ bool CResXS::AddPotentialUN(int nFirstResGroup, int nGroup, double *pGroup, doub
     if (i >= nFirstResGroup) {
       pot_xs = GetPotentialXS((pGroup[i] + pGroup[i+1])/2.0);
       pot_un = pot_xs*GetPotentialUN((pGroup[i] + pGroup[i+1])/2.0);
-//      printf("%d: %lE\n", i+1, pot_un);
       pUN[i] = sqrt(pUN[i]*pUN[i] + pot_un*pot_un + 2.0*m_fCorrRP*pUN[i]*pot_un);
     }
   }
 }
 
-int CResXS::GetStdGroupXSnUN(int nGroup, double *pGroup, int nSubGroup, double *pSubGroup, double *pXS, double *pUN, double **pNewUN)
+void CResXS::GetSubGroupXSnUN(int nGroup, double *pGroup, int nSubGroup, double *pSubGroup, double *pXS, double *pUN, double *pNewUN, int *pIndex)
 {
-  *pNewUN = new double[nSubGroup];
-
   for (int i=0;i<nSubGroup;i++) {
-//    printf("%d: %lE - %lE %lE\n", i+1, pSubGroup[i], pSubGroup[i+1], pXS[i]);
     for (int j=0;j<nGroup;j++) {
       if (pSubGroup[i] >= pGroup[j] && pSubGroup[i+1] <= pGroup[j+1]) {
-        (*pNewUN)[i] = pUN[j]/pXS[i];
-//        printf("STD %2d: %.5lE - %.5lE %.5lE/%.5lE = %.5lE\n", i+1, pSubGroup[i], pSubGroup[i+1], pUN[j], pXS[i], (*pNewUN)[i]);
+        pNewUN[i] = pUN[j];
+        pIndex[i] = j;
       }
     }
   }
-  return nSubGroup;
 }
-
-/*
-int CResXS::GetStdGroupXSnUN(int nGroup, double *pGroup, double *pXS, double *pUN, double **pNewGroup, double **pNewXS, double **pNewUN)
-{
-  int nNewGroup = NSTDGROUP + nGroup + 2;
-  *pNewGroup = new double[nNewGroup+1];
-  *pNewXS = new double[nNewGroup];
-  *pNewUN = new double[nNewGroup];
-
-  double e1, e2;
-  int n = 0;
-  for (int i=0;i<NSTDGROUP;i++) {
-    for (int j=0;j<nGroup && pGroup[j] < m_pStdGroup[i+1];j++) {
-      e1 = max(pGroup[j], m_pStdGroup[i]);
-      e2 = min(pGroup[j+1],m_pStdGroup[i+1]);
-      if (e2 > e1 && pXS[j] > 0) {
-        (*pNewGroup)[n] = e1;
-        (*pNewGroup)[n+1] = e2;
-        (*pNewXS)[n] = pXS[j];
-        (*pNewUN)[n] = pUN[j];
-        ++n;
-      }
-    }
-  }
-  nNewGroup = n;
-  return nNewGroup;
-}
-*/
 
 // calcualte the penetration and shift factors at each resonance energy
 void CResXS::CalcFactor()
@@ -796,35 +714,7 @@ void CResXS::GetAvgXS(double E1, double E2, double *xs)
 
   memset(xs, 0, 4*sizeof(double));
   memset(sum, 0, 4*sizeof(double));
-/*
-  int n, length;
-  double *pArray = link.GetArray(length);
-  for (n=0;n<length && pArray[n] < E1;n++) ;
-  if (n+1 >= length) return;
 
-  GetXS(e1=pArray[n], xs1);
-  for (++n;n < length && e2 <= E2; n++) {
-    GetXS(e2=pArray[n], xs2);
-    sum[0] += (xs2[0]+xs1[0])*(e2-e1)/2;
-    sum[1] += (xs2[1]+xs1[1])*(e2-e1)/2;
-    sum[2] += (xs2[2]+xs1[2])*(e2-e1)/2;
-    sum[3] += (xs2[3]+xs1[3])*(e2-e1)/2;
-    e1 = e2;
-    memcpy(xs1, xs2, 4*sizeof(double));
-  }
-
-  xs[0] = sum[0]/(E2-E1);
-  xs[1] = sum[1]/(E2-E1);
-  xs[2] = sum[2]/(E2-E1);
-  xs[3] = sum[3]/(E2-E1);
-*/
-
-/*
-  if ((e1 = link.GetCurrent()) == 0 || e1 > E1) {
-    e1 = link.GetFirst();
-  }
-  while (e1 > 0 && e1 < E1) e1 = link.GoNext();
-*/
   e1 = link.LocateValue(E1);
   if (e1 == 0) return;
 

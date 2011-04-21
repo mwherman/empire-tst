@@ -61,15 +61,21 @@ static int nIteration = 1;
 static double fCaptlim = 0.0;		// lower limit on capture % uncertainties
 static double fScatlim = 0.0;		// lower limit on scattering % uncertainties
 static double fFisslim = 0.0;		// lower limit on fission % uncertainties
-static double fScatteringXS = -1;		// thermal scattering cross section
-static double fScatteringUN = -1;		// uncertainty of thermal scattering cross section (E < 0.5 eV)
-static double fScatteringUN2 = -1;		// uncertainty of thermal scattering cross section (E >= 0.5 eV)
+static double fScatteringXS = -1;	// thermal scattering cross section
+static double fScatteringUN = -1;	// uncertainty of thermal scattering cross section (E < 0.5 eV)
+static double fScatteringUN2 = -1;	// uncertainty of thermal scattering cross section (E >= 0.5 eV)
 static double fCaptureXS = -1;		// thermal capture cross section
 static double fCaptureUN = -1;		// uncertainty of thermal capture cross section (E < 0.5 eV)
 static double fCaptureUN2 = -1;		// uncertainty of thermal capture cross section (E >= 0.5 eV)
+static int    nPreDefScatUN = 0;	// number of predefined scattering uncertainties
+static int    nPreDefCaptUN = 0;	// number of predefined capture uncertainties
+static int    nPreDefFissUN = 0;	// number of predefined fission uncertainties
+static BINUNC *pPreDefScatUN = NULL;	// predefined scattering uncertainties
+static BINUNC *pPreDefCaptUN = NULL;	// predefined capture uncertainties
+static BINUNC *pPreDefFissUN = NULL;	// predefined fission uncertainties
 
 void PrintAtlas(double fDefaultScatUnc);
-void CalcResXSnUN(int nFlag);
+void CalcXSnUN(int nFlag);
 void PrintPotential();
 void CalcIntegral(double fCorrNNRT, double fCorrGGRT, double fCorrNNB, double fCorrGGB);
 void Plot();
@@ -107,10 +113,6 @@ int main(int argc, char **argv)
   double fCorrGGRT = 0;			// correlation between capture cross sections in the thermal and resonance regions
   bool bUseArea = false;		// flag to use kernel from Atlas for capture cross section calculation
   bool bBound = false;			// flag to take bound resonances into account
-  int    nPreDefScatUN = 0;		// number of predefined scattering uncertainties
-  int    nPreDefCaptUN = 0;		// number of predefined capture uncertainties
-  BINUNC *pPreDefScatUN = NULL;		// predefined scattering uncertainties
-  BINUNC *pPreDefCaptUN = NULL;		// predefined capture uncertainties
   double f1, f2;
 
   if (argc < 2) {
@@ -258,8 +260,6 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  if (bPrintAtlas) PrintAtlas(fDefaultScatUnc);
-
   resxs.GetScatteringXS(f1, f2);
   if (fScatteringXS == -1) fScatteringXS = f1;
   if (fScatteringUN == -1) fScatteringUN = f2;
@@ -301,6 +301,110 @@ int main(int argc, char **argv)
     exit(1);
   }
 
+  // allocate the required memory
+
+  if (bScattering) {
+    if ((fp = fopen(szScatGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szScatGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nScatGroup);
+    pScatGroup = new double[nScatGroup+1];
+    for (int i=0;i<nScatGroup+1;i++) fscanf(fp, "%lf", pScatGroup+i);
+    fclose(fp);
+    nFirstResScatGroup = resxs.GetFirstResGroup(nScatGroup, pScatGroup);
+
+    if (bUseSubGroup) {
+      double pw = log10(pScatGroup[nScatGroup]-pScatGroup[nFirstResScatGroup])/100;
+      CLink link;
+      for (int i=0;i<=nScatGroup;i++) link.Add(pScatGroup[i]);
+      for (int i=1;i<100;i++) link.Add(pScatGroup[nFirstResScatGroup]+pow(10.0, i*pw));
+      double *p = link.GetArray(nScatSubGroup);
+      --nScatSubGroup;
+      pScatSubGroup = new double[nScatSubGroup+1];
+      for (int i=0;i<=nScatSubGroup;i++) pScatSubGroup[i] = p[i];
+
+      pScatXS = new double[nScatSubGroup];
+    } else pScatXS = new double[nScatGroup];
+
+    pScatUN = new double[nScatGroup];
+
+    for (int i=0;i<nPreDefScatUN;i++)
+      if (pPreDefScatUN[i].nBin+1 < 1 || pPreDefScatUN[i].nBin+1 > nScatGroup) {
+        fprintf(stderr, "%d in scatunc%d exceeds number of bins\n", pPreDefScatUN[i].nBin+1, pPreDefScatUN[i].nBin+1);
+        exit(1);
+      }
+  }
+
+  if (bCapture) {
+    if ((fp = fopen(szCaptGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szCaptGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nCaptGroup);
+    pCaptGroup = new double[nCaptGroup+1];
+    for (int i=0;i<nCaptGroup+1;i++) fscanf(fp, "%lf", pCaptGroup+i);
+    fclose(fp);
+    nFirstResCaptGroup = resxs.GetFirstResGroup(nCaptGroup, pCaptGroup);
+
+    if (bUseSubGroup) {
+      double pw = log10(pCaptGroup[nCaptGroup]-pCaptGroup[nFirstResCaptGroup])/100;
+      CLink link;
+      for (int i=0;i<=nCaptGroup;i++) link.Add(pCaptGroup[i]);
+      for (int i=1;i<100;i++) link.Add(pCaptGroup[nFirstResCaptGroup]+pow(10.0, i*pw));
+      double *p = link.GetArray(nCaptSubGroup);
+      --nCaptSubGroup;
+      pCaptSubGroup = new double[nCaptSubGroup+1];
+      for (int i=0;i<=nCaptSubGroup;i++) pCaptSubGroup[i] = p[i];
+
+      pCaptXS = new double[nCaptSubGroup];
+    } else pCaptXS = new double[nCaptGroup];
+
+    pCaptUN = new double[nCaptGroup];
+
+    for (int i=0;i<nPreDefCaptUN;i++)
+      if (pPreDefCaptUN[i].nBin+1 < 1 || pPreDefCaptUN[i].nBin+1 > nCaptGroup) {
+        fprintf(stderr, "%d in captunc%d exceeds number of bins\n", pPreDefCaptUN[i].nBin+1, pPreDefCaptUN[i].nBin+1);
+        exit(1);
+      }
+  }
+
+  if (bFission) {
+    if ((fp = fopen(szFissGroup, "r")) == NULL) {
+      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szFissGroup);
+      exit(1);
+    }
+    fgets(s, 1024, fp);
+    sscanf(s, "%d", &nFissGroup);
+    pFissGroup = new double[nFissGroup+1];
+    for (int i=0;i<nFissGroup+1;i++) fscanf(fp, "%lf", pFissGroup+i);
+    fclose(fp);
+    nFirstResFissGroup = resxs.GetFirstResGroup(nFissGroup, pFissGroup);
+
+    if (bUseSubGroup) {
+      double pw = log10(pFissGroup[nFissGroup]-pFissGroup[nFirstResFissGroup])/100;
+      CLink link;
+      for (int i=0;i<=nFissGroup;i++) link.Add(pFissGroup[i]);
+      for (int i=1;i<100;i++) link.Add(pFissGroup[nFirstResFissGroup]+pow(10.0, i*pw));
+      double *p = link.GetArray(nFissSubGroup);
+      --nFissSubGroup;
+      pFissSubGroup = new double[nFissSubGroup+1];
+      for (int i=0;i<=nFissSubGroup;i++) pFissSubGroup[i] = p[i];
+
+      pFissXS = new double[nFissSubGroup];
+    } else pFissXS = new double[nFissGroup];
+
+    pFissUN = new double[nFissGroup];
+
+    for (int i=0;i<nPreDefFissUN;i++)
+      if (pPreDefFissUN[i].nBin+1 < 1 || pPreDefFissUN[i].nBin+1 > nFissGroup) {
+        fprintf(stderr, "%d in fissunc%d exceeds number of bins\n", pPreDefFissUN[i].nBin+1, pPreDefFissUN[i].nBin+1);
+        exit(1);
+      }
+  }
+
   puts("#############################################################");
   puts("###############                                ##############");
   puts("###############    GLOBAL INPUT PARAMETERS     ##############");
@@ -331,91 +435,7 @@ int main(int argc, char **argv)
     fCaptureUN2 = f2/f1;
   } else fCaptureUN2 /= fCaptureXS;
 
-  // allocate the required memory
-
-  if (bScattering) {
-    if ((fp = fopen(szScatGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szScatGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nScatGroup);
-    pScatGroup = new double[nScatGroup+1];
-    for (int i=0;i<nScatGroup+1;i++) fscanf(fp, "%lf", pScatGroup+i);
-    fclose(fp);
-    nFirstResScatGroup = resxs.GetFirstResGroup(nScatGroup, pScatGroup);
-
-    if (bUseSubGroup) {
-      double pw = log10(pScatGroup[nScatGroup]-pScatGroup[nFirstResScatGroup])/100;
-      CLink link;
-      for (int i=0;i<=nScatGroup;i++) link.Add(pScatGroup[i]);
-      for (int i=1;i<100;i++) link.Add(pScatGroup[nFirstResScatGroup]+pow(10.0, i*pw));
-      double *p = link.GetArray(nScatSubGroup);
-      --nScatSubGroup;
-      pScatSubGroup = new double[nScatSubGroup+1];
-      for (int i=0;i<=nScatSubGroup;i++) pScatSubGroup[i] = p[i];
-
-      pScatXS = new double[nScatSubGroup];
-    } else pScatXS = new double[nScatGroup];
-
-    pScatUN = new double[nScatGroup];
-  }
-
-  if (bCapture) {
-    if ((fp = fopen(szCaptGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szCaptGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nCaptGroup);
-    pCaptGroup = new double[nCaptGroup+1];
-    for (int i=0;i<nCaptGroup+1;i++) fscanf(fp, "%lf", pCaptGroup+i);
-    fclose(fp);
-    nFirstResCaptGroup = resxs.GetFirstResGroup(nCaptGroup, pCaptGroup);
-
-    if (bUseSubGroup) {
-      double pw = log10(pCaptGroup[nCaptGroup]-pCaptGroup[nFirstResCaptGroup])/100;
-      CLink link;
-      for (int i=0;i<=nCaptGroup;i++) link.Add(pCaptGroup[i]);
-      for (int i=1;i<100;i++) link.Add(pCaptGroup[nFirstResCaptGroup]+pow(10.0, i*pw));
-      double *p = link.GetArray(nCaptSubGroup);
-      --nCaptSubGroup;
-      pCaptSubGroup = new double[nCaptSubGroup+1];
-      for (int i=0;i<=nCaptSubGroup;i++) pCaptSubGroup[i] = p[i];
-
-      pCaptXS = new double[nCaptSubGroup];
-    } else pCaptXS = new double[nCaptGroup];
-
-    pCaptUN = new double[nCaptGroup];
-  }
-
-  if (bFission) {
-    if ((fp = fopen(szFissGroup, "r")) == NULL) {
-      fprintf(stderr, "ERROR: cannot open a group file '%s'\n", szFissGroup);
-      exit(1);
-    }
-    fgets(s, 1024, fp);
-    sscanf(s, "%d", &nFissGroup);
-    pFissGroup = new double[nFissGroup+1];
-    for (int i=0;i<nFissGroup+1;i++) fscanf(fp, "%lf", pFissGroup+i);
-    fclose(fp);
-    nFirstResFissGroup = resxs.GetFirstResGroup(nFissGroup, pFissGroup);
-
-    if (bUseSubGroup) {
-      double pw = log10(pFissGroup[nFissGroup]-pFissGroup[nFirstResFissGroup])/100;
-      CLink link;
-      for (int i=0;i<=nFissGroup;i++) link.Add(pFissGroup[i]);
-      for (int i=1;i<100;i++) link.Add(pFissGroup[nFirstResFissGroup]+pow(10.0, i*pw));
-      double *p = link.GetArray(nFissSubGroup);
-      --nFissSubGroup;
-      pFissSubGroup = new double[nFissSubGroup+1];
-      for (int i=0;i<=nFissSubGroup;i++) pFissSubGroup[i] = p[i];
-
-      pFissXS = new double[nFissSubGroup];
-    } else pFissXS = new double[nFissGroup];
-
-    pFissUN = new double[nFissGroup];
-  }
+  if (bPrintAtlas) PrintAtlas(fDefaultScatUnc);
 
   if (bPrintPotential) {
     puts("#############################################################");
@@ -427,92 +447,7 @@ int main(int argc, char **argv)
     PrintPotential();
   }
 
-  CalcResXSnUN( (bUseArea?USEAREA:0) | (bBound?BOUND:0) );
-
-  if (bUseSubGroup) {
-    double *pNewUN, *p;
-    if (bScattering) {
-      nScatGroup = resxs.GetStdGroupXSnUN(nScatGroup, pScatGroup, nScatSubGroup, pScatSubGroup, pScatXS, pScatUN, &pNewUN);
-      delete[] pScatUN;
-      pScatUN = pNewUN;
-      nScatGroup = nScatSubGroup;
-      p = pScatGroup;
-      pScatGroup = pScatSubGroup;
-      pScatSubGroup = p;
-    }
-
-    if (bCapture) {
-      nCaptGroup = resxs.GetStdGroupXSnUN(nCaptGroup, pCaptGroup, nCaptSubGroup, pCaptSubGroup, pCaptXS, pCaptUN, &pNewUN);
-      delete[] pCaptUN;
-      pCaptUN = pNewUN;
-      nCaptGroup = nCaptSubGroup;
-      p = pCaptGroup;
-      pCaptGroup = pCaptSubGroup;
-      pCaptSubGroup = p;
-    }
-
-    if (bFission) {
-      nFissGroup = resxs.GetStdGroupXSnUN(nFissGroup, pFissGroup, nFissSubGroup, pFissSubGroup, pFissXS, pFissUN, &pNewUN);
-      delete[] pFissUN;
-      pFissUN = pNewUN;
-      nFissGroup = nFissSubGroup;
-      p = pFissGroup;
-      pFissGroup = pFissSubGroup;
-      pFissSubGroup = p;
-    }
-  } else {
-
-    // convert absolute uncertainties to relative ones
-
-    if (bScattering) {
-      for (int n=0;n<nScatGroup;n++) {
-        if (pScatXS[n] == 0) pScatUN[n] = 0;
-        else pScatUN[n] /= pScatXS[n];
-      }
-      for (int n=0;n<nPreDefScatUN;n++)
-        if (pPreDefScatUN[n].nBin >= 0 && pPreDefScatUN[n].nBin < nScatGroup)
-          pScatUN[pPreDefScatUN[n].nBin] = pPreDefScatUN[n].fUnc;
-    }
-    if (bCapture) {
-      for (int n=0;n<nCaptGroup;n++) {
-        if (pCaptXS[n] == 0) pCaptUN[n] = 0;
-        else pCaptUN[n] /= pCaptXS[n];
-      }
-      for (int n=0;n<nPreDefCaptUN;n++)
-        if (pPreDefCaptUN[n].nBin >= 0 && pPreDefCaptUN[n].nBin < nCaptGroup)
-          pCaptUN[pPreDefCaptUN[n].nBin] = pPreDefCaptUN[n].fUnc;
-    }
-    if (bFission) {
-      for (int n=0;n<nFissGroup;n++) {
-        if (pFissXS[0] == 0) pFissUN[n] = 0;
-        else pFissUN[n] /= pFissXS[n];
-      }
-    }
-  }
-
-  // calculate thermal cross sections and their uncertainties
-
-  if (bScattering) {
-    for (int n=0;n<nFirstResScatGroup;n++) {
-      // assign thermal scattering cross section
-      if (pScatGroup[n] < 0.5) {
-        pScatXS[n] = fScatteringXS;
-        pScatUN[n] = fScatteringUN;
-      } else {
-        pScatXS[n] = fScatteringXS;
-        pScatUN[n] = fScatteringUN2;
-      }
-    }
-  }
-
-  if (bCapture) {
-    for (int n=0;n<nFirstResCaptGroup;n++) {
-      // calculate thermal capture cross section
-      pCaptXS[n] = 2.0*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-      if (pCaptGroup[n] < 0.5) pCaptUN[n] = fCaptureUN;
-      else pCaptUN[n] = fCaptureUN2;
-    }
-  }
+  CalcXSnUN( (bUseArea?USEAREA:0) | (bBound?BOUND:0) );
 
   puts("#############################################################");
   puts("###############                                ##############");
@@ -521,7 +456,6 @@ int main(int argc, char **argv)
   puts("#############################################################");
 
   CalcIntegral(fCorrNNRT, fCorrGGRT, fCorrNNB, fCorrGGB);
-
 
 // print the results
 
@@ -556,9 +490,6 @@ int main(int argc, char **argv)
   if (pScatGroup) delete[] pScatGroup;
   if (pCaptGroup) delete[] pCaptGroup;
   if (pFissGroup) delete[] pFissGroup;
-  if (pScatSubGroup) delete[] pScatSubGroup;
-  if (pCaptSubGroup) delete[] pCaptSubGroup;
-  if (pFissSubGroup) delete[] pFissSubGroup;
   if (pScatXS) delete[] pScatXS;
   if (pCaptXS) delete[] pCaptXS;
   if (pFissXS) delete[] pFissXS;
@@ -584,7 +515,7 @@ void PrintAtlas(double fDefaultScatUnc)
 }
 
 // calculate average cross sections and their uncertainties at the resonance energy region
-void CalcResXSnUN(int nFlag)
+void CalcXSnUN(int nFlag)
 {
   double *pCumScatXS = NULL;
   double *pCumCaptXS = NULL;
@@ -598,11 +529,16 @@ void CalcResXSnUN(int nFlag)
   double *pScatGroupXS = NULL;
   double *pCaptGroupXS = NULL;
   double *pFissGroupXS = NULL;
+  int    *pScatIndex = NULL;
+  int    *pCaptIndex = NULL;
+  int    *pFissIndex = NULL;
   int     nScatGroupXS;
   int     nCaptGroupXS;
   int     nFissGroupXS;
 
   resxs.SetupEnergyGrid();
+
+  // allocate memory for iterative calculations
 
   if (bScattering) {
     nScatGroupXS = bUseSubGroup?nScatSubGroup:nScatGroup;
@@ -644,12 +580,16 @@ void CalcResXSnUN(int nFlag)
     resxs.AddEnergyPoints(nFissGroupXS+1, pFissGroupXS);
   }
 
+  // repeat calculations of average c/s and their uncertainties for nIteration times
+  // in order to take uncertainties from unknown Js into account
+
   for (int i=0;i<nIteration;i++) {
     resxs.AssignJ();
 
+    fprintf(stderr, "Iteration %4d\n", i+1);
     if (bScattering) {
-      if (!bUseSubGroup) resxs.GetAvgResXS(SCAT, nScatGroupXS, pScatGroupXS, pScatXS, nFlag);
-      else resxs.GetAvgXS(SCAT, nScatGroupXS, pScatGroupXS, pScatXS);
+      if (bUseSubGroup) resxs.GetAvgXS(SCAT, nScatGroupXS, pScatGroupXS, pScatXS);
+      else resxs.GetAvgResXS(SCAT, nScatGroupXS, pScatGroupXS, pScatXS, nFlag);
       resxs.GetAbsResUN(SCAT, nScatGroup, pScatGroup, pScatUN, nFlag);
       for (int n=0;n<nScatGroupXS;n++) {
         pCumScatXS[n]  += pScatXS[n];
@@ -659,10 +599,9 @@ void CalcResXSnUN(int nFlag)
         pCumScatUN[n]  += pScatUN[n];
       }
     }
-
     if (bCapture) {
-      if (!bUseSubGroup) resxs.GetAvgResXS(CAPT, nCaptGroupXS, pCaptGroupXS, pCaptXS, nFlag);
-      else resxs.GetAvgXS(CAPT, nCaptGroupXS, pCaptGroupXS, pCaptXS);
+      if (bUseSubGroup) resxs.GetAvgXS(CAPT, nCaptGroupXS, pCaptGroupXS, pCaptXS);
+      else resxs.GetAvgResXS(CAPT, nCaptGroupXS, pCaptGroupXS, pCaptXS, nFlag);
       resxs.GetAbsResUN(CAPT, nCaptGroup, pCaptGroup, pCaptUN, nFlag);
       for (int n=0;n<nCaptGroupXS;n++) {
         pCumCaptXS[n]  += pCaptXS[n];
@@ -672,10 +611,9 @@ void CalcResXSnUN(int nFlag)
         pCumCaptUN[n]  += pCaptUN[n];
       }
     }
-
     if (bFission) {
-      if (!bUseSubGroup) resxs.GetAvgResXS(FISS, nFissGroupXS, pFissGroupXS, pFissXS, nFlag);
-      else resxs.GetAvgXS(FISS, nFissGroupXS, pFissGroupXS, pFissXS);
+      if (bUseSubGroup) resxs.GetAvgXS(FISS, nFissGroupXS, pFissGroupXS, pFissXS);
+      else resxs.GetAvgResXS(FISS, nFissGroupXS, pFissGroupXS, pFissXS, nFlag);
       resxs.GetAbsResUN(FISS, nFissGroup, pFissGroup, pFissUN, nFlag);
       for (int n=0;n<nFissGroupXS;n++) {
         pCumFissXS[n]  += pFissXS[n];
@@ -687,133 +625,182 @@ void CalcResXSnUN(int nFlag)
     }
   }
 
-  // calculate average cross sections and their uncertainties including the thermal energy region
-  double xs2;
+  // compute average cross section and their uncertainties
 
+  double *pResXS = NULL;
   if (bScattering) {
-/*
-    for (int n=0;n<nScatGroup;n++) {
-      if (n < nFirstResScatGroup) {
-      // assign thermal scattering cross section
-        if (pScatGroup[n] < 0.5) {
-          pScatXS[n] = fScatteringXS;
-          pScatUN[n] = fScatteringXS*fScatteringUN;
-        } else {
-          pScatXS[n] = fScatteringXS;
-          pScatUN[n] = fScatteringXS*fScatteringUN2;
-        }
-      } else {
-        pScatXS[n] = pCumScatXS[n]/nIteration;
-        pScatUN[n] = pCumScatUN[n]/nIteration;
-        xs2 = pScatXS[n]*pScatXS[n];
-        if (xs2 == 0.0) pScatUN[n] = 0.0;
-        else pScatUN[n] = sqrt(pScatUN[n]*pScatUN[n] + max(pCumScatXS2[n]/nIteration - xs2, 0.0)/xs2);
-        pScatUN[n] = max(pScatUN[n],fScatlim);
-      }
-    }
-*/
-
-    double *pXS = new double[nScatGroupXS];
-    
-    for (int n=nFirstResScatGroup;n<nScatGroupXS;n++) {
+    pResXS = new double[nScatGroupXS];
+    for (int n=0;n<nScatGroupXS;n++) {
       pScatXS[n] = pCumScatXS[n]/nIteration;
       pCumScatXS2[n] /= nIteration;
-      pXS[n] = pScatXS[n];
+      pResXS[n] = pScatXS[n];
     }
-    for (int n=nFirstResScatGroup;n<nScatGroup;n++) {
+    for (int n=0;n<nScatGroup;n++) {
       pScatUN[n] = pCumScatUN[n]/nIteration;
     }
-    if (!bUseSubGroup) resxs.AddPotentialXS(nFirstResScatGroup, nScatGroupXS, pScatGroupXS, pScatXS);
-    resxs.AddPotentialUN(nFirstResScatGroup, nScatGroup, pScatGroup, pScatUN);
-
-    if (!bUseSubGroup) {
-      for (int n=nFirstResScatGroup;n<nScatGroup;n++) {
-        xs2 = pScatXS[n]*pScatXS[n];
-        pCumScatXS2[n] += (pScatXS[n]-pXS[n])*(pScatXS[n]-pXS[n]) + 2*(pScatXS[n]-pXS[n])*pXS[n];
-        if (xs2 == 0.0) pScatUN[n] = 0.0;
-        else pScatUN[n] = sqrt(pScatUN[n]*pScatUN[n] + max(pCumScatXS2[n] - xs2, 0.0));
-        pScatUN[n] = max(pScatUN[n],fScatlim*pScatXS[n]);
-      }
-    }
-    delete[] pXS;
   }
-
-/*
   if (bCapture) {
-    for (int n=0;n<nCaptGroup;n++) {
-      if (n < nFirstResCaptGroup) {
-      // calculate thermal capture cross section
-        pCaptXS[n] = 2.0*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
-        if (pCaptGroup[n] < 0.5) {
-          pCaptUN[n] = pCaptXS[n]*fCaptureUN;
-        } else {
-          pCaptUN[n] = pCaptXS[n]*fCaptureUN2;
-        }
-      } else {
-        pCaptXS[n] = pCumCaptXS[n]/nIteration;
-        pCaptUN[n] = pCumCaptUN[n]/nIteration;
-        xs2 = pCaptXS[n]*pCaptXS[n];
-        if (xs2 == 0.0) pCaptUN[n] = 0.0;
-        else pCaptUN[n] = sqrt(pCaptUN[n]*pCaptUN[n] + max(pCumCaptXS2[n]/nIteration - xs2, 0.0)/xs2);
-        pCaptUN[n] = max(pCaptUN[n],fCaptlim);
-      }
-      // the following line is for Pb208 only:
-      // if(pCaptGroup[n+1] < 1.0E+06) pCaptUN[n] = max(0.5,pCaptUN[n]);
-    }
-  }
-*/
-
-  if (bCapture) {
-    for (int n=nFirstResCaptGroup;n<nCaptGroupXS;n++) {
+    for (int n=0;n<nCaptGroupXS;n++) {
       pCaptXS[n] = pCumCaptXS[n]/nIteration;
       pCumCaptXS2[n] /= nIteration;
     }
-
-    for (int n=nFirstResCaptGroup;n<nCaptGroup;n++) {
+    for (int n=0;n<nCaptGroup;n++) {
       pCaptUN[n] = pCumCaptUN[n]/nIteration;
     }
-
-    if (!bUseSubGroup) {
-      for (int n=nFirstResCaptGroup;n<nCaptGroup;n++) {
-        xs2 = pCaptXS[n]*pCaptXS[n];
-        if (xs2 == 0.0) pCaptUN[n] = 0.0;
-        else pCaptUN[n] = sqrt(pCaptUN[n]*pCaptUN[n] + max(pCumCaptXS2[n] - xs2, 0.0));
-        pCaptUN[n] = max(pCaptUN[n],fCaptlim*pCaptXS[n]);
-      // the following line is for Pb208 only:
-      // if(pCaptGroup[n+1] < 1.0E+06) pCaptUN[n] = max(0.5,pCaptUN[n]);
-      }
-    }
   }
-
   if (bFission) {
-/*
-    for (int n=0;n<nFissGroup;n++) {
-      pFissXS[n] /= pCumFissXS[n]/nIteration;
-      pFissUN[n] /= pCumFissUN[n]/nIteration;
-      xs2 = pFissXS[n]*pFissXS[n];
-      if (xs2 == 0.0) pFissUN[n] = 0.0;
-      else pFissUN[n] = sqrt(pFissUN[n]*pFissUN[n] + max(pCumFissXS2[n]/nIteration - xs2,0.0)/xs2);
-      pFissUN[n] = max(pFissUN[n],fFisslim);
-    }
-*/
-
-    for (int n=nFirstResFissGroup;n<nFissGroupXS;n++) {
+    for (int n=0;n<nFissGroupXS;n++) {
       pFissXS[n] = pCumFissXS[n]/nIteration;
       pCumFissXS2[n] /= nIteration;
     }
-
-    for (int n=nFirstResFissGroup;n<nFissGroup;n++) {
+    for (int n=0;n<nFissGroup;n++) {
       pFissUN[n] = pCumFissUN[n]/nIteration;
     }
+  }
 
-    if (!bUseSubGroup) {
-      for (int n=nFirstResFissGroup;n<nFissGroup;n++) {
-        xs2 = pFissXS[n]*pFissXS[n];
-        if (xs2 == 0.0) pFissUN[n] = 0.0;
-        else pFissUN[n] = sqrt(pFissUN[n]*pFissUN[n] + max(pCumFissXS2[n] - xs2, 0.0));
-        pFissUN[n] = max(pFissUN[n],fFisslim*pFissXS[n]);
+  // distribute absolute uncertainties in the bins into finer subbins if UseSubGroup is defined
+
+  if (bUseSubGroup) {
+    double *pNewUN;
+    if (bScattering) {
+      pNewUN = new double[nScatSubGroup];
+      pScatIndex = new int[nScatSubGroup];
+      resxs.GetSubGroupXSnUN(nScatGroup, pScatGroup, nScatSubGroup, pScatSubGroup, pScatXS, pScatUN, pNewUN, pScatIndex);
+      delete[] pScatUN;
+      pScatUN = pNewUN;
+      nScatGroup = nScatSubGroup;
+      delete[] pScatGroup;
+      pScatGroup = pScatSubGroup;
+    }
+    if (bCapture) {
+      pNewUN = new double[nCaptSubGroup];
+      pCaptIndex = new int[nCaptSubGroup];
+      resxs.GetSubGroupXSnUN(nCaptGroup, pCaptGroup, nCaptSubGroup, pCaptSubGroup, pCaptXS, pCaptUN, pNewUN, pCaptIndex);
+      delete[] pCaptUN;
+      pCaptUN = pNewUN;
+      nCaptGroup = nCaptSubGroup;
+      delete[] pCaptGroup;
+      pCaptGroup = pCaptSubGroup;
+    }
+    if (bFission) {
+      pNewUN = new double[nFissSubGroup];
+      pFissIndex = new int[nFissSubGroup];
+      resxs.GetSubGroupXSnUN(nFissGroup, pFissGroup, nFissSubGroup, pFissSubGroup, pFissXS, pFissUN, pNewUN, pFissIndex);
+      delete[] pFissUN;
+      pFissUN = pNewUN;
+      nFissGroup = nFissSubGroup;
+      delete[] pFissGroup;
+      pFissGroup = pFissSubGroup;
+    }
+  }
+
+  // add potential c/s and their uncertainties
+
+  if (bScattering) {
+    if (!bUseSubGroup) resxs.AddPotentialXS(nFirstResScatGroup, nScatGroup, pScatGroup, pScatXS);
+    resxs.AddPotentialUN(nFirstResScatGroup, nScatGroup, pScatGroup, pScatUN);
+  }
+
+  double xs2;
+
+  // add uncertainties from unknown Js
+
+  if (bScattering) {
+    for (int n=0;n<nScatGroup;n++) {
+      if (!bUseSubGroup) pCumScatXS2[n] += (pScatXS[n]-pResXS[n])*(pScatXS[n]-pResXS[n]) + 2*(pScatXS[n]-pResXS[n])*pResXS[n];
+      xs2 = pScatXS[n]*pScatXS[n];
+      if (xs2 == 0.0) pScatUN[n] = 0.0;
+      else pScatUN[n] = sqrt(pScatUN[n]*pScatUN[n] + max(pCumScatXS2[n] - xs2, 0.0));
+      pScatUN[n] = max(pScatUN[n],fScatlim*pScatXS[n]);
+    }
+    if (pResXS) delete[] pResXS;
+  }
+  if (bCapture) {
+    for (int n=0;n<nCaptGroup;n++) {
+      xs2 = pCaptXS[n]*pCaptXS[n];
+      if (xs2 == 0.0) pCaptUN[n] = 0.0;
+      else pCaptUN[n] = sqrt(pCaptUN[n]*pCaptUN[n] + max(pCumCaptXS2[n] - xs2, 0.0));
+      pCaptUN[n] = max(pCaptUN[n],fCaptlim*pCaptXS[n]);
+      // the following line is for Pb208 only:
+      // if(pCaptGroup[n+1] < 1.0E+06) pCaptUN[n] = max(0.5,pCaptUN[n]);
+    }
+  }
+  if (bFission) {
+    for (int n=nFirstResFissGroup;n<nFissGroup;n++) {
+      xs2 = pFissXS[n]*pFissXS[n];
+      if (xs2 == 0.0) pFissUN[n] = 0.0;
+      else pFissUN[n] = sqrt(pFissUN[n]*pFissUN[n] + max(pCumFissXS2[n] - xs2, 0.0));
+      pFissUN[n] = max(pFissUN[n],fFisslim*pFissXS[n]);
+    }
+  }
+
+  // convert absolute uncertainties to relative ones
+
+  if (bScattering) {
+    for (int n=0;n<nScatGroup;n++) {
+      if (pScatXS[n] == 0) pScatUN[n] = 0;
+      else pScatUN[n] /= pScatXS[n];
+    }
+  }
+  if (bCapture) {
+    for (int n=0;n<nCaptGroup;n++) {
+      if (pCaptXS[n] == 0) pCaptUN[n] = 0;
+      else pCaptUN[n] /= pCaptXS[n];
+    }
+  }
+  if (bFission) {
+    for (int n=0;n<nFissGroup;n++) {
+      if (pFissXS[0] == 0) pFissUN[n] = 0;
+      else pFissUN[n] /= pFissXS[n];
+    }
+  }
+
+  // calculate thermal cross sections and their uncertainties and assign predefined uncertainties
+
+  if (bScattering) {
+    for (int n=0;n<nFirstResScatGroup;n++) {
+      // assign thermal scattering cross section
+      if (pScatGroup[n] < 0.5) {
+        pScatXS[n] = fScatteringXS;
+        pScatUN[n] = fScatteringUN;
+      } else {
+        pScatXS[n] = fScatteringXS;
+        pScatUN[n] = fScatteringUN2;
       }
     }
+    // assign predefined uncertainties
+    for (int n=0;n<nPreDefScatUN;n++)
+      if (bUseSubGroup) {
+        for (int i=0;i<nScatGroup;i++) {
+          if (pScatIndex[i] == pPreDefScatUN[n].nBin) pScatUN[i] = pPreDefScatUN[n].fUnc;
+        }
+      } else pScatUN[pPreDefScatUN[n].nBin] = pPreDefScatUN[n].fUnc;
+  }
+
+  if (bCapture) {
+    for (int n=0;n<nFirstResCaptGroup;n++) {
+      // calculate thermal capture cross section
+      pCaptXS[n] = 2.0*fCaptureXS*sqrt(0.0253)*(sqrt(pCaptGroup[n+1])-sqrt(pCaptGroup[n]))/(pCaptGroup[n+1]-pCaptGroup[n]);
+      if (pCaptGroup[n] < 0.5) pCaptUN[n] = fCaptureUN;
+      else pCaptUN[n] = fCaptureUN2;
+    }
+    // assign predefined uncertainties
+    for (int n=0;n<nPreDefCaptUN;n++)
+      if (bUseSubGroup) {
+        for (int i=0;i<nCaptGroup;i++) {
+          if (pCaptIndex[i] == pPreDefCaptUN[n].nBin) pCaptUN[i] = pPreDefCaptUN[n].fUnc;
+        }
+      } else pCaptUN[pPreDefCaptUN[n].nBin] = pPreDefCaptUN[n].fUnc;
+  }
+
+  if (bFission) {
+    // assign predefined uncertainties
+    for (int n=0;n<nPreDefFissUN;n++)
+      if (bUseSubGroup) {
+        for (int i=0;i<nFissGroup;i++) {
+          if (pFissIndex[i] == pPreDefFissUN[n].nBin) pFissUN[i] = pPreDefFissUN[n].fUnc;
+        }
+      } else pFissUN[pPreDefFissUN[n].nBin] = pPreDefFissUN[n].fUnc;
   }
 
   if (pCumScatXS) delete[] pCumScatXS;
@@ -825,6 +812,9 @@ void CalcResXSnUN(int nFlag)
   if (pCumScatUN) delete[] pCumScatUN;
   if (pCumCaptUN) delete[] pCumCaptUN;
   if (pCumFissUN) delete[] pCumFissUN;
+  if (pScatIndex) delete[] pScatIndex;
+  if (pCaptIndex) delete[] pCaptIndex;
+  if (pFissIndex) delete[] pFissIndex;
 }
 
 void PrintPotential()
@@ -911,7 +901,7 @@ void CalcIntegral(double fCorrNNRT, double fCorrGGRT, double fCorrNNB, double fC
       umx1 = pCaptUN[i]*xx;
       // printf("group %d: cmx=%lf\n", i+1, xx);
 
-      // only calculate the regular resonance integral from 0.5 - 100,000 eV.
+      // calculate the regular resonance integral from 0.5 - 100,000 eV.
 
       if (pCaptGroup[i+1] <= 0.5)   continue;
       if (pCaptGroup[i] >= 1.0E+05) continue;
@@ -1018,7 +1008,6 @@ void Plot()
   fprintf(fp, "set style line 4 lt 6 lc rgb 'purple' lw 3\n");
   fprintf(fp, "set style line 5 lt 5 lc rgb 'cyan' lw 3\n");
 */
-//  fprintf(fp, "plot 'SCAT-UNC.dat' using 1:2 title 'scattering xs' with steps lt -1");
   fprintf(fp, "plot 'SCAT-UNC.dat' using 1:2 axis x1y1 title 'Uncertainty' with steps lt -1 lw 1, \\\n");
   fprintf(fp, "     'SCAT-XS.dat' using 1:2 axis x1y2 title 'Cross section' with steps lt 3 lw 2");
   fclose(fp);
@@ -1073,7 +1062,6 @@ void Plot()
   fprintf(fp, "set style line 4 lt 6 lc rgb 'purple' lw 3\n");
   fprintf(fp, "set style line 5 lt 5 lc rgb 'cyan' lw 3\n");
 */
-//  fprintf(fp, "plot 'CAPT-UNC.dat' using 1:2 title 'capture xs' with steps lt -1");
   fprintf(fp, "plot 'CAPT-UNC.dat' using 1:2 axis x1y1 title 'Uncertainty' with steps lt -1 lw 1, \\\n");
   fprintf(fp, "     'CAPT-XS.dat' using 1:2 axis x1y2 title 'Cross section' with steps lt 3 lw 2");
   fclose(fp);
