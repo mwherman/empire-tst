@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 2017 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-05-02 01:16:27 +0200 (Mo, 02 Mai 2011) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -185,8 +185,11 @@ C     IF (IMOdel.EQ.3) model = 'coupled-channels soft rotor model'
       IF (IMOdel.EQ.3 .AND. FIRst_ein) THEN
          WRITE (8,*) 'WARNING: coupled-channels soft rotor model'
          WRITE (8,*) 'WARNING: OPTMAN code is needed            '
+         WRITE (8,*) 'WARNING: Use it to produce TLs for all '
+         WRITE (8,*) 'WARNING:   incident energies'
+         IMOdel=1  ! CHANGING SOFT ROTOR TO VIBRATIONAL MODEL 
          IWArn = 5
-         GOTO 300
+c        GOTO 300
       ENDIF
       IF (IMOdel.EQ.1 .OR. IMOdel.EQ.2 .OR. IMOdel.EQ.3) THEN
 C--------Imodel not used for non-inelastic channels
