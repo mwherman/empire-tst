@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2011 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-04-09 21:34:48 +0200 (Sa, 09 Apr 2011) $
+Ccc   * $Rev: 2016 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3048,7 +3048,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2011 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2016 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7501,6 +7501,9 @@ C
       CHARACTER*132 ctmp
       LOGICAL fexist
 
+      write(6,*)trim(empiredir)//trim(filename)
+      INQUIRE (FILE = trim(empiredir)//'C4.DAT', EXIST = fexist)
+      IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL IF C4.DAT EXISTS
 C
 C-----define target file name
 C
@@ -7524,6 +7527,7 @@ C-----concatenate file name with the projectile path
      & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
          RETURN
       ENDIF
+
       write(6,*)trim(empiredir)//trim(filename)
       INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
       IF (.NOT. fexist) THEN
@@ -7542,7 +7546,6 @@ C-----copy EXFOR file to the working directory
       write(8,*)ctmp
       iwin = pipe(ctmp) 
 
-C-----run C4SORT
       IF(IOPsys .EQ. 0) then  !Linux, Mac
          ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
       ELSE                    !Windows
@@ -8644,14 +8647,18 @@ C              different spin than the ground state
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
-         WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
+         WRITE (32,*)
+     &          ' N <',LEVcc,' for coupled levels in CC calculation'
+C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                 ' nucleus is treated as deformed'
          WRITE (8,*)
          WRITE (8,99005)
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
-         WRITE (8,*)'Dyn.deformations are not used in symm.rot.model'
+         WRITE (8,*)
+     &          ' N <',LEVcc,' for coupled levels in CC calculation'
+C        WRITE (8,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (8,'(1x,i3,1x,i3,a35)') iz, ia,
      &                                 ' nucleus is treated as deformed'
 C--------Putting Coupled levels first

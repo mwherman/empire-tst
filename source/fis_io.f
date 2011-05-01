@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 2016 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -196,7 +196,7 @@ c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (filename,99900)iz
 99900    FORMAT ('/RIPL-2/fission/HFB2007/z',i3.3,'.tab')
-         OPEN (UNIT = 52,FILE = trim(EMPiredir)//filename
+         OPEN (UNIT = 52,FILE = trim(EMPiredir)//trim(filename)
      &      ,STATUS = 'old',ERR = 460)
   410    read(52,*,END=460) izrr,iarr,npoints
          write(8,*) iz,ia,izrr,iarr

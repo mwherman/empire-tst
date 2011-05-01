@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 2016 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
 
 C
 C
@@ -1919,14 +1919,14 @@ C
 C99005 FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.tab')
 99005 FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
-      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
+      INQUIRE(file = trim(empiredir)//trim(filename), exist = fexist)
       IF(.not.fexist) THEN
        WRITE(8,*) trim(empiredir)//trim(filename), ' does not exist'
        WRITE(*,*) trim(empiredir)//trim(filename), ' does not exist'
        STOP 'ERROR: '
       ENDIF
 
-      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
+      OPEN (UNIT = 34,FILE = trim(empiredir)//trim(filename),ERR = 300)
   100 READ (34,99010,ERR=300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
@@ -1978,9 +1978,10 @@ C
 C99007   FORMAT ('/RIPL-2/densities/Gs/z',i3.3,'.cor')
 99007   FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
-        INQUIRE(file = trim(empiredir)//filename, exist = fexist)
+        INQUIRE(file = trim(empiredir)//trim(filename), exist = fexist)
         IF(fexist) then
-          OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 440)
+          OPEN (UNIT = 34,FILE = trim(empiredir)//trim(filename),
+     &      ERR = 440)
           pcorr = 0.d0
           acorr = 0.d0
   110     READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
@@ -2484,7 +2485,7 @@ C
       WRITE (filename,99006) ib, iz
 99006 FORMAT
      & ('/RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
-      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
+      INQUIRE(file = trim(empiredir)//trim(filename), exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
      &                  ' IN HFB at saddle ',ib
@@ -2511,7 +2512,7 @@ C
          ENDDO
       ENDDO
 
-      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
+      OPEN (UNIT = 34,FILE = trim(empiredir)//trim(filename),ERR = 300)
   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate
 99010 FORMAT (23x,a2,i3,3x,i3,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
