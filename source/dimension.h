@@ -8,7 +8,7 @@
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
-     *,LEVcc=20
+     *,LEVcc=30
      *,NDZMAX=110
      *,NDECSE=NDEX+20
      *,NDEPFN=2*NDEX     
