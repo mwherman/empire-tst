@@ -605,7 +605,7 @@ c     WRITE(97,'(10H<ANG.DIS.>,F10.2,F10.5,F10.2,2I5)')
      *    WRITE(97,'(I5,F5.1,A1,I4,I5)') K,0.5*JO(K),'-',1,MTET
         IF(ETA.EQ.0.) THEN
           DO L=1,LKK
-            WRITE(96,'(2I5,1P,D20.10)') K,L-1,COEF(K,L)
+            WRITE(96,'(2I5,1P,D20.10)') K,L-1,1000.D0*COEF(K,L) ! OUTPUT IN MB !
           ENDDO
         ENDIF
         DO M=1,MTET
