@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2016 $
+Ccc   * $Rev: 2021 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
+Ccc   * $Date: 2011-05-04 02:10:16 +0200 (Mi, 04 Mai 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3048,7 +3048,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2016 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2021 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7501,7 +7501,8 @@ C
       CHARACTER*132 ctmp
       LOGICAL fexist
 
-      write(6,*)trim(empiredir)//trim(filename)
+C     write(6,*)trim(empiredir)//trim(filename)
+      fexist=.FALSE. 
       INQUIRE (FILE = trim(empiredir)//'C4.DAT', EXIST = fexist)
       IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL IF C4.DAT EXISTS
 C
@@ -7517,23 +7518,29 @@ C
       
 C-----concatenate file name with the projectile path
       IF(IZAejc(0) .EQ. 1) THEN
-         filename = '/EXFOR/neutrons/'//trim(caz)
+         filename = 'EXFOR/neutrons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 1001) THEN
-         filename = '/EXFOR/protons/'//trim(caz)
+         filename = 'EXFOR/protons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 0) THEN
-         filename = '/EXFOR/gammas/'//trim(caz)
+         filename = 'EXFOR/gammas/'//trim(caz)
       ELSE
          WRITE (8,
      & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
          RETURN
       ENDIF
 
-      write(6,*)trim(empiredir)//trim(filename)
+      fexist=.FALSE. 
       INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
       IF (.NOT. fexist) THEN
+        WRITE (*,
+     & '(''  WARNING: No experimental data in EXFOR-C4 file:'')')
+        write (*,*)' ',trim(empiredir)//trim(filename)
+        WRITE (*,*)
         WRITE (8,
-     & '(''WARNING: No experimental data in EXFOR-C4'')')
-         RETURN 
+     & '(''  WARNING: No experimental data in EXFOR-C4 file:'')')
+        write (8,*)' ',trim(empiredir)//trim(filename)
+        WRITE (8,*)
+        RETURN 
       ENDIF
 
 C-----Create full command string
