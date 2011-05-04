@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2022 $
+Ccc   * $Rev: 2023 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-04 18:55:50 +0200 (Mi, 04 Mai 2011) $
+Ccc   * $Date: 2011-05-04 19:24:39 +0200 (Mi, 04 Mai 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3049,7 +3048,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2022 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2023 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7528,7 +7527,6 @@ C-----concatenate file name with the projectile path
      & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
          RETURN
       ENDIF
-
       write(6,*)trim(empiredir)//trim(filename)
       INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
       IF (.NOT. fexist) THEN
