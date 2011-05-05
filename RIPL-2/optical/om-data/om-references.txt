@@ -93,108 +93,114 @@
  66.  E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba, Unpublished.
  67.  E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba., Phys.Rev.C72 (
       2005) 024604
- 68.  C.A.Engelbrecht and H.Fiedeldey,  Ann. Phys. 42,262-295 (1967)
- 69.  A.J.Koning, J.P.Delaroche, Nucl. Phys. A713, 231 (2003).
- 70.  B.Morillon and P.Romain, Phys. Rev. C70, 014601 (2004); Phys. Rev.
+ 68.  E.Soukhovitski and R.Capote, Nucl. Data Sheets 110 (2009) 3107-321
+      4 (RIPL paper)
+ 69.  C.A.Engelbrecht and H.Fiedeldey,  Ann. Phys. 42,262-295 (1967)
+ 70.  A.J.Koning, J.P.Delaroche, Nucl. Phys. A713, 231 (2003).
+ 71.  B.Morillon and P.Romain, Phys. Rev. C70, 014601 (2004); Phys. Rev.
        C74, 014601 (2006)
- 71.  M.M.Nagadi,C.R.Howell,W.Tornow et al, Phys.Rev.C68,044610(2003)
- 72.  L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitski, et al., Proc.Int
+ 72.  M.M.Nagadi,C.R.Howell,W.Tornow et al, Phys.Rev.C68,044610(2003)
+ 73.  L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitski, et al., Proc.Int
       .Conf. on NDST, ND2007, Nice, France, #617, DOI: 10.1051/ndata:076
       17
- 73.  R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba, Unpublished.
- 74.  D.G.Madland, OECD/NEA Spec. Mtg. Nucleon-Nucleus Opt.Mod.to 200 Me
+ 74.  R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba, Unpublished.
+ 75.  E.Soukhovitski and R. Capote, Nucl. Data Sheets 110 (2009) 3107-32
+      14 (RIPL paper)
+ 76.  D.G.Madland, OECD/NEA Spec. Mtg. Nucleon-Nucleus Opt.Mod.to 200 Me
       V,Paris (1997) p.129.
- 75.  P.G.Young,E.D.Arthur,M.Bozian,T.R.England,G.M.Hale,R.J.LaBauve,R.C
+ 77.  P.G.Young,E.D.Arthur,M.Bozian,T.R.England,G.M.Hale,R.J.LaBauve,R.C
       .Little,et al., LANL Reports LA-11753-MS (1990); see also LA-8630-
       PR,p2 (1980)
- 76.  E.D.Arthur and C.Philis, Report LA-8630-PR,p2 (1980)
- 77.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 95,189(1987)
- 78.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 97,239(1987)
- 79.  P.G.Young, LANL Progress Report LA-11972-PR (1990) p.9
- 80.  P.G.Young, Report LA-UR (1997)
- 81.  P.G.Young and E.D.Arthur, LANL Report LA-UR-91-1424,894(1992); IAE
+ 78.  E.D.Arthur and C.Philis, Report LA-8630-PR,p2 (1980)
+ 79.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 95,189(1987)
+ 80.  R.Macklin and P.G.Young, Nucl.Sci.Eng. 97,239(1987)
+ 81.  P.G.Young, LANL Progress Report LA-11972-PR (1990) p.9
+ 82.  P.G.Young, Report LA-UR (1997)
+ 83.  P.G.Young and E.D.Arthur, LANL Report LA-UR-91-1424,894(1992); IAE
       A-TECDOC-1034 (1998) p.131
- 82.  P.G.Young, LANL Mod of Progress Report LA-11972-PR (1990) p.9
- 83.  M.B.Chadwick and A.C.Hayes (entered in current format by P.Talou),
+ 84.  P.G.Young, LANL Mod of Progress Report LA-11972-PR (1990) p.9
+ 85.  M.B.Chadwick and A.C.Hayes (entered in current format by P.Talou),
        [Ref. R.Macklin and P.G.Young, Nucl.Sci.Eng. 97,239(1987)]
- 84.  R.L.Varner,W.J.Thompson,T.L.McAbee,E.J.Ludwig,T.B.Clegg, Phys. Rep
+ 86.  R.L.Varner,W.J.Thompson,T.L.McAbee,E.J.Ludwig,T.B.Clegg, Phys. Rep
       . 201,57 (1991)
- 85.  R.L.Walter and P.P.Guss,  Rad. Effects 95, 73 (1986) [1985 Santa F
+ 87.  R.L.Walter and P.P.Guss,  Rad. Effects 95, 73 (1986) [1985 Santa F
       e Conf. Proc.]
- 86.  A.V.Ignatyuk,V.P.Lunev,Yu.N.Shubin,E.V.Gai,N.N.Titarenko,A.Ventura
+ 88.  A.V.Ignatyuk,V.P.Lunev,Yu.N.Shubin,E.V.Gai,N.N.Titarenko,A.Ventura
       ,W.Gudowski, Nucl.Sci.Engr. 136, 340 (2000).
- 87.  A.V.Ignatyuk, Priv.communication to NDS, BROND 2003 evaluations up
+ 89.  A.V.Ignatyuk, Priv.communication to NDS, BROND 2003 evaluations up
        to 150 MeV for 232 Th
- 88.  A.V.Ignatyuk et al, Nucl.Sc.&.Eng.142 (2002) 177-194
- 89.  A.V.Ignatyuk, E.V.Gai, V.P.Lunev, Yu.N.Shubin, N.N.Titarenko, Prog
+ 90.  A.V.Ignatyuk et al, Nucl.Sc.&.Eng.142 (2002) 177-194
+ 91.  A.V.Ignatyuk, E.V.Gai, V.P.Lunev, Yu.N.Shubin, N.N.Titarenko, Prog
       ress Report IAEA RC 12571 (Sept. 2004)
- 90.  A.J.Koning, J.J.van Wijk, J.P.Delaroche, OECD/NEA Spec. Mtg. Nucle
+ 92.  A.J.Koning, J.J.van Wijk, J.P.Delaroche, OECD/NEA Spec. Mtg. Nucle
       on-Nucleus Opt.Mod.to 200 MeV,Paris (1997) p.111.
- 91.  A.J.Koning, J.P.Delaroche, Nucl. Phys. A713, 231 (2003) [Global po
+ 93.  A.J.Koning, J.P.Delaroche, Nucl. Phys. A713, 231 (2003) [Global po
       tential].
- 92.  R.Capote, E.Soukhovitski, S.Chiba, J.M.Quesada, J. Nucl. Sc.&Tech.
+ 94.  R.Capote, E.Soukhovitski, S.Chiba, J.M.Quesada, J. Nucl. Sc.&Tech.
        (Japan) 45 (2008) 333-340. Nice ND2007 proceedings(pap#765).
- 93.  B.Morillon and P.Romain, Phys. Rev. C76, 044601 (2007)
- 94.  E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori, J. Ph
+ 95.  B.Morillon and P.Romain, Phys. Rev. C76, 044601 (2007)
+ 96.  E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori, J. Ph
       ys. G: Nucl. Part. Phys. 30, 905-920 (2004).
- 95.  E.Soukhovitski, S. Chiba and J. Lee, CP 769, Int.Conf.NDST, Santa 
+ 97.  E.Soukhovitski, S. Chiba and J. Lee, CP 769, Int.Conf.NDST, Santa 
       Fe, USA, ed.by R.C.Haight et al, AIP 2005, p. 1100.
- 96.  C.A.Engelbrecht and H.Fiedeldey, Ann. Phys. 42,262-295 (1967)
- 97.  E.D.Arthur,P.G.Young,W.Matthes, BNL-51245,p.751 (1980); Nucl.Sci.E
+ 98.  C.A.Engelbrecht and H.Fiedeldey, Ann. Phys. 42,262-295 (1967)
+ 99.  E.D.Arthur,P.G.Young,W.Matthes, BNL-51245,p.751 (1980); Nucl.Sci.E
       ng.124,271(1996)
- 98.  E.D.Arthur, Nucl.Sci.Eng. 76,137 (1980)
- 99.  P.G.Young and E.D.Arthur., LA-UR-84-2767(1984); LA-UR-94-3104(1994
+100.  E.D.Arthur, Nucl.Sci.Eng. 76,137 (1980)
+101.  P.G.Young and E.D.Arthur., LA-UR-84-2767(1984); LA-UR-94-3104(1994
       ).
-100.  M.B.Chadwick and P.G.Young, Proc.Int. Particle Therapy Mtg. and PT
+102.  M.B.Chadwick and P.G.Young, Proc.Int. Particle Therapy Mtg. and PT
       COG XXIV, 24-26 Apr. 1996,Detroit,Mich.
-101.  F.G.Perey, Phys. Rev. 131,745 (1963)
-102.  F.D.Becchetti Jr. and G.W.Greenlees, Phys. Rev. 182,1190 (1969)
-103.  J.J.H.Menet,E.E.Gross,J.J.Malanify, and A.Zucker, Phys. Rev. C4,11
+103.  F.G.Perey, Phys. Rev. 131,745 (1963)
+104.  F.D.Becchetti Jr. and G.W.Greenlees, Phys. Rev. 182,1190 (1969)
+105.  J.J.H.Menet,E.E.Gross,J.J.Malanify, and A.Zucker, Phys. Rev. C4,11
       14 (1971)
-104.  D.M.Patterson et al,  Nucl. Phys. A263,261 (1976)
-105.  C.H.Johnson et al, Phys. Rev. Lett.39,1604(1977); Phys. Rev. C20,2
+106.  D.M.Patterson et al,  Nucl. Phys. A263,261 (1976)
+107.  C.H.Johnson et al, Phys. Rev. Lett.39,1604(1977); Phys. Rev. C20,2
       052(1979)
-106.  D.S.Flynn et al, Phys. Rev. C. 31, 87 (1985)
-107.  P.Schwandt, H.O.Meyer, W.W.Jacobs, A.D.Bacher, S.E.Vigdor, M.D.Kai
+108.  D.S.Flynn et al, Phys. Rev. C. 31, 87 (1985)
+109.  P.Schwandt, H.O.Meyer, W.W.Jacobs, A.D.Bacher, S.E.Vigdor, M.D.Kai
       tchuck et al., Phys. Rev. C. 26, 55 (1982)
-108.  A.V.Ignatyuk,V.P.Lunev,Yu.N.Shubin,E.V.Gai,N.N.Titarenko,A.Ventura
+110.  A.V.Ignatyuk,V.P.Lunev,Yu.N.Shubin,E.V.Gai,N.N.Titarenko,A.Ventura
       ,W.Gudowski, Nucl.Sci.Eng. 136, 340 (2000).
-109.  R.Capote, E.Soukhovitski, J.M. Quesada, S. Chiba, Unpublished.
-110.  R.Capote, E.Soukhovitski, S. Chiba, J.M.Quesada, Unpublished.
-111.  E.Soukhovitski, R. Capote, J.M.Quesada, S.Chiba, Unpublished.
-112.  S.Kailas et al, Phys. Rev. C 20, 1272(1979); Pramana.J.Phys.27, 13
+111.  R.Capote, E.Soukhovitski, J.M. Quesada, S. Chiba, Unpublished.
+112.  E.Soukhovitski, R. Capote, J.M.Quesada, S.Chiba, Unpublished.
+113.  S.Kailas et al, Phys. Rev. C 20, 1272(1979); Pramana.J.Phys.27, 13
       9(1986)
-113.  Y.P.Viyogi,  Ph.D Thesis  (Calcutta University 1983)
-114.  P.G.Young,E.D.Arthur,M.Bozian,T.R.England,G.M.Hale,R.J.LaBauve,R.C
+114.  Y.P.Viyogi,  Ph.D Thesis  (Calcutta University 1983)
+115.  P.G.Young,E.D.Arthur,M.Bozian,T.R.England,G.M.Hale,R.J.LaBauve,R.C
       .Little,et al., LANL Report LA-11753-MS (1990); see also LA-8630-P
       R,p2      (1980)
-115.  R.L.Walter and P.P.Guss, Rad. Effects 95, 73 (1986) [1985 Santa Fe
+116.  R.L.Walter and P.P.Guss, Rad. Effects 95, 73 (1986) [1985 Santa Fe
        Conf. Proc.]
-116.  R.Capote, E.Soukhovitski, S. Chiba, J.M.Quesada, J. Nucl. Sc.&Tech
+117.  R.Capote, E.Soukhovitski, S. Chiba, J.M.Quesada, J. Nucl. Sc.&Tech
       . (Japan) 45 (2008) 333-340. Nice ND2007 proceedings(pap#765).
-117.  Xiaohua Li, Chonghai Cai, Nucl. Phys. A801, 43-67 (2008).
-118.  J.M.Lohr and W.Haeberli, Nucl. Phys. A232,381(1974)
-119.  C.M.Perey and F.G.Perey, Phys. Rev. 132,755 (1963)
-120.  W.W.Daehnick, J.D.Childs, and Z.Vrcelj., Phys.Rev.C21,2253(1980).
-121.  Haixia An and Chonghai Cai., Phys. Rev. C73, 054605 (2006)
-122.  Yinlu Han, Yuyang Shi, Qingbiao Shen., Phys.Rev.C74, 044615 (2006)
+118.  Xiaohua Li, Chonghai Cai, Nucl. Phys. A801, 43-67 (2008).
+119.  J.M.Lohr and W.Haeberli, Nucl. Phys. A232,381(1974)
+120.  C.M.Perey and F.G.Perey, Phys. Rev. 132,755 (1963)
+121.  W.W.Daehnick, J.D.Childs, and Z.Vrcelj., Phys.Rev.C21,2253(1980).
+122.  Haixia An and Chonghai Cai., Phys. Rev. C73, 054605 (2006)
+123.  Yinlu Han, Yuyang Shi, Qingbiao Shen., Phys.Rev.C74, 044615 (2006)
 
-123.  Yinlu Han, Yuyang Shi, Qingbiao Shen., Unpublished. Final Report t
-      o the RIPL-3 CRP.
-124.  J.Bojowald et al,   Phys. Rev. C 38,1153(1988)
-125.  F.D.Becchetti Jr. and G.W.Greenlees, Ann. Rept. J.H.Williams Lab.,
+124.  Yinlu Han, Yuyang Shi, Qingbiao Shen., Nucl. Data Sheets 110 (2009
+      ) 3107-3214 (RIPL paper)
+125.  J.Bojowald et al,   Phys. Rev. C 38,1153(1988)
+126.  F.D.Becchetti Jr. and G.W.Greenlees, Ann. Rept. J.H.Williams Lab.,
        Univ. Minnesota (1969)
-126.  Xiaohua Li, Chuntian Liang, Chonghai Cai., Nucl.Phys.A789, 103-113
+127.  Xiaohua Li, Chuntian Liang, Chonghai Cai., Nucl.Phys.A789, 103-113
       (2007)
-127.  H.H.Chang et al, Nucl. Phys. A297,105 (1978)
-128.  E.D.Arthur and P.G.Young, Report LA-8636-MS(ENDF-304) (1980)
-129.  E.D.Arthur,P.G.Young,W.Matthes, Report BNL-51245,751(1980)
-130.  L.McFadden and G.R.Satchler, Nucl. Phys. 84, 177 (1966)
-131.  J.R.Huizenga and G.Igo, Nucl. Phys. 29,462 (1962)
-132.  O.F.Lemos, Orsay, Series A ,No.136 (1972)
-133.  V.Avrigeanu,P.E.Hodgson, and M.Avrigeanu, Report OUNP-94-02 (1994)
+128.  H.H.Chang et al, Nucl. Phys. A297,105 (1978)
+129.  E.D.Arthur and P.G.Young, Report LA-8636-MS(ENDF-304) (1980)
+130.  E.D.Arthur,P.G.Young,W.Matthes, Report BNL-51245,751(1980)
+131.  L.McFadden and G.R.Satchler, Nucl. Phys. 84, 177 (1966)
+132.  J.R.Huizenga and G.Igo, Nucl. Phys. 29,462 (1962)
+133.  O.F.Lemos, Orsay, Series A ,No.136 (1972)
+134.  V.Avrigeanu,P.E.Hodgson, and M.Avrigeanu, Report OUNP-94-02 (1994)
        , Phys. Rev. C49,2136 (1994)
-134.  M.Avrigeanu,W.von Oertzen,F.L.Roman, and V.Avrigeanu, Progress Rep
+135.  M.Avrigeanu,W.von Oertzen,F.L.Roman, and V.Avrigeanu, Progress Rep
       ort IAEA RC 12422/R1 (2004), see also Nucl. Phys. A723,104(2003)
-135.  A.Kumar, S.Kailas, S.Rathi and K.Mahata., Nucl. Phys. A776 (2006) 
+136.  A.Kumar, S.Kailas, S.Rathi and K.Mahata., Nucl. Phys. A776 (2006) 
       105.
+137.  M.Avrigeanu, A.C. Obreja, F.L. Roman, V. Avrigeanu, and  W. von Oe
+      rtzen, At. Data Nucl. Data Tables 95(2009)501; EFFDOC-1081, OECD/N
+      EA, Paris, Nov. 2009.
