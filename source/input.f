@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2023 $
+Ccc   * $Rev: 2026 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-04 19:24:39 +0200 (Mi, 04 Mai 2011) $
+Ccc   * $Date: 2011-05-07 20:47:59 +0200 (Sa, 07 Mai 2011) $
 
 C
       SUBROUTINE INPUT
@@ -158,8 +158,7 @@ C--------neutralize tuning factors and OMP normalization factors
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
             NRSmooth(nnuc) = 5
-C           DO j = 1, NDLW
-            DO j = 1, NDLV
+            DO j = 1, NDLV  ! bug found, used to be NDLW
                ISIsom(j,nnuc) = 0
             ENDDO
             DO nejc = 0, NDEJC
@@ -813,9 +812,7 @@ C                    ENDF(nnuc) = 1
          ENDDO
 C
 C--------Retrieve C4 experimental data 
-C
-         INQUIRE (FILE = 'C4.DAT', EXIST = gexist)
-         IF (.NOT. gexist .AND. IX4ret.EQ.1) CALL RETRIEVE
+         IF (IX4ret.EQ.1) CALL RETRIEVE
 C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
          NNUct = NNUcd
@@ -2254,6 +2251,8 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
+
+
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)',END = 300) dum
@@ -3048,7 +3047,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2023 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2026 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7502,7 +7501,7 @@ C
       LOGICAL fexist
 
 C     write(6,*)trim(empiredir)//trim(filename)
-      INQUIRE (FILE = trim(empiredir)//'C4.DAT', EXIST = fexist)
+      INQUIRE (FILE = 'C4.DAT', EXIST = fexist)
       IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL IF C4.DAT EXISTS
 C
 C-----define target file name
@@ -7517,27 +7516,34 @@ C
       
 C-----concatenate file name with the projectile path
       IF(IZAejc(0) .EQ. 1) THEN
-         filename = '/EXFOR/neutrons/'//trim(caz)
+        filename = '/EXFOR/neutrons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 1001) THEN
-         filename = '/EXFOR/protons/'//trim(caz)
+        filename = '/EXFOR/protons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 0) THEN
-         filename = '/EXFOR/gammas/'//trim(caz)
+        filename = '/EXFOR/gammas/'//trim(caz)
       ELSE
-         WRITE (8,
+        WRITE (8,
      & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
-         RETURN
+        WRITE (8,*)     
+        RETURN
       ENDIF
-      write(6,*)trim(empiredir)//trim(filename)
+C     write(6,*)trim(empiredir)//trim(filename)
       INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
       IF (.NOT. fexist) THEN
+        WRITE (*,
+     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+        write (*,*)' ',trim(empiredir)//trim(filename)
+        WRITE (*,*)
         WRITE (8,
-     & '(''WARNING: No experimental data in EXFOR-C4'')')
-         RETURN 
+     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+        write (8,*)' ',trim(empiredir)//trim(filename)
+        WRITE (8,*)
+        RETURN 
       ENDIF
 
 C-----Create full command string
       IF(IOPsys .EQ. 0) then  !Linux, Mac
-         ctmp = 'cp '//trim(empiredir)//trim(filename)//' TMP.c4'
+        ctmp = 'cp '//trim(empiredir)//trim(filename)//' TMP.c4'
       ELSE                    !Windows
          ctmp = 'copy '//trim(empiredir)//trim(filename)//' TMP.c4'
       ENDIF 
@@ -7546,16 +7552,16 @@ C-----copy EXFOR file to the working directory
       iwin = pipe(ctmp) 
 
       IF(IOPsys .EQ. 0) then  !Linux, Mac
-         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
+        ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
       ELSE                    !Windows
-         ctmp = trim(empiredir)//'/scripts/sortc4.bat TMP'
+        ctmp = trim(empiredir)//'/scripts/sortc4.bat TMP'
       ENDIF 
       iwin = pipe(ctmp) 
 
       IF(IOPsys .EQ. 0) then  !Linux, Mac
-         ctmp = 'mv TMP.c4 C4.DAT'
+        ctmp = 'mv TMP.c4 C4.DAT'
       ELSE                    !Windows
-         ctmp = 'move TMP.c4 C4.DAT'
+        ctmp = 'move TMP.c4 C4.DAT'
       ENDIF 
       iwin = pipe(ctmp) 
       END
@@ -7617,7 +7623,6 @@ C
      &                    reftmp
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
-
              iccfus = iccfus + 1
              beta2 = betatmp
 c            CCFUS deformations
@@ -7668,6 +7673,7 @@ c            CCFUS deformations
      &      '/RIPL-2/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
       READ (84,'(///)')    ! Skipping first 4 title lines
+
       DO i = 1, 1700
          READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
      &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
