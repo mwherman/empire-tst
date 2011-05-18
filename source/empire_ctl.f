@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1882 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
+Ccc   * $Rev: 2027 $
+Ccc   * $Author: hikim $
+Ccc   * $Date: 2011-05-18 18:34:52 +0200 (Mi, 18 Mai 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1856,7 +1856,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=131)
+      parameter (ndreac=90, ndkeys=133)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1890,17 +1890,18 @@ C
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
-     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO'/
+     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO',
+     &  'ROHFBA', 'ROHFBP'/
       data namecat /
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'T'     , 'T'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'T'     , 'A'     ,   
+     &  'T'     , 'T'     , 'A'     , 'T'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
+     &  'R'     , 'R'     , 'R'     , 'R'     , 'T'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
@@ -1912,14 +1913,21 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
+     &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
 C-----    (parameter must be explicitly specified in the optional part
-C-----    of the standard input)
+C-----    of the standard input) ATTENTION: At this time it is not implemented
+C-----    and is actually equvalent to F
 C-----F - variation of the parameter not allowed (discrete value keyword)
+ccc
+C-----T - variation of the parameter allowed; the parameters
+C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
+C-----    DEFPAR, TOTRED, FUSRED, ...
+ccc
       LINUX = .TRUE.
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
@@ -2098,7 +2106,8 @@ C-----Read line of optional input
 C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN
-            IF(category.EQ.'A') THEN
+c           IF(category.EQ.'A') THEN
+            IF(category.EQ.'A'.OR.category.EQ.'T') THEN
                IF(name(1:4).EQ.'UOMP') THEN !special treatment for omp parameters (they must be negative)
                   WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val),
      &                     i1, i2, i3, i4 ! include omp parameter if missing
@@ -2118,7 +2127,10 @@ C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       ENDIF
 C-----Write modified input with increased value of the parameter if name matches
       IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND. i3.EQ.i3e
-     &   .AND. i4.EQ.i4e) THEN
+     &   .AND. i4.EQ.i4e.AND.category.EQ.'A') THEN
+         WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
+         ifound = 1
+      ELSEIF(name.EQ.namee.AND.i1e.EQ.i1p .AND. category.EQ.'T') THEN
          WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
          ifound = 1
       ELSEIF(namee.EQ.'ENDF  ') THEN
@@ -2135,11 +2147,14 @@ C-----
          READ (inprecord,'(1X,A6,G10.5,4I5)',END = 300) namee,vale, i1e,
      &      i2e, i3e, i4e
 C--------Write modified input with increased value of the parameter if name matches
-         IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND.
-     &      i3.EQ.i3e .AND. i4.EQ.i4e) THEN
+        IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND.
+     &      i3.EQ.i3e .AND. i4.EQ.i4e.AND.category.EQ.'A') THEN
             WRITE(7,'(''$'',A6,F10.3,4I5)') namee,vale*(1+val),
      &         i1e, i2e, i3e, i4e
-         ELSE
+        ELSEIF(name.EQ.namee.AND.i1e.EQ.i1p .AND. category.EQ.'T') THEN
+           WRITE(7,'(''$'',A6,F10.3,4I5)')namee,vale*(1.0+val),
+     &         i1e,i2e, i3e, i4e
+        ELSE
             WRITE(7,'(A80)') inprecord
          ENDIF
       ELSE
