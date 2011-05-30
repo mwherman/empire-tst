@@ -29,6 +29,9 @@ C-V  06/12 Another fix to format reading metastable targets (A.Trkov)
 C-V  07/04 Convert E2 to LVL for MT51 if Elo=Ehi (A.Trkov)
 C-V  08/01 Correct ZA of residual nucleus when searching level energies.
 C-V  08/02 Sort also by metastable products (A. Trkov).
+C-V  11/04 Adjusted  to deal with XC4 file retrieved from 
+C-V        http://www-nds.iaea.org/x4toc4-master/?C=M;O=D
+C-V        (removes lines with '#' in the first column) (M. Herman, R. Capote)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -262,6 +265,7 @@ C* Convert ratios to cross sections when possible - write to scratch
         IZA1=-1
         MT1 =-1
    17   READ (LC4,901,END=18) REC
+        IF(REC(1:1). EQ. '#') GOTO 17
         READ (REC(13:15),*) MF
         IF(MF.EQ.203) THEN
           READ(REC(59:76),*) RMT,RZA
@@ -366,7 +370,8 @@ C* Begin processing the source file
       MOU=0
 C* Copy records to scratch until the reference changes
    20 NSET=NSET+1
-      READ (LC4,901,END=200) REC
+   21 READ (LC4,901,END=200) REC
+      IF(REC(1:1). EQ. '#') GOTO 21
 c...
 c...  print *,'nset',nset,'"',rec(1:30)
 c...
@@ -526,7 +531,8 @@ C* Save record to RC6 field and sorting string to ELL
       ELL(IR)=ELW//POU//'  '
 C*
 C* Read a new record from the C4 file
-      READ (LC4,901,END=200) REC
+   33 READ (LC4,901,END=200) REC
+      IF(REC(1:1). EQ. '#') GOTO 33
       IF(REC(1:20).EQ.'                    ') GO TO 34
 C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
@@ -671,7 +677,8 @@ C* Sort MF6 by angle and outgoing energy
       END IF
 C* Read the next record
       IEN=1
-      READ (LC4,901,END=64) REC
+   63 READ (LC4,901,END=64) REC
+      IF(REC(1:1). EQ. '#') GOTO 63
       IEN=0
 c...
 c...  print *,'ir',ir,'"',rec(1:30)
