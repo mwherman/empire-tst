@@ -87,6 +87,9 @@ C-V          of population cross sections
 C-V  11/02 - Restore printout of pseudo-resonance data.
 C-V        - Refine tolerance for matching energies of discrete levels.
 C-V        - Fix number of photons in MF14 to match MF12.
+C-V  11/04 - Set LRF to MLBW because NJOY does not like anything else
+C-V          when energy-dependent scattering radius is given.
+C-V        - Update the comments and input instructions.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -121,7 +124,12 @@ C-M
 C-M  The angular distributions for discrete level reactions
 C-M  that appear in the ENDF file-4 sections are extracted from
 C-M  the spectra on the EMPIRE output file, interpolated to
-C-M  the appropriate energy, if necessary.
+C-M  the appropriate energy, if necessary. Legendre polynomial
+C-M  coefficients in the centre-of-mass are fitted to the
+C-M  distributions. For elastic scattering the Legendre
+C-M  coefficients are copied directly from the EMPIRE output;
+C-M  If more than 64 Legendre coefficients are required, formatting
+C-M  switches automatically to pointwise representation.
 C-M
 C-M  The correlated energy-angle distributions for continuum
 C-M  reactions that appear in ENDF file-6 sections are entered
@@ -131,12 +139,16 @@ C-M  limited to 64. For reactions with relatively smooth
 C-M  angular distributions, the number of coefficients is
 C-M  reduced accordingly.
 C-M
-C-M  Photon production reactions, which remain to be specified,
-C-M  particularly the (n,gamma) reaction, are given in the ENDF
-C-M  files-12, 14 and 15. Photon multiplicity is stored in 
-C-M  file-12. Isotropic angular distribution is assumed and
-C-M  written to file 14. The particle energy distribution is
-C-M  written to file15.
+C-M  Photon production information for discrete levels can be stored
+C-M  in ENDF files-12 and 14. The spectra for the continuum are
+C-M  included in File-6 (rather than file 15). File-12 contains photon
+C-M  transition probabilities and photon emission probabilities for
+C-M  discrete level reactions, while File 14 contains the corresponding
+C-M  angular distributions, which are assumed isotropic. The gamma
+C-M  spectra of the (n,gamma) reaction are presently stored in File-6.
+C-M  Primary gammas, which are optionally printed in the Empire output
+C-M  are not formatted. This option should not be used when ENDF
+C-M  formatting is required.
 C-M
 C-M  Instructions:
 C-M  The program can be executed interactively from a terminal
@@ -156,6 +168,11 @@ C-M     interpolation to within the specified tolerance, are
 C-M     removed. Entering a negative value for the thinning
 C-M     tolerance limit causes thinning to be suppressed.
 C-M   - ENDF material number identifier.
+C-M   - NLIB number assigned to the evaluation (see ENDF-6 manual).
+C-M     The parameters are optional.
+C-M   - ALAB, EDATE, AUTHOR string, where each of the listed
+C-M     parameters occupies 11 columns (see ENDF-6 manual for
+C-M     details). The parameters are optional.
 C-M
 C-M  To monitor the formatting process for quality assurance
 C-M  purposes, the EMPEND.LOG file is written in which the
@@ -4901,7 +4918,10 @@ C* Energy-dependent scattering radius allowed only when resonances given
           EL =EMIN
           EH =EIN(1)
           LRU=1
-          LRF=1
+C... Set LRF to MLBW because NJOY does not like anything else when
+C... energy-dependent scattering radius is given
+C...      LRF=1
+          LRF=2
           NLS=1
           LRX=0
           NRS=MXRS
