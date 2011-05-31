@@ -19,72 +19,30 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
-# To avoid calling FIXUP
-cp $file.endf $work/$file-f2.endf 2>/dev/null
-
-# RECONSTRUCT PROTON & ALPHA SPECTRA WITH FIXUP
-
-#rm $file-f2.endf 2>/dev/null
-#ln -sf $file.endf OUTPUT.ENDF
-#cat >FIXUP.INP <<EOF
-#12101011111001                                                              
-#OUTPUT.ENDF                                                                        
-#FIXUP.ENDF  
-#S203=+( 28, 28)+( 41, 41)+(103,103)
-#S207=+( 22, 25)+(107,109)+(112,114)
-#
-# 0.00000+00 0.00000+00          0          0${2}203
-#
-# 0.00000+00 0.00000+00          0          0${2}207
-#
-#
-#
-#
-#
-#
-#
-#                                                                 
-#EOF
-#
-#$EMPIREDIR/util/fixup/fixup < FIXUP.INP
-#rm OUTPUT.ENDF
-#rm FIXUP.INP
-#mv FIXUP.ENDF $work/$file-f2.endf
-#mv FIXUP.LST $work/$file-log.fixup2
-#
-
 # RUN LINEAR
 
-ln -sf $file-f2.endf ENDF.IN
-ln -sf $EMPIREDIR/util/linear/LINEAR.INP LINEAR.INP
-
-$EMPIREDIR/util/linear/linear < LINEAR.INP
-rm ENDF.IN
-rm LINEAR.INP
-mv LINEAR.OUT $work/$file-lin.endf
+rm LINEAR.INP 2>/dev/null
+ln -sf $file.endf ENDFB.IN
+$EMPIREDIR/util/linear/linear
+mv ENDFB.OUT  $work/$file-lin.endf
 mv LINEAR.LST $work/$file-log.linear
 
 # RUN RECENT
 
-ln -sf $work/$file-lin.endf ENDF.IN
-ln -sf $EMPIREDIR/util/recent/RECENT.INP RECENT.INP
-
-$EMPIREDIR/util/recent/recent < RECENT.INP
-rm ENDF.IN
-rm RECENT.INP
-mv RECENT.OUT $work/$file-rec.endf
+rm RECENT.INP 2>/dev/null
+ln -sf $work/$file-lin.endf ENDFB.IN
+$EMPIREDIR/util/recent/recent
+mv ENDFB.OUT  $work/$file-rec.endf
 mv RECENT.LST $work/$file-log.recent
 
 # RUN SIGMA1
 
-ln -sf $work/$file-rec.endf ENDF.IN
-ln -sf $EMPIREDIR/util/sigma1/SIGMA1.INP SIGMA1.INP
-
-$EMPIREDIR/util/sigma1/sigma1 < SIGMA1.INP
-rm ENDF.IN
-rm SIGMA1.INP
-mv SIGMA1.OUT $work/$file-sig.endf
+rm SIGMA1.INP 2>/dev/null
+ln -sf $work/$file-rec.endf ENDFB.IN
+$EMPIREDIR/util/sigma1/sigma1
+mv ENDFB.OUT  $work/$file-sig.endf
 mv SIGMA1.LST $work/$file-log.sigma1
+rm ENDFB.IN
 
 # RUN LEGEND
 
@@ -109,9 +67,9 @@ rm ENDF.IN
 rm SIXTAB.INP SIXTAB.TMP
 mv ENDF.OUT $work/$file-s.endf
 
-
 # RUN PLTLST TO PRODUCE LISTING OR PLOTC4
- $EMPIREDIR/scripts/plotlst $file
+
+$EMPIREDIR/scripts/plotlst $file
 
 # REMOVE INTERMEDIATE ENDF FILES
 
