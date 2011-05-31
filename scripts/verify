@@ -15,7 +15,7 @@ echo 'Inputs ready to run'
 echo ' '
 ls *\.endf
 echo ' '
-echo -n 'Choose one of the above (without .out extention!): '
+echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
