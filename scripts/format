@@ -26,7 +26,7 @@ cat >EMPEND.INP <<EOF
 $file.out
 $file-e.endf
 1 
-0.1
+-1.0
 $2
 EOF
 $EMPIREDIR/util/empend/empend <EMPEND.INP
@@ -63,6 +63,7 @@ mv FIXUP.LST $work/$file-log.fixup
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
 cp $file-f.endf $file-endres.endf
 if [ -s $file-res.endf ]; then
+cat >ENDRES.INP <<EOF
    ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
    rm $file.endf 2>/dev/null
    ln -sf $file-f.endf empire.end
