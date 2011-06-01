@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2052 $
+Ccc   * $Rev: 2053 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-01 20:11:11 +0200 (Mi, 01 Jun 2011) $
+Ccc   * $Date: 2011-06-01 21:12:47 +0200 (Mi, 01 Jun 2011) $
 
 C
       SUBROUTINE INPUT
@@ -159,7 +159,6 @@ C--------neutralize tuning factors and OMP normalization factors
             rTUNefi(nnuc) = 1.d0
             NRSmooth(nnuc) = 5
             DO j = 1, NDLV  ! bug found, used to be NDLW
-
                ISIsom(j,nnuc) = 0
             ENDDO
             DO nejc = 0, NDEJC
@@ -231,7 +230,6 @@ C--------set gamma-strength parameters
 C--------Full gamma cascade becomes the default setting  (Jan 2011)
 C--------Use GCASC input parameter to turn it off
          GCAsc =  1.0
-
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
          BETav = 4.0           ! viscosity parameter
@@ -2253,15 +2251,12 @@ C-------constructing input and filenames
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
 
-
-
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)',END = 300) dum
         ENDDO
         GOTO 100
       ELSE
-
 C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
@@ -2285,8 +2280,6 @@ C
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
 C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
-
-
           WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
@@ -2306,7 +2299,6 @@ C---------limit to max. of 40 levels if ENDF active
           ENDIF
 C---------levels for nucleus NNUC copied to file *.lev
           NSTored(nnuc) = izatmp
-
           DO ilv = 1, NLV(Nnuc)
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
@@ -3049,7 +3041,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3     |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    ARCOLE, $Rev: 2052 $  |'
+      WRITE (8,*)'                       |    ARCOLE, $Rev: 2053 $  |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -7502,12 +7494,8 @@ C
       CHARACTER*132 ctmp
       LOGICAL fexist
 
-C     write(6,*)trim(empiredir)//trim(filename)
-
       INQUIRE (FILE = 'C4.DAT', EXIST = fexist)
-
       IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL AND SORTING IF C4.DAT EXISTS
-
 C
 C-----define target file name
 C
@@ -7553,6 +7541,7 @@ C-----Create full command string
          ctmp = 'copy '//trim(empiredir)//trim(filename)//' TMP.c4'
       ENDIF 
 C-----copy EXFOR file to the working directory
+      iwin = pipe(ctmp) 
       write(*,*) ' '
       WRITE (8,
      &  '(''  Retrieving and sorting EXFOR(C4) file: '',A64)')
@@ -7560,9 +7549,6 @@ C-----copy EXFOR file to the working directory
       WRITE (*,
      &  '(''  Retrieving and sorting EXFOR(C4) file: '',A64)')
      &  trim(filename)
-
-      iwin = pipe(ctmp) 
-
       IF(IOPsys .EQ. 0) then  !Linux, Mac
         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
       ELSE                    !Windows
@@ -7618,11 +7604,8 @@ C
       DOUBLE PRECISION beta2, beta3, betatmp, etmp, jtmp
       INTEGER i, ia, ierr, iptmp, iz, natmp, nztmp, iccfus
       CHARACTER*6 reftmp
-
       ierr = 0
-
       iccfus = 0
-
 
       ia = A(0)
       iz = Z(0)
@@ -7639,7 +7622,6 @@ C
      &                    reftmp
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
-
              iccfus = iccfus + 1
              beta2 = betatmp
 c            CCFUS deformations
@@ -7647,181 +7629,101 @@ c            CCFUS deformations
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (2+) =',beta2
-
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
-
              beta3 = betatmp
 c            CCFUS deformations
              BETcc(iccfus) = beta3
              FLAm(iccfus) = 3
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (3-) =',beta3
-
          ENDIF
       ENDDO
-
-
  250  IF (beta2.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15 (2+) used'
-
       ENDIF
-
 
       IF (beta3.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &        'E(3-) level not found in Kibedi database (RIPL-2)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.05 (3-) used'
-
       ENDIF
 
-
       IF(AEJc(0).LE.4) GOTO 350
-
       ia = AEJc(0)
-
       iz = ZEJc(0)
-
       close(84)
-
       beta2 = 0.D0
-
       beta3 = 0.D0
-
       OPEN (84,FILE = trim(empiredir)//
-
      &      '/RIPL-2/optical/om-data/om-deformations.dat',
-
      &      STATUS = 'old',ERR = 200)
-
       READ (84,'(///)')    ! Skipping first 4 title lines
-
 
       DO i = 1, 1700
          READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
-
      &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
-
      &                    reftmp
-
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
-
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
-
              iccfus = iccfus + 1
-
              beta2 = betatmp
-
 c            CCFUS deformations
-
              BETcc(iccfus) = beta2
-
              FLAm(iccfus) = -2
-
              QCC(iccfus) = -etmp
-
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-
      &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (2+) =',beta2
-
          ENDIF
-
 
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
-
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
-
              iccfus = iccfus + 1
-
              beta3 = betatmp
-
 c            CCFUS deformations
-
              BETcc(iccfus) = beta3
-
              FLAm(iccfus) = -3
-
              QCC(iccfus) = -etmp
-
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-
      &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-
      &           'BETA (3-) =',beta3
-
          ENDIF
-
-
       ENDDO
-
  300  IF (beta2.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15 (2+) used'
-
       ENDIF
-
 
       IF (beta3.EQ.0.D0) THEN
-
          ierr = 1
-
          WRITE (8,*) ' WARNING: ',
-
      &        'E(3-) level not found in Kibedi database (RIPL-2)'
-
          WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.05 (3-) used'
-
       ENDIF
 
-
       GOTO 350
-
   200 WRITE (8,*) ' WARNING: ',
      &   'empire/RIPL-2/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
-
      &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
-
       ierr = 2
-
 
       GOTO 400
   350 CLOSE (84)
@@ -8008,7 +7910,6 @@ C--------Reading ground state information (to avoid overwriting deformation)
          WRITE (12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),6e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
-
 C
          mintsp = mod(NINT(2*D_Xjlv(1)),2)
          igreson = 0
@@ -8017,21 +7918,21 @@ C
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
-
+            itmp2=min(99,ICOllev(i))
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
             if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
-
 C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
             WRITE (8,
      &          '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
-     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          itmp2, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
@@ -8240,8 +8141,6 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
      &            'Default dynamical deformations 0.05(3-) will be used'
          beta3 = 0.05
       ENDIF
-
-
 
   400 DO ilv = 1, nlvs
          READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') itmp, elvr,
@@ -8748,7 +8647,6 @@ C              different spin than the ground state
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
          WRITE (32,*)
-
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
 C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
@@ -8758,7 +8656,6 @@ C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
          WRITE (8,*)
-
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
 C        WRITE (8,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (8,'(1x,i3,1x,i3,a35)') iz, ia,
@@ -8821,8 +8718,8 @@ C-----------------swapping
          DO i = 1, ND_nlv
             ftmp = D_Def(i,2)
             IF (i.EQ.1) ftmp = 0.01
-
             itmp1 = ICOllev(i)
+            itmp2 = min(ICOllev(i),99)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
             IF (itmp1.LE.NLV(nnurec) .and.
 C             For odd nuclides, collective states in continuum have
@@ -8830,30 +8727,30 @@ C             different spin than the ground state
      &        (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           itmp2, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           0, 0, ftmp
               WRITE (8,
-     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           '(1x,I3,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           itmp2, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           0, 0, ftmp
               WRITE (12,
-     &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &           '(1x,I3,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           0, 0, ftmp
             ELSE
-              ncont = ncont + 1
-              IF(ncont.GT.99) GOTO 99004
+C             ncont = ncont + 1
+C             IF(ncont.GT.99) GOTO 99004
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
-     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           itmp2, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
               WRITE (8,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
-     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           itmp2, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
               WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
-     &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &           D_Llv(i), D_Klv(i), ftmp,' cont'
             ENDIF
          ENDDO
