@@ -33,7 +33,7 @@ $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
 
-# RECONSTRUCT (N,P) AND (N,A) REACTIONS WITH FIXUP
+# RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
 
 rm $file-f.endf 2>/dev/null
 cat >FIXUP.INP <<EOF
@@ -46,8 +46,6 @@ S104=+(650,699)
 S105=+(700,749)
 S106=+(750,799)
 S107=+(800,849)
-S  3=+(  4,  5)+( 11, 18)+( 22, 26)+(28, 37)+( 41, 45)+(102,117)
-S  2=+(  1,  1)-(  3,  3)
 
  0.00000+00 0.00000+00          0          0${2}103
 
