@@ -78,6 +78,5 @@ rm $work/$file-lin.endf 2>/dev/null
 rm $work/$file-f.endf 2>/dev/null
 rm $work/$file-f2.endf 2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
-rm $work/$file-e.endf 2>/dev/null
 
 exit
