@@ -1,7 +1,7 @@
       SUBROUTINE TIMEIT(SECONDS)
 C=======================================================================
 C
-C     TIME SINCE START OF PROBLEM (BASE TIME) IN SECONDS
+C     LINUX - TIME SINCE START OF PROBLEM (BASE TIME) IN SECONDS
 C
 C=======================================================================
       SAVE

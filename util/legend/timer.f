@@ -3,6 +3,9 @@ C=======================================================================
 C
 C     TOTAL EXECUTION TIME
 C
+C     WARNING - ALL TIMES ARE IN SINGLE PRECISION.
+C               DO NOT ADD ANY DOUBLE OR REAL*8 STATEMENTS.
+C
 C=======================================================================
       SAVE
       INTEGER OUTP,OTAPE

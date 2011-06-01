@@ -58,8 +58,8 @@ C-----IF SEND, FEND OR MEND OUTPUT IN STANDARD FORM.
       CALL OUTS(MATH,MFH)
       RETURN
 C-----CONVERT FLOATING POINT NUMBERS TO STANDARD OUTPUT FORM.
-   10 CALL OUT9(C1H,FIELD2(1,1),  3)
-      CALL OUT9(C2H,FIELD2(1,2),  3)
+   10 CALL OUT9X(C1H,FIELD2(1,1))
+      CALL OUT9X(C2H,FIELD2(1,2))
 C-----ELIMINATE -0
       IF(IABS(L1H).LE.0) L1H=0
       IF(IABS(L2H).LE.0) L2H=0
@@ -119,8 +119,8 @@ C-----NO OUTPUT IF OUTPUT UNIT IS TURNED OFF
       CALL OUTS(MATH,MFH)
       RETURN
 C-----CONVERT FLOATING POINT NUMBERS TO STANDARD OUTPUT FORM.
-   10 CALL OUT9(C1,FIELD2(1,1),  3)
-      CALL OUT9(C2,FIELD2(1,2),  3)
+   10 CALL OUT9X(C1,FIELD2(1,1))
+      CALL OUT9X(C2,FIELD2(1,2))
 C-----ELIMINATE -0
       IF(IABS(L1).LE.0) L1=0
       IF(IABS(L2).LE.0) L2=0
@@ -219,8 +219,8 @@ C-----CHECK ENERGY ORDER.
       IF(X(I).GE.ELAST) GO TO 40
 C-----ALLOW FOR SMALL DIFFERENCES (ABOUT THE SAME TO 9 DIGITS).
       IF(DABS(ELAST-X(I)).LE.OKDIFF*ELAST) GO TO 30
-      CALL OUT9(ELAST,FIELD6(1,1),  3)
-      CALL OUT9(X(I) ,FIELD6(1,2),  3)
+      CALL OUT9X(ELAST,FIELD6(1,1))
+      CALL OUT9X(X(I) ,FIELD6(1,2))
       WRITE(OUTP,60) MATH,MFH,MTH,
      1 I-1,(FIELD6(M,1),M=1,11),
      2 I  ,(FIELD6(M,2),M=1,11)
@@ -287,10 +287,10 @@ C-----COUNT IF CROSS SECTION IS NEGATIVE.
 C-----SET FLAG IF POSITIVE.
       IF(Y(II).GT.ZEROD) IMPLUS=1
       K=K+1
-      CALL OUT9(X(II),FIELD6(1,K),3)
+      CALL OUT9X(X(II),FIELD6(1,K))
       K=K+1
 C-----CHANGED CROSS SECTION TO 9 DIGIT OUTPUT
-   10 CALL OUT9(Y(II),FIELD6(1,K),3)
+   10 CALL OUT9X(Y(II),FIELD6(1,K))
 C-----OUTPUT ONE LINE.
       IOUT=(I2-I1)+1
       GO TO (20,30,40),IOUT
@@ -410,7 +410,7 @@ C-----CONVERT DATA TO NORMAL FORM.
       K=0
       DO 10 L=I1,I2
       K=K+1
-   10 CALL OUT9(X(L),FIELD6(1,K),3)
+   10 CALL OUT9X(X(L),FIELD6(1,K))
 C-----OUTPUT ONE LINE.
       GO TO (20,30,40,50,60,70),K
    20 WRITE(OTAPE,90)   (FIELD6(M,1),M=1,11),
@@ -466,7 +466,7 @@ C-----CONVERT DATA TO NORMAL FORM.
       K=0
       DO 10 L=I1,I2
       K=K+1
-   10 CALL OUT9(X(L),FIELD6(1,K),3)
+   10 CALL OUT9X(X(L),FIELD6(1,K))
 C-----OUTPUT ONE LINE.
       GO TO (20,30,40,50,60,70),K
    20 WRITE(OTAPE,90)   (FIELD6(M,1),M=1,11),
@@ -844,6 +844,8 @@ C
 C     GIVEN ANY ZA (1000*Z+A) THIS ROUTINE WILL DEFINE A 10 CHARACTER
 C     EQUIVALENT IN THE FORM,
 C
+C     10/07/04 - ADDED Z = 104 THROUGH 110.
+C
 C     CHARACTER POSITION (1 THROUGH 10)
 C              1
 C     1234567890
@@ -870,7 +872,7 @@ C=======================================================================
       SAVE
       INTEGER ZA,Z,A
       CHARACTER*1 DUM1,DUM2,ZABCD,ZATAB,DIGITS,NEUTRON,FISSPRO,PHOTON
-      DIMENSION ZATAB(2,103),DUM1(2,54),DUM2(2,49),ZABCD(10),
+      DIMENSION ZATAB(2,110),DUM1(2,54),DUM2(2,56),ZABCD(10),
      1 DIGITS(10),NEUTRON(10),FISSPRO(10),PHOTON(10)
       EQUIVALENCE (ZATAB(1,1),DUM1(1,1)),(ZATAB(1,55),DUM2(1,1))
       DATA DIGITS/'0','1','2','3','4','5','6','7','8','9'/
@@ -893,7 +895,8 @@ C=======================================================================
      6 'A','t','R','n','F','r','R','a','A','c','T','h',
      7 'P','a','U',' ','N','p','P','u','A','m','C','m',
      8 'B','k','C','f','E','s','F','m','M','d','N','o',
-     9 'L','r'/
+     9 'L','r','R','f','D','b','S','g','B','h','H','a',
+     A 'M','t','D','s'/
       DATA NEUTRON/' ','N','e','u','t','r','o','n',' ',' '/
       DATA PHOTON /' ','P','h','o','t','o','n',' ',' ',' '/
       DATA FISSPRO/'F','i','s','s','.','P','r','o','d','.'/
@@ -930,7 +933,7 @@ C-----DEFINE Z AND A SEPARATELY.
 C-----DEFINE SYMBOL FOR ELEMENT.
       ZABCD(4)='-'
       ZABCD(7)='-'
-      IF(Z.GT.0.AND.Z.LE.103) GO TO 60
+      IF(Z.GT.0.AND.Z.LE.110) GO TO 60
       ZABCD(5)='?'
       ZABCD(6)='?'
       IF(Z.LT.0.OR.Z.GT.999) GO TO 90
@@ -1315,6 +1318,235 @@ C     SELECT F OR E FORMAT
 C
 C==============================================================
       IF(MF.NE.3) GO TO 180
+      IF(Z.LE.ZLOW.OR.Z.GE.ZHIGH) GO TO 180
+C==============================================================
+C
+C     F FORMAT
+C
+C     12345678901
+C      X.XXXXXXXX = 9 DIGITS
+C      .001234567
+C      123456789.
+C
+C==============================================================
+C-----DEFINE 6 TO 9 DIGIT MANTISSA WITH ROUNDING
+      IPOWER=8-IEXP
+      IF(IEXP.LT.0) IPOWER=8
+      IN=Z*TENS(IPOWER)
+C-----CHECK FOR OVERFLOW DUE TO ROUNDING
+      IF(IN-1000000000) 160,150,150
+  150 IN=100000000
+      IEXP=IEXP+1
+C-----DECIMAL POINT.
+  160 IDOT=3+IEXP
+      IF(IDOT.LE.2) THEN
+C----- IF < 1, MOVE DECIMAL POINT TO COLUMN 2 AND ADD A DIGIT
+      IDOT=2
+      IN=Z*10.0D+00*TENS(IPOWER)
+      ENDIF
+      FIELD(IDOT)='.'
+C-----MANTISSA - LAST DIGIT TO FIRST.
+      II=11
+      DO 170 I=2,11
+      IF(II.EQ.IDOT) GO TO 170
+      I2=IN/10
+      I3=IN-10*I2
+      FIELD(II)=DIGITS(I3)
+      IN=I2
+  170 II=II-1
+      RETURN
+C==============================================================
+C
+C     E FORMAT
+C
+C     12345678901
+C      X.XXXXX+NN = 6 DIGITS
+C      X.XXXXXX+N = 7 DIGITS
+C
+C==============================================================
+C-----DECIMAL POINT IS ALWAYS IN COLUMN 3
+  180 FIELD(3)='.'
+C
+C     SELECT 5 OR 6 DIGIT OUTPUT WITH ROUNDING
+C
+      IF(IABS(IEXP).GE.10) GO TO 200
+C
+C     6 DIGIT OUTPUT WITH ROUNDING
+C
+      ID=8
+      IN=(1.0D+05)*ZN
+C-----CHECK FOR OVERFLOW DUE TO ROUNDING
+      IF(IN-1000000) 220,190,190
+  190 IN=100000
+      IEXP=IEXP+1
+      IF(IABS(IEXP).LT.10) GO TO 220
+C
+C     5 DIGIT OUTPUT WITH ROUNDING
+C
+  200 ID=7
+      IN=(1.0D+04)*ZN
+C-----CHECK FOR OVERFLOW DUE TO ROUNDING
+      IF(IN-100000) 220,210,210
+  210 IN=10000
+      IEXP=IEXP+1
+C
+C     DEFINE MANTISSA
+C
+  220 IEXPS=ID+1
+      II=ID
+      DO 230 I=2,ID
+      IF(II.EQ.3) GO TO 230
+      I2=IN/10
+      I3=IN-10*I2
+      FIELD(II)=DIGITS(I3)
+      IN=I2
+  230 II=II-1
+C
+C     E
+C
+      FIELD(IEXPS) = 'E'
+      IEXPS = IEXPS + 1
+C
+C     SIGN OF EXPONENT
+C
+      IF(IEXP) 240,250,250
+  240 IEXP=-IEXP
+      FIELD(IEXPS)='-'
+      GO TO 260
+  250 FIELD(IEXPS)='+'
+C
+C     EXPONENT
+C
+  260 IF(IEXP-10) 280,270,270
+  270 KEXP=IEXP/10
+      FIELD(10)=DIGITS(KEXP)
+      IEXP=MOD(IEXP,10)
+  280 FIELD(11)=DIGITS(IEXP)
+      RETURN
+      END
+      SUBROUTINE OUT9X(ZIN,FIELD)
+C=======================================================================
+C
+C     IDENTICAL TO OUT9 BUT WITHOUT THRID ARGUMENT = MF
+C
+C     PURPOSE
+C     =======
+C     FORMAT NUMBER FOR OUTPUT TO INCLUDE AS MANY DIGITS OF
+C     ACCURACY AS POSSIBLE.
+C
+C     040923 - CHANGED ZLOW FROM 1.0D-4 TO 1.0D-3
+C              NEAR 1.0D-3 PRECISION GOES FROM 999,999 TO 1,000,000
+C              FOR SMOOTHEST TRANSITION FROM 6 TO 7 DIGITS
+C
+C     ARGUMENTS
+C     =========
+C     Z        = FLOATING POINT NUMBER OF BE OUTPUT (INPUT)
+C     FIELD    = 11A1 CHARACTERS TO OUTPUT          (OUTPUT)
+C
+C     METHOD
+C     ======
+C     COLUMNS            12345678901     ACCURACY
+C     -------------------------------------------
+C     0 TO 10^-9          1.2345E-12     5 DIGITS
+C     10^-9 TO 10^-3      1.23456E-8     6 DIGITS
+C     10^-3 TO 10^-2      .001234567     7 DIGITS
+C     10^-2 TO 10^-1      .012345678     8 DIGITS
+C     10^-1 TO 1          .123456789     9 DIGITS
+C     1 TO 10^9           12345.6789     9 DIGITS
+C     10^9 TO 10^10       1.23456E+9     6 DIGITS
+C     10^10 >             1.2345E+12     5 DIGITS
+C
+C     OUTPUT WILL BE IN 11 COLUMN FORMAT
+C
+C     WARNING - THIS IS NOT A GENERAL ROUNDING ROUTINE WHICH WILL WORK
+C               FOR ROUNDING TO ANY NUMBER OF DIGITS - IT WILL ONLY
+C               WORK PROPERLY FOR THE RANGES INDICATED ABOVE, FOR
+C               11 COLUMN OUTPUT.
+C
+C=======================================================================
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      SAVE
+      CHARACTER*1 FIELD,DIGITS,ZEROH,ELOWH,EHIGHH
+      DIMENSION DIGITS(0:9),FIELD(11),ZEROH(11),ELOWH(11),EHIGHH(11),
+     1 TENS(-100:100),ROUNDER(-100:100)
+      DATA DIGITS/
+     1 '0','1','2','3','4','5','6','7','8','9'/
+C-----RETURN FOR = 0
+      DATA ZEROH/
+     1 ' ','0','.','0',' ',' ',' ',' ',' ',' ',' '/
+C-----RETURN FOR = ELOW
+      DATA ELOWH/
+     1 ' ','1','.','0','0','0','0','0','E','-','4'/
+C-----RETURN FOR = EHIGH
+      DATA EHIGHH/
+     1 ' ','1','.','0','0','0','0','0','E','+','9'/
+C-----LOWER TRANSITION POINT FROM 7 TO 9 DIGIT OUTPUT
+      DATA ZLOW/1.0D-03/
+C-----UPPER TRANSITION POINT FROM 9 TO 7 DIGIT OUTPUT
+c     DATA ZHIGH/9999999995.0D+00/
+      DATA ZHIGH/1.0D+09/
+C-----ON FIRST CALL INITIALIZE POWERS OF 10
+      DATA IPASS/0/
+      IF(IPASS.NE.0) GO TO 50
+      IPASS=1
+      TENS(0)=1.0D+00
+      DO 10 I=1,100
+      TENS( I)=TENS(I-1)*10.0D+00
+      TENS(-I)=TENS(1-I)/10.0D+00
+   10 ROUNDER(I)  = 5.001D-05
+      DO 20 I=-100,-10
+   20 ROUNDER(I)  = 5.001D-05
+      DO 30 I=-9,-4
+   30 ROUNDER(I)  = 5.001D-06
+      ROUNDER(-3) = 5.001D-07
+      ROUNDER(-2) = 5.001D-08
+      ROUNDER(-1) = 5.001D-09
+      ROUNDER( 0) = 5.001D-09
+C     DO 5 I=1,10
+C     DO 5 I=1,9
+      DO 40 I=1,8
+   40 ROUNDER(I)  = 5.001D-09
+      ROUNDER(9)  = 5.001D-06
+C
+C     IMMEDIATELY RETURN 0.00000+00.
+C
+C-----02/14/04 - ADDED, JUST IN CASE
+   50 IF(DABS(ZIN).LT.0.0) GO TO 60
+      IF(ZIN) 80,60,90
+   60 DO 70 I=1,11
+   70 FIELD(I)=ZEROH(I)
+      RETURN
+C
+C     DEFINE SIGN OF MANTISSA AND ABSOLUTE MANTISSA
+C
+C-----NEGATIVE.
+   80 FIELD(1)='-'
+      Z=-ZIN
+      GO TO 100
+C-----POSITIVE.
+   90 FIELD(1)=' '
+      Z=ZIN
+C
+C     DEFINE EXPONENT AND NORMALIZED MANTISSA
+C
+  100 IEXP=DLOG10(Z)
+      IF(Z.LT.1.0D+00) IEXP = IEXP - 1
+      ZN=Z*TENS(-IEXP) + ROUNDER(IEXP)
+      IF(ZN-1.0D+00) 110,140,120
+  110 IEXP=IEXP-1
+      GO TO 140
+  120 IF(ZN-10.0D+00) 140,130,130
+  130 IEXP=IEXP+1
+      ZN=ZN/10.0D+00
+  140 Z = ZN*TENS(IEXP)
+C==============================================================
+C
+C     SELECT F OR E FORMAT
+C
+C==============================================================
+C----- 2/20/10 - this is the only difference from OUT9 = no test on MF
+C     IF(MF.NE.3) GO TO 180
+C----- 2/20/10 - this is the only difference from OUT9 = no test on MF
       IF(Z.LE.ZLOW.OR.Z.GE.ZHIGH) GO TO 180
 C==============================================================
 C
