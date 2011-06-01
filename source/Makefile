@@ -1,16 +1,16 @@
-#$Rev: 1962 $
+#$Rev: 2042 $
 #$Author: rcapote $
-#$Date: 2011-01-27 23:59:21 +0100 (Do, 27 Jän 2011) $
+#$Date: 2011-06-01 15:02:06 +0200 (Mi, 01 Jun 2011) $
 #
 #----GNU gfortran FORTRAN compiler
-#FC     =  gfortran
+FC     =  gfortran
 #CC     =  gcc
 #----flags for production compilation with gfortran
-#FFLAGS = -O3 -std=legacy
+FFLAGS = -O3 -std=legacy -ftree-vectorize
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
-#FFLAGS =  -g --bounds-check 
+#FFLAGS =  -g --bounds-check -std=legacy 
 
 #----GNU f95 FORTRAN compiler
 #FC     =  f95
@@ -36,7 +36,7 @@
 #FFLAGS = -Wall
 
 #----INTEL f95 compiler
-FC     =  ifort
+#FC     =  ifort
 #----flags for optimalization using ifort
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #FFLAGS = -arch pn4 -O3 -ipo
@@ -64,7 +64,7 @@ FC     =  ifort
 #----flag for Lahey/Fujitsu parallel
 #FFLAGS = --parallel
 
-#----From http://www.macresearch.org/best-fortran-compiler-leaopard
+#----From http://www.macresearch.org/best-fortran-compiler-leopard
 #----For Debugging under gfortran:
 #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none\
 #-fno-automatic
