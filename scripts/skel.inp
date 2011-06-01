@@ -5,8 +5,8 @@ xxx.   xx.           ;TARGET  A , Z
 1                    ;NUMBER OF PROTONS   TO BE EMITTED
 1                    ;NUMBER OF ALPHAS    TO BE EMITTED
 1                    ;NUMBER OF DEUTERONS TO BE EMITTED
-1                    ;NUMBER OF TRITONS   TO BE EMITTED
-1                    ;NUMBER OF He-3      TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       3.                                               
 LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
@@ -22,14 +22,14 @@ DEGAS      0.                               ! Spin conserving exciton model for 
 HMS        0.                               ! Monte Carlo Hybrid preequilibrium model
 *TUNE       0.90    Z0   A0    0            ! To fit the capture channel (commented)
 * OPTICAL MODEL INPUT
-DIRECT     0.                               ! Spherical optical model by default
 *OMPOT  -2405.       1                      ! OMP for the inverse neutron channel - Koning - Delaroche
 *OMPOT  -5405.       2                      ! OMP for the inverse proton channel  - Koning and Delaroche
 *OMPOT  -9600.       3                      ! OMP for the inverse alpha channel   - Avrigeanu et al
-*DIRECT     1.                                
-*DIRECT     2.                              ! CC calculation using the potential given by DIRPOT (RIPL # 2408)
+DIRECT     0.                               ! Spherical optical model by default
+*DIRECT     1.                              ! CC calculation for the incident channel only  
+*DIRECT     2.                              ! CC calculation for both the incident and inelastic channels)
 *DIRECT     3.                              ! DWBA calculation using the potential given by DIRPOT (RIPL # 2408)
-*DIRPOT -2408.       
+*DIRPOT -2408.                              ! OMP used for the incident (and/or inelastic) channels if DIRECT>0
 GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
 RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
 *KALMAN    1. 
