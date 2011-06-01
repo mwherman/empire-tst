@@ -94,35 +94,55 @@ C-M
 C-M  Manual for Program EMPEND
 C-M  =========================
 C-M  
-C-M  The EMPIRE output is processed and converted into ENDF 
-C-M  format. The ENDF formatted output file has to obey the
-C-M  rule of ordering the reactions in increasing order by
-C-M  the reaction MT number, so several sweeps of the EMPIRE
-C-M  file are made:
-C-M   - In the first sweep the cross sections and the
-C-M     corresponding reaction Q-values are extracted.
-C-M   - In the next sweep all reactions for which particle
-C-M     spectra are given are identified.
-C-M   - Another sweep is made for each reaction requiring
-C-M     an ENDF file-4 section. Particularly, these
-C-M     data are entered for discrete level reactions.
-C-M   - Next follows a sweep for each reaction having
-C-M     energy-angle correlated outgoing particle distributions.
+C-M  The EMPIRE output is processed and converted into ENDF format.
+C-M  The ENDF formatted output file has to obey the rule of ordering
+C-M  the reactions in increasing order by the reaction MT number,
+C-M  so several sweeps of the EMPIRE file are made:
+C-M   - In the first sweep the cross sections and the corresponding
+C-M     reaction Q-values are extracted. All reading is done with
+C-M     the REAMF3 routine.
+C-M   - In the next sweep all reactions for which particle spectra
+C-M     are given are identified. All reading is done with the SCNMF6
+C-M     routine.
+C-M   - Another sweep is made for each reaction having angular
+C-M     distributions. This applies to the elastic and all discrete
+C-M     level reactions (inelastic neutron, alpha and proton
+C-M     emission).
+C-M   - Next follows a sweep for each reaction having energy-angle
+C-M     correlated outgoing particle distributions.
 C-M   - Finally, a sweep is made for the remaining reactions,
 C-M     particularly the (n,gamma) reaction, for which the
-C-M     particle distributions are coded in ENDF Files-12, 14
-C-M     and 15.
+C-M     particle distributions are coded in ENDF File-6.
 C-M  
-C-M  The cross section data found on the file are fitted by
-C-M  a cubic spline and entered into the output ENDF file on
-C-M  a user-defined dense energy grid, thinned to the specified
+C-M  In the first sweep radionuclide production cross sections are
+C-M  located and the MT numbers are assigned, when possible.
+C-M  Cross sections, which can not be identified uniquely by an MT
+C-M  number are assigned MT=10(Z*1000+A)+LFS where LFS is the final
+C-M  isomeric state of the nuclide. The spin of the target nucleus,
+C-M  the S0-strength function, the average gamma width, the average
+C-M  level spacing and the energy-dependent scattering radius are
+C-M  also extracted to enable the assembly of the dummy resonance
+C-M  parameter file.
+C-M    In the second sweep, all reactions that do not have explicitly
+C-M  given spectra are added to MT=5. When many exclusive spectra are
+C-M  requested in the EMPIRE calculation, there may be cases where
+C-M  particle spectra are given but no MT number is assigned. The
+C-M  spectra are ignored, the cross sections are added to MT=5 and
+C-M  particle production cross sections for this MT are incremented.
+C-M    After the second sweep, all necessary information is
+C-M  available to write the comments-section (MF=1) and the prompt
+C-M  nu-bar (if the nuclide is fissile). For incident neutrons a
+C-M  dummy resonance file (MF=2) is constructed.
+C-M    The cross section data found on the file are fitted by a
+C-M  cubic spline and entered into the output ENDF file on a
+C-M  user-defined dense energy grid, thinned to the specified
 C-M  tolerance and taking reaction thresholds into account.
-C-M  If desired, the spline interpolation may be suppressed
-C-M  and the energy points found on the file are entered
-C-M  directly into the ENDF formatted file.
+C-M  If desired, the spline interpolation may be suppressed and
+C-M  the energy points found on the file are entered directly into
+C-M  the ENDF formatted file.
 C-M  
 C-M  The angular distributions for discrete level reactions
-C-M  that appear in the ENDF file-4 sections are extracted from
+C-M  that appear in the ENDF File-4 sections are extracted from
 C-M  the spectra on the EMPIRE output file, interpolated to
 C-M  the appropriate energy, if necessary. Legendre polynomial
 C-M  coefficients in the centre-of-mass are fitted to the
@@ -156,23 +176,54 @@ C-M  screen. The required input is entered in response to the
 C-M  prompts, which are the following:
 C-M   - The name of the EMPIRE output file to be processed.
 C-M   - The name of the ENDF formatted file to be written.
-C-M   - Number of subintervals per incident neutron energy 
-C-M     interval on the EMPIRE output file. The subintervals
-C-M     define the fine energy mesh on the ENDF formatted
-C-M     file. If zero is entered, only the points on the
-C-M     EMPIRE output are entered to the ENDF formatted file.
-C-M   - Thinning tolerance limit [%] to reduce the number of
-C-M     cross section points. Data points which, can be
-C-M     reproduced from the neighbouring points by linear 
-C-M     interpolation to within the specified tolerance, are 
-C-M     removed. Entering a negative value for the thinning
-C-M     tolerance limit causes thinning to be suppressed.
+C-M   - Number of subintervals per incident neutron energy interval
+C-M     on the EMPIRE output file. The subintervals define the fine
+C-M     energy mesh for the cross sections on the ENDF formatted
+C-M     file. The following are applicable:
+C-M       0  Only the points on the EMPIRE output are entered to the
+C-M          ENDF formatted file.
+C-M       1  The points at reaction thresholds are entered. The energy
+C-M          points above are as found in the EMPIRE output file.
+C-M       n  Threshold points are entered, but in addition, each
+C-M          interval on the EMPIRE output is subdivided into "n"
+C-M          subintervals. Cross section values at intermediate points
+C-M          are defined by a cubic spline fit.
+C-M   - Thinning tolerance limit [%] to reduce the number of cross
+C-M     section points. Data points which, can be reproduced from the
+C-M     neighbouring points by linear interpolation to within the
+C-M     specified tolerance, are removed. Entering a negative value
+C-M     for the thinning tolerance limit causes thinning to be
+C-M     suppressed.
 C-M   - ENDF material number identifier.
 C-M   - NLIB number assigned to the evaluation (see ENDF-6 manual).
 C-M     The parameters are optional.
 C-M   - ALAB, EDATE, AUTHOR string, where each of the listed
 C-M     parameters occupies 11 columns (see ENDF-6 manual for
 C-M     details). The parameters are optional.
+C-M
+C-M   NOTES:
+C-M   - Extensive exclusive spectra calculations in EMPIRE
+C-M     should be avoided when ENDF formatting is needed, since
+C-M     for complex reactions when a residual nuclide can be
+C-M     produced from more than one reaction, the assignment of
+C-M     spectra can not be done uniquely. It is recommended to
+C-M     allow up to 4 emitted neutrons and only a single charged
+C-M     particle.
+C-M   - All text preceeding the printout for first energy is
+C-M     transferred to the comments section in the ENDF file (FM=1,
+C-M     MT=451). The easiest way to insert customised comments into
+C-M     the ENDF file is to modify (manually) the EMPIRE output.
+C-M   - The resonance file (MF=2) that is generated for files
+C-M     with incident neutrons is by no means a realistic cross
+C-M     section representation. It is given for completeness, when
+C-M     no information on the resonances (other than from the
+C-M     systematics is available). The code places resonances spaced
+C-M     uniformly around the thermal value according to the given
+C-M     average level spacing. The neutron width is defined from the
+C-M     S0 strength function and the gamma-widths are the average
+C-M     gamma widths. The assigned resonance formalism is the
+C-M     Multi-level Breit-Wigner formalism with energy-dependent
+C-M     scattering radius.
 C-M
 C-M  To monitor the formatting process for quality assurance
 C-M  purposes, the EMPEND.LOG file is written in which the
