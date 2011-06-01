@@ -10,13 +10,13 @@
 
 compiler = "FC=gfortran"
 #flags1 = "FFLAGS=-O3 -std=legacy -m64"
-flags2 = "FFLAGS=-O3 -std=legacy"
+flags2 = "FFLAGS=-O3 -std=legacy -ftree-vectorize"
 
 # empire program. See also source/Makefile
 SOURCE = source
 
 # extra utilities:
-UTIL = util/c4sort util/c4zvd util/Calc_Cov util/checkr util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/x4toc4
+UTIL = util/kercen util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/x4toc4
 
 # more utilities that require g77 instead of default compiler:
 OTHER = util/lsttab util/resonance util/kalman
