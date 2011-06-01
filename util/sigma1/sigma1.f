@@ -147,6 +147,42 @@ C                                  OUTPUT FILES.
 C     VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII.
 C                                 *INCREASED PAGE SIZE FROM 60,000
 C                                  TO 360,000 ENERGY POINTS.
+C     VERS. 2008-1 (APRIL 2008)   *1/2 INITIAL ENERGY POINT SPACING
+C                                 *72 CHARACTER FILE NAMES.
+C     VERS. 2010-1 (Apr. 2010)    *ASSUME LOW ENERGY LOG-LOG VARIATION
+C                                  UP TO 1/A (eV) FOR ALL BUT TOTAL AND
+C                                  ELASTIC.
+C                                 *CHANGED DEFAULT UNCERTAINTY TO 0.01%
+C                                  FROM 0.1%
+C                                 *ALLOW MULTIPLE, ADJACENT UNRESOLVED
+C                                  RESONANCE REGIONS = COMBINE INTO ONE
+C                                  LARGER ENERGY RANGE TO COPY.
+C                                 *DO NOT BROADEN SECTIONS THAT START
+C                                  ABOVE 1 MILLION KT - PREVIOUSLY IT
+C                                  WAS ASSUMED TOTAL, ELASTIC, CAPTURE
+C                                  AND FISSION, AND LARGE SECTIONS (OVER
+C                                  10,000 ENERGY POINTS) WOULD BROADEN.
+C
+C     OWNED, MAINTAINED AND DISTRIBUTED BY
+C     ------------------------------------
+C     THE NUCLEAR DATA SECTION
+C     INTERNATIONAL ATOMIC ENERGY AGENCY
+C     P.O. BOX 100
+C     A-1400, VIENNA, AUSTRIA
+C     EUROPE
+C
+C     ORIGINALLY WRITTEN BY
+C     ------------------------------------
+C     Dermott E. Cullen
+C     University of California (retired)
+C-----Present Home Address----------------------------------------------
+C     Dermott E. Cullen
+C     1466 Hudson Way
+C     Livermore, CA 94550
+C     U.S.A.
+C     Telephone  925-443-1911
+C     E. Mail    RedCullen1@Comcast.net
+C     Website    http://home.comcast.net/~redcullen1
 C
 C     Acknowledgement 2004
 C     --------------------
@@ -160,27 +196,6 @@ C     feedback including,
 C     1) Bret Beck  - reported a problem at the resolved/unresolved
 C                     energy boundary.
 C     2) S. Ganesan - reported a problem for small temperature changes.
-C
-C     OWNED, MAINTAINED AND DISTRIBUTED BY
-C     ------------------------------------
-C     THE NUCLEAR DATA SECTION
-C     INTERNATIONAL ATOMIC ENERGY AGENCY
-C     P.O. BOX 100
-C     A-1400, VIENNA, AUSTRIA
-C     EUROPE
-C
-C     ORIGINALLY WRITTEN BY
-C     ------------------------------------
-C     DERMOTT E. CULLEN
-C     UNIVERSITY OF CALIFORNIA
-C     LAWRENCE LIVERMORE NATIONAL LABORATORY
-C     L-159
-C     P.O. BOX 808
-C     LIVERMORE, CA 94550
-C     U.S.A.
-C     TELEPHONE  925-423-7359
-C     E. MAIL    CULLEN1@LLNL.GOV
-C     WEBSITE    HTTP://WWW.LLNL.GOV/CULLEN1
 C
 C     AUTHORS MESSAGE
 C     ---------------
@@ -282,7 +297,7 @@ C     THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED
 C     BY THE ADDITION OF THREE COMMENTS CARDS AT THE END OF EACH
 C     HOLLERITH SECTION IN THE FORM
 C
-C     ***************** PROGRAM SIGMA1 (2007-1) ***************
+C     ***************** PROGRAM SIGMA1 (2010-1) ***************
 C     DATA DOPPLER BROADENED TO 300.0   KELVIN AND
 C     DATA THINNED TO WITHIN AN ACCURACY OF  0.1 PER-CENT
 C
@@ -445,9 +460,9 @@ C                  = 1 - SET = 0
 C           56-66  UNRESOLVED RESONANCE REGION TREATMENT
 C                  = 0 - COPY (NO BROADENING)
 C                  = 1 - IGNORE (BROADEN)
-C        2   1-60  ENDF/B INPUT DATA FILENAME
+C        2   1-72  ENDF/B INPUT DATA FILENAME
 C                  (STANDARD OPTION = ENDFB.IN)
-C        3   1-60  ENDF/B OUTPUT DATA FILENAME
+C        3   1-72  ENDF/B OUTPUT DATA FILENAME
 C                  (STANDARD OPTION = ENDFB.OUT)
 C      4-N   1-11  LOWER MAT OR ZA LIMIT
 C           12-22  UPPER MAT OR ZA LIMIT
@@ -732,18 +747,18 @@ C-----END ENDF/B FORMAT OUTPUT FILE.
   210 CONTINUE
       GO TO 180
   220 FORMAT(1X,79('-')/' Unresolved ',11A1,' to',11A1,
-     1 ' eV',4X,'MAT Totals',2I7/1X,79('-'))
-  230 FORMAT(1X,79('-')/' No Unresolved Region',23X,'MAT Totals',2I7/
+     1 ' eV',4X,'MAT Totals',2I9/1X,79('-'))
+  230 FORMAT(1X,79('-')/' No Unresolved Region',23X,'MAT Totals',2I9/
      1 1X,79('-'))
-  240 FORMAT(1X,79('-')/43X,'Tape Totals',2I7/1X,79('-'))
-  250 FORMAT(' Doppler Broaden ENDF/B Cross Sections (SIGMA1 2007-1)'/
+  240 FORMAT(1X,79('-')/43X,'Tape Totals',2I9/1X,79('-'))
+  250 FORMAT(' Doppler Broaden ENDF/B Cross Sections (SIGMA1 2010-1)'/
      1 1X,79('-'))
   260 FORMAT(1X,79('-')/' ENDF/B Tape Label'/1X,79('-')/1X,16A4,A2,I4/
      1 1X,79('-')/
      2 ' Projectile',4X,'  MAT  MT ENDF/B',5X,'Kelvin',5X,
-     3 'Q-Value Points Points'/
-     3 '       Material',9X,' Format',9X,'In',10X,'eV','     In',
-     3 '    Out'/1X,79('-'))
+     3 'Q-Value   Points   Points'/
+     3 '       Material',9X,' Format',9X,'In',10X,'eV','       In',
+     3 '      Out'/1X,79('-'))
   270 FORMAT(///' Extension'/1X,9('-')/
      1 ' Cross Section Extension Can be Avoided by'/
      2 ' Thinning Data or Doppler Broadening in Steps'/
@@ -838,7 +853,7 @@ C               1         2         3         4         5         6
 C       12345678901234567890123456789012345678901234567890123456789012
 C       3456
       DATA PROGDOC/
-     1 ' ***************** Program SIGMA1 (VERSION 2007-1) ***********',
+     1 ' ***************** Program SIGMA1 (VERSION 2010-1) ***********',
      2 ' Data Doppler Broadened to12345678901 Kelvin                  ',
      3 ' for All Data Greater than12345678901 barns in Absolute Value ',
      4 ' Data Linearized to Within an Accuracy of12345678901 per-cent ',
@@ -968,35 +983,53 @@ C-----INITIALIZE ERROR FLAG OFF.
 C-----HEAD RECORD ALREADY READ. DEFINE NUMBER OF ISOTOPES.
       NIS=N1H
 C-----DO LOOP OVER ALL ISOTOPES
-      DO 270 IS=1,NIS
+      DO 290 IS=1,NIS
       CALL CARDIO(C1H,C2H,L1H,LFW,NER,N2H)
 C-----DO LOOP OVER ALL ENERGY RANGES
-      DO 260 JER=1,NER
+      DO 280 JER=1,NER
       CALL CARDIO(EL,EH,LRU,LRF,N1H,N2H)
 C-----DEFINE LRU FOR INTERNAL USE AS ORIGINAL LRU (BEFORE RECENT).
       IF(LRU.GT.3) LRU=LRU-3
-      IF(LRU-1) 10,50,20
+      IF(LRU-1) 10,70,20
 C
 C     NO RESONANCE PARAMETERS PRESENT
 C
 C-----COPY SECTION WITH NO RESONANCE PARAMETERS.
    10 CALL CARDIO(C1H,C2H,L1H,L2H,N1H,N2H)
-      GO TO 260
+      GO TO 280
 C
 C     RESONANCE PARAMETERS PRESENT
 C
+C     ALLOW FOR MULTIPLE, ADJACENT UNRESOLVED REGIONS.
+C
 C-----CHECK FOR ONLY ONE UNRESOLVED RESONANCE REGION.
-   20 IF(UREVAL.LE.0) GO TO 40
-      IF(DABS(EULOW-EL).LE.0.0001*DABS(EULOW)) GO TO 30
-      IF(EL.GT.EULOW) EULOW=EL
-      IBAD=1
-   30 IF(DABS(EUHIGH-EH).LE.0.0001*DABS(EUHIGH)) GO TO 50
-      IF(EH.LT.EUHIGH) EUHIGH=EH
-      IBAD=1
-      GO TO 50
+   20 IF(UREVAL.LE.0) GO TO 60
+C-----MULTIPLE UNRESOLVED - FIRST CHECK FOR SAME ENERGY RANGE.
+      IF(DABS(EULOW-EL) .LE.0.0001*DABS(EULOW).AND.
+     1   DABS(EUHIGH-EH).LE.0.0001*DABS(EUHIGH)) GO TO 70
+C-----MULTIPLE UNRESOLVED - NEXT CHECK FOR ADJACENT ENERGY RANGE.
+      IF(DABS(EUHIGH-EL).GT.0.0001*DABS(EUHIGH)) GO TO 40
+C-----EUHIGH OF LAST = EL OF NEXT = ADJACENT RANGES - EXTEND RANGE UP
+      WRITE(OUTP,30) EULOW,EUHIGH,EL,EH
+      WRITE(*   ,30) EULOW,EUHIGH,EL,EH
+   30 FORMAT(1X,79('-')/
+     1       ' WARNING - Combining Adjacent Unresolved Ranges'/
+     1       '          ',1pd11.4,' eV to ',1pd11.4,' eV and'/
+     1       '          ',1pd11.4,' eV to ',1pd11.4,' eV'/1X,79('-'))
+      EUHIGH = EH
+      GO TO 70
+   40 IF(DABS(EULOW-EH).GT.0.0001*DABS(EULOW)) GO TO 50
+C-----EULOW OF LAST = EH OF NEXT = ADJACENT RANGES - EXTEND RANGE DOWN
+      WRITE(OUTP,30) EL,EH,EULOW,EUHIGH
+      WRITE(*   ,30) EL,EH,EULOW,EUHIGH
+      EULOW = EL
+      GO TO 70
+C-----MULTIPLE UNRESOLVED INCOMPATIBLE RANGES
+   50 IBAD=1
+      GO TO 70
 C-----SET FLAG TO INDICATE THE PRESENCE OF AN UNRESOLVED RESONANCE
 C-----REGION AND DEFINE ENERGY LIMITS OF THE UNRESOLVED REGION.
-   40 UREVAL=1
+   60 UREVAL=1
       EULOW=EL
       EUHIGH=EH
 C-----------------------------------------------------------------------
@@ -1010,74 +1043,74 @@ C     LRF= 1 - ENERGY INDEPENDENT WIDTHS (EXCEPT POSSIBLY FISSION)
 C        = 2 - ENERGY   DEPENDENT WIDTHS
 C
 C-----------------------------------------------------------------------
-   50 IF(LRU.NE.1) GO TO 60    ! Resolved?
+   70 IF(LRU.NE.1) GO TO 80    ! Resolved?
       IF(LRF.EQ.1.OR.          ! Single Level Breit-Wigner
      1   LRF.EQ.2.OR.          ! Multi-Level  Breit-Wigner
-     2   LRF.EQ.3) GO TO 70    ! Reich=Moore
-      IF(LRF.EQ.4) GO TO 120   ! Adler-Adler
-      IF(LRF.EQ.7) GO TO 150   ! New Reich-Moore
+     2   LRF.EQ.3) GO TO 90    ! Reich=Moore
+      IF(LRF.EQ.4) GO TO 140   ! Adler-Adler
+      IF(LRF.EQ.7) GO TO 170   ! New Reich-Moore
 C-----ILLEGAL - IGNORE REMAINDER OF FILE 2
-      GO TO 280
-   60 IF(LRU.NE.2) GO TO 280   ! Unresolved?
-      IF(LRF.EQ.1) GO TO 170   ! Energy Independent Widths
-      IF(LRF.EQ.2) GO TO 240   ! Energy   Dependent Widths
+      GO TO 300
+   80 IF(LRU.NE.2) GO TO 300   ! Unresolved?
+      IF(LRF.EQ.1) GO TO 190   ! Energy Independent Widths
+      IF(LRF.EQ.2) GO TO 260   ! Energy   Dependent Widths
 C-----ILLEGAL - IGNORE REMAINDER OF FILE 2
-      GO TO 280
+      GO TO 300
 C-----------------------------------------------------------------------
 C
 C     BREIT-WIGNER (SINGLE OR MULTI-LEVEL) OR REICH-MOORE FORMALISM
 C
 C-----------------------------------------------------------------------
 C-----IF SCATTERING RADIUS IS ENERGY DEPENDENT COPY TABULATED VALUES.
-   70 IF(N1H.EQ.0) GO TO 100
-      IF(LRF.NE.1.AND.LRF.NE.2) GO TO 100
+   90 IF(N1H.EQ.0) GO TO 120
+      IF(LRF.NE.1.AND.LRF.NE.2) GO TO 120
       CALL CARDIO(C1H,C2H,L1H,L2H,N1H,N2H)
 C-----SKIP SCATTERING RADIUS INTERPOLATION LAW.
-      DO 80 I=1,N1H,3
-   80 CALL COPY1
+      DO 100 I=1,N1H,3
+  100 CALL COPY1
 C-----SKIP SCATTERING RADIUS TABULATED VALUES.
-      DO 90 I=1,N2H,3
-   90 CALL COPY1
+      DO 110 I=1,N2H,3
+  110 CALL COPY1
 C-----READ NEXT CARD.
-  100 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
+  120 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
 C-----LOOP OVER ALL L STATES
-      DO 110 ILS=1,NLS
+      DO 130 ILS=1,NLS
 C-----READ NEXT CARD.
       CALL CARDIO(C1H,C2H,L1H,L2H,NRS6,NRS)
 C-----COPY RESONANCE PARAMETERS.
-      DO 110 IRS=1,NRS
-  110 CALL COPY1
-      GO TO 260
+      DO 130 IRS=1,NRS
+  130 CALL COPY1
+      GO TO 280
 C-----------------------------------------------------------------------
 C
 C     ADLER-ADLER FORMALISM
 C
 C-----------------------------------------------------------------------
 C-----READ NEXT CARD.
-  120 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
+  140 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
 C-----READ BACKGROUND CORRECTIONS.
       CALL CARDIO(C1H,C2H,L1H,L2H,NX6,N2H)
 C-----COPY BACKGROUND CORRECTION CONSTANTS.
-      DO 130 I=1,NX6,6
-  130 CALL COPY1
+      DO 150 I=1,NX6,6
+  150 CALL COPY1
 C-----LOOP OVER L STATES
-      DO 140 I=1,NLS
+      DO 160 I=1,NLS
       CALL CARDIO(C1H,C2H,L1H,L2H,NJS,N2H)
 C-----LOOP OVER J STATES
-      DO 140 J=1,NJS
+      DO 160 J=1,NJS
       CALL CARDIO(C1H,C2H,L1H,L2H,N1H,NLJ)
 C-----COPY ALL RESONANCE DATA
-      DO 140 K=1,NLJ
+      DO 160 K=1,NLJ
       CALL COPY1
-  140 CALL COPY1
-      GO TO 260
+  160 CALL COPY1
+      GO TO 280
 C-----------------------------------------------------------------------
 C
 C     NEW REICH-MOORE FORMALISM
 C
 C-----------------------------------------------------------------------
 C-----DEFINE NUMBER OF J STATES
-  150 CALL CARDIO(C1,C2,L1,L2,NJS,N2)
+  170 CALL CARDIO(C1,C2,L1,L2,NJS,N2)
 C-----DEFINE NUMBER OF PARTICLE-PAIRS
       CALL CARDIO(C1,C2,L1,L2,NPP12,N2)
 C-----COPY PARTICLE-PAIR DATA
@@ -1085,7 +1118,7 @@ C-----COPY PARTICLE-PAIR DATA
       CALL COPY1
       ENDDO
 C-----LOOP OVER J STATES
-      DO 160 IJ=1,NJS
+      DO 180 IJ=1,NJS
 C-----J, PARITY, AND NUMBER OF CHANNELS
       CALL CARDIO(C1,C2,L1,L2,NCH6,N2)
 C-----COPY CHANNEL DATA
@@ -1098,78 +1131,78 @@ C-----COPY RESONANCE PARAMETERS
       DO N=1,NRS
       CALL COPY1
       ENDDO
-  160 CONTINUE
-      GO TO 280
+  180 CONTINUE
+      GO TO 300
 C-----------------------------------------------------------------------
 C
 C     UNRESOLVED WITH ENERGY INDEPENDENT WIDTHS.
 C
 C-----------------------------------------------------------------------
 C-----TEST IF FISSION WIDTHS GIVEN
-  170 IF(LFW) 180,180,200
+  190 IF(LFW) 200,200,220
 C-----FISSION WIDTHS NOT GIVEN
-  180 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
+  200 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
 C-----LOOP OVER ALL L-STATES
-      DO 190 ILS=1,NLS
+      DO 210 ILS=1,NLS
       CALL CARDIO(C1H,C2H,L1H,L2H,N1H,NJS)
-      DO 190 N=1,NJS
-  190 CALL COPY1
-      GO TO 260
-C-----FISSION WIDTHS GIVEN (LFW=1)
-  200 CALL CARDIO(C1H,C2H,L1H,L2H,NE,NLS)
-C-----COPY FISSION WIDTH ENERGY POINTS
-      DO 210 I=1,NE,6
+      DO 210 N=1,NJS
   210 CALL COPY1
+      GO TO 280
+C-----FISSION WIDTHS GIVEN (LFW=1)
+  220 CALL CARDIO(C1H,C2H,L1H,L2H,NE,NLS)
+C-----COPY FISSION WIDTH ENERGY POINTS
+      DO 230 I=1,NE,6
+  230 CALL COPY1
 C-----LOOP OVER L-STATES
-      DO 230 I=1,NLS
+      DO 250 I=1,NLS
       CALL CARDIO(C1H,C2H,L1H,L2H,NJS,N2H)
 C-----LOOP OVER J STATES
-      DO 230 J=1,NJS
+      DO 250 J=1,NJS
       CALL CARDIO(C1H,C2H,L1H,L2H,NEP6,N2H)
-      DO 220 K=1,NEP6,6
-  220 CALL COPY1
-  230 CONTINUE
-      GO TO 260
+      DO 240 K=1,NEP6,6
+  240 CALL COPY1
+  250 CONTINUE
+      GO TO 280
 C-----------------------------------------------------------------------
 C
 C     UNRESOLVED WITH ENERGY DEPENDENT WIDTHS.
 C
 C-----------------------------------------------------------------------
 C-----READ NEXT CARD.
-  240 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
+  260 CALL CARDIO(C1H,C2H,L1H,L2H,NLS,N2H)
 C-----DO LOOP OVER L-STATES
-      DO 250 I=1,NLS
+      DO 270 I=1,NLS
       CALL CARDIO(C1H,C2H,L1H,L2H,NJS,N2H)
-      DO 250 J=1,NJS
+      DO 270 J=1,NJS
       CALL CARDIO(C1H,C2H,L1H,L2H,NE6P6,N2H)
 C-----COPY NUMBER OF DEGREES OF FREEDOM AND PARAMETERS.
-      DO 250 K=1,NE6P6,6
-  250 CALL COPY1
-  260 CONTINUE
-  270 CONTINUE
+      DO 270 K=1,NE6P6,6
+  270 CALL COPY1
+  280 CONTINUE
+  290 CONTINUE
 C-----------------------------------------------------------------------
 C
 C     END OF RESONANCE REGION (FILE 2) DATA.
 C
 C-----------------------------------------------------------------------
 C-----PRINT WARNING IF UNRESOLVED RESONANCE REGION IS NOT UNIQUE.
-  280 IF(UREVAL.LE.0) GO TO 300
-      IF(EULOW.LT.EUHIGH) GO TO 290
+  300 IF(UREVAL.LE.0) GO TO 320
+      IF(EULOW.LT.EUHIGH) GO TO 310
       UREVAL=0
-      WRITE(OUTP,320) IZA,MATH,MTH,FMTHOL
-      WRITE(*   ,320) IZA,MATH,MTH,FMTHOL
-      GO TO 300
-  290 IF(IBAD.GT.0) WRITE(OUTP,310) IZA,MATH,MTH,FMTHOL
-      IF(IBAD.GT.0) WRITE(*   ,310) IZA,MATH,MTH,FMTHOL
-  300 RETURN
-  310 FORMAT(1X,I6,2I5,2X,A2,
+      WRITE(OUTP,340) IZA,MATH,MTH,FMTHOL
+      WRITE(*   ,340) IZA,MATH,MTH,FMTHOL
+      GO TO 320
+  310 IF(IBAD.GT.0) WRITE(OUTP,330) IZA,MATH,MTH,FMTHOL
+      IF(IBAD.GT.0) WRITE(*   ,330) IZA,MATH,MTH,FMTHOL
+  320 RETURN
+  330 FORMAT(1X,I6,2I5,2X,A2,
      1 ' WARNING - Unresolved Resonance Energy Range NOT the Same'/
      2 29X,' for ALL Isotopes and Spin States. This Violates ENDF/B'/
      3 29X,' Conventions. The Unresolved Resonance Energy Range'/
      4 29X,' will be Considered to Extend from the Maximum Lower'/
      5 29X,' Energy Limit up to the Mimimum Upper Energy Limit'/
      6 29X,' of ALL the Unresolved Ranges Defined for this MAT.')
-  320 FORMAT(1X,I6,2I5,2X,A2,
+  340 FORMAT(1X,I6,2I5,2X,A2,
      1 ' WARNING - Unresolved Resonance Energy Range NOT the Same'/
      2 29X,' for ALL Isotopes and Spin States. This Violates ENDF/B'/
      3 29X,' Conventions. Cannot Locate ANY Energy Range that'/
@@ -1197,6 +1230,7 @@ C=======================================================================
      1 N2TOT,N2SCR
       COMMON/PAGER/NPAGE,NPT2,NPT3,NP1P1,NP2P1
       COMMON/HOTS/ALPHA,HOTSY1,HOTSY2,TEMPK,TEMPEF,N2TAPI,N2TAPO
+      COMMON/LOGLOGE/ELOGLOG
       COMMON/HEADER/ZA,AWR,L1H,L2H,N1H,N2H,MATH,MFH,MTH,NOSEQ
       COMMON/LEADER/C1,Q,L1,L2,N1,N2,MAT,MF,MT
       COMMON/ENDFIO/INP,OUTP,ITAPE,OTAPE
@@ -1288,6 +1322,16 @@ C-----NO.
       GO TO 90
 C-----YES.
    80 ALPHA=(AWR/ATWTP)/(BOLTZM*TEMPEF)
+C-----DEFINE CUTOFF ENERGY FOR LOW ENERGY LOG-LOG ASSUMPTION.
+      IF(MTH.LE.2) THEN
+      ELOGLOG = 0.0D+0             ! total an elastic
+      ELSE
+c-----this is the same as older versions, but easier and faster
+c-----E * a   < 40,   a = atwt/(kT) ~ 40*atwt (room kt~ 1/40 eV)
+c-----E *atwt < 1
+c-----E       < 1/atwt
+      ELOGLOG = 1.0D+0*(ATWTP/AWR) ! capture, fission, etc.
+      ENDIF
 C-----INITIALIZE FLAG TO INDICATE BEGINNING OF SECTION.
    90 ISTART=1
 C-----INITIALIZE TOTAL NUMBER OF POINTS IN SECTION AND NUMBER OF POINTS
@@ -1396,8 +1440,8 @@ C-----------------------------------------------------------------------
       RETURN
   160 FORMAT(///'  Interpolation Law is NOT Linear-Linear'/
      1 '  MAT/MF/MT=',I5,I3,I4/
-     2 '  ---------------------------------------'/'    NBT  INT'/
-     3 '  ---------------------------------------'/(I7,I5))
+     2 '  ---------------------------------------'/'      NBT  INT'/
+     3 '  ---------------------------------------'/(I9,I5))
   170 FORMAT(//'  Execution Terminated'///)
       END
       SUBROUTINE FILLUP
@@ -1421,6 +1465,7 @@ C=======================================================================
      1 UNRES1,UNRES2,UREVAL,UREACT
       COMMON/HEADER/C1H,AWR,L1H,L2H,N1H,N2H,MATH,MFH,MTH,NOSEQ
       COMMON/HOTS/ALPHA,HOTSY1,HOTSY2,TEMPK,TEMPEF,N2TAPI,N2TAPO
+      COMMON/LOGLOGE/ELOGLOG
       COMMON/SLIM/ISTART,NOTHIN,ITHIN1,ITHIN2,ITHIN3,MTEND
       COMMON/INDEX/COLD1,COLD2,COLD1P,COLD2P,HOT1,HOT2,HOT3,HOT3M1,N2IN,
      1 N2TOT,N2SCR
@@ -1433,6 +1478,7 @@ C=======================================================================
       COMMON/MAXIE/DEMAXC,DEMAXH,DEMAXLOW,DEMAXHI
       COMMON/POINT1/EIN1,EUSE1
       COMMON/IWATCH/MONITR,MAKEPLUS,MYUNRES
+      COMMON/TEMPO/TEMP3,IVERSE
       INCLUDE 'sigma1.h'
       DATA XCKM1/0.0D+00/
       DATA EKM1/0.0D+00/
@@ -1509,10 +1555,6 @@ C-----BROADEN.
       AX=ALPHA*EIN(IFILL)
       TOOHI=1
       ITHRES=0
-C-----NEVER TREAT TOTAL, ELASTIC, FISSION OR CAPTURE AS A THRESHOLD
-C-----REACTION.
-      IF(MTH.EQ.1.OR.MTH.EQ.2.OR.MTH.EQ.18.OR.MTH.EQ.19.OR.
-     1 MTH.EQ.102) GO TO 100
 C-----NO DOPPLER BROADENING IF THRESHOLD OVER 1,000,000*KT/A.
       IF(AX.LT.1000000.0) GO TO 100
 C-----SECTION WILL ONLY BE COPIED. TURN OFF UNRESOLVED REGION FLAG.
@@ -1679,9 +1721,9 @@ C     USE LOG-LOG INTERPOLATION AT LOW ENERGY
 C
 C-----------------------------------------------------------------------
       ITERP=2
-C-----02/03/00 - ADD LOG-LOG ONLY IF CROSS SECTIONS > 0
-      IF(XCIN(IFILL).GT.0.0.AND.XCKM1.GT.0.0.AND.
-     1   ALPHA*ENEXT.LE.4.0D+01) ITERP=5
+      IF(ENEXT.LT.ELOGLOG) THEN
+      IF(XCIN(IFILL).GT.0.0.AND.XCKM1.GT.0.0) ITERP = 5
+      ENDIF
       XCCOLD(K)=TERPIT(ENEXT,EIN(IFILL),EKM1,XCIN(IFILL),XCKM1,ITERP)
       ARG=ALPHA*ECOLD(K)
       YCOLD(K)=DSQRT(ARG)
@@ -2968,7 +3010,7 @@ C-----END FILE AND POSITION SCRATCH TO BE READ.
 C-----DEFINE FINAL NUMBER OF POINTS TO OUTPUT.
   300 N2TOT=ITHIN1+N2SCR
       RETURN
-  310 FORMAT(34X,I8,11A1,' to',11A1,' eV Finished')
+  310 FORMAT(33X,I9,11A1,' to',11A1,' eV Finished')
       END
       SUBROUTINE COPOUT
 C=======================================================================
@@ -3145,8 +3187,8 @@ C-----PRINT WARNING IF CROSS SECTION IS NOT POSITIVE AT ANY ENERGY.
       IF(IMPLUS.LE.0) WRITE(OUTP,110)
       IF(IMPLUS.LE.0) WRITE(*   ,110)
       RETURN
-   90 FORMAT(1X,A4,10A1,I5,I4,2X,A2,2X,2(1X,11A1),2I7,1X,2A4,A1)
-  100 FORMAT(19X,'WARNING - Above Cross Section Negative at',I6,
+   90 FORMAT(1X,A4,10A1,I5,I4,2X,A2,2X,2(1X,11A1),2I9,1X,2A4,A1)
+  100 FORMAT(19X,'WARNING - Above Cross Section Negative at',I9,
      1 ' Energies')
   110 FORMAT(19X,'WARNING - Above Cross Section NOT',
      1 ' Positive at ANY Energy')
@@ -3161,7 +3203,7 @@ C=======================================================================
       SAVE
       CHARACTER*1 FIELD6
       CHARACTER*4 MESS1,MESS2
-      CHARACTER*60 NAMEIN,NAMEOUT
+      CHARACTER*72 NAMEIN,NAMEOUT
       INTEGER OUTP,OTAPE
       COMMON/ENDFIO/INP,OUTP,ITAPE,OTAPE
       COMMON/IOSTATUS/ISTAT1,ISTAT2
@@ -3243,7 +3285,7 @@ C-----------------------------------------------------------------------
 C-----INPUT DATA.
       IF(ISTAT1.EQ.1) GO TO 60
       READ(INP,50,END=60,ERR=60) NAMEIN
-   50 FORMAT(A60)
+   50 FORMAT(A72)
       IF(NAMEIN.EQ.' ') NAMEIN = 'ENDFB.IN'
 C-----OUTPUT DATA.
       READ(INP,50,END=70,ERR=70) NAMEOUT
@@ -3258,7 +3300,7 @@ C-----PRINT FINAL FILENAME
       WRITE(*   ,90) NAMEIN,NAMEOUT
    90 FORMAT(1X,79('-')/
      1 ' ENDF/B Input and Output Data Filenames'/1X,79('-')/
-     2 1X,A60/1X,A60)
+     2 1X,A72/1X,A72)
 C-----------------------------------------------------------------------
 C
 C     OPEN ENDF/B DATA FILES
@@ -3273,7 +3315,7 @@ C-----------------------------------------------------------------------
       IF(ISTAT2.EQ.1) THEN
       WRITE(OUTP,100) NAMEIN
       WRITE(   *,100) NAMEIN
-  100 FORMAT(//' ERROR - Opening ENDF/B formatted file'/1X,A60//)
+  100 FORMAT(//' ERROR - Opening ENDF/B formatted file'/1X,A72//)
       CALL ENDIT
       ENDIF
 C-----------------------------------------------------------------------
@@ -3334,7 +3376,7 @@ C-----------------------------------------------------------------------
 C-----USE DEFAULT VALUES.
       MAXERT=2
       ENER3T(1)=0.0
-      ER3T(1)=0.001
+      ER3T(1)=0.0001  ! 1/16/09 - CHANGED DEFAULT TO 0.01%
       PERCNT=100.0*ER3T(1)
       ERRMAX=0.0
       CALL OUT9(ENER3T(1),FIELD6(1,1),3)
@@ -3447,15 +3489,20 @@ C=======================================================================
      3 1.0D-04,
      4 1.0D-05,
      5 1.0D-06/
-c***** DEBUG
-C-----12/22/06 - HALVED SPACING AGAIN
+C-----04/23/08 - HALVED SPACING AGAIN
       DATA DETAB/
-     1 1.09776500D+00,
-     2 1.02821650D+00,
-     3 1.00847700D+00,
-     4 1.00268750D+00,
-     5 1.00082100D+00/
-c***** DEBUG
+     1 1.04888250D+00,
+     2 1.01410820D+00,
+     3 1.00423800D+00,
+     4 1.00134370D+00,
+     5 1.00041050D+00/
+C-----12/22/06 - HALVED SPACING AGAIN
+c     DATA DETAB/
+c    1 1.09776500D+00,
+c    2 1.02821650D+00,
+c    3 1.00847700D+00,
+c    4 1.00268750D+00,
+c    5 1.00082100D+00/
 C-----01/16/04 - HALVED SPACING
 c     DATA DETAB/
 c    1 1.19553000D+00,
@@ -3463,7 +3510,6 @@ c    2 1.05643300D+00,
 c    3 1.01695400D+00,
 c    4 1.00537500D+00,
 c    5 1.00164200D+00/
-c***** DEBUG
 C-----12/20/06 - REDUCED SPACING BY FACTOR OF 10 (INSERTED 0 AFTER .)
 c     DATA DETAB/
 c    1 1.019553000D+00,
@@ -3471,7 +3517,6 @@ c    2 1.005643300D+00,
 c    3 1.001695400D+00,
 c    4 1.000537500D+00,
 c    5 1.000164200D+00/
-c***** DEBUG
 C-----12/20/06 - REDUCED SPACING BY FACTOR OF 100 (INSERTED 00 AFTER .)
 C     DATA DETAB/
 C    1 1.0019553000D+00,
@@ -3479,7 +3524,6 @@ C    2 1.0005643300D+00,
 C    3 1.0001695400D+00,
 C    4 1.0000537500D+00,
 C    5 1.0000164200D+00/
-c***** DEBUG
       IF(ERROR.LT.ERRTAB(1)) GO TO 10
       ESPACE=DETAB(1)
       RETURN
@@ -3661,7 +3705,7 @@ C=======================================================================
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       SAVE
       INTEGER OUTP,OTAPE,SCR
-      CHARACTER*60 NAMEIN,NAMEOUT
+      CHARACTER*72 NAMEIN,NAMEOUT
       COMMON/ENDFIO/INP,OUTP,ITAPE,OTAPE
       COMMON/IOSTATUS/ISTAT1,ISTAT2
       COMMON/UNITS/SCR
