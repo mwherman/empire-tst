@@ -186,9 +186,18 @@ echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
 echo ' '
 cd $HOME
-# Creating .bashrc
+#
+# Modifying .bashrc
+#
 echo 'Adding EMPIREDIR to .bashrc file'
 cat >>.bashrc <<EOF
+# ___________________________________________________________________
+# Lines added by EMPIRE-3.1 setup
+#
+# It is assumed that ActiveTcl was installed in $HOME/ActiveTcl
+#
+# EMPIREDIR is pointing to the active EMPIRE installation
+#
 EMPIREDIR=$instdir
 echo 'EMPIRE directory changed to '$instdir 
 PATH=./:$instdir/scripts:$HOME/ActiveTcl/bin:$PATH
