@@ -1,14 +1,5 @@
                      Frequently Asked Questions 
  
-Q WHY ISOMERIC CROSS SECTIONS GET TOO HIGH THRESHOLD?
-
-A Isomeric  cross sections  CAN  NOT BE  CALCULATED  WITH ENDF  option
-  activated  since direct  transitions  to discrete  levels after  the
-  first neutron, proton and alpha emission are shifted artificially to
-  the ground state. This is  done to avoid gamma transitions following
-  direct population  of discrete levels  which in the ENDF  format are
-  treated separately.
-
 
 Q I CHANGE OMP IN THE *-*.omp FILE BUT THERE IS NO EFFECT?
 
@@ -33,19 +24,13 @@ A Editing  *.c4 file  is a  convenient  method of  removing or  adding
   description of the computational format (*.c4 file).
 
 
-Q WHY EMPIRE COMPLAINS ABOUT NONEXISTING LEVELS?
-
-A Execute 'Clean'  after any  change in the  input file  that involves
-  target, projectile, optical model parameters or number of emissions.
-
-
 Q I'VE MADE 'CLEAN' AND LOST ALL FILES I HAD ADJUSTED BY HAND!
 
 A Note that 'Clean' button will remove  ALL(!)  project related  files
   except the input.  If you  want to preserve any file (usually *.lev,
   *.omp or *.col  which could have been modified  manually) you should
   rename    them   before    making   'clean'    and    restore   them
-  afterwords. Adding any  suffix will NOT work, adding  prefix will do
+  afterwords. Adding any  suffix will NOT work, adding a prefix will do
   the job.
   
 
@@ -61,7 +46,7 @@ A When the running  code is interrupted or crashes  for any reason the
 
 Q WHY THERE ARE NO PLOTS PRODUCED?
 
-A If no plots are produced  by PLOTC4 there are several possibilities:
+A If no plots are produced there are several possibilities:
   a) ENDF  option set to 0 or  not activated (check input  file) 
   b) no experimental  data available (check  *.c4 or  *.exf file)  
   c) single incident energy requested 
@@ -70,16 +55,16 @@ A If no plots are produced  by PLOTC4 there are several possibilities:
   e) EMPIRE exited  gracefully  but calculations  were not  completed
      (check end of the *.lst file) 
   f) EMPIRE crashed (see above)
-
+  NOTE: PLOTC4 is obsolete, ZVView should be used instaed.
 
 Q WHY SCRIPTS DO NOT RUN?
 
-A Check whther you have the bash shell installed (e.g., type 'bash' at
+A Check whether you have the bash shell installed (e.g., type 'bash' at
   command prompt)
 
   NOTE: bash shell is available on most UNIX/LINUX boxes but usually not
   on those running MS Windows (unless Cygnus is being used). All
-  FORTRAN sources in the EMPIRE II package should run on any platform,
+  FORTRAN sources in the EMPIRE package should run on any platform,
   but scripts will NOT!
 
 
