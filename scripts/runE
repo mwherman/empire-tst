@@ -310,7 +310,7 @@ def splashscreen():
     '          E      M    M  P      I  R  R   E              3 '+'\n'+
     '          EEEEE  M    M  P      I  R   R  EEEEE      33333 '+'\n'+
     '                                                           '+'\n'+
-    '                     A R C O L E (March 2011)              '+'\n'+
+    '                 A R C O L E release 3.1 (June 2011)       '+'\n'+
     '                                                           '+'\n'+
     '                                                           '+'\n']
     return splash[0]
