@@ -48,11 +48,10 @@ def runE(proj):
         glob('*.LEG') + glob('TARGET-*.tl') )
     
     
-    if os.path.exists(proj+'.inp'):
-        print("Using existing file with input: %s" % proj+'.inp')
-    else:
+    if (not os.path.exists(proj+'.inp')):
         print("Input file : %s does not exist" % proj+'.inp')
         sys.exit(1)
+	
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
