@@ -37,7 +37,7 @@
 
 \title{EMPIRE \\
 modular system for nuclear reaction calculations\\
-{\Large (version: 2.19 Lodi)}}
+{\Large (version: 3.1 Rivoli)}}
 
 
 \author{\textsf{M. Herman,} \textsf{\large P. Oblozinsky}, \textsf{}\\
@@ -46,6 +46,12 @@ modular system for nuclear reaction calculations\\
 \textsf{}\\
 \textsf{\large R. Capote-Noy, A. Trkov, V. Zerkin,}{\large{} }\\
 \textsf{\normalsize International Atomic Energy Agency, Vienna, Austria}\\
+\textsf{}\\
+\textsf{\large A. Trkov}{\large{} }\\
+\textsf{\normalsize Jo\v{z}ef Stefan Institute, Ljubljana, Slovenia}\\
+\textsf{}\\
+\textsf{\large H. Wienke}{\large{} }\\
+\textsf{\normalsize affiliation ...}\\
 \\
 \textsf{\large M. Sin,}{\large{} }\\
 \textsf{\normalsize University of Bucharest, Bucharest, Rumania}\\
@@ -60,32 +66,47 @@ Campos, Brazil }\\
 \begin{abstract}
 EMPIRE is a modular system of nuclear reaction codes, comprising various
 nuclear models, and designed for calculations over a broad range of
-energies and incident particles. A projectile can be any nucleon or
-Heavy Ion. The energy range starts just above the resonance region,
+energies and incident particles. 
+The system can be used for theoretical investigations of nuclear reactions 
+as well as for nuclear data evaluation work.
+A projectile can be a photons a nucleon, a light or
+heavy ion. The energy range starts just above the resonance region,
 in the case of a neutron projectile, and extends up to few hundred
 MeV for Heavy Ion induced reactions. The code accounts for the major
-nuclear reaction mechanisms, such as optical model, Coupled Channels
-and DWBA (ECIS03), Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
-Compound, exciton model (DEGAS) and the full featured Hauser-Feshbach
-model. Heavy Ion fusion cross section can be calculated within the
+nuclear reaction models, such as optical model, Coupled Channels
+and DWBA (ECIS06), Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
+Compound, exciton model (PCROSS and DEGAS), hybrid Monte Carlo simulation
+(DDHMS), and the full featured Hauser-Feshbach model including the 
+optical model for fission. 
+Heavy Ion fusion cross section can be calculated within the
 simplified coupled channels approach (CCFUS). A comprehensive library
-of input parameters covers nuclear masses, optical model parameters,
+of input parameters based on the RIPL-3 library 
+covers nuclear masses, optical model parameters,
 ground state deformations, discrete levels and decay schemes, level
-densities, fission barriers (BARFIT), moments of inertia (MOMFIT),
+densities, fission barriers,
 and $\gamma$-ray strength functions. Effects of the dynamic deformation
-of a fast rotating nucleus can be taken into account in the calculations.
+of a fast rotating nucleus can be taken into account in the calculations 
+(BARFIT, MOMFIT).
 The results can be converted into the ENDF-6 format using the accompanying
-code EMPEND. The package contains the full EXFOR library of experimental
-data. Relevant EXFOR entries in computational format C4 
+code EMPEND (... verification, resonance data). 
+The package contains the full EXFOR library of experimental
+data in computational format C4 that
 are automatically retrieved during the
-calculations. Plots comparing experimental results with calculations
+calculations. 
+Publication quality
+graphs can be obtained using the powerful and flexible plotting package
+ZVView. 
+Interactive plots with ZVView comparing experimental results with calculations
 can be produced 
 %using X4TOC4 and PLOTC4 codes linked to the rest of
-with ENDVER modules linked to the rest of
-the system through bash-shell (UNIX) scripts. Publication quality
-graphs can be obtained using the powerful and flexible plotting package
-ZVView. The graphic user interface, written in Tcl/Tk, provides for
+with ENDVER modules. 
+The graphic user interface, written in Tcl/Tk is linked to the rest of
+the system through bash-shell (UNIX) scripts and provides for
 easy operation of the system. 
+
+(Mike to add a paragraph on the resonance module and the covariances).
+
+
 \end{abstract}
 \newpage
 
@@ -339,7 +360,7 @@ These are important for modeling reactions on deformed nuclei and,
 in particular, for the correct description of a strong population
 of collective discrete levels in the inelastic scattering. ECIS-95
 was added to EMPIRE as its new extensive module by R. Capote in February
-2001 and replaced with the ECIS03 version in EMPIRE-2.19. Symmetric
+2001 and replaced with the ECIS03 version in EMPIRE-3.1. Symmetric
 rotational, vibrational-rotational and harmonic-vibrational CC modes
 are available. The implementation features automatic preparation of
 the ECIS03 input. It uses the RIPL\index{RIPL}-2 \cite{RIPL} optical
@@ -732,7 +753,7 @@ The maximum $l$-transfer $\lambda$ is internally set between 1 and
 4 depending on the maximum $l$ contributing to the reaction cross
 section.
 
-In EMPIRE-2.19 fitting of the coupling constants $\kappa_{\lambda}$has
+In EMPIRE-3.1 fitting of the coupling constants $\kappa_{\lambda}$has
 been improved to minimize their fluctuations with changing incident
 energy.
 
@@ -2307,7 +2328,7 @@ E_{GMR}=41A^{-1/3}\;[MeV]\label{emdr}\end{equation}
 \sigma_{GMR}=1.0\:[mb]\label{smdr}\end{equation}
 
 
-EMPIRE-2.19 includes also series of E1 $\gamma$-ray strength functions
+EMPIRE-3.1 includes also series of E1 $\gamma$-ray strength functions
 proposed in RIPL-2 \cite{RIPL2}. We refer to the RIPL-2 TECDOC available
 at www-nds.iaea.org/RIPL-2/handbook/ripl2.pdf for detailed description
 of these advanced approaches.
@@ -2490,7 +2511,7 @@ calculation is\begin{equation}
 \sigma_{a,f}(E)=\sum_{J\pi}\sigma_{a}(EJ\pi)P_{f}(EJ\pi),\end{equation}
  where $\sigma_{a}(EJ\pi)$ is the population of the fissioning nucleus
 in the state $EJ\pi$ and $P_{f}(EJ\pi)$ represents the fission probability.
-Depending on the type of particle which induces fission, EMPIRE-2.19
+Depending on the type of particle which induces fission, EMPIRE-3.1
 offers two formalisms (selected by the directive input FISSHI) to
 calculate fission probability . The default value (FISSHI = 0) selects
 the optical model for fission (or its simplified version) to calculate
@@ -3164,7 +3185,7 @@ neutron should be subtracted from the (n,n) and added to the (n,2n)
 spectrum. 
 
 A new alghorithm for calculation of the exclusive spectra has been
-developed and implemented in EMPIRE-2.19. It is based on the concept
+developed and implemented in EMPIRE-3.1. It is based on the concept
 of the 'population spectra', also used for the recoils, and avoids
 approximations inherent in the previous method. The new algorithm
 is more precise, never produces negative cross sections, and can treat
@@ -3178,7 +3199,7 @@ an arbitrary number of emissions.
 
 \section{Directory structure}
 
-The full version of EMPIRE-2.19 has the following directory structure:
+The full version of EMPIRE-3.1 has the following directory structure:
 
 \begin{itemize}
 \item \textbf{empire}
@@ -3215,11 +3236,11 @@ relevant to optical model calculations (files: \emph{om-parameter-u.dat,}
 MySQL database, MySQL server, and retrieval system including stand-alone
 GUI
 \item \textbf{EXFOR} - EXFOR library, index file (X4-INDEX.TXT) and retrieval
-tools (obsolate in 2.19)
+tools (obsolete in 3.1)
 
 \begin{itemize}
 \item \textbf{subent/xx/xxxx} - sub-directories with EXFOR sub-entries (optional,
-obsolate in 2.19)
+obsolete in 3.1)
 \end{itemize}
 \item \textbf{util} - utility codes
 
@@ -4399,7 +4420,7 @@ The present ETFSI compilation includes 2301 nuclei with Z=78 through
 rich nuclei (close to or up to the calculated neutron drip line),
 up to A = 318. This compilation contains the nuclei considered in
 \cite{Mamdouh1998}, for which experimental barriers are known, and
-a slightly extended version of the set published in \cite{Mamdouh2001}.
+a slightly extended version of the set published in \cite{Mamdouh(2001)}.
 Also included are the experimental fission barriers compiled in \cite{Mamdouh1998}
 and those originating principally from \cite{Smirenkin1993}.
 
@@ -4450,7 +4471,7 @@ Each record of the file contains:
 
 Nuclear Level Densities (NLD) at fission saddle points for some 2300
 nuclei with 78 $\le$ Z$\le$120 included in the ETFSI compilation
-\cite{Mamdouh2001}. The fission barriers and saddle point deformations
+\cite{Mamdouh(2001)}. The fission barriers and saddle point deformations
 are determined within the Extended Thomas-Fermi plus Strutinsky Integral
 (ETFSI) method. For each nucleus a maximum of two barriers are given,
 one \char`\"{}inner\char`\"{} and one \char`\"{}outer\char`\"{}. They
@@ -4551,20 +4572,20 @@ NOTE: This file will be replaced by RIPL\index{RIPL}-2 equivalents
 in future releases.
 
 
-\subsection{Level density parameters from the shell-model \protect \\
-(\emph{empire/data/nparac.dat})}
-
-This file contains level density parameters for 3962 nuclei between
-$^{12}$C and $^{252}$Sg that have been derived \cite{spspacings}
-from the spacings of the shell-model single-particle spectrum. The
-file consists of the following 5 columns:
-
-\begin{labeling}{00.00.0000}
-\item [{IZIAR}] nuclide identifier Z{*}1000+A,
-\item [{B}] ground state deformation (not used),
-\item [{$c_{1},\, c_{2},\, c_{3}$}] three coefficients defining energy
-dependent level density parameter $a(E)=a_{1}+a_{2}e^{-a_{3}E}$.
-\end{labeling}
+% \subsection{Level density parameters from the shell-model \protect \\
+% (\emph{empire/data/nparac.dat})}
+% 
+% This file contains level density parameters for 3962 nuclei between
+% $^{12}$C and $^{252}$Sg that have been derived \cite{spspacings}
+% from the spacings of the shell-model single-particle spectrum. The
+% file consists of the following 5 columns:
+% 
+% \begin{labeling}{00.00.0000}
+% \item [{IZIAR}] nuclide identifier Z{*}1000+A,
+% \item [{B}] ground state deformation (not used),
+% \item [{$c_{1},\, c_{2},\, c_{3}$}] three coefficients defining energy
+% dependent level density parameter $a(E)=a_{1}+a_{2}e^{-a_{3}E}$.
+% \end{labeling}
 
 \subsection{Ground state deformations (empire/data/deflib.dat)}
 
@@ -4750,7 +4771,7 @@ coefficients. ECIS03\index{ECIS} also provides analyzing powers but
 these are not used by the current version of EMPIRE. ECIS03 implements
 Coupled-Channels\index{Coupled-Channels} and DWBA\index{DWBA} models
 into EMPIRE. We note that ECIS03 has been converted into a subroutine
-in EMPIRE-2.19.
+in EMPIRE-3.1.
 
 
 \subsection*{fusion.f }
@@ -4789,14 +4810,14 @@ and arbitrary way, feeding mostly 2+ and 3- levels (4+ to lesser extent)
 that are possibly close to the collective states of these multipolarities. 
 
 
-\subsection*{scnd-preeq.f }
-
-A very small module, which calculates second-chance preequilibrium
-decay of the residual nucleus populated by the MSD\index{MSD} emission
-through emission of neutrons and protons using Chadwick's model. Assumes
-that: (i) the first residue (after MSD emission) contains 2 excitons
-only (ii) emission probability can be approximated by the s-wave transmission
-coefficient. 
+% \subsection*{scnd-preeq.f }
+% 
+% A very small module, which calculates second-chance preequilibrium
+% decay of the residual nucleus populated by the MSD\index{MSD} emission
+% through emission of neutrons and protons using Chadwick's model. Assumes
+% that: (i) the first residue (after MSD emission) contains 2 excitons
+% only (ii) emission probability can be approximated by the s-wave transmission
+% coefficient. 
 
 
 \subsection*{MSC\index{MSC}-NVWY.f }
@@ -4956,279 +4977,279 @@ integration, matrix inversion, interpolation, finding nucleus and
 ejectile index and setting to zero variables in EMPIRE.
 
 
-\section{List of subroutines}
-
-\begin{labeling}{MMMMMMMMMMMMMM}
-\item [{empire\_ctl.f:SCAN4FIT}] Scans the input file, {*}.inp (INPUT.DAT),
-for requests for optical model fitting or sensitivity or covariance
-calculations and prepares necessary files if optical model fitting
-is requested.
-\item [{empire\_ctl.f:WRITEPARS}] Writes information about the optical
-model parameters that are to be adjusted. 
-\item [{empire\_ctl.f:READC4}] Reads the C4 file, {*}.c4 (C4.dat), and
-prepares experimental data for fitting. 
-\item [{empire\_ctl.f:WRITENPUT}] Prepares discretized grid of incident
-energies for model calculations used in fits.
-\item [{empire\_ctl.f:BUBBLE}] Simple bubble fit used to order experimental
-data in energy and angle and to order fit parameters. 
-\item [{empire\_ctl.f:LOCALFIT}] A simple fit procedure that attempts to
-minimize the $\chi^{2}$ using a numerical gradient search. 
-\item [{empire\_ctl.f:CHISQRD}] Calculates the $\chi^{2}$ of an EMPIRE
-calculation for an optical model fit.
-\item [{empire\_ctl.f:FILEPREP}] Updates the files OMPAR.DIR and TARGET\_COLL.DAT
-during an optical model fit. 
-\item [{empire\_ctl.f:CLEANUP}] Prints final values of adjusted parameters
-and prepares input for a final run of EMPIRE after an optical model
-fit.
-\item [{empire\_ctl.f:SENSITIVITY}] Prepares appropriate input files and
-calculates a sensitivity matrix when requested.
-\item [{HF-comp.f:ACCUM}] Normalizes scratch arrays SCRT and SCRTL with
-the initial state population and divides by the Hauser-Feshbach\index{Hauser-Feshbach}
-denominator. Accumulates the results in the population array POP.
-\item [{HF-comp.f:DECAY}] Calculates decay of a continuum state in the
-parent nucleus NNUC to the continuum and to discrete levels of the
-residual nucleus NNUR.
-\item [{HF-comp.f:DECAYD}] Calculates $\gamma$-decay of discrete levels.
-Prints out the results and updates $\gamma$-spectrum matrix CSE.
-Must be called after the particle emission is completed. NOTE: no
-particle emission from discrete levels is considered.
-\item [{HF-comp.f:DECAYG}] Calculates $\gamma$-decay of a continuum state.
-\item [{HF-comp.f:DECAYT}] Calculates $\gamma$-decay of a continuum state
-(used instead of DECAYG if TURBO mode is invoked).
-\item [{HF-comp.f:FISSION}] Calculates fission of a nuclear state taking
-into account two viscosity effects. 
-\item [{MSC-NVWY\index{NVWY}.f:DECHMS}] Calculates decay of a continuum
-state in the composite nucleus using Heidelberg Multi-step Compound\index{MSC}
-model.
-\item [{MSC-NVWY.f:HMS}] Main Multi-step Compound routine. Neutrons, protons,
-and $\gamma$s are considered.
-\item [{MSD\index{MSD}-orion.f:ORION}] Main ORION\index{ORION} routine.
-Calculates Multi-step Direct\index{MSD} amplitudes in the frame of
-the TUL\index{TUL} theory. The results are later used by TRISTAN\index{TRISTAN}
-to produce MSD\index{MSD} cross sections.
-\item [{MSD-orion.f:OPMPARN}] Sets optical model parameters.
-\item [{MSD-orion.f:CCCTRL}] Called by ORION2.
-\item [{MSD-orion.f:FLGLCH}] Called by CCCTRL.
-\item [{MSD-orion.f:OMPOTEN}] Called by CCCTRL.
-\item [{MSD\index{MSD}-orion.f:FFCAL}] Called by ORION2.
-\item [{MSD-orion.f:HIBORN}] Called by ORION2.
-\item [{MSD-orion.f:MSTEP}] Called by HIBORN.
-\item [{MSD-orion.f:XSEC}] Called by ORION2.
-\item [{MSD-orion.f:XSC12}] Calculates transition amplitudes.
-\item [{MSD-orion\index{ORION}.f:XSCABC}] Called by XSC12.
-\item [{MSD-orion.f:LEGNDR}] Called by XSEC.
-\item [{MSD-orion.f:CLEBSCH}] Called by XSC12.
-\item [{MSD\index{MSD}-orion.f:CLEBRD}] Called by XSCABC.
-\item [{MSD-orion.f:CLEBZ}] Called by XSCABC.
-\item [{MSD-orion.f:RACHLF}] Called by XSCABC.
-\item [{MSD-orion.f:RACSIM}] Called by XSCABC.
-\item [{MSD-orion.f:CLEBHF}] Called by XSCABC.
-\item [{MSD-tristan.f:TRISTAN\index{TRISTAN}}] Main TRISTAN routine. Calculates
-two step MSD cross sections using the results of ORION stored on TAPE15
-and QRPA\index{QRPA} response functions.
-\item [{MSD-tristan.f:INELAS}] Calculates response functions.
-\item [{MSD-tristan.f:RADIAL}] Called by INELAS.
-\item [{MSD-tristan.f:CLEBTRI}] Called by INELAS.
-\item [{MSD-tristan.f:BCS}] Performs BCS calculations.
-\item [{MSD-tristan.f:NUMBER}] Called by BCS.
-\item [{MSD\index{MSD}-tristan.f:ESORT}] Sorts single-particle levels
-according to increasing energy. 
-\item [{MSD-tristan.f:SPLVL}] Calculates single-particle levels.
-\item [{MSD-tristan.f:RESPNS}] Controls calculation of the response functions
-and prints the results.
-\item [{MSD-tristan.f:POLYNM}] Called by PNORM.
-\item [{MSD-tristan.f:PNORM}] Called by SPECTR.
-\item [{MSD-tristan.f:INVERT}] Inverts a matrix.
-\item [{MSD-tristan.f:SPECTR}] Performs interpolations and final calculations
-of the MSD cross sections (including angle integration).
-\item [{MSD\index{MSD}-tristan\index{TRISTAN}.f:ACCUMSD}] Distributes
-MSD spectrum over the residual nucleus continuum assuming that the
-spin distribution is proportional to the spin distribution of 1\emph{p}-1\emph{h}
-states. Distributes also MSD contribution over the discrete levels
-in an arbitrary way, feeding predominantly 2+ then 3- and finally
-4+ states possibly close to the collective states of these multipolarities.
-\item [{auxiliary.f:CLEAR}] Sets some matrices and variables to 0.
-\item [{auxiliary.f:INTGRS}] Calculates a generic integral.
-\item [{auxiliary.f:LSQLGV}] Least-squares fitting by variable order Legendre
-polynomials.
-\item [{auxiliary.f:LSQLEG}] Fits Legendre coefficients to a set of data.
-\item [{auxiliary.f:PLNLEG}] Evaluates Legendre polynomials up to order
-NL.
-\item [{auxiliary.f:MTXGUP}] Matrix solver using Gauss elimination and
-partial pivoting.
-\item [{auxiliary.f:MATIN}] Matrix inversion with accompanying solution
-of linear equations. (used in MSC\index{MSC} calculations)
-\item [{auxiliary.f:MATIN1}] Matrix inversion with accompanying solution
-of linear equations (differs from MATIN in dimensions).
-\item [{auxiliary.f:MTXINV}] Matrix inversion using Gauss-Jordan method
-and full pivoting.
-\item [{auxiliary.f:MTXDG3}] Tridiagonal matrix solver using Gauss elimination
-with no pivoting.
-\item [{auxiliary.f:INTERMAT}] Interpolates along the first dimension of
-the array Yi assumed to contain histograms on the same equidistant
-grid. The resulting function, on the different but uniform grid, is
-added to the values contained in the array Yo in the energy range
-specified by Emin and Emax. 
-\item [{auxiliary.f:BINTERMAT}] Interpolates along both dimensions of the
-array Yi(x,z) assumed to contain histograms on the equidistant grid
-Sxi, Szi. The resulting function, on the different but uniform grid,
-is added to the values contained in the array Yo in the energy rectangle
-specified by Exmin-Exmax and Ezmin-Ezmax. 
-\item [{auxiliary.f:WHERE}] Locates position of the nucleus in EMPIRE matrices
-(last index).
-\item [{auxiliary.f:WHEREJC}] Locates position of the ejectile in EMPIRE
-matrices
-\item [{bar\_mom.f:BARFIT}] Returns the fission barrier height, the ground-state
-energy, and the angular momentum at which the fission barrier disappears.
-\item [{bar\_mom.f:MOMFIT}] Returns the three principal-axis moments of
-inertia and the angular momentum at which the fission barrier disappears.
-\item [{bar\_mom.f:LPOLY}] Calculates the ordinary Legendre polynomials.
-\item [{ccfus.f:CCFUS\index{CCFUS}}] Fusion Coupled-Channels\index{Coupled-Channels}
-code for calculation of barrier penetration parameters, cross sections
-and angular momentum distributions.
-\item [{ccfus.f:BAR}] Called by CCFUS when calculating fusion barrier.
-\item [{ccfus.f:POTENT}] Called by CCFUS when calculating fusion barrier.
-\item [{ccfus.f:POT}] Called by CCFUS when calculating fusion barrier.
-\item [{fusion.f:MARENG}] Calculates initial compound nucleus population
-after projectile absorption using transmission coefficients obtained
-from the optical or the distributed fusion barrier model.
-\item [{fusion.f:PUSH}] Calculates fusion transmission coefficients within
-the distributed fusion barrier model.
-\item [{gamma-strgth.f:ULM}] Using built in systematics, prepares Giant
-Resonances parameters (for GDR, GQR and GMR) to be used in the calculation
-of transmission coefficients for $\gamma$s. 
-\item [{gamma-strgth.f:ULMDYN}] Using built in systematics, prepares \emph{dynamic}
-deformation-dependent Giant Dipole Resonance parameters to be used
-in the calculation of transmission coefficients for $\gamma$s . 
-\item [{input.f:FINDPOT}] Finds OM potential entry in the RIPL\index{RIPL}
-database.
-\item [{input.f:INPUT}] Sets default values of input parameters, reads
-mandatory input and calls READIN to read optional input.
-\item [{input.f:LEVREAD}] Reads level energies, spins, parities and branching
-ratios from unit 13, and stores them in the appropriate arrays.
-\item [{input.f:PRINPUT}] Prints input parameters.
-\item [{input.f:PTLEVRE}] Reads from unit 13 the ground state spin and
-parity, and energies of the first 2+ and 3- levels (latter to be used
-by CCFUS\index{CCFUS} and TRISTAN\index{TRISTAN})
-\item [{input.f:PTLEVSET}] Sets ground state spin and parity and energies
-of the first 2+ and 3- levels (latter to be used by CCFUS\index{CCFUS}
-and TRISTAN\index{TRISTAN}). For even-even nuclei calls PTLEVRE;
-for odd-odd and odd-even nuclei calls PTLEVRE; for neighboring even-even
-nuclei takes averages for 2+ and 3- energies.
-\item [{input.f:READIN}] Reads input variables from optional input (.\emph{inp})
-and changes default values accordingly. 
-\item [{input.f:READNIX}] Reads nuclear deformations, shell corrections,
-and masses from the file \emph{empire/RIPL-2/masses/mass-frdm95.dat}.
-\item [{input.f:READLDP}] Reads level density\index{level density} parameters
-according to Iljinov \cite{Mebel}, and the number of the discrete
-level below which the decay scheme is assumed to be complete (see
-RIPL\index{RIPL} \cite{RIPL}).
-\item [{input.f:SHELLC}] Calculates shell corrections according to Myers
-and Swiatecki.
-\item [{input.f:LYMASM}] Called by SHELLC.
-\item [{input.f:BNDG}] Calculates binding energies.
-\item [{input.f:RETRIEVE}] Retrieves relevant EXFOR entries.
-\item [{lev-dens.f:ROCOL}] Calculates spin-dependent level densities, including
-vibrational and rotational collective effects and accounting for their
-energy fade-out. Sets potential surface energy for the saddle point. 
-\item [{lev-dens.f:VIBR}] Calculates vibrational enhancement of level densities.
-\item [{lev-dens.f:SIGMAK}] Calculates parallel and orthogonal spin cut-off
-parameters according to Vigdor and Karwowski~\cite{VK}, and spin-dependent
-deformation parameter $\alpha_{2}$ estimated from the liquid drop
-model summed with the temperature-damped ground state deformation.
-\item [{lev-dens.f:SIGMA}] Calculates parallel and orthogonal spin cut-off
-factors using simple rigid body moments of inertia for a given deformation
-$\beta$.
-\item [{lev-dens.f:DAMPKS}] Calculates damping of the rotational level
-density enhancement according to Vigdor and Karwowski~\cite{VK}.
-Slow and fast damping options are included, although they are not
-actually used.
-\item [{lev-dens.f:DAMPROT}] Damping of rotational effects with Fermi function,
-independent of deformation and mass number (consistent with the built-in
-systematics)
-\item [{lev-dens.f:DAMPV}] Damping of the vibrational level density\index{level density}
-enhancement.
-\item [{lev-dens.f:DAMP}] Damping of the rotational level density enhancement
-according to Rastopchin \cite{rastop}. Not used.
-\item [{lev-dens.f:ROEMP}] Calculates a table of energy and spin-dependent
-level densities in terms of the EMPIRE-specific approach.
-\item [{lev-dens.f:DAMIRO}] Called by ROEMP. Calculates spin-dependent
-level densities in terms of the EMPIRE-specific approach at a single
-excitation energy.
-\item [{lev-dens.f:PRERO}] Prepares level density\index{level density}
-calculations. Checks whether the table of excitation energies has
-been determined, sets yrast energies, fission barriers, scaling factor,
-and cleans up level density tables.
-\item [{lev-dens.f:ROGC}] Calculates a table of energy and spin-dependent
-level densities according to Gilbert-Cameron approach.
-\item [{lev-dens.f:ROHFBCS}] Reads Hartree-Fock-BCS level densities\index{level densities}
-stored in tabular form (RIPL\index{RIPL}-2), and interpolates them
-linearly on a log scale to the EMPIRE energy grid. 
-\item [{lev-dens.f:ALIT}] Reads coefficients for calculating level density
-parameter \emph{a} fitted to the shell-model single-particle state
-spacings \cite{spspacings}.
-\item [{ph-lev-dens.f:GDOWN}] Calculates $Y_{\downarrow}$-function Eq.
-\ref{Ydown} in MSC\index{MSC} according to Nucl. Phys., \textbf{A435}
-(1985) 67. Commented statements correspond to the original formulation
-of the reference above. The actual version accounts for the factor
-1/2 as pointed out by Oblozinsky (Nucl. Phys., \textbf{A453} (1986)
-127).
-\item [{ph-lev-dens.f:ZERO}] Calculates $Y_{n}^{n}$-function \ref{Yzero}
-in MSC\index{MSC}.
-\item [{ph-lev-dens.f:MINUS}] Calculates $Y_{n}^{n-1}$-function in\ref{Yminus}
-MSC\index{MSC}.
-\item [{ph-lev-dens.f:BACK}] Calculates conditional density of accessible
-states for backward transitions (without $g/\omega(p,h,E,-1)$ factor)
-using Oblozinsky formula for conditional state density.
-\item [{ph-lev-dens.f:TRATES}] Will calculate transition rates using combinatorial
-level densities when implemented - at present does nothing.
-\item [{print.f:AUERST}] Prints histogram of a spectrum and associated
-energy integrated cross section.
-\item [{tl.f:HITL}] Calculates transmission coefficients for Heavy-Ion
-absorption using the input fusion cross section, or the input value
-of \emph{l}-critical (CRL), or the distributed fusion barrier model
-(if CSFUS=-1.).
-\item [{tl.f:OMPAR}] Fixes optical model parameters according to the global
-systematics.
-\item [{tl.f:TLEVAL}] Calls ECIS03 to calculate optical model transmission
-coefficients and writes them into \emph{TL} matrix.
-\item [{tl.f:TLLOC}] For a given ejectile energy, EOUT locates the two
-bracketing energies in the ETL matrix and returns the relative position
-of EOUT between the two. To be used for the interpolation of transmission
-coefficients.
-\item [{tl.f:RIPL2EMPIRE}] Sets CC optical model parameters according to
-RIPL\index{RIPL}-2.
-\item [{tl.f:CREATE\_OMPAR}] Reads optical model parameters from the RIPL\index{RIPL}-2
-library and creates local OMPAR.RIPL file. 
-\item [{tl.f:READ\_OMPAR\_RIPL}] Reads RIPL optical model parameters from
-the local OMPAR.RIPL file.
-\item [{tl.f:OMIN}] Reads optical model parameters from the RIPL-2 parameter
-library.
-\item [{tl.f:SUMPRT}] Prints summary information for the OM potential included
-in the RIPL-2 library.
-\item [{tl.f:FINDPOT\_OMPAR\_RIPL}] Finds requested entry in the RIPL\index{RIPL}-2
-optical model database.
-\item [{tl.f:TRANSINP}] Calculates transmission coefficients for EMPIRE
-energy grid using ECIS03\index{ECIS}.
-\item [{tl.f:ECIS2EMPIRE\_TL\_TRG}] Processes ECIS03 output to extract
-transmission coefficients for the incident channel.
-\item [{tl.f:ECIS2EMPIRE\_TR}] Processes ECIS03\index{ECIS} output to
-extract transmission coefficients and maximum \emph{l} for EMPIRE
-energy grid.
-\item [{tl.f:INIT}] Writes initial part of ECIS03 input.
-\item [{tl.f:ECIS\_CCVIB}] Creates ECIS03 input files for Coupled-Channels\index{Coupled-Channels}
-calculation of transmission coefficients in the harmonic vibrational
-model. 
-\item [{tl.f:ECIS\_CCVIBROT}] Creates input files for ECIS03\index{ECIS}
-for Coupled-Channels\index{Coupled-Channels} calculation of transmission
-coefficients in rotational-vibrational model. 
-\item [{tl.f:WRITEXS}] Checks for the presence of the ECIS03 output and
-prints a message if does not exist.
-\item [{scnd-preeq.f:SCNDPREEQ}] Calculates second-chance preequilibrium
-decay of the residual nucleus (populated by the MSD\index{MSD} emission)
-through emission of neutron or proton using Chadwick model. 
-\end{labeling}
-\emph{To be updated}
+% \section{List of subroutines}
+% 
+% \begin{labeling}{MMMMMMMMMMMMMM}
+% \item [{empire\_ctl.f:SCAN4FIT}] Scans the input file, {*}.inp (INPUT.DAT),
+% for requests for optical model fitting or sensitivity or covariance
+% calculations and prepares necessary files if optical model fitting
+% is requested.
+% \item [{empire\_ctl.f:WRITEPARS}] Writes information about the optical
+% model parameters that are to be adjusted. 
+% \item [{empire\_ctl.f:READC4}] Reads the C4 file, {*}.c4 (C4.dat), and
+% prepares experimental data for fitting. 
+% \item [{empire\_ctl.f:WRITENPUT}] Prepares discretized grid of incident
+% energies for model calculations used in fits.
+% \item [{empire\_ctl.f:BUBBLE}] Simple bubble fit used to order experimental
+% data in energy and angle and to order fit parameters. 
+% \item [{empire\_ctl.f:LOCALFIT}] A simple fit procedure that attempts to
+% minimize the $\chi^{2}$ using a numerical gradient search. 
+% \item [{empire\_ctl.f:CHISQRD}] Calculates the $\chi^{2}$ of an EMPIRE
+% calculation for an optical model fit.
+% \item [{empire\_ctl.f:FILEPREP}] Updates the files OMPAR.DIR and TARGET\_COLL.DAT
+% during an optical model fit. 
+% \item [{empire\_ctl.f:CLEANUP}] Prints final values of adjusted parameters
+% and prepares input for a final run of EMPIRE after an optical model
+% fit.
+% \item [{empire\_ctl.f:SENSITIVITY}] Prepares appropriate input files and
+% calculates a sensitivity matrix when requested.
+% \item [{HF-comp.f:ACCUM}] Normalizes scratch arrays SCRT and SCRTL with
+% the initial state population and divides by the Hauser-Feshbach\index{Hauser-Feshbach}
+% denominator. Accumulates the results in the population array POP.
+% \item [{HF-comp.f:DECAY}] Calculates decay of a continuum state in the
+% parent nucleus NNUC to the continuum and to discrete levels of the
+% residual nucleus NNUR.
+% \item [{HF-comp.f:DECAYD}] Calculates $\gamma$-decay of discrete levels.
+% Prints out the results and updates $\gamma$-spectrum matrix CSE.
+% Must be called after the particle emission is completed. NOTE: no
+% particle emission from discrete levels is considered.
+% \item [{HF-comp.f:DECAYG}] Calculates $\gamma$-decay of a continuum state.
+% \item [{HF-comp.f:DECAYT}] Calculates $\gamma$-decay of a continuum state
+% (used instead of DECAYG if TURBO mode is invoked).
+% \item [{HF-comp.f:FISSION}] Calculates fission of a nuclear state taking
+% into account two viscosity effects. 
+% \item [{MSC-NVWY\index{NVWY}.f:DECHMS}] Calculates decay of a continuum
+% state in the composite nucleus using Heidelberg Multi-step Compound\index{MSC}
+% model.
+% \item [{MSC-NVWY.f:HMS}] Main Multi-step Compound routine. Neutrons, protons,
+% and $\gamma$s are considered.
+% \item [{MSD\index{MSD}-orion.f:ORION}] Main ORION\index{ORION} routine.
+% Calculates Multi-step Direct\index{MSD} amplitudes in the frame of
+% the TUL\index{TUL} theory. The results are later used by TRISTAN\index{TRISTAN}
+% to produce MSD\index{MSD} cross sections.
+% \item [{MSD-orion.f:OPMPARN}] Sets optical model parameters.
+% \item [{MSD-orion.f:CCCTRL}] Called by ORION2.
+% \item [{MSD-orion.f:FLGLCH}] Called by CCCTRL.
+% \item [{MSD-orion.f:OMPOTEN}] Called by CCCTRL.
+% \item [{MSD\index{MSD}-orion.f:FFCAL}] Called by ORION2.
+% \item [{MSD-orion.f:HIBORN}] Called by ORION2.
+% \item [{MSD-orion.f:MSTEP}] Called by HIBORN.
+% \item [{MSD-orion.f:XSEC}] Called by ORION2.
+% \item [{MSD-orion.f:XSC12}] Calculates transition amplitudes.
+% \item [{MSD-orion\index{ORION}.f:XSCABC}] Called by XSC12.
+% \item [{MSD-orion.f:LEGNDR}] Called by XSEC.
+% \item [{MSD-orion.f:CLEBSCH}] Called by XSC12.
+% \item [{MSD\index{MSD}-orion.f:CLEBRD}] Called by XSCABC.
+% \item [{MSD-orion.f:CLEBZ}] Called by XSCABC.
+% \item [{MSD-orion.f:RACHLF}] Called by XSCABC.
+% \item [{MSD-orion.f:RACSIM}] Called by XSCABC.
+% \item [{MSD-orion.f:CLEBHF}] Called by XSCABC.
+% \item [{MSD-tristan.f:TRISTAN\index{TRISTAN}}] Main TRISTAN routine. Calculates
+% two step MSD cross sections using the results of ORION stored on TAPE15
+% and QRPA\index{QRPA} response functions.
+% \item [{MSD-tristan.f:INELAS}] Calculates response functions.
+% \item [{MSD-tristan.f:RADIAL}] Called by INELAS.
+% \item [{MSD-tristan.f:CLEBTRI}] Called by INELAS.
+% \item [{MSD-tristan.f:BCS}] Performs BCS calculations.
+% \item [{MSD-tristan.f:NUMBER}] Called by BCS.
+% \item [{MSD\index{MSD}-tristan.f:ESORT}] Sorts single-particle levels
+% according to increasing energy. 
+% \item [{MSD-tristan.f:SPLVL}] Calculates single-particle levels.
+% \item [{MSD-tristan.f:RESPNS}] Controls calculation of the response functions
+% and prints the results.
+% \item [{MSD-tristan.f:POLYNM}] Called by PNORM.
+% \item [{MSD-tristan.f:PNORM}] Called by SPECTR.
+% \item [{MSD-tristan.f:INVERT}] Inverts a matrix.
+% \item [{MSD-tristan.f:SPECTR}] Performs interpolations and final calculations
+% of the MSD cross sections (including angle integration).
+% \item [{MSD\index{MSD}-tristan\index{TRISTAN}.f:ACCUMSD}] Distributes
+% MSD spectrum over the residual nucleus continuum assuming that the
+% spin distribution is proportional to the spin distribution of 1\emph{p}-1\emph{h}
+% states. Distributes also MSD contribution over the discrete levels
+% in an arbitrary way, feeding predominantly 2+ then 3- and finally
+% 4+ states possibly close to the collective states of these multipolarities.
+% \item [{auxiliary.f:CLEAR}] Sets some matrices and variables to 0.
+% \item [{auxiliary.f:INTGRS}] Calculates a generic integral.
+% \item [{auxiliary.f:LSQLGV}] Least-squares fitting by variable order Legendre
+% polynomials.
+% \item [{auxiliary.f:LSQLEG}] Fits Legendre coefficients to a set of data.
+% \item [{auxiliary.f:PLNLEG}] Evaluates Legendre polynomials up to order
+% NL.
+% \item [{auxiliary.f:MTXGUP}] Matrix solver using Gauss elimination and
+% partial pivoting.
+% \item [{auxiliary.f:MATIN}] Matrix inversion with accompanying solution
+% of linear equations. (used in MSC\index{MSC} calculations)
+% \item [{auxiliary.f:MATIN1}] Matrix inversion with accompanying solution
+% of linear equations (differs from MATIN in dimensions).
+% \item [{auxiliary.f:MTXINV}] Matrix inversion using Gauss-Jordan method
+% and full pivoting.
+% \item [{auxiliary.f:MTXDG3}] Tridiagonal matrix solver using Gauss elimination
+% with no pivoting.
+% \item [{auxiliary.f:INTERMAT}] Interpolates along the first dimension of
+% the array Yi assumed to contain histograms on the same equidistant
+% grid. The resulting function, on the different but uniform grid, is
+% added to the values contained in the array Yo in the energy range
+% specified by Emin and Emax. 
+% \item [{auxiliary.f:BINTERMAT}] Interpolates along both dimensions of the
+% array Yi(x,z) assumed to contain histograms on the equidistant grid
+% Sxi, Szi. The resulting function, on the different but uniform grid,
+% is added to the values contained in the array Yo in the energy rectangle
+% specified by Exmin-Exmax and Ezmin-Ezmax. 
+% \item [{auxiliary.f:WHERE}] Locates position of the nucleus in EMPIRE matrices
+% (last index).
+% \item [{auxiliary.f:WHEREJC}] Locates position of the ejectile in EMPIRE
+% matrices
+% \item [{bar\_mom.f:BARFIT}] Returns the fission barrier height, the ground-state
+% energy, and the angular momentum at which the fission barrier disappears.
+% \item [{bar\_mom.f:MOMFIT}] Returns the three principal-axis moments of
+% inertia and the angular momentum at which the fission barrier disappears.
+% \item [{bar\_mom.f:LPOLY}] Calculates the ordinary Legendre polynomials.
+% \item [{ccfus.f:CCFUS\index{CCFUS}}] Fusion Coupled-Channels\index{Coupled-Channels}
+% code for calculation of barrier penetration parameters, cross sections
+% and angular momentum distributions.
+% \item [{ccfus.f:BAR}] Called by CCFUS when calculating fusion barrier.
+% \item [{ccfus.f:POTENT}] Called by CCFUS when calculating fusion barrier.
+% \item [{ccfus.f:POT}] Called by CCFUS when calculating fusion barrier.
+% \item [{fusion.f:MARENG}] Calculates initial compound nucleus population
+% after projectile absorption using transmission coefficients obtained
+% from the optical or the distributed fusion barrier model.
+% \item [{fusion.f:PUSH}] Calculates fusion transmission coefficients within
+% the distributed fusion barrier model.
+% \item [{gamma-strgth.f:ULM}] Using built in systematics, prepares Giant
+% Resonances parameters (for GDR, GQR and GMR) to be used in the calculation
+% of transmission coefficients for $\gamma$s. 
+% \item [{gamma-strgth.f:ULMDYN}] Using built in systematics, prepares \emph{dynamic}
+% deformation-dependent Giant Dipole Resonance parameters to be used
+% in the calculation of transmission coefficients for $\gamma$s . 
+% \item [{input.f:FINDPOT}] Finds OM potential entry in the RIPL\index{RIPL}
+% database.
+% \item [{input.f:INPUT}] Sets default values of input parameters, reads
+% mandatory input and calls READIN to read optional input.
+% \item [{input.f:LEVREAD}] Reads level energies, spins, parities and branching
+% ratios from unit 13, and stores them in the appropriate arrays.
+% \item [{input.f:PRINPUT}] Prints input parameters.
+% \item [{input.f:PTLEVRE}] Reads from unit 13 the ground state spin and
+% parity, and energies of the first 2+ and 3- levels (latter to be used
+% by CCFUS\index{CCFUS} and TRISTAN\index{TRISTAN})
+% \item [{input.f:PTLEVSET}] Sets ground state spin and parity and energies
+% of the first 2+ and 3- levels (latter to be used by CCFUS\index{CCFUS}
+% and TRISTAN\index{TRISTAN}). For even-even nuclei calls PTLEVRE;
+% for odd-odd and odd-even nuclei calls PTLEVRE; for neighboring even-even
+% nuclei takes averages for 2+ and 3- energies.
+% \item [{input.f:READIN}] Reads input variables from optional input (.\emph{inp})
+% and changes default values accordingly. 
+% \item [{input.f:READNIX}] Reads nuclear deformations, shell corrections,
+% and masses from the file \emph{empire/RIPL-2/masses/mass-frdm95.dat}.
+% \item [{input.f:READLDP}] Reads level density\index{level density} parameters
+% according to Iljinov \cite{Mebel}, and the number of the discrete
+% level below which the decay scheme is assumed to be complete (see
+% RIPL\index{RIPL} \cite{RIPL}).
+% \item [{input.f:SHELLC}] Calculates shell corrections according to Myers
+% and Swiatecki.
+% \item [{input.f:LYMASM}] Called by SHELLC.
+% \item [{input.f:BNDG}] Calculates binding energies.
+% \item [{input.f:RETRIEVE}] Retrieves relevant EXFOR entries.
+% \item [{lev-dens.f:ROCOL}] Calculates spin-dependent level densities, including
+% vibrational and rotational collective effects and accounting for their
+% energy fade-out. Sets potential surface energy for the saddle point. 
+% \item [{lev-dens.f:VIBR}] Calculates vibrational enhancement of level densities.
+% \item [{lev-dens.f:SIGMAK}] Calculates parallel and orthogonal spin cut-off
+% parameters according to Vigdor and Karwowski~\cite{VK}, and spin-dependent
+% deformation parameter $\alpha_{2}$ estimated from the liquid drop
+% model summed with the temperature-damped ground state deformation.
+% \item [{lev-dens.f:SIGMA}] Calculates parallel and orthogonal spin cut-off
+% factors using simple rigid body moments of inertia for a given deformation
+% $\beta$.
+% \item [{lev-dens.f:DAMPKS}] Calculates damping of the rotational level
+% density enhancement according to Vigdor and Karwowski~\cite{VK}.
+% Slow and fast damping options are included, although they are not
+% actually used.
+% \item [{lev-dens.f:DAMPROT}] Damping of rotational effects with Fermi function,
+% independent of deformation and mass number (consistent with the built-in
+% systematics)
+% \item [{lev-dens.f:DAMPV}] Damping of the vibrational level density\index{level density}
+% enhancement.
+% \item [{lev-dens.f:DAMP}] Damping of the rotational level density enhancement
+% according to Rastopchin \cite{rastop}. Not used.
+% \item [{lev-dens.f:ROEMP}] Calculates a table of energy and spin-dependent
+% level densities in terms of the EMPIRE-specific approach.
+% \item [{lev-dens.f:DAMIRO}] Called by ROEMP. Calculates spin-dependent
+% level densities in terms of the EMPIRE-specific approach at a single
+% excitation energy.
+% \item [{lev-dens.f:PRERO}] Prepares level density\index{level density}
+% calculations. Checks whether the table of excitation energies has
+% been determined, sets yrast energies, fission barriers, scaling factor,
+% and cleans up level density tables.
+% \item [{lev-dens.f:ROGC}] Calculates a table of energy and spin-dependent
+% level densities according to Gilbert-Cameron approach.
+% \item [{lev-dens.f:ROHFBCS}] Reads Hartree-Fock-BCS level densities\index{level densities}
+% stored in tabular form (RIPL\index{RIPL}-2), and interpolates them
+% linearly on a log scale to the EMPIRE energy grid. 
+% \item [{lev-dens.f:ALIT}] Reads coefficients for calculating level density
+% parameter \emph{a} fitted to the shell-model single-particle state
+% spacings \cite{spspacings}.
+% \item [{ph-lev-dens.f:GDOWN}] Calculates $Y_{\downarrow}$-function Eq.
+% \ref{Ydown} in MSC\index{MSC} according to Nucl. Phys., \textbf{A435}
+% (1985) 67. Commented statements correspond to the original formulation
+% of the reference above. The actual version accounts for the factor
+% 1/2 as pointed out by Oblozinsky (Nucl. Phys., \textbf{A453} (1986)
+% 127).
+% \item [{ph-lev-dens.f:ZERO}] Calculates $Y_{n}^{n}$-function \ref{Yzero}
+% in MSC\index{MSC}.
+% \item [{ph-lev-dens.f:MINUS}] Calculates $Y_{n}^{n-1}$-function in\ref{Yminus}
+% MSC\index{MSC}.
+% \item [{ph-lev-dens.f:BACK}] Calculates conditional density of accessible
+% states for backward transitions (without $g/\omega(p,h,E,-1)$ factor)
+% using Oblozinsky formula for conditional state density.
+% \item [{ph-lev-dens.f:TRATES}] Will calculate transition rates using combinatorial
+% level densities when implemented - at present does nothing.
+% \item [{print.f:AUERST}] Prints histogram of a spectrum and associated
+% energy integrated cross section.
+% \item [{tl.f:HITL}] Calculates transmission coefficients for Heavy-Ion
+% absorption using the input fusion cross section, or the input value
+% of \emph{l}-critical (CRL), or the distributed fusion barrier model
+% (if CSFUS=-1.).
+% \item [{tl.f:OMPAR}] Fixes optical model parameters according to the global
+% systematics.
+% \item [{tl.f:TLEVAL}] Calls ECIS03 to calculate optical model transmission
+% coefficients and writes them into \emph{TL} matrix.
+% \item [{tl.f:TLLOC}] For a given ejectile energy, EOUT locates the two
+% bracketing energies in the ETL matrix and returns the relative position
+% of EOUT between the two. To be used for the interpolation of transmission
+% coefficients.
+% \item [{tl.f:RIPL2EMPIRE}] Sets CC optical model parameters according to
+% RIPL\index{RIPL}-2.
+% \item [{tl.f:CREATE\_OMPAR}] Reads optical model parameters from the RIPL\index{RIPL}-2
+% library and creates local OMPAR.RIPL file. 
+% \item [{tl.f:READ\_OMPAR\_RIPL}] Reads RIPL optical model parameters from
+% the local OMPAR.RIPL file.
+% \item [{tl.f:OMIN}] Reads optical model parameters from the RIPL-2 parameter
+% library.
+% \item [{tl.f:SUMPRT}] Prints summary information for the OM potential included
+% in the RIPL-2 library.
+% \item [{tl.f:FINDPOT\_OMPAR\_RIPL}] Finds requested entry in the RIPL\index{RIPL}-2
+% optical model database.
+% \item [{tl.f:TRANSINP}] Calculates transmission coefficients for EMPIRE
+% energy grid using ECIS03\index{ECIS}.
+% \item [{tl.f:ECIS2EMPIRE\_TL\_TRG}] Processes ECIS03 output to extract
+% transmission coefficients for the incident channel.
+% \item [{tl.f:ECIS2EMPIRE\_TR}] Processes ECIS03\index{ECIS} output to
+% extract transmission coefficients and maximum \emph{l} for EMPIRE
+% energy grid.
+% \item [{tl.f:INIT}] Writes initial part of ECIS03 input.
+% \item [{tl.f:ECIS\_CCVIB}] Creates ECIS03 input files for Coupled-Channels\index{Coupled-Channels}
+% calculation of transmission coefficients in the harmonic vibrational
+% model. 
+% \item [{tl.f:ECIS\_CCVIBROT}] Creates input files for ECIS03\index{ECIS}
+% for Coupled-Channels\index{Coupled-Channels} calculation of transmission
+% coefficients in rotational-vibrational model. 
+% \item [{tl.f:WRITEXS}] Checks for the presence of the ECIS03 output and
+% prints a message if does not exist.
+% \item [{scnd-preeq.f:SCNDPREEQ}] Calculates second-chance preequilibrium
+% decay of the residual nucleus (populated by the MSD\index{MSD} emission)
+% through emission of neutron or proton using Chadwick model. 
+% \end{labeling}
+% \emph{To be updated}
 
 
 \section{Executing EMPIRE}
@@ -5242,425 +5263,288 @@ mode should be the last choice if scripts can not be translated. For
 the sake of clarity these modes are described below in the revers
 order.
 
+Complete EMPIRE execution consists of the following operation sequences,
+which are described in more detail below:
 
-\subsection{Manual mode}
+\begin{itemize}
+\item "runE" sequence prepares data and runs the main calculation.
 
-In the manual mode, user has to ensure that the directory \emph{empire/TL/}
-exists and does not contain, for the considered nuclei, any results
-obtained with different optical model potentials or models (DWBA,
-CC, spherical OM). EMPIRE can be run from any subdirectory of \emph{empire/}
-(we'll use default default \emph{empire/work} in the following description)
-by placing the input in the \emph{INPUT.DAT} file (default name) and
-executing the line command :
+\item "format" sequence generates the ENDF formatted file.
 
-\begin{labeling}{00.00.0000}
-\item [{\texttt{../source/empire}}]~
-\end{labeling}
-on UNIX systems or appropriately modified on other operating systems
-(e.g., ..\textbackslash{}source\textbackslash{}empire under DOS).
-Successful execution will produce some or all all of the following
-output files:
+\item "verify" sequence checks the ENDF file for formal correctness and
+  internal consistency.
+  
+\item "process" sequence performs post-processing to prepare a derived
+  ENDF file, from which all plotting is done.
+\end{itemize}
 
-\begin{labeling}{MMMMMMM}
-\item [{\emph{LIST.DAT}}] lengthy output
-\item [{\emph{OUTPUT.DAT}}] short output
-\item [{\emph{LEVELS}}] levels for the nuclei involved in the calculations
-\item [{\emph{OMPAR.RIPL}}] optical model parameters extracted from the
-RIPL\index{RIPL}-2 library
-\item [{\emph{OMPAR.DIR}}] optical model parameters used for CC or DWBA\index{DWBA}
-calculations in the incoming channel
-\item [{\emph{TARGET\_COLL.DAT}}] parameters of collective levels in the
-target nucleus used for CC or DWBA\index{DWBA} calculations 
-\item [{\emph{TARGET}}] CC transmission coefficients calculated when DIRECT=2
-option is selected
-\item [{\emph{TAPE15}}] table with the results of ORION\index{ORION} for
-the last incident energy used by TRISTAN\index{TRISTAN} (only if
-MSD\index{MSD} calculations selected)
-\item [{\emph{EXFOR.DAT}}] retrieved EXFOR entries relevant to the run
-(only if EXFOR library has been installed)
-\item [{\emph{ecVIB.inp}}] input to ECIS03\index{ECIS} if vibrational
-model has been used
-\item [{\emph{ecROT.inp}}] input to ECIS03 if rotational model has been
-used
-\item [{\emph{ecSPH.inp}}] input to ECIS03 if spherical optical potential
-has been used
-\item [{\emph{ecVIBROT.inp}}] input to ECIS03\index{ECIS} if rotational-vibrational
-model has been used
-\item [{\emph{ECIS\_VIB.out\#}}] ECIS03 output if vibrational model has
-been used
-\item [{\emph{ECIS\_ROT.out\#}}] ECIS03 output if rotational model has
-been used
-\item [{\emph{ECIS\_VIBROT.out\#}}] ECIS03 output if rotational-vibrational
-model has been used
-\item [{FISSION.INP}] input parameters for fission calculations
-\item [{FISSION.OUT}] detailed results of fission calculations (includes
-fission transmission coefficients) 
-\item [{empire/TL/{*}}] directory containing numerous files with cross
-sections, angular distributions, and transmission coefficients for
-incident channel and transmission coefficients for all outgoing channels.
-Set of such files is stored for each incident energy. 'Root-name'
-of these files is constructed as ZA-projectile/ejectile\_ZA-target\_incident
-energy(keV), e.g., 00001\_92238\_007001 stands for neutrons interacting
-with 238-U and incident energy being 7.001 MeV. Transmission coefficients
-for the ejectile are stored in a binary form that is indicated by
-the file extension BIN. Note the incident energy refers to the projectile
-inducing the reaction, while {*}.BIN files contain data for all outgoing
-energies involved in the calculations. Files with extensions {*}.CS,
-{*}.ICS, {*}.ANG, {*}\_INC.BIN and {*}.TLJ contain refer to the incident
-channel and contain total, elastic, reaction and inelastic cross sections,
-angular distributions and transmission coefficients. These files are
-stored for speeding up subsequent calculations and the only intervention
-expected from the user is to remove them when optical model potential
-is changed. Therefore, exact format of these files is not discussed.
-\item [{CUMULPLOT.PS}] PostScript plots of cumulative number of discrete
-levels compared with level density\index{level density} predictions
-(only when FITLEV input different from 0). 
-\item [{FIT.OUT}] Information on variations in optical model or deformation
-fit parameters and the minimization of $\chi^{2}$ (only when FITOPT
-input different from 0). 
-\end{labeling}
-Disadvantage of the manual operation is that the same file names are
-used for different runs, and the results of previous calculations
-are overwritten. Therefore, it is difficult to keep track of various
-calculations. Furthermore, failure to delete the \emph{LEVELS, OMPAR.{*},
-FISSION.INP,} TARGET\_COLL.DAT files from a preceding run will result
-in an attempt by EMPIRE to consider these files as belonging to a
-new case, leading to a mismatch of the nuclei. In the case of \emph{LEVELS,}
-this situation may result in the message: LEVELS FOR NUCLEUS ... NOT
-FOUND IN THE FILE. The user has to remove old output files by renaming
-or deleting them before a new run in order to avoid this problem. 
-
-The associated codes can be run in the \textbf{following} order to
-produce the ENDF formatted file:
-
-\begin{description}
-\item [{1.}] \textbf{EMPEND\index{EMPEND}} to transform OUTPUT.DAT file
-into the ENDF format. The following UNIX line command must be issued
-from the \emph{work} sub-directory to achieve this objective: \\
-~\\
-\texttt{../util/empend/empend <../util/empend/EMPEND.INP} \\
-~\\
-The resulting ENDF-formatted file is written onto the \emph{OUTPUT.ENDF}
-file in the \emph{work} sub-directory. Users may change default parameters
-of the EMPEND\index{EMPEND} code by editing EMPEND input file \emph{empire/util/empend/EMPEND.INP.}
-Detailed description of the EMPEND input is given in the EMPEND source
-file \emph{empire/util/empend/empend.f} and in the manual \emph{empire/util/empend}/\emph{manual.txt}.
-\item [{2.}] \textbf{FIXUP\index{FIXUP}} to reconstruct inelastic cross
-section and cross sections for (n,p) and (n,$\alpha$) reactions which
-normally are formatted with discrete levels separated from the continuum.
-Inside the \emph{work} sub-directory, the user should type:\\
-~\\
-\texttt{cd ../util/fixup/ }~\\
-\texttt{rm OUTPUT.ENDF 2>/dev/null }~\\
-\texttt{ln -sf ../../}\texttt{\emph{work}}\texttt{/OUTPUT.ENDF OUTPUT.ENDF
-}~\\
-\texttt{./fixup }~\\
-\texttt{rm OUTPUT.ENDF }~\\
-\texttt{mv FIXUP.ENDF ../../}\texttt{\emph{work}}\texttt{/OUTPUT-F.ENDF
-}~\\
-\texttt{cd ../../}\texttt{\emph{work}}\\
-~
-\item [{3.}] \textbf{ENDRES} to include resonance parameters in the ENDF
-formatted file:\\
-~\\
-\texttt{cd ../util/endres/ }~\\
-\texttt{ln -sf ../../}\texttt{\emph{work}}\texttt{/OUTPUT-F.ENDF empire.end
-}~\\
-\texttt{./endres <ENDRES.INP }~\\
-\texttt{mv endf.dat} \texttt{\emph{../../work}}\texttt{/OUPUT-ER.ENDF
-}~\\
-\texttt{cd ../../}\texttt{\emph{work}} 
-\item [{4.}] \textbf{STANEF} to standardaize the ENDF formatted file:\\
-\texttt{rm -f INPUT }~\\
-\texttt{cat >INPUT <\,{}<EOF }~\\
-\texttt{OUTPUT-ER.ENDF }~\\
-\texttt{OUTPUT.ENDF }~\\
-\texttt{0}~\\
-\texttt{}~\\
-\texttt{DONE }~\\
-\texttt{EOF }~\\
-\texttt{../util/stanef/stanef <INPUT }
-\end{description}
-Running EMPEND\index{EMPEND}, FIXUP\index{FIXUP}, ENDRES, and STANEF
-makes sense only if the ENDF option was selected in the EMPIRE input
-and the calculations were performed for at least a few incident energies. 
-
-The advantage of the manual operation mode is that it can be carried
-out on any operating system providing the commands mentioned above
-are appropriately modified to match actual operating system (note
-that UNIX link command 'ln' can by replaced by the 'copy' on systems
-that do not provide 'ln'). However, running the full chain of codes
-in the manual mode is so laborious and error prone that we don't even
-provide instructions for further preprocessing, checking and plotting.
-These operations can be dramatically simplified by use of the scripts
-discussed below.
+A more detailed description of the task sequences is described below.
+Additional sequences are also defined to perform specific tasks.
 
 
-\subsection{Script mode}
+\subsection{"runE" sequence}
 
-The EMPIRE distribution contains several scripts located in the \emph{empire/scripts}
-directory. These scripts use UNIX bash-shell, which must be installed
-on the systems. Each script performs one or several steps, including
-those described in the previous section, taking care of moving, renaming
-and deleting the files and invoking the execution of appropriate codes.
-Scripts assume certain naming convention for the files, in particular,
-all input files must end with \emph{.inp} extension. Unless specified
-differently, each script is invoked with a single parameter; the name
-of the input file without \emph{.inp} extension (file root-name).
-For example, calculations with the input file \emph{Mo100.inp} can be
-performed using \emph{runE} script and typing \\
-~\\
-\texttt{../scripts/runE Mo100}\\
-~\\
-in the \emph{empire/work} directory (or any other directory at the
-same level as \emph{work}). General philosophy is that the root-name
-of the input file (\emph{Mo100} in the example above) defines a project
-name. Scripts modify generic file names produced by the codes, renaming
-them by the project name plus the specific extension. These extensions
-must not be modified as they define the contents of the file (see
-Table \ref{tab: files}) and are used as identifiers by the system.
-The project is set up by creating the EMPIRE input file with arbitrary
-root-name and .\emph{inp} extension. In the following, we replace
-root-name with the asterisk '{*}' and refer to the files through their
-extensions .%
-\begin{table}[top]
-\caption{\label{tab: files}Possible files for a given project (generally not
-all of them will be used). User created files are marked with $\clubsuit$.}
+The script sequence sets up the evnironment for a new EMPIRE calculation
+and cleans-up the directories before launching a new EMPIRE calculation.
+More specifically, the following tasks are performed:
+
+\begin{itemize}
+\item The EMPIREDIR environment variable is set, if necessary.
+
+\item Files from a previous run are deleted.
+
+\item EMPIRE is executed; case related files are moved to the appropriate
+  directories.
+
+\item If the experimental data in computational C4 format are not available,
+  they are copied or generated from the EXFOR file.
+\end{itemize}
+
+The "project name" is defined at this step. Usually this identifies the
+nuclide that is being processed (e.g. mn55, w182, u235, etc.). The
+project name is used in the filenames and is implied in the sections
+below whenever the "*" appears in the filename.
 
 
-\begin{centering}
-\begin{tabular}{llp{9cm}}
-\hline 
-\multicolumn{1}{l}{\textbf{extension}} & \textbf{generic name} & \textbf{contents of the file}\tabularnewline
-\hline
-{*}.inp~$\clubsuit$ & INPUT.DAT & EMPIRE input \tabularnewline
-{*}.fus~$\clubsuit$ & FUSION & set of \emph{l}-dependent transmission coefficients (one per each
-line) used for determination of the fusion cross section (optional)\tabularnewline
-{*}.lst & LIST.DAT & EMPIRE output (long )\tabularnewline
-{*}.out & OUTPUT.DAT & EMPIRE output (short )\tabularnewline
-{*}.lev & LEVELS &  discrete levels for all nuclei involved in the run\tabularnewline
-{*}-lev.col   & TARGET\_COLL.DAT & characteristics of collective levels used for ECIS03 calculations\tabularnewline
-{*}.-omp.ripl & OMPAR.RIPL & optical model parameters read from the RIPL database\tabularnewline
-{*}.-omp.dir & OMPAR.DIR & optical model parameters used for DWBA or CC calculations with ECIS03\tabularnewline
-{*}-inp.fis & FISSION.INP & input parameters related to fission channel\tabularnewline
- & FISSION.OUT & detailed output of fission calculations including intermediate results
-for purpose of checking\tabularnewline
-{*}.endf &  & results in the ENDF format including neutron resonance region and
-processed with FIXUP and STANEF (this is the final ENDF file for distribution)\tabularnewline
-{*}-e.endf &  & results in the ENDF format as produced by EMPEND (not yet fit for
-distribution)\tabularnewline
-{*}-s.endf &  & results in the ENDF format after processing with PREPRO codes (ready
-for plotting but not legal ENDF file for distribution!)\tabularnewline
-{*}.exf & EXFOR.DAT & relevant experimental data retrieved from EXFOR (if EXFOR installed)\tabularnewline
-{*}.c4 &  & relevant EXFOR data translated into computational format\tabularnewline
-{*}.ps &  & full set of PostScript plots comparing calculations against experimental
-data\tabularnewline
-{*}-cum.ps & CUMULPLOT.PS & cumulative plots of discrete levels in PostScript format\tabularnewline
-{*}-MT.zvd &  & ZVView file for plotting MT (MT=2, 4, 16,...)\tabularnewline
-{*}.x42c4\_lst &  & output of X4TOC4 code\tabularnewline
-{*}.x42c4\_errs &  & list of EXFOR entries not translated by the X4TOC4 code\tabularnewline
-{*}.war &  & warnings extracted from the EMPIRE output {*}.lst\tabularnewline
-\hline
-\end{tabular}
-\par\end{centering}
-\end{table}
-%
-\begin{table}[top]
-\caption{List of log-files}
+\subsection{"format" sequence}
+
+The following tasks are performed:
+
+\begin{itemize}
+\item EMPEND is executed to produce an ENDF file from the "short"
+  EMPIRE output (with extension *.OUT). The input file is generated
+  within the script. The output file *-e.endf is produced.
+  
+\item FIXUP is executed to reconstruct the (n,p) and (n,alpha) reactions
+  from the discrete level cross sections and the continuum. This step
+  is needed for easier visualisation of the results. The input file
+  is generated within the script. The output file *-f.endf is generated.
+
+\item ENDRES is executed (conditionally, if the file *-res.endf is present
+  on the local directory). The dummy resonance file in the ENDF file
+  generated by EMPEND is replaced with the resonance data from a
+  selected evaluated nuclear data file. The comments from the selected
+  file are appended after the original comments. All resonance
+  data in MF=2 are replaced.
+  The background cross sections in the total, elastic, fission (if
+  present) and radiative capture are set to zero from $10^{-5}$~eV to
+  the upper energy covered by the resonance parameters in the selected
+  file. 
+  The lower energy of the elastiv angular distribution is
+  extrapolated to $10^{-5}$~eV, if needed.
+  The resonance covariance data in MF=32 are also copied, if
+  available.
+  The input file is taken from the standardised input file ENDRES.INP,
+  which can be modified by the user, if needed. The main parameters
+  that can be changed are the filename from which the resonances are
+  taken and the value of the LSSF flag, which defines how the
+  unresolved resonance parameters are used (LSSF=0 to use URR to
+  calculate cross sections; LSSF=1 to use URR for selfshielding only).
+  The output ENDF file is *-endres.endf and the log file is *-log.endres.
+
+\item STANEF is executed to update the dictionary section in the new
+  ENDF file. The input file is generated within the script.
+\end{itemize}
+
+The final output ENDF file from this sequence of operations is *.endf.
 
 
-\begin{tabular}{ll}
-\hline 
-\textbf{extension} & \textbf{contents of the file}\tabularnewline
-\hline
-{*}-log.empend & produced by EMPEND when converting EMPIRE output into ENDF-6 format\tabularnewline
-{*}-log.endres & produced by ENDRES when merging EMPIRE results with the resonance
-region\tabularnewline
-{*}-log.checkr & results of format checking with code CHECKR\tabularnewline
-{*}-log.fizcon & results of physics checking with the code FIZCON\tabularnewline
-{*}-log.psyche & results of format checking with code PSYCHE\tabularnewline
-{*}-log.legend & produced by the PREPRO code LEGEND\tabularnewline
-{*}-log.linear & produced by the PREPRO code LINEAR\tabularnewline
-{*}-log.recent & produced by the PREPRO code RECENT (resonance reconstruction)\tabularnewline
-{*}-log.sigma1 & produced by the PREPRO code SIGMA1 (Doppler broadening)\tabularnewline
-{*}-log.plotc4 & produced by the code PLOTC4 (cross section plotting)\tabularnewline
-\hline
-\end{tabular}
-\end{table}
-\\
-The following scripts are provided:
+\subsection{"verify" sequence}
 
-\begin{labeling}{00.00.0000}
-\item [{\textbf{runE}}] runs EMPIRE, retrieves EXFOR data and translates
-them into computational format
-\item [{\textbf{format}}] runs EMPEND\index{EMPEND}, RESEND, FIXUP, and
-STANEF to transform .\emph{out} output into ENDF format (produces
-.\emph{endf} file)
-\item [{\textbf{process}}] run set of preprocessing codes to produce \emph{{*}-s.endf}
-file ready for plotting (prepares also a table of possible plots)
-\item [{\textbf{verify}}] runs set of checking codes CHECKR, FIZCON and
-PSYCHE
-\item [{\textbf{run}}] does all above (\textbf{runE + format + process
-+ verify})
-\item [{\textbf{stanef}}] runs ENDF-6 format standardization code STANEF
-\item [{\textbf{c4}}] converts EXFOR data in the \emph{{*}.exf} file into
-the computational format (file \emph{{*}.c4}) (included in \textbf{runE})
-\item [{\textbf{sortc4}}] sorts experimental data in the computational
-format ({*}\emph{.c4} file) (included in \textbf{runE})
-\item [{\textbf{plot}}] runs PLOTC4\index{PLOTC4} to create comparison
-plots of experimental and calculated cross sections
-\item [{\textbf{plotlst}}] produces list of possible plots by matching
-calculations against experimental data without doing actual plots
-(simulates log-output of PLOTC4 in a fraction of time required by
-PLOTC4) 
-\item [{\textbf{storemul}}] moves all files matching pattern za{*}\$2{*}
-to the directory ../\$1 (creates ../\$1 if it does not exists). \$1
-and \$2 are the parameter of the script, e.g., to move files obtained
-related to isotopes if iron (using input files of the type za260xx.inp)
-to the directory ../default\_om one should issue a command \\
-\texttt{../scripts/storemul default\_com 260}
-\item [{\textbf{x4interface}}] starts graphical interface for manual EXFOR
-retrieval from the local MySQL database. When called with the root-name
-of the project as an argument stores retrieved EXFOR file as 'root-name'.exf
-\item [{\textbf{X4retrieve}}] runs EXFOR retrieval from the local MySQL
-database (called internally by EMPIRE)
-\item [{\textbf{clean}}] removes all files related to a given project (except
-the input file \emph{{*}.inp}) and any \emph{core} file. This script
-must be run each time a project is changed by adding new channels
-or by modifying projectile or target in the input file .\emph{inp}.
-\item [{\textbf{cleansel}}] removes selected files related to the given
-project
-\item [{\textbf{cleanall}}] removes \textbf{all} output files for all projects
-in a current directory; only input files (\emph{{*}.inp}) are retained
-\item [{\textbf{store}}] moves .\emph{inp, .lst, .out, .ps, .endf}, and
-.\emph{res} files for all projects (.\emph{inp} files are copied rather
-than moved) to a subdirectory specified as a parameter to \emph{store}.
-If the subdirectory does not exists, one will be created, which avoids
-old files being overwritten by new ones (e.g., when calculations are
-repeated with modified parameters). For example, the results of calculations
-with the Moldauer's optical-model parameters can be saved in the subdirectory
-\emph{OM-Moldauer} by issuing the command:\\
-~\\
-\texttt{../scripts/store OM-Moldauer}\\
-
-\item [{\textbf{grepawk}}] handy tool for extracting specific excitation
-function from the EMPIRE output .\emph{lst} and arranging into two
-columns (incident energy, cross section). Such a representation allows
-any standard package to be used (e.g., gnuplot or xmgr) to plot excitation
-functions for any calculated cross section (e.g., population of a
-certain discrete level). The user must create a file with the project
-root-name and extension \emph{.pat} containing two line pattern as
-in the example below\textbf{:}\\
-\textbf{~}\\
- \texttt{incident energy}~\\
-\texttt{.3350 MeV~~~ 7.0 level}~\\
-\texttt{~}~\\
-The first line must be left intact.The second should be changed according
-to the needs, and has to be the exact string that uniquely identifies
-a line of the output from which the cross section is to be extracted.
-A convenient method it is to cut and paste between \emph{.lst} and
-.\emph{pat} files. As usual, script is invoked with the project name
-as a parameter. UNIX package {}``awk'' is used to scan the .\emph{lst}
-output. Each time a line is encountered that matches {}``incident~energy\texttt{'',}
-the projectile energy is extracted. When a match occurs to the second
-line of .\emph{pat} file, the requested cross section is identified
-as the word immediately before the {}``mb'' string and extracted.
-The resulting excitation function is written to the file .\emph{res.}
-Note that each use of \emph{grepawk} will overwrite the \emph{.res}
-file. Starting with version 2.16, similar functionality can be achieved
-with the \emph{zvpl} script which produces {*}.\emph{zvd} and calls
-ZVView\index{ZVView} to display this file. 
-\item [{\textbf{run-piece-wise}}] runs up to three different inputs for
-the same reaction, combines the results and processes them through
-the utility codes to produce a single ENDF file and relevant plots.
-Different models and/or model parameters are allowed in three separate
-energy ranges. Users have to ensure that incident energies are monotonically
-increasing across the three sets of input parameters.
-\item [{\textbf{zvd}}] plots comparisons of calculated and experimental
-data using ZVView\index{ZVView} graphic package. Script is called
-with MT number and project name as parameters. For example, to plot
-(n,$\gamma$) reaction for the \emph{100mo} project one should type:\\
-~\\
-\texttt{../scripts/zvd 102 100mo}\\
-~\\
-in which zvd script uses \emph{{*}-s.endf} file for plotting. If this
-does not exist, script invokes the \textbf{process} script to reconstruct
-(n,inl), (n,p) and (n,$\alpha$) reactions and produce File 6 in a
-form suitable for plotting. This file is processed along with {*}.c4
-that contains experimental data to produce \emph{{*}-MT.zvd} file
-(\emph{MT} is any legal ENDF-6 format MT number). List of typical
-MT numbers is given in the following:\\
-%
-\begin{table}[top]
-\caption{\label{MTs} Most frequently used MT numbers and corresponding reactions}
+The ENDF Utility codes CHECKR, FIZCON and PSYCHE are executed to verify
+formal correctness and internal consistency of the final ENDF file.
+The input files are generated within the script. The output files are
+*.checkr, *.fizcon and *.psyche for the corresponding checking code.
 
 
-\begin{centering}
-\begin{tabular}{cc}
-\hline 
-Reaction & MT\tabularnewline
-\hline
-tot & 1\tabularnewline
-elastic & 2\tabularnewline
-inelastic & 4\tabularnewline
-(n,2n) & 16\tabularnewline
-(n,3n) & 17\tabularnewline
-(n,f) & 18\tabularnewline
-(n,n$\alpha$) & 22\tabularnewline
-(n,np) & 28\tabularnewline
-(n,np$\alpha$) & 45\tabularnewline
-(n,$\gamma$) & 102\tabularnewline
-(n,p) & 103\tabularnewline
-(n,$\alpha$) & 107\tabularnewline
-(n,p$\alpha$) & 112\tabularnewline
-\hline
-\end{tabular}
-\par\end{centering}
-\end{table}
+\subsection{"process" sequence}
 
-\item [{\textbf{zvcomb}}] allows an arbitrary number of existing zvd plots
-to be combined into one. If zvcomb is called without any parameter,
-a list of available \emph{{*}.zvd} files is displayed on the terminal,
-so that the names can be pasted onto the command line.
-\item [{\textbf{zvpl}}] similar to grepawk but produces {*}.\emph{zvd}
-file and displays by calling ZVView\index{ZVView}. Can be operated
-from the Graphic User Interface \emph{Xrun.tcl}.
-\item [{\textbf{zvv}}] combines and displays various ZVView plots as a
-single plot, e.g., \\
-\texttt{../scripts/zvv nb93{*}.zvd}
-\item [{\textbf{zvvddx}}] create a ZVView plot of excitation functions,
-angular distributions, spectra, or double-differential cross sections
-(intended for use within the Graphic User Interface \emph{Xrun.tcl})
-\item [{\textbf{mtacomp}}] produces ZVView plots that compare experimental
-data with the results of up to three sets of calculations (or evaluations)
-in the ENDF format for a given MT number and target. The syntax is:\\
-\\
-\texttt{../scripts/mtacomp MT comp root dir1 name1 file2 name2 file3
-name3}\\
-\\
-where: MT stands for the ENDF reaction code (see Table \ref{MTs}),
-\emph{comp} is an arbitrary string added to names of plot files, \emph{dir}1
-points to the directory containing the first ENDF file, \emph{file1}
-and \emph{file2} indicate the remaining two ENDF files and \emph{name}i
-are labels of the respective curves. Note, that \emph{dir1} must contain
-the ENDF file named \emph{root-s.endf} and optionally EXFOR data in
-the computational format in the file named \emph{root.c4.} The naming
-convention is automatically ensured if the files were created by EMPIRE.
-There are no restrictions on the names of the remaining two ENDF files.
-The script is intended for use within the GUI but can also be run
-manually. 
-\item [{\textbf{acomp}}] same as \emph{mtacomp} but does the job for the
-whole list of MTs in Table \ref{MTs}; therefore, MT is omitted from
-the list of parameters. The script is intended for use within the
-Graphic User Interface but can also be run manually. 
-\item [{\textbf{showzvd}}] calls ZVView package for each \emph{.zvd} file
-from the argument list.
-\end{labeling}
-Note that EXFOR library must be installed in order to compare calculations
-with experiment and that in most cases plots are created from the
-ENDF formatted file. The detailed description of the X4TOC4 input
-is given in the source file \emph{empire/util/plotc4/plotc4.f} and
-in the manual \emph{empire/util/plotc4/manual.txt.}
+The Pre-Pro codes and some of the codes from the ENDVER package are
+executed to prepare the data for plotting. The following codes and
+scripts are executed on the ENDF file:
+
+\begin{itemize}
+\item LINEAR is used to linearise any cross sections, which are not be
+  defined with log interpolation in energy or cross section.
+  
+\item RECENT is used to reconstruct the resonance parameters into tabular
+  cross section values.
+
+\item SIGMA1 numerically Doppler-broadens the cross sections to 300 K.
+
+\item LEGEND converts angular distributions in ENDF File 4 given by
+  Legendre polynomial representation into tabular form.
+
+\item SIXTAB converts double-differential data into angle-energy sets
+  in tabular form (ENDF option LAW=7).
+
+\item "plotlst" script prepares the experimental data for
+  plotting. It checks for the presence of the C4 file of experimental
+  data and links auxilliary dictionary files for local use.
+
+\item PLTLST code generates a table of available types of nuclear data
+  that can be reconstructed and compared with the information in the
+  evaluated nuclear data files.
+\end{itemize}
+
+
+\subsection{"run" sequence}
+
+All the main processing sequences are executed one after another.
+
+
+
+% \subsection{Manual mode}
+% 
+% In the manual mode, user has to ensure that the directory \emph{empire/TL/}
+% exists and does not contain, for the considered nuclei, any results
+% obtained with different optical model potentials or models (DWBA,
+% CC, spherical OM). EMPIRE can be run from any subdirectory of \emph{empire/}
+% (we'll use default default \emph{empire/work} in the following description)
+% by placing the input in the \emph{INPUT.DAT} file (default name) and
+% executing the line command :
+% 
+% \begin{labeling}{00.00.0000}
+% \item [{\texttt{../source/empire}}]~
+% \end{labeling}
+% on UNIX systems or appropriately modified on other operating systems
+% (e.g., ..\textbackslash{}source\textbackslash{}empire under DOS).
+% Successful execution will produce some or all all of the following
+% output files:
+% 
+% \begin{labeling}{MMMMMMM}
+% \item [{\emph{LIST.DAT}}] lengthy output
+% \item [{\emph{OUTPUT.DAT}}] short output
+% \item [{\emph{LEVELS}}] levels for the nuclei involved in the calculations
+% \item [{\emph{OMPAR.RIPL}}] optical model parameters extracted from the
+% RIPL\index{RIPL}-2 library
+% \item [{\emph{OMPAR.DIR}}] optical model parameters used for CC or DWBA\index{DWBA}
+% calculations in the incoming channel
+% \item [{\emph{TARGET\_COLL.DAT}}] parameters of collective levels in the
+% target nucleus used for CC or DWBA\index{DWBA} calculations 
+% \item [{\emph{TARGET}}] CC transmission coefficients calculated when DIRECT=2
+% option is selected
+% \item [{\emph{TAPE15}}] table with the results of ORION\index{ORION} for
+% the last incident energy used by TRISTAN\index{TRISTAN} (only if
+% MSD\index{MSD} calculations selected)
+% \item [{\emph{EXFOR.DAT}}] retrieved EXFOR entries relevant to the run
+% (only if EXFOR library has been installed)
+% \item [{\emph{ecVIB.inp}}] input to ECIS03\index{ECIS} if vibrational
+% model has been used
+% \item [{\emph{ecROT.inp}}] input to ECIS03 if rotational model has been
+% used
+% \item [{\emph{ecSPH.inp}}] input to ECIS03 if spherical optical potential
+% has been used
+% \item [{\emph{ecVIBROT.inp}}] input to ECIS03\index{ECIS} if rotational-vibrational
+% model has been used
+% \item [{\emph{ECIS\_VIB.out\#}}] ECIS03 output if vibrational model has
+% been used
+% \item [{\emph{ECIS\_ROT.out\#}}] ECIS03 output if rotational model has
+% been used
+% \item [{\emph{ECIS\_VIBROT.out\#}}] ECIS03 output if rotational-vibrational
+% model has been used
+% \item [{FISSION.INP}] input parameters for fission calculations
+% \item [{FISSION.OUT}] detailed results of fission calculations (includes
+% fission transmission coefficients) 
+% \item [{empire/TL/{*}}] directory containing numerous files with cross
+% sections, angular distributions, and transmission coefficients for
+% incident channel and transmission coefficients for all outgoing channels.
+% Set of such files is stored for each incident energy. 'Root-name'
+% of these files is constructed as ZA-projectile/ejectile\_ZA-target\_incident
+% energy(keV), e.g., 00001\_92238\_007001 stands for neutrons interacting
+% with 238-U and incident energy being 7.001 MeV. Transmission coefficients
+% for the ejectile are stored in a binary form that is indicated by
+% the file extension BIN. Note the incident energy refers to the projectile
+% inducing the reaction, while {*}.BIN files contain data for all outgoing
+% energies involved in the calculations. Files with extensions {*}.CS,
+% {*}.ICS, {*}.ANG, {*}\_INC.BIN and {*}.TLJ contain refer to the incident
+% channel and contain total, elastic, reaction and inelastic cross sections,
+% angular distributions and transmission coefficients. These files are
+% stored for speeding up subsequent calculations and the only intervention
+% expected from the user is to remove them when optical model potential
+% is changed. Therefore, exact format of these files is not discussed.
+% \item [{CUMULPLOT.PS}] PostScript plots of cumulative number of discrete
+% levels compared with level density\index{level density} predictions
+% (only when FITLEV input different from 0). 
+% \item [{FIT.OUT}] Information on variations in optical model or deformation
+% fit parameters and the minimization of $\chi^{2}$ (only when FITOPT
+% input different from 0). 
+% \end{labeling}
+% Disadvantage of the manual operation is that the same file names are
+% used for different runs, and the results of previous calculations
+% are overwritten. Therefore, it is difficult to keep track of various
+% calculations. Furthermore, failure to delete the \emph{LEVELS, OMPAR.{*},
+% FISSION.INP,} TARGET\_COLL.DAT files from a preceding run will result
+% in an attempt by EMPIRE to consider these files as belonging to a
+% new case, leading to a mismatch of the nuclei. In the case of \emph{LEVELS,}
+% this situation may result in the message: LEVELS FOR NUCLEUS ... NOT
+% FOUND IN THE FILE. The user has to remove old output files by renaming
+% or deleting them before a new run in order to avoid this problem. 
+% 
+% The associated codes can be run in the \textbf{following} order to
+% produce the ENDF formatted file:
+% 
+% \begin{description}
+% \item [{1.}] \textbf{EMPEND\index{EMPEND}} to transform OUTPUT.DAT file
+% into the ENDF format. The following UNIX line command must be issued
+% from the \emph{work} sub-directory to achieve this objective: \\
+% ~\\
+% \texttt{../util/empend/empend <../util/empend/EMPEND.INP} \\
+% ~\\
+% The resulting ENDF-formatted file is written onto the \emph{OUTPUT.ENDF}
+% file in the \emph{work} sub-directory. Users may change default parameters
+% of the EMPEND\index{EMPEND} code by editing EMPEND input file \emph{empire/util/empend/EMPEND.INP.}
+% Detailed description of the EMPEND input is given in the EMPEND source
+% file \emph{empire/util/empend/empend.f} and in the manual \emph{empire/util/empend}/\emph{manual.txt}.
+% \item [{2.}] \textbf{FIXUP\index{FIXUP}} to reconstruct inelastic cross
+% section and cross sections for (n,p) and (n,$\alpha$) reactions which
+% normally are formatted with discrete levels separated from the continuum.
+% Inside the \emph{work} sub-directory, the user should type:\\
+% ~\\
+% \texttt{cd ../util/fixup/ }~\\
+% \texttt{rm OUTPUT.ENDF 2>/dev/null }~\\
+% \texttt{ln -sf ../../}\texttt{\emph{work}}\texttt{/OUTPUT.ENDF OUTPUT.ENDF
+% }~\\
+% \texttt{./fixup }~\\
+% \texttt{rm OUTPUT.ENDF }~\\
+% \texttt{mv FIXUP.ENDF ../../}\texttt{\emph{work}}\texttt{/OUTPUT-F.ENDF
+% }~\\
+% \texttt{cd ../../}\texttt{\emph{work}}\\
+% ~
+% \item [{3.}] \textbf{ENDRES} to include resonance parameters in the ENDF
+% formatted file:\\
+% ~\\
+% \texttt{cd ../util/endres/ }~\\
+% \texttt{ln -sf ../../}\texttt{\emph{work}}\texttt{/OUTPUT-F.ENDF empire.end
+% }~\\
+% \texttt{./endres <ENDRES.INP }~\\
+% \texttt{mv endf.dat} \texttt{\emph{../../work}}\texttt{/OUPUT-ER.ENDF
+% }~\\
+% \texttt{cd ../../}\texttt{\emph{work}} 
+% \item [{4.}] \textbf{STANEF} to standardaize the ENDF formatted file:\\
+% \texttt{rm -f INPUT }~\\
+% \texttt{cat >INPUT <\,{}<EOF }~\\
+% \texttt{OUTPUT-ER.ENDF }~\\
+% \texttt{OUTPUT.ENDF }~\\
+% \texttt{0}~\\
+% \texttt{}~\\
+% \texttt{DONE }~\\
+% \texttt{EOF }~\\
+% \texttt{../util/stanef/stanef <INPUT }
+% \end{description}
+% Running EMPEND\index{EMPEND}, FIXUP\index{FIXUP}, ENDRES, and STANEF
+% makes sense only if the ENDF option was selected in the EMPIRE input
+% and the calculations were performed for at least a few incident energies. 
+% 
+% The advantage of the manual operation mode is that it can be carried
+% out on any operating system providing the commands mentioned above
+% are appropriately modified to match actual operating system (note
+% that UNIX link command 'ln' can by replaced by the 'copy' on systems
+% that do not provide 'ln'). However, running the full chain of codes
+% in the manual mode is so laborious and error prone that we don't even
+% provide instructions for further preprocessing, checking and plotting.
+% These operations can be dramatically simplified by use of the scripts
+% discussed below.
 
 
 \subsection{GUI mode\label{GUIsection}}
@@ -5670,11 +5554,11 @@ running EMPIRE, and requires Tcl/Tk to be installed on the computer.
 Actually, the Tcl scripting language and the related graphic Tool
 kit (Tk) are available freely for practically any operating system~\cite{Tcl}.
 On most Linux distributions Tcl/Tk is installed by default. For convenience
-of the user EMPIRE-2.19 comes with the ActiveTcl package, which is
+of the user EMPIRE-3.1 comes with the ActiveTcl package, which is
 easy to install and seems to run on various flavors of Linux (version
 for Windows is also available from htpp://www.activestate.com/Products/ActiveTcl/). 
 
-Standard GUI of EMPIRE-2.19 is a Tcl script \emph{Xrun.tcl} that can
+Standard GUI of EMPIRE-3.1 is a Tcl script \emph{Xrun.tcl} that can
 be started in any 'working' directory (subdirectory of \emph{empire})
 by typing
 
@@ -6030,91 +5914,172 @@ the ENDF options and acts accordingly using MT=5 and specifying relative
 yields of the products in MF=6 if ENDF is set to 2. 
 
 The EMPIRE output ({*}.\emph{out}) is processed and converted into
-ENDF format by the EMPEND code written by Trkov. The ENDF formatted
-output file has to obey the rule of defining the reactions in increasing
-order by MT reaction number, so several sweeps of the EMPIRE file
-({*}.\emph{out}) are made: 
+ENDF format by the EMPEND code written by Trkov.
+The file has to obey the rules of sorting the data in increasing order
+by the data type (MF number) and reaction type (MT number),
+so several sweeps of the EMPIRE output file must be made:              
 
 \begin{itemize}
-\item first sweep: the cross sections and the corresponding reaction Q-values
-are extracted,
-\item second sweep: all reactions are identified for which particle spectra
-are given, 
-\item third sweep: to identify each reaction requiring an ENDF file-4 section;
-these data are entered for discrete level reactions,
-\item fourth sweep: to identify each reaction that has outgoing energy-angle
-correlated particle distributions, 
-\item finally, a sweep is made for the remaining reactions, particularly
-the (n,$\gamma$) reaction, for which the distributions are coded
-in ENDF Files-12, 14 and 15. 
+\item In the first sweep the cross sections and the corresponding             
+   reaction Q-values are extracted. All reading is done with               
+   the REAMF3 routine.                                                     
+\item In the next sweep all reactions for which particle spectra              
+   are given are identified. All reading is done with the SCNMF6           
+   routine.                                                                
+\item Another sweep is made for each reaction having angular                  
+   distributions. This applies to the elastic and all discrete             
+   level reactions (inelastic neutron, alpha and proton                    
+   emission).                                                              
+\item Next follows a sweep for each reaction having energy-angle              
+   correlated outgoing particle distributions.                             
+\item Finally, a sweep is made for the remaining reactions,                   
+   particularly the (n,gamma) reaction, for which the                      
+   particle distributions are coded in ENDF File-6.                        
 \end{itemize}
-The cross section data found on the file are fitted by a cubic spline
-and entered into the output ENDF file (\emph{{*}.endf}) on a user-defined
-dense energy grid, thinned to the specified tolerance and taking reaction
-thresholds into account. If desired, the spline interpolation may
-be suppressed and the energy points found on the file are entered
-directly into the ENDF formatted file.
+                                                                           
+In the first sweep radionuclide production cross sections are              
+located and the MT numbers are assigned, when possible.                    
+Cross sections, which can not be identified uniquely by an MT              
+number are assigned MT=10(Z*1000+A)+LFS where LFS is the final             
+isomeric state of the nuclide. The spin of the target nucleus,             
+the S0-strength function, the average gamma width, the average             
+level spacing and the energy-dependent scattering radius are               
+also extracted to enable the assembly of the dummy resonance               
+parameter file.                                                            
 
-The angular distributions for discrete level reactions that appear
-in the ENDF file-4 sections are extracted from the spectra on the
-EMPIRE output file ({*}.\emph{out}), and interpolated to the appropriate
-energy, if necessary.
+  In the second sweep, all reactions that do not have explicitly           
+given spectra are added to MT=5. When many exclusive spectra are           
+requested in the EMPIRE calculation, there may be cases where              
+particle spectra are given but no MT number is assigned. The               
+spectra are ignored, the cross sections are added to MT=5 and              
+particle production cross sections for this MT are incremented.            
+  After the second sweep, all necessary information is                     
+available to write the comments-section (MF=1) and the prompt              
+nu-bar (if the nuclide is fissile). For incident neutrons a                
+dummy resonance file (MF=2) is constructed.                                
+  The cross section data found on the file are fitted by a                 
+cubic spline and entered into the output ENDF file on a                    
+user-defined dense energy grid, thinned to the specified                   
+tolerance and taking reaction thresholds into account.                     
+If desired, the spline interpolation may be suppressed and                 
+the energy points found on the file are entered directly into              
+the ENDF formatted file.                                                   
+                                                                           
+The angular distributions for discrete level reactions                     
+that appear in the ENDF File-4 sections are extracted from                 
+the spectra on the EMPIRE output file, interpolated to                     
+the appropriate energy, if necessary. Legendre polynomial                  
+coefficients in the centre-of-mass are fitted to the                       
+distributions. For elastic scattering the Legendre                         
+coefficients are copied directly from the EMPIRE output;                   
+If more than 64 Legendre coefficients are required, formatting             
+switches automatically to pointwise representation.                        
+                                                                           
+The correlated energy-angle distributions for continuum                    
+reactions that appear in ENDF file-6 sections are entered                  
+in Legendre polynomial representation in the centre-of-                    
+mass coordinate system. The maximum Legendre order is                      
+limited to 64. For reactions with relatively smooth                        
+angular distributions, the number of coefficients is                       
+reduced accordingly.                                                       
+                                                                           
+Photon production information for discrete levels can be stored            
+in ENDF files-12 and 14. The spectra for the continuum are                 
+included in File-6 (rather than file 15). File-12 contains photon          
+transition probabilities and photon emission probabilities for             
+discrete level reactions, while File 14 contains the corresponding         
+angular distributions, which are assumed isotropic. The gamma              
+spectra of the (n,gamma) reaction are presently stored in File-6.          
+Primary gammas, which are optionally printed in the Empire output          
+are not formatted. This option should not be used when ENDF                
+formatting is required.                                                    
+                                                                           
+\subsection{Input instructions}
 
-The correlated energy-angle distributions for continuum reactions
-that appear in ENDF file-6 sections are entered as Legendre polynomial
-representations in the center-of-mass coordinate system. The maximum
-Legendre order is limited to 12. For reactions with relatively smooth
-angular distributions, the number of coefficients is reduced accordingly.
-Photon production reactions, which remain to be specified, particularly
-the (n,$\gamma$) reaction, are given in the ENDF files-12, 14 and
-15. Photon multiplicity is stored in file-12. Isotropic angular distribution
-is assumed and written to file 14. The particle energy distribution
-is written to file 15. 
-
-The program can be executed interactively from a terminal screen.
-The non-interactive version is called by the script \emph{format}
-and from the GUI. When the interactive version is executed the required
-input is entered in response to the prompts, which are as follows: 
-
+The program can be executed interactively from a terminal                  
+screen. The required input is entered in response to the                   
+prompts, which are the following:                                          
 \begin{itemize}
-\item Name of the EMPIRE output file to be processed. 
-\item Name of the ENDF formatted file to be written. 
-\item Number of sub-intervals per incident neutron energy interval on the
-EMPIRE output file. The sub-intervals define the fine energy mesh
-on the ENDF formatted file. If zero is entered, only the points on
-the EMPIRE output are entered to the ENDF formatted file. 
-\item Thinning tolerance limit {[}\%] to reduce the number of cross section
-points. Data points are removed that can be reproduced from the neighboring
-points by linear interpolation to within the specified tolerance.
-Entering a negative value for the thinning tolerance limit causes
-thinning to be suppressed. 
-\item ENDF material number identifier. 
+\item The name of the EMPIRE output file to be processed.                     
+\item The name of the ENDF formatted file to be written.                      
+\item Number of subintervals per incident neutron energy interval             
+   on the EMPIRE output file. The subintervals define the fine             
+   energy mesh for the cross sections on the ENDF formatted                
+   file. The following are applicable:                                     
+     0  Only the points on the EMPIRE output are entered to the            
+        ENDF formatted file.                                               
+     1  The points at reaction thresholds are entered. The energy          
+        points above are as found in the EMPIRE output file.               
+     n  Threshold points are entered, but in addition, each                
+        interval on the EMPIRE output is subdivided into "n"               
+        subintervals. Cross section values at intermediate points          
+        are defined by a cubic spline fit.                                 
+\item Thinning tolerance limit [%] to reduce the number of cross              
+   section points. Data points which, can be reproduced from the           
+   neighbouring points by linear interpolation to within the               
+   specified tolerance, are removed. Entering a negative value             
+   for the thinning tolerance limit causes thinning to be                  
+   suppressed.                                                             
+\item ENDF material number identifier.                                        
+\item NLIB number assigned to the evaluation (see ENDF-6 manual).             
+   The parameters are optional.                                            
+\item ALAB, EDATE, AUTHOR string, where each of the listed                    
+   parameters occupies 11 columns (see ENDF-6 manual for                   
+   details). The parameters are optional.                                  
 \end{itemize}
-In the non-interactive mode these data are read from the input file
-\emph{empire/work/EMPEND.INP}, which is available for editing from
-the GUI. 
-
-The formatting process is recorded for quality assurance purposes
-by writing the details in the \emph{EMPEND.LOG} file. A limited amount
-of checking is done. An entry is added to the log file in the following
-cases: 
-
+                                                                           
+NOTES:                                                                    
 \begin{itemize}
-\item The cross section obtained by integrating the spectrum should agree
-with the value given directly in the EMPIRE output file (\emph{.out}).
-If the difference exceeds 2\%, a warning message is written that lists
-the MT reaction number, the incident particle energy, the expected
-cross section (i.e. value given directly in the EMPIRE output file)
-and the percent difference. 
-\item The angular distributions are fitted to determine the Legendre polynomial
-expansion coefficients. If the distribution reconstructed from the
-Legendre polynomial coefficients differs from the point-wise values
-on the EMPIRE output file by more than 5\%, a warning message is written
-that gives the reaction MT number, the outgoing particle ZA identifier,
-the incident and the outgoing particle energies and the percent difference
-in the fitted distribution from the point-wise value on the file. 
+\item Extensive exclusive spectra calculations in EMPIRE                      
+   should be avoided when ENDF formatting is needed, since                 
+   for complex reactions when a residual nuclide can be                    
+   produced from more than one reaction, the assignment of                 
+   spectra can not be done uniquely. It is recommended to                  
+   allow up to 4 emitted neutrons and only a single charged                
+   particle.                                                               
+\item All text preceeding the printout for first energy is                    
+   transferred to the comments section in the ENDF file (FM=1,             
+   MT=451). The easiest way to insert customised comments into             
+   the ENDF file is to modify (manually) the EMPIRE output.                
+\item The resonance file (MF=2) that is generated for files                   
+   with incident neutrons is by no means a realistic cross                 
+   section representation. It is given for completeness, when              
+   no information on the resonances (other than from the                   
+   systematics is available). The code places resonances spaced            
+   uniformly around the thermal value according to the given               
+   average level spacing. The neutron width is defined from the            
+   S0 strength function and the gamma-widths are the average               
+   gamma widths. The assigned resonance formalism is the                   
+   Multi-level Breit-Wigner formalism with energy-dependent                
+   scattering radius.                                                      
 \end{itemize}
-Additional messages monitor the progress of the data formatting process.
+                                                                           
+To monitor the formatting process for quality assurance                    
+purposes, the EMPEND.LOG file is written in which the                      
+details of the formatting process are recorded. A limited                  
+amount of checking is done. An entry to the log file is                    
+added in the follwing cases:                                               
+\begin{itemize}
+\item The cross section obtained by integrating the spectrum                  
+   should agree with the value given directly in the                       
+   EMPIRE output file. If the difference exceeds 2%,                       
+   a warning message is written, giving the reaction                       
+   MT number, the incident particle energy, the expected                   
+   cross section (i.e. the value given directly in the                     
+   EMPIRE output file) and the percent difference.                         
+\item The angular distributions are fitted to determine the                   
+   Legendre polynomial expansion coefficients. If the                      
+   distribution reconstructed from the Legendre polynomial                 
+   coefficients differs from the pointwise values on the                   
+   EMPIRE output file by more than 5%, a warning message                   
+   is written, giving the reaction MT number, the outgoing                 
+   particle ZA identifier, the incident and the outgoing                   
+   particle energies and the percent difference in the                     
+   fitted distribution from the pointwise value on the                     
+   file.                                                                   
+\end{itemize}
+Additional messages monitor the progress of the data                       
+formatting process.                                                        
 
 
 \section{Fitting Optical Model Parameters}
@@ -6179,6 +6144,273 @@ TARGET\_COLL.DAT ({*}-lev.col) files. Information on the fit is written
 in the FIT.OUT ({*}-ompfit.lst) file. When a fit is complete, EMPIRE
 is run one last time with all options and energies given in the input
 file, excepting the fit ones. 
+
+
+\subsection{Script mode}
+
+The EMPIRE distribution contains several scripts located in the \emph{empire/scripts}
+directory. These scripts use UNIX bash-shell, which must be installed
+on the systems. Each script performs one or several steps, including
+those described in the previous section, taking care of moving, renaming
+and deleting the files and invoking the execution of appropriate codes.
+Scripts assume certain naming convention for the files, in particular,
+all input files must end with \emph{.inp} extension. Unless specified
+differently, each script is invoked with a single parameter; the name
+of the input file without \emph{.inp} extension (file root-name).
+For example, calculations with the input file \emph{Mo100.inp} can be
+performed using \emph{runE} script and typing \\
+~\\
+\texttt{../scripts/runE Mo100}\\
+~\\
+in the \emph{empire/work} directory (or any other directory at the
+same level as \emph{work}). General philosophy is that the root-name
+of the input file (\emph{Mo100} in the example above) defines a project
+name. Scripts modify generic file names produced by the codes, renaming
+them by the project name plus the specific extension. These extensions
+must not be modified as they define the contents of the file (see
+Table \ref{tab: files}) and are used as identifiers by the system.
+The project is set up by creating the EMPIRE input file with arbitrary
+root-name and .\emph{inp} extension. In the following, we replace
+root-name with the asterisk '{*}' and refer to the files through their
+extensions .%
+\begin{table}[top]
+\caption{\label{tab: files}Possible files for a given project (generally not
+all of them will be used). User created files are marked with $\clubsuit$.}
+
+
+\begin{centering}
+\begin{tabular}{llp{9cm}}
+\hline 
+\multicolumn{1}{l}{\textbf{extension}} & \textbf{generic name} & \textbf{contents of the file}\tabularnewline
+\hline
+{*}.inp~$\clubsuit$ & INPUT.DAT & EMPIRE input \tabularnewline
+{*}.fus~$\clubsuit$ & FUSION & set of \emph{l}-dependent transmission coefficients (one per each
+line) used for determination of the fusion cross section (optional)\tabularnewline
+{*}.lst & LIST.DAT & EMPIRE output (long )\tabularnewline
+{*}.out & OUTPUT.DAT & EMPIRE output (short )\tabularnewline
+{*}.lev & LEVELS &  discrete levels for all nuclei involved in the run\tabularnewline
+{*}-lev.col   & TARGET\_COLL.DAT & characteristics of collective levels used for ECIS03 calculations\tabularnewline
+{*}.-omp.ripl & OMPAR.RIPL & optical model parameters read from the RIPL database\tabularnewline
+{*}.-omp.dir & OMPAR.DIR & optical model parameters used for DWBA or CC calculations with ECIS03\tabularnewline
+{*}-inp.fis & FISSION.INP & input parameters related to fission channel\tabularnewline
+ & FISSION.OUT & detailed output of fission calculations including intermediate results
+for purpose of checking\tabularnewline
+{*}.endf &  & results in the ENDF format including neutron resonance region and
+processed with FIXUP and STANEF (this is the final ENDF file for distribution)\tabularnewline
+{*}-e.endf &  & results in the ENDF format as produced by EMPEND (not yet fit for
+distribution)\tabularnewline
+{*}-s.endf &  & results in the ENDF format after processing with PREPRO codes (ready
+for plotting but not legal ENDF file for distribution!)\tabularnewline
+{*}.exf & EXFOR.DAT & relevant experimental data retrieved from EXFOR (if EXFOR installed)\tabularnewline
+{*}.c4 &  & relevant EXFOR data translated into computational format\tabularnewline
+{*}.ps &  & full set of PostScript plots comparing calculations against experimental
+data\tabularnewline
+{*}-cum.ps & CUMULPLOT.PS & cumulative plots of discrete levels in PostScript format\tabularnewline
+{*}-MT.zvd &  & ZVView file for plotting MT (MT=2, 4, 16,...)\tabularnewline
+{*}.x42c4\_lst &  & output of X4TOC4 code\tabularnewline
+{*}.x42c4\_errs &  & list of EXFOR entries not translated by the X4TOC4 code\tabularnewline
+{*}.war &  & warnings extracted from the EMPIRE output {*}.lst\tabularnewline
+\hline
+\end{tabular}
+\par\end{centering}
+\end{table}
+%
+\begin{table}[top]
+\caption{List of log-files}
+
+
+\begin{tabular}{ll}
+\hline 
+\textbf{extension} & \textbf{contents of the file}\tabularnewline
+\hline
+{*}-log.empend & produced by EMPEND when converting EMPIRE output into ENDF-6 format\tabularnewline
+{*}-log.endres & produced by ENDRES when merging EMPIRE results with the resonance
+region\tabularnewline
+{*}-log.checkr & results of format checking with code CHECKR\tabularnewline
+{*}-log.fizcon & results of physics checking with the code FIZCON\tabularnewline
+{*}-log.psyche & results of format checking with code PSYCHE\tabularnewline
+{*}-log.legend & produced by the PREPRO code LEGEND\tabularnewline
+{*}-log.linear & produced by the PREPRO code LINEAR\tabularnewline
+{*}-log.recent & produced by the PREPRO code RECENT (resonance reconstruction)\tabularnewline
+{*}-log.sigma1 & produced by the PREPRO code SIGMA1 (Doppler broadening)\tabularnewline
+{*}-log.plotc4 & produced by the code PLOTC4 (cross section plotting)\tabularnewline
+\hline
+\end{tabular}
+\end{table}
+\\
+The following scripts are provided:
+
+\begin{labeling}{00.00.0000}
+\item [{\textbf{runE}}] runs EMPIRE, retrieves EXFOR data and translates
+them into computational format
+\item [{\textbf{format}}] runs EMPEND\index{EMPEND}, RESEND, FIXUP, and
+STANEF to transform .\emph{out} output into ENDF format (produces
+.\emph{endf} file)
+\item [{\textbf{process}}] run set of preprocessing codes to produce \emph{{*}-s.endf}
+file ready for plotting (prepares also a table of possible plots)
+\item [{\textbf{verify}}] runs set of checking codes CHECKR, FIZCON and
+PSYCHE
+\item [{\textbf{run}}] does all above (\textbf{runE + format + process
++ verify})
+\item [{\textbf{stanef}}] runs ENDF-6 format standardization code STANEF
+\item [{\textbf{c4}}] converts EXFOR data in the \emph{{*}.exf} file into
+the computational format (file \emph{{*}.c4}) (included in \textbf{runE})
+\item [{\textbf{sortc4}}] sorts experimental data in the computational
+format ({*}\emph{.c4} file) (included in \textbf{runE})
+\item [{\textbf{plot}}] runs PLOTC4\index{PLOTC4} to create comparison
+plots of experimental and calculated cross sections
+\item [{\textbf{plotlst}}] produces list of possible plots by matching
+calculations against experimental data without doing actual plots
+(simulates log-output of PLOTC4 in a fraction of time required by
+PLOTC4) 
+\item [{\textbf{storemul}}] moves all files matching pattern za{*}\$2{*}
+to the directory ../\$1 (creates ../\$1 if it does not exists). \$1
+and \$2 are the parameter of the script, e.g., to move files obtained
+related to isotopes if iron (using input files of the type za260xx.inp)
+to the directory ../default\_om one should issue a command \\
+\texttt{../scripts/storemul default\_com 260}
+\item [{\textbf{x4interface}}] starts graphical interface for manual EXFOR
+retrieval from the local MySQL database. When called with the root-name
+of the project as an argument stores retrieved EXFOR file as 'root-name'.exf
+\item [{\textbf{X4retrieve}}] runs EXFOR retrieval from the local MySQL
+database (called internally by EMPIRE)
+\item [{\textbf{clean}}] removes all files related to a given project (except
+the input file \emph{{*}.inp}) and any \emph{core} file. This script
+must be run each time a project is changed by adding new channels
+or by modifying projectile or target in the input file .\emph{inp}.
+\item [{\textbf{cleansel}}] removes selected files related to the given
+project
+\item [{\textbf{cleanall}}] removes \textbf{all} output files for all projects
+in a current directory; only input files (\emph{{*}.inp}) are retained
+\item [{\textbf{store}}] moves .\emph{inp, .lst, .out, .ps, .endf}, and
+.\emph{res} files for all projects (.\emph{inp} files are copied rather
+than moved) to a subdirectory specified as a parameter to \emph{store}.
+If the subdirectory does not exists, one will be created, which avoids
+old files being overwritten by new ones (e.g., when calculations are
+repeated with modified parameters). For example, the results of calculations
+with the Moldauer's optical-model parameters can be saved in the subdirectory
+\emph{OM-Moldauer} by issuing the command:\\
+~\\
+\texttt{../scripts/store OM-Moldauer}\\
+
+\item [{\textbf{grepawk}}] handy tool for extracting specific excitation
+function from the EMPIRE output .\emph{lst} and arranging into two
+columns (incident energy, cross section). Such a representation allows
+any standard package to be used (e.g., gnuplot or xmgr) to plot excitation
+functions for any calculated cross section (e.g., population of a
+certain discrete level). The user must create a file with the project
+root-name and extension \emph{.pat} containing two line pattern as
+in the example below\textbf{:}\\
+\textbf{~}\\
+ \texttt{incident energy}~\\
+\texttt{.3350 MeV~~~ 7.0 level}~\\
+\texttt{~}~\\
+The first line must be left intact.The second should be changed according
+to the needs, and has to be the exact string that uniquely identifies
+a line of the output from which the cross section is to be extracted.
+A convenient method it is to cut and paste between \emph{.lst} and
+.\emph{pat} files. As usual, script is invoked with the project name
+as a parameter. UNIX package {}``awk'' is used to scan the .\emph{lst}
+output. Each time a line is encountered that matches {}``incident~energy\texttt{'',}
+the projectile energy is extracted. When a match occurs to the second
+line of .\emph{pat} file, the requested cross section is identified
+as the word immediately before the {}``mb'' string and extracted.
+The resulting excitation function is written to the file .\emph{res.}
+Note that each use of \emph{grepawk} will overwrite the \emph{.res}
+file. Starting with version 2.16, similar functionality can be achieved
+with the \emph{zvpl} script which produces {*}.\emph{zvd} and calls
+ZVView\index{ZVView} to display this file. 
+\item [{\textbf{run-piece-wise}}] runs up to three different inputs for
+the same reaction, combines the results and processes them through
+the utility codes to produce a single ENDF file and relevant plots.
+Different models and/or model parameters are allowed in three separate
+energy ranges. Users have to ensure that incident energies are monotonically
+increasing across the three sets of input parameters.
+\item [{\textbf{zvd}}] plots comparisons of calculated and experimental
+data using ZVView\index{ZVView} graphic package. Script is called
+with MT number and project name as parameters. For example, to plot
+(n,$\gamma$) reaction for the \emph{100mo} project one should type:\\
+~\\
+\texttt{../scripts/zvd 102 100mo}\\
+~\\
+in which zvd script uses \emph{{*}-s.endf} file for plotting. If this
+does not exist, script invokes the \textbf{process} script to reconstruct
+(n,inl), (n,p) and (n,$\alpha$) reactions and produce File 6 in a
+form suitable for plotting. This file is processed along with {*}.c4
+that contains experimental data to produce \emph{{*}-MT.zvd} file
+(\emph{MT} is any legal ENDF-6 format MT number). List of typical
+MT numbers is given in the following:\\
+%
+\begin{table}[top]
+\caption{\label{MTs} Most frequently used MT numbers and corresponding reactions}
+
+
+\begin{centering}
+\begin{tabular}{cc}
+\hline 
+Reaction & MT\tabularnewline
+\hline
+tot & 1\tabularnewline
+elastic & 2\tabularnewline
+inelastic & 4\tabularnewline
+(n,2n) & 16\tabularnewline
+(n,3n) & 17\tabularnewline
+(n,f) & 18\tabularnewline
+(n,n$\alpha$) & 22\tabularnewline
+(n,np) & 28\tabularnewline
+(n,np$\alpha$) & 45\tabularnewline
+(n,$\gamma$) & 102\tabularnewline
+(n,p) & 103\tabularnewline
+(n,$\alpha$) & 107\tabularnewline
+(n,p$\alpha$) & 112\tabularnewline
+\hline
+\end{tabular}
+\par\end{centering}
+\end{table}
+
+\item [{\textbf{zvcomb}}] allows an arbitrary number of existing zvd plots
+to be combined into one. If zvcomb is called without any parameter,
+a list of available \emph{{*}.zvd} files is displayed on the terminal,
+so that the names can be pasted onto the command line.
+\item [{\textbf{zvpl}}] similar to grepawk but produces {*}.\emph{zvd}
+file and displays by calling ZVView\index{ZVView}. Can be operated
+from the Graphic User Interface \emph{Xrun.tcl}.
+\item [{\textbf{zvv}}] combines and displays various ZVView plots as a
+single plot, e.g., \\
+\texttt{../scripts/zvv nb93{*}.zvd}
+\item [{\textbf{zvvddx}}] create a ZVView plot of excitation functions,
+angular distributions, spectra, or double-differential cross sections
+(intended for use within the Graphic User Interface \emph{Xrun.tcl})
+\item [{\textbf{mtacomp}}] produces ZVView plots that compare experimental
+data with the results of up to three sets of calculations (or evaluations)
+in the ENDF format for a given MT number and target. The syntax is:\\
+\\
+\texttt{../scripts/mtacomp MT comp root dir1 name1 file2 name2 file3
+name3}\\
+\\
+where: MT stands for the ENDF reaction code (see Table \ref{MTs}),
+\emph{comp} is an arbitrary string added to names of plot files, \emph{dir}1
+points to the directory containing the first ENDF file, \emph{file1}
+and \emph{file2} indicate the remaining two ENDF files and \emph{name}i
+are labels of the respective curves. Note, that \emph{dir1} must contain
+the ENDF file named \emph{root-s.endf} and optionally EXFOR data in
+the computational format in the file named \emph{root.c4.} The naming
+convention is automatically ensured if the files were created by EMPIRE.
+There are no restrictions on the names of the remaining two ENDF files.
+The script is intended for use within the GUI but can also be run
+manually. 
+\item [{\textbf{acomp}}] same as \emph{mtacomp} but does the job for the
+whole list of MTs in Table \ref{MTs}; therefore, MT is omitted from
+the list of parameters. The script is intended for use within the
+Graphic User Interface but can also be run manually. 
+\item [{\textbf{showzvd}}] calls ZVView package for each \emph{.zvd} file
+from the argument list.
+\end{labeling}
+Note that EXFOR library must be installed in order to compare calculations
+with experiment and that in most cases plots are created from the
+ENDF formatted file. The detailed description of the X4TOC4 input
+is given in the source file \emph{empire/util/plotc4/plotc4.f} and
+in the manual \emph{empire/util/plotc4/manual.txt.}
 
 
 \section{Input/Output files}
@@ -8706,35 +8938,6 @@ button in GUI mode.}
 
 
 
-\subsection{PLOTC4}
-
-The X4TOC4\index{X4TOC4} and PLOTC4\index{PLOTC4} codes have been
-extended and incorporated into the ENDF Data Verification Package
-(ENDVER) by Trkov and Cullen to plot angular distributions and double-differential
-cross sections~\cite{ENDVER}. A typical example of such a plot is
-shown in Fig. \ref{fig:93Nb-ddx}. Since plotting might be very time
-consuming (e.g., in the case of 238-U) by default plots are no more
-generated at the end of each run, but have to be explicitly requested
-by running \emph{../scripts/plot} script or by selecting 'Plotting
-(PLOTC4)' check box in GUI (Main1). The layout and contents of the
-plots can be customized by editing the PLOTC4 input file available
-through the Graphic User Interface (GUI). 
-
-%
-\begin{figure}[top]
-\begin{centering}
-\includegraphics[width=0.7\textwidth,angle=-90,bb = 0 0 200 100, draft, type=eps]{nb93-KoBeGo-90.eps}
-\par\end{centering}
-
-\caption{\label{fig:93Nb-ddx}Calculated neutron emission spectrum from $^{93}$Nb
-at 90$^{\circ}$ and incident energy of 14.1 MeV compared with the
-experimental data using PLOTC4\index{PLOTC4}. The Ko-Be-Go set of
-input parameters has been used in the calculations (see p. \pageref{Ko-Be-Go}).}
-
-\end{figure}
-
-
-
 \subsection{ZVView}
 
 The plotting capabilities of EMPIRE have been greatly enhanced by
@@ -8832,6 +9035,35 @@ script scans EMPIRE output (\emph{{*}.lst}) for the lines containing
 the specified string and extracts a number (cross section) followed
 by the \char`\"{}mb\char`\"{} string along with the respective incident
 energy value. The results are sent to ZVView\index{ZVView} for plotting. 
+
+
+% \subsection{PLOTC4}
+% 
+% The X4TOC4\index{X4TOC4} and PLOTC4\index{PLOTC4} codes have been
+% extended and incorporated into the ENDF Data Verification Package
+% (ENDVER) by Trkov and Cullen to plot angular distributions and double-differential
+% cross sections~\cite{ENDVER}. A typical example of such a plot is
+% shown in Fig. \ref{fig:93Nb-ddx}. Since plotting might be very time
+% consuming (e.g., in the case of 238-U) by default plots are no more
+% generated at the end of each run, but have to be explicitly requested
+% by running \emph{../scripts/plot} script or by selecting 'Plotting
+% (PLOTC4)' check box in GUI (Main1). The layout and contents of the
+% plots can be customized by editing the PLOTC4 input file available
+% through the Graphic User Interface (GUI). 
+% 
+% %
+% \begin{figure}[top]
+% \begin{centering}
+% \includegraphics[width=0.7\textwidth,angle=-90,bb = 0 0 200 100, draft, type=eps]{nb93-KoBeGo-90.eps}
+% \par\end{centering}
+% 
+% \caption{\label{fig:93Nb-ddx}Calculated neutron emission spectrum from $^{93}$Nb
+% at 90$^{\circ}$ and incident energy of 14.1 MeV compared with the
+% experimental data using PLOTC4\index{PLOTC4}. The Ko-Be-Go set of
+% input parameters has been used in the calculations (see p. \pageref{Ko-Be-Go}).}
+% 
+% \end{figure}
+
 
 
 \section{Plans for further development}
@@ -9243,7 +9475,7 @@ results as illustrated by the following three sets of calculations:
 \begin{labeling}{00.00.0000}
 \item [{standard}] Wilmore-Hodgson S-OMP for neutrons and Becchetti-Greenlees
 for protons, EMPIRE-specific level densities with internal systematics,
-and discrete levels up to N$_{max}=10$ (note that in EMPIRE-2.19
+and discrete levels up to N$_{max}=10$ (note that in EMPIRE-3.1
 Koning-DeLaroche potential is a standard),%
 \begin{figure}[top]
 \begin{centering}
@@ -10022,7 +10254,7 @@ system of EMPIRE.
 \addchap{Appendix ChangeLog}
 
 
-\section*{Changes in version 2.19 with respect to 2.18 \protect \\
+\section*{Changes in version 3.1 with respect to 2.18 \protect \\
 Brookhaven, March 2005}
 
 \begin{enumerate}
