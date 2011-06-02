@@ -1,4 +1,4 @@
-//#include <malloc.h>
+#include <malloc.h>
 
 static int nalloc=0;
 

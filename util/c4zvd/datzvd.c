@@ -163,9 +163,9 @@ char    **argv;
     }
     fclose(inFile);
     printf("\n");
-    printf("lXrefs=%d ",lXref);
-    printf("lData=%d ",lData);
-    printf("lDataMax=%d ",lDataMax);
+    printf("lXrefs=%ld ",lXref);
+    printf("lData=%ld ",lData);
+    printf("lDataMax=%ld ",lDataMax);
     printf("\n");
 
     //--- allocation of memory

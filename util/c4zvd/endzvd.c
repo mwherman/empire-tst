@@ -52,7 +52,7 @@ char    **argv;
     if (zaStr[0]=='A') flagAllZA=1;
     else {
         flagAllZA=0;
-        i=sscanf (zaStr,"%ld",&zaNeeded);
+        i=sscanf (zaStr,"%d",&zaNeeded);
     }
 
     i=sscanf (*argv++,"%d",&mtNeeded);
