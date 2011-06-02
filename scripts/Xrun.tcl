@@ -1,3 +1,7 @@
+# $Rev: 2074 $
+# $Author: rcapote $
+# $Date: 2011-06-02 19:54:08 +0200 (Do, 02 Jun 2011) $
+#
 #!/bin/sh
 # the next line restarts using wish\
 exec wish "$0" "$@" 
@@ -4833,35 +4837,6 @@ proc vTcl:project:info {} {
         array set save {-labelfont 1 -labelpos 1 -labeltext 1 -textbackground 1 -textvariable 1 -width 1}
     }
     set site_8_3 [lindex [$base.tab88 childsite] 3]
-    namespace eval ::widgets::$site_8_3 {
-        array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
-    }
-    set site_8_0 $site_8_3
-    namespace eval ::widgets::$site_8_0.cpd70 {
-        array set save {-background 1 -font 1 -height 1 -highlightbackground 1 -labelbackground 1 -labelfont 1 -selectborderwidth 1 -selectcommand 1 -selectmode 1 -width 1 -yscrollcommand 1}
-        namespace eval subOptions {
-            array set save {-background 1 -font 1 -label 1 -labelrelief 1 -resizable 1 -visible 1 -width 1}
-        }
-    }
-    namespace eval ::widgets::$site_8_0.fra71 {
-        array set save {-background 1 -borderwidth 1 -height 1 -relief 1 -width 1}
-    }
-    set site_9_0 $site_8_0.fra71
-    namespace eval ::widgets::$site_9_0.lab72 {
-        array set save {-background 1 -text 1}
-    }
-    namespace eval ::widgets::$site_9_0.cpd77 {
-        array set save {-clientdata 1 -command 1 -editable 1 -justify 1 -labelpos 1 -labeltext 1 -width 1}
-    }
-    namespace eval ::widgets::$site_9_0.cpd75 {
-        array set save {-command 1 -justify 1 -labelpos 1 -labeltext 1 -width 1}
-    }
-    namespace eval ::widgets::$site_9_0.com81 {
-        array set save {-command 1 -editable 1 -labeltext 1}
-    }
-    namespace eval ::widgets::$site_9_0.com82 {
-        array set save {-textvariable 1}
-    }
     set site_8_4 [lindex [$base.tab88 childsite] 4]
     namespace eval ::widgets::$site_8_4 {
         array set save {-background 1 -highlightbackground 1 -highlightcolor 1}
@@ -5629,7 +5604,8 @@ foreach el $stablist {
    if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $mulinputn 1111 }
    if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $mulinputn}
    if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $mulinputn 1111 }
-   if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
+   if {$cplot == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $mulinputn}
+   #if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
 #  exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111
    set delistmul ""
@@ -5713,7 +5689,7 @@ set eres 0.02
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list empire_ctl.f main.f input.f  fusion.f tl.f ccfus.f  MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f plot-zvv.f degas.f  ddhms.f  pcross.f scnd-preeq.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f  ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.c systematics.f dimension.h global.h io.h ddhms.cmb Makefile]
+set modules [list empire_ctl.f main.f input.f fusion.f tl.f ccfus.f MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f fitbarrier.f plot-zvv.f degas.f  ddhms.f  pcross.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.f systematics.f pfns.f dtrans.f kailas07emp.f dimension.h global.h io.h ddhms.cmb Makefile]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -5801,7 +5777,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE GUI"
+    wm title $top "EMPIRE 3.1 (Rivoli) GUI, June 2011"
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -5857,7 +5833,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but86" "Button8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but86 "$site_3_0.but86 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but86 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Launch full sequence (calculations + formatting + preprocessing + checking) }
+        set ::vTcl::balloon::%W {Launch full sequence (calculations + formatting + preprocessing) }
     }
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -6043,7 +6019,7 @@ adjourn .top75}} \
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
     $top.tab88 add \
-        -command {} -label {DDX plots} -width 0 
+        -command {} -label {} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -6099,7 +6075,8 @@ editFile $file.inp } \
 if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file $mat }
 if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file}
 if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file $mat }
-if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file}
+if {$cplot == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file}
+#if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file}
 
 # create list of possible ddx plots
 ddlist
@@ -6142,11 +6119,11 @@ adjourn .top75} \
         -textvariable {} -variable cverify 
     $site_10_0.che77 add chk3 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text PreProcessing \
+        -justify left -selectcolor #00ff00 -text {Preparing ZVD-Plots}\
         -textvariable {} -variable cprepro 
     $site_10_0.che77 add chk4 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text {Plotting (PLOTC4)} \
+        -justify left -selectcolor #00ff00 -text {Adding resonances} \
         -textvariable {} -variable cplot 
     pack $site_10_0.fra70 \
         -in $site_10_0 -anchor center -expand 1 -fill both -side left 
@@ -6319,9 +6296,9 @@ close $rcfl
 
 
 exit} \
-        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -17} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text Exit -width 10 -wraplength 60 
+        -pady 2m -relief raised -text {SAVE and QUIT} -width 8 -wraplength 80 
     vTcl:DefineAlias "$site_9_0.cpd73" "Button58" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd73 "$site_9_0.cpd73 Button $top all _vTclBalloon"
     bind $site_9_0.cpd73 <<SetBalloon>> {
@@ -6937,86 +6914,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -highlightbackground #dcdcdc -labelbackground #dcdcdc \
         -labelfont {Helvetica -10} -selectborderwidth 0 \
         -selectcommand {set dd ""
-set ddxlist [selection get]
-set ddx ""
-set prev "#"
-set last "#"
-foreach el $ddxlist {
-   if { $prev == $last } {
-   lappend ddx $el
-   }
-   set prev $el
 }
-lappend dd} \
-        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
-    vTcl:DefineAlias "$site_8_3.cpd70" "Mclistbox2" vTcl:WidgetProc "Toplevel1" 1
-    $site_8_3.cpd70 column add col1 \
-        -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
-        -resizable 1 -visible 1 -width 5 
-    $site_8_3.cpd70 column add col2 \
-        -background #f999f999f999 -font {Helvetica -10 } -label MF \
-        -labelrelief flat -resizable 1 -visible 1 -width 5 
-    $site_8_3.cpd70 column add col3 \
-        -background #ffffff -font {Helvetica -10} -label p -labelrelief flat \
-        -resizable 1 -visible 1 -width 3 
-    $site_8_3.cpd70 column add col4 \
-        -background #f999f999f999 -font {Helvetica -10} -label MT \
-        -labelrelief flat -resizable 1 -visible 1 -width 6 
-    $site_8_3.cpd70 column add col5 \
-        -background #ffffff -font {Helvetica -10} -label Einc \
-        -labelrelief flat -resizable 1 -visible 1 -width 10 
-    $site_8_3.cpd70 column add col6 \
-        -background #f999f999f999 -font {Helvetica -10 } -label Elev \
-        -labelrelief flat -resizable 1 -visible 1 -width 10 
-    $site_8_3.cpd70 column add col7 \
-        -background #ffffff -font {Helvetica -10} -label Ang \
-        -labelrelief flat -resizable 1 -visible 1 -width 5 
-    $site_8_3.cpd70 column add col8 \
-        -background #ffffff -font {Helvetica -10} -label init \
-        -labelrelief flat -resizable 0 -visible 0 -width 3 
-    frame $site_8_3.fra71 \
-        -borderwidth 2 -relief groove -background #d9d9d9 -height 75 \
-        -width 125 
-    vTcl:DefineAlias "$site_8_3.fra71" "Frame3" vTcl:WidgetProc "Toplevel1" 1
-    set site_9_0 $site_8_3.fra71
-    label $site_9_0.lab72 \
-        -background #d9d9d9 -text {Add plots to the list} 
-    vTcl:DefineAlias "$site_9_0.lab72" "Label1" vTcl:WidgetProc "Toplevel1" 1
-    ::iwidgets::combobox $site_9_0.cpd77 \
-        -clientdata klapa \
-        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com74 _addToList}} \
-        -editable 1 -justify right -labelpos w -labeltext {MF      } \
-        -width 10 
-    vTcl:DefineAlias "$site_9_0.cpd77" "Combobox4" vTcl:WidgetProc "Toplevel1" 1
-    ::iwidgets::combobox $site_9_0.cpd75 \
-        \
-        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com74 _addToList}} \
-        -justify right -labelpos w -labeltext Ejectile -width 10 
-    vTcl:DefineAlias "$site_9_0.cpd75" "Combobox3" vTcl:WidgetProc "Toplevel1" 1
-    ::iwidgets::combobox $site_9_0.com81 \
-        \
-        -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page4.cs.fra71.com81 _addToList}} \
-        -editable 0 -labeltext {E inc} 
-    vTcl:DefineAlias "$site_9_0.com81" "Combobox2" vTcl:WidgetProc "Toplevel1" 1
-    ::combobox2::combobox2 $site_9_0.com82 \
-        -textvariable "$top\::com82" 
-    vTcl:DefineAlias "$site_9_0.com82" "Combo1" vTcl:WidgetProc "Toplevel1" 1
-    pack $site_9_0.lab72 \
-        -in $site_9_0 -anchor e -expand 0 -fill none -side top 
-    pack $site_9_0.cpd77 \
-        -in $site_9_0 -anchor e -expand 0 -fill none -padx 5 -pady 2 \
-        -side top 
-    pack $site_9_0.cpd75 \
-        -in $site_9_0 -anchor e -expand 0 -fill none -padx 5 -pady 2 \
-        -side top 
-    pack $site_9_0.com81 \
-        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
-    pack $site_9_0.com82 \
-        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
-    pack $site_8_3.cpd70 \
-        -in $site_8_3 -anchor w -expand 0 -fill y -side left 
-    pack $site_8_3.fra71 \
-        -in $site_8_3 -anchor w -expand 1 -fill both -side left 
     set site_8_4 [lindex [$top.tab88 childsite] 4]
     ::iwidgets::checkbox $site_8_4.che119 \
         -background #d9d9d9 \
@@ -8274,17 +8172,11 @@ exit} \
         -command { editFile $::env(EMPIREDIR)/util/endres/ENDRES.INP } \
         -label {ENDRES input} 
     $site_3_0.menu90 add command \
-        -command { editFile $::env(EMPIREDIR)/util/plotc4/PLOTC4.INP } \
-        -label {PLOTC4 input} 
-    $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/fixup/FIXUP.INP } \
         -label {FIXUP input} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/c4sort/C4SORT.INP } \
         -label {C4SORT input} 
-    $site_3_0.menu90 add command \
-        -command { editFile $::env(EMPIREDIR)/util/x4toc4/reaction } \
-        -label {X4TOC4 table} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/c4zvd/ps01.tit } \
         -label {ZVView options} 
@@ -8352,8 +8244,7 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu92 add command \
-        -command {exec {cp skel.inp
-$file.inp &}} -label {Create input} 
+        -command {file copy -force $::env(EMPIREDIR)/scripts/skel.inp $file.inp} -label {Create input} 
     $site_3_0.menu92 add command \
         -command { editFile $file.inp } -label {Edit input} 
     $site_3_0.menu92 add command \
@@ -8516,9 +8407,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command { editFile $file-fiss.xsc } -label {Fission chances} 
     $site_3_0.menu94 add command \
         -command { editFile $file-pfnm.out } \
-        -label {Fiss. neutr. multiplicities} 
+        -label {Fiss. neutr. multiplicities (nubar) } 
     $site_3_0.menu94 add command \
-        -command { editFile $file-pfns.out } -label {Fiss. neutr. spectra} 
+        -command { editFile $file-pfns.out } -label {Fiss. neutr. spectra (PFNS)} 
     $site_3_0.menu94 add command \
         -command { editFile $file.sys } -label {x-sec systematics} 
     $site_3_0.menu94 add command \
@@ -8681,7 +8572,7 @@ cd $workdir} \
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/doc/hints.txt } -label FAQ 
     $site_3_0.menu96 add command \
-        -command { pspdfView $::env(EMPIREDIR)/doc/empire.ps } \
+        -command { pspdfView $::env(EMPIREDIR)/doc/empire.pdf } \
         -label {EMPIRE manual} 
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/empend/manual.txt } \
@@ -8690,23 +8581,11 @@ cd $workdir} \
         -command { editFile $::env(EMPIREDIR)/util/c4sort/manual.txt } \
         -label {C4SORT manual} 
     $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/util/legend/manual.txt } \
-        -label {LEGEND manual} 
-    $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/util/plotc4/manual.txt } \
-        -label {PLOTC4 manual} 
-    $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/x4toc4/manual.txt } \
         -label {X4TOC4 manual} 
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/fixup/manual.txt } \
         -label {FIXUP manual} 
-    $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/util/lsttab/manual.txt } \
-        -label {LSTTAB manual} 
-    $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/util/sixtab/manual.txt } \
-        -label {SIXTAB manual} 
     menu $top.m76 \
         -disabledforeground #a1a4a1 -tearoff 1 
     ###################
