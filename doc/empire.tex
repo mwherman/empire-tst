@@ -76,9 +76,12 @@ and $\gamma$-ray strength functions. Effects of the dynamic deformation
 of a fast rotating nucleus can be taken into account in the calculations.
 The results can be converted into the ENDF-6 format using the accompanying
 code EMPEND. The package contains the full EXFOR library of experimental
-data. Relevant EXFOR entries are automatically retrieved during the
+data. Relevant EXFOR entries in computational format C4 
+are automatically retrieved during the
 calculations. Plots comparing experimental results with calculations
-can be produced using X4TOC4 and PLOTC4 codes linked to the rest of
+can be produced 
+%using X4TOC4 and PLOTC4 codes linked to the rest of
+with ENDVER modules linked to the rest of
 the system through bash-shell (UNIX) scripts. Publication quality
 graphs can be obtained using the powerful and flexible plotting package
 ZVView. The graphic user interface, written in Tcl/Tk, provides for
@@ -160,35 +163,41 @@ format (written by A. Trkov),
 \item [{\textbf{ENDRES\index{ENDRES}}}] merges existing resonance parameters
 into ENDF-6 formatted file produced by EMPEND (written by A. Trkov),
 \item [{\textbf{X4TOC4\index{X4TOC4}}}] converts experimental data retrieved
-from EXFOR into computational format (written by D.E. Cullen)~\cite{PREPRO},
+from EXFOR into computational C4 format (written by D.E. Cullen)~\cite{PREPRO},
 \item [{\textbf{C4SORT\index{C4SORT}}}] sorts experimental data in the
-computational format file by MAT/MF/MT numbers and incident energy
+computational C4 format file by MAT/MF/MT numbers and incident energy
 (written by A.Trkov)~\cite{ENDVER},
-\item [{\textbf{FIXUP\index{FIXUP}}}] used to reconstruct MT=4, 103, and
-107 (written by D.E. Cullen)~\cite{PREPRO},
-\item [{\textbf{LEGEND\index{LEGEND}}}] calculates linearly interpolable
-angular distributions from ENDF data (written by D.E. Cullen)~\cite{PREPRO},
+\item [{\textbf{FIXUP\index{FIXUP}}}] used to reconstruct redundant cross sections
+MT=4, 103, and 107 (Program of the Pre-Pro series, written by D.E. Cullen)~\cite{PREPRO},
+\item [{\textbf{LEGEND\index{LEGEND}}}] reconstructs tabular linearly interpolable
+angular distributions from ENDF data in different format representations 
+(Program of the Pre-Pro series, written by D.E. Cullen)~\cite{PREPRO},
 \item [{\textbf{LSTTAB\index{LSTTAB}}}] tabulates ENDF and EXFOR data
-in PLOTTAB format (written by A.Trkov)~\cite{ENDVER},
+in PLOTTAB format (module of ENDVER package, written by A.Trkov)~\cite{ENDVER},
 \item [{\textbf{SIXTAB\index{SIXTAB}}}] converts ENDF file MF6 to Law
-7 representation (written by A.Trkov)~\cite{ENDVER},
+7 representation (module of ENDVER package, written by A.Trkov)~\cite{ENDVER},
 \item [{\textbf{PLOTC4\index{PLOTC4}}}] plots comparison between EMPIRE
 results and EXFOR data (written by D.E. Cullen and A. Trkov)~\cite{ENDVER},
 \item [{\textbf{CHECKR\index{CHECKR}}}] performs format checking of the
-ENDF-6 formatted file (written by Ch. Dunford)
+ENDF-6 formatted file (ENDF Utility codes, written by Ch. Dunford)
 \item [{\textbf{FIZCON}}] performs physics check of the ENDF-6 formatted
-file (written by Ch. Dunford)
+file (ENDF Utility codes, written by Ch. Dunford)
 \item [{\textbf{PSYCHE}}] performs more physics checking of the ENDF-6
-formatted file (written by Ch. Dunford)
-\item [{\textbf{LINEAR}}] converts MF=3 (cross sections) of the ENDF-6
-file into a linear-linear interpolable form (written by D.E. Cullen)~\cite{PREPRO}
-\item [{\textbf{PLTLST}}] prepares list of possible plots by matching experimental
-data against ENDF-6 file 
+formatted file (ENDF Utility codes, written by Ch. Dunford)
+\item [{\textbf{LINEAR}}] converts MF=3 (cross sections) in an ENDF
+file into a linear-linear interpolable form (Program of the Pre-Pro series, 
+written by D.E. Cullen)~\cite{PREPRO}
+\item [{\textbf{PLTLST}}] prepares a list of data types in the EXFOR data-base
+that can be compared to quantities in the ENDF files
+(module of ENDVER package, written by A.Trkov)~\cite{ENDVER},
 \item [{\textbf{RECENT}}] reconstructs the resonace contribution to the
-cross section in linearly interpolable form (written by D.E. Cullen)~\cite{PREPRO}
-\item [{\textbf{SIGMA1}}] Doppler broaden neutron induced cross section
-(written by D.E. Cullen)~\cite{PREPRO}
+cross sections in an ENDF file into linearly interpolable form 
+(Program of the Pre-Pro series, written by D.E. Cullen)~\cite{PREPRO}
+\item [{\textbf{SIGMA1}}] Doppler broadens neutron induced cross sections
+in an ENDF file
+(Program of the Pre-Pro series, written by D.E. Cullen)~\cite{PREPRO}
 \item [{\textbf{STANEF}}] Standardizes ENDF-6 formatted file
+(ENDF Utility codes, written by Ch. Dunford)
 \item [{\textbf{zvvddx}}] Produces plots of angular distributions, spectra
 and double differential cross sections using ZVView package (written
 by V. Zerkin).
@@ -233,7 +242,7 @@ with transmission coefficients determined according to one of the
 following methods:
 
 \begin{labeling}{00.00.0000}
-\item [{(i)}] the simplified Coupled-Channels\index{Coupled-Channels}
+\item [{(i)}] Simplified Coupled-Channels\index{Coupled-Channels}
 approach \cite{CCFUS} (CCFUS\index{CCFUS} code). Inelastic excitations
 and transfer reaction channels are treated as independent modes which
 couple to the initial ground state. The corresponding wave equations
@@ -244,7 +253,7 @@ with weights given by the overlap of the initial state with the eigenchannels.
 This is a default option. It takes into account coupling of the excited
 collective states in the target and projectile. A detailed description
 of the method can be found in the original reference \cite{CCFUS}.
-\item [{(ii)}] the distributed fusion-barrier\index{distributed fusion-barrier}
+\item [{(ii)}] Distributed fusion-barrier\index{distributed fusion-barrier}
 model \cite{difusb}. This method accounts for the effective lowering
 of the one-dimensional fusion barrier by allowing for the additional
 dimension and assuming that the barrier distribution in the added
@@ -269,7 +278,7 @@ in EMPIRE allows for the extra-push energy that can be specified in
 the input and added to the fusion barrier. The latter, if not specified
 in the input, is by default calculated using BAR subroutine of CCFUS\index{CCFUS}
 (see above) .
-\item [{(iii)}] the fusion cross sections for each $l$ read from the external
+\item [{(iii)}] Fusion cross sections for each $l$ read from the external
 file \emph{FUSION} (\emph{{*}.fus}). The code converts them into transmission
 coefficients to be used in Eq.\ref{fusion}. The existence of the
 \emph{FUSION} (\emph{{*}.fus}) file overrides all input dispositions
@@ -305,9 +314,9 @@ E_{2}=\frac{Z_{1}Z_{2}e^{2}}{R_{12}}\left\{ 1+\frac{1}{f^{2}}\frac{1-x}{2x}-\fra
 {}
 
 \begin{labeling}{00.00.0000}
-\item [{(iv)}] the total fusion cross section specified in input (single
+\item [{(iv)}] Total fusion cross section specified in input (single
 incident energy only).
-\item [{(v)}] the critical angular momentum $l_{cr}$ for compound nucleus
+\item [{(v)}] Critical angular momentum $l_{cr}$ for compound nucleus
 formation specified in input (single incident energy only).
 \end{labeling}
 In the latter two cases the transmission coefficients are assumed
@@ -3477,7 +3486,7 @@ not used by EMPIRE are omitted. Accordingly, RIPL-2 documentation
 can be consulted for more details. The advent of the more complete
 and more up to date RIPL-2 database has reduced the original \emph{empire/data}
 library to a few EMPIRE-specific files and neutron resonance parameters
-from ENDF/B-VI.8. 
+from ENDF/B-VII.0. 
 
 
 \subsection{Masses (\emph{empire/RIPL-2/masses/mass-frdm95.dat)}}
@@ -4589,7 +4598,7 @@ potential
 \subsection{Neutron resonances (empire/data/resonances.endf)}
 
 This file contains full set of evaluated neutron resonance parameters
-(329 materials) extracted from the ENDF/B-VI.8 library. The file is
+(329 materials) extracted from the ENDF/B-VII.0 library. The file is
 in the ENDF-6 format and contains descriptive part.
 
 
@@ -5398,7 +5407,7 @@ Scripts assume certain naming convention for the files, in particular,
 all input files must end with \emph{.inp} extension. Unless specified
 differently, each script is invoked with a single parameter; the name
 of the input file without \emph{.inp} extension (file root-name).
-For example, calculations with the input file \emph{Mo100.inp} can
+For example, calculations with the input file \emph{Mo100.inp} can be
 performed using \emph{runE} script and typing \\
 ~\\
 \texttt{../scripts/runE Mo100}\\
