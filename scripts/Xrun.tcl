@@ -1,6 +1,6 @@
-# $Rev: 2074 $
+# $Rev: 2081 $
 # $Author: rcapote $
-# $Date: 2011-06-02 19:54:08 +0200 (Do, 02 Jun 2011) $
+# $Date: 2011-06-02 23:37:18 +0200 (Do, 02 Jun 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8290,6 +8290,10 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-elastic $file &} \
         -label {Reconstruct elastic} 
+    $site_3_0.menu93 add command \
+        \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file &} \
+        -label {Reconstruct (n,p), (n,a) and inel} 
     $site_3_0.menu93 add command \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
