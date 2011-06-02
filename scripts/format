@@ -34,32 +34,10 @@ mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
 
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
-
-rm $file-f.endf 2>/dev/null
-cat >FIXUP.INP <<EOF
-12101011111001
-$file-e.endf
-$work/$file-f.endf
-S  4=+( 50, 91)
-S103=+(600,649)
-S104=+(650,699)
-S105=+(700,749)
-S106=+(750,799)
-S107=+(800,849)
-
- 0.00000+00 0.00000+00          0          0${2}103
-
- 0.00000+00 0.00000+00          0          0${2}107
-
-
-
-EOF
-$EMPIREDIR/util/fixup/fixup < FIXUP.INP
-rm FIXUP.INP
-mv FIXUP.LST $work/$file-log.fixup
+# moved to a new script "rec-ch-part" called from a GUI(Execute)
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
-cp $file-f.endf $file-endres.endf
+cp $file-e.endf $file-endres.endf
 if [ -s $file-res.endf ]; then
    ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
    rm $file.endf 2>/dev/null
