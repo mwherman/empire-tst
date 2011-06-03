@@ -1,6 +1,6 @@
-# $Rev: 2090 $
+# $Rev: 2107 $
 # $Author: rcapote $
-# $Date: 2011-06-03 15:31:01 +0200 (Fr, 03 Jun 2011) $
+# $Date: 2011-06-03 20:36:20 +0200 (Fr, 03 Jun 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5777,7 +5777,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE 3.1 (Rivoli) GUI, Sao Jose do Campos, Brazil, June 2011"
+    wm title $top "EMPIRE 3.1 (Rivoli) GUI, Sao Jose dos Campos, Brazil, June 2011"
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -6440,7 +6440,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {GUI interface} -width 26 
+        -pady 1m -relief raised -text {Web EXFOR retrieval} -width 26 
     vTcl:DefineAlias "$site_10_0.cpd81" "Button40" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd81 "$site_10_0.cpd81 Button $top all _vTclBalloon"
     bind $site_10_0.cpd81 <<SetBalloon>> {
