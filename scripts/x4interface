@@ -9,9 +9,12 @@ fi
 work=`pwd`
 rm x4r1x4.x4 2>/dev/null
 rm /tmp/x4* 2>/dev/null
-$EMPIREDIR/x4cd/linux/mysql_start.sh 7777 0
-$EMPIREDIR/x4cd/linux/x4java2_mysql.sh
-$EMPIREDIR/x4cd/linux/mysql_stop.sh
+#$EMPIREDIR/x4cd/linux/mysql_start.sh 7777 0
+#$EMPIREDIR/x4cd/linux/x4java2_mysql.sh
+#$EMPIREDIR/x4cd/linux/mysql_stop.sh
+#
+# browser should be fired to retrieve .exf (exfor data) from the web
+# Could use new NDS capabilities to select the X4 retrieval from the command line
 if [ -s x4r1x4.x4 ]; then
 mv x4r1x4.x4 $work/$1.exf
 fi
