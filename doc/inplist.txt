@@ -35,8 +35,8 @@ LTURBO   Step in the angular momentum set to VAL. This option can be
          normalized so that no flux is lost (default: 1).
 
 ENDF     Controls output for ENDF formatting and exclusive/inclusive emission,
-       =  0 no output for the ENDF formatting will be created (default).
-       >= 1 output for the ENDF formatting will be created ,       
+        = 0 only the cross sections for ENDF formatting will be created (default).
+       >= 1 output for the full ENDF formatting will be created,
             ENDF = 2 means all reactions emitting 2 or less particles are exclusive
                      the rest are inclusive (lumped into MT=5)
             ENDF = 3 means all reactions emitting 3 or less particles are exclusive
@@ -456,6 +456,9 @@ GDRDYN  Controls GDR treatment,
        = 0 GDR shape depends on the ground state deformation (default),
        = 1 GDR shape dependence accounts for the rotation induced
            deformation (spin dependent, Eq. [totdefor]).
+
+EGDR1   GDR energy of first peak set to VAL (default calculated internally
+        from systematics).
 
 GGDR1   GDR width of first peak set to VAL (default calculated
         internally from systematics).
