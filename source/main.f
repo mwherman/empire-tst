@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 2085 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-06-03 14:36:19 +0200 (Fr, 03 Jun 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1835,38 +1835,35 @@ C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
              IF (nnuc.EQ.mt91) THEN
                   nejc = 1
-                  WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
-     &                '' mb  '')') xtotsp
-                  WRITE (8,'(11X,'' Sum to discrete          '',G12.5,
-     &                '' mb  '')') CSDirlev(1,nejc)
+                  WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') xtotsp
+                  WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
                   xtotsp = xtotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ELSEIF (nnuc.EQ.mt649) THEN
                   nejc = 2
-                  WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
-     &                '' mb  '')') ptotsp
+                  WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') ptotsp
                   ptotsp = ptotsp + CSDirlev(1,nejc)
-                  WRITE (8,'(11X,'' Sum to discrete          '',G12.5,
-     &                '' mb  '')') CSDirlev(1,nejc)
+                  WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ELSEIF (nnuc.EQ.mt849) THEN
                   nejc = 3
-                  WRITE (8,'(11X,'' Sum to continuum         '',G12.5,
-     &                '' mb  '')') atotsp
-                  WRITE (8,'(11X,'' Sum to discrete          '',G12.5,
-     &                '' mb  '')') CSDirlev(1,nejc)
+                  WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') atotsp
+                  WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
                   atotsp = atotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ENDIF
-
-
-
              WRITE (8,*) ' '
              WRITE (8,*) ' '
              WRITE (8,*)
@@ -1921,7 +1918,7 @@ c                 ENDDO
              DO m = 1, INT(FISmod(nnuc)) + 1
               WFIsm(m) = 0.d0
               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-	        IF(FISShi(nnuc).ne.1.d0)
+            IF(FISShi(nnuc).ne.1.d0)
      >          WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
            ENDDO
            IF(FISShi(nnuc).ne.1.d0)
