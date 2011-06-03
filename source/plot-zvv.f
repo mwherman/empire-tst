@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2108 $
+Ccc   * $Rev: 2109 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 20:55:34 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Date: 2011-06-03 21:33:20 +0200 (Fr, 03 Jun 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'
@@ -79,49 +79,49 @@ C
      &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1+rolowint2
       ENDDO
+      CALL CLOSE_ZVV(36,' ',' ')
 
       IF(LEVDEN.EQ.3) then      
-       CALL CLOSE_ZVV(36,' ',' ')
-       write(caz,'(A7)') 'Pos_GS+'
-       CALL OPEN_ZVV(36,caz,' ')
-       DO kk = 1, NEX(Nnuc)
-        u = EX(kk,Nnuc)
-        rolowint1 = 0.D0
-        DO j = 1, NLWst
-          rolowint1 = rolowint1 + RO(kk,j,1,Nnuc)
-        ENDDO
-        IF(rolowint1.gt.1e30) exit
+        write(caz,'(A7)') 'PosP-GS'
+        CALL OPEN_ZVV(36,caz,' ')
+        DO kk = 1, NEX(Nnuc)
+          u = EX(kk,Nnuc)
+          rolowint1 = 0.D0
+          DO j = 1, NLWst
+            rolowint1 = rolowint1 + RO(kk,j,1,Nnuc)
+          ENDDO
+          IF(rolowint1.gt.1e30) exit
 C
-C       Avoiding printing the first point 
-C       as LDs are defined above the discrete levels  
+C         Avoiding printing the first point 
+C         as LDs are defined above the discrete levels  
 C
-        IF(rolowint1.gt.0.d0) 
-     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
+          IF(rolowint1.gt.0.d0) 
+     &      WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint1
-       ENDDO
-       CALL CLOSE_ZVV(36,' ',' ')
-
-       write(caz,'(A7)') 'Neg_GS-'
-       CALL OPEN_ZVV(36,caz,' ')
-       DO kk = 1, NEX(Nnuc)
-        u = EX(kk,Nnuc)
-        rolowint2 = 0.D0
-        DO j = 1, NLWst
-          rolowint2 = rolowint2 + RO(kk,j,2,Nnuc)
         ENDDO
-        IF(rolowint2.gt.1e30) exit
+        CALL CLOSE_ZVV(36,' ',' ')
+ 
+        write(caz,'(A7)') 'NegP-GS'
+        CALL OPEN_ZVV(36,caz,' ')
+        DO kk = 1, NEX(Nnuc)
+          u = EX(kk,Nnuc)
+          rolowint2 = 0.D0
+          DO j = 1, NLWst
+            rolowint2 = rolowint2 + RO(kk,j,2,Nnuc)
+          ENDDO
+          IF(rolowint2.gt.1e30) exit
 C
-C       Avoiding printing the first point 
-C       as LDs are defined above the discrete levels  
+C         Avoiding printing the first point 
+C         as LDs are defined above the discrete levels  
 C
-        IF(rolowint2.gt.0.d0) 
-     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
+          IF(rolowint2.gt.0.d0) 
+     &      WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,rolowint2
-       ENDDO
-       CALL CLOSE_ZVV(36,' ','GS Level Density')
-
+        ENDDO
+        CALL CLOSE_ZVV(36,' ','GS Level Density')
+     
       ENDIF
-  
+ 
       CLOSE (36)
       return
       end
@@ -184,9 +184,10 @@ c       DO j = 1,NFIsj1
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
       
-      write(caz,'(A6,I1)') 'Pos_S_',Ib
-      CALL OPEN_ZVV(36,caz,' ')
-      DO kk = 1,NRBinfis(Ib)
+      IF(LEVDEN.EQ.3) then      
+       write(caz,'(A6,I1)') 'PosP-S',Ib
+       CALL OPEN_ZVV(36,caz,' ')
+       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
 c       if(u.gt.EMAx(Nnuc)) exit
         rocumul1 = 0.d0
@@ -199,11 +200,10 @@ c        pause
         IF(rocumul1.gt.1e30) exit
           WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &          1e6*u,max(rocumul1,0.1d0)
-      ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
+       ENDDO
+       CALL CLOSE_ZVV(36,' ',' ')
 
-      IF(LEVDEN.EQ.3) then      
-       write(caz,'(A6,I1)') 'Neg_S_',Ib
+       write(caz,'(A6,I1)') 'NegP-S',Ib
        CALL OPEN_ZVV(36,caz,' ')
        DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
