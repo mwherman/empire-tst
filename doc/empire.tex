@@ -2708,7 +2708,8 @@ barriers are only associated with the discrete transition states.
 Accordingly, the continuum contribution to the fission coefficient
 is calculated considering a double-humped barrier with the second
 peak representing a single barrier equivalent to the two outer humps
-(Figure \ref{emp-3bar}). The parameters of the equivalent barrier
+(Figure \ref{cap:Triple-humped-fission-barriers}). 
+The parameters of the equivalent barrier
 are determined by imposing equal transmission. 
 
 The negative imaginary potential $iW$ is introduced in the deformation
@@ -2718,8 +2719,10 @@ the absorption of the incoming flux in this well ~\cite{Back:74,Bhandari:79,Bjor
 For the triple-humped barrier the tertiary well is supposed to be
 shallow enough to neglect damping of class III vibrational states.
 The strength $W$ depends quadratically on deformation and increases
-with the excitation energy\begin{equation}
-W(\beta)=-\alpha[E-V(\beta)]\end{equation}
+with the excitation energy
+\begin{equation}
+W(\beta)=-\alpha[E-V(\beta)] \label{wimag}
+\end{equation}
  The input parameter $\alpha$, which controls the strength of the
 imaginary part of the fission potential, should be chosen to fit the
 width of the resonances in sub-barrier fission cross section and to
@@ -3293,7 +3296,7 @@ an arbitrary number of emissions.
 \emph{To be completed}
 
 
-\chapter{Code}
+\chapter{Code} \label{Chap:code}
 
 
 \section{Directory structure}
@@ -3348,12 +3351,12 @@ obsolete in 3.1)
 ENDF format
 \item \textbf{c4sort\index{C4SORT}} - sorts experimental data in the computational
 format file 
-\item \textbf{fixup\index{FIXUP}} - reconstructs missing MT sections
+\item \textbf{fixup\index{FIXUP}} - reconstructs redundant MT sections
 \item \textbf{legend\index{LEGEND}} - calculates linearly interpolable
 angular distributions 
 \item \textbf{lsttab\index{LSTTAB}} - tabulates ENDF and EXFOR data in
 PLOTTAB format 
-\item \textbf{sixtab\index{SIXTAB}} - converts ENDF file MF6 into Law 7
+\item \textbf{sixtab\index{SIXTAB}} - converts ENDF File~6 into Law 7
 representation 
 \item \textbf{x4toc4\index{X4TOC4}} - converts retrieved EXFOR data into
 the computational format
@@ -3361,19 +3364,18 @@ the computational format
 and experimental data
 \item \textbf{c4zvd} - ZVView\index{ZVView} plotting package
 \item \textbf{checkr} - ENDF-6 format checking
-\item \textbf{endres} - merges resonace parameters from \emph{empire/data/BNL-325}
-into the ENDF-6 formatted file conatinig EMPIRE results to produce
+\item \textbf{endres} - merges resonace parameters from file *-res.endf
+into the new ENDF-6 formatted file conatinig EMPIRE results to produce
 full evaluation
 \item \textbf{fizcon} - more ENDF-6 format checking
 \item \textbf{psyche} - ENDF-6 file physics checking
-\item \textbf{linear} - makes all interpolations schemes in ENDF-6 file
-(MF=3) linear
-\item \textbf{pltlst} - prepares list of possible plots by matching existing
-exparimental data against calculations (produces the same output as
-PLOTC4 allowing ZVView plots to be requested without lenghty PLOTC4
-run)
-\item \textbf{recent} - reconstructs resonace region from the resonace parameters
-\item \textbf{sigma1} - Doppler\index{Doppler} broadens neutron resonances
+\item \textbf{linear} - makes all cross section in File~3 linearly interpolable
+\item \textbf{pltlst} - prepares a list of exparimental data for the selected
+nuclide that can be compaerd to the data reconstructed from an ENDF file
+(the list file has identical format as the report file from PLOTC4)
+\item \textbf{recent} - reconstructs cross sections from the resonace parameters
+\item \textbf{sigma1} - Doppler\index{Doppler} broadens cross sections in the
+  resonance range
 \item \textbf{stanef} - standardizes ENDF-6 formatted file
 \item \textbf{zvvddx} - plots angular distributions, energy spactra and
 double-differentila cross sections using \index{ZVView} package
@@ -3399,13 +3401,15 @@ the installation script \emph{setup-emp}. The \emph{.tgz} files contain
 \begin{itemize}
 \item \emph{empire-2-xx.tgz -} (\emph{xx} standing for the current version
 of the code) contains EMPIRE source, parameter library, \emph{work}
-sub-directory, and PREPRO2000 and ENDVER packages and format checking
+sub-directory, PREPRO2000 and ENDVER packages, and format checking
 codes (mandatory).
-\item \emph{x4cd.tgz} - EXFOR library of experimental data loaded into the
-MySQL database along with the MySQL server, Java environment, retrieval
-system used by EMPIRE, and standalone graphic retrieval interface
-(similar to the one available from BNL-NNDC and IAEA-NDS web sites).
-EMPIRE can be run without it, and the results processed into the ENDF-6
+\item \emph{x4cd.tgz} - EXFOR library of experimental data 
+(... appropriate text is needed)
+%loaded into the
+%MySQL database along with the MySQL server, Java environment, retrieval
+%system used by EMPIRE, and standalone graphic retrieval interface
+%(similar to the one available from BNL-NNDC and IAEA-NDS web sites).
+%EMPIRE can be run without it, and the results processed into the ENDF-6
 format.
 \item \emph{HFBCS-lev-dens.tgz} - contains files with tabulated level densities\index{level densities}
 calculated in the frame of the HF-BCS\index{HF-BCS} approach. Size
@@ -3416,11 +3420,12 @@ them.
 at inner and outer fission barrier calculated in the frame of the
 HF-BCS\index{HF-BCS} approach. Users who do not intend to use this
 option for level densities may choose not to install them.
-\item \emph{X4-2-17.tgz} - obsolate version of the EXFOR library now replaced
-by the \emph{x4cd} directory. This version does not require Java and
-MySQL so can be uesd in case problems are encountered when running
-\emph{x4cd}. Size of this file after decompression is about 580 Mb.
-Users of \emph{x4cd} should ignore this file. 
+\item \emph{X4-2-17.tgz} - obsolete Fit is (... appropriate text is needed)
+% version of the EXFOR library now replaced
+% by the \emph{x4cd} directory. This version does not require Java and
+% MySQL so can be uesd in case problems are encountered when running
+% \emph{x4cd}. Size of this file after decompression is about 580 Mb.
+% Users of \emph{x4cd} should ignore this file. 
 \end{itemize}
 Out of these files only \emph{empire-2-xx.tgz} is required to run
 calculations, \emph{x4cd.tgz,} \emph{HFBCS-lev-dens.tgz,} and \emph{fis-lev-den.tgz}
@@ -3494,7 +3499,7 @@ like
 \end{quotation}
 in \emph{the empire/source/} directory. The utility executables should
 be named after their respective directories, i.e., \emph{plotc4\index{PLOTC4},
-x4toc4}\index{X4TOC4}, etc.. In most cases it is achieved with the
+x4toc4}\index{X4TOC4}, etc.. In most cases thisFrevers is achieved with the
 \emph{-o} option as in the example above. This syntax may differ for
 various compilers. Note that \emph{empire/source/} sub-directory contains
 a file \emph{pipe.c,} which is written in C-language. Modern FORTRAN
@@ -5360,7 +5365,7 @@ Graphic User Interface mode is the most convenient, and is recommended
 on UNIX systems with Tcl/Tk . Where the Tcl/Tk interpreter is not
 available, the user is advised to use the script mode. The manual
 mode should be the last choice if scripts can not be translated. For
-the sake of clarity these modes are described below in the revers
+the sake of clarity these modes are described below in the reverse
 order.
 
 EMPIRE execution may involve the following operation sequences,
@@ -5376,14 +5381,15 @@ which are described in more detail below:
   internal consistency.
   
 \item "process" sequence performs post-processing to prepare a derived
-  ENDF file, from which all plotting is done.
+  ENDF file, from which more advanced plotting is done.
 \end{itemize}
 
-The complete sequence is intended evaluated files in ENDF-6 format,
-but for theoretical modelling execution of "runE" is sufficient.
+The complete sequence is intended for the production of evaluated 
+files in ENDF-6 format,
+but for theoretical modelling, execution of "runE" is sufficient.
 However, in this case automatic plotting is limited to the cross sections.
 A more detailed description of the task sequences is described below.
-Additional sequences are also defined to perform specific tasks.
+% Additional sequences are also defined to perform specific tasks.
 
 
 \subsection{"runE" sequence (Run EMPIRE)}
@@ -5418,7 +5424,7 @@ The following tasks are performed:
 
 \begin{itemize}
 \item EMPEND is executed to produce an ENDF file from the "short"
-  EMPIRE output (with extension *.OUT). The input file is generated
+  EMPIRE output (with extension *.OUT). The input file for EMPEND is generated
   within the script. The output file *-e.endf is produced.
   
 % \item FIXUP is executed to reconstruct the (n,p) and (n,alpha) reactions
@@ -5426,12 +5432,13 @@ The following tasks are performed:
 %   is needed for easier visualisation of the results. The FIXUP input file
 %   is generated within the script. The output file *-f.endf is generated.
 
-\item ENDRES is executed (conditionally, if the file *-res.endf is present
+\item ENDRES is executed (conditionally, if the new resonance file
+  file *-res.endf is present
   on the local directory). The dummy resonance file in the ENDF file
-  generated by EMPEND is replaced with the resonance data from a
-  selected evaluated nuclear data file. The comments from the selected
+  generated by EMPEND is replaced with the resonance data on the *-res.endf file.
+  The comments from the specified
   file are appended after the original comments. All resonance
-  data in MF=2 are replaced.
+  data in ENDF File~2 are replaced.
   The background cross sections in the total, elastic, fission (if
   present) and radiative capture are set to zero from $10^{-5}$~eV to
   the upper energy covered by the resonance parameters in the selected
@@ -5440,7 +5447,7 @@ The following tasks are performed:
   extrapolated to $10^{-5}$~eV, if needed.
   The resonance covariance data in MF=32 are also copied, if
   available.
-  The input file is taken from the standardised input file ENDRES.INP,
+  The ENDRES input file is taken from the standardised input file ENDRES.INP,
   which can be modified by the user, if needed. The main parameters
   that can be changed are the filename from which the resonances are
   taken and the value of the LSSF flag, which defines how the
@@ -5466,7 +5473,8 @@ The input files are generated within the script. The output files are
 \subsection{"process" sequence}
 
 The Pre-Pro codes and some of the codes from the ENDVER package are
-executed to prepare the ENDF-formatted data for plotting. The following codes and
+executed to prepare the ENDF-formatted data for plotting. 
+The output file *-s.endf is produced. The following codes and
 scripts are executed on the ENDF file:
 
 \begin{itemize}
@@ -5748,39 +5756,33 @@ region\tabularnewline
 The following scripts are provided:
 
 \begin{labeling}{00.00.0000}
-\item [{\textbf{runE}}] runs EMPIRE, retrieves EXFOR data and translates
-them into computational format
-\item [{\textbf{format}}] runs EMPEND\index{EMPEND}, RESEND, FIXUP, and
-STANEF to transform .\emph{out} output into ENDF format (produces
-.\emph{endf} file)
-\item [{\textbf{process}}] run set of preprocessing codes to produce \emph{{*}-s.endf}
-file ready for plotting (prepares also a table of possible plots)
-\item [{\textbf{verify}}] runs set of checking codes CHECKR, FIZCON and
-PSYCHE
-\item [{\textbf{run}}] does all above (\textbf{runE + format + process
-+ verify})
+\item [{\textbf{runE}}] executes the "runE" sequence described in the previous section.
+\item [{\textbf{format}}] executes the "format" sequence described in the previous section.
+\item [{\textbf{process}}] executes the "process" sequence described in the previous section.
+\item [{\textbf{verify}}] executes the "verify" sequence described in the previous section.
+\item [{\textbf{run}}] executes all of the above sequences one after the other.
 \item [{\textbf{stanef}}] runs ENDF-6 format standardization code STANEF
 \item [{\textbf{c4}}] converts EXFOR data in the \emph{{*}.exf} file into
 the computational format (file \emph{{*}.c4}) (included in \textbf{runE})
 \item [{\textbf{sortc4}}] sorts experimental data in the computational
 format ({*}\emph{.c4} file) (included in \textbf{runE})
 \item [{\textbf{plot}}] runs PLOTC4\index{PLOTC4} to create comparison
-plots of experimental and calculated cross sections
-\item [{\textbf{plotlst}}] produces list of possible plots by matching
-calculations against experimental data without doing actual plots
-(simulates log-output of PLOTC4 in a fraction of time required by
-PLOTC4) 
+plots of experimental and calculated cross sections; the log-file from PLOTC4
+is an index of experimental data that can be compared to quantities derived
+from evaluated nuclear data files (obsolete)
+\item [{\textbf{plotlst}}] produces the index of experimental data
+without doing the lengthy PLOTC4 run
 \item [{\textbf{storemul}}] moves all files matching pattern za{*}\$2{*}
 to the directory ../\$1 (creates ../\$1 if it does not exists). \$1
 and \$2 are the parameter of the script, e.g., to move files obtained
-related to isotopes if iron (using input files of the type za260xx.inp)
+related to isotopes of iron (using input files of the type za260xx.inp)
 to the directory ../default\_om one should issue a command \\
 \texttt{../scripts/storemul default\_com 260}
-\item [{\textbf{x4interface}}] starts graphical interface for manual EXFOR
-retrieval from the local MySQL database. When called with the root-name
-of the project as an argument stores retrieved EXFOR file as 'root-name'.exf
-\item [{\textbf{X4retrieve}}] runs EXFOR retrieval from the local MySQL
-database (called internally by EMPIRE)
+% \item [{\textbf{x4interface}}] starts graphical interface for manual EXFOR
+% retrieval from the local MySQL database. When called with the root-name
+% of the project as an argument stores retrieved EXFOR file as 'root-name'.exf
+% \item [{\textbf{X4retrieve}}] runs EXFOR retrieval from the local MySQL
+% database (called internally by EMPIRE)
 \item [{\textbf{clean}}] removes all files related to a given project (except
 the input file \emph{{*}.inp}) and any \emph{core} file. This script
 must be run each time a project is changed by adding new channels
@@ -5846,11 +5848,10 @@ does not exist, script invokes the \textbf{process} script to reconstruct
 form suitable for plotting. This file is processed along with {*}.c4
 that contains experimental data to produce \emph{{*}-MT.zvd} file
 (\emph{MT} is any legal ENDF-6 format MT number). List of typical
-MT numbers is given in the following:\\
+MT numbers is given in the Table~\ref{MTs}
 %
 \begin{table}[top]
 \caption{\label{MTs} Most frequently used MT numbers and corresponding reactions}
-
 
 \begin{centering}
 \begin{tabular}{cc}
@@ -5991,10 +5992,10 @@ there are several equivalent ways of performing the same operation
 and the user my choose the one which suits him best. All basic functions,
 such as running the code and viweing the results can be achieved from
 the pull-down menues and icon-denoted buttons below the menue bar.
-On the other hand, more advanced features such a plotting and file
+On the other hand, more advanced features such as plotting and file
 management can only be accessed from the various panels.
 
-All operations (except multiple run) begin with selection of the project
+All operations (except multiple run) begin with the selection of the project
 name that will be used as a root of the input file name (say 56Fe).
 Existing project can be selected by clicking on the 'open folder'
 icon to the left of the GUI. The following icons (from left to right)
@@ -6006,6 +6007,7 @@ refresh list of files, (xi) change working directory, and (xii) remove
 all files related to the project except input. More operations are
 possible from individual GUI panels.
 
+\vspace{2mm}
 \textbf{Main1 panel} - (Fig. \ref{cap:EMPIRE-GUI-Main1}) provides
 for essential control of calculations. It allows to create a new input
 file (clicking on the {}``Create'' button copies the standard input
@@ -6018,6 +6020,7 @@ and plotting is only possible starting from the preprocessed file.
 Main1 panel gives also access to output and output/input files produced
 by EMPIRE in the first run. 
 
+\vspace{2mm}
 \textbf{Main2 panel} - (Fig. \ref{cap:EMPIRE-GUI-Main2}) provides
 additional four features for which there was not enough room on the
 Main1 panel. %
@@ -6036,11 +6039,11 @@ button makes 3 copies of the main EMPIRE input. These 3 copies can
 be modified allowing for use of different parameters or models providing
 that they refer to the same combination of target and projectile and
 allow for the same number of emissions. The energy ranges must be
-choosen is such a way that input \emph{a} covers the lower part, input
+choosen in such a way that input \emph{a} covers the lower part, input
 \emph{b} intermediate and input \emph{c} the upper part of the requested
-energy range. When 'run-piecewise' button is hit caluclations are
+energy range. When 'run-piecewise' button is hit calculations are
 executed for all three input files, respective outputs are merged
-and the resulting file is formatted and processed as obtained in a
+and the resulting file is formatted and processed as if obtained in a
 single run. Note that use of different parameters and models in the
 three energy ranges will generally produce discontinuities at the
 borders. The piece-wise calculations are also possible with 2 input
@@ -6052,7 +6055,7 @@ previous set. Input option FITOMP should be set to 1 to restrict calculations
 to those relevant to optical parameter fitting (e.g., second neutron
 emission will not be followed even though specified in the input).
 After the first calculation is completed user should create up to
-2 plots using right part of panel 'ZVV plots' (each of them may contain
+2 plots using the right part of panel 'ZVV plots' (each of them may contain
 a number of curves) and name them in the 'List name' field as \emph{omp1}
 and \emph{omp2}. Then, optical model parameters can be adjusted manually
 by editing respective files and calculations re-run. This will automatically
@@ -6091,8 +6094,8 @@ each incident energy)
 \textbf{ZVV plots panel} (Fig. \ref{cap:EMPIRE-GUI-ZVV}) provides
 for a powerfull interface to the ZVView plotting package. The window
 to the left lists all ZVView plots (\emph{{*}.zvd} files) that have
-been previously created. User can display them by doubleclicking on
-any of them. Selecting several plots and doubleclicking on the last
+been previously created. User can display them by double-clicking on
+any of them. Selecting several plots and double-clicking on the last
 one will combine all the selected curves into a single plot. Note
 that 'Filter' field allows to restrict displayed files to those containing
 filter string in the name (by default Filter is set to the project
@@ -6109,7 +6112,7 @@ must exist).
 \item Hitting 'Launch ZVV Interface' will start more powerfull GUI that
 allows to create the same type of plots as before but including up
 to 3 additional ENDF-6 formatted files for comparison. 
-\item 'ZVV plots from EMPIRE' is bit cumbersome way of creating a cross
+\item 'ZVV plots from EMPIRE' is a bit cumbersome way of creating a cross
 section ZVView plot by selecting unique string identifying output
 line containing the cross section of interest, pasting it into the
 other window and filling additional information (next line, title,
@@ -6136,9 +6139,10 @@ discrete lines (e.g., elastic) and to smooth continuum in the plotted
 energy spectra. The 'Comapre to' field allows to select another ENDF-6
 formatted file to be included in the plots. Note that in order to
 obtain correct plots the additional file should be preprocessed in
-a way analogous to the original EMPIRE file (otherwise resonances
-might not be plotted since not reconstructed and File 6 data might
-not be in a right format).
+a way analogous to the original EMPIRE file (resonances
+will not be plotted unless the cross sections are reconstructed
+from the resonance parameters and double-differential data will not
+be plotted unless converted into the right format).
 \end{itemize}
 ~
 
@@ -6149,6 +6153,8 @@ not be in a right format).
 \caption{\label{cap:EMPIRE-GUI-Logs}EMPIRE GUI - Logs panel}
 
 \end{figure}
+
+\vspace{2mm}
 \textbf{Logs panel} (Fig. \ref{cap:EMPIRE-GUI-Logs}) provides access
 to various output files that should be inspected for possible errors
 encountered during EMPIRE execution, EXFOR translation into compuational
@@ -6161,6 +6167,7 @@ format, ENDF-6 formatting, format verification and preprocessing.%
 \end{figure}
 
 
+\vspace{2mm}
 \textbf{Files panel} (Fig. \ref{cap:EMPIRE-GUI-Files}) offers file
 management functions tailored to facilitate operation of the EMPIRE
 code. Large number of files produced in a single EMPIRE run might
@@ -6181,10 +6188,13 @@ to the current project. In addition, individual files can be removed
 by clicking on the 'Delete all selected' button. A double-click on
 any of the listed files will open it with an appropriate application.
 
+\vspace{2mm}
 \textbf{Folders panel} - (Fig. )
 
+\vspace{2mm}
 \textbf{Multirun panel} - (Fig. )
 
+\vspace{2mm}
 \textbf{Source panel} - (Fig. )
 
 \emph{To be completed}
@@ -6224,11 +6234,13 @@ EMPIRE also calculates cross sections for the production of metastable
 isomers. EMPEND recognises these and stores them in ENDF File~10.
 Cross sections for radionuclide production, which can not be uniquely
 associated with any specific reaction (i.e. an ENDF MT number) are
-lumped into MT~5, but to preserve the complete information, the
-radionuclide production is stored in MF~10, MT~5.
+lumped into File~3 MT~5, but to preserve the complete information, the
+radionuclide production is stored in File~10, MT~5. This can be done 
+because according to ENDF-6 rules the cross sections in File~10 by
+definition are not required for the reconstruction of redundant reactions.
 
 The ENDF file has to obey the rules of sorting the data in increasing order
-by the data type (MF number) and reaction type (MT number),
+by data type (MF number) and reaction type (MT number),
 so several sweeps of the EMPIRE output file must be made, which may
 slow down the formatting process considerably. In general, the
 required operations are described as follows:
@@ -6266,11 +6278,13 @@ given spectra are identified. When many exclusive spectra are
 requested in the EMPIRE calculation, there may be cases where              
 particle spectra are given but no MT number is assigned. The               
 spectra are ignored, the cross sections are added to MT=5 and              
-particle production cross sections for this MT are incremented.            
+particle production cross sections for this MT are incremented.
+This preserves particle multiplicities, but spectral shapes may 
+become distorted.
   After the second sweep, all necessary information is                     
 available to write the comments-section (MF=1) and the prompt              
 nu-bar (if the nuclide is fissile). For incident neutrons a                
-dummy resonance file (MF=2) is constructed.                                
+dummy resonance file (File~2) is constructed.                                
   The cross section data found on the file are fitted by a                 
 cubic spline and entered into the output ENDF file on a                    
 user-defined dense energy grid, thinned to the specified                   
@@ -6280,7 +6294,7 @@ the energy points found on the file are entered directly into
 the ENDF formatted file.                                                   
                                                                            
 The angular distributions for discrete level reactions                     
-that appear in the ENDF File-4 sections are extracted from                 
+that appear in the ENDF File~4 sections are extracted from                 
 the spectra on the EMPIRE output file, interpolated to                     
 the appropriate energy, if necessary. Legendre polynomial                  
 coefficients in the centre-of-mass are fitted to the                       
@@ -6290,7 +6304,7 @@ If more than 64 Legendre coefficients are required, formatting
 switches automatically to pointwise representation.                        
                                                                            
 The correlated energy-angle distributions for continuum                    
-reactions that appear in ENDF file-6 sections are entered                  
+reactions that appear in ENDF File-6 sections are entered                  
 in Legendre polynomial representation in the centre-of-                    
 mass coordinate system. The maximum Legendre order is                      
 limited to 64. For reactions with relatively smooth                        
@@ -6305,8 +6319,9 @@ discrete level reactions, while File~14 contains the corresponding
 angular distributions, which are assumed isotropic. The gamma              
 spectra of the (n,gamma) reaction are presently stored in File-6.          
 Primary gammas, which are optionally printed in the Empire output          
-are not formatted. This option should not be used when ENDF                
-formatting is required.                                                    
+explicitly are not formatted. This option should not be used when 
+ENDF formatting is required. By default, primary gammas are included
+in the photon spectrum in tabular form.
                                                                            
 \subsection{EMPEND Input instructions}
 
@@ -6323,8 +6338,8 @@ prompts, which are the following:
    \begin{itemize}
      \item[0]  Only the points on the EMPIRE output are entered to the            
         ENDF formatted file.                                               
-     \item[1]  The points at reaction thresholds are entered. The energy          
-        points above are as found in the EMPIRE output file.               
+     \item[1]  The points at reaction thresholds are added. The energy          
+        points above threshold are as found in the EMPIRE output file.               
      \item[n]  Threshold points are entered, but in addition, each                
         interval on the EMPIRE output is subdivided into "n"               
         subintervals. Cross section values at intermediate points          
@@ -6338,7 +6353,7 @@ prompts, which are the following:
    suppressed.                                                             
 \item ENDF material number identifier.                                        
 \item NLIB number assigned to the evaluation (see ENDF-6 manual).             
-   The parameters are optional.                                            
+   The parameter is optional.                                            
 \item ALAB, EDATE, AUTHOR string, where each of the listed                    
    parameters occupies 11 columns (see ENDF-6 manual for                   
    details). The parameters are optional.                                  
@@ -7155,1169 +7170,6 @@ in an output):
 \item inclusive $\gamma$, n, p, $\alpha$ and light ion spectra
 \end{itemize}
 \end{itemize}
-Excerpts from the typical EMPIRE output including MSD\index{MSD}
-and MSC\index{MSC} calculations are shown below. The listing refers
-to the \textbf{2.13} version of the code, although, differences between
-2.13 and 2.17.1 outputs are minimal and limited to a few additional
-self-explanatory lines with the results from the newly introduced
-models. Occasionally, the printout is annotated with more detailed
-explanations. Note that EMPIRE uses \emph{mb} for cross sections and
-\emph{MeV} for energies in all input and output files.
-
-~
-
-~
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~ |~ E M P I R E~
--~ 2.13~ |}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~ |~~~~~~~~~~~~~~~~~~~~~~~
-|}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~ |~~~~~~~~~~
-b y~~~~~~~~~ |}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~ |~~~~ M.~
-H e r m a n~~~ |}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~ |\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_|}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Parameters specified explicitly in input}{\scriptsize \par}
-
-\texttt{\scriptsize ~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Main calculations output control set to~ 3}{\scriptsize \par}
-
-\texttt{\scriptsize ~Level densities with~ dynamic effects selected }{\scriptsize \par}
-
-\texttt{\scriptsize ~Maximum number of energy steps in the integration
-set to 100}{\scriptsize \par}
-
-\texttt{\scriptsize ~MSD calculations with ORION+TRISTAN selected}{\scriptsize \par}
-
-\texttt{\scriptsize ~Heidelberg MSC calculations selected}{\scriptsize \par}
-
-\texttt{\scriptsize ~Output for the ENDF formatting will be created }{\scriptsize \par}
-
-~
-
-\noindent Each entry in the optional input has been reported above.
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Level density systematics normalized by factor~~
-0.969471491}{\scriptsize \par}
-
-\texttt{\scriptsize ~============================================================}{\scriptsize \par}
-
-\texttt{\scriptsize ~Reaction~~ 1n +100Mo at incident energy~
-14.0~~~~ MeV}{\scriptsize \par}
-
-\texttt{\scriptsize ~============================================================}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Compound nucleus energy~~ 19.260 MeV}{\scriptsize \par}
-
-\texttt{\scriptsize ~Projectile binding energy~~ 5.399 MeV}{\scriptsize \par}
-
-\texttt{\scriptsize ~Total number of nuclei considered~ 26}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ B i n d i n g~~~ e n e r
-g i e s}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ Nucleus~~~~~~~~~ 1n~~~~~~~
-1p~~~~~~~ 4He}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo-101~~~~~~~~ 5.399~~~ 10.861~~~~
-2.988}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo-100~~~~~~~~ 8.290~~~ 11.146~~~~
-3.169}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo- 99~~~~~~~~ 5.925~~~~ 9.729~~~~
-2.733}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 41-Nb-100~~~~~~~~ 5.683~~~~ 9.459~~~~
-4.024}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 41-Nb- 99~~~~~~~~ 6.872~~~~ 8.340~~~~
-3.548}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 41-Nb- 98~~~~~~~~ 5.991~~~~ 7.867~~~~
-3.602}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 97~~~~~~~~ 5.580~~~ 11.897~~~~
-5.286}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 96~~~~~~~~ 7.854~~~ 11.525~~~~
-4.990}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 95~~~~~~~~ 6.463~~~ 10.597~~~~
-4.444}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 39-Y - 96~~~~~~~~ 5.208~~~ 10.512~~~~
-5.990}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 39-Y - 95~~~~~~~~ 6.926~~~~ 9.651~~~~
-5.881}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 39-Y - 94~~~~~~~~ 6.197~~~~ 9.551~~~~
-5.420}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ Nucleus~~~~~~~~ Shell Corr.~ Deform.~
-Fiss. barr.}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~~~~~~ (J=0)~~~~~~
-(J=0)~~~~~~~ (J=0)}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo-101~~~~~~~~~~ 2.060~~~~~~
-0.309~~~~~ 42.599}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo-100~~~~~~~~~~ 2.060~~~~~~
-0.244~~~~~ 42.303}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo- 99~~~~~~~~~~ 1.939~~~~~~
-0.207~~~~~ 41.973}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 41-Nb-100~~~~~~~~~~ 2.080~~~~~~
-0.358~~~~~ 42.995}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 41-Nb- 99~~~~~~~~~~ 2.083~~~~~~
-0.281~~~~~ 42.743}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 97~~~~~~~~~~ 2.086~~~~~~
-0.273~~~~~ 42.838}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 96~~~~~~~~~~ 1.968~~~~~~
-0.217~~~~~ 42.565}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 40-Zr- 95~~~~~~~~~~ 0.896~~~~~~
-0.180~~~~~ 42.258}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 39-Y - 96~~~~~~~~~~ 2.119~~~~~~
-0.360~~~~~ 43.108}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 38-Sr- 93~~~~~~~~~~ 1.797~~~~~~
-0.208~~~~~ 42.874}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 38-Sr- 92~~~~~~~~~~ 1.124~~~~~~
-0.080~~~~~~ 0.000}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\noindent Shell corrections, deformation parameters, and fission
-barriers are printed for spin 0, i.e., without rotation-induced effects
-(in EMPIRE these quantities are spin-dependent).
-
-~
-
-~
-
-\texttt{\scriptsize ~ neutron o. m. parameters: WILMORE-HODGSON 1964}{\scriptsize \par}
-
-\texttt{\scriptsize ~ proton~ o. m. parameters: BECCHETTI-GREENLEES
-1969}{\scriptsize \par}
-
-\texttt{\scriptsize ~ alpha~~ o. m. parameters: MC FADDEN AND SATCHLER}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Optical model transmission coefficients used
-for the fusion determination}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 12.4752472 and Q3=~
-12.4752472}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 8.31683146 and Q3=~
-12.4752472}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 4.15841573 and Q3=~
-12.4752472}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 0. and Q3=~ 12.4752472}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 8.31683146 and Q3=~
-8.31683146}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 4.15841573 and Q3=~
-8.31683146}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 0. and Q3=~ 8.31683146}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 4.15841573 and Q3=~
-4.15841573}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 0. and Q3=~ 4.15841573}{\scriptsize \par}
-
-\texttt{\scriptsize ~ORION calculated for Q2=~ 0. and Q3=~ 0.}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize 1}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}~~~~~
-MSDR CALCULATION OF CONTINUOUS SPECTRA~~~~~ {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(ON PROGRAM TRISTAN )}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(V2.0, OCT.94)}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ COUPLING CONSTANTS AND RENORMALIZATION}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~ ( INELASTIC EXCITATION
-)~~~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ L~~~ EA~~~ SELF-CON~~ EMPIRICAL~~~~~
-RATIO~~~~~~ VEFF~~~ RESIDUE~~~~~ WIDTH CONFIG.}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0~~ 0.000 0.2729E-01 0.2729E-01~~~~
-1.0000~~~~ 8.7220 0.0000E+00~~~~ 0.0000~~~~ 60}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1~ 15.656-0.1543E-01-0.4506E-01~~~~
-2.9206~~~ 25.4735 0.2148E+00~~~~ 1.8433~~~ 111}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2~~ 0.536 0.9021E-02 0.1360E-01~~~~
-1.5074~~~ 13.1480 0.1207E+00~~~~ 0.0872~~~ 198}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3~~ 1.908 0.9443E-02 0.7307E-02~~~~
-0.7738~~~~ 6.7495 0.1141E-01~~~~ 0.0428~~~ 265}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4~~ 0.000 0.9245E-02 0.9245E-02~~~~
-1.0000~~~~ 8.7220 0.2113+262~~~~ 0.0000~~~ 305}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~ CONFIGURATION SPACE IS EQQX:~~
-80.000 (MEV)}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\noindent The results printed above are the results of adjusting
-the coupling constants, which determine the strength functions in
-the MSD\index{MSD} approach (TRISTAN\index{TRISTAN}). Self-consistent
-values are always included and can be compared against the fitted
-(experimental) ones. The first column of the table shows angular momentum
-transfer $\lambda$ and the second lists the experimental energy that
-has been used for fitting.
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ RPA RESPONSE FUNCTIONS (INELASTIC
-EXCITATION)}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ EXMIN=~~ 0.00 EXMAX=~ 13.67
-ESTEP=~~ 0.19}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ EX~~~~~~ 0~~~~~~~~~ 1~~~~~~~~~
-2~~~~~~~~~ 3~~~~~~~~~ 4}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.00 0.4694E-08 0.2580E-09 0.1338E-04 0.5944E-06
-0.2530E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.19 0.3212E-04 0.9035E-06 0.1086E-01 0.1138E-03
-0.9699E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.38 0.6352E-04 0.1808E-05 0.4044E-01 0.2391E-03
-0.2715E-01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.57 0.9356E-04 0.2715E-05 0.1152E+00 0.3906E-03
-0.7686E-01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.76 0.1217E-03 0.3626E-05 0.4048E-01 0.5927E-03
-0.1711E+00}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.95 0.1475E-03 0.4542E-05 0.1293E-01 0.8920E-03
-0.7592E-01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.14 0.1708E-03 0.5464E-05 0.5654E-02 0.1393E-02
-0.2646E-01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.33 0.1917E-03 0.6394E-05 0.2972E-02 0.2380E-02
-0.1175E-01}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.16 0.1503E-02 0.1070E-02 0.1981E-02 0.7388E-03
-0.2054E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.35 0.1539E-02 0.1179E-02 0.1885E-02 0.7209E-03
-0.2083E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.54 0.1585E-02 0.1306E-02 0.1786E-02 0.7061E-03
-0.2096E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.73 0.1641E-02 0.1456E-02 0.1688E-02 0.6943E-03
-0.2094E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.92 0.1710E-02 0.1630E-02 0.1593E-02 0.6856E-03
-0.2080E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.11 0.1792E-02 0.1832E-02 0.1502E-02 0.6798E-03
-0.2055E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.30 0.1887E-02 0.2066E-02 0.1416E-02 0.6764E-03
-0.2022E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.49 0.1997E-02 0.2334E-02 0.1337E-02 0.6750E-03
-0.1983E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.68 0.2121E-02 0.2643E-02 0.1264E-02 0.6751E-03
-0.1940E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~SRNEW: 0.2091E-01 0.2104E-01 0.6148E-01 0.4130E-01
-0.1196E+00}{\scriptsize \par}
-
-\texttt{\scriptsize ~SREW : 0.2613E+00 0.3012E+00 0.1962E+00 0.2069E+00
-0.3915E+00}{\scriptsize \par}
-
-~
-
-\noindent The table above contains RPA\index{RPA} strength functions
-for different angular momentum transfers $\lambda$. The energy is
-that of the residual nucleus, and 0 corresponds to the end of the
-emission spectrum. Non-energy-weighted and energy-weighted sum rules
-are printed at the bottom of the table for each multi-polarity.
-
-~
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-A~~~~~ n~~~~~ g~~~~~ l~~~~~ e~~~~~ s }{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Energy~~~~~~~ 0.0~~~~~~ 10.0~~~~~~
-20.0~~~~~~ 30.0~~~~~~ 40.0~~~~~~ 50.0~~~~~~
-60.0~~~~~~ 70.0}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.000~ 0.0000E+00 0.0000E+00 0.0000E+00
-0.0000E+00 0.0000E+00 0.0000E+00 0.0000E+00 0.0000E+00}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.190~ 0.1783E+01 0.9923E+00 0.7844E+00
-0.8024E+00 0.9537E+00 0.1040E+01 0.1285E+01 0.1315E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.380~ 0.1428E+01 0.1002E+01 0.8241E+00
-0.8174E+00 0.9447E+00 0.1025E+01 0.1239E+01 0.1242E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.570~ 0.1308E+01 0.1044E+01 0.8743E+00
-0.8400E+00 0.9448E+00 0.1028E+01 0.1215E+01 0.1198E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.760~ 0.1274E+01 0.1107E+01 0.9339E+00
-0.8694E+00 0.9518E+00 0.1045E+01 0.1208E+01 0.1175E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.950~ 0.1330E+01 0.1199E+01 0.1006E+01
-0.9066E+00 0.9668E+00 0.1074E+01 0.1213E+01 0.1169E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.140~ 0.1432E+01 0.1313E+01 0.1090E+01
-0.9509E+00 0.9882E+00 0.1113E+01 0.1229E+01 0.1175E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.330~ 0.1585E+01 0.1458E+01 0.1188E+01
-0.1002E+01 0.1016E+01 0.1160E+01 0.1252E+01 0.1192E+01}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}- cut -{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.347~ 0.1370E+02 0.1196E+02 0.1006E+02 0.9834E+01
-0.8753E+01 0.6835E+01 0.5880E+01 0.5116E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.537~ 0.1728E+02 0.1533E+02 0.1310E+02 0.1247E+02
-0.1089E+02 0.8588E+01 0.7131E+01 0.5885E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.727~ 0.2346E+02 0.2149E+02 0.1912E+02 0.1789E+02
-0.1553E+02 0.1238E+02 0.9384E+01 0.6998E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.916~ 0.4275E+02 0.4057E+02 0.3773E+02 0.3458E+02
-0.2939E+02 0.2364E+02 0.1699E+02 0.1178E+02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.106~ 0.6667E+02 0.6295E+02 0.5802E+02 0.5074E+02
-0.3904E+02 0.3060E+02 0.2384E+02 0.1770E+02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.296~ 0.5139E+02 0.4796E+02 0.4353E+02 0.3685E+02
-0.2604E+02 0.1984E+02 0.1688E+02 0.1339E+02}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.486~ 0.1759E+02 0.1631E+02 0.1474E+02 0.1254E+02
-0.8924E+01 0.6851E+01 0.5818E+01 0.4560E+01}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.676~ 0.4024E+01 0.3713E+01 0.3342E+01 0.2874E+01
-0.2086E+01 0.1620E+01 0.1354E+01 0.1039E+01}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}- cut -{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~Neutron MSD cross section =~~ 395.467796}{\scriptsize \par}
-
-\texttt{\scriptsize ~Proton~ MSD cross section =~~ 0.}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\noindent Double-differential cross sections for inelastic scattering
-to continuum and discrete level region are printed above. These cross
-sections result purely from the MSD\index{MSD} mechanism. The energy
-and angle integrated MSD cross section is printed at the bottom.
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~ Compound nucleus 101-Mo spin distribution}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ 1/2~ 35.000~~~~~~~~~~ -1/2~
-33.867~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ 3/2~ 69.066~~~~~~~~~~ -3/2~
-67.735~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ 5/2~ 103.60~~~~~~~~~~ -5/2~
-96.515~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ 7/2~ 123.11~~~~~~~~~~ -7/2~
-128.69~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~ 9/2~ 153.89~~~~~~~~~~ -9/2~
-127.29~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 11/2~ 91.985~~~~~~~~~ -11/2~ 152.75~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 13/2~ 107.32~~~~~~~~~ -13/2~ 36.526~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 15/2~ 7.4157~~~~~~~~~ -15/2~ 41.744~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 17/2~ 8.3427~~~~~~~~~ -17/2 0.95672~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 19/2 0.92250E-01~~~~~ -19/2~ 1.0630~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 21/2 0.10148~~~~~~~~~ -21/2 0.71698E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 23/2 0.46790E-03~~~~~ -23/2 0.78217E-02}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 25/2 0.50689E-03~~~~~ -25/2 0.26311E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ Fusion cross section =~~ 1782.5~~~~
-mb}{\scriptsize \par}
-
-~
-
-\noindent Spin and parity distribution of the fusion cross section
-are printed above. The part related to the decay of the Compound Nucleus
-begins: 
-
-~
-
-\texttt{\scriptsize ~ -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 1~ Decaying nucleus 101-Mo}{\scriptsize \par}
-
-\texttt{\scriptsize ~ -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~Gamma transitions parameters}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ E1~~~~~~~~~~~ E2~~~~~~~~~~~
-M1 }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~TE~~~~~~ 0.00~~~~~~~~ 1.00~~~~~~~~
-1.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~CE~~~~~~ 0.010~~~~~~~ 0.100~~~~~~~
-0.100}{\scriptsize \par}
-
-\texttt{\scriptsize ~E1~~~~~ 12.80~~~~~~~ 13.53~~~~~~~~
-8.81}{\scriptsize \par}
-
-\texttt{\scriptsize ~W1~~~~~~ 2.58~~~~~~~~ 4.90~~~~~~~~
-4.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~D1~~~~ 136.11~~~~~~~~ 2.12~~~~~~~~
-1.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~E2~~~~~ 17.14}{\scriptsize \par}
-
-\texttt{\scriptsize ~W2~~~~~~ 5.26}{\scriptsize \par}
-
-\texttt{\scriptsize ~D2~~~~ 128.96}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~ (1-TE){*}Weiss. + TE{*}GMR}{\scriptsize \par}
-
-~
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\noindent and lists parameters for the Giant Multipole Resonances.
-\emph{E}, \emph{W}, and \emph{D} are the energy, width, and peak cross
-section, respectively. GDR (E1) is split into two components, and
-\emph{CE} is a scaling factor applied to the Weisskopf estimates.
-
-Parameters and options used in the MSC\index{MSC} calculations are
-listed below. Note that EMPIRE has decided to follow the MSC calculations
-with Hauser-Feshbach\index{Hauser-Feshbach} calculations. 
-
-~
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Options in Heidelberg M.S.C.}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Transmission coeff. calculated using matrix
-elements determined in the incident channel}{\scriptsize \par}
-
-\texttt{\scriptsize ~Gamma down calculated using matrix element determined
-from the optical model imaginary part}{\scriptsize \par}
-
-\texttt{\scriptsize ~using full spreading width of the GDR}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Single particle state density set internally
-to A/13.0 in HMS}{\scriptsize \par}
-
-\texttt{\scriptsize ~M.S.C. calculations of the C.N. decay will be
-followed by the Hauser-Feshbach approach}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Spreading/total GDR width = 0.80000~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Initial particle type number of excitons for
-neutrons= 1.20 for protons= 0.80 total number of excitons= 3}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Ratio of unbound-bound to unbound-unbound matrix
-elements~ 1.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~Relative population of subsequent MSC classes
-from the open space}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 0.1593E+00 0.2675E+00 0.2983E+00}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-~}{\scriptsize \par}
-
-~
-
-\noindent The last three numbers are those parts of the fusion cross
-section entering the first, second, and third MSC\index{MSC} classes,
-respectively, directly from the incident channel (known also as the
-gradual absorption). Histograms of preequilibrium spectra follow these
-data but are not reproduced here.
-
-~
-
-\texttt{\scriptsize ~~~~~~~~~ Discrete level population}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 1~~~ 0.0000~~~ 1~~~~
-0.5~~ 0.831020E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 2~~~ 0.0140~~~ 1~~~~
-1.5~~ 0.237065E-03}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 3~~~ 0.0570~~~ 1~~~~
-2.5~~ 0.452711E-03}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 4~~~ 0.1710~~~ 1~~~~
-2.5~~ 0.238752E-03}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 5~~~ 0.2380~~~ 1~~~~
-1.5~~ 0.709769E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 6~~~ 0.2410~~~ 1~~~~
-3.5~~ 0.484111E-03}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 7~~~ 0.2710~~ -1~~~~
-5.5~~ 0.199587E-02}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-~
-
-\noindent The above table lists the populations of discrete levels
-in the Compound Nucleus after $\gamma$-cascade in the continuum but
-before their further de-excitation through discrete transitions. The
-columns are: running index of the level, level energy, parity, spin,
-and the population cross section.
-
-~
-
-\texttt{\scriptsize ~{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}{\scriptsize \par}
-
-\texttt{\scriptsize ~Discrete gamma transitions }{\scriptsize \par}
-
-\texttt{\scriptsize ~{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Decay of~~ 0.4550 MeV~~~ 2.5 level
-with final population~~ 0.57405E-04 mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Level populated~~~~ E.gamma~~~~
-Intensity mb }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0000~~~ 0.5~~~~~ 0.4550~~~~~~
-0.63145E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0140~~~ 1.5~~~~~ 0.4410~~~~~~
-0.35017E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0570~~~ 2.5~~~~~ 0.3980~~~~~~
-0.28702E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.1710~~~ 2.5~~~~~ 0.2840~~~~~~
-0.74626E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.2900~~~ 1.5~~~~~ 0.1650~~~~~~
-0.17221E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.2380~~~ 1.5~~~~~ 0.2170~~~~~~
-0.40183E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize Level of energy~~~ 0.4490 MeV and spin~~~
-0.5 with population~~ 0.10846E-04 mb is not depopulated }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Decay of~~ 0.3520 MeV~~~ 1.5 level
-with final population~~ 0.40371E-04 mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Level populated~~~~ E.gamma~~~~
-Intensity mb }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0000~~~ 0.5~~~~~ 0.3520~~~~~~
-0.13322E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0140~~~ 1.5~~~~~ 0.3380~~~~~~
-0.80742E-06}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0570~~~ 2.5~~~~~ 0.2950~~~~~~
-0.24626E-04}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.1710~~~ 2.5~~~~~ 0.1810~~~~~~
-0.12111E-05}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.3150~~~ 3.5~~~~~ 0.0370~~~~~~
-0.40371E-06}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\noindent The detailed $\gamma$-cascade between discrete levels
-is printed as shown above. Decay starts from the highest level and
-ends with the first excited state. For each level the population is
-given, including the complete feeding from the levels above, thus
-defining the population of a meta-stable state. $\gamma$-lines originating
-from the level are printed. Each line of the output corresponds to
-a single $\gamma$-transition identified by the energy and spin of
-the final level, and the energy and intensity of the $\gamma$-transition.
-If the branching ratios for the de-population of a given level are
-not known, an appropriate message is printed, and the cross section
-is trapped at the level and not distributed further. 
-
-The total production cross section of the residue is printed (obtained
-by summing population of the ground state after the $\gamma$-cascade
-is completed, with the cross sections trapped at levels with no branching
-ratios). In this particular case, the production cross section corresponds
-to the $^{100}$Mo(n,$\gamma$)$^{101}$Mo reaction:
-
-~
-
-~
-
-\texttt{\scriptsize ~ 42-Mo-101 production cross section~ 0.41639E-02
-mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Average total~~ life-time 0.21356E-18 s}{\scriptsize \par}
-
-\texttt{\scriptsize ~Average total~~ width~~~~ 0.57826E-06
-MeV}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~Fission~~~ cross section~~~~~ 0.0000~~~~
-mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-~
-
-\noindent and a typical spectrum histogram is reproduced below. This
-spectrum contains contributions from MSD\index{MSD}, MSC\index{MSC}
-and from the Compound Nucleus mechanisms. Transitions between discrete
-levels are also included in the $\gamma$ listings. Such spectra are
-produced for all ejectiles considered in the calculations, although
-only the neutron spectrum is listed below.
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-~
-
-\texttt{\scriptsize ~{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}
-neutron spectrum~ }\texttt{\noun{\scriptsize {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~Ener.~~~~~ Spectr.~~~~ .1E+01~~~~~~~~~~~~~~~~~~~~~~~~
-.1E+02~~~~~~~~~~~~~~~~~~~~~~~~ .1E+03}{\scriptsize \par}
-
-\texttt{\scriptsize ~ MeV~~~~~~ mb/MeV~~~~~ I~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-I~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ I }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~~~~~~~~~~~~~~
--{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.00~~~ 0.2472E-02~ I }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.19~~~ 0.2154E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.38~~~ 0.3155E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.57~~~ 0.3557E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.76~~~ 0.3730E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 0.95~~~ 0.3813E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.14~~~ 0.3853E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.33~~~ 0.3862E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.52~~~ 0.3838E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.71~~~ 0.3779E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 1.90~~~ 0.3682E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2.09~~~ 0.3551E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2.28~~~ 0.3389E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2.47~~~ 0.3204E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2.66~~~ 0.3005E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 2.85~~~ 0.2798E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.04~~~ 0.2589E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.23~~~ 0.2385E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.42~~~ 0.2187E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.61~~~ 0.1999E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.80~~~ 0.1822E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 3.99~~~ 0.1655E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4.18~~~ 0.1501E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4.37~~~ 0.1358E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4.56~~~ 0.1226E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4.75~~~ 0.1105E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 4.94~~~ 0.9945E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 5.13~~~ 0.8947E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 5.32~~~ 0.8056E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 5.51~~~ 0.7281E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 5.70~~~ 0.6608E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 5.89~~~ 0.6010E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 6.08~~~ 0.5487E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 6.27~~~ 0.5066E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 6.46~~~ 0.4778E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 6.65~~~ 0.4614E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 6.84~~~ 0.4548E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.03~~~ 0.4488E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.22~~~ 0.4451E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.41~~~ 0.4553E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.60~~~ 0.4590E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.79~~~ 0.4662E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 7.98~~~ 0.4060E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 8.17~~~ 0.3214E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 8.36~~~ 0.2530E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 8.55~~~ 0.2126E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 8.74~~~ 0.1897E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 8.93~~~ 0.1823E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 9.12~~~ 0.1855E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 9.31~~~ 0.1786E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 9.50~~~ 0.1855E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 9.69~~~ 0.1978E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~~ 9.88~~~ 0.1890E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 10.07~~~ 0.2038E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 10.26~~~ 0.2262E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 10.45~~~ 0.2265E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 10.64~~~ 0.2491E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 10.83~~~ 0.2779E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.02~~~ 0.3188E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.21~~~ 0.3264E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.40~~~ 0.2836E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.59~~~ 0.2869E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.78~~~ 0.4511E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 11.97~~~ 0.5156E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.16~~~ 0.4874E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.35~~~ 0.6086E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.54~~~ 0.7354E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.73~~~ 0.9560E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 12.92~~~ 0.1705E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.11~~~ 0.2396E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.30~~~ 0.1700E+03~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.49~~~ 0.5817E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.68~~~ 0.1344E+02~ I {*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*} }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 13.87~~~ 0.5335E-03~ I }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 14.06~~~ 0.0000E+00~ I }{\scriptsize \par}
-
-\texttt{\scriptsize ~ 14.25~~~ 0.0000E+00~ I }{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ Integrated spectrum~~ 1781.21843 mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~n~ emission cross section~ 1781.2~~~~
-mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-~
-
-\noindent Part of the output related to the decay of the first residue
-is given below, and is repeated for each decaying nucleus.
-
-~
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 2~ Decaying nucleus 100-Mo}{\scriptsize \par}
-
-\texttt{\scriptsize ~ -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~ ATTENTION!!: BRANCHING RATIOS FOR LEVEL 1 IN
-NUCLEUS A=~ 100. Z=~ 42.}{\scriptsize \par}
-
-\texttt{\scriptsize ~ ARE MISSING}{\scriptsize \par}
-
-\texttt{\scriptsize ~Gamma transitions parameters}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ E1~~~~~~~~~~~ E2~~~~~~~~~~~
-M1 }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~TE~~~~~~ 0.00~~~~~~~~ 1.00~~~~~~~~
-1.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~CE~~~~~~ 0.010~~~~~~~ 0.100~~~~~~~
-0.100}{\scriptsize \par}
-
-\texttt{\scriptsize ~E1~~~~~ 13.64~~~~~~~ 13.58~~~~~~~~
-8.83}{\scriptsize \par}
-
-\texttt{\scriptsize ~W1~~~~~~ 2.99~~~~~~~~ 4.91~~~~~~~~
-4.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~D1~~~~ 116.58~~~~~~~~ 2.14~~~~~~~~
-1.00}{\scriptsize \par}
-
-\texttt{\scriptsize ~E2~~~~~ 17.18}{\scriptsize \par}
-
-\texttt{\scriptsize ~W2~~~~~~ 5.43}{\scriptsize \par}
-
-\texttt{\scriptsize ~D2~~~~ 123.32}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~ (1-TE){*}Weiss. + TE{*}GMR}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\noindent Note the message below. When the ENDF option is used, the
-population of discrete levels due to inelastic scattering (to discrete
-levels) is shifted to the ground state because ENDF format requires
-that $\gamma$-transitions following inelastic scattering (e.g., MT=51,
-52, \ldots{}) are counted separately from the continuum $\gamma$-cascade
-that belongs to MT=91. These cross sections are not lost - within
-the ENDF format they are treated in a special file with branching
-ratios together with their cross sections in MT=51, 52, \ldots{}
-However, this feature will cause \textbf{serious problems when calculating
-isomeric\index{isomeric ratio} state populations} in the (n,n'),
-(n,p), and (n,$\alpha$) reactions. The isomeric cross section will
-be 0 immediately above the threshold until the continuum starts to
-be populated. In such a case, one needs to turn off the ENDF option
-(setting ENDF=0) in order to model the population of discrete levels
-properly.
-
-~
-
-\texttt{\scriptsize ~~~~~~~~~ Discrete level population}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ NOTE: due to ENDF option direct
-particle contribution was shifted to the g.s.}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ -{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 1~~~ 0.0000~~~ 1~~~~
-0.0~~~ 207.063~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 2~~~ 0.5360~~~ 1~~~~
-2.0~~~ 46.9998~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 3~~~ 0.6950~~~ 1~~~~
-0.0~~~ 5.99200~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 4~~~ 1.0640~~~ 1~~~~
-2.0~~~ 18.7834~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 5~~~ 1.1360~~~ 1~~~~
-4.0~~~ 56.6486~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 6~~~ 1.4640~~~ 1~~~~
-2.0~~~ 8.44069~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 7~~~ 1.5050~~~ 1~~~~
-0.0~~~ 1.47572~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 8~~~ 1.6070~~~ 1~~~~
-3.0~~~ 11.3257~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~~ 9~~~ 1.7660~~~ 1~~~~
-0.0~~ 0.908138~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 10~~~ 1.7710~~~ 1~~~~
-4.0~~~ 10.1520~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 11~~~ 1.8470~~~ 1~~~~
-6.0~~~ 49.1093~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 12~~~ 1.9080~~ -1~~~~
-3.0~~~ 14.3362~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 13~~~ 1.9770~~~ 1~~~~
-1.0~~~ 5.72301~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 14~~~ 2.0370~~~ 1~~~~
-0.0~~ 0.554358~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~~~~~ 15~~~ 2.0430~~~ 1~~~~
-2.0~~~ 2.47126~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}{\scriptsize \par}
-
-\texttt{\scriptsize ~Discrete gamma transitions }{\scriptsize \par}
-
-\texttt{\scriptsize ~{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}{*}}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Decay of~~ 2.0430 MeV~~~ 2.0 level
-with final population~~~ 2.4713~~~~ mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Level populated~~~~ E.gamma~~~~
-Intensity mb }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.0000~~~ 0.0~~~~~ 2.0430~~~~~~
-0.59310~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.5360~~~ 2.0~~~~~ 1.5070~~~~~~
-0.24713~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 1.0640~~~ 2.0~~~~~ 0.9790~~~~~~
-0.59310~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 1.4640~~~ 2.0~~~~~ 0.5790~~~~~~
-0.84023~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 1.6070~~~ 3.0~~~~~ 0.4360~~~~~~
-0.19770~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Decay of~~ 2.0370 MeV~~~ 0.0 level
-with final population~~ 0.55436~~~~ mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~ Level populated~~~~ E.gamma~~~~
-Intensity mb }{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 0.5360~~~ 2.0~~~~~ 1.5010~~~~~~
-0.51555~~~ }{\scriptsize \par}
-
-\texttt{\scriptsize ~~~~~ 1.4640~~~ 2.0~~~~~ 0.5730~~~~~~
-0.38805E-01}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-{}-{}-}{\scriptsize{} }\texttt{\textbf{\scriptsize cut}}{\scriptsize{}
-}\texttt{\scriptsize -{}-{}-{}-{}-{}-{}-}{\scriptsize \par}
-
-\texttt{\scriptsize ~}{\scriptsize \par}
-
-\texttt{\scriptsize ~ 42-Mo-100 production cross section~~ 439.98~~~~
-mb}{\scriptsize \par}
-
-\texttt{\scriptsize ~ }{\scriptsize \par}
-
 
 \subsection{{*}.out (OUTPUT.DAT; short output)}
 
@@ -9117,19 +7969,27 @@ energy value. The results are sent to ZVView\index{ZVView} for plotting.
 
 \section{Plans for further development}
 
-Following extensions are foreseen in future releases of the EMPIRE
+Following extensions are foreseen in the future releases of the EMPIRE
 code:
 
 \begin{enumerate}
 \item Inclusion of isospin,
-\item Microscopic p-h level densities\index{p-h level densities} (routine
-  exists),
-\item Moldauer method for widths fluctuation correction, 
+%\item Microscopic p-h level densities\index{p-h level densities} (routine
+%  exists),
+%\item Moldauer method for widths fluctuation correction, 
+\item Width fluctuation correction for reactions on excited targets,
 \item Improved parametrization of the elastic enhancement factor,
-\item Formatting of primary gammas.
+\item ENDF-formatting of primary gammas.
+\item Improved description of direct reactions (e.g. breakup, pickup, etc.)
+  for reactions with incident complex particles
+  (e.g. deuteron, triton and $^3$He),
+\item Implement particle decay of discrete levels that is relevant
+  for the treatment of direct reactions (e.g. 12C(n,n+3$\alpha$) ) 
+  in the outgoing channels.
+\item Inclusion of heavy-ion optical potential (Sao Paulo potential).
 \end{enumerate}
 
-\chapter{Working notes}
+\chapter{Working notes} \label{Chap:work}
 
 
 \section{Avoiding problems}
@@ -9157,9 +8017,6 @@ file ({*}.\emph{inp}) that requires running the \emph{clean} script
 increasing order.
 \item Log files \emph{{*}.war, {*}.x42c4\_errs} and \emph{empend.log} should
 be checked for possible warnings and error messages.
-\item The MSD\index{MSD}=2 option must be used with care. EMPIRE does not
-check whether the existing output of ORION\index{ORION} (\emph{TAPE15})
-is compatible with the currently executed case.
 \item Irregularities in the excitation functions such as (n,2n) or (n,p)
 are usually due to improper level density\index{level density} parametrization
 (check cumulative plots of discrete levels) or to the overestimated
@@ -10033,241 +8890,246 @@ by the sum rule, and users should ensure that the inputted values
 respect this limitation. 
 
 
-\section{Sample inputs}
-
-Some typical examples of EMPIRE input files are presented below for
-illustrative purpose only. No attempt was made to ensure that the
-choice of parameters is suitable for reproducing the experimental
-data. 
-
-
-\subsection{Neutron capture}
-
-Input is simplest if all defaults are accepted, and the .\emph{inp}
-file consists only of the mandatory part end two closing records:
-GO for the optional input, and -1 for the list of incident energies.
-Since we are not interested in the production of residues after particle
-emission in the case of a capture reaction, the number of particle
-emissions can be set to 0. This setting does not mean that all particle
-channels will be closed, for they will compete with $\gamma$-emission
-from the Compound Nucleus. However, once the particles are emitted
-from the Compound Nucleus, their fate will not be considered any further.
-Therefore, particle emission spectra will only arise from the decay
-of the Compound Nucleus. 
-
-The input file contains an incident energy and specification of a
-target and projectile: 
-
-\begin{quotation}
-\texttt{\scriptsize ~1.9~~~~~~~~~~~~~~~~ ;INCIDENT
-ENERGY (IN LAB)}{\scriptsize \par}
-
-\texttt{\scriptsize 100. 42.~~~~~~~~~~~~ ;TARGET~ A ,
-Z }{\scriptsize \par}
-
-\texttt{\scriptsize 1.~~~ 0.~~~~~~~~~~~~ ;PROJECTILE
-A, Z}{\scriptsize \par}
-
-\texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF PROTONS~ TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF ALPHAS~~ TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF L.I. TO
-BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-
-\texttt{\scriptsize GO }{\scriptsize \par}
-
-\texttt{\scriptsize -1.}~\\
-{\scriptsize \par}
-\end{quotation}
-This input file can be extended to multiple-energy calculations by
-including more incident energies (between GO and -1 record), as in
-the Section \ref{sec: eval-calc}. Also particle channels can be easily
-included by replacing zeros in lines 4 through 7 by the requested
-number of emissions. Memory requirements increase rapidly with the
-number of requested particle emissions, and the user is advised to
-avoid asking for residues which can not be reached with the highest
-incident energy to be considered in the calculations. As these nuclei
-are not populated in the de-excitation chain, they hardly impinged
-on the CPU time but occupy the same amount of memory as all the others.
-
-
-\subsection{Heavy ion induced reaction}
-
-Default input for heavy ion calculations is no more complicated than
-that described above (the incident neutron is simply replaced by the
-heavy ion). The code will automatically change the default for calculating
-the fusion cross section from the optical model to the simplified
-Coupled-Channels\index{Coupled-Channels} method (CCFUS\index{CCFUS}
-\cite{CCFUS}). As listed in the example given below, we present a
-more complicated input file in which several options are set explicitly
-in the input for the $^{48}$Ca + $^{248}$Cm reaction leading to
-the super-heavy element Z=116:
-
-\begin{quotation}
-\texttt{\scriptsize 240.0~~~~~~~~~~~~~~~ ;INCIDENT
-ENERGY (IN LAB)}{\scriptsize \par}
-
-\texttt{\scriptsize 248. 96.~~~~~~~~~~~~ ;TARGET~ A ,
-Z, Spin , parity (integer!!)}{\scriptsize \par}
-
-\texttt{\scriptsize 48.~ 20.~~~~~~~~~~~~ ;PROJECTILE
-A, Z, SPIN}{\scriptsize \par}
-
-\texttt{\scriptsize 6~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF PROTONS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF ALPHAS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF LI
-TO BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-
-\texttt{\scriptsize IOUT~~~~~~ 3.}{\scriptsize \par}
-
-\texttt{\scriptsize NEX~~~~~~100.}{\scriptsize \par}
-
-\texttt{\scriptsize BETAV~~~~~ 8.6}{\scriptsize \par}
-
-\texttt{\scriptsize SHRJ~~~~~ 20.}{\scriptsize \par}
-
-\texttt{\scriptsize SHRD~~~~~~ 3.}{\scriptsize \par}
-
-\texttt{\scriptsize NIXSH~~~~~ 1.}{\scriptsize \par}
-
-\texttt{\scriptsize LTURBO~~~~ 2.}{\scriptsize \par}
-
-\texttt{\scriptsize DEFPAR~~~~ 1.}{\scriptsize \par}
-
-\texttt{\scriptsize GO}{\scriptsize \par}
-
-\texttt{\scriptsize -1. }{\scriptsize \par}
-\end{quotation}
-IOUT=3 is used to print more detailed output with respect to the default
-option. NEX=100 increases the number of energy bins in discretization
-of the continuum (default is 50). The viscosity parameter BETAV in
-the fission channel is set to $8.6\cdot10^{-21}$ s$^{-1}$. The shell-correction
-to the fission barrier is assumed to decrease to half at spin J=20
-$\hbar$, with diffuseness of 3 $\hbar$, as specified by SHRJ and
-SHRD, respectively. Nix-Moller shell corrections are selected \cite{masses}
-with LTURBO is set to 3. This latter option has been used to speed
-up the calculations, and is particularly useful for heavy ion induced
-reactions which often involve high angular momenta. Calculations will
-be performed for each second spin only, which should make the study
-4 times faster. However, in reality the increased speed of manipulation
-is smaller but still sufficient to justify usage of the LTURBO option.
-If the number of partial waves is large (say 50) the loss of accuracy
-introduced by the LTURBO option is of the order of a few percent .
-The last parameter DEFPAR (coefficient \emph{b} in Eq. \ref{defor})
-is set to 1, which is actually the default value. The only advantage
-of specifying this parameter in the optional input is that the value
-will be printed at the beginning of the output, and might turn out
-to be convenient for tracking different calculations if the parameter
-is to be varied.
-
-
-\subsection{MSD\index{MSD}+MSC\index{MSC}+HF calculation\label{sec: eval-calc}}
-
-The following example illustrates an input file (.\emph{inp}) that
-could be used to run first shot calculations when evaluating $^{100}$Mo
-isotope. All the reactions of the type $^{100}$Mo(n, \emph{x}n \emph{y}p
-\emph{z}$\alpha)$ with \emph{x}=0, 1, 2, \emph{y}= 0, 1 and \emph{z}=0,
-1 are considered. The energy range is between 0.1 and 20 MeV. The
-Multi-step Direct\index{MSD} and Multi-step Compound\index{MSC}
-mechanisms are taken into account. The optical model parameters of
-Rapaport are selected (note the use of the positional parameter -
-1, which refers to neutrons). The ENDF option is set to allow for
-processing the .\emph{out} file with EMPEND\index{EMPEND} code. The
-results for the $^{100}$Mo(n,2n) $^{99}$Mo reaction obtained using
-this input file are shown in Fig. \ref{fig: 100Mon2n}.
-
-\begin{quotation}
-\texttt{\scriptsize ~~0.1~~~~~~~~~~~~~~ ;INCIDENT
-ENERGY (IN LAB)}{\scriptsize \par}
-
-\texttt{\scriptsize 100.~~42.~~~~~~~~~~ ;TARGET A , Z }{\scriptsize \par}
-
-\texttt{\scriptsize ~~1.~~~0.~~~~~~~~~~ ;PROJECTILE
-A, Z}{\scriptsize \par}
-
-\texttt{\scriptsize 2~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF PROTONS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
-OF ALPHAS TO BE EMITTED}{\scriptsize \par}
-
-\texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~ ;NUMBER OF L.I. TO
-BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-
-\texttt{\scriptsize IOUT~~~~~~ 3. }{\scriptsize \par}
-
-\texttt{\scriptsize LEVDEN~~~~ 0. }{\scriptsize \par}
-
-\texttt{\scriptsize NEX~~~~~ 100. }{\scriptsize \par}
-
-\texttt{\scriptsize MSD~~~~~~~ 1. }{\scriptsize \par}
-
-\texttt{\scriptsize MSC ~~~~~~~1. }{\scriptsize \par}
-
-\texttt{\scriptsize ENDF~~~~~~ 1. }{\scriptsize \par}
-
-\texttt{\scriptsize OMPOT~~~~~ 6.~~~~~~ 1}{\scriptsize \par}
-
-\texttt{\scriptsize GO }{\scriptsize \par}
-
-\texttt{\scriptsize 0.5}{\scriptsize \par}
-
-\texttt{\scriptsize 1.}{\scriptsize \par}
-
-\texttt{\scriptsize 2.}{\scriptsize \par}
-
-\texttt{\scriptsize 3.}{\scriptsize \par}
-
-\texttt{\scriptsize 4.}{\scriptsize \par}
-
-\texttt{\scriptsize 5.}{\scriptsize \par}
-
-\texttt{\scriptsize 6.}{\scriptsize \par}
-
-\texttt{\scriptsize 7.}{\scriptsize \par}
-
-\texttt{\scriptsize 8.}{\scriptsize \par}
-
-\texttt{\scriptsize 9.}{\scriptsize \par}
-
-\texttt{\scriptsize 10.}{\scriptsize \par}
-
-\texttt{\scriptsize 11.}{\scriptsize \par}
-
-\texttt{\scriptsize 12.}{\scriptsize \par}
-
-\texttt{\scriptsize 13.}{\scriptsize \par}
-
-\texttt{\scriptsize 14.}{\scriptsize \par}
-
-\texttt{\scriptsize 15.}{\scriptsize \par}
-
-\texttt{\scriptsize 16.}{\scriptsize \par}
-
-\texttt{\scriptsize 17.}{\scriptsize \par}
-
-\texttt{\scriptsize 18.}{\scriptsize \par}
-
-\texttt{\scriptsize 20.}{\scriptsize \par}
-
-\texttt{\scriptsize -1.}{\scriptsize \par}
-\end{quotation}
+\section{Description of test cases}
+
+The test cases are intended for the verification of the local
+installation.
+
+(to be completed by Roberto)
+
+% Some typical examples of EMPIRE input files are presented below for
+% illustrative purpose only. No attempt was made to ensure that the
+% choice of parameters is suitable for reproducing the experimental
+% data. 
+% 
+% 
+% \subsection{Neutron capture}
+% 
+% Input is simplest if all defaults are accepted, and the .\emph{inp}
+% file consists only of the mandatory part end two closing records:
+% GO for the optional input, and -1 for the list of incident energies.
+% Since we are not interested in the production of residues after particle
+% emission in the case of a capture reaction, the number of particle
+% emissions can be set to 0. This setting does not mean that all particle
+% channels will be closed, for they will compete with $\gamma$-emission
+% from the Compound Nucleus. However, once the particles are emitted
+% from the Compound Nucleus, their fate will not be considered any further.
+% Therefore, particle emission spectra will only arise from the decay
+% of the Compound Nucleus. 
+% 
+% The input file contains an incident energy and specification of a
+% target and projectile: 
+% 
+% \begin{quotation}
+% \texttt{\scriptsize ~1.9~~~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 100. 42.~~~~~~~~~~~~ ;TARGET~ A ,
+% Z }{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1.~~~ 0.~~~~~~~~~~~~ ;PROJECTILE
+% A, Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS~ TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS~~ TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF L.I. TO
+% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO }{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1.}~\\
+% {\scriptsize \par}
+% \end{quotation}
+% This input file can be extended to multiple-energy calculations by
+% including more incident energies (between GO and -1 record), as in
+% the Section \ref{sec: eval-calc}. Also particle channels can be easily
+% included by replacing zeros in lines 4 through 7 by the requested
+% number of emissions. Memory requirements increase rapidly with the
+% number of requested particle emissions, and the user is advised to
+% avoid asking for residues which can not be reached with the highest
+% incident energy to be considered in the calculations. As these nuclei
+% are not populated in the de-excitation chain, they hardly impinged
+% on the CPU time but occupy the same amount of memory as all the others.
+% 
+% 
+% \subsection{Heavy ion induced reaction}
+% 
+% Default input for heavy ion calculations is no more complicated than
+% that described above (the incident neutron is simply replaced by the
+% heavy ion). The code will automatically change the default for calculating
+% the fusion cross section from the optical model to the simplified
+% Coupled-Channels\index{Coupled-Channels} method (CCFUS\index{CCFUS}
+% \cite{CCFUS}). As listed in the example given below, we present a
+% more complicated input file in which several options are set explicitly
+% in the input for the $^{48}$Ca + $^{248}$Cm reaction leading to
+% the super-heavy element Z=116:
+% 
+% \begin{quotation}
+% \texttt{\scriptsize 240.0~~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 248. 96.~~~~~~~~~~~~ ;TARGET~ A ,
+% Z, Spin , parity (integer!!)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 48.~ 20.~~~~~~~~~~~~ ;PROJECTILE
+% A, Z, SPIN}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 6~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF LI
+% TO BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize IOUT~~~~~~ 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize NEX~~~~~~100.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize BETAV~~~~~ 8.6}{\scriptsize \par}
+% 
+% \texttt{\scriptsize SHRJ~~~~~ 20.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize SHRD~~~~~~ 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize NIXSH~~~~~ 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize LTURBO~~~~ 2.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize DEFPAR~~~~ 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO}{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1. }{\scriptsize \par}
+% \end{quotation}
+% IOUT=3 is used to print more detailed output with respect to the default
+% option. NEX=100 increases the number of energy bins in discretization
+% of the continuum (default is 50). The viscosity parameter BETAV in
+% the fission channel is set to $8.6\cdot10^{-21}$ s$^{-1}$. The shell-correction
+% to the fission barrier is assumed to decrease to half at spin J=20
+% $\hbar$, with diffuseness of 3 $\hbar$, as specified by SHRJ and
+% SHRD, respectively. Nix-Moller shell corrections are selected \cite{masses}
+% with LTURBO is set to 3. This latter option has been used to speed
+% up the calculations, and is particularly useful for heavy ion induced
+% reactions which often involve high angular momenta. Calculations will
+% be performed for each second spin only, which should make the study
+% 4 times faster. However, in reality the increased speed of manipulation
+% is smaller but still sufficient to justify usage of the LTURBO option.
+% If the number of partial waves is large (say 50) the loss of accuracy
+% introduced by the LTURBO option is of the order of a few percent .
+% The last parameter DEFPAR (coefficient \emph{b} in Eq. \ref{defor})
+% is set to 1, which is actually the default value. The only advantage
+% of specifying this parameter in the optional input is that the value
+% will be printed at the beginning of the output, and might turn out
+% to be convenient for tracking different calculations if the parameter
+% is to be varied.
+% 
+% 
+% \subsection{MSD\index{MSD}+MSC\index{MSC}+HF calculation\label{sec: eval-calc}}
+% 
+% The following example illustrates an input file (.\emph{inp}) that
+% could be used to run first shot calculations when evaluating $^{100}$Mo
+% isotope. All the reactions of the type $^{100}$Mo(n, \emph{x}n \emph{y}p
+% \emph{z}$\alpha)$ with \emph{x}=0, 1, 2, \emph{y}= 0, 1 and \emph{z}=0,
+% 1 are considered. The energy range is between 0.1 and 20 MeV. The
+% Multi-step Direct\index{MSD} and Multi-step Compound\index{MSC}
+% mechanisms are taken into account. The optical model parameters of
+% Rapaport are selected (note the use of the positional parameter -
+% 1, which refers to neutrons). The ENDF option is set to allow for
+% processing the .\emph{out} file with EMPEND\index{EMPEND} code. The
+% results for the $^{100}$Mo(n,2n) $^{99}$Mo reaction obtained using
+% this input file are shown in Fig. \ref{fig: 100Mon2n}.
+% 
+% \begin{quotation}
+% \texttt{\scriptsize ~~0.1~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 100.~~42.~~~~~~~~~~ ;TARGET A , Z }{\scriptsize \par}
+% 
+% \texttt{\scriptsize ~~1.~~~0.~~~~~~~~~~ ;PROJECTILE
+% A, Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 2~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~ ;NUMBER OF L.I. TO
+% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize IOUT~~~~~~ 3. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize LEVDEN~~~~ 0. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize NEX~~~~~ 100. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize MSD~~~~~~~ 1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize MSC ~~~~~~~1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize ENDF~~~~~~ 1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize OMPOT~~~~~ 6.~~~~~~ 1}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO }{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0.5}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 2.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 4.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 5.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 6.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 7.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 8.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 9.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 10.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 11.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 12.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 13.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 14.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 15.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 16.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 17.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 18.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 20.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1.}{\scriptsize \par}
+% \end{quotation}
 
 \section*{Acknowledgments}
 
@@ -10275,22 +9137,22 @@ EMPIRE is the result of international cooperation towards open source
 software as so successfully promoted by the General Public License.
 A number of authors contributed to the development of the code. The
 recent developments described in this report would not have been possible
-without their valuable voluntary contributions. V. Zerkin has translated
-the EXFOR library into a suitable form for EMPIRE and adapted his
-powerful plotting package ZVView to bring the data presentation in
-EMPIRE to an unprecedented level of sophistication. I would also like
+without their valuable voluntary contributions. We would also like
 to acknowledge the authors of the codes that are included in EMPIRE:
-E. Betak and P. Oblozinsky (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso
+E. Betak (DEGAS), M.B. Chadwick (DDHMS), C.H. Dasso
 and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN),
-J. Raynal (ECIS06), and A. Sierk (BARFIT and MOMFIT). I would like
+J. Raynal (ECIS06), and A. Sierk (BARFIT and MOMFIT). We would like
 to thank M. Mebel for providing the routine for calculation of shell-corrections
-according to Myers and Swiatecki. I am grateful to G. Giardina and
+according to Myers and Swiatecki. We are grateful to G. Giardina and
 his collaborators A. D'Arrigo, A. Taccone, and A. Lamberto who assisted
 the project from the very beginning and have tested various versions
-of the code since 1993. I would also like to thank A. Nichols for
-his thorough review of this text. Finally, I am indebted to R. Sturiale
-for drawing my attention to LINUX, which became the native operating
-system of EMPIRE. 
+of the code since 1993. We would also like to thank A.L. Nichols for
+his continual support of the project. Finally, we are indebted to R. Sturiale
+for LINUX support at the early stages of the development of EMPIRE development. 
+
+M. Pigni (attn. Roberto) ...
+
+RIPL Project ...
 
 \bibliographystyle{prsty}
 \bibliography{empire}
