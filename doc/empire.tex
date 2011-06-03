@@ -80,14 +80,14 @@ as well as for nuclear data evaluation work.
 A projectile can be a photon a nucleon, a light or
 heavy ion. The energy range starts just above the resonance region
 in the case of a neutron projectile, and extends up to few hundred
-MeV for Heavy Ion induced reactions. The code accounts for the major
+MeV for heavy ion induced reactions. The code accounts for the major
 nuclear reaction models, such as optical model, Coupled Channels
 and DWBA (ECIS06), Coupled Channels' Soft-Rotator (OPTMAN), 
 Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
 Compound, exciton model (PCROSS and DEGAS), hybrid Monte Carlo simulation
 (DDHMS), and the full featured Hauser-Feshbach model including the 
 optical model for fission. 
-Heavy Ion fusion cross section can be calculated within the
+Heavy ion fusion cross section can be calculated within the
 simplified coupled channels approach (CCFUS). A comprehensive library
 of input parameters based on the RIPL-3 library 
 covers nuclear masses, optical model parameters,
@@ -97,7 +97,9 @@ and $\gamma$-ray strength functions. Effects of the dynamic deformation
 of a fast rotating nucleus can be taken into account in the calculations 
 (BARFIT, MOMFIT).
 The results can be converted into the ENDF-6 format using the accompanying
-code EMPEND (... verification, resonance data). 
+EMPEND code. 
+Modules of the ENDF Utility Codes and the ENDF Pre-Processing
+codes are applied for ENDF file verification.
 The package contains the full EXFOR library of experimental
 data in computational format C4 that
 are automatically retrieved during the
@@ -140,7 +142,7 @@ mechanism \cite{FKK} lead to the EMPIRE-MSC version. Subsequently,
 the NVWY\index{NVWY} formulation of the Multi-step Compound mechanism
 \cite{NVWY} was implemented in the HMS-EMPIRE. This version also
 included combinatorial calculations of particle-hole level densities.
-In addition, a version for Heavy Ion induced reactions (EMPIRE HI)
+In addition, a version for heavy ion induced reactions (EMPIRE HI)
 was developed.
 
 EMPIRE-2 is a totally new release of the code. Contrary to the preceding
@@ -152,7 +154,7 @@ which together with careful coding of the most crucial parts of the
 code, increased the speed of the program by a factor of 20. The new
 code is projected to be general and flexible, and can been applied
 to the calculation of neutron capture in the keV region, as well as
-for Heavy Ion (HI) induced reactions at several hundreds of MeV. All
+for heavy ion (HI) induced reactions at several hundreds of MeV. All
 dimensions in the main code are set up through the parameter statements
 contained in the separate file, which is included wherever appropriate,
 making any adjustment of the code to the actual problem and/or computer
@@ -267,7 +269,7 @@ ECIS06\cite{ECIS} unless an external file FUSION exists. In the latter
 case, the spin distribution of the Compound Nucleus is constructed
 from this file.
 
-The Heavy Ion fusion cross section is calculated using Eq. \ref{fusion}
+The heavy ion fusion cross section is calculated using Eq. \ref{fusion}
 with transmission coefficients determined according to one of the
 following methods:
 
@@ -1652,7 +1654,7 @@ the fission transmission coefficient $T_{f}^{HW}$ is given by
 \noindent \begin{equation}
 T_{f}^{HW}(E-E_{sad}(J)-\epsilon)=\frac{1}{1+exp[-\frac{2\pi}{\hbar\omega}(E-E_{sad}(J)-\epsilon)]}\,.\label{THW}\end{equation}
 By default, $\hbar\omega=1$ MeV is taken. This formulation is adequate
-for Heavy Ion induced reactions but needs refinement in the case of
+for heavy ion induced reactions but needs refinement in the case of
 fission induced by low energy nucleons. This shortcoming will be removed
 in the later versions of the code. 
 
@@ -1672,7 +1674,7 @@ the level density parameter $a$, providing reasonable estimate of
 the level densities as long as damping of the collective effects is
 irrelevant. The relatively low angular momentum introduced by the
 incident projectile justifies neglect of dynamical effects. However,
-these effects have to be taken into account in case of the Heavy Ion
+these effects have to be taken into account in case of the heavy ion
 induced reactions and/or higher excitation energies. In these cases,
 the dynamic approach which accounts for the shape-dependent collective
 enhancements, their damping with increasing energy, and the temperature
@@ -2004,7 +2006,7 @@ number. Typically, it is taken as $A/8$ but can be specified in the
 input file. Also in this case Eqs. \ref{ro1} through \ref{Qvib}
 are applied down to the discrete levels and no adjustment to experimental
 data is performed. This method is not recommended and is included
-only because of its wide use in the Heavy Ion calculations.
+only because of its wide use in the heavy ion calculations.
 
 
 \subsubsection*{Hartree-Fock-BCS approach}
@@ -4838,7 +4840,7 @@ prints out input parameters to the output file (\emph{{*}.lst}).
 
 \subsection*{ccfus.f }
 
-Calculates fusion cross section for Heavy Ions in terms of a simplified
+Calculates fusion cross section for heavy ions in terms of a simplified
 Coupled-Channels approach. Collective states in target and projectile
 are identified in \emph{input.f} and used in the CC calculations.
 As a first guess ground state deformation is assumed for all the collective
@@ -4852,7 +4854,7 @@ routines (e.g., distributed barrier model)
 This module determines the optical model transmission coefficients.
 Optical model parameters are retrieved from the RIPL\index{RIPL}-2
 library and subroutine ECIS06 is called. The transmission coefficients
-are calculated inside the \emph{tl.f} for Heavy Ions only. For light
+are calculated inside the \emph{tl.f} for heavy ions only. For light
 particles this task is delegated to ECIS06, and \emph{tl.f} module
 ensures the proper transfer of calculated transmission coefficients
 to the rest of the system.
@@ -4875,11 +4877,11 @@ in EMPIRE-3.1.
 
 Calculates initial Compound Nucleus population after projectile absorption
 using transmission coefficients obtained either from the optical model
-or the distributed barrier model (for Heavy Ions). Also handles additional
+or the distributed barrier model (for heavy ions). Also handles additional
 possibilities (reading absorption cross section for each partial wave
 from the external file, reading total absorption cross section from
 input, and reading critical value of angular momentum \emph{l}$_{cr}$)
-that are available for Heavy Ion induced reactions (see Section \ref{sec: fusion}).
+that are available for heavy ion induced reactions (see Section \ref{sec: fusion}).
 
 
 \subsection*{MSD\index{MSD}-orion\index{ORION}.f }
@@ -6585,7 +6587,7 @@ through the optional input entries is given below.
 \item [{NEX}] Maximum number of energy steps in the integration set to
 VAL (default: min(50, NDEX)).
 \item [{LTURBO}] Step in the angular momentum set to VAL. This option can
-be used to speed up Heavy Ion calculations. For example, setting LTURBO
+be used to speed up heavy ion calculations. For example, setting LTURBO
 to 2, only each second spin in the Compound Nucleus and in all residual
 nuclei will be considered. The result is appropriately normalized
 so that no flux is lost (default: 1).
@@ -6862,7 +6864,7 @@ Z=I1, A=I2 \\
 = 0 advanced fission (multi-humped barrier, optical model for fission)
 recommended for light particle or photon induced fission (default)
 \\
-= 1 fission over single-humped barrier (good only for Heavy Ion induced
+= 1 fission over single-humped barrier (good only for heavy ion induced
 reactions) \\
 = 2 fission ignored \\
 \\
@@ -9460,7 +9462,7 @@ is negative. Thermal energy is calculated as the difference between
 the total excitation energy and the energy needed for rotation. Spin
 and energy ranges are also formally unlimited in the EMPIRE-specific
 level densities. These features make the approach particularly suited
-for the Heavy Ion and high-energy nucleon-induced reactions. On the
+for the heavy ion and high-energy nucleon-induced reactions. On the
 other hand, EMPIRE-specific level densities are fitted to the experimental
 data in a manner similar to the GC, suggesting that their predictions
 at low energies should be comparable to those of GC or even better
@@ -9723,8 +9725,8 @@ refer to them by keywords defined in the input description (see Section
 
 \subsubsection*{Fusion}
 
-We have to distinguish between Heavy Ion and Light Ion (A<5) of nucleon
-induced reactions. Heavy Ion induced reactions:
+We have to distinguish between heavy ion and Light Ion (A<5) of nucleon
+induced reactions. Heavy ion induced reactions:
 
 \begin{labeling}{00.00.0000}
 \item [{FUSRED}] scales calculated fusion cross section with an arbitrary
@@ -10097,9 +10099,9 @@ on the CPU time but occupy the same amount of memory as all the others.
 
 \subsection{Heavy ion induced reaction}
 
-Default input for Heavy Ion calculations is no more complicated than
+Default input for heavy ion calculations is no more complicated than
 that described above (the incident neutron is simply replaced by the
-Heavy Ion). The code will automatically change the default for calculating
+heavy ion). The code will automatically change the default for calculating
 the fusion cross section from the optical model to the simplified
 Coupled-Channels\index{Coupled-Channels} method (CCFUS\index{CCFUS}
 \cite{CCFUS}). As listed in the example given below, we present a
@@ -10157,7 +10159,7 @@ to the fission barrier is assumed to decrease to half at spin J=20
 $\hbar$, with diffuseness of 3 $\hbar$, as specified by SHRJ and
 SHRD, respectively. Nix-Moller shell corrections are selected \cite{masses}
 with LTURBO is set to 3. This latter option has been used to speed
-up the calculations, and is particularly useful for Heavy Ion induced
+up the calculations, and is particularly useful for heavy ion induced
 reactions which often involve high angular momenta. Calculations will
 be performed for each second spin only, which should make the study
 4 times faster. However, in reality the increased speed of manipulation
