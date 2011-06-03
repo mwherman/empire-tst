@@ -1,6 +1,6 @@
-# $Rev: 2081 $
+# $Rev: 2086 $
 # $Author: rcapote $
-# $Date: 2011-06-02 23:37:18 +0200 (Do, 02 Jun 2011) $
+# $Date: 2011-06-03 15:06:32 +0200 (Fr, 03 Jun 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8378,7 +8378,12 @@ exec xterm -e mv $file-m.endf $file.endf
 exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -label {Insert covariances} 
     $site_3_0.menu93 add separator \
-        
+
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/sampling.sh $file &} \
+        -label {Monte Carlo sampling} 
+    $site_3_0.menu93 add separator \
+       
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/stanef $file &} \
         -label STANEF 
