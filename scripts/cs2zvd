@@ -19,14 +19,14 @@ read file
 fi                          
 
 # Deleting previous plots
-if [ -f "$file-tot.zvd" ]; then
- rm "$file-tot.zvd" 
+if [ -f "$file-ztot.zvd" ]; then
+ rm "$file-ztot.zvd" 
 fi
-if [ -f "$file-el.zvd" ]; then
- rm "$file-el.zvd" 
+if [ -f "$file-zel.zvd" ]; then
+ rm "$file-zel.zvd" 
 fi
-if [ -f "$file-non.zvd" ]; then
- rm "$file-non.zvd" 
+if [ -f "$file-znon.zvd" ]; then
+ rm "$file-znon.zvd" 
 fi
 if [ -f "$file-zg.zvd" ]; then
  rm "$file-zg.zvd" 
@@ -56,13 +56,13 @@ ln -sf $EMPIREDIR/util/cs2zvd/CS2ZVD.INP CS2ZVD.INP
 #vi CS2ZVD.INP	
 $EMPIREDIR/util/cs2zvd/cs2zvd.exe 
 if [ -f "XS_(z,tot).zvd" ]; then
- mv "XS_(z,tot).zvd" $file-tot.zvd
+ mv "XS_(z,tot).zvd" $file-ztot.zvd
 fi
 if [ -f "XS_(z,nel).zvd" ]; then
-  mv "XS_(z,nel).zvd" $file-el.zvd
+  mv "XS_(z,nel).zvd" $file-zel.zvd
 fi
 if [ -f "XS_(z,nonel).zvd" ]; then
-  mv "XS_(z,nonel).zvd" $file-non.zvd
+  mv "XS_(z,nonel).zvd" $file-znon.zvd
 fi
 if [ -f "XS_(z,gamma).zvd" ]; then
   mv "XS_(z,gamma).zvd" $file-zg.zvd
