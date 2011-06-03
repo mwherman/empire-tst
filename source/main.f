@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2085 $
+Ccc   * $Rev: 2100 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 14:36:19 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Date: 2011-06-03 18:50:49 +0200 (Fr, 03 Jun 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -631,6 +631,7 @@ C     GOTO 99999
 C
 C-----Locate positions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
+      write(*,*) mt2
       CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)
       CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)
       CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)
@@ -965,18 +966,18 @@ C-----
      &  '' DWBA inelastic contribution '')')
          ENDIF
       ENDIF
-      IF (ENDf(1).EQ.0.0D0) THEN
+C     IF (ENDf(1).EQ.0.0D0) THEN
 C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
-         WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
-     &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
-      ELSE
+C        WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
+C    &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
+C     ELSE
          WRITE (12,*) ' '
          WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
-     &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
+     &         CSFus + (SINl + SINlcc)*FCCred + SINlcont
          WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
      &         TOTcs*TOTred
          WRITE (12,*) ' '
-      ENDIF
+C     ENDIF
       POPmax(1) = CSFus*1.0E-25
 C-----Renormalization of CN spin distribution if TURBO mode invoked
       IF (LTUrbo.NE.1) THEN
@@ -1054,7 +1055,7 @@ C--------Reset variables for life-time calculations
             WRITE (8,*) ' -------------------------------------'
             WRITE (8,*) ' '
          ENDIF
-         IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
+C        IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
@@ -1068,10 +1069,10 @@ C--------Reset variables for life-time calculations
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-          ENDIF
-            WRITE (12,*)
+C         ENDIF
+          WRITE (12,*)
      &' ---------------------------------------------------------------'
-            IF (nnuc.NE.1) THEN
+          IF (nnuc.NE.1) THEN
                IF (nnuc.EQ.mt91) THEN
                  nejc = 1
                ELSEIF (nnuc.EQ.mt649) THEN
@@ -1590,7 +1591,8 @@ C--------Printout of results for the decay of NNUC nucleus
 C
 C        Primary gamma printout -----------------------
 C
-         IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
+C       IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
+        IF (                      nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
            cspg = 0.d0
            DO il = 1, NLV(nnuc)
              cspg = cspg + CSEpg(il) 
@@ -1645,7 +1647,8 @@ c            write(0,*) CSPrd(nnuc),NLV(nnuc)
      &                              LVP(il,nnuc), XJLv(il,nnuc),
      &                              POPlv(il,nnuc),' ISOMER'
             ENDIF
-            IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
+C           IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
+            IF (                      nnuc.EQ.1) THEN
 C--------------Check for the number of branching ratios
                nbr = 0
                DO ib = 1, NDBR
@@ -1661,7 +1664,8 @@ C--------------Check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-         IF ( (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0.d0) .AND.
+C       IF ( (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0.d0) .AND.
+        IF ( (                      CSPrd(nnuc).GT.0.d0) .AND.
      &        (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &         nnuc.EQ.mt849)) THEN
             WRITE (12,'(1X,/,10X,40(1H-),/)')
