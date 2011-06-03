@@ -14,24 +14,26 @@ echo '    EEE    M MM M  PPPP   I  RRRR   EEE    =   33333       '
 echo '    E      M    M  P      I  R  R   E              3       '
 echo '    EEEEE  M    M  P      I  R   R  EEEEE      33333       '
 echo '                                                           '
-echo '        A R C O L E (release '$empver'), June 2011         '
-echo '_______________________________________________________________________________________'
-echo '                                                                                       '
-echo ' Please refer to:                                                                      '
-echo ' 1)M.Herman, R.Capote, B.Carlson, P.Oblozinsky, M.Sin, A.Trkov, H.Wienke, and V.Zerkin '
-echo '  "EMPIRE: Nuclear Reaction Model Code System for data evaluation",                    '
-echo '   Nuclear Data Sheets 108 (2007) 2655-2715                                            '
-echo '                                                                                       '
-echo ' 2)R.Capote, M.Herman, P.Oblozinsky, P.G.Young, S.Goriely, T.Belgya, A.V.Ignatyuk,     '
-echo '   A.J.Koning, S.Hilaire, V.A.Plujko, M.Avrigeanu, Zhigang Ge, Yinlu Han, S.Kailas,    '
-echo '   J. Kopecky, V.M. Maslov, G.Reffo, M.Sin, E.Sh.Soukhovitskii, and P.Talou,           '
-echo '  "RIPL - Reference Input Parameter Library for Calculation of Nuclear Reactions and   '
-echo '   Nuclear Data Evaluations", Nuclear Data Sheets 110 (2009) 3107-3214                 '
-echo '   RIPL available online at http://www-nds.iaea.org/RIPL-3/                            '
-echo '_______________________________________________________________________________________'
+echo '        R I V O L I (release '$empver'), June 2011         '
+echo '                                                           '
+echo '              Sao Jose do Campos, Brazil                   '
+echo '_______________________________________________________________________________'
+echo '                                                                               '
+echo ' Please refer to:                                                              '
+echo ' 1)M.Herman, R.Capote, B.Carlson, P.Oblozinsky, M.Sin, A.Trkov, H.Wienke, and  '
+echo '   V.Zerkin, "EMPIRE: Nuclear Reaction Model Code System for data evaluation", '
+echo '   Nuclear Data Sheets 108 (2007) 2655-2715                                    '
+echo '                                                                               '
+echo ' 2)R.Capote, M.Herman, P.Oblozinsky, P.G.Young, S.Goriely, T.Belgya,           '
+echo '   A.V.Ignatyuk, A.J.Koning, S.Hilaire, V.A.Plujko, M.Avrigeanu, Zhigang Ge,   '
+echo '   S.Kailas, J. Kopecky, V.M. Maslov, G.Reffo, M.Sin, E.Sh.Soukhovitskii, and  '
+echo '   P.Talou, "RIPL - Reference Input Parameter Library for Calculation of       '
+echo '   Nuclear Reactions and Nuclear Data Evaluations", Nuclear Data Sheets 110    '
+echo '   (2009) 3107-3214. RIPL available online at http://www-nds.iaea.org/RIPL-3/  '
+echo '_______________________________________________________________________________'
 echo ' '
-echo 'This is the EMPIRE-3 (release '$empver') installation script. It will lead you through '
-echo 'the set-up procedure and eventually compile the whole the package. '
+echo 'This is the EMPIRE-3 (release '$empver') installation script. It will lead you '
+echo 'through the set-up procedure and eventually compile the whole the package.     '
 echo ' '
 echo '  Press ENTER to start the EMPIRE setup, CTRL-C to cancel'
 read dir
@@ -44,8 +46,8 @@ if [ -f $sourcedir/EMPIRE-$empver.tgz ]; then
    echo ' '
 else
    echo ' '
-   echo 'EMPIRE-'$empver'.tgz not found in '$sourcedir', please restart the setup script in '
-   echo ' the directory containing the EMPIRE-'$empver'.tgz file'
+   echo 'EMPIRE-'$empver'.tgz not found in '$sourcedir', please restart the setup'
+   echo '  script in the directory containing the EMPIRE-'$empver'.tgz file'
    exit
 fi
 echo 'Specify a directory in which EMPIRE-3 should be installed.'
@@ -85,11 +87,11 @@ else
    echo ' '
    exit
 fi
-echo 'Exploding microscopic HFB level densities in the directory '$instdir'/RIPL-2/densities/total/level-densities-hfb'
+echo 'Exploding HFB level densities in the directory '$instdir'/RIPL-2/densities/total/level-densities-hfb'
 cd $instdir/RIPL-2/densities/total/level-densities-hfb
 tar xzvf $sourcedir/level-densities-hfb.tgz
 echo ' '
-echo 'RIPL-3 HFB level densities decompressed in directory '$instdir/RIPL-2/densities/total/level-densities-hfb
+echo 'RIPL-3 HFB level densities decompressed ('$instdir/RIPL-2/densities/total/level-densities-hfb')'
 cd $instdir
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
@@ -101,7 +103,7 @@ if [ -f $sourcedir/C4-IAEA-Jan2011.tgz ]; then
    echo ' '
 else
    echo ' '
-   echo 'C4-IAEA-Jan2011.tgz not found in '$sourcedir', please restart the '
+   echo 'C4-IAEA-Jan2011.tgz not found in '$sourcedir', please restart the      '
    echo ' setup script in the directory containing the EMPIRE-'$empver'.tgz file'
    exit
 fi
@@ -115,15 +117,15 @@ read dir
 echo ' '
 # Installing Tcl/Tk packages
 echo ' '
-echo 'We will need Tcl/Tk and Itcl packages to run EMPIRE GUI. Although your system    '
+echo 'We will need Tcl/Tk and itcl packages to run EMPIRE GUI. Although your system    '
 echo 'might have these packages installed it often happens that they are not compatible'
 echo 'with EMPIRE. To be on a safe side we would install industry standard ActiveTcl   '
 echo 'package that runs on most Linuxes.'
 echo ' '
-echo 'The ActiveTcl graphical setup will request the Tcl installation directory:       '
-echo 'Please specify installation directory (default:/usr/local/username               '
+echo 'The ActiveTcl GUI setup will request the Tcl installation directory as follows:  '
+echo 'Please specify installation directory:/usr/local/username (default)              '
 echo ' '
-echo 'You should overwrite the default selection by writing '$instdir/ActiveTcl        '
+echo 'You should overwrite the default selection by writing '$instdir/ActiveTcl'       '
 echo ' '
 echo 'Please note that this package will be installed locally in the empire directory  '
 echo 'and will not mess up with your native Tcl/Tk installation (if any).              '
@@ -139,20 +141,16 @@ echo ' '
 if [ "$activetcl" = "y" ]; then
   if [ -f $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz ]; then
      echo 'exploding ActiveTcl'
-#    gunzip $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
-#    tar xzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar
      tar xvzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
      cd ActiveTcl8.4.7.0-linux-ix86
      sh install.sh
      cd ../
-     echo 'DO NOT FORGET TO ADD THE LINE AS ADVISED, THEN LOGOFF AND LOGIN! '
   else
      echo 'ActiveTcl installation failed, '
-     echo '$sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz file not found'
+     echo 'ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz file not found in '$sourcedir
+     echo 'please find the file and restart the setup script'
+     exit
   fi
-     echo 'If there were errors during installation of the TCL/Tk packages'
-     echo 'you will have to pick up CD-ROM(s) with your system and install'
-     echo 'Tcl, Tk, and itcl packages to be able to use GUIs'
 fi
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
@@ -162,11 +160,14 @@ echo '_____________________________________________________________________'
 cd $instdir
 echo ' '
 echo 'Now we will compile the whole EMPIRE package.'
-#echo 'By default Intel FORTRAN compiler will be used.'
-echo ' '
 echo 'By default gfortran GNU FORTRAN compiler will be used.'
 echo 'It is freely available for download and distributed in all LINUX packages.'
+echo ' '
+echo 'The gfortran compiler installed in your system is:'
+gfortran -dumpversion
+echo ' '
 echo 'Please note that gfortran version > 4.2 is required !!'
+echo '_____________________________________________________________________'
 echo ' '
 echo 'Compiling EMPIRE and preprocessing codes'
 echo ' '
@@ -181,7 +182,7 @@ read dir
 echo ' '
 cd $HOME
 #
-# Modifying .bashrc
+# Modifying/Creating .bashrc
 #
 echo 'Adding EMPIREDIR to .bashrc file'
 #
@@ -205,10 +206,10 @@ echo '
 PATH=$newpath
 export EMPIREDIR PATH 
 EOF
-source .bashrc 
 EMPIREDIR=$instdir
 PATH=$newpath
 export EMPIREDIR PATH 
+echo ' '
 echo 'EMPIREDIR environment variable set to '$EMPIREDIR    
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
@@ -247,17 +248,13 @@ echo ' '
 echo 'Assuming your working directory is '$instdir/work', you should type:  '
 echo ' '
 echo ' cd '$instdir/work
-echo ' $instdir/scripts/Xrun.tcl &'
+echo ' '$instdir'/scripts/Xrun.tcl &'
 echo ' '
 echo ' to start EMPIRE GUI.'
 echo ' '
 echo ' Bons calculos !'
-echo ' The EMPIRE team, Sao Jose do Campos, Brazil, May 2011.'
-echo ' '
-echo '  Press ENTER to launch EMPIRE GUI, CTRL-C to cancel'
-read dir
-echo ' '
-cd $instdir/work
-$instdir/scripts/Xrun.tcl &
+echo ' The EMPIRE team, Sao Jose do Campos, Brazil, June 2011.'
+echo '______________________________________________________________________'
+echo ' For further information contact R.Capote at r.capotenoy@iaea.org     '
 exit
 
