@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1961 $
+Ccc   * $Rev: 2108 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-27 22:54:59 +0100 (Do, 27 Jän 2011) $
+Ccc   * $Date: 2011-06-03 20:55:34 +0200 (Fr, 03 Jun 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'
@@ -18,9 +18,9 @@ C
 C
 C Local variables
 C
-      CHARACTER*20 ctmp
+      CHARACTER*22 ctmp
       CHARACTER*7 caz
-      CHARACTER*13 fname
+      CHARACTER*10 fname
       CHARACTER*20 title
 
       DOUBLE PRECISION u
@@ -34,21 +34,27 @@ C
       endif
 
       IF(LEVden.eq.0) then
-        write(fname,'(A13)') '_GS_EMPLD.zvd'
-        write(ctmp,'(A20)') caz//fname
-        write(caz,'(A7)') 'EMP_GS_'
+        write(fname,'(A10)') 'LD_EGSM_GS'
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A7)') 'EGSM-GS'
+      ENDIF
+
+      IF(LEVden.eq.1) then
+        write(fname,'(A10)') 'LD_GSM__GS'
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A7)') 'GSM-GS '
       ENDIF
 
       IF(LEVden.eq.2) then
-        write(fname,'(A13)') '_GS_GCMLD.zvd'
-        write(ctmp,'(A20)') caz//fname
-        write(caz,'(A7)') 'GCM_GS_'
+        write(fname,'(A10)') 'LD_GCM__GS'
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A7)') 'GCM-GS '
       ENDIF
 
       IF(LEVden.eq.3) then
-        write(fname,'(A13)') '_GS_HFBLD.zvd'
-        write(ctmp,'(A20)') caz//fname
-        write(caz,'(A7)') 'HFB_GS_'
+        write(fname,'(A10)') 'LD_HFBM_GS'
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A7)') 'HFB-GS '
       ENDIF
 
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
@@ -130,9 +136,9 @@ C
 C
 C Local variables
 C
-      CHARACTER*20 ctmp
+      CHARACTER*22 ctmp
       CHARACTER*7 caz
-      CHARACTER*13 fname
+      CHARACTER*10 fname
       CHARACTER*20 title
 
       DOUBLE PRECISION u,rocumul1,rocumul2
@@ -146,15 +152,15 @@ C
       endif
 
       IF(FISden(Nnuc).LE.1) then
-        write(fname,'(A2,I1,A10)') '_S',ib,'_EMPLD.zvd'
-        write(ctmp,'(A20)') caz//fname
-        write(caz,'(A6,I1)') 'EMP_S_',Ib
+        write(fname,'(A9,I1)') 'LD_EGSM_S',ib
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A6,I1)') 'EGSM-S',Ib
       ENDIF
 
       IF(FISden(Nnuc).eq.2) then
-        write(fname,'(A2,I1,A10)') '_S',ib,'_HFBLD.zvd'
-        write(ctmp,'(A20)') caz//fname
-        write(caz,'(A6,I1)') 'HFB_S_',Ib
+        write(fname,'(A9,I1)') 'LD_HFBM_S',ib
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A6,I1)') 'HFBM-S',Ib
       ENDIF
  
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
@@ -196,9 +202,10 @@ c        pause
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
 
-      write(caz,'(A6,I1)') 'Neg_S_',Ib
-      CALL OPEN_ZVV(36,caz,' ')
-      DO kk = 1,NRBinfis(Ib)
+      IF(LEVDEN.EQ.3) then      
+       write(caz,'(A6,I1)') 'Neg_S_',Ib
+       CALL OPEN_ZVV(36,caz,' ')
+       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
 c       if(u.gt.EMAx(Nnuc)) exit
         rocumul2 = 0.d0
@@ -209,8 +216,10 @@ c       DO j = 1,NFIsj1
         IF(rocumul2.gt.1e30) exit
         WRITE (36,'(G10.3,2X,1P(90E12.5))')
      &      1e6*u,max(0.1d0,rocumul2)
-      ENDDO
-      CALL CLOSE_ZVV(36,' ',' SP Level Density')
+       ENDDO
+       CALL CLOSE_ZVV(36,' ',' SP Level Density')
+      ENDIF
+       
       CLOSE (36)
 
       return
