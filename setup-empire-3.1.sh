@@ -123,10 +123,10 @@ echo 'might have these packages installed it often happens that they are not com
 echo 'with EMPIRE. To be on a safe side we would install industry standard ActiveTcl   '
 echo 'package that runs on most operating systems (Linux,Mac, Windows).'
 echo ' '
-echo 'Please note that this package will be installed locally in the empire directory  '
+echo 'Please note that this package will be copied to your '$instdir' directory        '
 echo 'and will not mess up with your native Tcl/Tk installation (if any).              '
 echo ' '
-echo 'Do you want to proceed with installation of the ActiveTcl package y/n [y]:'
+echo 'Do you want to copy the ActiveTcl package to your '$instdir' directory  y/n [y]:'
 read yesno
 if [ ! "$yesno" = "" ]; then
         activetcl=$yesno
@@ -136,21 +136,21 @@ fi
 echo ' '
 if [ "$activetcl" = "y" ]; then
   if [ "$XWIN" = "Darwin" ]; then
-    echo 'ActiveTcl for Mac users'
+    echo ' '
     if [ -f $sourcedir/ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg ]; then
       echo ' '
-      echo 'Copying ActiveTcl for Apple Mac'
       echo '********* '
       echo 'Apple Mac users need to install ActiveTcl manually'
-      echo 'Once installation is finished please go to the '$instdir' and double click'
-      echo '  on the icon ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg      '
-      echo '  to install the package '
+      echo ' '
+      echo 'Once EMPIRE setup finished please double click on the icon'
+      echo ' ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg      '
+      echo ' in your '$sourcedir' to install the ActiveTcl package in your Mac computer'
       echo '********* '
       echo ' '
     else
       echo 'ActiveTcl copying for Apple Mac failed, '
       echo 'ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg file not found in '$sourcedir
-      echo 'please find the file and restart the setup script'
+      echo 'please find the file and restart the EMPIRE setup script'
       exit
     fi
   else
@@ -297,6 +297,12 @@ echo ' to start EMPIRE GUI.'
 echo ' '
 echo ' Bons calculos !'
 echo ' The EMPIRE team, Sao Jose dos Campos, Brazil, June 2011.'
+if [ "$XWIN" = "Darwin" ]; then
+  echo ' '
+  echo '********* '
+  echo 'Apple Mac users please remember to install ActiveTcl manually'
+  echo 'Please go to the '$sourcedir' and double click on the icon ActiveTcl8.4.*'
+  echo 'to install the ActiveTcl package in your Mac computer'
 echo '______________________________________________________________________'
 echo ' For further information contact R.Capote at r.capotenoy@iaea.org     '
 exit
