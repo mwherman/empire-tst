@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2089 $
+Ccc   * $Rev: 2102 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 15:28:48 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Date: 2011-06-03 19:48:47 +0200 (Fr, 03 Jun 2011) $
 
 C
       SUBROUTINE INPUT
@@ -3039,10 +3039,11 @@ C     GOTO 10
 
       WRITE (8,*)'                        __________________________'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    E M P I R E  -  3 . 1 |'
+      WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    RIVOLI, $Rev: 2089 $  |'
+      WRITE (8,*)'                       |    RIVOLI, $Rev: 2102 $  |'
       WRITE (8,*)'                       |                          |'
+      WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, June 2011    |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
