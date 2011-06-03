@@ -34,7 +34,7 @@ echo '   (2009) 3107-3214. RIPL available online at http://www-nds.iaea.org/RIPL
 echo '_______________________________________________________________________________'
 echo ' '
 echo 'This is the EMPIRE-3 (release '$empver') installation script. It will lead you '
-echo 'through the set-up procedure and eventually compile the whole the package.     '
+echo 'through the set-up procedure and eventually compile the whole package.         '
 echo ' '
 echo '  Press ENTER to start the EMPIRE setup, CTRL-C to cancel'
 read dir
@@ -118,6 +118,8 @@ read dir
 echo ' '
 if [ "$XWIN" = "Darwin" ]; then
 echo 'ActiveTcl is not installed for Mac users'
+echo ' '
+activetcl=n
 else
 # Installing Tcl/Tk packages
 echo ' '
@@ -158,34 +160,14 @@ if [ "$activetcl" = "y" ]; then
   fi
 fi
 fi
-echo ' '
-echo '_____________________________________________________________________'
-cd $instdir
-echo ' '
-echo 'Now we will compile the whole EMPIRE package.'
-echo 'By default gfortran GNU FORTRAN compiler will be used.'
-echo 'It is freely available for download and distributed in all LINUX packages.'
-echo ' '
-echo 'The gfortran compiler installed in your system is:'
-gfortran -dumpversion
-echo ' '
-echo 'Please note that gfortran version > 4.2 is required !!'
-echo ' '
-echo '  Press ENTER to continue the setup, CTRL-C to cancel'
-read dir
-echo ' '
-echo '_____________________________________________________________________'
-echo ' '
-echo 'Compiling EMPIRE and preprocessing codes (it takes 2-5 minutes) '
-echo ' '
-echo 'The warning in lev-dens.f:'
-echo '   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate '
-echo 'is expected.'
-echo ' '
-make
-echo ' '
-echo '  Press ENTER to continue the setup, CTRL-C to cancel'
-read dir
+if [ "$XWIN" = "Darwin" ]; then
+echo '********* '
+echo 'MAC USERS need to check EMPIRE for compatibility with installed Mac Tcl library'
+export DISPLAY=:0
+cp -f $instdir/util/c4zvd/zvv2-1.005-mac.exe $instdir/util/c4zvd/zvview.exe
+echo 'Mac ZVView installed'
+echo '********* '
+fi
 echo ' '
 cd $HOME
 #
@@ -193,7 +175,11 @@ cd $HOME
 #
 echo 'Adding EMPIREDIR to .bashrc file'
 #
+if [ "$XWIN" = "Darwin" ]; then
+newpath=./:$instdir/scripts:$PATH
+else
 newpath=./:$instdir/scripts:$instdir/ActiveTcl/bin:$PATH
+fi
 if [ "$activetcl" = "n" ]; then
 newpath=./:$instdir/scripts:$PATH
 fi
@@ -218,6 +204,37 @@ PATH=$newpath
 export EMPIREDIR PATH 
 echo ' '
 echo 'EMPIREDIR environment variable set to '$EMPIREDIR    
+echo ' '
+echo '  Press ENTER to continue the setup, CTRL-C to cancel'
+read dir
+echo '_____________________________________________________________________'
+cd $instdir
+echo ' '
+echo 'Now we will compile the whole EMPIRE package.'
+echo ' '
+echo 'By default gfortran GNU FORTRAN compiler will be used.'
+echo 'It is freely available for download and distributed in all LINUX packages.'
+echo 'You may use a different compiler (e.g. ifort) once the setup is finished  '
+echo '   by going to the '$instdir' (cd '$instdir') and type make ifort'
+echo 'If gfortran is available then you only need to type make to recompile     '   
+echo ' '
+echo 'The gfortran compiler installed in your system is:'
+gfortran -dumpversion
+echo ' '
+echo 'Please note that gfortran version > 4.2 is required !!'
+echo ' '
+echo '  Press ENTER to start compilation, CTRL-C to cancel the setup'
+read dir
+echo ' '
+echo '_____________________________________________________________________'
+echo ' '
+echo 'Compiling EMPIRE and preprocessing codes (it takes 2-5 minutes) '
+echo ' '
+echo 'The warning in lev-dens.f:'
+echo '   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate '
+echo 'is expected.'
+echo ' '
+make
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
@@ -250,14 +267,6 @@ echo ' Brookhaven National Laboratory, NNDC, New York, USA                  '
 echo '       @ http://www.nndc.bnl.gov/empire-3.1/                          '
 echo ' '
 echo '______________________________________________________________________'
-if [ "$XWIN" = "Darwin" ]; then
-echo '********* '
-echo 'MAC USERS need to check EMPIRE for compatibility with installed Mac Tcl library'
-export DISPLAY=:0
-cp -f $instdir/util/c4zvd/zvv2-1.005-mac.exe $instdir/util/c4zvd/zvview.exe
-echo 'Mac ZVView installed'
-echo '********* '
-fi
 echo ' '
 echo 'Assuming your working directory is '$instdir/work', you should type:  '
 echo ' '
