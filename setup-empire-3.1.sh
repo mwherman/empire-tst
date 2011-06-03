@@ -116,11 +116,6 @@ echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
 echo ' '
-if [ "$XWIN" = "Darwin" ]; then
-echo 'ActiveTcl is not installed for Mac users'
-echo ' '
-activetcl=n
-else
 # Installing Tcl/Tk packages
 echo ' '
 echo 'We will need Tcl/Tk and itcl packages to run EMPIRE GUI. Although your system    '
@@ -146,24 +141,41 @@ if [ ! "$yesno" = "" ]; then
 fi
 echo ' '
 if [ "$activetcl" = "y" ]; then
-  if [ -f $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz ]; then
-     echo 'exploding ActiveTcl'
-     tar xvzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
-     cd ActiveTcl8.4.7.0-linux-ix86
-     sh install.sh
-     cd ../
+  if [ "$XWIN" = "Darwin" ]; then
+    echo 'ActiveTcl for Mac users'
+    if [ -f $sourcedir/ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg ]; then
+       echo 'exploding ActiveTcl for Apple Mac'
+      echo '********* '
+      echo 'Apple Mac users need to install ActiveTcl manually'
+      echo 'Once installation is finished please go to the '$instdir' and double click'
+      echo 'on the icon ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg'
+      echo ' '
+    else
+      echo 'ActiveTcl copying for Apple Mac failed, '
+      echo 'ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg file not found in '$sourcedir
+      echo 'please find the file and restart the setup script'
+      exit
+    fi
   else
-     echo 'ActiveTcl installation failed, '
-     echo 'ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz file not found in '$sourcedir
-     echo 'please find the file and restart the setup script'
-     exit
-  fi
+    echo 'ActiveTcl for Linux users'
+    if [ -f $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz ]; then
+      echo 'exploding ActiveTcl'
+      tar xvzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
+      cd ActiveTcl8.4.7.0-linux-ix86
+      sh install.sh
+      cd ../
+    else
+      echo 'ActiveTcl installation for Linux failed, '
+      echo 'ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz file not found in '$sourcedir
+      echo 'please find the file and restart the setup script'
+      exit
+    fi
+  fi  
 fi
-fi
+
 if [ "$XWIN" = "Darwin" ]; then
-echo '********* '
-echo 'MAC USERS need to check EMPIRE for compatibility with installed Mac Tcl library'
 export DISPLAY=:0
+echo '********* '
 cp -f $instdir/util/c4zvd/zvv2-1.005-mac.exe $instdir/util/c4zvd/zvview.exe
 echo 'Mac ZVView installed'
 echo '********* '
