@@ -7,6 +7,7 @@ instdir=$HOME
 sourcedir=`pwd`
 #EMPIRE version number
 empver='3.1'
+XWIN=`uname`
 echo '                                                           '
 echo '    EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333       '
 echo '    E      MM  MM  P   P  I  R   R  E             33       '
@@ -16,7 +17,7 @@ echo '    EEEEE  M    M  P      I  R   R  EEEEE      33333       '
 echo '                                                           '
 echo '        R I V O L I (release '$empver'), June 2011         '
 echo '                                                           '
-echo '              Sao Jose do Campos, Brazil                   '
+echo '              Sao Jose dos Campos, Brazil                  '
 echo '_______________________________________________________________________________'
 echo '                                                                               '
 echo ' Please refer to:                                                              '
@@ -115,6 +116,9 @@ echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
 echo ' '
+if [ "$XWIN" = "Darwin" ]; then
+echo 'ActiveTcl is not installed for Mac users'
+else
 # Installing Tcl/Tk packages
 echo ' '
 echo 'We will need Tcl/Tk and itcl packages to run EMPIRE GUI. Although your system    '
@@ -123,10 +127,11 @@ echo 'with EMPIRE. To be on a safe side we would install industry standard Activ
 echo 'package that runs on most Linuxes.'
 echo ' '
 echo 'The ActiveTcl GUI setup will request the Tcl installation directory as follows:  '
-echo 'Please specify installation directory:/usr/local/username (default)              '
-echo ' '
+echo 'Please specify installation directory:/usr/local/username                        '
+echo '******** '
 echo 'You should overwrite the default selection by writing '$instdir/ActiveTcl'       '
-echo ' '
+echo 'Please copy '$instdir/ActiveTcl' to have it available to paste when requested    '
+echo '******** '
 echo 'Please note that this package will be installed locally in the empire directory  '
 echo 'and will not mess up with your native Tcl/Tk installation (if any).              '
 echo ' '
@@ -152,9 +157,7 @@ if [ "$activetcl" = "y" ]; then
      exit
   fi
 fi
-echo ' '
-echo '  Press ENTER to continue the setup, CTRL-C to cancel'
-read dir
+fi
 echo ' '
 echo '_____________________________________________________________________'
 cd $instdir
@@ -167,9 +170,13 @@ echo 'The gfortran compiler installed in your system is:'
 gfortran -dumpversion
 echo ' '
 echo 'Please note that gfortran version > 4.2 is required !!'
+echo ' '
+echo '  Press ENTER to continue the setup, CTRL-C to cancel'
+read dir
+echo ' '
 echo '_____________________________________________________________________'
 echo ' '
-echo 'Compiling EMPIRE and preprocessing codes'
+echo 'Compiling EMPIRE and preprocessing codes (it takes 2-5 minutes) '
 echo ' '
 echo 'The warning in lev-dens.f:'
 echo '   100 READ (34,99010,ERR = 100,END = 300) car2, izr, iar, paritate '
@@ -195,7 +202,7 @@ cat >>.bashrc <<EOF
 # ___________________________________________________________________
 # Lines added by EMPIRE-3.1 setup
 #
-# It is assumed that ActiveTcl was installed in $HOME/ActiveTcl
+# It is assumed that ActiveTcl was installed in $instdir/ActiveTcl
 #
 # EMPIREDIR is pointing to the active EMPIRE installation
 #
@@ -218,8 +225,10 @@ echo ' '
 echo '______________________________________________________________________'
 echo ' '
 echo ' We extended your PATH variables to get access to ActiveTcl and       '
-echo ' empire binaries for a shell sh enviroment (.bashrc)                  '
+echo ' empire binaries for a shell sh enviroment (.bashrc). You have        '
+echo ' to close your console and reopen it ********                         '
 echo ' '
+echo ' If you are using a different shell (not bash), then read below       '
 echo ' For a sh or similar perform                                          '
 echo '     EMPIREDIR="'$instdir'"                                           '
 echo '     PATH="'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"        '
@@ -229,9 +238,6 @@ echo ' For a csh or compatible perform                                      '
 echo '     setenv EMPIREDIR "'$instdir'"                                    '
 echo '     setenv PATH "'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH" '
 echo '     export EMPIREDIR PATH                                            '
-echo ' '
-echo ' Some shells (bash for example) allow                                 '
-echo '     export PATH="'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH" '
 echo ' '
 echo ' Once you modify your path variables close your console and reopen it '
 echo '______________________________________________________________________'
@@ -244,6 +250,14 @@ echo ' Brookhaven National Laboratory, NNDC, New York, USA                  '
 echo '       @ http://www.nndc.bnl.gov/empire-3.1/                          '
 echo ' '
 echo '______________________________________________________________________'
+if [ "$XWIN" = "Darwin" ]; then
+echo '********* '
+echo 'MAC USERS need to check EMPIRE for compatibility with installed Mac Tcl library'
+export DISPLAY=:0
+cp -f $instdir/util/c4zvd/zvv2-1.005-mac.exe $instdir/util/c4zvd/zvview.exe
+echo 'Mac ZVView installed'
+echo '********* '
+fi
 echo ' '
 echo 'Assuming your working directory is '$instdir/work', you should type:  '
 echo ' '
@@ -253,7 +267,7 @@ echo ' '
 echo ' to start EMPIRE GUI.'
 echo ' '
 echo ' Bons calculos !'
-echo ' The EMPIRE team, Sao Jose do Campos, Brazil, June 2011.'
+echo ' The EMPIRE team, Sao Jose dos Campos, Brazil, June 2011.'
 echo '______________________________________________________________________'
 echo ' For further information contact R.Capote at r.capotenoy@iaea.org     '
 exit
