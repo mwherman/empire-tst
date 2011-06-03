@@ -47,7 +47,7 @@ if [ -s $file-res.endf ]; then
    mv endres.lst $file-log.endres
    rm ENDRES.INP empire.end ENDRES.DAT 2>/dev/null
 else
-   cp $file-e.endf $file-endres.endf
+   mv $file-e.endf $file-endres.endf
 fi
 
 # RUN STANEF
