@@ -37,16 +37,17 @@ rm EMPEND.INP empmf1.tmp
 # moved to a new script "rec-ch-part" called from a GUI(Execute)
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
-cp $file-e.endf $file-endres.endf
 if [ -s $file-res.endf ]; then
    ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
    rm $file.endf 2>/dev/null
-   ln -sf $file-f.endf empire.end
+   ln -sf $file-e.endf empire.end
    ln -sf $file-res.endf ENDRES.DAT
    $EMPIREDIR/util/endres/endres < ENDRES.INP
    mv endf.dat $file-endres.endf
    mv endres.lst $file-log.endres
-   rm ENDRES.INP empire.end ENDRES.DAT
+   rm ENDRES.INP empire.end ENDRES.DAT 2>/dev/null
+else
+   cp $file-e.endf $file-endres.endf
 fi
 
 # RUN STANEF
