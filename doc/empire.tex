@@ -6201,34 +6201,35 @@ any of the listed files will open it with an appropriate application.
 The ENDF formatted file is created by the user selecting the ENDF
 option in the input file ({*}.\emph{inp}). This instructs EMPIRE to
 write all necessary information to the output file \emph{{*}.out},
-which may actually become long! This file is processed by the utility
-code EMPEND\index{EMPEND}, which creates the ENDF-6 formatted file.
-Two distinct options are available 
+which may actually become very long, depending to some extent on the
+choice of input options in the EMPIRE calculations. This file is
+processed by the utility code EMPEND\index{EMPEND} written by Trkov, 
+which creates the ENDF-6 formatted file.
 
-\begin{labeling}{MMMMMM}
-\item [{ENDF~~~~1.}] exclusive spectra (classical ENDF-6 representation)
-\item [{ENDF~~~~2.}] inclusive spectra.
-\end{labeling}
-While the physical calculations performed by EMPIRE with the ENDF=2
-option are the same, the results are transferred for formatting in
-a different form. Rather than providing exclusive cross sections and
-associated spectra for each of the reactions separately, EMPIRE outputs
+Rather than providing exclusive cross sections and
+associated spectra for each of the reactions separately, EMPIRE can output
 inclusive cross sections, spectra and double-differential cross sections.
-In other words, total emission spectra of neutrons, protons, $\alpha$-particles
-and $\gamma$s are printed instead of individual contributions from
-various reactions. EMPEND\index{EMPEND} automatically recognizes
-the ENDF options and acts accordingly using MT=5 and specifying relative
-yields of the products in MF=6 if ENDF is set to 2. 
+This means that the total emission spectra of neutrons, protons, 
+$\alpha$-particles and $\gamma$s are printed, instead of individual 
+contributions from the reactions, with the exception of some distinct
+reactions that are always treated exclusively 
+(e.g. inelastic, (n,2n), (n,p), etc.) 
+This is the preferred mode of EMPIRE execution
+when ENDF formatting is required. EMPEND\index{EMPEND} automatically 
+recognizes the calculation options from the contents and acts accordingly.
 
-... exclusive, inclusive, combined ...
+EMPIRE also calculates cross sections for the production of metastable
+isomers. EMPEND recognises these and stores them in ENDF File~10.
+Cross sections for radionuclide production, which can not be uniquely
+associated with any specific reaction (i.e. an ENDF MT number) are
+lumped into MT~5, but to preserve the complete information, the
+radionuclide production is stored in MF~10, MT~5.
 
-... mention metastable resuduals ...
-
-The EMPIRE output ({*}.\emph{out}) is processed and converted into
-ENDF format by the EMPEND code written by Trkov.
-The file has to obey the rules of sorting the data in increasing order
+The ENDF file has to obey the rules of sorting the data in increasing order
 by the data type (MF number) and reaction type (MT number),
-so several sweeps of the EMPIRE output file must be made:              
+so several sweeps of the EMPIRE output file must be made, which may
+slow down the formatting process considerably. In general, the
+required operations are described as follows:
 
 \begin{itemize}
 \item In the first sweep the cross sections and the corresponding             
@@ -6259,7 +6260,7 @@ also extracted to enable the assembly of the dummy resonance
 parameter file.                                                            
 
   In the second sweep, all reactions that do not have explicitly           
-given spectra are added to MT=5. When many exclusive spectra are           
+given spectra are identified. When many exclusive spectra are           
 requested in the EMPIRE calculation, there may be cases where              
 particle spectra are given but no MT number is assigned. The               
 spectra are ignored, the cross sections are added to MT=5 and              
