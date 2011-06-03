@@ -121,14 +121,8 @@ echo ' '
 echo 'We will need Tcl/Tk and itcl packages to run EMPIRE GUI. Although your system    '
 echo 'might have these packages installed it often happens that they are not compatible'
 echo 'with EMPIRE. To be on a safe side we would install industry standard ActiveTcl   '
-echo 'package that runs on most Linuxes.'
+echo 'package that runs on most operating systems (Linux,Mac, Windows).'
 echo ' '
-echo 'The ActiveTcl GUI setup will request the Tcl installation directory as follows:  '
-echo 'Please specify installation directory:/usr/local/username                        '
-echo '******** '
-echo 'You should overwrite the default selection by writing '$instdir/ActiveTcl'       '
-echo 'Please copy '$instdir/ActiveTcl' to have it available to paste when requested    '
-echo '******** '
 echo 'Please note that this package will be installed locally in the empire directory  '
 echo 'and will not mess up with your native Tcl/Tk installation (if any).              '
 echo ' '
@@ -144,11 +138,14 @@ if [ "$activetcl" = "y" ]; then
   if [ "$XWIN" = "Darwin" ]; then
     echo 'ActiveTcl for Mac users'
     if [ -f $sourcedir/ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg ]; then
-       echo 'exploding ActiveTcl for Apple Mac'
+      echo ' '
+      echo 'Copying ActiveTcl for Apple Mac'
       echo '********* '
       echo 'Apple Mac users need to install ActiveTcl manually'
       echo 'Once installation is finished please go to the '$instdir' and double click'
-      echo 'on the icon ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg'
+      echo '  on the icon ActiveTcl8.4.19.5.294317-macosx-universal-threaded.dmg      '
+      echo '  to install the package '
+      echo '********* '
       echo ' '
     else
       echo 'ActiveTcl copying for Apple Mac failed, '
@@ -157,7 +154,18 @@ if [ "$activetcl" = "y" ]; then
       exit
     fi
   else
+    echo ' '
     echo 'ActiveTcl for Linux users'
+    echo ' '
+    echo '******** '
+    echo 'The ActiveTcl GUI setup will request the Tcl installation directory as follows:  '
+    echo 'Please specify installation directory:/usr/local/username                        '
+    echo 'You should overwrite the default selection by writing '$instdir/ActiveTcl'       '
+    echo 'Please copy '$instdir/ActiveTcl' to have it available to paste when requested    '
+    echo '******** '
+    echo ' '
+    echo '  Press ENTER to continue the setup, CTRL-C to cancel'
+    read dir
     if [ -f $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz ]; then
       echo 'exploding ActiveTcl'
       tar xvzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
