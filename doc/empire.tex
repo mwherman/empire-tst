@@ -40,32 +40,34 @@ modular system for nuclear reaction calculations\\
 {\Large (version: 3.1 Rivoli)}}
 
 
-\author{\textsf{M. Herman,} \textsf{\large P. Oblozinsky}, \textsf{}\\
+\author{{\large M. Herman} {\textsf{} }\\
 \textsf{\normalsize NNDC, Brookhaven National Laboratory, Upton, USA}\\
-\textsf{\normalsize e-mail: mwherman@bnl.gov}\textsf{}\\[2mm]
+\textsf{\normalsize e-mail: mwherman@bnl.gov}\\[1mm]
 %
-\textsf{\large R. Capote, V. Zerkin,}{\large{} }\\
-\textsf{\normalsize International Atomic Energy Agency, Vienna, Austria}\\[2mm]
+\textsf{\large R. Capote}{\large{} }\\
+\textsf{\normalsize NDS, International Atomic Energy Agency, Vienna, Austria}\\[1mm]
+%
+\textsf{\large  V. Zerkin,}{\large{} }\\
+\textsf{\normalsize NDS, International Atomic Energy Agency, Vienna, Austria}\\[1mm]
 %
 \textsf{\large A. Trkov}{\large{} }\\
-\textsf{\normalsize Jo\v{z}ef Stefan Institute, Ljubljana, Slovenia}\\[2mm]
+\textsf{\normalsize Jo\v{z}ef Stefan Institute, Ljubljana, Slovenia}\\[1mm]
 %
 \textsf{\large H. Wienke}{\large{} }\\
 \textsf{\normalsize affiliation ...}\\
 %
 \textsf{\large M. Sin,}{\large{} }\\
-\textsf{\normalsize University of Bucharest, Bucharest, Romania}\\[2mm]
+\textsf{\normalsize University of Bucharest, Bucharest, Romania}\\[1mm]
 %
 \textsf{\large B.V. Carlson}{\large{} }\\
 \textsf{\normalsize ITA/Centro Tecnico Aeroespacial, Sao Jose dos
-Campos, Brazil }\\[2mm]
+Campos, Brazil }\\[1mm]
 %
 \textsf{\large C. Matoon}{\large{} }\\
-\textsf{\normalsize ... affiliation }\\[2mm]
+\textsf{\normalsize Lawrence Livermore National Laboratory, Livermore, USA }\\[1mm]
 %
 \textsf{\large Young-Sik Cho}{\large{} }\\
-\textsf{\normalsize ... affiliation }\\[2mm]
-%\textsf{\normalsize }\\
+\textsf{\normalsize Korea Atomic Energy Research Institute,  Daejeon, South Korea }\\[1mm]
 }
 
 \maketitle
@@ -9050,6 +9052,54 @@ RIPL Project
 
 \addchap{Appendix ChangeLog}
 
+
+\section*{Changes in version 3.1 with respect to 2.19 \protect \\
+Sao Jose dos Campos, June 2011}
+
+\begin{enumerate}
+\item PREPRO2007 updated to PREPRO2010
+\item Merging resonance parameters into the final ENDF file 
+\item  GUI assisted OMP fitting 
+\item  Prompt fission neutron spectra  including post-fission neutrons emitted from fully accelerated fragments (Los Alamos or  Kornilov model) (M. Sin, R. Capote)
+\item  DWBA calculations on odd nuclei (discrete levels embedded in the continuum only) (R. Capote)
+\item  ECIS subroutine modified to allow  use of dispersive potentials with different geometry of the imaginary and real parts (R. Capote)
+\item  MSD-model extended to deformed nuclei  (H. Wienke)
+\item  Recursive treatment of transmission through multi-hump fission barrier (M. Sin, R. Capote)
+\item  Library of neutron resonances updated to ENDF/B-VII.0
+\item  Checking codes updated 
+\item  Calculation, formatting and plotting of isomers
+\item  Options are partially implemented to use average radiation width, neutron width, and resonance spacing, to create fake resonance file (MF=2).
+\item  EXFOR library updated to January 2011 version 
+\item MySQL based EXFOR retrieval system moved to more robust FORTRAN implementation
+\item  Moments of inertia (spin distribution parameter) controlled from the input
+\item  Parity dependent level densities (HFBCS available)
+\item  Resonance module added
+    \begin{itemize} 
+	\item  Parameters from Atlas of Neutron Resonances => MF2
+	\item  Parameter uncertainties => MF32
+	\item  Reproducing thermal cross section uncertainties 
+	\item  Inclusion of arbitrary correlations among gamma-widths and among neutron-widths 
+   \end{itemize}
+\item   New parametrization of EGSM level densities (EGSM = Enhanced/EMPIRE Generalized Superfluid Model)
+\item   New fission model  implemented (Phys. Rev. C 77 (2008) 054601)
+\item   RIPL-3 updates
+    \begin{itemize} 
+	\item   Discrete levels library
+	\item   Optical model parameters
+	\item   Microscopic level densities (HFBCS) with parity dependence
+    \end{itemize}
+\item   ECIS-2006 implemented
+\item   Covariance generation capabilities using Monte Carlo approach or Kalman filter
+\item   Accounting for model uncertainties in covariance generation
+\item   Correlated sampling in Monte Carlo
+\item   Scaling factor in Kalman filter
+\item   Six ejectiles (n, p, alpha, g, d, t, 3He) + arbitrary light ion; includes ENDF-6 formatting (Capote, Trkov)
+\item   Inclusion of RIPL-3 combinatorial level densities with parity dependence
+\item   Upgrade of ZVView package with 2-D and 3-D plotting of covariance matrices (Zerkin)  
+\item   DDHMS preequilibrium model extended to produce exclusive spectra
+\item   KERCEN code incorporated in the EMPIRE system (not linked through GUI)
+\item   Primary capture gammas isolated and printed separately 
+\end{enumerate}
 
 \section*{Changes in version 2.19 with respect to 2.18 \protect \\
 Brookhaven, March 2005}
