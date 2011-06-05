@@ -73,10 +73,10 @@ $EMPIREDIR/scripts/plotlst $file
 
 # REMOVE INTERMEDIATE ENDF FILES
 
-rm $work/$file-l.endf 2>/dev/null
-rm $work/$file-lin.endf 2>/dev/null
-rm $work/$file-f.endf 2>/dev/null
-rm $work/$file-f2.endf 2>/dev/null
-rm $work/$file-rec.endf 2>/dev/null
+# rm $work/$file-l.endf 2>/dev/null
+# rm $work/$file-lin.endf 2>/dev/null
+# rm $work/$file-f.endf 2>/dev/null
+# rm $work/$file-f2.endf 2>/dev/null
+# rm $work/$file-rec.endf 2>/dev/null
 
 exit
