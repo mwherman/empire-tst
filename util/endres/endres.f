@@ -21,6 +21,7 @@ C-V  07/09 - Fix interpolation table for NR>1.
 C-V        - Fix rare cases of E-threshold mismatch in TAB2 for LAW=2
 C-V        - Fix copying of MF33 (no adjustment to energy boundaries)
 C-V  08/04 - Fix conversion MF10/MT102 to MF9/MT102 when MF8 present.
+C-V  11/06 Take temperature from the source and not the resonance file.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -72,6 +73,8 @@ C*
       ERL=ELE
       NF10=0
       NF09=0
+      IZRO=0
+      ZERO=0
 C-F  Write ENDRES banner
       WRITE(LTT,691) ' ENDRES - Add Resonance Data to ENDF    '
       WRITE(LTT,691) ' ===================================    '
@@ -194,7 +197,7 @@ C* Copy the beginning of file MF1 from the source ENDF file
       CALL RDTEXT(LEM,MAT,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       CALL RDTEXT(LEM,MAT,MF,MT,CH66,IER)
-      READ (CH66,891) C1,C2,L1,L2,N1,NC
+      READ (CH66,891) TEMP,C2,LDRV,L2,N1,NC
 C* Copy the comments from the source ENDF file to scratch
       NSS=0
       DO I=1,N1
@@ -230,7 +233,7 @@ C* Copy comments from the resonance file (2 records read in FINDMT)
       END IF
 C* Copy comments from scratch to output ENDF file
       REWIND LSC
-      CALL WRCONT(LOU,MAT,MF,MT,NS,C1,C2,L1,L2,NX,NC)
+      CALL WRCONT(LOU,MAT,MF,MT,NS,TEMP,ZERO,LDRV,IZRO,NX,NC)
       DO I=1,NX
         CALL RDTEXT(LSC,MAT,MF,MT,CH66,IER)
         CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
@@ -1540,11 +1543,11 @@ C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
 C-Version:
 C-V  05/02 Double precision internal arithmetic to avoid roundoff error
-      REAL*8       FA
+      DOUBLE PRECISION FA
       CHARACTER*1  SN
       CHARACTER*11 CH
       CH=' 0.000000+0'
-      FA=ABS(FF)
+      FA=DBLE(ABS(FF))
       IA=0
    20 IF(FA.LT.   1.0D-30) RETURN
       IF(FA.LT.9.999950D0) GO TO 40
