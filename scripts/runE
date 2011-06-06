@@ -209,6 +209,9 @@ def runE(proj):
     mv('FIT.OUT',proj+'-ompfit.lst',0)
     mv('COVAR.DAT',proj+'-MC.par',0)
     mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+    # level-density plots:
+    for LDfile in glob("LD_*.zvd"):
+        mv(LDfile,proj+LDfile,0)
     
     # Extract Warnings from the list file:
     # this is portable version of 'grep WARNING infile > outfile
