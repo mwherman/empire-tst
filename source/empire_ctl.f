@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2027 $
-Ccc   * $Author: hikim $
-Ccc   * $Date: 2011-05-18 18:34:52 +0200 (Mi, 18 Mai 2011) $
+Ccc   * $Rev: 2118 $
+Ccc   * $Author: cmattoon $
+Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -2236,9 +2236,9 @@ C     ENDDO
 C     DO i=1,nreac
       READ(36,'(A80)') inprecord
 C     ENDDO
- 180  READ(34,'(G10.5,1P(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac)
-      READ(35,'(G10.5,1P(90E12.5))') einl, (xsecd(i),i=1,ireac)
-      READ(36,'(G10.5,1P(90E12.5))') einl, (xsec(i),i=1,ireac)
+ 180  READ(34,'(G10.5,1P,(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac)
+      READ(35,'(G10.5,1P,(90E12.5))') einl, (xsecd(i),i=1,ireac)
+      READ(36,'(G10.5,1P,(90E12.5))') einl, (xsec(i),i=1,ireac)
       DO i = 1, ireac
          IF(ABS(xsecu(i)-xsecd(i)).LE.((xsecu(i)+xsecd(i))*1.0D-5) )THEN
             sensmat(i) = 0
@@ -2250,7 +2250,7 @@ C-----------Relative sensitivity (per variation interval)
             sensmat(i) = (xsecu(i)-xsecd(i))/xsec(i)
          ENDIF
       ENDDO
-      WRITE(92,'(G10.5,1P(90E12.4))') EINl, (sensmat(i),i=1,ireac)
+      WRITE(92,'(G10.5,1P,(90E12.4))') EINl, (sensmat(i),i=1,ireac)
       GOTO 180
   190 CONTINUE
       CLOSE(34)

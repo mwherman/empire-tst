@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2100 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 18:50:49 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Rev: 2118 $
+Ccc   * $Author: cmattoon $
+Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2147,14 +2147,14 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
           csprnt(i) = CSPrd(nnuc)
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
-      WRITE(41,'(G10.5,1P(95E12.5))') EINl, TOTcs*TOTred,
+      WRITE(41,'(G10.5,1P,(95E12.5))') EINl, TOTcs*TOTred,
      &     ELAcs + ElasticCorr + 4.*PI*ELCncs,
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
-     &  WRITE(98,'(G10.5,2X,1P(95E12.5))') EINl,
+     &  WRITE(98,'(G10.5,2X,1P,(95E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
       CLOSE (80)
       CLOSE (79)

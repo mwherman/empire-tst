@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2109 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 21:33:20 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Rev: 2118 $
+Ccc   * $Author: cmattoon $
+Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
       INCLUDE 'dimension.h'
@@ -76,7 +76,7 @@ C       Avoiding printing the first point
 C       as LDs are defined above the discrete levels  
 C
         IF(rolowint1+rolowint2.gt.0.d0) 
-     &    WRITE (36,'(G10.3,2X,1P(90E12.5))')
+     &    WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint1+rolowint2
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
@@ -96,7 +96,7 @@ C         Avoiding printing the first point
 C         as LDs are defined above the discrete levels  
 C
           IF(rolowint1.gt.0.d0) 
-     &      WRITE (36,'(G10.3,2X,1P(90E12.5))')
+     &      WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint1
         ENDDO
         CALL CLOSE_ZVV(36,' ',' ')
@@ -115,7 +115,7 @@ C         Avoiding printing the first point
 C         as LDs are defined above the discrete levels  
 C
           IF(rolowint2.gt.0.d0) 
-     &      WRITE (36,'(G10.3,2X,1P(90E12.5))')
+     &      WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint2
         ENDDO
         CALL CLOSE_ZVV(36,' ','GS Level Density')
@@ -179,7 +179,7 @@ c       DO j = 1,NFIsj1
           rocumul2 = rocumul2 + ROFisp(kk,j,2,Ib)
         ENDDO
         IF(rocumul1+rocumul2.gt.1e30) exit
-        WRITE (36,'(G10.3,2X,1P(90E12.5))')
+        WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &        1e6*u,max(0.1d0,rocumul2+rocumul1)
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
@@ -198,7 +198,7 @@ c          write(*,*)kk, u, rocumul1
         ENDDO
 c        pause
         IF(rocumul1.gt.1e30) exit
-          WRITE (36,'(G10.3,2X,1P(90E12.5))')
+          WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,max(rocumul1,0.1d0)
        ENDDO
        CALL CLOSE_ZVV(36,' ',' ')
@@ -214,7 +214,7 @@ c       DO j = 1,NFIsj1
           rocumul2 = rocumul2 + ROFisp(kk,j,2,Ib)
         ENDDO
         IF(rocumul2.gt.1e30) exit
-        WRITE (36,'(G10.3,2X,1P(90E12.5))')
+        WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &      1e6*u,max(0.1d0,rocumul2)
        ENDDO
        CALL CLOSE_ZVV(36,' ',' SP Level Density')
