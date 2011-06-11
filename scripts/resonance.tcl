@@ -1089,11 +1089,11 @@ proc ::PlotXS {nMT bENDF bJENDL bJEFF} {
         tk_dialog .msgbox "Error" "JEFF file '$fn' not found" info 0 OK
       }
     }
-#   exec rm -f Present c4 Present.zvd temp.dat c4.zvd ENDF-VII.0 JENDL-3.3 JEFF-3.1 ENDF.zvd JENDL.zvd JEFF.zvd
+    exec rm -f Present c4 Present.zvd temp.dat c4.zvd ENDF-VII.0 JENDL-3.3 JEFF-3.1 ENDF.zvd JENDL.zvd JEFF.zvd
 #   exec mv -f $m_szFile-$nMT.zvd $m_szWorkingDir
 #    cd $m_szWorkingDir
 #    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd 2> /dev/null &
-    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd
+    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd &
   } else {
     if {![file exists $m_szFile-res.pendf]} {
       if {$m_bGotRECENT == 0} {
