@@ -851,8 +851,8 @@ proc ::main {argc argv} {
   }
 
   set m_szFile ""
-  set m_szEditor "gvim"
-  set m_szPsviewer "kghostview"
+  set m_szEditor "vi"
+  set m_szPsviewer "gv"
   if {[file exists $m_szBaseDir/.Xrunrc] == 1} {
     set rcfl [open $m_szBaseDir/.Xrunrc r]
     gets $rcfl m_szFile
@@ -998,18 +998,18 @@ proc ::LoadVars {} {
     puts [format "Error: Local resonance parameter table '%s' not found" $atlasfn]
   }
 
-  if {[file exists $m_szFile.exf]} { exec cp $m_szFile.exf EXFOR.DAT }
-  exec xterm -T readx4 -e sh -c "$m_szCodeDir/readx4 $m_nZA $m_szBaseDir"
-  if {[file exists "EXFOR.DAT"]} { exec mv EXFOR.DAT $m_szFile.exf }
-  if {[file exists $m_szFile.exf]} {
-    if {[file exists $m_szFile.c4] != 1} {
-#     RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
-      exec xterm -T c4 -e sh -c "$m_szBaseDir/scripts/c4 $m_szFile"
-#     RUN c4sort TO SORT C4 DATA
-      exec xterm -T sortc4 -e sh -c "$m_szBaseDir/scripts/sortc4 $m_szFile"
-    }
-  }
-  exec rm -f EXFOR.DAT EXFOR.DATP
+#  if {[file exists $m_szFile.exf]} { exec cp $m_szFile.exf EXFOR.DAT }
+##  exec xterm -T readx4 -e sh -c "$m_szCodeDir/readx4 $m_nZA $m_szBaseDir"
+#  if {[file exists "EXFOR.DAT"]} { exec mv EXFOR.DAT $m_szFile.exf }
+#  if {[file exists $m_szFile.exf]} {
+#    if {[file exists $m_szFile.c4] != 1} {
+##     RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+#      exec xterm -T c4 -e sh -c "$m_szBaseDir/scripts/c4 $m_szFile"
+##     RUN c4sort TO SORT C4 DATA
+#      exec xterm -T sortc4 -e sh -c "$m_szBaseDir/scripts/sortc4 $m_szFile"
+#    }
+#  }
+#  exec rm -f EXFOR.DAT EXFOR.DATP
 }
 #############################################################################
 ## Procedure:  Cleanup
@@ -1036,52 +1036,64 @@ proc ::PlotXS {nMT bENDF bJENDL bJEFF} {
   global m_szBaseDir m_szWorkingDir
   global m_nZA m_nZ m_nA
   global m_bGotRECENT
- 
+
   cd $m_szWorkingDir 
+  if {![file exists $m_szFile.c4]} {
+    set fn [format "%s/neutrons/%03d_%s_%03d.c4" $m_szBaseDir/EXFOR $m_nZ [GetSymbol $m_nZ] $m_nA]
+    if {[file exists $fn]} {
+      exec cp -af $fn $m_szFile.c4
+    } else {
+      tk_dialog .msgbox "Error" "EXFOR file '$fn' not found" info 0 OK
+      return
+    }
+  }
+# RUN c4sort TO SORT C4 DATA
+  exec xterm -T sortc4 -e sh -c "$m_szBaseDir/scripts/sortc4 $m_szFile"
   if {[file exists $m_szFile-res.pendf] && [file exists $m_szFile.c4]} {
-    cd $m_szBaseDir/util/c4zvd
-    exec ln -fs $m_szWorkingDir/$m_szFile-res.pendf Present
-    exec ln -fs $m_szWorkingDir/$m_szFile.c4 c4
+    exec ln -fs $m_szFile-res.pendf Present
+    exec ln -fs $m_szFile-res.pendf Present
+    exec ln -fs $m_szFile.c4 c4
     exec rm -f endf.zvd temp.dat c4.zvd $m_szFile-$nMT.zvd
-    exec xterm -T endzvdl -e sh -c "endzvdl.exe $m_nZA $nMT Present Present.zvd"
-    exec xterm -T c4dat4l -e sh -c "c4dat4l.exe c4 temp.dat MF=3 MT=$nMT"
-    exec xterm -T datzvdl -e sh -c "datzvdl.exe temp.dat c4.zvd"
+    exec xterm -T endzvdl -e sh -c "$m_szBaseDir/util/c4zvd/endzvdl.exe $m_nZA $nMT Present Present.zvd"
+    exec xterm -T c4dat4l -e sh -c "$m_szBaseDir/util/c4zvd/c4dat4l.exe c4 temp.dat MF=3 MT=$nMT"
+    exec xterm -T datzvdl -e sh -c "$m_szBaseDir/util/c4zvd/datzvdl.exe temp.dat c4.zvd"
     exec cat c4.zvd > $m_szFile-$nMT.zvd
     exec cat Present.zvd >> $m_szFile-$nMT.zvd
     if {$bENDF} {
       set fn [format "%s/n-%03d_%s_%03d.endf" $m_szBaseDir/ENDF/ENDF-VII.0 $m_nZ [GetSymbol $m_nZ] $m_nA]
       if {[file exists $fn]} {
         exec ln -fs $fn ENDF-VII.0
-        exec xterm -T endzvdl -e sh -c "endzvdl.exe $m_nZA $nMT ENDF-VII.0 ENDF.zvd"
+        exec xterm -T endzvdl -e sh -c "$m_szBaseDir/util/c4zvd/endzvdl.exe $m_nZA $nMT ENDF-VII.0 ENDF.zvd"
         exec cat ENDF.zvd >> $m_szFile-$nMT.zvd
       } else {
-        puts "Error: ENDF file '$fn' not found"
+        tk_dialog .msgbox "Error" "ENDF file '$fn' not found" info 0 OK
       }
     }
     if {$bJENDL} {
       set fn [format "%s/n-%03d_%s_%03d.endf" $m_szBaseDir/ENDF/JENDL-3.3 $m_nZ [GetSymbol $m_nZ] $m_nA]
       if {[file exists $fn]} {
         exec ln -fs $fn JENDL-3.3
-        exec xterm -T endzvdl -e sh -c "endzvdl.exe $m_nZA $nMT JENDL-3.3 JENDL.zvd"
+        exec xterm -T endzvdl -e sh -c "$m_szBaseDir/util/c4zvd/endzvdl.exe $m_nZA $nMT JENDL-3.3 JENDL.zvd"
         exec cat JENDL.zvd >> $m_szFile-$nMT.zvd
       } else {
-        puts "Error: JENDL file '$fn' not found"
+        tk_dialog .msgbox "Error" "JENDL file '$fn' not found" info 0 OK
       }
     }
     if {$bJEFF} {
       set fn [format "%s/n-%03d_%s_%03d.endf" $m_szBaseDir/ENDF/JEFF-3.1 $m_nZ [GetSymbol $m_nZ] $m_nA]
       if {[file exists $fn]} {
         exec ln -fs $fn JEFF-3.1
-        exec xterm -T endzvdl -e sh -c "endzvdl.exe $m_nZA $nMT JEFF-3.1 JEFF.zvd"
+        exec xterm -T endzvdl -e sh -c "$m_szBaseDir/util/c4zvd/endzvdl.exe $m_nZA $nMT JEFF-3.1 JEFF.zvd"
         exec cat JEFF.zvd >> $m_szFile-$nMT.zvd
       } else {
-        puts "Error: JEFF file '$fn' not found"
+        tk_dialog .msgbox "Error" "JEFF file '$fn' not found" info 0 OK
       }
     }
-    exec rm -f Present c4 Present.zvd temp.dat c4.zvd ENDF-VII.0 JENDL-3.3 JEFF-3.1 ENDF.zvd JENDL.zvd JEFF.zvd
-    exec mv -f $m_szFile-$nMT.zvd $m_szWorkingDir
-    cd $m_szWorkingDir
-    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd 2> /dev/null &
+#   exec rm -f Present c4 Present.zvd temp.dat c4.zvd ENDF-VII.0 JENDL-3.3 JEFF-3.1 ENDF.zvd JENDL.zvd JEFF.zvd
+#   exec mv -f $m_szFile-$nMT.zvd $m_szWorkingDir
+#    cd $m_szWorkingDir
+#    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd 2> /dev/null &
+    exec $m_szBaseDir/scripts/showzvd $m_szFile-$nMT.zvd
   } else {
     if {![file exists $m_szFile-res.pendf]} {
       if {$m_bGotRECENT == 0} {
@@ -1805,8 +1817,6 @@ proc vTclWindow.top71 {base} {
         -label Input 
     $top.tab85 add \
         -label Execute 
-    $top.tab85 add \
-        -label {} 
     set site_8_0 [lindex [$top.tab85 childsite] 0]
     label $site_8_0.lab89 \
         -anchor w -text ZA: 
