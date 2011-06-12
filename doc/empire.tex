@@ -63,7 +63,7 @@ modular system for nuclear reaction calculations\\
 \textsf{\normalsize ITA/Centro Tecnico Aeroespacial, Sao Jose dos
 Campos, Brazil }\\[1mm]
 %
-\textsf{\large C. Matoon}{\large{} }\\
+\textsf{\large C.M. Mattoon}{\large{} }\\
 \textsf{\normalsize Lawrence Livermore National Laboratory, Livermore, USA }\\[1mm]
 %
 \textsf{\large Young-Sik Cho}{\large{} }\\
@@ -3333,7 +3333,7 @@ relevant to optical model calculations (files: \emph{om-parameter-u.dat,}
 (files: \emph{abundance.dat, gs-deformations-exp.dat, mass-frdm95.dat})
 \end{itemize}
 \item \textbf{work} - input and output files
-\item \textbf{scripts} - bash and Tcl/Tk scripts
+\item \textbf{scripts} - bash, python and Tcl/Tk scripts designed to streamline the use of EMPIRE. Scripts are described in more detail in section~\ref{sec:executing}
 \item \textbf{x4cd} - complex package containing full EXFOR loaded into
 MySQL database, MySQL server, and retrieval system including stand-alone
 GUI
@@ -3381,6 +3381,7 @@ nuclide that can be compaerd to the data reconstructed from an ENDF file
 double-differentila cross sections using \index{ZVView} package
 \item \textbf{auxiliary -} icons and pictures
 \end{itemize}
+\item \textbf{empy} - supplemental python modules for EMPIRE. See section~\ref{sec:empy} for more detail
 \item \textbf{doc} - documentation (includes this manual)
 \end{itemize}
 \end{itemize}
@@ -5355,20 +5356,43 @@ ejectile index and setting to zero variables in EMPIRE.
 % \end{labeling}
 % \emph{To be updated}
 
+\section{empy: python modules for EMPIRE}
+\label{sec:empy}
+EMPIRE has recently been extended with several python modules designed mainly for easier interaction with ENDF-formatted files and with processed files (following processing by the NJOY and PUFF codes).
+Contents of the empy module include:
+\begin{itemize}
+\item covEndf.py, MF31.py, MF32.py, MF33.py and MF35.py: modules for reading and writing ENDF-formatted covariances.
+\item readNJOY.py, readPUFF.py, and boxr.py: interact with output of the processing codes NJOY and PUFF.
+\item sg33.py: output covariances in the exchange format designed for the WPEC sub-group 33
+\end{itemize}
+
+\par To use empy, the user must set the PYTHONPATH environment variable in order to locate the module inside python:
+\begin{verbatim}export PYTHONPATH=/path/to/empire
+\end{verbatim}
+
+\par For more information about empy, see the file `empire/empy/info.py', or use python's online, interactive help system:
+
+\begin{verbatim}>python
+>import empy
+>help( empy )
+or:
+>from empy import readNJOY
+>help( readNJOY )
+\end{verbatim}
 
 \section{Executing EMPIRE}
+\label{sec:executing}
 
-EMPIRE can be executed %in three different modes (i) manually, (ii)
-using scripts %, and (iii)
-or through Graphic User Interface (GUI). The
-Graphic User Interface mode is the most convenient, and is recommended
-on UNIX systems with Tcl/Tk . Where the Tcl/Tk interpreter is not
-available, the user is advised to use the script mode. The manual
-mode should be the last choice if scripts can not be translated. For
-the sake of clarity these modes are described below in the reverse
-order.
+% cmattoon: GUI should now work on non-UNIX systems. Also, I'm taking out description of 'manual' mode:
+EMPIRE can be executed either with the included Graphical User Interface (GUI), 
+or from the command-line using scripts.
+The Graphic User Interface mode is the most convenient, and is recommended
+if a Tcl/Tk interpreter is available. Where the Tcl/Tk interpreter is not
+available, the user is advised to use the script mode. 
+%The manual mode should be the last choice if scripts can not be translated.
+For the sake of clarity, we start by describing the `script-driven' mode of EMPIRE:
 
-EMPIRE execution may involve the following operation sequences,
+EMPIRE execution most commonly involves the following four operation sequences,
 which are described in more detail below:
 
 \begin{itemize}
@@ -5384,9 +5408,9 @@ which are described in more detail below:
   ENDF file, from which more advanced plotting is done.
 \end{itemize}
 
-The complete sequence is intended for the production of evaluated 
+This complete sequence is intended for the production of evaluated 
 files in ENDF-6 format,
-but for theoretical modelling, execution of "runE" is sufficient.
+but for theoretical modeling, the "runE" script is likely sufficient.
 However, in this case automatic plotting is limited to the cross sections.
 A more detailed description of the task sequences is described below.
 % Additional sequences are also defined to perform specific tasks.
@@ -5394,13 +5418,13 @@ A more detailed description of the task sequences is described below.
 
 \subsection{"runE" sequence (Run EMPIRE)}
 
-The script sequence sets up the evnironment for a new EMPIRE calculation
+The runE script sets up the environment for a new EMPIRE calculation
 and cleans-up the directories before launching a new EMPIRE calculation.
 More specifically, the following tasks are performed:
 
 \begin{itemize}
 
-% \item The EMPIREDIR environment variable is set, if necessary.
+\item The EMPIREDIR environment variable is set, if necessary (see section \ref{sec:EMPIREDIR} for more information)
 
 \item Unnecessary files from a previous run are deleted.
 
@@ -5504,7 +5528,7 @@ scripts are executed on the ENDF file:
 
 \subsection{"run" sequence}
 
-All the main processing sequences are executed one after another.
+All the main processing sequences (`runE', `format', `process' and `verify') are executed one after another.
 
 
 
@@ -5664,8 +5688,8 @@ All the main processing sequences are executed one after another.
 \subsection{Script mode}
 
 The EMPIRE distribution contains several scripts located in the \emph{empire/scripts}
-directory. These scripts use UNIX bash-shell, which must be installed
-on the systems. Each script performs one or several steps, including
+directory. These scripts use UNIX bash-shell and in some cases python, both of which 
+must be installed on the system. Each script performs one or more steps, including
 those described in the previous section, taking care of moving, renaming
 and deleting the files and invoking the execution of appropriate codes.
 Scripts assume certain naming convention for the files, in particular,
@@ -5673,7 +5697,7 @@ all input files must end with \emph{.inp} extension. Unless specified
 differently, each script is invoked with a single parameter; the name
 of the input file without \emph{.inp} extension (file root-name).
 For example, calculations with the input file \emph{Mo100.inp} can be
-performed using \emph{runE} script and typing \\
+performed using the \emph{runE} script and typing \\
 ~\\
 \texttt{../scripts/runE Mo100}\\
 ~\\
@@ -5683,13 +5707,25 @@ of the input file (\emph{Mo100} in the example above) defines a project
 name. Scripts modify generic file names produced by the codes, renaming
 them by the project name plus the specific extension. These extensions
 must not be modified as they define the contents of the file (see
-Table \ref{tab: files}) and are used as identifiers by the system.
+Table \ref{tab:files}) and are used as identifiers by the system.
 The project is set up by creating the EMPIRE input file with arbitrary
 root-name and .\emph{inp} extension. In the following, we replace
 root-name with the asterisk '{*}' and refer to the files through their
-extensions .%
+extensions.%
+
+\subsubsection{EMPIREDIR environment variable}
+\label{sec:empiredir}
+In the above example, EMPIRE was executed in the `empire/work' directory. In this case EMPIRE automatically finds the path to all required scripts. If the user wishes to work in other directories outside of `empire', an environment variable should be set so that the system knows where to find the required scripts and executables.
+\par
+In bash, for example, the variable may be set in any of the bash setup files (.bashrc, etc) with the line:
+\begin{verbatim}export EMPIREDIR=/path/to/empire
+\end{verbatim} \break
+On Windows, the variable should be added to the registry.
+\par
+Again, setting the EMPIREDIR variable is only required in order to run a project some place other than in a direct sub-directory of the empire installation.
+
 \begin{table}[top]
-\caption{\label{tab: files}Possible files for a given project (generally not
+\caption{\label{tab:files}Possible files for a given project (generally not
 all of them will be used). User created files are marked with $\clubsuit$.}
 
 
@@ -5753,6 +5789,8 @@ region\tabularnewline
 \end{tabular}
 \end{table}
 \\
+
+\subsubsection{List of available scripts}
 The following scripts are provided:
 
 \begin{labeling}{00.00.0000}
@@ -5968,18 +6006,18 @@ key pressed at the end of the region,
 \item arbitrary multiple selection by clicking left mouse button while holding
 'Ctrl' key pressed. 
 \end{itemize}
-\item Whenever Tcl/Tk allows a 'baloon-help' is showed when cursor remains
+\item Whenever Tcl/Tk allows a `balloon-help' is showed when cursor remains
 above the button or icon for a short period of time. This help is
 hoped to be sufficient to operate the interface without additional
 instructions. Note that if cursor is moved fast across the interface
-the 'baloon-help' which appears on the screen might refer to a button
+the 'balloon-help' which appears on the screen might refer to a button
 different from the one to which the cursor actually points. To be
 sure that the help is correct keep in mind that help string always
 starts exactly below the middle of a button or icon. 
-\item Colours on the GUI buttons follow 'trafic light scheme' - green means
+\item Colours on the GUI buttons follow 'traffic light scheme' - green means
 that pressing button at any time will not make any damage, red warns
 that some data or files that have been obtained before or manually
-editied might be lost (overwritten). Generally, all buttons involving
+edited might be lost (overwritten). Generally, all buttons involving
 editor calls are green while button involving execution of codes or
 deleting files are red. Similar distinction is introduced between
 the files - red is used for those which are likely to have been manually
@@ -5990,8 +6028,8 @@ Due to a large number of operations and extended lists the new GUI
 is organized in a form of a notebook with several panels. Generally,
 there are several equivalent ways of performing the same operation
 and the user my choose the one which suits him best. All basic functions,
-such as running the code and viweing the results can be achieved from
-the pull-down menues and icon-denoted buttons below the menue bar.
+such as running the code and viewing the results can be achieved from
+the pull-down menus and icon-denoted buttons below the menu bar.
 On the other hand, more advanced features such as plotting and file
 management can only be accessed from the various panels.
 
@@ -6000,7 +6038,7 @@ name that will be used as a root of the input file name (say 56Fe).
 Existing project can be selected by clicking on the 'open folder'
 icon to the left of the GUI. The following icons (from left to right)
 allow to (i) edit input, (ii) launch full chain of calculations, (iii)
-run EMPIRE only, (iv) vew long EMPIRE output, (v) view short EMPIRE
+run EMPIRE only, (iv) view long EMPIRE output, (v) view short EMPIRE
 output, (vi) view ENDF-6 formatted file, (vii) view EXFOR data, (viii)
 view EXFOR data in computational format, (ix) view PLTC4 plots, (x)
 refresh list of files, (xi) change working directory, and (xii) remove
@@ -6039,7 +6077,7 @@ button makes 3 copies of the main EMPIRE input. These 3 copies can
 be modified allowing for use of different parameters or models providing
 that they refer to the same combination of target and projectile and
 allow for the same number of emissions. The energy ranges must be
-choosen in such a way that input \emph{a} covers the lower part, input
+chosen in such a way that input \emph{a} covers the lower part, input
 \emph{b} intermediate and input \emph{c} the upper part of the requested
 energy range. When 'run-piecewise' button is hit calculations are
 executed for all three input files, respective outputs are merged
@@ -6049,7 +6087,7 @@ three energy ranges will generally produce discontinuities at the
 borders. The piece-wise calculations are also possible with 2 input
 files only (the third one should be deleted in such a case). 
 \item OMP fit section allows to run manual fit of the optical model potential.
-EMPIRE provides limitted support by producing plots of selected cross
+EMPIRE provides limited support by producing plots of selected cross
 sections (angular distributions) and comparing them with the best
 previous set. Input option FITOMP should be set to 1 to restrict calculations
 to those relevant to optical parameter fitting (e.g., second neutron
@@ -6059,14 +6097,14 @@ After the first calculation is completed user should create up to
 a number of curves) and name them in the 'List name' field as \emph{omp1}
 and \emph{omp2}. Then, optical model parameters can be adjusted manually
 by editing respective files and calculations re-run. This will automatically
-produce previously defined plots overlayed with those obtained in
+produce previously defined plots overlaid with those obtained in
 the first run. If the new calculation performs better it can be set
 as a temporary reference set by hitting the 'Store as ref.' button.
 Next results will be compared to this reference until a new reference
 is defined.
 \item EXFOR section provides access to the stand alone EXFOR retrieval that
-is graphically similar and functionaly identical to the one availabale
-from the IAEA and NNDC web sites. Under normal cicumstances this retrieval
+is graphically similar and functionally  identical to the one available
+from the IAEA and NNDC web sites. Under normal circumstances this retrieval
 is not necessary as it is performed internally be EMPIRE during the
 first run. However, user may choose to use manual retrieval interface
 in order to exercise direct control on the retrieved data. When the
@@ -6074,7 +6112,7 @@ EXFOR interface is closed the resulting file with experimental data
 is automatically renamed to conform to the current project. It is
 up to the user to ensure that the data retrieved are actually relevant
 to the calculations. Once retrieved, the data have to be converted
-into the compuational format ('Run X4TOC4' button) and sorted ('Sort
+into the computational format ('Run X4TOC4' button) and sorted ('Sort
 C4' button). The same sequence of buttons should also be used if users
 decides to modify the existing \emph{{*}.exf} file (e.g., by removing
 or adding certain entries)
@@ -6092,7 +6130,7 @@ each incident energy)
 
 \end{figure}
 \textbf{ZVV plots panel} (Fig. \ref{cap:EMPIRE-GUI-ZVV}) provides
-for a powerfull interface to the ZVView plotting package. The window
+for a powerful interface to the ZVView plotting package. The window
 to the left lists all ZVView plots (\emph{{*}.zvd} files) that have
 been previously created. User can display them by double-clicking on
 any of them. Selecting several plots and double-clicking on the last
@@ -6109,7 +6147,7 @@ is included in the plot filename for identification (e.g., \emph{56Fe-102.zvd}
 for capture). This method allows to plot only excitation functions
 (cross sections) for the current calculations (ENDF-6 formatted file
 must exist).
-\item Hitting 'Launch ZVV Interface' will start more powerfull GUI that
+\item Hitting 'Launch ZVV Interface' will start more powerful GUI that
 allows to create the same type of plots as before but including up
 to 3 additional ENDF-6 formatted files for comparison. 
 \item 'ZVV plots from EMPIRE' is a bit cumbersome way of creating a cross
@@ -6128,7 +6166,7 @@ by PLOTC4 or \emph{pltlst} script). This is the only possibility of
 plotting angular distributions, and energy spectra with the ZVView
 package. For the relevant line being included in the list there must
 be a match between experimental data and calculations (i.e., plots
-are only possible if adeqaute experimental data are available). Multiple
+are only possible if adequate experimental data are available). Multiple
 selection can be plotted and each of such selections can be stored
 by specifying its name in the 'List name' field. When multiple selection
 is plotted the individual curves are offset from each other by a number
@@ -6136,7 +6174,7 @@ of decades specified in the 'Shift 10{*}{*}' field. It implies that
 the \emph{y}-scale be logarithmic unless shift is set to 0. 'Eres
 (rel)' is the experimental relative energy resolution used to spread
 discrete lines (e.g., elastic) and to smooth continuum in the plotted
-energy spectra. The 'Comapre to' field allows to select another ENDF-6
+energy spectra. The 'Compare to' field allows to select another ENDF-6
 formatted file to be included in the plots. Note that in order to
 obtain correct plots the additional file should be preprocessed in
 a way analogous to the original EMPIRE file (resonances
@@ -6157,7 +6195,7 @@ be plotted unless converted into the right format).
 \vspace{2mm}
 \textbf{Logs panel} (Fig. \ref{cap:EMPIRE-GUI-Logs}) provides access
 to various output files that should be inspected for possible errors
-encountered during EMPIRE execution, EXFOR translation into compuational
+encountered during EMPIRE execution, EXFOR translation into computational
 format, ENDF-6 formatting, format verification and preprocessing.%
 \begin{figure}[top]
 \includegraphics[bb = 0 0 200 100, draft, type=eps]{GUI-Files.eps}
@@ -6176,12 +6214,12 @@ several projects. Files panel is designed to facilitate access to
 files belonging to a current project by setting default value of the
 filter to the root-name of the project. User can modify filter value
 to restrict further list of the files (e.g., filter set to \emph{56Fe{*}endf}
-will show only files with extension {*}.\emph{endf} beloging to the
+will show only files with extension {*}.\emph{endf} belonging to the
 \emph{56Fe} project) or relax it to display more files (e.g., filter
 set to \emph{inp} will show input files for all projects). We note
 that, selecting a file with a name consisting only of the root-name
 and extension (e.g., \emph{56Fe.exf} but not \emph{56Fe-log.psyche)}
-and hitting 'Change to its project' button is a convienient way of
+and hitting 'Change to its project' button is a convenient way of
 redirecting GUI toward another project. The left part of the panel
 provides for a convenient removal of the selected types of files belonging
 to the current project. In addition, individual files can be removed
@@ -6231,7 +6269,7 @@ when ENDF formatting is required. EMPEND\index{EMPEND} automatically
 recognizes the calculation options from the contents and acts accordingly.
 
 EMPIRE also calculates cross sections for the production of metastable
-isomers. EMPEND recognises these and stores them in ENDF File~10.
+isomers. EMPEND recognizes these and stores them in ENDF File~10.
 Cross sections for radionuclide production, which can not be uniquely
 associated with any specific reaction (i.e. an ENDF MT number) are
 lumped into File~3 MT~5, but to preserve the complete information, the
@@ -6347,7 +6385,7 @@ prompts, which are the following:
    \end{itemize}
 \item Thinning tolerance limit [\%] to reduce the number of cross              
    section points. Data points, which can be reproduced from the           
-   neighbouring points by linear interpolation to within the               
+   neighboring points by linear interpolation to within the               
    specified tolerance, are removed. Entering a negative value             
    for the thinning tolerance limit causes thinning to be                  
    suppressed.                                                             
@@ -6368,9 +6406,9 @@ NOTES:
    spectra can not be done uniquely. It is recommended to                  
    allow up to 4 emitted neutrons and only a single charged                
    particle.                                                               
-\item All text preceeding the printout for first energy is                    
+\item All text preceding the printout for first energy is                    
    transferred to the comments section in the ENDF file (FM=1,             
-   MT=451). The easiest way to insert customised comments into             
+   MT=451). The easiest way to insert customized comments into             
    the ENDF file is to modify (manually) the EMPIRE output.                
 \item The resonance file (MF=2) that is generated for files                   
    with incident neutrons is by no means a realistic cross                 
@@ -6389,7 +6427,7 @@ To monitor the formatting process for quality assurance
 purposes, the EMPEND.LOG file is written in which the                      
 details of the formatting process are recorded. A limited                  
 amount of checking is done. An entry to the log file is                    
-added in the follwing cases:                                               
+added in the following cases:                                               
 \begin{itemize}
 \item The cross section obtained by integrating the spectrum                  
    should agree with the value given directly in the                       
@@ -6457,9 +6495,9 @@ The parameters to be adjusted are specified by using the FITabc or
 FITDEF options, described in more detail below. The RIPL-2 parametrization
 described in Section \ref{sec:RIPLomp} is used to identify the optical
 model parameters, any of which may be adjusted. The adjustable deformations
-are simply those of the collective level file. Quadrupole and hexadecupole
+are simply those of the collective level file. Quadrupole and hexadecapole
 deformations are permitted for nuclei identified as rotational, while
-quadrupole and octupole deformations are permitted for those identified
+quadrupole and octapole deformations are permitted for those identified
 as vibrational. The FITabc and FITDEF options typically identify the
 desired parameter and furnish a shift in its initial value and the
 maximum variation allowed during the fit with respect to its (shifted)
@@ -6801,10 +6839,10 @@ calculations, \\
 to A/VAL (default 13).
 \end{labeling}
 
-\subsubsection*{Monte Carlo preequilibrium model (HMS\index{HMS}) }
+\subsubsection*{Monte Carlo pre-equilibrium model (HMS\index{HMS}) }
 
 \begin{labeling}{00.00.0000}
-\item [{HMS}] Controls Monte Carlo preequilibrium calculations,\\
+\item [{HMS}] Controls Monte Carlo pre-equilibrium calculations,\\
 = 0 HMS disabled (default),\\
 = 1 HMS enabled.
 \item [{NHMS}] Number of events in HMS set to VAL
@@ -7129,7 +7167,7 @@ in an output):
 \item TRISTAN\index{TRISTAN} results
 \item fusion cross section
 \item MSC\index{MSC} results 
-\item spectra summed over all preequilibrium mechanisms
+\item spectra summed over all pre-equilibrium mechanisms
 \item discrete level population before their $\gamma$-de-excitation
 \item intensities of discrete $\gamma$-lines 
 \item residue (CN) production cross section
@@ -7350,8 +7388,8 @@ This file collects all incident energy independent input parameters
 related to fission. It follows general EMPIRE philosophy of input/output
 files: it is created by the code if missing and it is read by the
 code if it exists. Users can edit it to modify default fission parameters.
-The file is divided into sections correponding to each fissioning
-nuccleus. Below we reproduce one such section of the file. The format
+The file is divided into sections corresponding to each fissioning
+nucleus. Below we reproduce one such section of the file. The format
 is self-explanatory and users should have no problems to understand
 content of the file.
 
