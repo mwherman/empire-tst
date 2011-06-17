@@ -90,6 +90,9 @@ C-V        - Fix number of photons in MF14 to match MF12.
 C-V  11/04 - Set LRF to MLBW because NJOY does not like anything else
 C-V          when energy-dependent scattering radius is given.
 C-V        - Update the comments and input instructions.
+C-V  11/06 - Fix calculation of level energy when no recoils given
+C-V        - Print warning when no recoils given on output
+C-V        - Improved identification of insignificant cross sections.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -326,6 +329,7 @@ c...  NMOD= 0
       LRP =0
       I600=0
       I800=0
+      IRCOIL=0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -575,17 +579,23 @@ c...  print *,'processing MT',MT6
 c...
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
      1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
-     1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT
+     1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
      2           ,MXE,LX,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
 c...
 c...  print *,'Done reamf6 MT,ier',MT6,ier
 c...
+      IF(MT4.GT.0) THEN
+        WRITE(LTT,995) ' WARNING - No recoil spectra given      '
+        WRITE(LER,995) ' WARNING - No recoil spectra given      '
+        WRITE(LTT,995) BLNK
+        WRITE(LER,995) BLNK
+      END IF
       IF(IER.LT.0) GO TO 870
       IF(NK.LE.0) GO TO 490
 C* Write the ENDF file-4 data
       MT4=2
   420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
-     1           ,MT4,MAT,IZA,IZI,AWR,LCT,NS)
+     1           ,MT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
       IF(MT4.GT.0) THEN
         WRITE(LTT,995) ' Processed angular distrib. for MT    : ',MT4
         WRITE(LER,995) ' Processed angular distrib. for MT    : ',MT4
@@ -639,7 +649,7 @@ C* Read the EMPIRE output file to extract energy/angle distrib.
       REWIND LIN
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
      1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
-     1           ,MT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT
+     1           ,MT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
      2           ,MXE,LX,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
       IF(IER.LT.0) GO TO 870
 c...
@@ -2485,6 +2495,7 @@ C*
 C-Title  : Subroutine FIXZRO
 C-Purpose: Eliminate reactions with all-zero cross sections
       DIMENSION MTH(MXT),XSC(MXE,MXT),XSG(MXE,MXT),QQM(MXT),QQI(MXT)
+      XSMAL=1.E-10
 C*
       II=0
       DO I=1,NXS
@@ -2492,7 +2503,7 @@ C*
         XMX=0
         DO J=1,NEN
           XX=XSC(J,I)
-          IF(XX.GT.0) THEN
+          IF(XX.GT.XSMAL) THEN
 C*          -- Count non-zero cross sections
             NPT=NPT+1
             XMX=MAX(XMX,XX)
@@ -2508,8 +2519,8 @@ C*             spurious values at lower energies
             END IF
           END IF
         END DO
-C*      -- Eliminate cross sections with a single non-zero value
-        IF(NPT.LT.2 .AND. MTH(I).NE.9151 ) NPT=0
+C*      -- Eliminate cross sections with less than 2 significant values
+        IF(NPT.LE.2 .AND. MTH(I).NE.9151 ) NPT=0
 C*
 C* Repack the array, removing All-zero cross section from the list
         IF(NPT.GT.0) THEN
@@ -3828,8 +3839,8 @@ C* Scale gamma-production cross section
       RETURN
       END
       SUBROUTINE REAMF6(LIN,LTT,LER,EIN,XSC,XSG,NE3,EIS,YLD,RWO,MTH,MT6
-     1                 ,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,MXE,MXR
-     2                 ,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
+     1                 ,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
+     2                 ,MXE,MXR,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
 C-Title  : REAMF6 Subroutine
 C-Purpose: Read EMPIRE output energy/angle distrib. for each MT
 C-Version:
@@ -4223,6 +4234,7 @@ C* Check if particle is to be processed
       IF(PTST.NE.POUT(IK)) GO TO 210
       READ (REC(35:58),808) KZAK
       IF(PTST.EQ.'recoils ') THEN
+        IRCOIL=1
 c...
 c...    print *,rec(15:41),pout(ik),izak(ik)
 c...
@@ -5260,7 +5272,7 @@ C*
       RETURN
       END
       SUBROUTINE WRIMF4(LOU,LTT,LER,MTH,QQM,QQI,NXS,MT6,RWO,EMIN
-     1                 ,MT,MAT,IZA,IZI,AWR,LCT0,NS)
+     1                 ,MT,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=202)
@@ -5356,7 +5368,8 @@ C*      Process all energies for elastic
         EOU=0
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
-        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))*((AWR+AWI-AWP)/(AWR+AWI))
+        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))
+        IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
