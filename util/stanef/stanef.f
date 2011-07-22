@@ -1,5 +1,5 @@
-! $Rev: 1906 $                                                        
-! $Date: 2011-01-14 23:05:28 +0100 (Fr, 14 Jän 2011) $
+! $Rev: 2125 $                                                        
+! $Date: 2011-07-22 21:46:31 +0200 (Fr, 22 Jul 2011) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -29,6 +29,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.05   July 2011     A. Trkov
+!-V                        Increase No. of points in MF3 from 250K to 500K.
 !-V         Version 8.04   January 2011     A. Trkov
 !-V                        1. Read data in double-precision to avoid underflow
 !-V                        2. Fix processing of MF32, LCOMP=2, LRF=7
@@ -173,9 +175,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -280,7 +282,7 @@
 !     INTEGER(KIND=I4), PARAMETER :: POINTSMAX=90000
 !original start
 !trkov    start
-      INTEGER(KIND=I4), PARAMETER :: POINTSMAX=250000
+      INTEGER(KIND=I4), PARAMETER :: POINTSMAX=500000
 !trkov    end
       REAL(KIND=R8), DIMENSION(POINTSMAX) :: XP,YP
 !
