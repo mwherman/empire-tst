@@ -1,5 +1,5 @@
-! $Rev: 1987 $                                                          | 
-! $Date: 2011-02-12 05:01:29 +0100 (Sa, 12 Feb 2011) $                                                     
+! $Rev: 2127 $                                                          | 
+! $Date: 2011-08-02 13:35:34 +0200 (Di, 02 Aug 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.14   August 2011   A. Trkov
+!-V                        Allow LFI>0 without delayed data for derived files
+!-V                        (e.g. dosimetry library).
 !-V         Version 8.13   February 2011   A. Trkov
 !-V                        Require EMAX=0 for spontaneous FP yield data
 !-V                        (suggested by E. Dupont)
@@ -240,9 +243,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
 !---MDC---
 !
 !     Define variable precision
@@ -613,12 +616,15 @@
       END IF
 !
 !     END OF FILE 1 CHECK THAT VALUE OF LFI AND PRESENCE OF NUBAR
-!         IS COMPATIBLE
+!         IS COMPATIBLE (MISMATCH ALLOWED FOR DERIVED FILES,
+!         E.G. DOSIMETRY LIBRARY)
 !
        IF(MF.NE.MFO.AND.MFO.EQ.1)   THEN
          IF(LFI.EQ.1.AND.I452.NE.1.AND.MOD(NSUB,10).EQ.0) THEN
-            EMESS = 'LFI INCORRECT OR NUBAR-TOTAL MISSING   PRECEDING '
-            CALL ERROR_MESSAGE(NSEQP)
+            IF(LDRV.EQ.0) THEN
+             EMESS = 'LFI INCORRECT OR NUBAR-TOTAL MISSING   PRECEDING '
+             CALL ERROR_MESSAGE(NSEQP)
+            END IF
          END IF
          IF(LFI.NE.1.AND.I452.EQ.1)  THEN
             EMESS = 'LFI SHOULD BE SET TO 1                 PRECEDING '
