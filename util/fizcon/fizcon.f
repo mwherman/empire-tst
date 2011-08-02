@@ -1,5 +1,5 @@
-! $Rev: 1988 $                                                         |
-! $Date: 2011-02-12 05:06:52 +0100 (Sa, 12 Feb 2011) $                                                     
+! $Rev: 2126 $                                                         |
+! $Date: 2011-08-02 13:33:09 +0200 (Di, 02 Aug 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,10 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.09   August 2011   A. Trkov
+!-V                        - Improved error counting
+!-V                        - Fix checking No. of gammas in MF14 when all are
+!-V                          isotropic (found by A. Koning)
 !-V         Version 8.08   February 2011   A. Trkov
 !-V                        Improve testing of cross-reaction covariances
 !-V         Version 8.07   January 2011    A. Trkov
@@ -212,9 +216,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -1646,6 +1650,7 @@
             IERX = 1
             WRITE(EMESS,'(A,I3,A)') 'MF= ',MF,' IS NOT PERMITTED'
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
       END SELECT
 !
       RETURN
@@ -2213,6 +2218,7 @@
       IF((ABS(ABNTOT-1.)).GT.EPSILN3)   THEN
          EMESS = 'ISOTOPIC ABUNDANCES DO NOT ADD UP TO UNITY'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
       RETURN
@@ -3528,6 +3534,7 @@
    90 WRITE(EMESS,'(A,I4)')                                             &       
      &   'SECTIONS ARE NOT IN INCREASING LEVEL ENERGY ORDER AT MT =',MT
       CALL ERROR_MESSAGE(0)
+      NERROR = NERROR + 1
 !
   100 RETURN
       END SUBROUTINE CHK_LEVEL
@@ -3748,6 +3755,7 @@
      &              'MUST be ',IKTFIS,', the number of subsections for',&       
      &              ' total fission cross section.'
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
       END IF
@@ -3945,6 +3953,7 @@
                WRITE(EMESS,'(A,1PE12.5,A,1PE12.5)')                     &       
      &          'FOR LF=1 EPMAX FOUND TO BE',ESMAX,' SHOULD BE',EAVAIL
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
          GO TO 100
@@ -3962,12 +3971,14 @@
                   WRITE(EMESS,'(A,I2,A,1PE12.5,A,1PE12.5)')             &       
      &               'FOR LF=',LF,' U OF',U,' OUT OF RANGE FOR Q OF ',Q
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             ELSE
                IF(U.LT.Q1.OR.U.GT.ETHRS)   THEN
                   WRITE(EMESS,'(A,I2,A,1PE12.5,A,1PE12.5)')             &       
      &               'FOR LF=',LF,' U OF',U,' OUT OF RANGE FOR Q OF',Q
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             END IF
             GO TO 100
@@ -3991,6 +4002,7 @@
                WRITE(EMESS,'(A,I2,A,1PE12.5,A,1PE12.5)')                &       
      &            'FOR LF=',LF,' U FOUND TO BE',U,' SHOULD BE .GT.',Q
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
       END IF
@@ -4066,6 +4078,7 @@
      &               'NOT equal to # subsections for total (n,p) '//    &       
      &                 'cross section: ',IKTNP
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             ELSE
                EMESS = 'NO distribution given for total (n,p) cross '// &       
@@ -4074,6 +4087,7 @@
                WRITE(EMESS,'(4X,A,I3,A,I3)')                            &       
      &             'with ',NK,' subsections given for MT ',MT
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          ELSE IF(MT.GE.800.AND.MT.LE.849) THEN
             IF (IMTNA.EQ.1) THEN
@@ -4085,6 +4099,7 @@
      &               'NOT equal to # subsections for total'//           &       
      &                 ' (n,alpha) cross section: ',IKTNA
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             ELSE
                EMESS = 'NO distribution given for total (n,alpha)'//    &       
@@ -4093,6 +4108,7 @@
                WRITE(EMESS,'(4X,A,I3,A,I3)')                            &       
      &             'with ',NK,' subsections given for MT ',MT
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
       END IF
@@ -4135,6 +4151,7 @@
      &               'NOT equal to law ',ILTNP(N),' for corresponding ' &       
      &                 //'subsection in total (n,p) cross section'
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             ELSE IF(MT.GE.800.AND.MT.LE.849) THEN
                IF ((IMTNA.EQ.1).AND.(LF.NE.ILTNA(N))) THEN
@@ -4144,6 +4161,8 @@
                   WRITE(EMESS,'(4X,A,I2,A)')                            &       
      &               'NOT equal to law ',ILTNA(N),' for corresponding ' &       
      &                //'subsection in total (n,alpha) cross section'
+                  CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             END IF
          END IF
@@ -4276,6 +4295,7 @@
      &               'LTP = ',LTP,' REQUIRES THAT ALL ELASTIC CROSS '// &       
      &                   'SECTIONS IN FILE 3 BE SET TO 1.0'
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
                E = C2L
                IF(I.EQ.1)  THEN
@@ -4512,6 +4532,7 @@
             WRITE(EMESS,'(A,I3,A)')                                     &       
      &         'SECTION',MT,' SHOULD NOT EXIST FOR A NATURAL ELEMENT'
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
          END IF
          CALL CHK457
 !
@@ -4576,6 +4597,7 @@
                WRITE(EMESS,'(A,F9.2,A,1PE15.5,A)')                      &       
      &              'FISSION PRODUCT YIELDS SUM TO',SSUM,' AT',C1L,' EV'
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
       END DO
@@ -5258,6 +5280,7 @@
                   WRITE(EMESS,'(A,1PE12.5,A,1PE12.5)')                  &       
      &                  'Q(IS)=',QX,'  Q(GS)=',QO(IR)
                   CALL ERROR_MESSAGE(0)
+                  NERROR = NERROR + 1
                END IF
             END IF
             QO(IR) = AMAX1(QO(IR),QX)
@@ -5325,13 +5348,13 @@
 !
       IF(MSEQ.GT.0)   THEN
          WRITE(EMESS,'(2A)')  SYM,' SUMUP FAILURE'
-         CALL ERROR_MESSAGE(MSEQ)
+         CALL ERROR_MESSAGE(0)
       ELSE
          WRITE(EMESS,'(2A)')  SYM,' SUMUP FAILURE'
          CALL ERROR_MESSAGE(0)
       END IF
       WRITE(EMESS,'(4X,A,1PE12.5,A,1PE12.5)') 'WHOLE=',S,'  SUM=',SUMX
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(MSEQ)
 !
   100 RETURN
       END SUBROUTINE SUMCK
@@ -5391,6 +5414,7 @@
          EA = 0.
          EMESS = 'ERROR CALCULATING BETA SPECTRUM INTEGRAL'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       ELSE
          G = G/F
          DL = DL/F/(EMASS*1.E-6)
@@ -6251,6 +6275,7 @@
          WRITE(EMESS,'(A,I3,A)')                                        &       
      &              'SUBSECTION',N,' NOT DESCRIBED IN FILE 8'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
 !
 !        SUM MULTIPLICITIES AT ENERGIES
 !
@@ -6345,6 +6370,7 @@
                WRITE(EMESS,'(A,I4,A)')                                  &       
      &              'MT=',MT,' CANNOT EXIST IN FILE 12 AND FILE 13'
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
                GO TO 20
             END IF
          END DO
@@ -6442,6 +6468,7 @@
          WRITE(EMESS,'(A,I3)')                                          &       
      &       'ONLY ONE CONTINUUM SUB-SECTION ALLOWED IN FILE'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
 !     TESTS WHEN THERE IS A TOTAL YIELD RECORD
@@ -6456,6 +6483,7 @@
             WRITE(EMESS,'(4X,A,I6)')                                    &       
      &          'SPAN THE COMBINED RANGE OF THE PARTIAL TABLES, MT=',MT
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
          END IF
 !********DO FINAL SUMUP TEST
          IF(ITEST.NE.0)   CALL SUMPAR(0)
@@ -6518,6 +6546,7 @@
          WRITE(EMESS,'(A,1PE11.4,A,I4)')                                &       
      &      'SUM OF TRANSITION PROBABILITIES=',SSUM,' FOR MT=',MT
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
 !     INDICATE IF ANY ELEMENTS FOUND OUT OF RANGE
@@ -6526,12 +6555,14 @@
          WRITE(EMESS,'(I4,A)')                                          &       
      &      NE1,' TRANSITION PROBABILITIES NOT IN RANGE 0.0 TO 1.0'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
       IF(NE2.NE.0)   THEN
          WRITE(EMESS,'(I4,A)')                                          &       
      &         NE2,' CONDITIONAL TRANSITION PROBABILITIES NOT IN '//    &       
      &        'RANGE 0.0 TO 1.0'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
   100 RETURN
@@ -6559,6 +6590,11 @@
 !
       CALL TESTD(1000*MF+MT)
 !
+!     BRANCH IF ALL DISTRIBUTIONS FOR ALL GAMMAS ARE ISOTROPIC
+!
+      LI = L1H
+      IF(LI.EQ.1) GO TO 60
+!
 !     Check that the number of gammas matches the number in MF12
 !
       NK = N1H
@@ -6574,14 +6610,9 @@
       EMESS = 'Complementary section not found in MF12,13'
       CALL ERROR_MESSAGE(NSEQP1)
 !
-!     BRANCH IF ALL DISTRIBUTIONS FOR ALL GAMMAS ARE ISOTROPIC
-!
-   20 LI = L1H
-      IF(LI.EQ.1) GO TO 60
-!
 !     INITIALIZE
 !
-      NI = N2H
+   20 NI = N2H
       LTT = L2H
       ELO = BIGNO
       EHI = 0.
@@ -6742,6 +6773,7 @@
       IF(NCON.GT.1) THEN
          EMESS = 'ONLY ONE CONTINUUM SUB-SECTION ALLOWED '
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
 !     SAVE ENERGY RANGE SPANNED
@@ -7604,6 +7636,7 @@
                      WRITE(EMESS,'(4X,A,1PE12.5,A,1PE12.5)')            &       
      &                  'EI(J,1)=',EI(J,1),' EI(J,2)=',EI(J,2)
                      CALL ERROR_MESSAGE(0)
+                     NERROR = NERROR + 1
                   END IF
                END DO
             END DO
@@ -7805,6 +7838,7 @@
                         WRITE(EMESS,'(4X,A,1PE12.5,A,1PE12.5)')         &       
      &                     'EI(J,1)=',EI(J,1),' EI(J,2)=',EI(J,2)
                         CALL ERROR_MESSAGE(0)
+                        NERROR = NERROR + 1
                      END IF
                   END DO
                END DO
@@ -7874,6 +7908,7 @@
          CALL ERROR_MESSAGE(0)
          EMESS = ' ***ERROR IN NCTEST.  NCX EXCEEDS NCXMAX.'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
          IERX = 1
          GO TO 100
       END IF
@@ -7895,6 +7930,7 @@
             CALL ERROR_MESSAGE(0)
             EMESS = ' ***ERROR IN NCTEST.  MTR EXCEEDS MTRMAX.'
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
             IERX = 1
             GO TO 100
          END IF
@@ -8143,7 +8179,8 @@ C...        GO TO 10
          IF(NEN.EQ.1) THEN
             WRITE(EMESS,'(A,I2,A)')                                     &       
      &         'NOT EXPECTING LB =',LB,', MATRIX IS SYMMETRIC.'
-            CALL ERROR_MESSAGE(0)
+            CALL WARNING_MESSAGE(0)
+            NWARNG = NWARNG + 1
          END IF
          GO TO 20
       END IF
@@ -8169,7 +8206,8 @@ C...        GO TO 10
       IF(LB.GE.6) THEN
          WRITE(EMESS,'(A,I2,A)')                                        &       
      &         'NOT EXPECTING LB =',LB,', MATRIX IS SYMMETRIC.'
-         CALL ERROR_MESSAGE(0)
+         CALL WARNING_MESSAGE(0)
+         NWARNG = NWARNG + 1
          GO TO 100
       END IF
       LS = L1L
@@ -8277,6 +8315,7 @@ C...        GO TO 10
             CALL ERROR_MESSAGE(0)
             EMESS = ' ***ERROR IN NEWGRD.  NMT EXCEEDS NMTMAX.'
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
             IERX = 1
             GO TO 100
          END IF
@@ -8288,6 +8327,7 @@ C...        GO TO 10
             CALL ERROR_MESSAGE(0)
             EMESS = ' ***ERROR IN NEWGRD.  NEG EXCEEDS NEGMAX.'
             CALL ERROR_MESSAGE(0)
+            NERROR = NERROR + 1
             IERX = 1
             GO TO 100
          END IF
@@ -8371,6 +8411,7 @@ C...        GO TO 10
       CALL ERROR_MESSAGE(0)
       EMESS = ' ***ERROR IN NEWGRD.  NIX EXCEEDS NIXMAX.'
       CALL ERROR_MESSAGE(0)
+      NERROR = NERROR + 1
       IERX = 1
 !
   100 RETURN
@@ -10333,6 +10374,7 @@ C...        GO TO 10
      &         'THIS SECTION REQUIRES THAT MISSING FILE',MF2,           &       
      &         ', MT=',MT2,'  BE PRESENT'
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
       GO TO 100
 !
@@ -10362,6 +10404,7 @@ C...        GO TO 10
      &        'SECTION DOES NOT SPAN THE SAME ENERGY RANGE AS FILE ',   &       
      &        MF2,', MT=',MT2
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
   100 RETURN
@@ -10404,6 +10447,7 @@ C...        GO TO 10
       WRITE(EMESS,'(A,I3,A,I3,A)')                                      &       
      &        'SECTION',MFC,'/',MTC,' NOT IN INDEX'
       CALL ERROR_MESSAGE(0)
+      NERROR = NERROR + 1
       IF(NXC.GE.NSECMAX) GO TO 100
       NXC = NXC + 1
       IF(N.NE.NXC)  THEN
@@ -10484,6 +10528,7 @@ C...        GO TO 10
          WRITE(EMESS,'(A,I3,A,I3)')                                     &       
      &       'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFC,'/',MTC
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
       RETURN
@@ -10524,6 +10569,7 @@ C...        GO TO 10
                WRITE(EMESS,'(4X,A,1PE12.5,A,1PE12.5,A)')                &       
      &            'SHOULD BE ',ELOT,'(EV) FOR Q= ',Q,'(EV)'
                CALL ERROR_MESSAGE(0)
+               NERROR = NERROR + 1
             END IF
          END IF
       END IF
@@ -10537,6 +10583,7 @@ C...        GO TO 10
          WRITE(EMESS,'(3X,A,1PE12.5)')                                  &       
      &         'SHOULD BE GREATER THAN OR EQUAL TO ',ENMAX
          CALL ERROR_MESSAGE(0)
+         NERROR = NERROR + 1
       END IF
 !
       RETURN
@@ -11908,6 +11955,8 @@ C...        GO TO 10
       SUBROUTINE ERROR_MESSAGE(JSEQ)
 !
 !     ROUTINE TO OUTPUT ERROR MESSAGE IN STANDARD FORM
+!     (If JSEQ record identifier is non-zero, the error counter
+!      is incremented)
 !
       IMPLICIT NONE
 !
