@@ -1,5 +1,5 @@
-! $Rev: 2127 $                                                          | 
-! $Date: 2011-08-02 13:35:34 +0200 (Di, 02 Aug 2011) $                                                     
+! $Rev: 2128 $                                                          | 
+! $Date: 2011-08-31 10:40:49 +0200 (Mi, 31 Aug 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.15   August 2011   M. White
+!-V                        Upgrade for MF1/MT458 extension
 !-V         Version 8.14   August 2011   A. Trkov
 !-V                        Allow LFI>0 without delayed data for derived files
 !-V                        (e.g. dosimetry library).
@@ -243,9 +245,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.15'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.15'
 !---MDC---
 !
 !     Define variable precision
@@ -1616,8 +1618,9 @@
 !
          CASE (458)          ! ENERGY RELEASE IN FISSION
             CALL RDLIST
-            CALL TEST2(NPL,18,'NPL')
-            CALL TEST2(N2L,9,'N2L')
+            CALL TEST1(L2L,0,64,'NPLY',1)
+            CALL TEST2(NPL,18*(L2L+1),'NPL')
+            CALL TEST2(N2L, 9*(L2L+1),'N2L')
             GO TO 100
 !
          CASE (460)          ! Delayed photon data
