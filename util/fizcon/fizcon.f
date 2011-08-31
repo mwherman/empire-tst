@@ -1,5 +1,5 @@
-! $Rev: 2126 $                                                         |
-! $Date: 2011-08-02 13:33:09 +0200 (Di, 02 Aug 2011) $                                                     
+! $Rev: 2129 $                                                         |
+! $Date: 2011-08-31 10:52:34 +0200 (Mi, 31 Aug 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.10   August 2011   M. White
+!-V                        Upgrade for MF1/MT458 extension
 !-V         Version 8.09   August 2011   A. Trkov
 !-V                        - Improved error counting
 !-V                        - Fix checking No. of gammas in MF14 when all are
@@ -216,9 +218,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -1962,8 +1964,8 @@
 !
       REAL(KIND=R4), INTRINSIC :: ABS
 !
-      INTEGER(KIND=I4) :: K
-      REAL(KIND=R4) :: YK
+      INTEGER(KIND=I4) :: K,KK
+      REAL(KIND=R4) :: YK,YKK
       REAL(KIND=R4) :: SSUM
       REAL(KIND=R4) :: ET,DELTA,ERBAR
 !
@@ -1974,20 +1976,33 @@
          CALL ERROR_MESSAGE(0)
       END IF
       CALL RDLIST
-!*****SUM PARTIAL ENERGIES
+!*****SUM PARTIAL ENERGIES AND CHECK VALUES
       SSUM = 0.0
-      DO K=1,NPL-2,2
+      DO K=1,NPL,2
          YK = Y(K)
-         IF(YK.LT.0.0)   THEN
-            WRITE(EMESS,'(A,I3)')                                       &       
-     &                'NEGATIVE FISSION ENERGY COMPONENT #',K
-            CALL ERROR_MESSAGE(NSEQP)
-         ELSE IF(YK.LT.Y(K+1)) THEN
-            WRITE(EMESS,'(A,I3)')                                       &       
+         IF(K.LE.13) SSUM = SSUM + YK
+         KK = MOD(K,18)
+         YKK = Y(KK)
+         IF(ABS(YK).LT.Y(K+1)) THEN
+            WRITE(EMESS,'(A,I3)')                                       &
      &                'ERROR GREATER THAN VALUE AT COMPONENT #',K
             CALL ERROR_MESSAGE(NSEQP)
          END IF
-         IF(K.LE.13)   SSUM = SSUM + YK
+         IF(Y(K+1).LT.0.0)   THEN
+            WRITE(EMESS,'(A,I3)')                                       &
+     &                'NEGATIVE FISSION ENERGY UNCERTAINTY #',K+1
+            CALL ERROR_MESSAGE(NSEQP)
+         END IF
+         IF(K.LE.18.AND.YK.LT.0.0)   THEN
+            WRITE(EMESS,'(A,I3)')                                       &
+     &                'NEGATIVE FISSION ENERGY COMPONENT #',K
+            CALL ERROR_MESSAGE(NSEQP)
+         END IF
+         IF(YKK.LT.ABS(YK)) THEN
+            WRITE(EMESS,'(A,I3)')                                       &
+     &                'ABS(COMPONENT) GREATER THAN C0 VALUE AT #',K
+            CALL ERROR_MESSAGE(NSEQP)
+         END IF
       END DO
 !*****TEST SUMS
       ERQ = Y(15)
