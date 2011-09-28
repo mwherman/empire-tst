@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2017 $
+Ccc   * $Rev: 2130 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-02 01:16:27 +0200 (Mo, 02 Mai 2011) $
+Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -752,6 +752,8 @@ C
       INTEGER INT
       CHARACTER*2 symbejcr, symbnucr
 C
+      if(KTRlom(Nejc,Nnuc).eq.0) return ! for HI
+C
 C-----IKEY < 0  :   EIlab is given
 C-----IKEY > 0  :   EIcms is given
 C
@@ -819,6 +821,7 @@ C-----or reading error happened
 C-----(reading from the RIPL database)
 C
       ipoten = KTRlom(Nejc,Nnuc)
+	
       ki = 26
 C-----Searching in the RIPL database for IPOTEN catalog number
       CALL FINDPOT(ki,ieof,ipoten)

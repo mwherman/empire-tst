@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2118 $
-Ccc   * $Author: cmattoon $
-Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
+Ccc   * $Rev: 2130 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1823,6 +1823,7 @@ c     &                                 ,hcs
 
 9753           FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section ',G12.6,
+C    &           ' population XS to contin. ',G12.6,
      &           ' mb    : ',A9) 
              ENDDO
              WRITE (12,*)
@@ -1843,6 +1844,12 @@ C--------------(merely for checking purpose)
      &                G12.5,'' mb  '')') xtotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+
+                  WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') xtotsp
+                  WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+
                   xtotsp = xtotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
@@ -1851,9 +1858,15 @@ c                 ENDDO
                   nejc = 2
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
      &                G12.5,'' mb  '')') ptotsp
-                  ptotsp = ptotsp + CSDirlev(1,nejc)
+
+                  WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') ptotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+                  WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+
+                  ptotsp = ptotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
@@ -1863,6 +1876,11 @@ c                 ENDDO
      &                G12.5,'' mb  '')') atotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+                  WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') atotsp
+                  WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+
                   atotsp = atotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
@@ -2035,7 +2053,7 @@ C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.0 .and.
+             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
@@ -3159,7 +3177,7 @@ C     ENDDO
               WRITE (8,'(11x,   ''**********************''/)')
               DO nejc = 0, NEJcm
                 CALL Print_Total(nejc)
-                CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
+                IF (IOUT.GT.5) CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
               ENDDO   
             ENDIF
          ENDIF  

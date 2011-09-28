@@ -1,8 +1,9 @@
-Ccc   * $Rev: 2118 $
-Ccc   * $Author: cmattoon $
-Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
+Ccc   * $Rev: 2130 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
 
-      SUBROUTINE PLOT_ZVV_GSLD(LEVden,Nnuc) 
+      SUBROUTINE PLOT_ZVV_GSLD(Levtmp,Nnuc) 
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -14,7 +15,7 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Nnuc
+      INTEGER Nnuc,Levtmp
 C
 C Local variables
 C
@@ -33,25 +34,25 @@ C
      >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
       endif
 
-      IF(LEVden.eq.0) then
+      IF(Levtmp.eq.0) then
         write(fname,'(A10)') 'LD_EGSM_GS'
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A7)') 'EGSM-GS'
       ENDIF
 
-      IF(LEVden.eq.1) then
+      IF(Levtmp.eq.1) then
         write(fname,'(A10)') 'LD_GSM__GS'
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A7)') 'GSM-GS '
       ENDIF
 
-      IF(LEVden.eq.2) then
+      IF(Levtmp.eq.2) then
         write(fname,'(A10)') 'LD_GCM__GS'
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A7)') 'GCM-GS '
       ENDIF
 
-      IF(LEVden.eq.3) then
+      IF(Levtmp.eq.3) then
         write(fname,'(A10)') 'LD_HFBM_GS'
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A7)') 'HFB-GS '
@@ -81,7 +82,7 @@ C
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
 
-      IF(LEVDEN.EQ.3) then      
+      IF(Levtmp.EQ.3) then      
         write(caz,'(A7)') 'PosP-GS'
         CALL OPEN_ZVV(36,caz,' ')
         DO kk = 1, NEX(Nnuc)
@@ -126,13 +127,13 @@ C
       return
       end
 
-      SUBROUTINE PLOT_ZVV_SadLD(Nnuc,Ib) 
+      SUBROUTINE PLOT_ZVV_SadLD(Levtmp,Nnuc,Ib) 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C Dummy arguments
 C
-      INTEGER Nnuc,Ib
+      INTEGER Levtmp,Nnuc,Ib
 C
 C Local variables
 C
@@ -184,7 +185,7 @@ c       DO j = 1,NFIsj1
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
       
-      IF(LEVDEN.EQ.3) then      
+      IF(Levtmp.EQ.3) then      
        write(caz,'(A6,I1)') 'PosP-S',Ib
        CALL OPEN_ZVV(36,caz,' ')
        DO kk = 1,NRBinfis(Ib)

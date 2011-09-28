@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2016 $
+Ccc   * $Rev: 2130 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
+Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
 
 C
 C
@@ -1178,9 +1178,7 @@ C           IF (Cf.EQ.0.0D0) DEF(j,Nnuc) = beta ! Commented to avoid using wrong
      &             *segnor
 C
 C              write(*,*) segs,aj*(aj + 1)/(2.0*momort)
-
 C              Yrast states redefined for normal states to avoid discontinuities
-
 C              as proposed by MS, except for HI induced reactions (AJEc(0)>4)
 
                if(AEJc(0).LE.4.) segs = aj*(aj + 1)/(2.0*momort)   ! Jan 2011
@@ -2422,7 +2420,7 @@ C              No symmetry
          ENDDO
       ENDDO
 
-      IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
+      IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(NINT(ADIv),Nnuc,Ib)
 
       END
 C**************************************************************************
@@ -2869,7 +2867,7 @@ c-----------SYMMETRY ENHANCEMENT
       VIBf12(Ib)= vibbf12
       VIBfdt(Ib)= vibbfdt
 
-      IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
+      IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(NINT(ADIv),Nnuc,Ib)
       RETURN
       END
 C

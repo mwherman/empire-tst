@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2102 $
+Ccc   * $Rev: 2130 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-06-03 19:48:47 +0200 (Fr, 03 Jun 2011) $
+Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1441,8 +1441,9 @@ C
 C        Light ion nuclear mass estimated from mass excess table
 C
          IF(NDEJC.gt.6)  EJMass(NDEJC) = 
-     &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele +
-     &                   XMAss_ej(NDEJC))/AMUmev
+     &     AEJc(NDEJC) + XMAss_ej(NDEJC)/AMUmev
+C    &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele +
+C    &                   XMAss_ej(NDEJC))/AMUmev
 
 C--------READ shell corrections of RIPL-2/3
          CALL READ_SHELL_CORR
@@ -1455,26 +1456,50 @@ C-----------fix-up deformations and discrete levels for CCFUS
 
             DO j = 1, NSCc
                IF (QCC(j).EQ.0.0D0) THEN
-                  IF (FLAm(j).GE.0.0D0) WRITE (8,*)
+                  IF (FLAm(j).GE.0.0D0) THEN
+				  WRITE (8,*)
      &                ' Collective state ', ABS(FLAm(j)),
      &                ' in target (sequence number', j,
      &                ') has excitation energy of 0 MeV'
-                  IF (FLAm(j).LT.0.0D0) WRITE (8,*)
+                    iccerr = 1
+	            ENDIF
+                  IF (FLAm(j).LT.0.0D0) THEN
+				  WRITE (8,*)
      &                ' Collective state ', ABS(FLAm(j)),
      &                ' in projectile (sequence number', j,
      &                ') has excitation energy of 0 MeV'
+                    iccerr = 2
+                  ENDIF
                   WRITE (8,*)
      &            ' Likely the code was not able to find out this state'
                   WRITE (8,*)
-     &                 ' you must set this energy in the optional input'
-                  iccerr = 1
+     &            ' you must set this energy in the EMPIRE input  '
+	            NSCc = NSCc - 1
                ENDIF
                IF (BETcc(j).EQ.0.0D0) THEN
                   IF (FLAm(j).LT.0.0D0) BETcc(j) = DEFprj
                   IF (FLAm(j).GE.0.0D0) BETcc(j) = DEF(1,0)
                ENDIF
             ENDDO
-            IF (iccerr.EQ.1) STOP 'CCFUS STATE MISSING'
+            IF (iccerr.EQ.1) THEN
+	        WRITE(8,*) 
+		    WRITE(8,*) 
+     &		' WARNING: CCFUS COUPLED LEVEL MISSING FOR TARGET'
+		    WRITE(8,*) 
+     &        ' WARNING: Number of inelastic levels in CCFUS =',NSCc
+	        IF(NSCc.LT.0) NSCc =0 
+	        WRITE(8,*) 
+	      ENDIF
+            IF (iccerr.EQ.2) THEN
+	        WRITE(8,*) 
+		    WRITE(8,*) 
+     &		' WARNING: CCFUS COUPLED LEVEL MISSING FOR PROJECTILE'
+		    WRITE(8,*) 
+     &        ' WARNING: Number of inelastic levels in CCFUS =',NSCc
+	        IF(NSCc.LT.0) NSCc =0 
+	        WRITE(8,*) 
+	      ENDIF
+
          ENDIF
 C--------fix-up deformations for coupled channels *** done ***
          DO nnuc = 0, NDNUC
@@ -3041,7 +3066,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    RIVOLI, $Rev: 2102 $  |'
+      WRITE (8,*)'                       |    RIVOLI, $Rev: 2130 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, June 2011    |'
