@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2118 $
-Ccc   * $Author: cmattoon $
-Ccc   * $Date: 2011-06-09 23:02:57 +0200 (Do, 09 Jun 2011) $
+Ccc   * $Rev: 2131 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1703,12 +1703,18 @@ C--- Reading and writing header
           write(71,'(a100)') line
          end do
 
-C--- Check to see if rotational or vibrational
+C--- Check to see if rotational or vibrational or soft
         read(70,'(a50)') line(1:50)
         idef=0
         if(line(36:43).eq.'deformed') idef=1
+        if(line(36:43).eq.'dynamica') then
+C         Added for soft rotor potentials
+          SOFt = .TRUE.
+          idef = 0
+          WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
+          STOP 'OPTMAN OMP fit is not implemented' 
+        endif    
         write(71,'(a50)') line(1:50)
-
         do i=1,2
           read(70,'(a50)') line(1:50)
           write(71,'(a50)') line(1:50)

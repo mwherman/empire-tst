@@ -1,6 +1,6 @@
-C $Rev: 1958 $
+C $Rev: 2131 $
 C $Author: rcapote $
-C $Date: 2011-01-27 03:19:40 +0100 (Do, 27 Jän 2011) $
+C $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -51,10 +51,11 @@ C
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
+     &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe,
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,
-     &        IOUt, IPFdis(nftrans,nfparab), IPH(ndcollev),
+     &        IOUt, IPFdis(nftrans,nfparab), 
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
@@ -66,11 +67,10 @@ C
      &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab),
      &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
-     &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
-     &        NRHump, NPRIm_g, NPAirpe
+     &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead, EXClusiv
+     &        RELkin, SDRead, EXClusiv, SOFt
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,ENDf(0:ndnuc),
@@ -132,7 +132,8 @@ C
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
       DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED 
-	  DOUBLE PRECISION rTUNEfi(0:ndnuc)
+
+      DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
 c
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
@@ -183,7 +184,7 @@ c
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
-     &                 CSPfis, RECoil, POPcselv
+     &                 D_nno, CSPfis, RECoil, POPcselv
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_E/ EMPiredir
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
@@ -191,14 +192,14 @@ c
      &                  ISIsom, IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX,
      &                  IX4ret, JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs,
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite,
-     &                  NEXr, IDNa, ND_nlv, IPH, LMAxcc, IDEfcc, IOPsys,
+     &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
-     &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff,
+     &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
      &                  NANgela,NDAng,ISProd,FITomp,ICAlangs, NPAirpe,
      &                  KALman, MT2, MT91, MT649, MT849, IOPran, NPRIm_g
-      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed,
+      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt,
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
@@ -209,4 +210,3 @@ c
       COMMON /TLCOEF/ TL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas
-

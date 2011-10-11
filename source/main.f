@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2130 $
+Ccc   * $Rev: 2131 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-09-28 18:19:21 +0200 (Mi, 28 Sep 2011) $
+Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -117,7 +117,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
      &        isnewchain(0:1), ncon
       INTEGER INT, MIN0, NINT
-      LOGICAL nvwful, fexist, skip_fiss
+      LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
@@ -626,12 +626,71 @@ C
       ENDIF
       ENDIF
 C
+C-----calculate transmission coefficients in outgoing channels
+C
+      DO nnuc = 1, NNUcd
+         DO nejc = 1, NEJcm
+            ares = A(nnuc) - AEJc(nejc)
+            zres = Z(nnuc) - ZEJc(nejc)
+C           residual nuclei must be heavier than alpha
+            if(ares.le.4 . or. zres.le.2) cycle
+
+            izares = INT(1000*zres + ares)
+            CALL WHERE(izares,nnur,iloc)
+            IF (iloc.EQ.1) cycle
+
+            netl = 6
+            IF (NEX(nnuc).GT.0) netl =
+     &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
+            IF (netl.GT.NDETL) cycle
+
+C-----------calculate transmission coefficients
+            ICAlangs = ICAlangs-10
+            itmp = NANgela
+            NANgela = 2
+            CALL TLEVAL(nejc,nnur,nonzero)
+            ICAlangs = ICAlangs+10
+            NANgela = itmp
+C-----------print transmission coefficients
+            IF (nonzero .AND. IOUt.EQ.5) THEN
+              WRITE (8,*)
+              WRITE (8,*) ' Transmission coefficients for '
+              WRITE (8,'(1x,A15,I3,A3,I3,A3,F4.1)')
+     &                    ' Projectile: A=', INT(AEJc(nejc)), ' Z=',
+     &                   INT(ZEJc(nejc)), ' S=', SEJc(nejc)
+              WRITE (8,'(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
+     &                    ' TARGET: A=', INT(A(nnur)), ' Z=',
+     &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
+     &                   ' P=', INT(LVP(1,nnur))
+              DO i = 1, netl
+                IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (8,99010)
+     &             ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
+              ENDDO
+              WRITE (8,'(1X,/)')
+            ENDIF
+
+C-----------check of etl index determination (to be deleted)
+C           IEXR=NEX(NNUC)-NEXR(NEJC,NNUC)
+C           ITLC=IEXR-5
+C           WRITE(8,*) 'IEXR, ITLC, Q',IEXR,ITLC,Q(NEJC,NNUC)
+C           do 100 i=nex(nnuc),2,-1
+C             JMAX=I-IEXR
+C             do 100 j=jmax,1,-1
+C               etlr=ex(i,nnuc)-ex(j,nnur)-q(nejc,nnuc)
+C               jtl=i-j-itlc
+C 100           WRITE(8,*) 'i,j,etlr,jtl,etl ',
+C    &          i,j,etlr,jtl,etl(jtl,nejc,nnur)
+C-----------check of etl index determination done
+C
+C-----------determination of etl matrix and transmission coeff.--done
+         ENDDO     !over ejectiles (nejc)
+      ENDDO     !over nuclei (nnuc)
+C
 C     Skipping all emission calculations
 C     GOTO 99999
 C
 C-----Locate positions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
-      write(*,*) mt2
       CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)
       CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)
       CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)
@@ -966,18 +1025,14 @@ C-----
      &  '' DWBA inelastic contribution '')')
          ENDIF
       ENDIF
-C     IF (ENDf(1).EQ.0.0D0) THEN
-C        WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')') CSFus
-C        WRITE (12,'('' FUSION CROSS SECTION = '',G13.6, '' mb'')')
-C    &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
-C     ELSE
-         WRITE (12,*) ' '
-         WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
-     &         CSFus + (SINl + SINlcc)*FCCred + SINlcont
-         WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
+C
+      WRITE (12,*) ' '
+      WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
+     &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
+      WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6,'' mb'')')
      &         TOTcs*TOTred
-         WRITE (12,*) ' '
-C     ENDIF
+      WRITE (12,*) ' '
+C
       POPmax(1) = CSFus*1.0E-25
 C-----Renormalization of CN spin distribution if TURBO mode invoked
       IF (LTUrbo.NE.1) THEN
@@ -1056,6 +1111,7 @@ C--------Reset variables for life-time calculations
             WRITE (8,*) ' '
          ENDIF
 C        IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
+         IF (                         FITomp.LT.0) THEN
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
@@ -1069,10 +1125,10 @@ C        IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-C         ENDIF
-          WRITE (12,*)
+          ENDIF
+            WRITE (12,*)
      &' ---------------------------------------------------------------'
-          IF (nnuc.NE.1) THEN
+            IF (nnuc.NE.1) THEN
                IF (nnuc.EQ.mt91) THEN
                  nejc = 1
                ELSEIF (nnuc.EQ.mt649) THEN
@@ -1648,7 +1704,7 @@ c            write(0,*) CSPrd(nnuc),NLV(nnuc)
      &                              POPlv(il,nnuc),' ISOMER'
             ENDIF
 C           IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
-            IF (                      nnuc.EQ.1) THEN
+            IF (                      nnuc.EQ.1) THEN            
 C--------------Check for the number of branching ratios
                nbr = 0
                DO ib = 1, NDBR
@@ -1664,8 +1720,8 @@ C--------------Check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-C       IF ( (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0.d0) .AND.
-        IF ( (                      CSPrd(nnuc).GT.0.d0) .AND.
+C        IF ( (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0.d0) .AND.
+         IF ( (                      CSPrd(nnuc).GT.0.d0) .AND.
      &        (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &         nnuc.EQ.mt849)) THEN
             WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1823,7 +1879,6 @@ c     &                                 ,hcs
 
 9753           FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section ',G12.6,
-C    &           ' population XS to contin. ',G12.6,
      &           ' mb    : ',A9) 
              ENDDO
              WRITE (12,*)
@@ -1842,14 +1897,12 @@ C--------------(merely for checking purpose)
                   nejc = 1
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
      &                G12.5,'' mb  '')') xtotsp
-                  WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
-
                   WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
      &                G12.5,'' mb  '')') xtotsp
+                  WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
-
                   xtotsp = xtotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
@@ -1858,15 +1911,13 @@ c                 ENDDO
                   nejc = 2
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
      &                G12.5,'' mb  '')') ptotsp
-
                   WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
      &                G12.5,'' mb  '')') ptotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
-
-                  ptotsp = ptotsp + CSDirlev(1,nejc)
+                  ptotsp = ptotsp + CSDirlev(1,nejc)     
 c                 DO ilev = 1, NLV(nnuc)
 c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
@@ -1880,12 +1931,12 @@ c                 ENDDO
      &                G12.5,'' mb  '')') atotsp
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                G12.5,'' mb  '')') CSDirlev(1,nejc)
-
                   atotsp = atotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
              ENDIF
+
              WRITE (8,*) ' '
              WRITE (8,*) ' '
              WRITE (8,*)

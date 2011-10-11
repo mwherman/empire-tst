@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 2131 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -49,7 +49,7 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
-     &        nang, itmp2, kk
+     &        nang, itmp2, kk, itmp3, indic
       INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
@@ -298,7 +298,7 @@ C--------and calculate transmission coefficients
             IF (stl(il).GT.1.0D0) THEN
                WRITE (8,
      &'(''WARNING: INPUT FUSION TRANSMISSION > 1'', '' FOR l='',
-     &I3)') j - 1
+     &I3)') il - 1
                WRITE (8,*) ' EXECUTION STOPPED!!!'
                STOP
             ENDIF
@@ -346,6 +346,7 @@ C--------calculation of o.m. transmission coefficients for absorption
          einlab = -EINl
          IWArn = 0
          ldbwacalc = .FALSE.
+	   CCCalc = .FALSE.
          ltlj = .FALSE.
          lodd = .false.
          IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
@@ -401,13 +402,13 @@ C--------------Restoring KTRlom(0,0)
             ldbwacalc = .TRUE.
          ENDIF
 C
-C---------In EMPIRE 2.19 DIRECT=1 and DIRECT=2 produces exactly
+C---------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly
 C---------the same array of transmission coefficients calculated
 C---------by CC OMP. The differences between DIRECT 1/2 options are in the
 C---------calculations of the outgoing channel (TRANSINP() routine)
 C---------DIRECT 2 option uses CC method to produce outgoing TLs
 C---------for the inelastic channel. DIRECT 1 option assumes SOMP
-C---------with only one level to calculate the inelastic TLs.
+C---------with only one level (the GS) to calculate the inelastic TLs.
 C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
             WRITE (8,*) ' CC transmission coefficients used for ',
@@ -422,24 +423,38 @@ C--------------Saving KTRlom(0,0)
             ENDIF
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
-            IF (DEFormed) THEN
-C--------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
-               CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
-               IF (ldbwacalc) THEN
+            IF (SOFt) THEN
+C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
+              CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab) 
+C             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
+              IF (ldbwacalc) THEN
                 CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
-               ELSE
-                CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
-                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.FALSE.)
-               ENDIF
-            ELSE
-C--------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
-               CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
-               IF (ldbwacalc) THEN
-                CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
-               ELSE
+              ELSE
                 CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                 CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
-               ENDIF
+              ENDIF
+            ELSE
+              IF (DEFormed) THEN
+C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
+                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
+                IF (ldbwacalc) THEN
+                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                ELSE
+                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                  CALL ECIS2EMPIRE_TL_TRG(
+     >                                 Npro,Ntrg,maxlw,stl,sel,.FALSE.)
+                ENDIF
+              ELSE
+C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
+                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
+                IF (ldbwacalc) THEN
+                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                ELSE
+                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                  CALL ECIS2EMPIRE_TL_TRG(
+     >                                  Npro,Ntrg,maxlw,stl,sel,.TRUE.)
+                ENDIF
+              ENDIF
             ENDIF
             IF (DIRect.EQ.1) THEN
 C--------------Restoring KTRlom(0,0)
@@ -473,7 +488,7 @@ C                 Only Legendre elastic expansion is needed
                ENDIF
 C--------------Inelastic cross section (incident.ics)
                OPEN (45,FILE = 'dwba.ICS',STATUS = 'OLD',ERR = 220)
-               OPEN (46,FILE = 'ccm.ICS' ,STATUS = 'OLD',ERR = 220)
+               OPEN (46,FILE = 'ccm.ICS'   ,STATUS = 'OLD',ERR = 220)
                OPEN (47,FILE = 'INCIDENT.ICS',STATUS = 'UNKNOWN')
                READ (45,'(A80)',END = 220,ERR = 220) rstring
                READ (46,'(A80)',END = 210,ERR = 210) ! first line is taken from dwba
@@ -495,17 +510,12 @@ C--------------Angular distribution (incident.ang)
                WRITE (47,'(A80)') rstring
                DO i = 1, ND_nlv
 C-----------------checking the correspondence of the excited states
-C                 READ (45,'(5x,F5.1,A1,4x,i5)',END = 240) stmp1, ctmp1,
-C    &                  nang
-C                 READ (45,'(5x,F5.1,A1,i4,i5)',END = 240) stmp1, ctmp1,
-C    &                  itmp2, nang
                   READ (45,'(i5,6x,i4,i5)',END = 240,ERR = 240) 
      &                 istat1, itmp2, nang
-C                 READ (46,'(5x,F5.1,A1)',END = 235) stmp2, ctmp2
-                  READ (46,'(i5)',END = 235,ERR = 235) istat2
+                  READ (46,'(i5,6x,i4))',END = 235,ERR = 235) 
+     &                 istat2, itmp3
 C-----------------checking the correspondence of the excited states for even-even targets
                   IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   
-C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN   
                     WRITE (8,*)
      &            ' WARNING: DWBA and CCM state order do not coincide'
                      STOP
@@ -518,13 +528,20 @@ C    &                 (stmp1.NE.stmp2 .OR. ctmp1.NE.ctmp2) )THEN
                   READ (45,'(A80)',ERR = 240, END = 240) rstring
  2351             WRITE (47,'(A80)') rstring
                   DO j = 1, itmp2*nang ! ecis06
-                     READ (45,'(A80)',ERR = 240,END = 240) rstring
-                     READ (46,'(A80)',ERR = 236,END = 236) rstring
-  236                WRITE (47,'(A80)') rstring
-                  ENDDO
-               ENDDO
-  240          CLOSE (45,STATUS = 'DELETE')
-               CLOSE (46,STATUS = 'DELETE')
+                     READ (45,'(i3,A80)',ERR = 240,END = 240) 
+     &                 indic, rstring
+	               if(ICOllev(i).GE.LEVcc .and. indic.eq.0)
+     &                 WRITE (47,'(3x,A80)') rstring 
+	            ENDDO
+                  DO j = 1, itmp3*nang ! ecis06
+                     READ (46,'(i3,A80)',ERR = 236,END = 236) 
+     &                 indic, rstring
+	               if(ICOllev(i).LT.LEVcc .and. indic.eq.0)
+     &                 WRITE (47,'(3x,A80)') rstring 
+	            ENDDO
+  236          ENDDO
+  240          CLOSE (45) ! ,STATUS = 'DELETE')
+               CLOSE (46) ! ,STATUS = 'DELETE')
                CLOSE (47)
 C--------------Experimental angular distribution (incident.ang)
                IF( ICAlangs.GT.0) THEN   ! To be updated for ecis06 
@@ -804,43 +821,68 @@ C--------Corrected scattering radius
            IF(sel(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
-         selast = selast *  10.d0*PI/ak2
-         WRITE(8,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+	   IF(selast.gt.0.d0) then
+           selast = selast *  10.d0*PI/ak2
+           WRITE(8,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs 
-         WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
+           WRITE(12,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
      &              selast, ELAcs
-         WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
+           WRITE(53,'(7x,5HElab=,F7.2,1x,3HkeV,
      &              6x,17HSHAPE ELASTIC XS=,F10.3,1x,2hmb)') 
      &              EINl*1000, selast
-         WRITE (8,99006)
-         WRITE (12,99006)
-         WRITE (53,99006)
-         DO l = 0, maxlw
-           IF(STL(l+1).LT.1.d-15) EXIT
-           WRITE (8,99007) l, stl(l + 1), 
+           WRITE (8,99006)
+           WRITE (12,99006)
+           WRITE (53,99006)
+           DO l = 0, maxlw
+             IF(STL(l+1).LT.1.d-15) EXIT
+             WRITE (8,99007) l, stl(l + 1), 
      &              10.d0*PI/ak2*sel(l + 1)
-           WRITE (12,99007) l, stl(l + 1),
+             WRITE (12,99007) l, stl(l + 1),
      &              10.d0*PI/ak2*sel(l + 1)
-           WRITE (53,99007) l, stl(l + 1),
+             WRITE (53,99007) l, stl(l + 1),
      &              10.d0*PI/ak2*sel(l + 1)
-         ENDDO
-         WRITE (8,99008)
-         WRITE (12,99008)
-         WRITE (53,99008)
-99006    FORMAT (6x,' ****************************************'/
-     &           6x,' *  L         Tl(L)    Shape Elastic(L) *')
-99007    FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
-99008    FORMAT (6x,' ****************************************')
-         WRITE (8,*)
-         WRITE (8,*)
-     &   '      SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
-         WRITE (8,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
-         WRITE (8,*)
-     &   '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
-         WRITE (8,*)
-         WRITE (12,*)
+           ENDDO
+           WRITE (8,99008)
+           WRITE (12,99008)
+           WRITE (53,99008)
+99006      FORMAT (6x,' ****************************************'/
+     &             6x,' *  L         Tl(L)    Shape Elastic(L) *')
+99007      FORMAT (6x,' *',I3,2(1x,D15.7),'   *')
+99008      FORMAT (6x,' ****************************************')
+           WRITE (8,*)
+           WRITE (8,*)
+     &     '      SElast = SUM_over_L {(2*L+1)*Shape Elastic(L)}'
+           WRITE (8,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
+           WRITE (8,*)
+     &     '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
+           WRITE (8,*)
+           WRITE (12,*)
+	    ELSE
+           WRITE (8,89006)
+           WRITE (12,89006)
+           WRITE (53,89006)
+           DO l = 0, maxlw
+             IF(STL(l+1).LT.1.d-15) EXIT
+             WRITE (8 ,89007) l, stl(l + 1) 
+             WRITE (12,89007) l, stl(l + 1)
+             WRITE (53,89007) l, stl(l + 1)
+           ENDDO
+           WRITE (8,89008)
+           WRITE (12,89008)
+           WRITE (53,89008)
+89006      FORMAT (/6x,' ************************'/
+     &             6x,' *  L         Tl(L)     *')
+89007      FORMAT (6x,' *',I3,1x,D15.7,'   *')
+89008      FORMAT (6x,' ************************')
+           WRITE (8,*)
+           WRITE (8,*)'      Sfus   = SUM_over_L {(2*L+1)*Tl(L)}'
+           WRITE (8,*)
+     &     '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
+           WRITE (8,*)
+           WRITE (12,*)
+	    ENDIF
       ENDIF
 
       IF (INT(AEJc(0)).GT.0)
@@ -893,7 +935,7 @@ C    &         '             to discrete un-coupled collective levels'
       IF (IOUt.EQ.5) THEN
          WRITE (8,*)
          WRITE (8,*) 
-     &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(ECIS)'
+     &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(OMP) '
          WRITE (8,'(4x,3(4x,D12.6,4x))')
      &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
          WRITE (8,*)
