@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2131 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 
 C
       SUBROUTINE INPUT
@@ -41,11 +41,11 @@ C
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT
-      LOGICAL gexist, fexist, calc_fiss
+      LOGICAL gexist, fexist, calc_fiss
 
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        netl, nnuc, nnur, mulem, nucmin
+     &        netl, nnuc, nnur, mulem, nucmin, hh
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       INTEGER INT, ISEED, NINT
       CHARACTER*2 SMAT
@@ -121,7 +121,6 @@ C mt    triton mass   3.015 500 713 amu 3
 C m3He  3He mass      3.014 932 234 69 amu 1
 C ma    4He mass      4.001 506 1747 amu 1
 C
-
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
@@ -158,9 +157,7 @@ C--------neutralize tuning factors and OMP normalization factors
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
             NRSmooth(nnuc) = 5
-            DO j = 1, NDLV  ! bug found, used to be NDLW
-
-
+            DO j = 1, NDLV  ! bug found, used to be NDLW
                ISIsom(j,nnuc) = 0
             ENDDO
             DO nejc = 0, NDEJC
@@ -196,8 +193,6 @@ C-----------set level density parameters
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
             ATIlfi(nnuc) = 1.
-            FISbin(nnuc) = 1.
-            FISbou(nnuc) = 1.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
 C-----------set ENDF flag to 0 (no ENDF formatting)
@@ -215,6 +210,13 @@ C--------set gamma-strength parameters
             GDRpar(5,nnuc) = 0.0
             GDRpar(6,nnuc) = 0.0
             GDRpar(7,nnuc) = 1.0
+            DO hh=1,NFHump
+               FISv_n(hh,nnuc)=1.0
+               FISh_n(hh,nnuc)=1.0
+               FISa_n(hh,nnuc)=1.0
+               FISd_n(hh,nnuc)=1.0
+               FISn_n(hh,nnuc)=1.0
+            ENDDO           
          ENDDO
          IZA(0) = 0
          ENDf(0) = 1.0  
@@ -232,7 +234,6 @@ C--------set gamma-strength parameters
 C--------Full gamma cascade becomes the default setting  (Jan 2011)
 C--------Use GCASC input parameter to turn it off
          GCAsc =  1.0
-
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
          BETav = 4.0           ! viscosity parameter
@@ -259,8 +260,8 @@ C
 C--------Capote, additional input options
 C
          DIRect = 0
-         KTRompcc = 0
-         SOFt = .FALSE.
+         KTRompcc = 0
+         SOFt = .FALSE.
          CCCalc = .FALSE.
          NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
@@ -298,7 +299,6 @@ C
          IOPSYS = 0 !   LINUX - Default
 C        IOPSYS = 1 !   WINDOWS
          CALL GETENV ('OS', empireos)
-
          if(empireos(1:3). eq. 'Win') IOPsys = 1
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
@@ -827,7 +827,6 @@ C--------------To find inelastic channel
      &             NPRoject = nejc
                ares = A(nnuc) - AEJc(nejc)
                zres = Z(nnuc) - ZEJc(nejc)
-
 C              residual nuclei must be heavier than alpha
                if(ares.le.4 . or. zres.le.2) cycle
 
@@ -1621,18 +1620,13 @@ C-----set giant resonance parameters for CN
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
       CALL LEVREAD(0)
-
-
-
       IF (DIRect.GT.0 .AND. FIRst_ein  .AND. AEJc(0).LE.4 ) THEN
                               ! Inelastic scattering by DWBA for all particles
 C--------fix-up deformations and discrete levels for ECIS coupled channels
             ierr = IFINDCOLL()
 C-----------Defining ICOller(i)
-            ICOller(1) = ICOllev(1)
-
-            DO i = 2, ND_nlv
-
+            ICOller(1) = ICOllev(1)
+            DO i = 2, ND_nlv
                itmp = ICOllev(i)
                IF (itmp.GE.LEVcc) itmp = ICOllev(i) - LEVcc
                ICOller(i) = itmp
@@ -1742,16 +1736,15 @@ C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
 C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.0
-C-----calculate compound nucleus level density
-      ARGred = -1.
-      IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
-C     IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,0.0D0,2.D0) ! to do a fitting
-      IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
-      IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
-      IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,0.0D0)
-      IF (IOUt.EQ.6) THEN
+C-----calculate compound nucleus level density (only for FITLEV>0)
+      IF(FITlev.GT.0) THEN
+       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
+       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
+       IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
+       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
+       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
-         IF (ADIv.LT.3.0D0) THEN
+         IF (ADIv.NE.3.0D0) THEN
            WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
      &          SYMb(nnuc)
            DO i = 1, NEX(nnuc)
@@ -1793,6 +1786,7 @@ c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ENDIF
+       ENDIF
       ENDIF
 C
 C-----other decaying nuclei
@@ -1915,7 +1909,7 @@ C-----------determination of Q-value for isotope production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
             IF (qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
             IF (FITlev.GT.0.0D0) ECUt(nnur) = 0.0
-C-----------determination of etl matrix and transmission coeff. calculation
+C-----------determination of etl matrix for the transmission coeff. calculation
 C-----------first 4 elements are set independently in order to get more
 C-----------precise grid at low energies. from the 5-th element on the step
 C-----------is de (bin width).
@@ -1969,45 +1963,6 @@ Cpr         >        AEJC(NEJC),' Z=',ZEJC(NEJC)
 Cpr         DO I=1,NETL
 Cpr         WRITE(8,*) I,ETL(I,NEJC,NNUR)
 Cpr         END DO
-C-----------calculate transmission coefficients
-C           IF (FITlev.EQ.0) THEN
-C              ICAlangs = ICAlangs-10
-C              itmp = NANgela
-C              NANgela = 2
-C              CALL TLEVAL(nejc,nnur,nonzero)
-C              ICAlangs = ICAlangs+10
-C              NANgela = itmp
-C--------------print transmission coefficients
-C              IF (nonzero .AND. IOUt.EQ.5) THEN
-C                 WRITE (8,*)
-C                 WRITE (8,*) ' Transmission coefficients for '
-C                 WRITE (8,'(1x,A15,I3,A3,I3,A3,F4.1)')
-C    &                    ' Projectile: A=', INT(AEJc(nejc)), ' Z=',
-C    &                   INT(ZEJc(nejc)), ' S=', SEJc(nejc)
-C                 WRITE (8,'(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
-C    &                    ' TARGET: A=', INT(A(nnur)), ' Z=',
-C    &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
-C    &                   ' P=', INT(LVP(1,nnur))
-C                 DO i = 1, netl
-C                    IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (8,99010)
-C    &                   ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
-C                 ENDDO
-C                 WRITE (8,'(1X,/)')
-C              ENDIF
-C--------------check of etl index determination (to be deleted)
-C              IEXR=NEX(NNUC)-NEXR(NEJC,NNUC)
-C              ITLC=IEXR-5
-C              WRITE(8,*) 'IEXR, ITLC, Q',IEXR,ITLC,Q(NEJC,NNUC)
-C              do 100 i=nex(nnuc),2,-1
-C              JMAX=I-IEXR
-C              do 100 j=jmax,1,-1
-C              etlr=ex(i,nnuc)-ex(j,nnur)-q(nejc,nnuc)
-C              jtl=i-j-itlc
-C              100         WRITE(8,*) 'i,j,etlr,jtl,etl ',
-C              &          i,j,etlr,jtl,etl(jtl,nejc,nnur)
-C--------------check of etl index determination done
-C-----------determination of etl matrix and transmission coeff.--done
-C           ENDIF
          ENDDO     !over ejectiles (nejc)
       ENDDO     !over nuclei (nnuc)
       WRITE (8,*) ' '
@@ -2020,22 +1975,24 @@ C           ENDIF
           WRITE(8,*) 'Spectra marked with < are inclusive' 
         ENDIF
         WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
-        ENDIF
+      ENDIF
 
       WRITE (8,*) ' '
-C-----calculate residual nucleus level density
-      DO nnur = 2, NNUct
-         IF (NEX(nnur).GE.1 .OR. FITlev.GT.0) THEN
+C-----calculate residual nucleus level density (only for FITLEV>0)
+      IF(FITlev.GT.0) THEN
+       DO nnur = 2, NNUct
+         ia = INT(A(nnur))
+         iz = INT(Z(nnur))
+         IF (NEX(nnur).LE.0) cycle
             IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-C           IF (ADIv.EQ.1.0D0) CALL ROCOL(nnur,0.D0,2.D0)    ! to fit LDs
+            IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
 C-----------<m2> could be added to the input ( to use 0.124 if needed)
             IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
 C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
-            IF (ADIv.GT.3.0D0) CALL ROCOL(nnur,0.D0)
             IF (IOUt.EQ.6) THEN
               ia = INT(A(nnur))
-              IF (ADIv.LT.3.0D0) THEN
+              IF (ADIv.NE.3.0D0) THEN
                 WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
      &          ia, SYMb(nnur)
                 DO i = 1, NEX(nnur)
@@ -2074,13 +2031,10 @@ c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
 c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
                 ENDDO
+              ENDIF
             ENDIF
-          ENDIF
-         ELSE
-            ia = INT(A(nnur))
-            iz = INT(Z(nnur))
-         ENDIF
-      ENDDO
+       ENDDO
+      ENDIF
       WRITE (8,*)
       DO i = 1, NDLW
          DRTl(i) = 1.0
@@ -2091,18 +2045,10 @@ C--------OMPAR.DIR
          CLOSE (33,STATUS = 'DELETE')
 C--------OMPAR.RIPL
          CLOSE (29,STATUS = 'DELETE')
-         IF(ADIv.EQ.0 .OR. ADIv.EQ.2) THEN
-            STOP 'PLOTS DONE'
-         ELSE
-            WRITE(8,*) ' '
-            WRITE(8,*) 'LEVEL DENSITY PLOTS ARE ONLY POSSIBLE'
-            WRITE(8,*) 'FOR EMPIRE-SPECIFIC (LEVDEN=0) AND   '
-            WRITE(8,*) 'GILBERT-CAMERON LEVEL DENSITIES      '
-            STOP 'NO CUMULATIVE PLOTS FOR THIS VALUE OF LEVDEN'
-         ENDIF
+         STOP 'PLOTS DONE'
       ENDIF
-C---- fission input is created if it does not exist and FISSHI=0
 C
+C---- fission input is created if it does not exist and FISSHI=0
 C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
@@ -2281,7 +2227,7 @@ C-------constructing input and filenames
         REWIND (13)
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
-     &      ngamr, nmax, itmp2, qn
+     &      ngamr, nmax, itmp2, qn
 
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
@@ -2289,7 +2235,6 @@ C-------constructing input and filenames
         ENDDO
         GOTO 100
       ELSE
-
 C----------nmax is a number of levels that constitute a complete scheme as
 C----------estimated by Belgya for RIPL-2. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
@@ -2313,8 +2258,6 @@ C
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
 C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
-
-
           WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
@@ -2334,7 +2277,6 @@ C---------limit to max. of 40 levels if ENDF active
           ENDIF
 C---------levels for nucleus NNUC copied to file *.lev
           NSTored(nnuc) = izatmp
-
           DO ilv = 1, NLV(Nnuc)
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
@@ -2470,25 +2412,20 @@ C--------------------only gamma decay is considered up to now
         ADDnuc = .TRUE.
         GOTO 100
       ENDIF
-
       IF(FIRst_ein) WRITE (8,
      &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in the RIPL database '')') ia, iz
-
 
       IF(ADDnuc) THEN
         CLOSE(13)
         CLOSE(14,STATUS='DELETE')
         IF (FILevel) OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
       ENDIF
-
       RETURN
 
   400 WRITE (8,'('' WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
-
       RETURN
-
       END
 C
 C
@@ -2744,7 +2681,7 @@ C        DO i = 1, NNUcd
          WRITE (8,*)' Alpha     o. m. parameters: RIPL catalog number ',
      &            KTRlom(3,1)
         else
-         WRITE (8,*) ' Alpha     o. m. parameters: Kumar & Kailas 2007 '
+         WRITE (8,*)' Alpha     o. m. parameters: Kumar & Kailas 2007 '
         endif
         WRITE (8,*) ' Deuteron  o. m. parameters: RIPL catalog number ',
      &            KTRlom(4,1)
@@ -3043,8 +2980,10 @@ C
       INTEGER IPArCOV
       INTEGER INT
       CHARACTER*6 name, namee
+      CHARACTER*35 char
+      CHARACTER*13 char1
       LOGICAL fexist
-      DOUBLE PRECISION val,vale,sigma,shelss
+      DOUBLE PRECISION val,vale,sigma,shelss,quant
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -3075,10 +3014,10 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    RIVOLI, $Rev: 2131 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2133 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
-      WRITE (8,*)'                       |     Brazil, June 2011    |'
+      WRITE (8,*)'                       |     Brazil, Dec 2011     |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -3101,9 +3040,9 @@ C     GOTO 10
       WRITE (12,*) 'system a number of important modules and features: '                                         '
       WRITE (12,*) '                                                   '
       WRITE (12,*) '- Spherical and deformed Optical Model including   '
-      WRITE (12,*) '  coupled-channels -ECIS06 by J. Raynal            '
+      WRITE (12,*) '  coupled-channels-ECIS06 by J. Raynal             '
       WRITE (12,*) '- Soft-rotator deformed Optical Model including    '
-      WRITE (12,*) '  coupled-channels -OPTMAN by E.Soukhovitskii et al'
+      WRITE (12,*) '  coupled-channels-OPTMAN by E.Soukhovitskii et al.'
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
       WRITE (12,*) '  HRTW width fluctuation correction                '
       WRITE (12,*) '- Quantum-mechanical MSD TUL model (codes ORION &  '
@@ -3431,8 +3370,7 @@ C
             GOTO 100
          ENDIF
          IF (name.EQ.'EcDWBA') THEN
-C           EcDWBA meaningless if Collective level file exists
-
+C           EcDWBA meaningless if Collective level file exists
             INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
             IF(fexist) goto 100
             ECUtcoll = val
@@ -3604,29 +3542,20 @@ C-----
      &           '('' EMPIRE-specific level densities were selected '')'
      &           )
             IF (ADIv.EQ.1.0D0) WRITE (8,
-     &'('' EMPIRE-specific level densities with fitted parameters were s
-     &elected'')')
-            IF (ADIv.GT.3.0D0) WRITE (8,
-     &     '('' ROCOL level densities with a=A/''  ,F5.2,'' selected'')'
-     &     ) ADIv
+     &           '('' GSM (Ignatyuk) level densities were selected '')')
             IF (ADIv.EQ.2.0D0) WRITE (8,
      &           '('' Gilbert-Cameron level densities were selected '')'
      &           )
             IF (ADIv.EQ.3.0D0) WRITE (8,
      &          '('' Microscopic parity dependent HFB level densities we
-
-
      &re selected'')')
             IF (ADIv.EQ.0.0D0) WRITE (12,
      &           '('' EMPIRE-specific level densities '')'
      &           )
             IF (ADIv.EQ.1.0D0) WRITE (12,
-     &'('' EMPIRE-specific level densities with fitted parameters'')')
-            IF (ADIv.GT.3.0D0) WRITE (12,
-     &     '('' ROCOL level densities with a=A/''  ,F5.2)') ADIv
+     &           '('' GSM level densities (Ignatyuk)  '')')
             IF (ADIv.EQ.2.0D0) WRITE (12,
-     &           '('' Gilbert-Cameron level densities '')'
-     &           )
+     &           '('' Gilbert-Cameron level densities '')')
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
             GOTO 100
@@ -5381,102 +5310,6 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF (name.EQ.'FISBIN') THEN
-            izar = i1*1000 + i2
-            IF (izar.EQ.0) THEN
-               DO i = 1, NDNUC
-                 FISbin(i) = val
-               ENDDO
-               WRITE (8,
-     &'('' Inner fission barrier  in all nuclei multiplied by '',
-     &F6.2)') val
-               WRITE (12,
-     &'('' Inner fission barrier  in all nuclei multiplied by '',
-     &F6.2)') val
-               GOTO 100
-            ENDIF
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,
-     &         '('' NORMALIZATION OF inner fission barrier IGNORED'')')
-               GOTO 100
-            ENDIF
-
-            if(i3.ne.0 .and. IOPran.ne.0) then
-              WRITE (8,
-     &        '('' Inner fission barrier uncertainty in '',I3,
-     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-              sigma = val*i3*0.01
-              IF(IOPran.gt.0) then
-                FISbin(nnuc) = val + grand()*sigma
-              ELSE
-                FISbin(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF
-              WRITE (8,
-     &        '('' Inner fission barrier factor sampled value : '',
-     &        f8.3)') FISbin(nnuc)
-              IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FISbin(nnuc),INDexf,INDexb
-            else
-              FISbin(nnuc) = val
-              WRITE (8,
-     &        '('' Inner fission barrier in '',I3,A2,
-     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-            endif
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'FISBOU') THEN
-            izar = i1*1000 + i2
-            IF (izar.EQ.0) THEN
-               DO i = 1, NDNUC
-                  FISbou(i) = val
-               ENDDO
-               WRITE (8,
-     &'('' Outer fission barrier  in all nuclei multiplied by '',
-     &F6.2)') val
-               WRITE (12,
-     &'('' Outer fission barrier  in all nuclei multiplied by '',
-     &F6.2)') val
-               GOTO 100
-            ENDIF
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,
-     &         '('' NORMALIZATION OF outer fission barrier IGNORED'')')
-               GOTO 100
-            ENDIF
-
-            if(i3.ne.0 .and. IOPran.ne.0) then
-               WRITE (8,
-     &        '('' Outer fission barrier uncertainty in '',I3,
-     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-               sigma = val*i3*0.01
-               IF(IOPran.gt.0) then
-                 FISbou(nnuc) = val + grand()*sigma
-               ELSE
-                 FISbou(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
-               ENDIF
-               WRITE (8,
-     &         '('' Outer fission barrier factor sampled value : '',
-     &         f8.3)') FISbou(nnuc)
-               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, FISbou(nnuc),INDexf,INDexb
-            else
-              FISbou(nnuc) = val
-              WRITE (8,
-     &        '('' Outer fission barrier in '',I3,A2,
-     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-            endif
-            GOTO 100
-         ENDIF
-C-----
          IF (name.EQ.'GTILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
@@ -6063,10 +5896,6 @@ C-----
      &       '('' Full gamma cascade in the first CN selected'')')
             IF (GCAsc.EQ.0.0D0) WRITE (8,
      &       '('' Full gamma cascade is not followed'')')
-
-
-
-
             GOTO 100
          ENDIF
 C-----
@@ -6278,7 +6107,7 @@ C-----pseudo a-parameter used to adjust HFB LD
             endif
             GOTO 100
          ENDIF
-
+C--------FISSION
 C--------checking for fission data in the optional input
          IF (name.EQ.'FISSHI') THEN
             izar = i1*1000 + i2
@@ -6494,6 +6323,294 @@ C-----
      &            ) i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
+C-----         
+         IF (name.EQ.'FISV1') THEN
+            char =' Fission barrier first hump height  '
+            char1=' first hump  ' 
+            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char, char1)
+            IF (izar.EQ.0) THEN
+             DO i = 1, NDNUC
+               FISv_n(1,i) = val
+             ENDDO
+             WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char, val
+             WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char, val
+            ELSE
+             FISv_n(1,nnuc) = quant
+             WRITE (8 ,'(a35,''in '',I3,A2,'' set to '',F6.3)')
+     &          char, i2, SYMb(nnuc), quant
+             WRITE (12,'(a35,''in '',I3,A2,'' set to '',F6.3)')
+     &          char, i2, SYMb(nnuc), quant
+            ENDIF 
+            GOTO 100
+         ENDIF
+C-----       
+      IF (name.EQ.'FISV2') THEN
+         char =' Fission barrier second hump height '
+         char1='second hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISv_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISv_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISV3') THEN
+         char =' Fission barrier third hump height  '
+         char1=' third hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISv_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISv_n(3,nnuc)=quant
+         goto 100
+       ENDIF      
+C-----       
+      IF (name.EQ.'FISHO1') THEN
+         char =' Fission barrier first hump width   '
+         char1=' first hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISh_n(1,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISHO2') THEN
+         char =' Fission barrier second hump width  '
+         char1='second hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISh_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISHO3') THEN
+         char =' Fission barrier third hump width   '
+         char1=' third hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISh_n(3,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISA1') THEN
+         char =' L.d.a-parameter for first saddle   '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISa_n(1,nnuc)=quant
+         goto 100
+       ENDIF
+C----             
+      IF (name.EQ.'FISA2') THEN
+         char =' L.d. a-parameter for second saddle '
+         char1='second saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISa_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISA3') THEN
+         char =' L.d. a-parameter for third saddle  '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISa_n(3,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISDL1') THEN
+         char =' L.d.DEL-parameter for first saddle '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISd_n(1,nnuc)=quant
+         goto 100
+       ENDIF
+C----             
+      IF (name.EQ.'FISDL2') THEN
+         char =' L.d.DEL-parameter for second saddle '
+         char1='second saddle'
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISd_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISDL3') THEN
+         char =' L.d.DEL-parameter for third saddle '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISd_n(3,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISNV1') THEN
+         char =' Vib. enhancement for first saddle  '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISn_n(1,nnuc)=quant
+         goto 100
+       ENDIF
+C----             
+      IF (name.EQ.'FISNV2') THEN
+         char =' Vib. enhancement for second saddle '
+         char1='second saddle'
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISn_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISNV3') THEN
+         char =' Vib. enhancement  for third saddle '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISn_n(3,nnuc)=quant
+         goto 100
+       ENDIF
 C-----
          IF (name.EQ.'RANDOM') THEN
             if(nint(val).eq.0) goto 100             
@@ -6545,6 +6662,48 @@ C-----
       STOP ' FATAL: INVALID FORMAT in input KEY '
       END
 C
+      SUBROUTINE ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,
+     &                  char1)
+
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      REAL*8 quant,val,sigma
+      REAL*8 GRAND,DRAND
+      INTEGER i1,i2,i3,iloc,nnuc
+      CHARACTER*35 char
+      CHARACTER*13 char1
+
+      izar = i1*1000 + i2
+      IF (izar.EQ.0) RETURN
+
+      CALL WHERE(izar,nnuc,iloc)
+      IF (iloc.EQ.1) THEN
+         WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+         WRITE (8,
+     &         '('' NORMALIZATION OF'',a12,''IGNORED'')')char1
+         return
+      ENDIF
+
+      IF(i3.ne.0 .and. IOPran.ne.0) THEN
+         WRITE (8,'(a35,'' uncertainty in '',I3,
+     &         A2,'' is equal to '',i2,''%'')') char,i2, SYMb(nnuc), i3
+         sigma = val*i3*0.01
+         IF(IOPran.gt.0) then
+            quant = val + grand()*sigma
+         ELSE
+            quant = val + 1.732d0*(2*drand()-1.)*sigma
+         ENDIF
+         WRITE (8,'(a35,''factor sampled value : '',f8.3)')char, quant
+      ELSE
+         quant = val
+         WRITE (8, '(a35,'' in '',I3,A2,
+     &        '' multiplied by '',F6.2)'  )char, i2, SYMb(nnuc),val
+      ENDIF
+
+      RETURN
+      END
 C
       SUBROUTINE READNIX
       INCLUDE 'dimension.h'
@@ -7536,9 +7695,9 @@ C
       CHARACTER*132 ctmp
       LOGICAL fexist
 
-C     write(6,*)trim(empiredir)//trim(filename)
-      INQUIRE (FILE = 'C4.DAT', EXIST = fexist)
-      IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL AND SORTING IF C4.DAT EXISTS
+C     write(6,*)trim(empiredir)//trim(filename)
+      INQUIRE (FILE = 'C4.DAT', EXIST = fexist)
+      IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL AND SORTING IF C4.DAT EXISTS
 C
 C-----define target file name
 C
@@ -7651,8 +7810,8 @@ C
       INTEGER i, ia, ierr, iptmp, iz, natmp, nztmp, iccfus
       CHARACTER*6 reftmp
 
-      ierr = 0
-      iccfus = 0
+      ierr = 0
+      iccfus = 0
 
       ia = A(0)
       iz = Z(0)
@@ -7668,110 +7827,110 @@ C
      &         ERR = 250) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
      &                    reftmp
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
-     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
              iccfus = iccfus + 1
              beta2 = betatmp
 c            CCFUS deformations
              BETcc(iccfus) = beta2
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-     &           'BETA (2+) =',beta2
+             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
-             iccfus = iccfus + 1
+             iccfus = iccfus + 1
              beta3 = betatmp
 c            CCFUS deformations
              BETcc(iccfus) = beta3
              FLAm(iccfus) = 3
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
-     &           'BETA (3-) =',beta3
+             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'BETA (3-) =',beta3
          ENDIF
-      ENDDO
+      ENDDO
 
- 250  IF (beta2.EQ.0.D0) THEN
-         ierr = 1
-         WRITE (8,*) ' WARNING: ',
-     &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15 (2+) used'
-      ENDIF
+ 250  IF (beta2.EQ.0.D0) THEN
+         ierr = 1
+         WRITE (8,*) ' WARNING: ',
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
+         WRITE (8,*) ' WARNING: ',
+     &       'Default dynamical deformations 0.15 (2+) used'
+      ENDIF
 
-      IF (beta3.EQ.0.D0) THEN
-         ierr = 1
-         WRITE (8,*) ' WARNING: ',
-     &        'E(3-) level not found in Kibedi database (RIPL-2)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.05 (3-) used'
-      ENDIF
+      IF (beta3.EQ.0.D0) THEN
+         ierr = 1
+         WRITE (8,*) ' WARNING: ',
+     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+         WRITE (8,*) ' WARNING: ',
+     &       'Default dynamical deformations 0.05 (3-) used'
+      ENDIF
 
-      IF(AEJc(0).LE.4) GOTO 350
-      ia = AEJc(0)
-      iz = ZEJc(0)
-      close(84)
-      beta2 = 0.D0
-      beta3 = 0.D0
-      OPEN (84,FILE = trim(empiredir)//
-     &      '/RIPL-2/optical/om-data/om-deformations.dat',
-     &      STATUS = 'old',ERR = 200)
-      READ (84,'(///)')    ! Skipping first 4 title lines
+      IF(AEJc(0).LE.4) GOTO 350
+      ia = AEJc(0)
+      iz = ZEJc(0)
+      close(84)
+      beta2 = 0.D0
+      beta3 = 0.D0
+      OPEN (84,FILE = trim(empiredir)//
+     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+     &      STATUS = 'old',ERR = 200)
+      READ (84,'(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
-         READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
-     &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
-     &                    reftmp
-         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
-     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
-             iccfus = iccfus + 1
-             beta2 = betatmp
-c            CCFUS deformations
-             BETcc(iccfus) = beta2
-             FLAm(iccfus) = -2
-             QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-     &           'BETA (2+) =',beta2
-         ENDIF
+         READ (84,'(2I4,4x,f10.6,1x,f4.1,i3,3x,f10.6,2x,a6)',END = 300,
+     &         ERR = 300) nztmp, natmp, etmp, jtmp, iptmp, betatmp,
+     &                    reftmp
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.2.D0 .AND.
+     &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
+             iccfus = iccfus + 1
+             beta2 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta2
+             FLAm(iccfus) = -2
+             QCC(iccfus) = -etmp
+             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'BETA (2+) =',beta2
+         ENDIF
 
-         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
-     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
-             iccfus = iccfus + 1
-             beta3 = betatmp
-c            CCFUS deformations
-             BETcc(iccfus) = beta3
-             FLAm(iccfus) = -3
-             QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
-     &           'BETA (3-) =',beta3
-         ENDIF
-      ENDDO
+         IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
+     &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
+             iccfus = iccfus + 1
+             beta3 = betatmp
+c            CCFUS deformations
+             BETcc(iccfus) = beta3
+             FLAm(iccfus) = -3
+             QCC(iccfus) = -etmp
+             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'BETA (3-) =',beta3
+         ENDIF
+      ENDDO
 
- 300  IF (beta2.EQ.0.D0) THEN
-         ierr = 1
-         WRITE (8,*) ' WARNING: ',
-     &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15 (2+) used'
-      ENDIF
+ 300  IF (beta2.EQ.0.D0) THEN
+         ierr = 1
+         WRITE (8,*) ' WARNING: ',
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
+         WRITE (8,*) ' WARNING: ',
+     &       'Default dynamical deformations 0.15 (2+) used'
+      ENDIF
 
-      IF (beta3.EQ.0.D0) THEN
-         ierr = 1
-         WRITE (8,*) ' WARNING: ',
-     &        'E(3-) level not found in Kibedi database (RIPL-2)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.05 (3-) used'
-      ENDIF
-      GOTO 350
+      IF (beta3.EQ.0.D0) THEN
+         ierr = 1
+         WRITE (8,*) ' WARNING: ',
+     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+         WRITE (8,*) ' WARNING: ',
+     &       'Default dynamical deformations 0.05 (3-) used'
+      ENDIF
+      GOTO 350
 
   200 WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL-2/optical/om-data/om-deformations.dat not found '
-      WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
-      ierr = 2
+      WRITE (8,*) ' WARNING: ',
+     &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+      ierr = 2
       GOTO 400
 
   350 CLOSE (84)
@@ -7896,124 +8055,124 @@ C--------82 208    nucleus is treated as spherical
          READ (32,'(a100)') comment
          WRITE (8,'(a100)') comment
          WRITE (12,'(a100)') comment
-C        '  40  90    nucleus is treated as dynamically deformed                                              '
-         idefault = SCAN(comment(34:40),'sphe')                  
-         if(idefault.eq.0) then
-C
-C          Soft rotator optical model
-C
-           do i=1,5 
-             READ (32,'(a100)') comment
-             WRITE (8,'(a100)') comment
-             WRITE (12,'(a100)') comment
-           enddo
-C----------empty line
-           READ (32,'(a100)') comment
-           WRITE (8,'(a100)') comment
-           WRITE (12,'(a100)') comment
-C----------Ncoll 
-           READ (32,'(a100)') comment
-           WRITE (8,'(a100)') comment
-           WRITE (12,'(a100)') comment
-           DEFormed = .FALSE.
-
-           SOFt = .TRUE.
-
-           READ (32,'(3x,3I5)') ND_nlv
-           WRITE (8,'(3x,3I5)') ND_nlv
-           WRITE (12,'(3x,3I5)') ND_nlv
-           IF (ND_nlv.EQ.0) THEN
-            WRITE (8,*) ' WARNING: ND_NLV=0 in COLLECTIVE.LEV file'
-            WRITE (8,*) ' WARNING: No collective levels considered'
-            WRITE (8,*) ' WARNING: DIRECT has been set to 0'
-C-----------setting DIRect to zero
-            DIRect = 0
-            IFINDCOLL = 2
-            RETURN
-           ENDIF
-C----------empty line
-           READ (32,'(a100)') comment
-           WRITE (8,'(a100)') comment
-C----------'collective levels:'
-           READ (32,'(a100)') comment
-           WRITE (8,'(a100)') comment
-           WRITE (12,*)' '
-           WRITE (12,'(a100)') comment
-C----------Reading ground state information (to avoid overwriting deformation)
-           READ(32,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
-           WRITE(8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
-           WRITE(12,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
-
-C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
-           igreson = 0
-           DO i = 2, ND_nlv
-            READ (32,
-     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
-     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), ftmp, D_nno(i), ctmp5  
-
-C           For odd nuclides, collective states in continuum have
-C           different spin than the ground state
-C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
-            if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
-C
-C           For covariance calculation of dynamical deformation
-            D_Def(i,2) = ftmp*DEFdyn
-C
-            WRITE (8,
-     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
-     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
-            itmp1 = ICOllev(i)
-            if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-
-            IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
-              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-              igreson = 1
-            ENDIF
-            WRITE (12,
-     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
-     &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
-C
-C           CHECKING EWSR (only for neutrons)
-C
-            IF(D_Def(i,2).GT.0.d0 .AND. D_Def(i,2).LE.0.05d0 .AND.
-     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
-              ftmp = D_Def(i,2)
-              if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
-     >                            ftmp = D_Def(1,2) ! coupled levels
-              betasq=ftmp*ftmp
-              edis1=D_Elv(i)
-              jdis1=int(D_Xjlv(i))
-              if (jdis1.eq.0) Sgmr=Sgmr-betasq*edis1
-              if (jdis1.eq.2) Sgqr=Sgqr-betasq*edis1
-              if (jdis1.eq.3) Sleor=Sleor-betasq*edis1
-              if(sgmr.gt.0) isgmr = ICOllev(i)
-              if(sgqr.gt.0) isgqr = ICOllev(i)
-              if(sleor.gt.0) isgor = ICOllev(i)
-            ENDIF
-           ENDDO
-
-       else
-C
-C          Rigid rotor (deformed) or vibrational (spherical) optical model
-C
+C        '  40  90    nucleus is treated as dynamically deformed                                              '
+         idefault = SCAN(comment(34:40),'sphe')                  
+         if(idefault.eq.0) then
+C
+C          Soft rotator optical model
+C
+           do i=1,5 
+             READ (32,'(a100)') comment
+             WRITE (8,'(a100)') comment
+             WRITE (12,'(a100)') comment
+           enddo
 C----------empty line
-           READ (32,'(a100)') comment
-           WRITE (8,'(a100)') comment
-           WRITE (12,'(a100)') comment
+           READ (32,'(a100)') comment
+           WRITE (8,'(a100)') comment
+           WRITE (12,'(a100)') comment
+C----------Ncoll 
+           READ (32,'(a100)') comment
+           WRITE (8,'(a100)') comment
+           WRITE (12,'(a100)') comment
+           DEFormed = .FALSE.
+
+           SOFt = .TRUE.
+
+           READ (32,'(3x,3I5)') ND_nlv
+           WRITE (8,'(3x,3I5)') ND_nlv
+           WRITE (12,'(3x,3I5)') ND_nlv
+           IF (ND_nlv.EQ.0) THEN
+            WRITE (8,*) ' WARNING: ND_NLV=0 in COLLECTIVE.LEV file'
+            WRITE (8,*) ' WARNING: No collective levels considered'
+            WRITE (8,*) ' WARNING: DIRECT has been set to 0'
+C-----------setting DIRect to zero
+            DIRect = 0
+            IFINDCOLL = 2
+            RETURN
+           ENDIF
+C----------empty line
+           READ (32,'(a100)') comment
+           WRITE (8,'(a100)') comment
+C----------'collective levels:'
+           READ (32,'(a100)') comment
+           WRITE (8,'(a100)') comment
+           WRITE (12,*)' '
+           WRITE (12,'(a100)') comment
+C----------Reading ground state information (to avoid overwriting deformation)
+           READ(32,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+           WRITE(8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+           WRITE(12,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+
+C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
+           igreson = 0
+           DO i = 2, ND_nlv
+            READ (32,
+     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), ftmp, D_nno(i), ctmp5  
+
+C           For odd nuclides, collective states in continuum have
+C           different spin than the ground state
+C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
+            if (D_Elv(i) .gt. ELV( NLV(0),0)) ctmp5 = ' cont'
+C
+C           For covariance calculation of dynamical deformation
+            D_Def(i,2) = ftmp*DEFdyn
+C
+            WRITE (8,
+     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
+            itmp1 = ICOllev(i)
+            if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
+
+            IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
+              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+              igreson = 1
+            ENDIF
+            WRITE (12,
+     &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
+     &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
+C
+C           CHECKING EWSR (only for neutrons)
+C
+            IF(D_Def(i,2).GT.0.d0 .AND. D_Def(i,2).LE.0.05d0 .AND.
+     &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
+              ftmp = D_Def(i,2)
+              if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
+     >                            ftmp = D_Def(1,2) ! coupled levels
+              betasq=ftmp*ftmp
+              edis1=D_Elv(i)
+              jdis1=int(D_Xjlv(i))
+              if (jdis1.eq.0) Sgmr=Sgmr-betasq*edis1
+              if (jdis1.eq.2) Sgqr=Sgqr-betasq*edis1
+              if (jdis1.eq.3) Sleor=Sleor-betasq*edis1
+              if(sgmr.gt.0) isgmr = ICOllev(i)
+              if(sgqr.gt.0) isgqr = ICOllev(i)
+              if(sleor.gt.0) isgor = ICOllev(i)
+            ENDIF
+           ENDDO
+
+       else
+C
+C          Rigid rotor (deformed) or vibrational (spherical) optical model
+C
+C----------empty line
+           READ (32,'(a100)') comment
+           WRITE (8,'(a100)') comment
+           WRITE (12,'(a100)') comment
 C----------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
            READ (32,'(a100)') comment
            WRITE (8,'(a100)') comment
@@ -8021,7 +8180,7 @@ C----------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
            DEFormed = .FALSE.
            IF (ABS(DEF(1,0)).GT.0.1D0) DEFormed = .TRUE.
 
-           SOFt = .FALSE.
+           SOFt = .FALSE.
 C
 C          If odd nucleus, then rotational model is always used
 C          It could be a bad approximation for a quasispherical nucleus
@@ -8062,18 +8221,18 @@ C----------empty line
 C----------'collective levels:'
            READ (32,'(a100)') comment
            WRITE (8,'(a100)') comment
-           WRITE (12,*)' '
-           WRITE (12,'(a100)') comment
-C----------Reading ground state information (to avoid overwriting deformation)
+           WRITE (12,*)' '
+           WRITE (12,'(a100)') comment
+C----------Reading ground state information (to avoid overwriting deformation)
 
-           READ(32,
+           READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &         D_Llv(1), D_Klv(1)
            WRITE(8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
-           WRITE(12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
+           WRITE(12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &          ) ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.01
 C
@@ -8094,12 +8253,12 @@ C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
-            IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
-              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-              igreson = 1
-            ENDIF
+            IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
+              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+              igreson = 1
+            ENDIF
 
             WRITE (8,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,3x,A5)')
@@ -8132,7 +8291,7 @@ C
             ENDIF
 
            ENDDO
-         endif
+         endif
 
          WRITE(12,*) ' '
          CLOSE (32)
@@ -8179,7 +8338,7 @@ C       If odd nucleus, then rotational model is always used
 C       It could be a bad approximation for a quasispherical nucleus
         DEFormed = .TRUE.
         odd = .TRUE.
-        SOFt = .FALSE.
+        SOFt = .FALSE.
 
       ENDIF
       i20p = 0
@@ -8335,9 +8494,9 @@ C                                assigning randomly 2+,4+,3- spin
             D_Elv(ND_nlv) = elvr
             D_Lvp(ND_nlv) = lvpr
             D_Xjlv(ND_nlv) = xjlvr
-C           RCN 0811 
+C           RCN 0811 
 
-            IPH(ND_nlv) = 1
+            IPH(ND_nlv) = 1
 
 C
             D_Llv(ND_nlv) = 0
@@ -8428,40 +8587,40 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Def(ND_nlv,2) = 0.05
                GOTO 500
             ENDIF
-            IF (i1m.EQ.0 .AND. xjlvr.EQ.1.d0 .AND. lvpr.EQ.-1) THEN
-               i1m = ilv
-               ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + LEVcc
-               D_Elv(ND_nlv) = elvr
-               D_Lvp(ND_nlv) = lvpr
-               D_Xjlv(ND_nlv) = xjlvr
-               IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = beta3
-               GOTO 500
-            ENDIF
-            IF (i3m.EQ.0 .AND. xjlvr.EQ.3.d0 .AND. lvpr.EQ.-1) THEN
-               i3m = ilv
-               ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv 
-               IF (DIRECT.EQ.3) ICOllev(ND_nlv) = ICOllev(ND_nlv)+LEVcc
-               D_Elv(ND_nlv) = elvr
-               D_Lvp(ND_nlv) = lvpr
-               D_Xjlv(ND_nlv) = xjlvr
-               IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = beta3
-               GOTO 500
-            ENDIF
-            IF (i5m.EQ.0 .AND. xjlvr.EQ.5.d0 .AND. lvpr.EQ.-1) THEN
-               i5m = ilv
-               ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + LEVcc
-               D_Elv(ND_nlv) = elvr
-               D_Lvp(ND_nlv) = lvpr
-               D_Xjlv(ND_nlv) = xjlvr
-               IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = beta3
-               GOTO 500
-            ENDIF
+            IF (i1m.EQ.0 .AND. xjlvr.EQ.1.d0 .AND. lvpr.EQ.-1) THEN
+               i1m = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv + LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 2
+               D_Def(ND_nlv,2) = beta3
+               GOTO 500
+            ENDIF
+            IF (i3m.EQ.0 .AND. xjlvr.EQ.3.d0 .AND. lvpr.EQ.-1) THEN
+               i3m = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv 
+               IF (DIRECT.EQ.3) ICOllev(ND_nlv) = ICOllev(ND_nlv)+LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 1
+               D_Def(ND_nlv,2) = beta3
+               GOTO 500
+            ENDIF
+            IF (i5m.EQ.0 .AND. xjlvr.EQ.5.d0 .AND. lvpr.EQ.-1) THEN
+               i5m = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv + LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 2
+               D_Def(ND_nlv,2) = beta3
+               GOTO 500
+            ENDIF
             IF (i41p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1) THEN
                i41p = ilv
                ND_nlv = ND_nlv + 1
@@ -8512,9 +8671,9 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                i20p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
+C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
 
-               IF (DIRECT.EQ.3)
+               IF (DIRECT.EQ.3)
 
      &            ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
@@ -8529,8 +8688,8 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                i4p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
-               IF (DIRECT.EQ.3)
+C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
+               IF (DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -8544,8 +8703,8 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                i6p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
-               IF (DIRECT.EQ.3)
+C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
+               IF (DIRECT.EQ.3)
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -8560,9 +8719,9 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                i8p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
-C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
-               IF (DIRECT.EQ.3)
-     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
+C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
+               IF (DIRECT.EQ.3)
+     >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -8841,7 +9000,7 @@ C              different spin than the ground state
          WRITE (32,99005)
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
-         WRITE (32,*)
+         WRITE (32,*)
 
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
 C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
@@ -8851,7 +9010,7 @@ C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (8,99005)
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
-         WRITE (8,*)
+         WRITE (8,*)
 
 
      &          ' N <',LEVcc,' for coupled levels in CC calculation'

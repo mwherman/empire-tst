@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1994 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1404,6 +1404,10 @@ C
       END
 
 
+
+
+
+
       SUBROUTINE FISFIS(Nnuc,Iec,Ip,Jc,Sumfis,Mmod)
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
@@ -1451,6 +1455,7 @@ C
 
       INTEGER JCC
       COMMON /IMAG  / TF, TDIr, TABs, TG2
+      COMMON /VBAR  / vbarex, ho,faza2
 C
 C Dummy arguments
 C
@@ -1462,14 +1467,13 @@ C
       DOUBLE PRECISION aj, ee, tdircont(NfHump),
      &                 exfis, sfmin, snc,
      &                 tfcon(NfHump), tfdis(NfPARAB),
-     &                 vbarmax(NFPARAB)
+     &                 vbarmax(NFPARAB),faza2,enh_asym(NFPARAB)
       REAL FLOAT
       INTEGER ibar, ist, jnc, nr, ipa
 C
       ee = EX(Iec,Nnuc)
       IF (ee.EQ.0.0D0) RETURN
       JCC = Jc
-
 c-----initialization
       Sumfis = 0.D0
       DO ih = 1, nrhump
@@ -1512,7 +1516,12 @@ c-----initialization
          HO(k) = H(1, NRhump+int(k/2))
       ENDDO
 
-
+      snc = FLOAT(Jc) + HIS(Nnuc)
+      DO ibar = 1, NRHump
+         enh_asym(ibar)=1.d0
+         IF(BFF(ibar).EQ.2)enh_asym(ibar)= 2.d0*snc+1.d0
+         IF(BFF(ibar).EQ.3)enh_asym(ibar)=2.d0
+      ENDDO
 c-----discrete contribution
 
 c-----numerical barrier from RIPL-3; gs is the only discrete transition state
@@ -1532,7 +1541,6 @@ c              CALL WKBFIS(Ee, nnuc, tfdis, tdirp,tabsp)
 
 c-----parabolic barriers
       DO nr = 1, NRFdis(1)
-c      DO nr = 1,4
          sfmin = SFDis(nr,1)
          ist = 1
          IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ.1) THEN
@@ -1555,12 +1563,20 @@ c      DO nr = 1,4
                snc = FLOAT(jnc) + HIS(Nnuc)
                DO ibar = 1, NRBar
                   exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
-     &                    *(snc*(snc + 1) - SFDis(nr,ibar)
-     &                    *(SFDis(nr,ibar) + 1))
-                  IF(exfis.lt.0)exfis=0.d0
+     &                    *(snc*(snc + 1) - SFDis(nr,ibar)**2)
+c     &                    *(SFDis(nr,ibar) + 1))
+c    
                   VBArex(ibar) = EFB(ibar) + exfis
                   IF(nr.eq.1) vbarmax(ibar) = exfis
                   IF(exfis.gt.vbarmax(ibar)) vbarmax(ibar) = exfis
+                  IF(vbarex(Nrhump+1).GE.vbarex(1))
+     &               vbarex(Nrhump+1) = vbarex(1)- 0.02
+                  IF(vbarex(Nrhump+1).GE.vbarex(2))
+     &               vbarex(Nrhump+1) = vbarex(2)- 0.02
+                  IF(vbarex(Nrhump+2).GE.vbarex(2))
+     &               vbarex(Nrhump+2) = vbarex(2)- 0.02
+                  IF(vbarex(Nrhump+2).GE.vbarex(3))
+     &               vbarex(Nrhump+2) = vbarex(3)- 0.02
                ENDDO
 
                IF(FISopt(Nnuc).EQ.0.)THEN
@@ -1572,29 +1588,37 @@ c      DO nr = 1,4
                   goto 600
                ENDIF
 
-               CALL NUMBARR(Nnuc,Vbarex,HO)
+               IF(FISbar(Nnuc).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
                CALL WKBFIS(Ee, nnuc, tfd, tdirp,tabsp)
+
+               DO ibar = 1, Nrhump
+                     arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(nr,Ibar)
+                     IF (arg1.GE.EXPmax) arg1 = EXPmax
+                     TFD(ibar)= 1.d0/(1.d0 + EXP(arg1))
+                  ENDDO
 
                IF(FISopt(Nnuc).GT.0.)THEN
                   DO iw = 1, nrwel
                      DO iw1 = iw + 1, nrwel + 1
                         tabspp(iw, iw1) = tabspp(iw, iw1) +
-     &                                    tabsp(iw, iw1)
+     &                                    tabsp(iw, iw1) * enh_asym(iw)
                      ENDDO
                   ENDDO
 
                   DO iw = nrwel + 1, 3, -1
                      DO iw1 = iw -1, 2, -1
                         tabspp(iw, iw1) = tabspp(iw, iw1) +
-     &                                    tabsp(iw, iw1)
+     &                                    tabsp(iw, iw1) * enh_asym(iw)
                      ENDDO
                   ENDDO
 
                   DO ih = 1, nrhump
                      DO ih1 = 1, nrhump
                         IF(tdirp(ih, ih1).LT.1E-10)tdirp(ih, ih1)=0.d0
-                        tdirpp(ih, ih1) = tdirpp(ih, ih1) +
-     &                                    tdirp(ih, ih1)
+c                       write(*,*)'pp',ih,ih1,tdirp(ih, ih1) 
+                       tdirpp(ih, ih1) = tdirpp(ih, ih1) +
+     &                                    tdirp(ih, ih1)*
+     &                                min(enh_asym(ih),enh_asym(ih1))
                      ENDDO
                   ENDDO
                ENDIF
@@ -1604,6 +1628,10 @@ c      DO nr = 1,4
             ENDIF
          ENDDO
       ENDDO
+
+      DO ibar = 1, NRHump
+         tfdis(ibar) = tfdis(ibar) * enh_asym(ibar)
+      ENDDO          
 C----continuum contribution
  700  aj = FLOAT(Jc) + HIS(Nnuc)
       IF(Ip.EQ.1)  ipa = 1
@@ -1613,7 +1641,7 @@ c-----continuum direct and indirect weights
          IF(awf(iw).EQ.0.d0)THEN
             wdir(iw + 1) = 1.d0
          ELSE
-            vsh=-.03
+            vsh=0.d0
             barmin = min((vbarmax(iw) + efb(iw)-vsh),
      &                   (vbarmax(iw + 1) + efb(iw + 1))-vsh)
             vbar= VBArex(NRhump + iw)+efb(NRhump + iw)
@@ -1630,12 +1658,10 @@ c-----continuum direct and indirect weights
          endif
       ENDDO
 
-C-----Continuum contribution to each hump transmission coeffiecient
+C-----Continuum contribution to each hump transmission coefficient
  800  CALL SIMPSFIS(Nnuc,Ee,JCC,Ipa,tfcon)
       DO ih = 1, nrhump
-c         tfcon(ih)=0.d0
-c         tfdis(ih)=0.d0
-        TF(ih) = tfdis(ih) + tfcon(ih) * TUNEfi(Nnuc)
+        TF(ih) = tfdis(ih) + tfcon(ih)
         IF(TF(ih).LE.1.d-19) THEN
           TF(ih) = 0.d0
           tfdis(ih) = 0.d0
@@ -1650,20 +1676,19 @@ c
          GOTO 890
       ENDIF
 c-----continuum direct
-      IF(wdir(1).eq.0..and.wdir(2).eq.0.) GOTO 809
+      IF(wdir(1).eq.0..and.wdir(2).eq.0.) GOTO 809    
       CALL SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
-      DO ih = 1, nrhump
-         tdircont(ih) = tdircont(ih) * TUNEfi(Nnuc)
-      ENDDO
 c-----adding wheighted continuum direct
  809  DO ih = 1, nrhump
          tdirpp(ih, ih) = tf(ih)
       ENDDO
  810  DO ih = 1, nrhump - 1
+c         write(*,*)'td',tdirpp(ih, nrhump)
          tdirpp(ih, nrhump) = tdirpp(ih, nrhump) + tdircont(ih) 
      &                       * (1.d0 - wdir(ih + 1))
       ENDDO
 c      if(nrbar.eq.5) tdirpp(2,3) = tdirpp(2,3) + tdircont(2) 
+c     &                       * (1.d0 - wdir(3))
 c 
 c-----COMPLETE DAMPING + surrogate OPT.MOD
       IF (FISopt(Nnuc).EQ.0.) THEN
@@ -1679,6 +1704,7 @@ c-----COMPLETE DAMPING + surrogate OPT.MOD
          sumfis=tfd(1)
          GOTO 890
       ENDIF
+
 c-----PARTIAL DAMPING
 c-----adding wheighted continuum absorption
       DO iw = 1, nrwel 
@@ -1690,7 +1716,7 @@ c-----adding wheighted continuum absorption
 c-----sum of competting channels in wells
       sumtp(1) = 1.d0
       DO iw = 2, nrwel + 1
-         sumtp(iw)= tdirpp(iw-1, 1) + tdirpp(iw, nrhump)
+         sumtp(iw)= tdirpp(iw-1, 1)+ tdirpp(iw, nrhump)
          DO iw1 = 2, nrwel + 1
             IF(iw1.NE.iw) sumtp(iw) = sumtp(iw) + tabspp(iw, iw1)
          ENDDO
@@ -1717,9 +1743,15 @@ c----sumfis
          tindp = tindp + tdirpp(iw, nrhump)/sumtp(iw)
          sumfis = sumfis + tindp * tabspp(1, iw)  * rap
       ENDDO
-      sumfis =  sumfis + tdirpp(1, nrhump)
+      sumfis=sumfis + tdirpp(1, nrhump)
+c      sumfis=tfcon(1)*tfcon(2)/(tfcon(1)+tfcon(2))
+c            sumfis=tf(1)*tf(2)/(tf(1)+tf(2))
       tabs = tabspp(1,2)
       tdir = tdirpp(1,nrhump)
+
+c      write(*,*)'hf',jc,ip 
+c      write(*,*)'hf',sumfis,tdirpp(1, nrhump)!tindp, tabspp(1, iw)!, rap
+c      pause
 
       IF (FISopt(Nnuc).EQ.2.) THEN
 C--------gamma transition in isomeric well, not calculated yet
@@ -1765,15 +1797,9 @@ C-----single-humped
 
 C-----double-humped
       IF (Nrhump.EQ.2.) THEN
-c         IF (FISopt(Nnuc).EQ.0.)
-c     &       WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
-c     &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
-c     &                tfdis(2), tfcon(1), tfcon(2), Sumfis
-
-c         IF (FISopt(Nnuc).GT.0.)
-            WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
-     &                 'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
-     &                tfdis(2), tfcon(1), tfcon(2), Sumfis, TDIr, TABs
+         WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
+     &             'Mode=', Mmod, 'J=', aj, 'Pi=', Ip, tfdis(1),
+     &              tfdis(2), tfcon(1), tfcon(2), Sumfis, TDIr, TABs
       ENDIF
 C-----triple-humped
       IF (Nrhump.EQ.3)
@@ -1818,7 +1844,7 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
                uexcit1 = Ee - ux1
                CALL PHASES(uexcit1, phase,phase_h, nnuc,iphas_opt,
      &                     discrete)
-               arg1 = 2.d0 * phase_h(ibar)    !(2 * ibar -1)
+               arg1 = 2.d0 * phase_h(ibar)   
             ELSE
                arg1 = 2*PI*(ux1 + EFB(Ibar) - Ee)/Hcont(Ibar)
             ENDIF
@@ -1829,7 +1855,7 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
             TFCc = TFCc + nn *
      &             ROFisp(i, JCC, ipa, Ibar)/(1.d0 + EXP(arg1))
         ENDDO
-        TFCc = TFCc * DEStepp(Ibar)
+        TFCc = TFCc * DEStepp(Ibar)/3.
         tfcon(ibar) = TFCc * TUNEfi(Nnuc)
       ENDDO
       RETURN
@@ -1878,7 +1904,7 @@ C
             ii = int(vbarmax(ib)/destepp(ib))
          ENDIF
       ENDDO
-      DO i = 1, NRBinfis(Ibar)                ! ii, NRBinfis(Ibar)
+      DO i = 1, NRBinfis(Ibar)               
          ux1 = XMInn(ibar) + (i - 1)*DEStepp(Ibar)
          IF(FISBAR(Nnuc).EQ.3)THEN
             uexcit1 = Ee - ux1
@@ -1903,7 +1929,7 @@ C
             ENDIF
 c            arg1 =  - 2.d0 * PI * (ux1 + EFB(NRHump + ih1) - Ee)
 c     &               /HCOnt(Nrhump + ih1)
-            arg1=0.d0
+            arg1=0.d0   ! to avoid fluctuations
             dmom = (1.d0 - tdirc(ih1, ih1)) *
      &             (1.d0 - tdirc(ih1 + 1, nrhump))
             tdirc(ih1, nrhump) = tdirc(ih1, ih1) *
@@ -1921,8 +1947,33 @@ c     &               /HCOnt(Nrhump + ih1)
          ENDDO
       ENDDO
       DO ih = 1,NRHump
-         tdircont(ih) = tdircont(ih) * DEStepp(Ibar)
+         tdircont(ih) = tdircont(ih) * DEStepp(Ibar)/3.
       ENDDO
       RETURN
       END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

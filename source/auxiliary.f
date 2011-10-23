@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -82,6 +82,8 @@ C
       SCRtl    = 0.d0
       CSAlev   = 0.d0
       REDmsc   = 1.d0
+
+      JSTab    = 0
 
       return
       END

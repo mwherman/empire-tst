@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2131 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -100,7 +100,7 @@ C                      Total PF angular distribution defined only for neutrons
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
-      DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs
+      DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs, csmax
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -196,6 +196,102 @@ C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
+C
+C 
+C---- Calculate compound nucleus (CN) level density
+C
+      nnuc = 1
+      IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
+      IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
+      IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
+      IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
+
+C-----check whether NLW is not larger than max spin at which nucleus
+C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
+      IF (NLW.GT.JSTab(1) .and. JSTab(1).GT.0) THEN
+         NLW = JSTab(1)
+         IF (IOUt.GT.0) THEN
+            WRITE (8,'('' Maximum spin to preserve stability is'',I4)')
+     &             JSTab(1)
+            WRITE (8,
+     &             '('' Calculations will be truncated at this limit'')'
+     &             )
+            WRITE (8,
+     &            '('' part of the fusion cross section will be lost'')'
+     &            )
+         ENDIF
+         DO j = NLW + 1, NDLW
+            CSFus = CSFus - POP(NEX(1),j,1,1) - POP(NEX(1),j,2,1)
+            POP(NEX(1),j,1,1) = 0.0
+            POP(NEX(1),j,2,1) = 0.0
+         ENDDO
+         RETURN
+      ENDIF
+
+	csmax = 0.d0
+      DO ip = 1, 2
+        DO j = 1, NDLW
+          csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+        ENDDO
+      ENDDO
+
+      IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
+     &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
+         WRITE (8,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
+     &               POP(NEX(1),NLW,2,1), 'NLW=', NLW
+         WRITE (8,
+     &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
+     &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
+     &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
+     &''D '')')
+         STOP 'Insufficient dimension NDLW for partial waves'
+      ENDIF
+
+      IF (IOUt.EQ.6) THEN
+         ia = INT(A(nnuc))
+         IF (ADIv.NE.3.0D0) THEN
+           WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
+     &          SYMb(nnuc)
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
+             DO j = 1, NLW
+               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
+             ENDDO
+             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+     &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
+           ENDDO
+         ELSE
+           WRITE (8,'(1X,/,
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
+     &          ia, SYMb(nnuc)
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
+             DO j = 1, NLW
+               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
+             ENDDO
+             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+     &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
+           ENDDO
+
+           WRITE (8,'(1X,/,
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
+     &          ia, SYMb(nnuc)
+           DO i = 1, NEX(nnuc)
+             rocumul = 0.D0
+             DO j = 1, NLW
+               rocumul = rocumul + RO(i,j,2,Nnuc)
+             ENDDO
+             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+     &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
+           ENDDO
+         ENDIF
+      ENDIF
 C
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
@@ -638,12 +734,12 @@ C           residual nuclei must be heavier than alpha
             izares = INT(1000*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) cycle
-
             netl = 6
             IF (NEX(nnuc).GT.0) netl =
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
+          
             IF (netl.GT.NDETL) cycle
-
+            
 C-----------calculate transmission coefficients
             ICAlangs = ICAlangs-10
             itmp = NANgela
@@ -668,23 +764,64 @@ C-----------print transmission coefficients
               ENDDO
               WRITE (8,'(1X,/)')
             ENDIF
-
-C-----------check of etl index determination (to be deleted)
-C           IEXR=NEX(NNUC)-NEXR(NEJC,NNUC)
-C           ITLC=IEXR-5
-C           WRITE(8,*) 'IEXR, ITLC, Q',IEXR,ITLC,Q(NEJC,NNUC)
-C           do 100 i=nex(nnuc),2,-1
-C             JMAX=I-IEXR
-C             do 100 j=jmax,1,-1
-C               etlr=ex(i,nnuc)-ex(j,nnur)-q(nejc,nnuc)
-C               jtl=i-j-itlc
-C 100           WRITE(8,*) 'i,j,etlr,jtl,etl ',
-C    &          i,j,etlr,jtl,etl(jtl,nejc,nnur)
-C-----------check of etl index determination done
+C-----------determination of transmission coeff.--done
 C
-C-----------determination of etl matrix and transmission coeff.--done
+C-----------calculate residual nucleus level density
+
+            IF (NEX(nnur).LE.0) cycle
+            
+            IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
+            IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
+C-----------<m2> could be added to the input ( to use 0.124 if needed)
+            IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
+C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
+            IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
+            IF (IOUt.EQ.6) THEN
+              ia = INT(A(nnur))
+              IF (ADIv.NE.3.0D0) THEN
+                WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
+     &          ia, SYMb(nnur)
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
+                  DO j = 1, NLW
+                    rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
+                  ENDDO
+                  WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
+     &                     (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+                ENDDO
+              ELSE
+                WRITE (8,'(1X,/,
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
+     &          ia, SYMb(nnur)
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
+                  DO j = 1, NLW
+                    rocumul = rocumul + RO(i,j,1,nnur)
+                  ENDDO
+                  WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
+     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
+                ENDDO
+
+                WRITE (8,'(1X,/,
+     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
+     &          ia, SYMb(nnur)
+                DO i = 1, NEX(nnur)
+                  rocumul = 0.D0
+                  DO j = 1, NLW
+                    rocumul = rocumul + RO(i,j,2,nnur)
+                  ENDDO
+                  WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
+     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
+c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
+c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
+                ENDDO
+              ENDIF
+            ENDIF
          ENDDO     !over ejectiles (nejc)
       ENDDO     !over nuclei (nnuc)
+99011 FORMAT (1X,14(G10.4,1x))
 C
 C     Skipping all emission calculations
 C     GOTO 99999
@@ -1125,7 +1262,7 @@ C        IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-          ENDIF
+            ENDIF
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF (nnuc.NE.1) THEN
@@ -1284,18 +1421,12 @@ C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
                IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,1.D0,0.0D0)
-C              IF (ADIv.EQ.1.0D0) CALL ROCOL(nnuc,1.D0,2.D0) !  fitting
-               IF (ADIv.GT.3.0D0) CALL ROCOL(nnuc,1.D0)
-               IF (ADIv.EQ.2.0D0) WRITE (8,*)
+               IF (ADIv.eq.2.0D0) WRITE (8,*)
      &  ' MUST NOT USE GILBERT-CAMERON LEVEL DENSITIES FOR SADDLE POINT'
                IF (IOUt.EQ.6) THEN
                   WRITE (8,'(1X,/,'' Saddle point level density'',/)')
                   WRITE (8,99055) (EX(i,nnuc),(ROF(i,j,nnuc),j = 1,12),
      &                            i = 1,NEX(nnuc))
-Cpr            WRITE(8,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=13,24),i=1,nex(nnuc))
-Cpr            WRITE(8,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=25,36),i=1,nex(nnuc))
-Cpr            WRITE(8,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=37,48),i=1,nex(nnuc))
-Cpr            WRITE(8,20) (EX(i,nnuc),(ROF(i,j,nnuc),j=49,60),i=1,nex(nnuc))
 99055             FORMAT (1X,13G10.4)
                ENDIF
             ENDIF

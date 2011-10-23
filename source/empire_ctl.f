@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2131 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1709,7 +1709,7 @@ C--- Check to see if rotational or vibrational or soft
         if(line(36:43).eq.'deformed') idef=1
         if(line(36:43).eq.'dynamica') then
 C         Added for soft rotor potentials
-          SOFt = .TRUE.
+C         SOFt = .TRUE.
           idef = 0
           WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
           STOP 'OPTMAN OMP fit is not implemented' 
@@ -1862,7 +1862,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=133)
+      parameter (ndreac=90, ndkeys=131)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1895,9 +1895,8 @@ C
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
-     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'FISBIN',
-     &  'FISBOU', 'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO',
-     &  'ROHFBA', 'ROHFBP'/
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 
+     &  'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP'/
       data namecat /
      &  'A'     , 'A'     , 'T'     , 'T'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'T'     , 'A'     ,   
@@ -1920,8 +1919,7 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2131 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -893,8 +893,9 @@ C-----channel spin min and max
       smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
       mul = smax - smin + 1.0001
       CSFus = 0.0
-      DO ip = 1, 2     ! over parity
-         DO j = 1, NDLW !over compound nucleus spin
+      DO ip = 1, 2      ! over parity
+         DO j = 1, NLW  !over compound nucleus spin
+C        DO j = 1, NDLW !over compound nucleus spin
             sum = 0.0
             DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
@@ -953,47 +954,16 @@ C
          ELTl(i) = stl(i)
       ENDDO
       DO j = NDLW, 1, -1
-         NLW = j
-         IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) GOTO 400
-         IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) GOTO 400
+         NLW = j + 1  ! added + 1,  Oct2011
+         IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
+         IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
       ENDDO
+
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
 C-----Plujko_new-2005
 C 400 NLW = NLW + 3
   400 NLW = NLW + 1 + MAXmult
-C-----check whether NLW is not larger then max spin at which nucleus
-C-----is still stable
-      IF (NLW.GT.JSTab(1)) THEN
-         NLW = JSTab(1)
-         IF (IOUt.GT.0) THEN
-            WRITE (8,'('' Maximum spin to preserve stability is'',I4)')
-     &             JSTab(1)
-            WRITE (8,
-     &             '('' Calculations will be truncated at this limit'')'
-     &             )
-            WRITE (8,
-     &            '('' part of the fusion cross section will be lost'')'
-     &            )
-         ENDIF
-         DO j = NLW + 1, NDLW
-            CSFus = CSFus - POP(NEX(1),j,1,1) - POP(NEX(1),j,2,1)
-            POP(NEX(1),j,1,1) = 0.0
-            POP(NEX(1),j,2,1) = 0.0
-         ENDDO
-         RETURN
-      ENDIF
-      IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
-     &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
-         WRITE (8,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
-     &               POP(NEX(1),NLW,2,1), 'NLW=', NLW
-         WRITE (8,
-     &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
-     &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
-     &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
-     &''D '')')
-         STOP 'Insufficient dimension NDLW for partial waves'
-      ENDIF
       RETURN
       END
 

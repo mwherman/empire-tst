@@ -1,6 +1,6 @@
-C $Rev: 2131 $
+C $Rev: 2133 $
 C $Author: rcapote $
-C $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+C $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -39,15 +39,23 @@ C
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),
      &                 EFB(nfparab),EFDis(nftrans,nfparab),
      &                 EGDr1, EGDr2, EIN, EINl,
-     &                 EJMass(0:ndejc), FISbou(0:ndnuc),
-     &                 FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
+     &                 EJMass(0:ndejc), FISbou(0:ndnuc)
+      DOUBLE PRECISION FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
      &                 FNwsomp(0:ndejc,0:ndnuc), TISomer,
      &                 FNasomp(0:ndejc,0:ndnuc),
      &                 FNrvomp(0:ndejc,0:ndnuc),
      &                 FNrwvomp(0:ndejc,0:ndnuc),
-     &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc)
+     &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),
+     &                 FISV1(ndnuc),FISV2(ndnuc),FISV3(ndnuc),
+     &                 FISHO1(ndnuc),FISHO2(ndnuc),FISHO3(ndnuc),
+     &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
+     &                 FISA1(ndnuc),FISA2(ndnuc),FISA3(ndnuc),
+     &                 FISDL1(ndnuc),FISDL2(ndnuc),FISDL3(ndnuc),
+     &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
+     &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
+     &                 FISn_n(NFHUMP,ndnuc)
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -133,9 +141,10 @@ C
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
       DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED 
 
+
       DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
-c
+
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
@@ -145,6 +154,10 @@ c
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
+      COMMON /COMFIS_KEY/FISV1 ,FISV2 ,FISV3 ,FISHO1 ,FISHO2 ,FISHO3,
+     &                   FISA1 ,FISA2 ,FISA3 ,FISDL1 ,FISDL2 ,FISDL3,
+     &                   FISNV1,FISNV2,FISNV3
+      COMMON /COMFIS_PAR/FISv_n, FISh_n, FISa_n, FISd_n, FISn_n
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
       COMMON /DEPTH / POTe

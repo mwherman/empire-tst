@@ -1,15 +1,12 @@
-Ccc   * $Rev: 2016 $
+Ccc   * $Rev: 2133 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
+Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
 C Creates fission.inp  which contains all the fission
 C parameters independent of energy.
 C
-C-----fundamental fission barrier
-C-----FISBAR=0 RIPL-2; HF-BCS theoretical heights for simple and double barriers,
-C---- information about curvatures and wells provided by the code
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -64,7 +61,7 @@ C
 C Local variables
 C
       CHARACTER*1 chstar(70)
-      INTEGER i, ib, ibar, ka, kz, m, nr,  nrmod, nrsm
+      INTEGER i, ib, ibar,ih, ka, kz, m, nr,  nrmod, nrsm,bfi
       INTEGER INT,iz,ia,iarr,izrr
       CHARACTER*50 filename
       DOUBLE PRECISION rmiu, bb2, bb3, bb4
@@ -147,7 +144,7 @@ c
          H(1,1) = 1.
          Hcont(1)=1.
       ENDIF
-C-------Lynn values
+C-----Lynn values
       IF (NRBar.EQ.2) THEN
          IF (ka/2.EQ.INT(ka/2) .AND. kz/2.EQ.INT(kz/2)) THEN   ! even-even
             H(1,1) = 1.00
@@ -198,66 +195,69 @@ c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
 99900    FORMAT ('/RIPL-2/fission/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//trim(filename)
      &      ,STATUS = 'old',ERR = 460)
-  410    read(52,*,END=460) izrr,iarr,npoints
+ 410     read(52,*,END=460) izrr,iarr,npoints
          write(8,*) iz,ia,izrr,iarr
 C   When the mass number is smaller than that of all existing barriers,
 C         the barrier of smallest mass number is used (BVC, MS - 05/10)
 C         if(izrr.ne.iz .or. iarr.ne.ia) then
          IF(izrr.NE.iz .OR. iarr.LT.ia) THEN
-           DO ii=1,npoints
-             READ (52,*,END = 460)
+            DO ii=1,npoints
+               READ (52,*,END = 460)
             ENDDO
-           GOTO 410
+            GOTO 410
          ENDIF
-          IF(ia.LT.iarr) THEN
+         IF(ia.LT.iarr) THEN
             WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
      &                     ' IN HFB2007 (RIPL-3)'
             WRITE (8,*) '      Using barriers FOR Z=', iz, ' A=', iarr
-           ENDIF    
+         ENDIF    
          DO ii=1,npoints
            READ (52,*,END = 480) bb2, bb3, bb4, vdef_1d(ii)
            eps_1d(ii) = bb2
-          ENDDO
-         GOTO 480
- 460     WRITE (8,*)' CHANGE FISBAR OPTION(NOW=3). EXECUTION TERMINATED'
-         WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
+        ENDDO
+        GOTO 480
+ 460    WRITE (8,*)' CHANGE FISBAR OPTION(NOW=3). EXECUTION TERMINATED'
+        WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
      &                     ' IN HFB2007 (RIPL-3)'
-         STOP ' FATAL: Fission barrier can not be retrieved'
- 480     CLOSE (52)
-         nextr = Find_Extrem(Nnuc)
-         nrhump = nextr/2 + 1
-         nrwel = nextr/2
-         nrbar = nrhump + nrwel
-C------- Fitting parabola
-         rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
-         DO j=1,nextr
-            CALL ParabFit(iiextr(j),nrsm,rmiu,eps_1d,vdef_1d,
+        STOP ' FATAL: Fission barrier can not be retrieved'
+ 480    CLOSE (52)
+        nextr = Find_Extrem(Nnuc)
+        
+        write(*,*)nextr,nrsm
+        pause
+        nrhump = nextr/2 + 1
+        nrwel = nextr/2
+        nrbar = nrhump + nrwel
+C-------Fitting parabola
+        rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
+        DO j=1,nextr
+           CALL ParabFit(iiextr(j),nrsm,rmiu,eps_1d,vdef_1d,
      &        centr,  heigth,  width(j), ucentr, uheigth, uwidth)
-            IF(width(j).LT.0.05d0) CYCLE ! Skipping very narrow peaks
-         ENDDO
-         DO k=1, NRBar,2
+           IF(width(j).LT.0.05d0) CYCLE ! Skipping very narrow peaks
+        ENDDO
+        DO k=1, NRBar,2
             EFB(int(k/2)+1)    = Vdef_1d(iiextr(k))
             h(1,int(k/2)+1)    = width(k)
             DEFfis(int(k/2)+1) = eps_1d(iiextr(k))
-         ENDDO
-         DO k=2, NRBar,2
+        ENDDO
+        DO k=2, NRBar,2
             EFB(NRHump+int(k/2))    = Vdef_1d(iiextr(k))
             h(1,NRHump+int(k/2))    = width(k)
             DEFfis(NRHump+int(k/2)) = eps_1d(iiextr(k))
-         ENDDO
+        ENDDO
       ENDIF
 C-----Default value for curvatures and protection !!
   500 DO i = 1, NRBar
          IF (H(1,i).EQ.0) H(1,i) = 1.
       ENDDO
-      IF(NRBar.EQ.2.AND.FISOPT(Nnuc).EQ.0.)THEN
+      IF(NRBar.EQ.2.)THEN
          NRBar = 3
          NRHump = 2
          NRWel = 1
          EFB(3) = 2.d0
          H(1,3) = 0.5d0
       ENDIF
-      NRHump=NRBar-NRWel
+      NRHump = NRBar - NRWel
 C
 C----------------------input fundamental fission barrier *** done
 C------- discrete barriers---------------------------------------
@@ -570,7 +570,7 @@ c
       IF (NRBar.EQ.5) THEN
          WRITE (79,'(a,1x,a)')
      &'    Va      ha      Vb      hb      Vc       hc      Vi
-     &hi      Vo      ho  (in Mev) '
+     &      hi      Vo      ho  (in Mev) '
          WRITE (79,'(10f8.3,15x)') (EFB(i),H(1,i),i = 1,NRBar)
          WRITE (79,*) ' '
          WRITE (79,'(6a10)') 'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)',
@@ -644,8 +644,11 @@ c
       WRITE (79,*)chstar
       WRITE (79,*) '            Asym    Delta    alpha   Norm'
       DO ih = 1, nrhump
-         WRITE (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier', ih,
-     &          bff(ih), rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+         bfi=int(bff(ih))
+         WRITE (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier ', ih,
+c     &          bff(ih), rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+     &          bfi, rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+c         bff(ih)= float(bfi)
       ENDDO
       WRITE (79,*)
 
@@ -704,7 +707,7 @@ C Local variables
 C
       CHARACTER*2 cara3, carz
       CHARACTER*10 cara8
-      INTEGER i, ia, ibar, ibaro, iz, m, mm, nr, nrmod
+      INTEGER i, ia, ibar,ih, ibaro, iz, m, mm, nr, nrmod,bfi
       INTEGER INT
       CHARACTER*40 line
       DOUBLE PRECISION rmiu
@@ -835,7 +838,11 @@ c         READ (79,*)
 
          DO ih = 1, nrhump
             READ (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
-     &            bff(ih),rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+c     &            bff(ih),rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+     &            bfi,rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+c        if(ih.eq.2) write (*,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
+c     &            bfi,rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+             bff(i)= float(bfi)
          ENDDO
          READ (79,*)
       ENDIF
@@ -901,19 +908,28 @@ C------- Fitting parabola
             DEFfis(NRHump + int(k/2)) = eps_1d(iiextr(k))
          ENDDO
       ENDIF
-C     For covariance
-      EFB(1) = EFB(1) * FISbin (Nnuc)
-      IF(NRHump.GE.2) THEN
-        DO i = 2, NRHump
-          EFB(i) = EFB(i) * FISbou (Nnuc)
-        ENDDO
-      ENDIF
 
       IF (NRBar.EQ.2)THEN
          efb(nrbar+1) = 2.
          h(1,nrbar+1) = 1.
          NRBar=3
       ENDIF
+
+C     For covariance
+c      EFB(1) = EFB(1) * FISbin (Nnuc)
+      IF(NRHump.GE.2) THEN
+      DO i = 1, NRHump
+         EFB(i) = EFB(i) * FISv_n (i,Nnuc)
+         Hcont(i)=hcont(i)*FISh_n(i,Nnuc)
+         AFIs(i)=AFIs(i)*FISa_n(i,Nnuc)
+         DELtafis(i)= DEltafis(i)*FISd_n(i,Nnuc)
+         vibfnorm(i)=vibfnorm(i)*FISn_n(i,Nnuc)
+c       write(*,*) vibfnorm(i),vibfnorm(i)*FISn_n(i,Nnuc)
+c       pause
+      ENDDO
+      ENDIF
+
+
       IF(FISbar(Nnuc).LE.2.)CALL DEFO_FIS(Nnuc)
       END
 c
@@ -938,7 +954,7 @@ C
       iiextr(0)=1
 CC--------------------------------------------------------------------------
 C     determination of the minima   and maxima
-      iext=0
+ 10   iext=0
       do j = NRSmooth(Nnuc) + 1 , npoints - NRSmooth(Nnuc)
          logmax=.true.
          do k = j - NRSmooth(Nnuc), j + NRSmooth(Nnuc)
@@ -959,6 +975,10 @@ C     determination of the minima   and maxima
             iiextr(iext)=j
          endif
       enddo
+      IF(iext.GT.5)THEN
+         NRSmooth(Nnuc)= NRSmooth(Nnuc)+1
+         GOTO 10
+      ENDIF
       Find_Extrem = iext
       iiextr(iext+1)= npoints
       return
@@ -1088,7 +1108,7 @@ C Local variables
 C
       CHARACTER*36 cara1
       CHARACTER*1 chstar(70)
-      INTEGER i, ib, ibar, m, nr, j
+      INTEGER i, ib, ibar,ih, m, nr, j,bfi
       INTEGER INT
       DATA chstar/70*'='/
 C
@@ -1297,10 +1317,12 @@ c
       IF(FISDEN(Nnuc).EQ.2)THEN
          WRITE (80,*) '              Delta    alpha   Norm'
          DO ih = 1, nrhump
-            WRITE (80,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier', ih,
-     &             bff(ih), rohfbp_sd(ih), rohfba_sd(ih), rohfb_norm
+            bfi=int(bff(ih))
+c           WRITE (80,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') 'Barrier',int(ih),
+c     &             bfi, rohfbp_sd(ih), rohfba_sd(ih), rohfb_norm
          ENDDO
          WRITE (80,*)
+c         pause
       ENDIF
 
       WRITE (80,*)
