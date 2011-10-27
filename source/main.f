@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2134 $
+Ccc   * $Rev: 2135 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-27 16:31:36 +0200 (Do, 27 Okt 2011) $
+Ccc   * $Date: 2011-10-27 18:35:39 +0200 (Do, 27 Okt 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -197,195 +197,101 @@ C-----Locate position of the target among residues
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-
 C 
-
 C---- Calculate compound nucleus (CN) level density
-
 C
-
       nnuc = 1
-
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
-
       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
-
       IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
-
       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
 
-
-
 C-----check whether NLW is not larger than max spin at which nucleus
-
 C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
 
       IF (NLW.GT.JSTab(1) .and. JSTab(1).GT.0) THEN
-
          NLW = JSTab(1)
-
          IF (IOUt.GT.0) THEN
-
             WRITE (8,'('' Maximum spin to preserve stability is'',I4)')
-
      &             JSTab(1)
-
             WRITE (8,
-
      &             '('' Calculations will be truncated at this limit'')'
-
      &             )
-
             WRITE (8,
-
      &            '('' part of the fusion cross section will be lost'')'
-
      &            )
-
          ENDIF
-
          DO j = NLW + 1, NDLW
-
             CSFus = CSFus - POP(NEX(1),j,1,1) - POP(NEX(1),j,2,1)
-
             POP(NEX(1),j,1,1) = 0.0
-
             POP(NEX(1),j,2,1) = 0.0
-
          ENDDO
-
          RETURN
-
       ENDIF
 
-
-
-    csmax = 0.d0
-
+      csmax = 0.d0
       DO ip = 1, 2
-
         DO j = 1, NDLW
-
           csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
-
         ENDDO
-
       ENDDO
 
-
-
       IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
-
      &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
-
          WRITE (8,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
-
      &               POP(NEX(1),NLW,2,1), 'NLW=', NLW
-
          WRITE (8,
-
      &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
-
      &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
-
      &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
-
      &''D '')')
-
          STOP 'Insufficient dimension NDLW for partial waves'
-
       ENDIF
 
-
-
       IF (IOUt.EQ.6) THEN
-
          ia = INT(A(nnuc))
-
          IF (ADIv.NE.3.0D0) THEN
-
            WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
-
      &          SYMb(nnuc)
-
            DO i = 1, NEX(nnuc)
-
              rocumul = 0.D0
-
              DO j = 1, NLW
-
                rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-
              ENDDO
-
              WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-
      &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-
            ENDDO
-
          ELSE
-
            WRITE (8,'(1X,/,
-
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-
      &          ia, SYMb(nnuc)
-
            DO i = 1, NEX(nnuc)
-
              rocumul = 0.D0
-
              DO j = 1, NLW
-
                rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-
              ENDDO
-
              WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-
      &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-
            ENDDO
-
-
 
            WRITE (8,'(1X,/,
-
      &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
-
      &          ia, SYMb(nnuc)
-
            DO i = 1, NEX(nnuc)
-
              rocumul = 0.D0
-
              DO j = 1, NLW
-
                rocumul = rocumul + RO(i,j,2,Nnuc)
-
              ENDDO
-
              WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-
      &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
-
 c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
-
 c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
-
            ENDDO
-
          ENDIF
-
       ENDIF
 
 C
@@ -819,93 +725,51 @@ C
       ENDIF
 
 C
-
 C-----calculate transmission coefficients in outgoing channels
-
 C
-
       DO nnuc = 1, NNUcd
-
          DO nejc = 1, NEJcm
-
             ares = A(nnuc) - AEJc(nejc)
-
             zres = Z(nnuc) - ZEJc(nejc)
-
 C           residual nuclei must be heavier than alpha
-
             if(ares.le.4 . or. zres.le.2) cycle
 
-
             izares = INT(1000*zres + ares)
-
             CALL WHERE(izares,nnur,iloc)
-
             IF (iloc.EQ.1) cycle
-
             netl = 6
-
             IF (NEX(nnuc).GT.0) netl =
-
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
-
           
             IF (netl.GT.NDETL) cycle
-
-            
+             
 C-----------calculate transmission coefficients
-
             ICAlangs = ICAlangs-10
-
             itmp = NANgela
-
             NANgela = 2
-
             CALL TLEVAL(nejc,nnur,nonzero)
-
             ICAlangs = ICAlangs+10
-
             NANgela = itmp
-
 C-----------print transmission coefficients
-
             IF (nonzero .AND. IOUt.EQ.5) THEN
-
               WRITE (8,*)
-
               WRITE (8,*) ' Transmission coefficients for '
-
               WRITE (8,'(1x,A15,I3,A3,I3,A3,F4.1)')
-
      &                    ' Projectile: A=', INT(AEJc(nejc)), ' Z=',
-
      &                   INT(ZEJc(nejc)), ' S=', SEJc(nejc)
-
               WRITE (8,'(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
-
      &                    ' TARGET: A=', INT(A(nnur)), ' Z=',
-
      &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
-
      &                   ' P=', INT(LVP(1,nnur))
-
               DO i = 1, netl
-
                 IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (8,99010)
-
      &             ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
-
               ENDDO
-
               WRITE (8,'(1X,/)')
-
             ENDIF
-
 C-----------determination of transmission coeff.--done
-
 C
 C-----------calculate residual nucleus level density
-
             IF (NEX(nnur).LE.0) cycle
             
             IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
@@ -964,7 +828,6 @@ c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
 99011 FORMAT (1X,14(G10.4,1x))
 
 C
-
 C     Skipping all emission calculations
 C     GOTO 99999
 C
