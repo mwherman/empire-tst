@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-10-27 16:31:36 +0200 (Do, 27 Okt 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -559,6 +559,7 @@ C****************************************************
 
       REAL*8 Shcn
       INTEGER ia,iz
+      CHARACTER*2 SMAT
 	REAL*8 FSHELL
 
       real*8 pi, pi2, xr, ar
@@ -590,9 +591,10 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt,SHCn,GAMma)
       SCR = 2.*ACRt*TCRt
 
-      WRITE(8, '(1X,/,'' Atil='', F6.3,''  Acrt='',F6.3,''  Ucrt='',
-     &      F5.3, ''  Econd='', F5.3,''  Det='', F8.3, ''  Scrt='',
-     &      F6.3/)')atil,acrt,ucrt,econd,detcrt,scr
+      WRITE(8, '(2X,/,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
+     &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
+     &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
+     &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
       
       RETURN
       END
