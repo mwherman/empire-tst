@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2136 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1744,9 +1744,11 @@ C-----calculate compound nucleus level density (only for FITLEV>0)
        IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
        IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
-         IF (ADIv.NE.3.0D0) THEN
-           WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
+         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
      &          SYMb(nnuc)
+         WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
+     &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
+         IF (ADIv.NE.3.0D0) THEN
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -1758,9 +1760,7 @@ c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ELSE
-           WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnuc)
+           WRITE (8,'(2X,/,''  POSITIVE PARITY'')')
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -1771,10 +1771,7 @@ c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
-
-           WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
-     &          ia, SYMb(nnuc)
+           WRITE (8,'(2X,/,''  NEGATIVE PARITY'')')
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -1992,9 +1989,12 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
             IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
             IF (IOUt.EQ.6) THEN
               ia = INT(A(nnur))
-              IF (ADIv.NE.3.0D0) THEN
-                WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
+              WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') 
      &          ia, SYMb(nnur)
+              WRITE(8,'(/2x,A25,1x,F5.2,A4//
+     & 		  1x,''   E        RHO(E)  '')')
+     &          'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
+              IF (ADIv.NE.3.0D0) THEN
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -2004,9 +2004,7 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
      &                     (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
                 ENDDO
               ELSE
-                WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnur)
+                WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -2018,9 +2016,7 @@ c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
                 ENDDO
 
-                WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
-     &          ia, SYMb(nnur)
+                WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -2370,9 +2366,9 @@ C--------------------only gamma decay is considered up to now
               ENDIF
             ENDIF
           ENDDO  ! end of loop over levels
-          IF(IOUT.GT.3) write(8,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-     &        'FOR NUCLEUS ',chelem,
-     &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
+C         IF(IOUT.GT.3) write(8,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
+C    &        'FOR NUCLEUS ',chelem,
+C    &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
         ENDIF
       ENDIF
   200 IF(.NOT.ADDnuc) THEN
@@ -3014,7 +3010,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2133 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2136 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2136 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -210,7 +210,7 @@ c        pause
       end
      
 c==============================================================
-      SUBROUTINE PLOT_ZVV_NumCumul(Nnuc,Defit,nplot,NLwst) 
+      SUBROUTINE PLOT_ZVV_NumCumul(Nnuc,Defit,Nplot,Nlwst) 
 
 
       INCLUDE 'dimension.h'
@@ -220,12 +220,14 @@ c==============================================================
       PARAMETER (NLDGRID = 60)!,JMAX = 5
       COMMON /UCGRID/ uugrid, cgrid, iugrid 
       COMMON /CT/ am,ux,eo,T
+
       REAL*8 am,ux,t,eo
       REAL*8 uugrid(0:NLDGRID), cgrid(0:NLDGRID,2)
 C
 C Dummy arguments
 C
-      INTEGER Nnuc,Nlwst,iugrid,nplot
+      REAL*8 Defit
+      INTEGER Nnuc, Nlwst, Nplot
 C
 C Local variables
 C
@@ -235,7 +237,7 @@ C
       CHARACTER*30 title
 
       REAL FLOAT
-      INTEGER ij, kk
+      INTEGER ij, kk,iugrid
       INTEGER INT
 
 
@@ -276,7 +278,9 @@ C
 C-----EGSM,GSM,GCM
       IF(ADIv.lt.3)THEN
          DO kk = 2, nplot
+
             IF(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
+
             IF(ADIv.EQ.2)THEN
                rocumul = EXP(( - eo/t))*(EXP(defit*(kk - 1)/t) - 1.)
             ELSE

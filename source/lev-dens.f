@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-27 16:31:36 +0200 (Do, 27 Okt 2011) $
+Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -81,9 +81,6 @@ C
 
       IF(FISSHI(Nnuc).EQ.1.d0.OR.Aejc(0).GT.4)CALL PRERO(Nnuc)
 
-      IF(IOUt.eq.6)
-     &   WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
-     &          SYMb(nnuc)
 C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
       CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -91,7 +88,7 @@ C-----EMPIRE-3.0-dependence
       ATIl = AP1*FLOAT(ia) + AP2*A23
       ATIl = ATIl*ATIlnor(Nnuc)
 c-----calculate crtical values
-      CALL DAMIRO_CRT(ia,iz,shc(nnuc))
+      CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt)
       IF (BF.EQ.0.D0 .AND. Asaf.LT.0.0D0) ACR = ACRt
 C-----fit of cumulative low-lying discrete levels
       IF(BF.NE.0.d0)Call LEVFIT(Nnuc,Nplot,Dshif,Dshift, Defit)
@@ -547,18 +544,18 @@ C==========================================================
 
 
 c****************************************************
-      SUBROUTINE DAMIRO_CRT(ia,iz,Shcn)
+      SUBROUTINE DAMIRO_CRT(ia,iz,Shcn,iout)
 C****************************************************
 
       REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
-      INTEGER NLWst                                      ! PARAM
+      INTEGER NLWst                                             ! PARAM
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
       REAL*8 Shcn
-      INTEGER ia,iz
+      INTEGER ia,iz,iout
       CHARACTER*2 SMAT
 	REAL*8 FSHELL
 
@@ -591,7 +588,8 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt,SHCn,GAMma)
       SCR = 2.*ACRt*TCRt
 
-      WRITE(8, '(2X,/,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
+      if(iout.eq.6)
+     & WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
      &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
      &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
      &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
@@ -777,7 +775,7 @@ C Local variables
       CALL PRERORITO(Nnuc)
       NLWst = NLW
 c      Jstab(Nnuc)=NDLW
-      CALL DAMIRO_CRT(ia,iz,shcn)
+      CALL DAMIRO_CRT(ia,iz,shcn,IOUt)
       def2=def(1,nnuc)
       rotemp = 0.d0
      
@@ -2706,7 +2704,7 @@ C-----surface deformation dependent factor bsq
 cc      ATIl = AP1*A(Nnuc) + BSQ(cigor)*AP2*A(Nnuc)**0.666667
 cc      ATIl = ATIl*Rafis
 
-      CALL DAMIRO_CRT(ia,iz,shcf)
+      CALL DAMIRO_CRT(ia,iz,shcf,IOUt)
 
       momparcrt=mompar
       momortcrt=momort

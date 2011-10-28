@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2135 $
+Ccc   * $Rev: 2136 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-27 18:35:39 +0200 (Do, 27 Okt 2011) $
+Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -250,9 +250,11 @@ C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnuc))
-         IF (ADIv.NE.3.0D0) THEN
-           WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)') ia,
+         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
      &          SYMb(nnuc)
+         WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
+     &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
+         IF (ADIv.NE.3.0D0) THEN
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -264,9 +266,7 @@ c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ELSE
-           WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnuc)
+           WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -278,9 +278,7 @@ c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
 
-           WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
-     &          ia, SYMb(nnuc)
+           WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
            DO i = 1, NEX(nnuc)
              rocumul = 0.D0
              DO j = 1, NLW
@@ -293,7 +291,6 @@ c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ENDIF
       ENDIF
-
 C
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
@@ -449,11 +446,10 @@ C            WRITE(8,*) 'E calc',EX(NEX(1),1)-Q(nejcec,1)-(icsl-1)*DE
 C            WRITE(8,*) 'Last discr. level',ELV(NLV(nnurec),nnurec)
 C            WRITE(8,*) 'Ecut',ECUt(nnurec)
 C            WRITE(8,*) 'Ex',EX(NEX(1),1)-Q(nejcec,1)-(ncon-1)*DE
-C            WRITE(8,*) 'Continuum starts at bin number',ncon
+C            WRITE(8,*) 'Continuum at bin number',ncon
 C------------Avoid reading closed channels
 C            IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
-             IF (echannel.GE.0.0001 .and. icsl.gt.0)
-     &         THEN
+             IF (echannel.GE.0.0001 .and. icsl.gt.0) THEN
                READ (46,*,END = 1400) popread
 C
 C--------------This level is not counted as a discrete one
@@ -596,31 +592,6 @@ C-----Print elastic and direct cross sections from ECIS
          imaxt = MIN0(4*iang,NANgela)
          WRITE (8,99025) ((j - 1)*angstep,elada(j),j = imint,imaxt)
       ENDDO
-C     For Chris
-C     IF (ICAlangs.LE.0) THEN  ! skipping when fitting OMP
-C        WRITE (68,'('' INCIDENT ENERGY (lab)    ='',G12.5,'' MeV'')')
-C    &     EINl
-C        if(ELAcs.GT.0.D0) then
-C          DO iang= 1,NANgela
-C            IF( ABS(FLOAT(iang-1)*angstep-125.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-165.d0).le.0.1 )
-C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep,
-C    &             (1.d0 + ElasticCorr/ELAcs)*elada(iang)+ELCncs
-C          ENDDO
-C        else
-C          DO iang= 1,NANgela
-C            IF( ABS(FLOAT(iang-1)*angstep-125.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-135.d0).le.0.1 .or.
-C    &           ABS(FLOAT(iang-1)*angstep-165.d0).le.0.1 )
-C    &           WRITE (68,'(9X,F5.1,E15.5)') FLOAT(iang-1)*angstep,
-C    &             elada(iang) + ELCncs
-C          ENDDO
-C        endif
-C
-C        WRITE (68,*)
-C
-C      ENDIF
 99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
 99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
@@ -737,13 +708,13 @@ C           residual nuclei must be heavier than alpha
             izares = INT(1000*zres + ares)
             CALL WHERE(izares,nnur,iloc)
             IF (iloc.EQ.1) cycle
+
             netl = 6
             IF (NEX(nnuc).GT.0) netl =
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
           
             IF (netl.GT.NDETL) cycle
              
-C-----------calculate transmission coefficients
             ICAlangs = ICAlangs-10
             itmp = NANgela
             NANgela = 2
@@ -767,22 +738,32 @@ C-----------print transmission coefficients
               ENDDO
               WRITE (8,'(1X,/)')
             ENDIF
-C-----------determination of transmission coeff.--done
+         ENDDO     !over ejectiles (nejc)
+      ENDDO     !over nuclei (nnuc)
 C
-C-----------calculate residual nucleus level density
-            IF (NEX(nnur).LE.0) cycle
-            
-            IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-            IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
+C-----determination of transmission coeff.--done
+C
+
+C-----calculate residual nucleus level density
+      DO nnur = 2, NNUct
+         ia = INT(A(nnur))
+         iz = INT(Z(nnur))
+         IF (NEX(nnur).LE.0) cycle
+         
+         IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
+         IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
 C-----------<m2> could be added to the input ( to use 0.124 if needed)
-            IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
-C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
-            IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
-            IF (IOUt.EQ.6) THEN
-              ia = INT(A(nnur))
-              IF (ADIv.NE.3.0D0) THEN
-                WRITE (8,'(1X,/,'' LEVEL DENSITY FOR '',I3,''-'',A2,/)')
-     &          ia, SYMb(nnur)
+         IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
+C        IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
+         IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
+         
+	   IF (IOUt.EQ.6) THEN
+           WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
+     &          SYMb(nnur)
+           WRITE(8,'(/2x,A25,1x,F5.2,A4//
+     &		 1x,''   E        RHO(E)  '')')
+     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
+           IF (ADIv.NE.3.0D0) THEN
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -791,10 +772,8 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
                   WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
      &                     (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
                 ENDDO
-              ELSE
-                WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' POSITIVE PARITY''/)')
-     &          ia, SYMb(nnur)
+           ELSE
+                WRITE (8,'(2X,/,''  POSITIVE PARITY'')')
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -806,9 +785,7 @@ c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
                 ENDDO
 
-                WRITE (8,'(1X,/,
-     &   '' LEVEL DENSITY FOR '',I3,''-'',A2,'' NEGATIVE PARITY''/)')
-     &          ia, SYMb(nnur)
+                WRITE (8,'(2X,/,''  NEGATIVE PARITY'')')
                 DO i = 1, NEX(nnur)
                   rocumul = 0.D0
                   DO j = 1, NLW
@@ -819,12 +796,12 @@ c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
 c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
                 ENDDO
-              ENDIF
-            ENDIF
-         ENDDO     !over ejectiles (nejc)
-
-      ENDDO     !over nuclei (nnuc)
-
+           ENDIF
+         ENDIF
+	ENDDO
+C
+C-----determination of the residual nucleus level density done
+C
 99011 FORMAT (1X,14(G10.4,1x))
 
 C
