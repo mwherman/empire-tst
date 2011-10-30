@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2136 $
+Ccc   * $Rev: 2137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
+Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
 
 C
       SUBROUTINE INPUT
@@ -938,7 +938,8 @@ C               Comment the following block and uncommment the line after the bl
                 ENDIF
 C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
               ENDIF
-              IF (ENDf(nnuc).EQ.1) THEN
+C             IF (ENDf(nnuc).EQ.1) THEN
+              IF (ENDf(nnuc).LE.1) THEN
                 NEXclusive = NEXclusive + 1
                 IF(NEXclusive.GT.NDExclus) THEN
                   WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
@@ -3010,7 +3011,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2136 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2137 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -4925,7 +4926,8 @@ C           Setting ENDF for a single nucleus
                GOTO 100
             ENDIF
             ENDf(nnuc) = INT(val)
-            IF (ENDf(nnuc).EQ.1) THEN
+C           IF (ENDf(nnuc).EQ.1) THEN
+            IF (ENDf(nnuc).LE.1) THEN
               WRITE (8,
      &       '('' Exclusive spectra will be available for emission'',
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)

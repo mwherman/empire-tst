@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -75,7 +75,8 @@ C-----
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
-            IF (ENDf(Nnuc).EQ.1) THEN
+C           IF (ENDf(Nnuc).EQ.1) THEN
+            IF (ENDf(Nnuc).LE.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
@@ -138,14 +139,16 @@ C
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
    
             IF (popll.NE.0.0D+0) THEN
-               IF (ENDf(Nnuc).EQ.1) THEN
+C              IF (ENDf(Nnuc).EQ.1) THEN
+               IF (ENDf(Nnuc).LE.1) THEN
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
             IF (poph.NE.0.0D+0) THEN
-               IF (ENDf(Nnuc).EQ.1) THEN
+C              IF (ENDf(Nnuc).EQ.1) THEN
+               IF (ENDf(Nnuc).LE.1) THEN
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
@@ -697,7 +700,8 @@ C
 
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
-            IF (ENDf(Nnuc).EQ.1) THEN
+C           IF (ENDf(Nnuc).EQ.1) THEN
+            IF (ENDf(Nnuc).LE.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
      &          ,INExc(Nnuc)) + gacs/DE
             ELSEIF(ENDf(Nnuc).EQ.2) THEN
@@ -764,7 +768,8 @@ C
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
-                  IF (ENDf(Nnuc).EQ.1) THEN
+C                 IF (ENDf(Nnuc).EQ.1) THEN
+                  IF (ENDf(Nnuc).LE.1) THEN
                      POPcse(0,0,icse,INExc(Nnuc))
      &                = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
                   ELSEIF(ENDf(Nnuc).EQ.2) THEN

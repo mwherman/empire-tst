@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2136 $
+Ccc   * $Rev: 2137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
+Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1900,7 +1900,8 @@ C----------Integrating exclusive population spectra (ENDF)
            hcs = 0
 C          write(*,'(2x,F3.0,1x,F3.0,2x,A3,2x,F3.1)') 
 C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
-           IF (ENDf(nnuc).EQ.1) THEN
+C          IF (ENDf(nnuc).EQ.1) THEN
+           IF (ENDf(nnuc).LE.1) THEN
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
                gcs = gcs + CSE(ispec,0,nnuc)*DE
@@ -2380,7 +2381,8 @@ C     For Kalbach parameterization
          xcos(i)=cos(theta)
       enddo
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
-         IF (ENDf(nnuc).EQ.1) THEN
+C        IF (ENDf(nnuc).EQ.1) THEN
+         IF (ENDf(nnuc).LE.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
               DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
@@ -2649,7 +2651,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
               IF (nnuc.NE.1  .AND. RECoil.GT.0)
      &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
-         ENDIF ! IF (ENDf(nnuc).EQ.1)
+         ENDIF ! IF (ENDf(nnuc).LE.1)
 C
 C--------Prompt fission spectra of neutrons and gammas
 C        for a given decaying nucleus
@@ -2657,7 +2659,8 @@ C
          IF (FISSPE.gt.0 .and.
      &      TOTcsfis.gt.0.d0 .and. CSPfis(nnuc).GT.0.0D0 .and.
      &       ( Z(0).eq.Z(nnuc) .OR.   Z(0)-1.eq.Z(nnuc) ) .AND.
-     &      ENDf(nnuc).EQ.1 .and.
+     &      ENDf(nnuc).LE.1 .and.
+C    &      ENDf(nnuc).EQ.1 .and.
 C           Prompt fission spectra are not calculated if:
 C           Partial fission cross section is lower than 1.d-7*TOTcsfis
      &      CSPfis(Nnuc).GT.1.d-7*TOTcsfis) THEN
@@ -4395,7 +4398,8 @@ C
 C-----------Fission
             Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
             CSFis = CSFis + Fisxse
-            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+C           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+            IF (ENDf(Nnuc).LE.1 .AND. Fisxse.NE.0.0D+0 .AND.
      &        POPbin(Ke,Nnuc).GT.0.d0)
      &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
          ENDIF
@@ -4455,7 +4459,8 @@ C-----fission
       IF (FISmod(Nnuc).EQ.0.) THEN
            Fisxse = Sumfis*Xnor
            CSFis  = CSFis + Fisxse
-           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+C          IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+           IF (ENDf(Nnuc).LE.1 .AND. Fisxse.NE.0.0D+0 .AND.
      &        POPbin(Ke,Nnuc).GT.0.d0)
      &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF
