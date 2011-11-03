@@ -1,6 +1,6 @@
 $DEBUG
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
+Ccc   * $Date: 2011-11-04 00:51:42 +0100 (Fr, 04 Nov 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1435,8 +1435,8 @@ c            GOTO 500 !????
 
       IF (igna.NE.0D0) THEN
          DO i = 1, 10  
-	      write(*,*) '***',a(nnuc),z(nnuc),ux
-	      write(*,*) am, 6/t, atil
+C	      write(*,*) '***',a(nnuc),z(nnuc),ux
+C	      write(*,*) am, 6/t, atil
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
             am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
          ENDDO

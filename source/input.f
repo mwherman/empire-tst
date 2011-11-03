@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2137 $
+Ccc   * $Rev: 2140 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
+Ccc   * $Date: 2011-11-04 00:51:42 +0100 (Fr, 04 Nov 2011) $
 
 C
       SUBROUTINE INPUT
@@ -42,7 +42,6 @@ C
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT
       LOGICAL gexist, fexist, calc_fiss
-
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh
@@ -1993,7 +1992,7 @@ C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
               WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') 
      &          ia, SYMb(nnur)
               WRITE(8,'(/2x,A25,1x,F5.2,A4//
-     & 		  1x,''   E        RHO(E)  '')')
+     &        1x,''   E        RHO(E)  '')')
      &          'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
               IF (ADIv.NE.3.0D0) THEN
                 DO i = 1, NEX(nnur)
@@ -2225,7 +2224,6 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
-
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)',END = 300) dum
@@ -3011,7 +3009,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2137 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2140 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -6884,37 +6882,22 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
 Ccc   *                         R E A D L D P                            *
 Ccc   *                                                                  *
-Ccc   *     Reads level density parameter according to Mebel and         *
-Ccc   *     the discrete level below which the decay scheme is complete  *
-Ccc   *     as determined by Molnar-Belgya (see RIPL CRP) from file 24   *
-Ccc   *     File 24 is organized in the following way:                   *
-Ccc   *     ZA    - Z*1000+A                                             *
-Ccc   *     NLEVC - number of the level (NLEVC=1 for g.s.)               *
+Ccc   *     Reads level density parameters from file 24                  *
 Ccc   *     AROGC - a-parameter without collective effects (G.C.)        *
-Ccc   *     AROC  - a-parameter including collective effects.            *
+Ccc   *     AROC  - a-parameter including collective effects (EGSM)      *
 Ccc   *     QN    - neutron binding energy (as in Iljinov & Mebel)       *
 Ccc   *     DOBS  - D-observed for neutron resoances ( -- " --)          *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   * output:none                                                      *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * calls:where                                                      *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * author: M.Herman                                                 *
 Ccc   * date:   12.Jul.1997                                              *
-Ccc   * revision:1    by:M. Herman                on:11.07.1998          *
-Ccc   *               EMPIRE systematics for level density parameter 'a' *
-Ccc   *               introduced, 'a' values compatible with the dynamic *
-Ccc   *               level density model read in from file ldp.dat,     *
-Ccc   *               local normalization of the systematics to the exp. *
-Ccc   *               data introduced for the dynamic and Gilbert-       *
-Ccc   *               Cameron level densities.                           *
+Ccc   * revision:2    by:R. Capote                on:11.04.2011          *
 Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
@@ -6940,10 +6923,10 @@ C
       nexp = 0
       atilsum = 0.0
 C-----Set EGSM normalization factors for each Z
+      DO iz = 1,NDZmax
+         ATIlnoz(iz) = 1.0 !default
+      ENDDO
       IF (ADIv.EQ.0.0D0) THEN
-         DO iz = 1,NDZmax
-            ATIlnoz(iz) = 1.0 !default
-         ENDDO
 c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          OPEN(31, FILE= trim(empiredir)//
      &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat',
@@ -6982,16 +6965,14 @@ c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          WRITE(8,'(4X,54(''-''))')
       ENDIF
 C
-C     READING FROM INTERNAL EMPIRE DATA FILE /data/ldp.dat
+C     reading from the RIPL level-densities-param.dat file (EGSM & GC)
 C
 C     Skipping header
+C
       READ (24,'(///)')
-C     ! reading from the EGSM_ldp.dat file
-C 100 READ (24,'(2I4,9x,F7.3,E13.5,67x,f8.4,9x,f8.4)',END = 200)
-C    &           nixz, nixa, qn, dob, aroc
-C     ! reading from the ldp.dat file
-  100 READ (24,'(2I4,8x,F7.3,3E14.5,3f8.4)',END = 200)
-     &           nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam
+  100 READ (24,'(2I4,8x,F7.3,3E14.5,5f8.4)',END = 200)
+     &  nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam, ftmp, arogc 
+
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
          CALL WHERE(izar,nnuc,iloc)
@@ -7004,8 +6985,7 @@ C-----------set up normalization factors for level density parameter 'a'
             IF (ROPaa(nnuc).EQ.( - 2.D0)) THEN
 C--------------Gilbert-Cameron (no explicit collective effects)
                IF (ADIv.EQ.2.D0) THEN
-
-                  arogc = aroc ! for the time being, G&C not refitted !
+                  ! for the time being, G&C not refitted !
                   del = 0.0
                   delp = 12.0/SQRT(A(nnuc))
                   IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
@@ -7810,7 +7790,6 @@ C
 
       ierr = 0
       iccfus = 0
-
       ia = A(0)
       iz = Z(0)
 
@@ -7849,7 +7828,6 @@ c            CCFUS deformations
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
-
  250  IF (beta2.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
@@ -7857,7 +7835,6 @@ c            CCFUS deformations
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.15 (2+) used'
       ENDIF
-
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
@@ -7865,7 +7842,6 @@ c            CCFUS deformations
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
-
       IF(AEJc(0).LE.4) GOTO 350
       ia = AEJc(0)
       iz = ZEJc(0)
@@ -7892,7 +7868,6 @@ c            CCFUS deformations
      &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
      &           'BETA (2+) =',beta2
          ENDIF
-
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
@@ -7906,7 +7881,6 @@ c            CCFUS deformations
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
-
  300  IF (beta2.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
@@ -7914,7 +7888,6 @@ c            CCFUS deformations
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.15 (2+) used'
       ENDIF
-
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
@@ -7923,7 +7896,6 @@ c            CCFUS deformations
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
       GOTO 350
-
   200 WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL-2/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
@@ -8073,9 +8045,7 @@ C----------Ncoll
            WRITE (8,'(a100)') comment
            WRITE (12,'(a100)') comment
            DEFormed = .FALSE.
-
            SOFt = .TRUE.
-
            READ (32,'(3x,3I5)') ND_nlv
            WRITE (8,'(3x,3I5)') ND_nlv
            WRITE (12,'(3x,3I5)') ND_nlv
@@ -8109,7 +8079,6 @@ C----------Reading ground state information (to avoid overwriting deformation)
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
-
 C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
            igreson = 0
            DO i = 2, ND_nlv
@@ -8117,7 +8086,6 @@ C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, D_nno(i), ctmp5  
-
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
@@ -8132,7 +8100,6 @@ C
      &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
-
             IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
               IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
               IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
@@ -8162,7 +8129,6 @@ C
               if(sleor.gt.0) isgor = ICOllev(i)
             ENDIF
            ENDDO
-
        else
 C
 C          Rigid rotor (deformed) or vibrational (spherical) optical model
@@ -8222,7 +8188,6 @@ C----------'collective levels:'
            WRITE (12,*)' '
            WRITE (12,'(a100)') comment
 C----------Reading ground state information (to avoid overwriting deformation)
-
            READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
@@ -8257,7 +8222,6 @@ C
               IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
               igreson = 1
             ENDIF
-
             WRITE (8,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,3x,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -8290,7 +8254,6 @@ C
 
            ENDDO
          endif
-
          WRITE(12,*) ' '
          CLOSE (32)
          if(igreson.eq.0 .and.
@@ -8337,7 +8300,6 @@ C       It could be a bad approximation for a quasispherical nucleus
         DEFormed = .TRUE.
         odd = .TRUE.
         SOFt = .FALSE.
-
       ENDIF
       i20p = 0
       i21p = 0
@@ -8493,9 +8455,7 @@ C                                assigning randomly 2+,4+,3- spin
             D_Lvp(ND_nlv) = lvpr
             D_Xjlv(ND_nlv) = xjlvr
 C           RCN 0811 
-
             IPH(ND_nlv) = 1
-
 C
             D_Llv(ND_nlv) = 0
             D_Klv(ND_nlv) = 0
@@ -8670,9 +8630,7 @@ C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
 C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
-
                IF (DIRECT.EQ.3)
-
      &            ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
@@ -8999,7 +8957,6 @@ C              different spin than the ground state
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
          WRITE (32,*)
-
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
 C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
          WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
@@ -9009,7 +8966,6 @@ C        WRITE (32,*)'Dyn.deformations are not used in symm.rot.model'
      &' Collective levels selected automatically from available target l
      &evels (rigid rotor)       '
          WRITE (8,*)
-
 
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
 C        WRITE (8,*)'Dyn.deformations are not used in symm.rot.model'
