@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2137 $
+Ccc   * $Rev: 2138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
+Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -57,8 +57,10 @@ C-----
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
-         icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
+C        icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
+         icse = (excnq - EX(ie,Nnur))/DE + 1.0001
          icse = MAX0(2,icse)
+         icse = MIN0(ndecse,icse)
          popt = 0.0
          DO j = 1, NLW, LTUrbo  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
@@ -76,6 +78,7 @@ C-----
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
 C           IF (ENDf(Nnuc).EQ.1) THEN
+
             IF (ENDf(Nnuc).LE.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -112,7 +115,7 @@ C               Primary gammas from the CN: Nnuc=1, Nejc=0
 C               Originate from the primary excitation energy bin: Iec = NEX(1)
 C
                 xcse = eemi/DE + 1.0001
-                icsl = min(NINT(xcse),NDECSE-1)
+                icsl = min(INT(xcse),NDECSE-1)
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
 C
@@ -140,6 +143,7 @@ C
    
             IF (popll.NE.0.0D+0) THEN
 C              IF (ENDf(Nnuc).EQ.1) THEN
+
                IF (ENDf(Nnuc).LE.1) THEN
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -148,6 +152,7 @@ C              IF (ENDf(Nnuc).EQ.1) THEN
             ENDIF
             IF (poph.NE.0.0D+0) THEN
 C              IF (ENDf(Nnuc).EQ.1) THEN
+
                IF (ENDf(Nnuc).LE.1) THEN
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                ELSEIF (ENDf(Nnuc).EQ.2) THEN
@@ -700,6 +705,7 @@ C
 
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
+
 C           IF (ENDf(Nnuc).EQ.1) THEN
             IF (ENDf(Nnuc).LE.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
@@ -769,6 +775,7 @@ C
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
 C                 IF (ENDf(Nnuc).EQ.1) THEN
+
                   IF (ENDf(Nnuc).LE.1) THEN
                      POPcse(0,0,icse,INExc(Nnuc))
      &                = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
@@ -1956,7 +1963,6 @@ c     &               /HCOnt(Nrhump + ih1)
       ENDDO
       RETURN
       END
-
 
 
 

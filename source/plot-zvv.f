@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2136 $
+Ccc   * $Rev: 2138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
+Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -24,6 +24,8 @@ C
       CHARACTER*20 title
 
       DOUBLE PRECISION u
+
+      if(NLV(Nnuc).le.3) return
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
         write(caz,'(I2.2,A1,A1,I3.3)')
@@ -63,9 +65,11 @@ C
 
       OPEN (36, FILE=ctmp, STATUS='unknown')
       CALL OPEN_ZVV(36,caz,title)
-
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
+
+        if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
+
         rolowint1 = 0.D0
         rolowint2 = 0.D0
         DO j = 1, NLWst
@@ -272,6 +276,7 @@ C
       write(caz,'(A7)') 'Cum_Tot'
 
       CALL OPEN_ZVV(36,caz,title)
+
       rocumul = 1.D0
       WRITE (36,*) '0.0 1.0'
 
@@ -282,7 +287,8 @@ C-----EGSM,GSM,GCM
             IF(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
 
             IF(ADIv.EQ.2)THEN
-               rocumul = EXP(( - eo/t))*(EXP(defit*(kk - 1)/t) - 1.)
+               rocumul = 1.d0 + 
+     &            EXP(( - eo/t))*(EXP(defit*(kk - 1)/t) - 1.)
             ELSE
                DO ij = 1, NLWst
                   rocumul = rocumul + 0.5d0*defit/RORed*

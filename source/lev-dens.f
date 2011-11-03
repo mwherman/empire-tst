@@ -1,5 +1,6 @@
+$DEBUG
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-29 01:38:19 +0200 (Sa, 29 Okt 2011) $
+Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -153,7 +154,7 @@ C
 C Dummy arguments
 C
       REAL*8 Aj, Destep, Dshif, Rotemp
-	INTEGER Kk, Nnuc
+      INTEGER Kk, Nnuc
 C
 C Local variables
 C
@@ -231,7 +232,7 @@ C
  
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t
       ENDDO
-	RETURN
+      RETURN
       END
 
 CCC
@@ -442,9 +443,9 @@ CCC***************************************************************
 
       REAL*8 A,T,momo,A2,u,vib_KQ,rot_K,rot_Q 
       REAL*8 qv,qr,vibrk
-	real*8 ftmp
+      real*8 ftmp
 C     To avoid Compiler warning
-	ftmp = A2 
+      ftmp = A2 
 C-----vibrational enhancement factor (EMPIRE-2.19)
       CALL VIB_K_EGSM(A,t,vibrk)
 C-----damping of vibrational effects
@@ -557,7 +558,7 @@ C****************************************************
       REAL*8 Shcn
       INTEGER ia,iz,iout
       CHARACTER*2 SMAT
-	REAL*8 FSHELL
+      REAL*8 FSHELL
 
       real*8 pi, pi2, xr, ar
       INTEGER ix
@@ -1035,7 +1036,7 @@ C-----set to 0 level density array
             ENDIF
          ENDDO
       ENDDO
-	RETURN
+      RETURN
       END
 
 CCC
@@ -1314,14 +1315,10 @@ C
 C Local variables
 C
       REAL*8 am, amas, arg, atil, e, efort, enorm, eo,
-     &                 eom, exl, rhou, rjj, rolowint, sigh, sigl, t, tm,
-     &                 u, ux, xj
-      REAL*8 DEXP
-      REAL FLOAT
-      INTEGER i, ig, igna, il, iter, j
-      INTEGER INT
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
+     &                 eom, exl, ro_u, ro_j, ro_pi,rolowint, sigh, sigl, 
+     &                 t, tm, u, ux, xj
+      REAL*8 FSHELL
+      INTEGER i, ig, igna, iter, j
 
       eom = 0.d0
 C-----next call prepares for lev. dens. calculations
@@ -1329,6 +1326,7 @@ C-----next call prepares for lev. dens. calculations
 
       amas = A(Nnuc)
       igna = 0
+      ro_pi=0.5
 C-----zero potentially undefined variables
       GAMma = 0.d0
       exl = 0.d0
@@ -1342,8 +1340,8 @@ C-----Ignatyuk parametrization
 C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054d0
-         ROPar(1,Nnuc) = 
-     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
+         ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
+c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C-----Arthurs' parametrization
@@ -1352,8 +1350,8 @@ C-----Arthurs' parametrization
 C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054d0
-         ROPar(1,Nnuc) = 
-     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
+         ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
+c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C-----Mebel's  parametrization (taken from the INC code for the case
@@ -1363,8 +1361,8 @@ C-----of no collective enhancements) normalized to existing exp. data
 C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.051d0
-         ROPar(1,Nnuc) = 
-     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
+         ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
+c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C
@@ -1385,7 +1383,7 @@ C
          ELSE
             t = SQRT(am/ux) - 3./2./ux
             t = 1./t
-            tm = t
+            tm = t  
          ENDIF
       ENDIF
 C
@@ -1404,9 +1402,9 @@ C
       iter = 0
   100 IF (am*t.LE.6.D0 .OR. iter.GT.300) THEN
          WRITE (8,*) 'WARNING: '
-         IF (iter.LT.301) THEN
+         IF (iter.LT.101) THEN
             WRITE (8,*) 'WARNING: Number of iterations in ROGC ',
-     &                  iter - 1
+     &                  iter
             WRITE (8,*) 'WARNING: Can not calculate Ux'
          ELSE
             WRITE (8,*) 'WARNING: Maximum number if iterations in ROGC'
@@ -1422,64 +1420,34 @@ C
          WRITE (8,*) 'WARNING: a=', am, ' T=', t
          WRITE (8,*) 'WARNING: I will use the last T=', tm,' for calc.'
          WRITE (8,*) 'WARNING: '
-C--------anyhow, plot fit of the levels with the low energy l.d. formula
          IF (FITlev.GE.0.0D0) THEN
-            IF (NLV(Nnuc).GT.3) THEN
-               WRITE (8,*) ' a=', A(Nnuc), 'Z=', Z(Nnuc)
-               WRITE (8,*) ' A=', am, ' UX=', ux, ' T=', tm, ' EO=', eo
-               OPEN (35,FILE = 'fort.35')
-               WRITE (35,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                          NLV(Nnuc)
-99005          FORMAT ('set title "NO SOLUTION FOR ',I3,'-',A2,'-',I3,
-     &                 ' Ncut=',I3,'"')
-               WRITE (35,*) 'set terminal postscript enhanced color lw 2
-     & solid "Helvetica" 20'
-               WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
-               WRITE (35,*) 'set logscale y'
-               WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
-             WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
-               WRITE (35,*) 'set style line 1 lt 5 lw 2'
-               WRITE (35,*) 'set style line 2 lt 1 lw 2'
-               WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discre
-     &te levels", "fort.34" w l ls 1 t "Level density" '')')
-               CLOSE (35)
-               OPEN (34,FILE = 'fort.34')
-               OPEN (36,FILE = 'fort.36')
-               WRITE (36,*) '0.0 1.0'
-               DO il = 1, NLV(Nnuc)
-                  WRITE (36,*) ELV(il,Nnuc), FLOAT(il - 1)
-                  WRITE (36,*) ELV(il,Nnuc), FLOAT(il)
-C-----------------integration over energy. There should be factor
-C-----------------2 because of the parity
-                  rolowint = EXP(( - eom/tm))
-     &                       *(EXP(ELV(il,Nnuc)/tm) - 1.)
-                  WRITE (34,*) ELV(il,Nnuc), rolowint + 1.0
-               ENDDO
-               CLOSE (36)
-               CLOSE (34)
-               IF (IOPsys.EQ.0) THEN
-                  iwin = PIPE('gnuplot fort.35')
-                  CLOSE (35)
-               ENDIF
-            ENDIF
 C-----------set nuclear temperature to the value from the systematics
             t = 0.9 - 0.0024*amas
             IF (amas.LT.100.D0) t = 60./amas + 0.06
             tm = t
+c            GOTO 500 !????
          ELSEIF (FITlev.LT.0.0D0) THEN
             WRITE (8,*) ' ERROR IN DISCRETE LEVEL FITTING'
             WRITE (8,*) ' EXECUTION STOPPED BECAUSE OF FITLEV<0 OPTION '
             STOP 'ERROR IN DISCRETE LEVEL FITTING (GC)'
          ENDIF
       ENDIF
-      DO i = 1, 10
+
+      IF (igna.NE.0D0) THEN
+         DO i = 1, 10  
+	      write(*,*) '***',a(nnuc),z(nnuc),ux
+	      write(*,*) am, 6/t, atil
+            IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
+            am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
+         ENDDO
+      ELSE
          IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
-         IF (igna.EQ.0D0) GOTO 200
-         am = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*ux))/ux)
-      ENDDO
+      ENDIF
+
   200 exl = ux + DEL
-C-----IF(Scutf.LT.0.0D0)sigh = could be calculated according to Dilg's recommendations
-C-----0.6079 = 6/pi^2          a=6/pi^2*g     sig^2 = <m^2>gt    Scutf = <m^2>
+C-----RCN 12/2004 
+C-----IF(Scutf.LT.0.0D0)sigh calculated according to Dilg's recommendations
+C-----0.6079 = 6/pi^2   a=6/pi^2*g  sig^2 = <m^2>gt  Scutf = <m^2>
       sigh = Scutf*0.6079*amas**0.6666667*SQRT(ux*am)
 C
 C-----determination of the index in EX-array such that EX(IG,.).LT.EXL
@@ -1492,9 +1460,9 @@ C
       GOTO 400
   300 ig = i - 1
   400 IF (eo.EQ.0.0D0) THEN
-         rhou = DEXP(2.*SQRT(am*ux))/(12.*SQRT(2*sigh))
+         ro_u = DEXP(2.*SQRT(am*ux))/(12.*SQRT(2*sigh))
      &          /am**0.25/ux**1.25
-         eo = exl - t*LOG(t*rhou)
+         eo = exl - t*LOG(t*ro_u)
       ENDIF
       eom = eo
 C-----fit nuclear temperature (and Ux) to discrete levels
@@ -1509,7 +1477,7 @@ C-----fit nuclear temperature (and Ux) to discrete levels
             ux = 0.0
             eo = 0.0
             iter = iter + 1
-            GOTO 100
+            if (iter.le.300) GOTO 100
          ENDIF
       ENDIF
      
@@ -1517,10 +1485,11 @@ C-----plot fit of the levels with the low energy l.d. formula
       defit = (ELV(NLV(Nnuc),Nnuc)+2.d0)
      &           /(NEXreq-1) 
       nplot = (ELV(NLV(Nnuc),Nnuc)+2.d0)/defit
+
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.5) 
      &  CALL PLOT_GNU_NumCumul_GC(Nnuc) 
      
-      ROPar(1,Nnuc) = am
+ 500  ROPar(1,Nnuc) = am
       ROPar(2,Nnuc) = ux
       ROPar(3,Nnuc) = DEL
       ROPar(4,Nnuc) = eo
@@ -1532,20 +1501,18 @@ C-----(low energy formula)
             e = EX(i,Nnuc)
             arg = (e - eo)/t - ARGred
             IF (arg.LT.EXPmax) THEN
-               rhou = EXP(arg)/t
+               ro_u = EXP(arg)/t
 C--------------Spin-cutoff is interpolated
                SIG = sigl
                IF (e.GT.ECUt(Nnuc)) SIG = (sigh - sigl)*(e - ECUt(Nnuc))
      &             /(exl - ECUt(Nnuc)) + sigl
                DO j = 1, NLW
                   xj = j + HIS(Nnuc)
-C                 arg = (xj + 1)*xj/(2.*Sig)
                   arg = (xj + 0.5)**2/(2.*SIG)
                   IF (arg.LE.EXPmax) THEN
-                     rjj = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
-C--------------------0.5 coming from parity
-                     RO(i,j,1,Nnuc) = 0.5*rhou*rjj
-                     RO(i,j,2,Nnuc) = 0.5*rhou*rjj
+                     ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
+                     RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi
+                     RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi
                      IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
                      IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0
                   ENDIF
@@ -1564,28 +1531,21 @@ C--------EXL /fermi gas formula/
 C
          DO i = ig, NEX(Nnuc)
             u = EX(i,Nnuc) - DEL
-            IF (igna.EQ.1) am = atil*(1.0 + SHC(Nnuc)*(1.0 - EXP(GAMma*u
-     &                          ))/u)
+            IF (igna.EQ.1) am = atil*FSHELL(u,SHC(Nnuc),-GAMma)
             UEXcit(i,Nnuc) = MAX(u,0.D0)
             TNUc(i,Nnuc) = SQRT(u/am)
-C-----------RCN 12/2004
-C-----------IF(Scutf.LT.0.0D0)sigh = could be calculated according to Dilg's recommendations
-C-----------0.6079 = 6/pi^2          a=6/pi^2*g     sig^2 = <m^2>gt    Scutf = <m^2>
+C-----------Dilg's recommendations
             SIG = Scutf*0.6079*amas**0.6666667*SQRT(u*am)
             arg = 2.*SQRT(am*u) - ARGred
             IF (arg.LE.EXPmax) THEN
-               rhou = DEXP(arg)/(12.*SQRT(2*SIG))/am**0.25/u**1.25
+               ro_u = DEXP(arg)/(12.*SQRT(2*SIG))/am**0.25/u**1.25
                DO j = 1, NLW
                   xj = j + HIS(Nnuc)
-C                 arg = (xj + 1)*xj/(2.*Sig)
                   arg = (xj + 0.5)**2/(2.*SIG)
                   IF (arg.LT.EXPmax) THEN
-                     rjj = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
-C--------------------0.5 coming from parity
-C                    RO(i,j,Nnuc) = 0.5*rhou*rjj
-C                    IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.d0
-                     RO(i,j,1,Nnuc) = 0.5*rhou*rjj   !!!!
-                     RO(i,j,2,Nnuc) = 0.5*rhou*rjj   !!!!
+                     ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
+                     RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi  
+                     RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi  
                      IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
                      IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0         
                   ENDIF
@@ -1594,7 +1554,7 @@ C                    IF (RO(i,j,Nnuc).LT.RORed) RO(i,j,Nnuc) = 0.d0
          ENDDO
       ENDIF
 
-      IF (IOUt.GE.6. .AND. FITlev.GT.0.0D0 .AND. NEX(Nnuc).GT.1) THEN
+      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NEX(Nnuc).GT.1) THEN
          CALL PLOT_ZVV_GSLD(Nnuc)     
          call PLOT_ZVV_NumCumul(Nnuc, Defit,nplot,NLwst) 
       ENDIF
@@ -2084,16 +2044,16 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
 
          IF (FITlev.GT.0.0D0) then 
           Ecrt = UCRt - DEL - dshift
-	    write(8,*)
-	    WRITE (8,*) '*****   A=',nint(A(nnuc)),
-     &	 ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
+        write(8,*)
+        WRITE (8,*) '*****   A=',nint(A(nnuc)),
+     &   ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
      &     ' LDshif=',LDShif(nnuc)
           WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
      &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
-     &    ' DEL = ',DEL 		 
+     &    ' DEL = ',DEL          
           WRITE (8,'(A5,I3,4X,G12.5,A15,2(G12.5,1x))') 
      &    'It # ', iter, dshi, ' Final shift = ',dshift
-	    write(8,*)
+        write(8,*)
          ENDIF
          IF (ABS(dshi).GT.0.01D0 .and. iter.LE.20) GOTO 150
       ENDIF
@@ -2209,7 +2169,7 @@ C-----------dependent factor
          ROF(Kk,i,Nnuc) = Rotemp   
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t
       ENDDO
-	  RETURN
+      RETURN
       END
 
 
@@ -2580,6 +2540,9 @@ C
       INTEGER INT
       REAL*8 ROBCSF, RODEFF, FSHELL
 
+
+       ARGred = 0.
+       RORed = 1.
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
 C-----where continuum starts,ends,steps in between
@@ -2736,10 +2699,13 @@ c
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,MOMort,
      &                         HIS(Nnuc),ARGred,
      &                         EXPmax,temp,def2,vibbf12,vibbfdt,vn)
+c               write(*,*)'fmg',u,rotemp  
             ELSE
                accn = ACRt
                rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
      &                  mompar,temp,def2,vibbf12,vibbfdt,vn)*RORed
+
+c            write(*,*)'bcs',u,rotemp  
             ENDIF
 c-----------SYMMETRY ENHANCEMENT
  345        IF (Iff.EQ.2) rotemp =
@@ -2754,6 +2720,8 @@ c-----------SYMMETRY ENHANCEMENT
 
             IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp ! to be updated
          ENDDO
+
+c        write(*,*)'ro',u, ROFisp(kk,1,1,1)
       ENDDO
 
  346  ACRtf(Ib) = ACRt
@@ -2792,12 +2760,18 @@ C
      
       ROBCSF = 0.D0
       Bf=0.d0
+c      write(*,*)'1',A,U,Aj,Mompar,Momort,def2,T,Bf
       ro = ROBCS(A,U,Aj,Mompar,Momort,def2,T,Bf)
+c       write(*,*)'2',A,U,Aj,Mompar,Momort,def2,T,Bf,momp
+    
       Mompr=Momp 
 
       CALL COLL_KQ_FIS(0,A,T,momo,def2,u,vib_KQ,rot_K,rot_Q,
      &                   vibbf12,vibbfdt,vn)
       ROBCSF = ro *  rot_K * rot_Q * vib_KQ
+
+c      write(*,*)'ro', robcsf,ro,  rot_K, rot_Q, vib_KQ
+c      pause
       RETURN
       END
 C
@@ -2972,8 +2946,8 @@ C-----parameters of Jan 23, 2011
 C     ap1 =  0.76122d-01
 C     ap2 = -0.45559d-02
 C     gam =  0.58269d0
-C	frms  = 1.687
-C	Chi-2 =	34.6
+C   frms  = 1.687
+C   Chi-2 = 34.6
 C-----parameters of Jan 26, 2011
 C  Do-fit using RIPL-3 database, 2.19 vibr enhancement (MINUIT)       
 C     alpha 0=  .0750000 delta alpha= .500000D-01

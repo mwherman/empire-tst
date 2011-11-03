@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2137 $
+Ccc   * $Rev: 2138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
+Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1759,8 +1759,7 @@ C--------Printout of results for the decay of NNUC nucleus
 C
 C        Primary gamma printout -----------------------
 C
-C       IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
-        IF (                      nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
+        IF (nnuc.EQ.1 . AND. NPRIm_g.GT.0) THEN  
            cspg = 0.d0
            DO il = 1, NLV(nnuc)
              cspg = cspg + CSEpg(il) 
@@ -1804,7 +1803,6 @@ C          Primary gammas -------- done ---------------
          ENDIF
          DO il = 1, NLV(nnuc)
             CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
-c            write(0,*) CSPrd(nnuc),NLV(nnuc)
             IF(ISIsom(il,Nnuc).EQ.0) THEN
               IF (IOUt.GT.0) WRITE (8,99070) il, ELV(il,nnuc),
      &                              LVP(il,nnuc), XJLv(il,nnuc),
@@ -1815,8 +1813,8 @@ c            write(0,*) CSPrd(nnuc),NLV(nnuc)
      &                              LVP(il,nnuc), XJLv(il,nnuc),
      &                              POPlv(il,nnuc),' ISOMER'
             ENDIF
-C           IF (ENDf(nnuc).NE.0 .AND. nnuc.EQ.1) THEN
-            IF (                      nnuc.EQ.1) THEN            
+
+            IF (nnuc.EQ.1) THEN            
 C--------------Check for the number of branching ratios
                nbr = 0
                DO ib = 1, NDBR
@@ -1832,8 +1830,8 @@ C--------------Check for the number of branching ratios
      &                          ,ib = 1,nbr)
             ENDIF
          ENDDO
-C        IF ( (ENDf(nnuc).GT.0 .AND. CSPrd(nnuc).GT.0.d0) .AND.
-         IF ( (                      CSPrd(nnuc).GT.0.d0) .AND.
+
+         IF ( CSPrd(nnuc).GT.0.d0 .AND.
      &        (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &         nnuc.EQ.mt849)) THEN
             WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1900,7 +1898,6 @@ C----------Integrating exclusive population spectra (ENDF)
            hcs = 0
 C          write(*,'(2x,F3.0,1x,F3.0,2x,A3,2x,F3.1)') 
 C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
-C          IF (ENDf(nnuc).EQ.1) THEN
            IF (ENDf(nnuc).LE.1) THEN
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
@@ -1945,26 +1942,12 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
                ENDIF
              ENDDO
              POPcs(0,INExc(nnuc)) = gtotsp
-c            Write(12,*) nnuc, 'g: ',POPcs(0,INExc(nnuc)),CSEmis(0,nnuc)
-c     &                                 ,gcs 
              POPcs(1,INExc(nnuc)) = xtotsp
-c            Write(12,*) nnuc, 'n: ',POPcs(1,INExc(nnuc)),CSEmis(1,nnuc) 
-c     &                                 ,ncs 
              POPcs(2,INExc(nnuc)) = ptotsp
-c            Write(12,*) nnuc, 'p: ',POPcs(2,INExc(nnuc)),CSEmis(2,nnuc) 
-c     &                                 ,pcs 
              POPcs(3,INExc(nnuc)) = atotsp
-c            Write(12,*) nnuc, 'a: ',POPcs(3,INExc(nnuc)),CSEmis(3,nnuc) 
-c     &                                 ,acs 
              POPcs(4,INExc(nnuc)) = dtotsp
-c            Write(12,*) nnuc, 'd: ',POPcs(4,INExc(nnuc)),CSEmis(4,nnuc) 
-c     &                                 ,dcs 
              POPcs(5,INExc(nnuc)) = ttotsp
-c            Write(12,*) nnuc, 't: ',POPcs(5,INExc(nnuc)),CSEmis(5,nnuc) 
-c     &                                 ,tcs 
              POPcs(6,INExc(nnuc)) = htotsp
-c            Write(12,*) nnuc, 'h: ',POPcs(6,INExc(nnuc)),CSEmis(6,nnuc) 
-c     &                                 ,hcs 
              IF (NDEJC.EQ.7) POPcs(NDEJC,INExc(nnuc)) = ctotsp
 
              WRITE (12,*)
@@ -2381,16 +2364,12 @@ C     For Kalbach parameterization
          xcos(i)=cos(theta)
       enddo
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
-C        IF (ENDf(nnuc).EQ.1) THEN
          IF (ENDf(nnuc).LE.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
               DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
-c                ares = A(nnuc) - AEJc(nejc)
-c                zres = Z(nnuc) - ZEJc(nejc)
-C---------------Residual nuclei must be heavier than alpha
-c                if(ares.le.4. and. zres.le.2.) cycle
-                IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) cycle
+
+                IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
                 IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
                  ELSE
@@ -2434,10 +2413,10 @@ C    &                                POPcse(0, nejc, 1, INExc(nnur))*2
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.0
-                IF (nejc.GT.0 .AND. RECoil.GT.0) 
+                IF (nejc.GT.0) 
      &             recorp = 1. + EJMass(nejc)/AMAss(nnuc)
-C 1529
-                IF (LHMs.EQ.0 .OR. nejc.LT.1 .OR. nejc.GT.2) THEN
+
+               IF (LHMs.EQ.0 .OR. nejc.LT.1) THEN
                   nspec = min(INT(EMAx(nnuc)/DE) + 2,NDECSE)
                  ELSE
                   nspec = min(INT(recorp*EMAx(nnuc)/DE) + 2,NDECSE)
@@ -3195,8 +3174,6 @@ C    &          enepfns(ie,nejc), csepfns(ie,nejc), ratio2maxw(ie)
 C-----
 C-----ENDF spectra inclusive representation
 C-----
-C-----
-C-----
 C-----NOTE: transformation into CM
 C-----(reduce channel energy to account for recoils)
 C-----is not yet done! Should be performed in ACCUM and EXCLUSIVEC/L
@@ -3395,10 +3372,10 @@ C--------Exact endpoint
 
 C--------Print inclusive spectra of ejectiles
 C--------neutrons
-         recorp = 1.0d0
-         IF(RECoil .GT. 0) recorp = (1. + EJMass(1)/AMAss(1))
+         recorp = (1. + EJMass(1)/AMAss(1))
+         nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 2)
+
          IF(LHMS.GT.0) THEN
-           nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 2)
            DO ie = 1, nspec + 1
 C             Subtract HMS contribution to CM emission spectrum 
              CSE(ie,1,0) = CSE(ie,1,0) - CSEhms(ie,1,0)
@@ -3406,8 +3383,8 @@ C             Subtract HMS contribution to CM emission spectrum
              csetmp(ie) = 0.0
              DO nang = 1, NDANG
                cseaprnt(ie,nang) = 0.0
-              ENDDO
-            ENDDO
+             ENDDO
+           ENDDO
            CALL HINTERMAT(0.0d0, DE/recorp,CSE(1,1,0), NDECSE,
      &                    0.0D0, DE, csetmp, NDECSE, 1, 0.0d0,
      &                    (nspec+1)*DE)
@@ -3418,9 +3395,8 @@ C             Subtract HMS contribution to CM emission spectrum
               ENDDO
              CSE(ie,1,0) = recorp*csetmp(ie) + CSEhmslab(ie,1,0)
             ENDDO 
-         ELSE
-           nspec = MIN0(NDECSE - 1,INT((EMAx(1) - Q(1,1))/DE) + 2)
          ENDIF
+
          IF (nspec.gt.0) THEN
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
@@ -3432,17 +3408,9 @@ C             Subtract HMS contribution to CM emission spectrum
      &         max(0.d0,CSE(ie,1,0))
           ENDDO
 C---------Exact endpoint
-          IF(LHMS.EQ.0) THEN
-            WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(1,1),
+          WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(1,1)),
      &                              max(0.d0,CSE(nspec,1,0))
-            WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(1,1), 0.d0
-          ELSE
-            WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(1,1)),
-     &                              max(0.d0,CSE(nspec,1,0))
-            WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(1,1)), 0.d0
-
-
-          ENDIF
+          WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(1,1)), 0.d0
 
           totspec = 0.d0
           DO ie = 1, nspec - 1
@@ -3478,11 +3446,11 @@ C---------------Inclusive DDX spectrum (neutrons)
             ENDDO
           ENDIF
          ENDIF
+
 C--------protons
-         recorp = 1.0d0
-         IF(RECoil.GT.0) recorp = (1. + EJMass(2)/AMAss(1))
+         recorp = (1. + EJMass(2)/AMAss(1))
+         nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(2,1))/DE) + 2)
          IF(LHMS.GT.0) THEN
-           nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(2,1))/DE) + 2)
            DO ie = 1, nspec + 1
 C             Subtract HMS contribution to CM emission spectrum 
              CSE(ie,2,0) = CSE(ie,2,0) - CSEhms(ie,2,0)
@@ -3502,9 +3470,8 @@ C             Subtract HMS contribution to CM emission spectrum
               ENDDO
              CSE(ie,2,0) = recorp*csetmp(ie) + CSEhmslab(ie,2,0)
            ENDDO 
-         ELSE
-           nspec = MIN0(NDECSE - 1,INT((EMAx(1) - Q(2,1))/DE) + 2)
          ENDIF
+
          IF (nspec.gt.0) THEN
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
@@ -3530,7 +3497,6 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,2,0)
           ENDDO
-
           totspec = totspec - 0.5d0*(CSE(1,2,0) + CSE(nspec-1,2,0))
           totspec = totspec*DE 
 
@@ -3562,6 +3528,7 @@ C---------------Inclusive DDX spectrum (protons)
            ENDIF
          ENDIF
 C--------alphas
+         recorp = 1. + EJMass(3)/AMAss(1)
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
          IF(nspec.gt.0) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3596,6 +3563,8 @@ C---------Exact endpoint
          ENDIF
 
 C--------deuterons
+         recorp = (1. + EJMass(4)/AMAss(1))
+
          nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
          IF(nspec.gt.0) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3628,6 +3597,8 @@ C---------Exact endpoint
          ENDIF
 
 C--------tritons
+         recorp = (1. + EJMass(5)/AMAss(1))
+
          nspec = INT((EMAx(1) - Q(5,1))/DE) + 2
          IF(nspec.gt.0) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3660,6 +3631,8 @@ C---------Exact endpoint
          ENDIF
 
 C--------helium-3
+         recorp = (1. + EJMass(6)/AMAss(1))
+
          nspec = INT((EMAx(1) - Q(6,1))/DE) + 2
          IF(nspec.gt.0) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3692,6 +3665,7 @@ C---------Exact endpoint
 
 C--------light ions
          IF (NDEJC.EQ.7) THEN
+           recorp = (1. + EJMass(NDEJC)/AMAss(1))
            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
            IF(nspec.gt.0) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
