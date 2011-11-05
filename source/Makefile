@@ -1,6 +1,6 @@
-#$Rev: 2042 $
+#$Rev: 2143 $
 #$Author: rcapote $
-#$Date: 2011-06-01 15:02:06 +0200 (Mi, 01 Jun 2011) $
+#$Date: 2011-11-05 16:32:02 +0100 (Sa, 05 Nov 2011) $
 #
 #----GNU gfortran FORTRAN compiler
 FC     =  gfortran
@@ -78,7 +78,6 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize
 #ifort -m64 -fast
 #Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
 
-
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
             gamma-strgth.o    input.o           lev-dens.o    main.o\
@@ -89,11 +88,17 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
             systematics.o     subecis06m.o
 
-# ECIS must not be optimized:
-#OBJE =      subecis06m.o
+all: 
+	$(MAKE) empire
+	$(MAKE) optmand
 
-empire:   $(OBJF)
+empire:	$(OBJF)
 	$(FC) -o $@ $(OBJF)
+
+optmand:	optmand.o
+	$(FC) -o $@ optmand.o
+#	$(FC) optmand.f -o $@ 
+
 
 #empire:   $(OBJF) ecis
 #	$(FC) -o $@ $(OBJF) $(OBJE)
