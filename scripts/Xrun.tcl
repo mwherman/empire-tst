@@ -1,6 +1,6 @@
-# $Rev: 2132 $
-# $Author: rcapote $
-# $Date: 2011-10-23 23:18:10 +0200 (So, 23 Okt 2011) $
+# $Rev: 2152 $
+# $Author: mherman $
+# $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6296,13 +6296,13 @@ close $rcfl
 
 
 exit} \
-        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -17} \
+        -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {SAVE and QUIT} -width 8 -wraplength 80 
+        -pady 2m -relief raised -text {EXIT} -width 13 -wraplength 80 
     vTcl:DefineAlias "$site_9_0.cpd73" "Button58" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd73 "$site_9_0.cpd73 Button $top all _vTclBalloon"
     bind $site_9_0.cpd73 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Close GUI}
+        set ::vTcl::balloon::%W {Save settings and close GUI}
     }
     pack $site_9_0.fra76 \
         -in $site_9_0 -anchor center -expand 0 -fill none -side top 

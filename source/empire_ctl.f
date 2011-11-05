@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Rev: 2152 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1408,7 +1408,7 @@ c----------------------------------------------------------------------
             if(den.gt.1.0d-6) then
               dpx=0.5d0*(dp1**2*chi2-dp2**2*chi1)/den
               if(dpx.gt.dp2) then
-                dpx=min(dpx,10.0d0*dp2)
+                dpx=min(dpx,10.0*dp2)
                 id=3
                 if(chi2.lt.chi1) id=2
                else if(dpx.gt.dp1) then

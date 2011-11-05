@@ -1,6 +1,13 @@
-#$Rev: 2143 $
-#$Author: rcapote $
-#$Date: 2011-11-05 16:32:02 +0100 (Sa, 05 Nov 2011) $
+#$Rev: 2152 $
+#$Author: mherman $
+#$Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
+#
+#----Absoft FORTRAN compiler
+#FC     =  af95
+#----flags for production compilation with Absoft
+#FFLAGS = -O0
+#----We need to include Unix and Wax libraries to add etime, getenv, and system functions in Absoft 
+#LIBS =  -lV77  -lU77
 #
 #----GNU gfortran FORTRAN compiler
 FC     =  gfortran
@@ -93,7 +100,7 @@ all:
 	$(MAKE) optmand
 
 empire:	$(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(LIBS)
 
 optmand:	optmand.o
 	$(FC) -o $@ optmand.o

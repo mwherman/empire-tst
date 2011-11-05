@@ -34,7 +34,7 @@ c................................................................
       subroutine rd1451
       common/quan/ za,awr,awri,spin,ap,endres, ncard(2)
       common/cont/ mat,mf,mt,nseq
-      character txt*66,blk32*32
+      character txt*66
  1000 format(a,i4,i2,i3,i5)
  1100 format(2e11.4,4i11,i4,i2,i3,i5)
       nseq=1
@@ -67,6 +67,7 @@ c........................................................................
       common/quan/ za,awr,awri,spin,ap,endres, ncard(2)
       common/cont/ mat,mf,mt,nseq
       common/cut/ cuten
+      REAL*8 chisq, chisq0, chisq1
       dimension cuten(10)
       character*6 fname
       character*6 nwave

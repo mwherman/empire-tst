@@ -54,7 +54,7 @@ C    &
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G10.5,1P(100E12.5))',END=20) 
+        READ(20,'(G10.5,1P,(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
  	  check_cs(j)=check_cs(j) + cs(i,j)

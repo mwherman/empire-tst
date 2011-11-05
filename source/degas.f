@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1948 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-25 15:40:00 +0100 (Di, 25 Jän 2011) $
+Ccc   * $Rev: 2152 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
 
             
       SUBROUTINE EMPIREDEGAS
