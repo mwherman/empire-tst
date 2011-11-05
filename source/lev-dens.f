@@ -1,6 +1,5 @@
-$DEBUG
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-04 00:51:42 +0100 (Fr, 04 Nov 2011) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2011-11-05 16:59:48 +0100 (Sa, 05 Nov 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
