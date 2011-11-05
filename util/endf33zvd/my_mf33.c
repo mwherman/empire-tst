@@ -637,10 +637,10 @@ char    **argv;
 	float  *arr;
 	arr=endfArray+iiEndfArray;
 	if (debug>1)
-	printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu MF=%d\n",iiEndfArray,llEndfArray,arr,strlen(str),MF);
+	printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu MF=%d\n",iiEndfArray,llEndfArray,arr,(long unsigned int)strlen(str),MF);
 	if (debug>1)
 	if (MF==33) {
-		printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu MF=%d\n",iiEndfArray,llEndfArray,arr,strlen(str),MF);
+		printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu MF=%d\n",iiEndfArray,llEndfArray,arr,(long unsigned int)strlen(str),MF);
 		printf("%s\n",str);
 	}
 	if (iiEndfArray+6>llEndfArray) return 0;
@@ -712,7 +712,7 @@ char    **argv;
 	int ii;
 	float  *arr;
 	arr=endfArray;
-	if (debug>1) printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu\n",iiEndfArray,llEndfArray,arr,strlen(str));
+	if (debug>1) printf("...rrEndfLine:iiEndfArray=%d, llEndfArray=%d, arr=%p, lstr=%lu\n",iiEndfArray,llEndfArray,arr,(long unsigned int)strlen(str));
 	if (iiEndfArray+6>llEndfArray) return 0;
 	for (ii=0; ii<iiEndfArray; ii++) {
 	    if (ii%6==0) printf("%4d)\t",(ii/6)+1);
