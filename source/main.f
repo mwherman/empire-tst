@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2138 $
+Ccc   * $Rev: 2144 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
+Ccc   * $Date: 2011-11-05 16:32:25 +0100 (Sa, 05 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -757,11 +757,11 @@ C-----------<m2> could be added to the input ( to use 0.124 if needed)
 C        IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
          IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
          
-	   IF (IOUt.EQ.6) THEN
+           IF (IOUt.EQ.6) THEN
            WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
      &          SYMb(nnur)
            WRITE(8,'(/2x,A25,1x,F5.2,A4//
-     &		 1x,''   E        RHO(E)  '')')
+     &         1x,''   E        RHO(E)  '')')
      &        'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
            IF (ADIv.NE.3.0D0) THEN
                 DO i = 1, NEX(nnur)
