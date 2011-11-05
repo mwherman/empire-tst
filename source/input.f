@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2140 $
+Ccc   * $Rev: 2151 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-04 00:51:42 +0100 (Fr, 04 Nov 2011) $
+Ccc   * $Date: 2011-11-05 18:55:46 +0100 (Sa, 05 Nov 2011) $
 
 C
       SUBROUTINE INPUT
@@ -1737,7 +1737,7 @@ C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.0
 C-----calculate compound nucleus level density (only for FITLEV>0)
-      IF(FITlev.GT.0) THEN
+C     IF(FITlev.GT.0) THEN
        IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
        IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
        IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
@@ -1784,7 +1784,7 @@ c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
            ENDDO
          ENDIF
        ENDIF
-      ENDIF
+C     ENDIF
 C
 C-----other decaying nuclei
 C
@@ -1976,7 +1976,7 @@ Cpr         END DO
 
       WRITE (8,*) ' '
 C-----calculate residual nucleus level density (only for FITLEV>0)
-      IF(FITlev.GT.0) THEN
+C     IF(FITlev.GT.0) THEN
        DO nnur = 2, NNUct
          ia = INT(A(nnur))
          iz = INT(Z(nnur))
@@ -2030,7 +2030,7 @@ c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
               ENDIF
             ENDIF
        ENDDO
-      ENDIF
+C     ENDIF
       WRITE (8,*)
       DO i = 1, NDLW
          DRTl(i) = 1.0
@@ -2205,8 +2205,13 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         RETURN
       ENDIF
 C-----set ground state in case nucleus not in file
-      NLV(Nnuc) = 1
-      NCOmp(Nnuc) = 1
+C
+C     Avoid overwriting the NLV(nnuc) assigned in READLDP 
+C       (coming from level-density-param.dat file)
+C
+      IF(NLV(Nnuc).le.0) NLV(Nnuc) = 1
+      IF(NCOmp(Nnuc).le.0) NCOmp(Nnuc) = 1
+
       ELV(1,Nnuc) = 0.0
       LVP(1,Nnuc) = 1
       XJLv(1,Nnuc) = 0.0
@@ -3009,7 +3014,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2140 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2151 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -6911,7 +6916,7 @@ C
 
       REAL FLOAT
       DOUBLE PRECISION FSHELL
-      INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz
+      INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz, nlevc
       INTEGER INT
       pi2 = PI**2
       izamx = 0
@@ -6927,7 +6932,6 @@ C-----Set EGSM normalization factors for each Z
          ATIlnoz(iz) = 1.0 !default
       ENDDO
       IF (ADIv.EQ.0.0D0) THEN
-c         OPEN(31, FILE='../data/EGSM_norm.dat', STATUS='OLD')
          OPEN(31, FILE= trim(empiredir)//
      &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat',
      &   STATUS='OLD')
@@ -6971,18 +6975,24 @@ C     Skipping header
 C
       READ (24,'(///)')
   100 READ (24,'(2I4,8x,F7.3,3E14.5,5f8.4)',END = 200)
-     &  nixz, nixa, qn, dob, ddob, esh, dap, aroc, dam, ftmp, arogc 
+     &  nixz, nixa, qn, dob, ddob, esh, dap,aroc,dam,ftmp,arogc,nlevc 
 
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
          CALL WHERE(izar,nnuc,iloc)
          IF (iloc.EQ.0) THEN
+C
+C           Taking the default number of discrete levels from the EMPIRE file  
+C					 ../data/level-density-param.dat
+            NLV(nnuc)   = MIN(NDLV,nlevc)
+            NCOmp(nnuc) = MIN(NDLV,nlevc)
+C
             DOBs(nnuc) = dob
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
 
 C-----------set up normalization factors for level density parameter 'a'
-            IF (ROPaa(nnuc).EQ.( - 2.D0)) THEN
+            IF (ROPaa(nnuc).EQ. (- 2.D0)) THEN
 C--------------Gilbert-Cameron (no explicit collective effects)
                IF (ADIv.EQ.2.D0) THEN
                   ! for the time being, G&C not refitted !

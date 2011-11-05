@@ -4,7 +4,7 @@
      *,NDEJC=6
      *,NDAFIS=1
      *,NDEX=  121
-     *,NDLW= 200
+     *,NDLW= 50
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40

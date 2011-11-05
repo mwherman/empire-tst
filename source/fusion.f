@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2151 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-11-05 18:55:46 +0100 (Sa, 05 Nov 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -129,9 +129,11 @@ C--------Here the old calculated files should be read
      &' Transmission coefficients for incident channel read from file: '
                WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
-            NLW = maxlw
-              WRITE(8,*) ' Maximum CN spin limited to ', NLW
-              WRITE(8,*) 
+C           NLW = maxlw
+            WRITE(8,*) ' Maximum CN spin is ', NLW
+            WRITE(8,*) ' Spin dimension  is ', NDLW
+            NLW = NDLW
+            WRITE(8,*) 
             GOTO 300
          ENDIF
 C
@@ -599,9 +601,11 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (8,*) ' FATAL: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
-         NLW = maxlw
-           WRITE(8,*) ' Maximum CN spin limited to ', NLW
-           WRITE(8,*) 
+C        NLW = maxlw
+         WRITE(8,*) ' Maximum CN spin is ', maxlw
+         WRITE(8,*) ' Spin dimension  is ', NDLW
+         NLW = NDLW
+         WRITE(8,*) 
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
@@ -618,9 +622,11 @@ C--------calculation of h.i. transmission coefficients for fusion
          maxlw = NDLW-1
          CALL HITL(stl)
          if(NLW.GT.0) maxlw = min(NLW,maxlw)
-         NLW = maxlw
-           WRITE(8,*) ' Maximum CN spin limited to ', NLW
-           WRITE(8,*) 
+C        NLW = maxlw
+         WRITE(8,*) ' Maximum CN spin is ', maxlw
+         WRITE(8,*) ' Spin dimension  is ', NDLW
+         NLW = NDLW
+         WRITE(8,*) 
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
