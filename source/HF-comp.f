@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2138 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -57,7 +57,6 @@ C-----
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
-C        icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
          icse = (excnq - EX(ie,Nnur))/DE + 1.0001
          icse = MAX0(2,icse)
          icse = MIN0(ndecse,icse)
@@ -77,11 +76,9 @@ C        icse = MIN(INT((excnq - EX(ie,Nnur))/DE + 1.0001),ndecse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
-C           IF (ENDf(Nnuc).EQ.1) THEN
-
-            IF (ENDf(Nnuc).LE.1) THEN
+            IF (ENDf(Nnuc).EQ.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
-            ELSEIF (ENDf(Nnuc).EQ.2) THEN
+            ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
             ENDIF
          ENDIF
@@ -105,9 +102,7 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
     
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
      &       Nejc.EQ.0) THEN
-C
-C           goto 123 (to skip primary gamma emission for debugging purposes)
-C
+
             IF(NPRIm_g.GT.0) THEN  ! Primary gammas stored 
               IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
 C
@@ -120,12 +115,11 @@ C
                 CSEpg(il)  = CSEpg(il) + pop1
 C
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
-
                 CYCLE ! for primary gammas no further processing is needed 
             
               ENDIF
             ENDIF 
- 123        xcse = eemi/DE + 1.0001
+            xcse = eemi/DE + 1.0001
             icsl = min(INT(xcse),NDECSE-1)
             icsh = icsl + 1
             popl = pop1*(FLOAT(icsh) - xcse)/DE
@@ -142,20 +136,16 @@ C
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
    
             IF (popll.NE.0.0D+0) THEN
-C              IF (ENDf(Nnuc).EQ.1) THEN
-
-               IF (ENDf(Nnuc).LE.1) THEN
+               IF (ENDf(Nnuc).EQ.1) THEN
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
-               ELSEIF (ENDf(Nnuc).EQ.2) THEN
+               ELSE
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
             IF (poph.NE.0.0D+0) THEN
-C              IF (ENDf(Nnuc).EQ.1) THEN
-
-               IF (ENDf(Nnuc).LE.1) THEN
+               IF (ENDf(Nnuc).EQ.1) THEN
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
-               ELSEIF (ENDf(Nnuc).EQ.2) THEN
+               ELSE
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
                ENDIF
             ENDIF
@@ -221,8 +211,6 @@ C
       INTEGER icsp, ie, iejc
       INTEGER INT
 C     data jsigma/0/,jsigma2/36/
-C
-C
 C
 C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
@@ -388,22 +376,21 @@ C---------------------Store also population spectra for discrete levels
 C--------------DDX spectra using portions
                DO iejc = 0, NDEJCD
                   IF(POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                     IF(ENDF(Nnur).EQ.2) THEN
-                        POPcseaf(0,iejc,iesp,0)
-     &                  = POPcseaf(0,iejc,iesp,0)
-     &                  + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                     ELSE
-                        POPcseaf(0,iejc,iesp,INExc(Nnur))
-     &                  = POPcseaf(0,iejc,iesp,INExc(Nnur))
-     &                  + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                     ENDIF
+                    IF(ENDF(Nnur).EQ.2) THEN
+                      POPcseaf(0,iejc,iesp,0)
+     &                = POPcseaf(0,iejc,iesp,0)
+     &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                    ELSE
+                      POPcseaf(0,iejc,iesp,INExc(Nnur))
+     &                = POPcseaf(0,iejc,iesp,INExc(Nnur))
+     &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                    ENDIF
                   ENDIF
                ENDDO
             ENDDO
          ENDIF
       ENDIF
       END
-
 
       SUBROUTINE DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Sum)
 Ccc
@@ -706,11 +693,10 @@ C
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
 
-C           IF (ENDf(Nnuc).EQ.1) THEN
-            IF (ENDf(Nnuc).LE.1) THEN
+            IF (ENDf(Nnuc).EQ.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
      &          ,INExc(Nnuc)) + gacs/DE
-            ELSEIF(ENDf(Nnuc).EQ.2) THEN
+            ELSE
                CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
             ENDIF
          ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND.
@@ -774,12 +760,10 @@ C
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
-C                 IF (ENDf(Nnuc).EQ.1) THEN
-
-                  IF (ENDf(Nnuc).LE.1) THEN
+                  IF (ENDf(Nnuc).EQ.1) THEN
                      POPcse(0,0,icse,INExc(Nnuc))
      &                = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
-                  ELSEIF(ENDf(Nnuc).EQ.2) THEN
+                  ELSE
                      CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
                   ENDIF
                   IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
@@ -1303,8 +1287,6 @@ C
       INTEGER kn, knm
       DOUBLE PRECISION TLF
 C
-C
-
       Sumfis = 0.0
       IF (EX(Iec,Nnuc).EQ.0.0D0) RETURN
 C-----set level density parameter systematics
@@ -1414,11 +1396,6 @@ C
       atlf = pix2*Ekin/htom
       IF (atlf.LT.38.D0) TLF = 1./(1. + EXP((-atlf)))
       END
-
-
-
-
-
 
       SUBROUTINE FISFIS(Nnuc,Iec,Ip,Jc,Sumfis,Mmod)
 Ccc   ********************************************************************
@@ -1963,28 +1940,3 @@ c     &               /HCOnt(Nrhump + ih1)
       ENDDO
       RETURN
       END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

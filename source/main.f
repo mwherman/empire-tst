@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2151 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-05 18:55:46 +0100 (Sa, 05 Nov 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -57,16 +57,7 @@ C
       COMMON /R250COM/ INDexf,INDexb,BUFfer
       COMMON /KALB/ XCOs
 
-C     DOUBLE PRECISION tres,fkt,prefise(20),nubar(20),nubart
-C     DOUBLE PRECISION postfise(20),rfc(20)
-C     DOUBLE PRECISION efl(20),efh(20),tm(20)
-C     DOUBLE PRECISION er(20),tke(20),amash(20),sn(20),egam(20)
       DOUBLE PRECISION eenc(200),signcf(200)
-C     COMMON /nubar1 / tres,fkt,prefise,nubar,nubart
-C     COMMON /nubar2 / postfise, rfc
-C     COMMON /nubar3 / efl,efh,tm
-C     COMMON /inp_sp1/ er,tke,amash,sn,egam
-C     COMMON /inp_sp3/ flf,fhf,finput,filsan,fnc
       COMMON /inp_sp5/ eenc,signcf,nrnc
 C
 C Local functions
@@ -694,7 +685,6 @@ C
          ENDIF
       ENDIF
       ENDIF
-
 C
 C-----calculate transmission coefficients in outgoing channels
 C
@@ -1229,7 +1219,7 @@ C--------Reset variables for life-time calculations
             WRITE (8,*) ' -------------------------------------'
             WRITE (8,*) ' '
          ENDIF
-         IF (ENDf(nnuc).NE.0.0D0 .OR. FITomp.LT.0) THEN
+         IF (ENDf(nnuc).NE.0 .OR. FITomp.LT.0) THEN
             WRITE (12,*) ' '
             WRITE (12,*)
      &' ---------------------------------------------------------------'
@@ -1740,9 +1730,10 @@ C--------Printout of results for the decay of NNUC nucleus
            dtmp = dtmp + POPlv(il,nnuc)
          ENDDO
          IF(dtmp.LE.0.d0) GOTO 1525
+
          IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
-     &     ''NOTE:   was not included in emission spectra'')')
+     &  3X,''NOTE:   was not included in emission spectra'')')
          IF (IOUt.GT.0) WRITE (8,
      &                        '(1X,/,10X,''Discrete level population'')'
      &                        )
@@ -1750,7 +1741,7 @@ C--------Printout of results for the decay of NNUC nucleus
      &       WRITE (8,
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
-         IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0.0D0 .AND.
+         IF (IOUt.GT.0 .AND. ENDf(nnuc).NE.0 .AND.
      &       (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))
      &       WRITE (8,
      &'(3X,''NOTE: due to ENDF option direct particle contribution was s 
@@ -1898,7 +1889,7 @@ C----------Integrating exclusive population spectra (ENDF)
            hcs = 0
 C          write(*,'(2x,F3.0,1x,F3.0,2x,A3,2x,F3.1)') 
 C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
-           IF (ENDf(nnuc).LE.1) THEN
+           IF (ENDf(nnuc).EQ.1) THEN
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
                gcs = gcs + CSE(ispec,0,nnuc)*DE
@@ -2193,20 +2184,15 @@ C------------Residual nuclei must be heavier than alpha
      &       '('' iloc=1! CSEmis('',i1,'','',i2,'')='',G12.5)')
      &                                 nejc,nnuc,CSEmis(nejc,nnuc)
              IF(iloc.EQ.1) CYCLE
-C            IF(CSEmis(nejc,nnuc).LE.0.) CYCLE
-
              IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
 
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (ENDf(nnuc).LE.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
+             IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
-C            IF (IOUt.GT.0) WRITE (8,
-C    &            '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
-C    &             SYMbe(nejc), CSEmis(nejc,nnuc)
 C------------Print residual nucleus population
              poptot = 0.0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
@@ -2331,12 +2317,12 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
       WRITE (8,*) ' '
       WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
+
 C----
-C---- ENDF spectra printout (exclusive representation)
+C---- Initialization of PFNS calculations
 C----
 c fisspec===========
       IF (FISspe.eq.1) CALL INPUT_SPEC
-c fisspec===============
 C     Assumed that a maximum of 2 different isotopes contribute to fission XS
 C     (i.e those coming from fissioning nuclei after primary neutron-proton
 C     emission and first CN.
@@ -2358,28 +2344,33 @@ C     emission and first CN.
           cseapfns(ie,nang) = 0.d0
         ENDDO
       ENDDO
+c fisspec===============
+
 C     For Kalbach parameterization
       do i=1,NDAng
          theta=DBLE(i-1)/DBLE(NDAng-1)*pi
          xcos(i)=cos(theta)
       enddo
+C----
+C---- ENDF spectra printout (exclusive representation)
+C----
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
-         IF (ENDf(nnuc).LE.1) THEN
+         IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
               DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
 
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
-                IF(nejc.GT.0) THEN
+                
+			  IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
-                 ELSE
+                ELSE
                   nnur = nnuc
                   iloc = 0
-                 ENDIF
+                ENDIF
                 IF(iloc.NE.0) CYCLE
-c                WRITE(12,*) nnuc,nejc, nnur, CSEmis(nejc,nnur),
-c     1                                POPcs(nejc,INexc(nnuc))
-                IF (nejc.EQ.0) THEN
+                
+			  IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
                   iizaejc = 0
                 ELSEIF (nejc.EQ.1) THEN
@@ -2404,32 +2395,26 @@ c     1                                POPcs(nejc,INexc(nnuc))
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(NDEJC)
                 ENDIF
-C---------------Double the first bin x-sec to preserve integral in EMPEND
-C               POPcse(0, nejc, 1, INExc(nnur)) = 
-C    &                                POPcse(0, nejc, 1, INExc(nnur))*2
                 WRITE (12,*) ' '
                 WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
+C
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.0
                 IF (nejc.GT.0) 
-     &             recorp = 1. + EJMass(nejc)/AMAss(nnuc)
+     &            recorp = 1. + EJMass(nejc)/AMAss(nnuc)
 
-               IF (LHMs.EQ.0 .OR. nejc.LT.1) THEN
-                  nspec = min(INT(EMAx(nnuc)/DE) + 2,NDECSE)
-                 ELSE
-                  nspec = min(INT(recorp*EMAx(nnuc)/DE) + 2,NDECSE)
-                 ENDIF
+                nspec = min(INT(recorp*EMAx(nnuc)/DE) + 2,NDECSE)
 C---------------Exclusive DDX spectra (neutrons & protons)
                 IF (nejc.GE.1 .AND. nejc.LE.2) THEN
-                  WRITE (12,
+                   WRITE (12,
      &                      '(30X,''A     n     g     l     e     s '')'
      &                      )
-                  WRITE (12,*) ' '
-                  WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+                   WRITE (12,*) ' '
+                   WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
-                  IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
+                   IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                   (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
                                                               ! first emission reactions
 C-----------------------(discrete levels part)
@@ -2470,30 +2455,30 @@ C-----------------------(continuum part)
                               ENDIF
                               DO nang = 1, NDANG
                                  cseaprnt(ie,nang) =
-     &                          ftmp + CSEa(ie,nang,nejc,1)*
+     &                           ftmp + CSEa(ie,nang,nejc,1)*
      &                                POPcseaf(0,nejc,ie,INExc(nnuc))
                               ENDDO
                            ENDDO
                         ENDIF
-                    DO nang = 1, NDANG
+                        DO nang = 1, NDANG
                                       !double the first bin to preserve integral in EMPEND
-                      cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-                    ENDDO
-                    DO ie = 1, nspec - 1
+                          cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+                        ENDDO
+                        DO ie = 1, nspec - 1
                                            ! print DDX spectrum
-                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                        FLOAT(ie - 1)*DE/recorp,
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-                    ENDDO
-                    DO ie = nspec, nspec + 1
+                        ENDDO
+                        DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
-                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                        EMAx(nnuc)/recorp,
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-                    ENDDO
-                    WRITE (12,*) ' '    
+                        ENDDO
+                        WRITE (12,*) ' '    
 
-                  ELSE ! LHMS.NE.0
+                   ELSE 
 C-------------------Remaining n- or p-emissions (continuum)
                         DO ie = 1, nspec + 1 ! clean DDX matrix
                            DO nang = 1, NDANG
@@ -2507,8 +2492,6 @@ C-------------------Remaining n- or p-emissions (continuum)
                            ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
      &                           piece*POPcseaf(0,nejc,ie,INExc(nnuc)
      &                           ))/4.0/PI
-c                          write(12,*)'ie,piece,POPcseaf', ie, piece,
-c    &                                 POPcseaf(0,nejc,ie,INExc(nnuc))
                            IF(ftmp.LT.0) THEN
                               ftmp = 0.0
                               POPcseaf(0,nejc,ie,INExc(nnuc)) =
@@ -2523,8 +2506,6 @@ c    &                                 POPcseaf(0,nejc,ie,INExc(nnuc))
                               cseaprnt(ie,nang)
      &                           = ftmp + CSEa(ie,nang,nejc,1)*
      &                          POPcseaf(0,nejc,ie,INExc(nnuc))
-c                          write(12,*)'ie,nang,INExc,CSEa', ie, nang,
-c    &                            INExc(1), CSEa(ie,nang,nejc,1)
                            ENDDO
                         ENDDO
 C-----------------------double the first bin to preserve integral in EMPEND
@@ -2544,42 +2525,11 @@ C                       ENDDO
      &))') EMAx(nnuc)/recorp,
      &     (max(cseaprnt(ie,nang)*recorp,0.d0),nang = 1,NDANG)
                         ENDDO
-C-------
-C-------MH commented block introduced by Brett when implementing exclusive spectra
-C-------in DDHMS, and restored ver.1717 coding
-C-------
-C                   CALL HINTERMAT(0.0d0, DE/recorp,
-C    &                            CSE(1,nejc,nnur), NDECSE,
-C    &                            0.0D0, DE, csetmp, NDECSE,
-C    &                            1,0.0d0, (nspec+1)*DE)
-C                   DO ie = 1, nspec ! reconstruct continuum DDX spectrum
-C                     ftmp = recorp*csetmp(ie)/4.0/PI
-C                     DO nang = 1, NDANG
-C                       cseaprnt(ie,nang) =
-C    &                          ftmp + CSEahmslab(ie,nang,nejc,nnur)
-C                     ENDDO
-C                     CSE(ie,nejc,nnur) = recorp*csetmp(ie) + 
-C    &                                           CSEhmslab(ie,nejc,nnur)
-C                   ENDDO 
-CC-------------------double the first bin to preserve integral in EMPEND
-CC                   DO nang = 1, NDANG
-CC                     cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-CC                   ENDDO
-C                   DO ie = 1, nspec - 1
-C                     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-C    &                        FLOAT(ie - 1)*DE,
-C    &                        (cseaprnt(ie,nang),nang = 1,NDANG)
-C                    ENDDO
-C                   DO ie = nspec, nspec + 1
-C                                     ! exact DDX spectrum endpoint
-C                     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-C    &                        EMAx(nnuc)*recorp,
-C    &                     (max(cseaprnt(ie,nang),0.d0),nang = 1,NDANG)
-C                   ENDDO
                     WRITE (12,*) ' '    
-   
-                  ENDIF ! LHMS.EQ.0
-                 ELSE !  then (nejc.GE.1 .AND. nejc.LE.2)
+                   ENDIF 
+C
+                ELSE !  then (nejc.GE.1 .AND. nejc.LE.2)
+C
 C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
 C-----------------double the first bin x-sec to preserve integral in EMPEND
                   POPcse(0,nejc,1,INExc(nnuc)) =
@@ -2630,7 +2580,8 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
               IF (nnuc.NE.1  .AND. RECoil.GT.0)
      &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
-         ENDIF ! IF (ENDf(nnuc).LE.1)
+         ENDIF ! IF (ENDf(nnuc).EQ.1)
+
 C
 C--------Prompt fission spectra of neutrons and gammas
 C        for a given decaying nucleus
@@ -2638,8 +2589,7 @@ C
          IF (FISSPE.gt.0 .and.
      &      TOTcsfis.gt.0.d0 .and. CSPfis(nnuc).GT.0.0D0 .and.
      &       ( Z(0).eq.Z(nnuc) .OR.   Z(0)-1.eq.Z(nnuc) ) .AND.
-     &      ENDf(nnuc).LE.1 .and.
-C    &      ENDf(nnuc).EQ.1 .and.
+     &      ENDf(nnuc).EQ.1 .and.
 C           Prompt fission spectra are not calculated if:
 C           Partial fission cross section is lower than 1.d-7*TOTcsfis
      &      CSPfis(Nnuc).GT.1.d-7*TOTcsfis) THEN
@@ -2693,6 +2643,7 @@ C                 Maximum emission energy from n,xnf
                   ENDDO
                 endif
               ENDIF
+C
               IF(isnewchain(izfiss).eq.0) THEN ! IF(nnuc.eq.1) THEN  ! CN
 C
 C             First fissioning nucleus in the isotope chain
@@ -2797,6 +2748,7 @@ C                CSEfis(1,nejc,Nnuc) = CSEfis(1,nejc,Nnuc)*2
                  WRITE  (12,'(''  No fission neutrons emitted'')')
                endif
                WRITE (12,*) ' '
+C
               ELSE ! (A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1))
 C
 C--------------Fission chances (emissive and post fission contributions to PFNS)
@@ -3019,14 +2971,14 @@ C              CSEfis(1,nejc,Nnuc) = CSEfis(1,nejc,Nnuc)*2
 C-----
 C-----PRINTING TOTAL PFNS and PFNM quantities
 C-----
-      WRITE (12,*) ' '
-      WRITE (12,*) ' '
-      WRITE (12,'(''  Sum of fission cross section '',G12.4,'' mb'')')
-     &       TOTcsfis
-      WRITE (8,*) ' '
-      WRITE (8,*) ' '
-      WRITE (8,'(''  Sum of fission cross section '',G12.4,'' mb'')')
-     &       TOTcsfis
+C     WRITE (12,*) ' '
+C     WRITE (12,*) ' '
+C     WRITE (12,'(''  Sum of fission cross section '',G12.4,'' mb'')')
+C    &       TOTcsfis
+C     WRITE (8,*) ' '
+C     WRITE (8,*) ' '
+C     WRITE (8,'(''  Sum of fission cross section '',G12.4,'' mb'')')
+C    &       TOTcsfis
 C ????????
       IF (FISspe.gt.0 .and. TOTcsfis.gt.0.d0) THEN
          DO nejc = 0, 1         !loop over gamma and neutrons only
@@ -3836,29 +3788,7 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
         WRITE (12,*) ' '
        ENDIF        
 C-----End of ENDF spectra (inclusive)
-C     IF (EXClusiv .AND. EINl.GE.1.d0 .AND. IOUT.EQ.6) THEN
-C        WRITE (8,*) ' '
-C        WRITE (8,*) '----------------------------------------------'
-C        WRITE (8,*) 'Test - integrals of portions of DDX spectra'
-C        WRITE (8,'('' Energy'',12x,'' gamma '',9x,''neutron'',
-C    &                                10x,''proton '',8x,'' alpha'')')
-C        WRITE (8,*) '----------------------------------------------'
-C        DO ispec = 1, NEX(1) + 10
-C           controlg = 0
-C           controln = 0
-C           controlp = 0
-C           controla = 0
-C           DO nnuc = 1, NNUcd
-C              IF(ENDf(nnuc).NE.1) CYCLE
-C              controlg = controlg + POPcseaf(0,0,ispec,INExc(nnuc))
-C              controln = controln + POPcseaf(0,1,ispec,INExc(nnuc))
-C              controlp = controlp + POPcseaf(0,2,ispec,INExc(nnuc))
-C              controla = controla + POPcseaf(0,3,ispec,INExc(nnuc))
-C           ENDDO
-C           WRITE (8,'(5g15.5)') (ispec - 1)*DE, controlg,
-C    &                       controln, controlp, controla
-C        ENDDO
-C     ENDIF
+C
  1155 IF( FITomp.GE.0 ) THEN
         READ (5,'(A36)') nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
@@ -4372,8 +4302,7 @@ C
 C-----------Fission
             Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
             CSFis = CSFis + Fisxse
-C           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-            IF (ENDf(Nnuc).LE.1 .AND. Fisxse.NE.0.0D+0 .AND.
+            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
      &        POPbin(Ke,Nnuc).GT.0.d0)
      &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
          ENDIF
@@ -4433,8 +4362,7 @@ C-----fission
       IF (FISmod(Nnuc).EQ.0.) THEN
            Fisxse = Sumfis*Xnor
            CSFis  = CSFis + Fisxse
-C          IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-           IF (ENDf(Nnuc).LE.1 .AND. Fisxse.NE.0.0D+0 .AND.
+           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
      &        POPbin(Ke,Nnuc).GT.0.d0)
      &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF

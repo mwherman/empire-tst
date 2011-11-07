@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2151 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-05 18:55:46 +0100 (Sa, 05 Nov 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -130,7 +130,7 @@ C--------Here the old calculated files should be read
                WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
 C           NLW = maxlw
-            WRITE(8,*) ' Maximum CN spin is ', NLW
+            WRITE(8,*) ' Maximum CN spin is ', maxlw
             WRITE(8,*) ' Spin dimension  is ', NDLW
             NLW = NDLW
             WRITE(8,*) 

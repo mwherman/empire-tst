@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -223,8 +223,9 @@ C         if(izrr.ne.iz .or. iarr.ne.ia) then
  480    CLOSE (52)
         nextr = Find_Extrem(Nnuc)
         
-        write(*,*)nextr,nrsm
-        pause
+C       write(*,*)nextr,nrsm
+C       pause
+
         nrhump = nextr/2 + 1
         nrwel = nextr/2
         nrbar = nrhump + nrwel

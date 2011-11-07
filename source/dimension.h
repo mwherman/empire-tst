@@ -3,14 +3,14 @@
      *,NDEXCLUS = 60
      *,NDEJC=6
      *,NDAFIS=1
-     *,NDEX=  121
+     *,NDEX= 121
      *,NDLW= 50
      *,NDMSCS=4
      *,NDLV=40
      *,NDBR=40
      *,LEVcc=30
      *,NDZMAX=110
-     *,NDECSE=NDEX+20
+     *,NDECSE=NDEX+50
      *,NDEPFN=2*NDEX     
      *,NDANGecis=91
      *,NDAnghmx=37   ! Must be equal to NDAnghms in ddhms.cmb

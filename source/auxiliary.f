@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2133 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -765,10 +765,12 @@ C
       ENDDO
       WRITE (8,*) ' Nucleus Izaf ',Izaf,' not found'
       WRITE (8,*)
-     &' INSUFFICIENT MEMORY ALLOCATION TO ACOMODATE ALL REQUESTED NUCLEI
-     &'
-      WRITE (8,*) ' INCREASE NDNUC PARAMETER IN global.h AND RECOMPILE'
-      WRITE (8,*) ' EXECUTION STOPPED'
+     &' ERROR: INSUFFICIENT MEMORY ALLOCATION TO ACOMODATE'
+      WRITE (8,*)
+     %' ERROR: ALL REQUESTED NUCLEI;  EXECUTION STOPPED'
+      WRITE (8,*) 
+     &' ERROR: INCREASE NDNUC PARAMETER IN global.h AND RECOMPILE'
+      WRITE (8,*) ''
       STOP
       END
 C

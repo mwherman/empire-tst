@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2137 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-30 22:32:06 +0100 (So, 30 Okt 2011) $
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2137 $
+C CVS Version Management $Revision: 2155 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -1884,16 +1884,13 @@ C Local variables
 C
       REAL*8 anorm, dth, ecount(0:10), restot, thet,
      &        zjadd, anormrec, dxang, angnorm
-C     DOUBLE PRECISION DSIN, DCOS
-C     REAL FLOAT
-C     INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
      &        nemax, norder, nth, nu, numax,iwritxddx
 
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
 
-C  zero arrays to accumulate exclusive emission cross sections
+C     zero arrays to accumulate exclusive emission cross sections
       DO jz = 0, NDIM_ZEM
         DO jn = 0, NDIM_NEM
           xsnx(jz,jn) = 0.
@@ -1967,7 +1964,7 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 2137 $')
+99005 FORMAT ('  ddhms version: $Revision: 2155 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $')
 C
@@ -4977,8 +4974,7 @@ C-----to discrete levels
      &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
          nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
          DO ne = 1, nspec
-C           IF (ENDf(nnuc).EQ.1) THEN
-            IF (ENDf(nnuc).LE.1) THEN
+            IF (ENDf(nnuc).EQ.1) THEN
                CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + CSEhms(ne,1,nnuc)
                IF(Inx.GT.0) POPcse(0,1,ne,Inx)=
      &                       POPcse(0,1,ne,Inx) + CSEhms(ne,1,nnuc)
@@ -5054,8 +5050,7 @@ C-----to discrete levels
      &                              NDECSE,1,NEX(nnur)*DE,EMAx(nnur))
          nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
          DO ne = 1, nspec
-C           IF (ENDf(nnuc).EQ.1) THEN
-            IF (ENDf(nnuc).LE.1) THEN
+            IF (ENDf(nnuc).EQ.1) THEN
                CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + CSEhms(ne,2,nnuc)
                IF(Inx.GT.0) POPcse(0,2,ne,Inx)=
      &                       POPcse(0,2,ne,Inx) + CSEhms(ne,2,nnuc)

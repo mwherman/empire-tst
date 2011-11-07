@@ -1,6 +1,6 @@
-C $Rev: 2133 $
+C $Rev: 2155 $
 C $Author: rcapote $
-C $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+C $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -63,7 +63,7 @@ C
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,
-     &        IOUt, IPFdis(nftrans,nfparab), 
+     &        IOUt, IPFdis(nftrans,nfparab),ENDf(0:ndnuc), 
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
@@ -78,10 +78,10 @@ C
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead, EXClusiv, SOFt
+     &        RELkin, SDRead, EXClusiv, SOFt 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
-     &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,ENDf(0:ndnuc),
+     &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
@@ -166,7 +166,7 @@ C
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
      &                 DENhf, GCAsc, BFUs, GDIv, GDRweis, CHMs, CHMax,
-     &                 DERec,ENDf, SHNix, TEMp0, SHRt, QFIs, SHRj, SHRd,
+     &                 DERec, SHNix, TEMp0, SHRt, QFIs, SHRj, SHRd,
      &                 SIG, TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1,
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
@@ -209,10 +209,10 @@ C
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, INExc,
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,INExc, ENDf, 
      &                  NANgela,NDAng,ISProd,FITomp,ICAlangs, NPAirpe,
      &                  KALman, MT2, MT91, MT649, MT849, IOPran, NPRIm_g
-      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt,
+      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
       COMMON /GSA   / KEY_shape, KEY_gdrgfl

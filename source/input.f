@@ -1,8 +1,6 @@
-Ccc   * $Rev: 2151 $
+Ccc   * $Rev: 2155 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-05 18:55:46 +0100 (Sa, 05 Nov 2011) $
-
-C
+Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -44,7 +42,7 @@ C
       LOGICAL gexist, fexist, calc_fiss
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        netl, nnuc, nnur, mulem, nucmin, hh
+     &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       INTEGER INT, ISEED, NINT
       CHARACTER*2 SMAT
@@ -113,7 +111,7 @@ C-----Electron mass = 5.485 799 0945 x 10-4 u
       AMUele = 0.00054857990945D0
 C
 C mn    neutron mass  1.008 664 915 78 amu 
-C me    electron mass 5.485 799 110 ×10-4 amu 
+C me    electron mass 5.485 799 110 ï¿½10-4 amu 
 C mp    proton mass   1.007 276 466 88 amu 
 C md    deuteron mass 2.013 553 212 71 amu 1
 C mt    triton mass   3.015 500 713 amu 3
@@ -195,7 +193,7 @@ C-----------set level density parameters
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
 C-----------set ENDF flag to 0 (no ENDF formatting)
-            ENDf(nnuc) = 0.0
+            ENDf(nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
             NSTOred(nnuc) = -1
          ENDDO
@@ -217,8 +215,8 @@ C--------set gamma-strength parameters
                FISn_n(hh,nnuc)=1.0
             ENDDO           
          ENDDO
+C
          IZA(0) = 0
-         ENDf(0) = 1.0  
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
@@ -267,8 +265,7 @@ C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.
-C        WIDcoll = 0.d0    
-         WIDcoll = 0.05d0  ! Default changed to 50 keV resolution  RCN 2010
+         WIDcoll = 0.05d0  ! Default = 50 keV resolution  
          DXSred = 1.d0     ! scaling factor for direct processes in deuteron induced reactions
          DEFdyn = 1.d0
          DEFsta = 1.d0
@@ -296,9 +293,8 @@ C--------set fission defaults
          ENDDO
 C
          IOPSYS = 0 !   LINUX - Default
-C        IOPSYS = 1 !   WINDOWS
          CALL GETENV ('OS', empireos)
-         if(empireos(1:3). eq. 'Win') IOPsys = 1
+         if(empireos(1:3). eq. 'Win') IOPsys = 1 ! Windows
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 copy C4 file
@@ -490,21 +486,8 @@ C--------mandatory part of the input
 C--------incident energy (in LAB)
          READ (5,*) EIN
 C        Starting value of the number of angular points
-C        NANgela = 37
-C        NDAng   = 37
-C        IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-C          NANgela = 73
-C          NDAng   = 73
-C        ELSEIF(EIN.GT.50.) THEN
-C          NANgela = 91
-C          NDAng   = 91
-C        ENDIF
-C
          NANgela = 91
          NDAng   = 91
-C        Customized for Chris Laird
-C        NANgela = 73
-C        NDAng   = 73
 
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(8,*)
@@ -539,11 +522,13 @@ C-----------GAMMA EMISSION
             CALL PTLEVSET(AEJc(0),ZEJc(0),SEJc(0),lpar,e2pej,e3mej)
          ENDIF
 
-C        CALL PTLEVSET(A(0),Z(0),XJLv(1,0),LVP(1,0),e2p,e3m)
          CALL PTLEVSET(A(0),Z(0),XJLv(LEVtarg,0),LVP(LEVtarg,0),e2p,e3m)
 
          XN(0) = A(0) - Z(0)
          IZA(0) = INT(1000*Z(0) + A(0))
+
+         ENDF(0) = 1
+
          ia = INT(A(0))
          iz = INT(Z(0))
          SYMb(0) = SMAT(iz)
@@ -597,6 +582,8 @@ C--------cluster ejectile
             SYMbe(NDEJC) = SMAT(iz)
          ENDIF
 C--------cluster ejectile *** done ***
+         Irun = 0
+         CALL READIN(Irun)   !optional part of the input
 
 C--------ascribing location to each nucleus
 C--------compound nucleus 1
@@ -610,7 +597,6 @@ C--------compound nucleus 1
          SYMb(1) = SMAT(iz)
          HIS(1) = -1.
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
-         ENDf(1) = 1.0 ! Jan 2009
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C--------other decaying nuclei
@@ -619,7 +605,6 @@ C--------NNUcd number of decaying nuclei
 C--------NNUct total number of nuclei considered
 C
          NEJcm = NDEJC
-C        IF (aclu.EQ.0.0D0 .OR. zclu.EQ.0.0D0) NEJcm = 3
          IF (ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0) SYMbe(0) = gamma
 C--------correct ejectiles symbols
          DO nejc = 1, NEJcm
@@ -672,8 +657,8 @@ C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
                   HIS(nnuc) = -1.
                   IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                HIS(nnuc) = -0.5
-C                 These reactions are assumed to be always exclusive
-                  IF(mulem.eq.in .and. in.le.4) ENDf(nnuc) = 1 ! n,xn
+                  IF(NENdf.gt.0 .and. mulem.eq.in .and. in.le.4) 
+     &             ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -712,7 +697,6 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-C                    ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
@@ -720,7 +704,6 @@ C                    From n,2np   to   n,t
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
-C                    ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
@@ -728,7 +711,6 @@ C                    From n,n2p   to   n,he3
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
-C                    ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
@@ -736,7 +718,6 @@ C                    From n,2n2p   to   n,a
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
-C                    ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
@@ -744,7 +725,6 @@ C                    From n,3n2p   to   n,na
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 2) = 'na'
                      iend = iend + 2
-C                    ENDF(nnuc) = 1
                   ENDIF
                                   
                   IF (ia.NE.0) THEN
@@ -817,9 +797,28 @@ C--------Retrieve C4 experimental data
          IF (IX4ret.EQ.1) CALL RETRIEVE
 C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
-         NNUct = NNUcd
+         NNUct = nnuc
+
+	   NEXclusive = 0
          DO nnuc = 1, NNUcd
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
+
+            ENDf(nnuc)=1
+            irepeated = 0
+            do i=1,nnuc-1
+              IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
+            enddo
+
+            if(irepeated.eq.0) then
+              NEXclusive = NEXclusive + 1 
+              IF(NEXclusive.GT.NDExclus) THEN
+                WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
+                WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
+                WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
+                STOP 'INSUFFICIENT DIMENSION NDExclus'
+              ENDIF
+            endif
+
             DO nejc = 1, NEJcm
 C--------------To find inelastic channel
                IF (AEJc(0).EQ.AEJc(nejc) .AND. ZEJc(0).EQ.ZEJc(nejc))
@@ -840,12 +839,13 @@ C              residual nuclei must be heavier than alpha
                   SYMb(nnur) = SMAT(iz)
                   HIS(nnur) = -1.
                   IF (A(nnur)*0.5.NE.AINT(A(nnur)*0.5)) HIS(nnur) = -0.5
-                  ENDf(nnur) = 2 ! RCN, July 2005
                   NNUct = NNUct + 1
+C                 These nuclei are always considered inclusive
+                  ENDf(nnur)=2
+C
                ENDIF
             ENDDO
          ENDDO
-C--------end ascribing location to each nucleus
 
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
@@ -886,23 +886,22 @@ C-----------(McFadden global potential 9100 could be used)
             KTRlom(4,i) = 6200
             KTRlom(5,i) = 7100
             KTRlom(6,i) = 8100
-
             KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
 C
 C--------inteligent defaults *** done ***
 C
-         Irun = 0
-         CALL READIN(Irun)   !optional part of the input
+C        Irun = 0
+C        CALL READIN(Irun)   !optional part of the input
 
-C--------Set exclusive and inclusive ENDF formatting flags
-         NEXclusive = 1  ! CN is always exclusive
-         INExc(1) = 1    ! CN is always exclusive
+         IF(NENdf.EQ.0) THEN
 
-C--------We fix below target ENDf flag since it escapes normal setting
-         IF (ENDf(0).EQ.0) ENDf(0) = 1
+           ENDF = 0
+           NEXclusive = 0
+           EXClusiv = .FALSE.
 
-         IF(NENdf.GT.0) THEN
+         ELSE ! NENdf.GT.0
+
             DO iac = 0, NEMc
             DO ih = 0, nemh
             DO it = 0, nemt
@@ -927,82 +926,45 @@ C             residues must be heavier than alpha
               if(atmp.le.4 . or. ztmp.le.2) cycle
               izatmp = INT(1000*ztmp + atmp)
               CALL WHERE(izatmp,nnuc,iloc)
-              IF(mulem.LE.NENdf) THEN
-                IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
-              ELSE
-C               Comment the following block and uncommment the line after the block for all-exclusive spectra
-                IF (ENDf(nnuc).EQ.0) THEN
-                  ENDf(nnuc) = 2
-                  EXClusiv = .FALSE.
-                ENDIF
-C               IF (ENDf(nnuc).EQ.0) ENDf(nnuc) = 1
-              ENDIF
-C             IF (ENDf(nnuc).EQ.1) THEN
-              IF (ENDf(nnuc).LE.1) THEN
-                NEXclusive = NEXclusive + 1
-                IF(NEXclusive.GT.NDExclus) THEN
-                  WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
-                  WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
-                  WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
-                  STOP 'INSUFFICIENT DIMENSION NDExclus'
-                ENDIF
-                INExc(nnuc) = NEXclusive
-              ENDIF
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
- 
-C           IF(EXClusiv) then
-C             WRITE(8,*) 'All spectra are exclusive' 
-C           ELSE
-C             WRITE(8,*) 'Marked with > spectra are exclusive' 
-C             ENDIF
-C           WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
- 
-         ELSE
-C
-C           ENDF=0
-C
-            DO iac = 0, NEMc
-            DO ih = 0, nemh
-            DO it = 0, nemt
-            DO id = 0, nemd
-            DO ia = 0, nema
-            DO ip = 0, nemp
-            DO in = 0, nemn
-              mulem = iac + ia + ip + in + id + it + ih
-              if(mulem.eq.0) cycle
-              atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-     &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
-     &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
-              IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
 
-              ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-     &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-     &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-              IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
+              IF(ENDf(nnuc).EQ.2 .or. nnuc.EQ.NTArget) cycle
 
-C             residues must be heavier than alpha
-              if(atmp.le.4 . or. ztmp.le.2) cycle
-              izatmp = INT(1000*ztmp + atmp)
+              do i=1,nnuc-1
+                IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
+              enddo
+	        if(irepeated.eq.1) cycle
+
+              IF(mulem.GT.NENdf) THEN
+                EXClusiv = .FALSE.
+                ENDf(nnuc) = 2
+              ENDIF
+
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+            ENDDO
+C
+C           Reducing the number of exclusive nuclei 
+C           by eliminating those from higher emission loops 
+C
+            itmp = 0          
+            do i=1,NEXclusive
+              iatmp = int(a(i))
+              iztmp = int(z(i))
+              izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
-              ENDf(nnuc) = 0
-              EXClusiv = .TRUE.
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-
-            ENDf(0) = 0
-            ENDf(1) = 0
-
+              if(endf(nnuc).eq.1) then 
+                itmp = itmp + 1
+                INExc(nnuc) = itmp 
+C               write(*,*) i,int(a(i)),int(z(i)),INExc(nnuc),endf(nnuc) 
+              endif
+            enddo
+            NEXclusive = itmp
+C           write(*,*) '***',NEXclusive
+          
          ENDIF
 C
 C--------check input for consistency
@@ -1010,9 +972,10 @@ C
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
-     &'WARNING: For HI induced reactions it is recommended Lmax>=100'
+     &'WARNING: For HI induced reactions it is recommended Lmax~200'
             WRITE (8,*)
      &'WARNING: Increase NDLW parameter in dimension.h and recompile'
+            WRITE (8,*)         
          ENDIF
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
      &      WRITE (8,*)
@@ -1031,10 +994,22 @@ C
             WRITE (8,*) ' WARNING:  LTURBO has been set to 1'
             WRITE (8,*) ' '
          ENDIF
-C        IF (DEGa.GT.0) GCAsc = 1.
-C        Commented in Jan 2011
-
-C        IF (PEQc.GT.0) GCAsc = 1.  ! PCROSS
+C
+         IF (DEGa.GT.0 .and. GCAsc.EQ.0.d0) THEN
+            GCAsc = 1.
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING: For DEGAS the gamma cascade must be'
+            WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
+            WRITE (8,*) ' '
+	   ENDIF
+C
+         IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
+            GCAsc = 1.
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING: For PCROSS the gamma cascade must be' 
+            WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
+            WRITE (8,*) ' '
+	   ENDIF
 C
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
@@ -1152,13 +1127,9 @@ C        8 trit . cont.  0     0     0      0      0      x
 C        9 He-3 . cont.  0     0     0      0      0      x
 C       10 LI   . cont.  0     0     0      0      0      0
 C       11 alpha. cont.  0     0     0      0      0      x
-
 C       12 deut . cont.  0     0     0      0      0      x
-
 C       13 trit . cont.  0     0     0      0      0      x
-
 C       14 He-3 . cont.  0     0     0      0      0      x
-
 C
 C--------with x=1 if used and x=0 if not.
 C
@@ -1408,7 +1379,6 @@ C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
             IOUt = 1
             NEXreq = MIN(NEXreq,30)
-C           GCAsc = 1      ! already set as default in Jan 2011
             MSD = 0
             MSC = 0
             LHMs = 0
@@ -1432,21 +1402,18 @@ C--------set projectile/ejectile masses
 C
 C        Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
 C        ions have to be calculated separately
-C 
          DO nejc = 0, min(6,NDEJC)
 C          Setting projectile/ejectiles mass 
 C          these are nuclear masses following ENDF Manual 2009, so electron mass is not considered
-C          EJMass(nejc) = (AEJc(nejc)*AMUmev - ZEJc(nejc)*AMUele +
-C    &                   XMAss_ej(nejc))/AMUmev
+C          EJMass(nejc) = (AEJc(nejc)*AMUmev - ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
            EJMass(nejc) = AEJc(nejc) + XMAss_ej(nejc)/AMUmev
          ENDDO
 C
 C        Light ion nuclear mass estimated from mass excess table
 C
-         IF(NDEJC.gt.6)  EJMass(NDEJC) = 
-     &     AEJc(NDEJC) + XMAss_ej(NDEJC)/AMUmev         
-C    &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele +
-C    &                   XMAss_ej(NDEJC))/AMUmev
+         IF(NDEJC.gt.6)   
+     &     EJMass(NDEJC) = AEJc(NDEJC) + XMAss_ej(NDEJC)/AMUmev         
+C    &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele + XMAss_ej(NDEJC))/AMUmev
 
 C--------READ shell corrections of RIPL-2/3
          CALL READ_SHELL_CORR
@@ -1651,7 +1618,7 @@ C-----set Q-value for CN production
       QPRod(1) = Q(0,1)
       ia = INT(A(0))
       iae = INT(AEJc(0))
-      IF (ENDf(1).EQ.0.0D0) THEN
+      IF (ENDf(1).EQ.0) THEN
          IF (DEFga.NE.0.0D0) WRITE (12,
      &        '('' DEFGA='',F7.3,'' DEFGW='',F7.3,    '' DEFGP='',F7.3)'
      &        ) DEFga, DEFgw, DEFgp
@@ -1686,11 +1653,11 @@ C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
       ENDIF
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
+C     The line below introduces dependence on the NDEX in dimension.h
+C     However it supress any dependence on input NEXreq
 C-----check whether spectrum array can accommodate capture with this DE
-C     CALL CHECK_DE(EMAx(1),NDECSE)
-C     CALL CHECK_DE(EMAx(1),NDEX)
-
-      CALL CHECK_DE(EMAx(1),NEXreq)
+      CALL CHECK_DE(EMAx(1),NDECSE)
+Cok   CALL CHECK_DE(EMAx(1),NEXreq)
 
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
@@ -1702,22 +1669,30 @@ C-----check whether any residue excitation is higher than CN
             ichanmin = i
          ENDIF
       ENDDO
-      CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
-C-----check whether population array can accommodate the reaction with the largest
-C-----continuum using current DE, if not adjust DE
-C     CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+	
+      IF(qmin.lt.0.d0) THEN
+        WRITE(8,'(1x,A19)')	'Exotermic reaction '
+        CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
+C-------check whether population array can accommodate the reaction with the largest
+C-------continuum using current DE, if not adjust DE
+        CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+Cok     CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NEXreq)
+C
+C-------check whether spectra array can accommodate the reaction with the largest
+C-------continuum using current DE, if not adjust DE
+        CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+	ENDIF
 
-      CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NEXreq)
-
-C-----check whether spectra array can accommodate the reaction with the largest
-C-----continuum using current DE, if not adjust DE
-C     CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C
       WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
+      WRITE(8,'(1x,''# energy points ='',i3,'';   NDEX ='',i3)') 
+     &   NEXreq, NDEX
+
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
-C
+
 C-----determination of excitation energy matrix in CN ***done***
 C
 C-----set energy bin for recoils (max. energy is increased by 5%)
@@ -1859,14 +1834,15 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
      &         /(1.3d0*(AEJc(Nejc)**0.3333334 + A(Nnur)**0.3333334))
 
-            IF (NEX(nnur).GT.NEXreq) THEN
+C           IF (NEX(nnur).GT.NEXreq) THEN
+            IF (NEX(nnur).GT.NDEX) THEN
                WRITE (8,*)
                WRITE (8,'('' WARNING: NUMBER OF BINS '',I3,
      &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
-     &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3)')  
-
-
-     &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
+C    &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3)')  
+C    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
+     &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
+     &         '-',SYMb(nnur),NDEX
                WRITE (8,
      &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
      &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
@@ -1874,10 +1850,8 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
      &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (8,*)
-     &          '         TO CONSIDER IT, YOU HAVE TO DECREASE ',
-     &          ' NEX IN THE INPUT '
-               WRITE (8,*)
-     &          '        AND INCREASE NDEX PARAMETER IN dimension.h'
+     &          '         TO CONSIDER IT, YOU HAVE TO INCREASE ',
+     &          '        NDEX PARAMETER IN dimension.h'
                WRITE (8,'('' WARNING: EMAXr : '',F7.2,
      &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
                WRITE (8,*)
@@ -1923,18 +1897,11 @@ C-----------determination of etl matrix
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
-c               IF((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).LT.culbar) THEN
-                 EMAx(nnur) = 0.d0
-                 NEX(nnur) = 0
-                 NEXr(nejc,nnuc) = 0
-                 Q(nejc,nnuc) = 99.d0
-                 CYCLE
-c               ELSE
-c                 WRITE (8,*)
-c     &             ' OUT OF BOUNDARY; DECREASE NEX IN INPUT OR INCREASE'
-c     &             , ' NDEX IN dimension.h AND RECOMPILE'
-c                 STOP 10
-c               ENDIF
+                EMAx(nnur) = 0.d0
+                NEX(nnur) = 0
+                NEXr(nejc,nnuc) = 0
+                Q(nejc,nnuc) = 99.d0
+                CYCLE
             ENDIF
             IF (NEXr(nejc,nnuc).GT.0 .AND. NEX(nnuc).GT.0) THEN
                ETL(5,nejc,nnur) = EX(NEX(nnuc),nnuc)
@@ -1966,11 +1933,11 @@ Cpr         END DO
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
 
       IF(ENDF(1).GT.0) THEN
-        IF(EXClusiv) then
-          WRITE(8,*) 'All spectra are exclusive' 
-        ELSE
+C       IF(EXClusiv) then
+C         WRITE(8,*) 'All spectra are exclusive' 
+C       ELSE
           WRITE(8,*) 'Spectra marked with < are inclusive' 
-        ENDIF
+C       ENDIF
         WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
       ENDIF
 
@@ -2263,7 +2230,7 @@ C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
         IF (nlvr.NE.0) THEN
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
 C---------limit to max. of 40 levels if ENDF active
-          IF (ENDf(1).GT.0.0D0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+          IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
           IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
@@ -2462,7 +2429,6 @@ C
       INTEGER IFIX
       REAL SNGL
 
-C     IF (ENDf(1).NE.0.0D0 .AND. FIRst_ein) THEN
       IF (FIRst_ein) THEN
         WRITE (12,*) ' '
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (12,*)
@@ -2528,11 +2494,11 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 
       iexclus = 0
       DO i = 1, NNUcd
-        IF(ENDf(i).GT.0.D0) THEN
-          IF (ENDf(i).EQ.1.0D0)
+        IF(ENDf(i).GT.0) THEN
+          IF (ENDf(i).EQ.1)
      &      WRITE (8,99010) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
-          IF (ENDf(i).EQ.2.0D0) THEN
+          IF (ENDf(i).EQ.2) THEN
             iexclus = 1
             WRITE (8,99015) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
@@ -2550,11 +2516,11 @@ C       Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 
       IF (FIRst_ein) THEN
         DO i = 1, NNUcd
-          IF(ENDf(i).GT.0.D0) THEN
-            IF (ENDf(i).EQ.1.0D0)
+          IF(ENDf(i).GT.0) THEN
+            IF (ENDf(i).EQ.1)
      &        WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
-            IF (ENDf(i).EQ.2.0D0)
+            IF (ENDf(i).EQ.2)
      &        WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
           ELSE
@@ -3014,7 +2980,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2151 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2155 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -4929,8 +4895,7 @@ C           Setting ENDF for a single nucleus
                GOTO 100
             ENDIF
             ENDf(nnuc) = INT(val)
-C           IF (ENDf(nnuc).EQ.1) THEN
-            IF (ENDf(nnuc).LE.1) THEN
+            IF (ENDf(nnuc).EQ.1) THEN
               WRITE (8,
      &       '('' Exclusive spectra will be available for emission'',
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
@@ -6840,7 +6805,7 @@ C              md    deuteron mass 2.013 553 amu
 C              mt    triton mass   3.015 501 amu 
 C              m3He  3He mass      3.014 932 amu 
 
-C              me    electron mass 5.485 799×10-4 amu 
+C              me    electron mass 5.485 799ï¿½10-4 amu 
 C
                IF (nixa.EQ.1 .AND. nixz.EQ.0)
      >           XMAss_ej(ii)=(AMUneu-1.d0)*AMUmev
@@ -7706,7 +7671,7 @@ C-----concatenate file name with the projectile path
         filename = '/EXFOR/gammas/'//trim(caz)
       ELSE
         WRITE (8,
-     & '(''WARNING: No EXFOR retrievals for complex projectiles'')')
+     & '('' WARNING: No EXFOR retrievals for complex projectiles'')')
         WRITE (8,*)     
         RETURN
       ENDIF
@@ -7718,7 +7683,7 @@ C     write(6,*)trim(empiredir)//trim(filename)
         write (*,*)' ',trim(empiredir)//trim(filename)
         WRITE (*,*)
         WRITE (8,
-     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+     & '('' WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
         write (8,*)' ',trim(empiredir)//trim(filename)
         WRITE (8,*)
         RETURN 
