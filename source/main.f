@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2156 $
+Ccc   * $Rev: 2157 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-15 10:07:18 +0100 (Di, 15 Nov 2011) $
+Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -192,10 +192,7 @@ C
 C---- Calculate compound nucleus (CN) level density
 C
       nnuc = 1
-C     IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
-C     IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
-C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
-C     IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
+C     CALL INP_LD(nnur)
 
 C-----check whether NLW is not larger than max spin at which nucleus
 C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
@@ -238,50 +235,7 @@ C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
      &''D '')')
          STOP 'Insufficient dimension NDLW for partial waves'
       ENDIF
-
-C     IF (IOUt.EQ.6) THEN
-C        ia = INT(A(nnuc))
-C        WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
-C    &          SYMb(nnuc)
-C        WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
-C    &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
-C        IF (ADIv.NE.3.0D0) THEN
-C          DO i = 1, NEX(nnuc)
-C            rocumul = 0.D0
-C            DO j = 1, NLW
-C              rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-C            ENDDO
-C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-C    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-C          ENDDO
-C        ELSE
-C          WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
-C          DO i = 1, NEX(nnuc)
-C            rocumul = 0.D0
-C            DO j = 1, NLW
-C              rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-C            ENDDO
-C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-C    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-C          ENDDO
-C
-C          WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
-C          DO i = 1, NEX(nnuc)
-C            rocumul = 0.D0
-C            DO j = 1, NLW
-C              rocumul = rocumul + RO(i,j,2,Nnuc)
-C            ENDDO
-C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-C    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
-C          ENDDO
-C        ENDIF
-C     ENDIF
+    
 C
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
@@ -733,63 +687,11 @@ C-----------print transmission coefficients
 C
 C-----determination of transmission coeff.--done
 C
-
-C-----calculate residual nucleus level density
+C-----LEVEL DENSITY for residual nuclei 
 C     DO nnur = 2, NNUct
-C        ia = INT(A(nnur))
-C        iz = INT(Z(nnur))
 C        IF (NEX(nnur).LE.0) cycle
-C        
-C        IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-C        IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
-C-----------<m2> could be added to the input ( to use 0.124 if needed)
-C        IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
-C        IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
-C        IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
-         
-C        IF (IOUt.EQ.6) THEN
-C          WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
-C    &          SYMb(nnur)
-C          WRITE(8,'(/2x,A25,1x,F5.2,A4//
-C    &         1x,''   E        RHO(E)  '')')
-C    &        'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
-C          IF (ADIv.NE.3.0D0) THEN
-C               DO i = 1, NEX(nnur)
-C                 rocumul = 0.D0
-C                 DO j = 1, NLW
-C                   rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
-C                 ENDDO
-C                 WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
-C    &                     (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
-C               ENDDO
-C          ELSE
-C               WRITE (8,'(2X,/,''  POSITIVE PARITY'')')
-C               DO i = 1, NEX(nnur)
-C                 rocumul = 0.D0
-C                 DO j = 1, NLW
-C                   rocumul = rocumul + RO(i,j,1,nnur)
-C                 ENDDO
-C                 WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
-C    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
-C               ENDDO
-
-C               WRITE (8,'(2X,/,''  NEGATIVE PARITY'')')
-C               DO i = 1, NEX(nnur)
-C                 rocumul = 0.D0
-C                 DO j = 1, NLW
-C                   rocumul = rocumul + RO(i,j,2,nnur)
-C                 ENDDO
-C                 WRITE (8,99011) EX(i,nnur), rocumul*EXP(ARGred),
-C    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
-C               ENDDO
-C          ENDIF
-C        ENDIF
+C        CALL INP_LD(nnur)
 C     ENDDO
-C
 C-----determination of the residual nucleus level density done
 C
 99011 FORMAT (1X,14(G10.4,1x))

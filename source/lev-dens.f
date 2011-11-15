@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-11-05 16:59:48 +0100 (Sa, 05 Nov 2011) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -59,6 +59,7 @@ C
       INTEGER ia, in, iz, kk, nplot
       INTEGER INT
 
+      write(*,*)'sin'
       pi2 = PI*PI
       BF = 1.0
       IF (Cf.NE.0.0D0) BF = 0.0D0
@@ -88,7 +89,9 @@ C-----EMPIRE-3.0-dependence
       ATIl = AP1*FLOAT(ia) + AP2*A23
       ATIl = ATIl*ATIlnor(Nnuc)
 c-----calculate crtical values
-      CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt)
+      if(a(nnuc).eq.236.and.z(nnuc).eq.92)
+     &  write(*,*)'atil',atil!dam1',destep, fitlev
+      CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
       IF (BF.EQ.0.D0 .AND. Asaf.LT.0.0D0) ACR = ACRt
 C-----fit of cumulative low-lying discrete levels
       IF(BF.NE.0.d0)Call LEVFIT(Nnuc,Nplot,Dshif,Dshift, Defit)
@@ -105,7 +108,6 @@ C-----fit of cumulative low-lying discrete levels
 
       ellq = Q(1,Nnuc) - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
       Ecrt = UCRt - DEL - dshift
-
       DO kk = 1, NEX(Nnuc)
          IF (FITlev.LE.0.0D0 .OR. 
      &       EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc))
@@ -544,7 +546,7 @@ C==========================================================
 
 
 c****************************************************
-      SUBROUTINE DAMIRO_CRT(ia,iz,Shcn,iout)
+      SUBROUTINE DAMIRO_CRT(ia,iz,Shcn,iout,ifis)
 C****************************************************
 
       REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
@@ -555,7 +557,7 @@ C****************************************************
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
       REAL*8 Shcn
-      INTEGER ia,iz,iout
+      INTEGER ia,iz,iout,ifis
       CHARACTER*2 SMAT
       REAL*8 FSHELL
 
@@ -588,11 +590,20 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt,SHCn,GAMma)
       SCR = 2.*ACRt*TCRt
 
-      if(iout.eq.6)
+      if(iout.EQ.6.AND.ifis.EQ.0)
      & WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
      &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
      &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
      &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
+
+      if(ia.eq.236.and.iz.eq.92)THEN
+         write(*,*)'ifis',ifis
+      WRITE(*, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
+     &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
+     &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
+     &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
+      pause
+      ENDIF
       
       RETURN
       END
@@ -774,8 +785,8 @@ C Local variables
       atil=aas
       CALL PRERORITO(Nnuc)
       NLWst = NLW
-c      Jstab(Nnuc)=NDLW
-      CALL DAMIRO_CRT(ia,iz,shcn,IOUt)
+c     Jstab(Nnuc)=NDLW
+      CALL DAMIRO_CRT(ia,iz,shcn,IOUt,0)
       def2=def(1,nnuc)
       rotemp = 0.d0
      
@@ -2666,7 +2677,7 @@ C-----surface deformation dependent factor bsq
 cc      ATIl = AP1*A(Nnuc) + BSQ(cigor)*AP2*A(Nnuc)**0.666667
 cc      ATIl = ATIl*Rafis
 
-      CALL DAMIRO_CRT(ia,iz,shcf,IOUt)
+      CALL DAMIRO_CRT(ia,iz,shcf,IOUt,1)
 
       momparcrt=mompar
       momortcrt=momort

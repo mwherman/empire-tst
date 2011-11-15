@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
+Ccc   * $Rev: 2157 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1681,7 +1681,7 @@ C
 C-------check whether spectra array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-	ENDIF
+      ENDIF
 
 C
       WRITE(8,'(1x,A28,F6.1,A4)')
@@ -1711,55 +1711,9 @@ C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
 C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.0
-C-----calculate compound nucleus level density (only for FITLEV>0)
-C     IF(FITlev.GT.0) THEN
-       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,0.0D0,0.024D0)
-       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnuc) 
-       IF (ADIv.EQ.2.0D0) CALL ROGC(nnuc,0.24D0)
-       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnuc)
-       IF (IOUt.EQ.6) THEN
-         ia = INT(A(nnuc))
-         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
-     &          SYMb(nnuc)
-         WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
-     &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
-         IF (ADIv.NE.3.0D0) THEN
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-             ENDDO
-             WRITE (8,99010) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-         ELSE
-           WRITE (8,'(2X,/,''  POSITIVE PARITY'')')
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-             ENDDO
-             WRITE (8,99010) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-           WRITE (8,'(2X,/,''  NEGATIVE PARITY'')')
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + RO(i,j,2,Nnuc)
-             ENDDO
-             WRITE (8,99010) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-         ENDIF
-       ENDIF
-C     ENDIF
+C-----calculate compound nucleus level density 
+c     IF(FITlev.GT.0) CALL INP_LD(nnuc)  ! only for FITLEV>0    
+      CALL INP_LD(nnuc)      
 C
 C-----other decaying nuclei
 C
@@ -1837,10 +1791,11 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
 C           IF (NEX(nnur).GT.NEXreq) THEN
             IF (NEX(nnur).GT.NDEX) THEN
                WRITE (8,*)
+
                WRITE (8,'('' WARNING: NUMBER OF BINS '',I3,
      &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
-C    &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3)')  
-C    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
+cC    &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3,  
+cC    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
      &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
      &         '-',SYMb(nnur),NDEX
                WRITE (8,
@@ -1933,72 +1888,18 @@ Cpr         END DO
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
 
       IF(ENDF(1).GT.0) THEN
-C       IF(EXClusiv) then
-C         WRITE(8,*) 'All spectra are exclusive' 
-C       ELSE
-          WRITE(8,*) 'Spectra marked with < are inclusive' 
-C       ENDIF
+        WRITE(8,*) 'Spectra marked with < are inclusive' 
         WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
       ENDIF
 
       WRITE (8,*) ' '
-C-----calculate residual nucleus level density (only for FITLEV>0)
-C     IF(FITlev.GT.0) THEN
-       DO nnur = 2, NNUct
-         ia = INT(A(nnur))
-         iz = INT(Z(nnur))
+C-----LEVEL DENSITY for residual nuclei 
+      DO nnur = 2, NNUct
          IF (NEX(nnur).LE.0) cycle
-            IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
-            IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
-C-----------<m2> could be added to the input ( to use 0.124 if needed)
-            IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
-C           IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
-            IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
-            IF (IOUt.EQ.6) THEN
-              ia = INT(A(nnur))
-              WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') 
-     &          ia, SYMb(nnur)
-              WRITE(8,'(/2x,A25,1x,F5.2,A4//
-     &        1x,''   E        RHO(E)  '')')
-     &          'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
-              IF (ADIv.NE.3.0D0) THEN
-                DO i = 1, NEX(nnur)
-                  rocumul = 0.D0
-                  DO j = 1, NLW
-                    rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
-                  ENDDO
-                  WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &                     (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
-                ENDDO
-              ELSE
-                WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
-                DO i = 1, NEX(nnur)
-                  rocumul = 0.D0
-                  DO j = 1, NLW
-                    rocumul = rocumul + RO(i,j,1,nnur)
-                  ENDDO
-                  WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
-                ENDDO
-
-                WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
-                DO i = 1, NEX(nnur)
-                  rocumul = 0.D0
-                  DO j = 1, NLW
-                    rocumul = rocumul + RO(i,j,2,nnur)
-                  ENDDO
-                  WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
-c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
-c    &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
-                ENDDO
-              ENDIF
-            ENDIF
-       ENDDO
-C     ENDIF
+         CALL INP_LD(nnur)
+      ENDDO
       WRITE (8,*)
+
       DO i = 1, NDLW
          DRTl(i) = 1.0
       ENDDO
@@ -2046,6 +1947,67 @@ C
       END
 C
 C
+      SUBROUTINE INP_LD(Nnur)
+
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      REAL*8 rocumul
+      INTEGER Nnur,ia
+
+      IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
+      IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
+C-----<m2> could be added to the input ( to use 0.124 if needed)
+      IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
+C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
+      IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
+
+      IF (IOUt.EQ.6) THEN
+         ia = INT(A(nnur))
+         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') 
+     &        ia, SYMb(nnur)
+         WRITE(8,'(/2x,A25,1x,F5.2,A4//
+     &1x,''   E        RHO(E)  '')')
+     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
+         IF (ADIv.NE.3.0D0) THEN
+            DO i = 1, NEX(nnur)
+               rocumul = 0.D0
+               DO j = 1, NLW
+                  rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
+               ENDDO
+               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
+     &              (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+            ENDDO
+         ELSE
+            WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
+            DO i = 1, NEX(nnur)
+               rocumul = 0.D0
+               DO j = 1, NLW
+                  rocumul = rocumul + RO(i,j,1,nnur)
+               ENDDO
+               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
+     &              (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+c     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
+c     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
+            ENDDO
+
+            WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
+            DO i = 1, NEX(nnur)
+               rocumul = 0.D0
+               DO j = 1, NLW
+                  rocumul = rocumul + RO(i,j,2,nnur)
+               ENDDO
+               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
+     &              (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
+c     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
+c     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
+            ENDDO
+         ENDIF
+      ENDIF
+99010 FORMAT (1X,14(G10.4,1x))
+      RETURN 
+      END
+ 
       SUBROUTINE LEVREAD(Nnuc)
 Ccc
 Ccc   ********************************************************************
@@ -2980,7 +2942,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2155 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2157 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
