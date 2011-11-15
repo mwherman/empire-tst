@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
+Ccc   * $Rev: 2156 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Date: 2011-11-15 10:07:18 +0100 (Di, 15 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -239,49 +239,49 @@ C-----is still stable (should be moved after LD calculation in main.f - Oct2011)
          STOP 'Insufficient dimension NDLW for partial waves'
       ENDIF
 
-      IF (IOUt.EQ.6) THEN
-         ia = INT(A(nnuc))
-         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
-     &          SYMb(nnuc)
-         WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
-     &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
-         IF (ADIv.NE.3.0D0) THEN
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-             ENDDO
-             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+C     IF (IOUt.EQ.6) THEN
+C        ia = INT(A(nnuc))
+C        WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') ia,
+C    &          SYMb(nnuc)
+C        WRITE(8,'(/2x,A25,1x,F5.2,A4//1x,''   E        RHO(E)  '')')
+C    &        'Continuum starts above E=',ELV( NLV(nnuc),nnuc),' MeV'
+C        IF (ADIv.NE.3.0D0) THEN
+C          DO i = 1, NEX(nnuc)
+C            rocumul = 0.D0
+C            DO j = 1, NLW
+C              rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
+C            ENDDO
+C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+C    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (2.d0*RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-         ELSE
-           WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
-             ENDDO
-             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
+C          ENDDO
+C        ELSE
+C          WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
+C          DO i = 1, NEX(nnuc)
+C            rocumul = 0.D0
+C            DO j = 1, NLW
+C              rocumul = rocumul + 2.d0*RO(i,j,1,Nnuc)
+C            ENDDO
+C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+C    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 1,11)
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,1,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-
-           WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
-           DO i = 1, NEX(nnuc)
-             rocumul = 0.D0
-             DO j = 1, NLW
-               rocumul = rocumul + RO(i,j,2,Nnuc)
-             ENDDO
-             WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
-     &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
+C          ENDDO
+C
+C          WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
+C          DO i = 1, NEX(nnuc)
+C            rocumul = 0.D0
+C            DO j = 1, NLW
+C              rocumul = rocumul + RO(i,j,2,Nnuc)
+C            ENDDO
+C            WRITE (8,99011) EX(i,nnuc), rocumul*EXP(ARGred),
+C    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 1,11)
 c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 11,21)
 c    &                     (RO(i,j,2,nnuc)*EXP(ARGred),j = 21,31)
-           ENDDO
-         ENDIF
-      ENDIF
+C          ENDDO
+C        ENDIF
+C     ENDIF
 C
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
