@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2157 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
+Ccc   * $Rev: 2158 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2011-11-28 21:33:14 +0100 (Mo, 28 Nov 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1040,7 +1040,7 @@ C
       WRITE (12,*) ' '
       WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
      &          CSFus + (SINl + SINlcc)*FCCred + SINlcont
-      WRITE (12,'('' TOTAL CROSS SECTION = '',G13.6, '' mb'')')
+      WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6, '' mb'')')
      &         TOTcs*TOTred
       WRITE (12,*) ' '
 C
