@@ -1933,7 +1933,7 @@ C
       IMPLICIT REAL*8(A-H,O-Z)
       COMMON/BNWI/FNR(90),FNI(90),FBR(90),FBI(90),X,LMA1
      */COUL/CONZ,ETA,COPH(20,90)
-      COMMON/INT/SUMCUR,ALOW,AUP,ALW,EPSIN
+      COMMON/IND/SUMCUR,ALOW,AUP,ALW,EPSIN
       DO 1 I=1,LMA1
       ALW=I-1.
       AUP=0.D+00
@@ -1959,7 +1959,7 @@ C***********************************************************************
       IMPLICIT REAL*8(A-H,O-Z)
       COMMON/BNWI/FNR(90),FNI(90),FBR(90),FBI(90),X,LMA1
      */COUL/CONZ,ETA,COPH(20,90)
-      COMMON/INT/SUMCUR,ALOW,AUP,ALW,EPSIN
+      COMMON/IND/SUMCUR,ALOW,AUP,ALW,EPSIN
       SUMIN=0.
       NN=4
       H=(AUP-ALOW)/NN
