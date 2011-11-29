@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2157 $
+Ccc   * $Rev: 2159 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
+Ccc   * $Date: 2011-11-29 13:19:15 +0100 (Di, 29 Nov 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -582,8 +582,9 @@ C--------cluster ejectile
             SYMbe(NDEJC) = SMAT(iz)
          ENDIF
 C--------cluster ejectile *** done ***
-         Irun = 0
-         CALL READIN(Irun)   !optional part of the input
+C        wrong position  
+C        Irun = 0
+C        CALL READIN(Irun)   !optional part of the input
 
 C--------ascribing location to each nucleus
 C--------compound nucleus 1
@@ -891,8 +892,8 @@ C-----------(McFadden global potential 9100 could be used)
 C
 C--------inteligent defaults *** done ***
 C
-C        Irun = 0
-C        CALL READIN(Irun)   !optional part of the input
+         Irun = 0
+         CALL READIN(Irun)   !optional part of the input
 
          IF(NENdf.EQ.0) THEN
 
@@ -2942,7 +2943,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2157 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2159 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
