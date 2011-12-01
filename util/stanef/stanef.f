@@ -1,5 +1,5 @@
-! $Rev: 2125 $                                                        
-! $Date: 2011-07-22 21:46:31 +0200 (Fr, 22 Jul 2011) $
+! $Rev: 2162 $                                                        
+! $Date: 2011-12-01 20:53:23 +0100 (Do, 01 Dez 2011) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -29,6 +29,12 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.06   November 2011, A. Trkov
+!-V                        1. Prevent stripping of the header record if
+!-V                           tape ID equals zero.
+!-V                        2. Special case: suppress redefining ZASYM 
+!-V                           if ZA=MAT (special purpose files where
+!-V                           the ZA is not define from Z and A)
 !-V         Version 8.05   July 2011     A. Trkov
 !-V                        Increase No. of points in MF3 from 250K to 500K.
 !-V         Version 8.04   January 2011     A. Trkov
@@ -175,9 +181,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -636,9 +642,13 @@
 !
       READ(ITAPE,'(A,I4,I2,I3)') CTEXT,MAT,MF,MT
       IF(MF.NE.0.OR.MT.NE.0)   THEN
+!        -- If MF>0 or MT>0 on first record, assume no header record
          REWIND (UNIT=ITAPE)
          CTEXT = ' '
          MAT = 0
+      ELSE
+!        -- If tape label is zero, change to 7777
+         IF(MAT.EQ.0) MAT=7777
       END IF
 !
 !     NEW TAPE TO BE LABELED
@@ -1049,8 +1059,9 @@
          END SELECT
          NSUB = 10
       END IF
-      IF(NSUB.NE.12) THEN
-         ZSA = ' '
+      ZSA = ' '
+!     -- Special case: suppress redefining ZSA if ZA=MAT
+      IF(NSUB.NE.12 .AND. NINT(ZA).NE.MAT) THEN
          ZZA = ZA
          IZA = IFIX(ZZA+.001)
          IA = MOD(IZA,1000)
@@ -1100,10 +1111,11 @@
          DO N=1,NTRD
             NPROC = NPROC + 1
             READ(ITAPE,'(A)')   TEXTS(NPROC)
-            IF(NPROC.EQ.1.AND.NSUB.NE.12) THEN
+!           -- Special case: suppress redefining ZSA if ZA=MAT
+            IF(NPROC.EQ.1.AND.NSUB.NE.12.AND.NINT(ZA).NE.MAT) THEN
                TEXTS(NPROC)(1:11) = ZSA
-            ELSE
-               CALL UPSTR(TEXTS(NPROC)(1:11))
+!           ELSE
+!              CALL UPSTR(TEXTS(NPROC)(1:11))
             END IF
             ITEX = TEXTS(NPROC)(1:4)
             IF(ITEX.EQ.'----')   NPROC = NPROC - 1
