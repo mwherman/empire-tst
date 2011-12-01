@@ -1,5 +1,5 @@
-! $Rev: 2128 $                                                          | 
-! $Date: 2011-08-31 10:40:49 +0200 (Mi, 31 Aug 2011) $                                                     
+! $Rev: 2163 $                                                          | 
+! $Date: 2011-12-01 20:56:28 +0100 (Do, 01 Dez 2011) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,11 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.16   November 2011
+!-V                        Allow MT numbers 152-200 approved by CSEWG
+!-V                        Special case: suppress testing ZASYM if ZA=MAT
+!-V                        Suppress test for LRP in derived files
+!-V                        (last two items needed for the dosimetry library)
 !-V         Version 8.15   August 2011   M. White
 !-V                        Upgrade for MF1/MT458 extension
 !-V         Version 8.14   August 2011   A. Trkov
@@ -245,9 +250,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.15'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.15'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
 !---MDC---
 !
 !     Define variable precision
@@ -1741,6 +1746,7 @@
 !
 !     ENDF-V format file
 !
+      IEF = 0
       IF(NFOR.EQ.0)   THEN
          NFOR = 5
          NSUB = 10
@@ -1875,11 +1881,6 @@
       ELSE
          IF(LRP.EQ.0)   IEF = 1
       END IF
-      IF(IEF.EQ.1) THEN
-         WRITE(EMESS,'(A,I2,A,I5)')                                     &       
-     &                 'INVALID FLAG LRP=',LRP,' FOR NSUB=',NSUB
-         CALL ERROR_MESSAGE(NSEQP1-2)
-      END IF
 !
 !     Process last control record
 !
@@ -1890,6 +1891,12 @@
       LDRV = L1H
       TEMP = C1H
       NCD = N1H
+!     Suppress test for LRP in derived files
+      IF(IEF.EQ.1 .AND. LDRV.EQ.0) THEN
+         WRITE(EMESS,'(A,I2,A,I5)')                                     &       
+     &                 'INVALID FLAG LRP=',LRP,' FOR NSUB=',NSUB
+         CALL ERROR_MESSAGE(NSEQP1-2)
+      END IF
       IF(NFOR.GE.6)   THEN
          CALL TEST1(LDRV,0,999,'LDRV',1)
          IF(LDRV.EQ.0)   THEN
@@ -1917,7 +1924,7 @@
          CALL RDTEXT
          IF(IERX.EQ.1)   GO TO 100
          IF(NC.EQ.1) THEN
-            IF(NSUB.NE.12.AND.ZSA.NE.TEXT(1:11)) THEN
+            IF(NSUB.NE.12.AND.ZSA.NE.TEXT(1:11).AND.NINT(ZA).NE.MAT)THEN
                EMESS = 'ZSYNAM SHOULD BE "'//TRIM(ZSA)//'" NOT "'//     &       
      &                 TRIM(TEXT(1:11))//'"'
                CALL WARNING_MESSAGE(NSEQP)
@@ -6457,12 +6464,22 @@ c        END IF
 !
       MTCAT = 0
       MT3 = MTT
-      IF(MTT.LE.150 .OR. (MTT.GE.152.AND.MTT.LE.200))     GO TO 50
+      IF(MTT.LE.150) GO TO 50
 !
-!     RESONANCE PARAMETERS  151 - 200
+!     RESONANCE PARAMETERS  151
 !
-      IF(MTT.GE.151.AND.MTT.LE.200) THEN
-         IF(MTT.EQ.151)   MTCAT = 2
+      IF(MTT.EQ.151) THEN
+         MTCAT = 2
+!
+!     ADDITIONAL ACTIVATION REACTIONS 152 - 200
+!
+      ELSE IF(MTT.GE.152.AND.MTT.LE.200) THEN
+         MTCAT = 6
+!
+!     ADDITIONAL ACTIVATION REACTIONS 152 - 200
+!
+      ELSE IF(MTT.GE.152.AND.MTT.LE.200) THEN
+         MTCAT = 6
 !
 !     PARTICLE PRODUCTION REACTIONS, MUBAR XI AND GAMMA  201 - 300
 !
@@ -6471,6 +6488,8 @@ c        END IF
             IF(NFOR.GE.6.OR.(MTT.GE.203.AND.MTT.LE.207))  MTCAT = 5
          ELSE
             IF(MTT.GE.251.AND.MTT.LE.253) MTCAT = 3
+!           -- Dosimetry spectra
+            IF(MTT.EQ.261) MTCAT=3
          END IF
 !
 !     REACTION IN ENERGY DEPOSIT REGION  301 - 450
