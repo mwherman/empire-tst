@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-15 10:58:31 +0100 (Di, 15 Nov 2011) $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2011-12-02 17:06:08 +0100 (Fr, 02 Dez 2011) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -59,7 +59,6 @@ C
       INTEGER ia, in, iz, kk, nplot
       INTEGER INT
 
-      write(*,*)'sin'
       pi2 = PI*PI
       BF = 1.0
       IF (Cf.NE.0.0D0) BF = 0.0D0
@@ -89,8 +88,6 @@ C-----EMPIRE-3.0-dependence
       ATIl = AP1*FLOAT(ia) + AP2*A23
       ATIl = ATIl*ATIlnor(Nnuc)
 c-----calculate crtical values
-      if(a(nnuc).eq.236.and.z(nnuc).eq.92)
-     &  write(*,*)'atil',atil!dam1',destep, fitlev
       CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
       IF (BF.EQ.0.D0 .AND. Asaf.LT.0.0D0) ACR = ACRt
 C-----fit of cumulative low-lying discrete levels
@@ -592,18 +589,10 @@ C-----45.84 stands for (12/SQRT(pi))**2
 
       if(iout.EQ.6.AND.ifis.EQ.0)
      & WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
-     &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
-     &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
+     &      ''  Acrt='',F6.3,''  Ucrt='', F6.3, ''  Econd='', F5.3,
+     &      ''  Det='', G11.3, ''  Scrt='',F6.3)')
      &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
 
-      if(ia.eq.236.and.iz.eq.92)THEN
-         write(*,*)'ifis',ifis
-      WRITE(*, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
-     &      ''  Acrt='',F6.3,''  Ucrt='', F5.3, ''  Econd='', F5.3,
-     &      ''  Det='', F8.3, ''  Scrt='',F6.3)')
-     &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
-      pause
-      ENDIF
       
       RETURN
       END
