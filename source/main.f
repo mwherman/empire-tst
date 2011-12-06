@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2158 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2011-11-28 21:33:14 +0100 (Mo, 28 Nov 2011) $
+Ccc   * $Rev: 2165 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-12-06 11:24:56 +0100 (Di, 06 Dez 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -110,6 +110,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
+
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
 
@@ -262,6 +263,7 @@ C-----
         READ (45,*,END = 1400)   ! To skip level identifier line
         DO iang = 1, NANgela
          READ (45,'(24x,E12.5)',END = 1400) elada(iang)
+
         ENDDO
       ELSE
         OPEN (45,FILE = (ctldir//ctmp23//'.LEG'),STATUS = 'OLD',
@@ -280,7 +282,8 @@ C-----
         DO iang1 = 1, NANgela
 C----------To use only those values corresponding to EMPIRE grid for elastic XS
 C          READ (45,'( 7x,E12.5)',END = 1400) ftmp
-           READ (45,'(11x,E12.5)',END = 1400) ftmp    ! ecis06
+           READ (45,'(3x,12x,E12.5)',END = 1400) ftmp    ! ecis06
+
            if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
            iang = iang +1
            elada(iang) = ftmp
@@ -339,7 +342,9 @@ C--------------Add direct transition to the spectrum
                  iang = 0
                  DO iang1 = 1, NANgela
 C                  READ (45,'( 7x,E12.5)',END = 1400) ftmp
-                   READ (45,'(11x,E12.5)',END = 1400) ftmp
+C                  READ (45,'(11x,E12.5)',END = 1400) ftmp
+
+                   READ (45,'(3x,12x,E12.5)',END = 1400) ftmp    ! ecis06
 C------------------To use only those values corresponding to EMPIRE grid for inelastic XS
                    if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                    iang = iang +1
@@ -448,7 +453,9 @@ C
                  iang = 0
                  DO iang1 = 1, NANgela
 C                   READ (45,'( 7x,E12.5)',END = 1400) ftmp
-                    READ (45,'(11x,E12.5)',END = 1400) ftmp
+C                   READ (45,'(11x,E12.5)',END = 1400) ftmp
+
+                    READ (45,'(3x,12x,E12.5)',END = 1400) ftmp    ! ecis06
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
@@ -2264,7 +2271,7 @@ C----
 
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
                 
-			  IF(nejc.GT.0) THEN
+                    IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
                 ELSE
                   nnur = nnuc
@@ -2272,7 +2279,7 @@ C----
                 ENDIF
                 IF(iloc.NE.0) CYCLE
                 
-			  IF (nejc.EQ.0) THEN
+                    IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
                   iizaejc = 0
                 ELSEIF (nejc.EQ.1) THEN

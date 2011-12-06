@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
+Ccc   * $Rev: 2165 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Date: 2011-12-06 11:24:56 +0100 (Di, 06 Dez 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -49,7 +49,7 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
-     &        nang, itmp2, kk, itmp3, indic
+     &        nang, itmp2, itmp3, indic
       INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
@@ -348,7 +348,7 @@ C--------calculation of o.m. transmission coefficients for absorption
          einlab = -EINl
          IWArn = 0
          ldbwacalc = .FALSE.
-	   CCCalc = .FALSE.
+         CCCalc = .FALSE.
          ltlj = .FALSE.
          lodd = .false.
          IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
@@ -528,19 +528,21 @@ C-----------------checking the correspondence of the excited states for even-eve
                   GOTO 2351 
   235             BACKSPACE (45)
                   READ (45,'(A80)',ERR = 240, END = 240) rstring
- 2351             WRITE (47,'(A80)') rstring
+C                 Setting the number of lines to 1 (only cross sections written)
+ 2351                 rstring(15:15)='1' 
+                  WRITE (47,'(A80)') rstring
                   DO j = 1, itmp2*nang ! ecis06
                      READ (45,'(i3,A80)',ERR = 240,END = 240) 
      &                 indic, rstring
-	               if(ICOllev(i).GE.LEVcc .and. indic.eq.0)
+                     if(ICOllev(i).GE.LEVcc .and. indic.eq.0)
      &                 WRITE (47,'(3x,A80)') rstring 
-	            ENDDO
+                  ENDDO
                   DO j = 1, itmp3*nang ! ecis06
                      READ (46,'(i3,A80)',ERR = 236,END = 236) 
      &                 indic, rstring
-	               if(ICOllev(i).LT.LEVcc .and. indic.eq.0)
+                     if(ICOllev(i).LT.LEVcc .and. indic.eq.0)
      &                 WRITE (47,'(3x,A80)') rstring 
-	            ENDDO
+                  ENDDO
   236          ENDDO
   240          CLOSE (45) ! ,STATUS = 'DELETE')
                CLOSE (46) ! ,STATUS = 'DELETE')
@@ -562,7 +564,7 @@ C-----------------checking the correspondence of the excited states
      &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
                      STOP
      &        ' WARNING: Exptl DWBA and CCM state order do not coincide'
-                   ENDIF
+                  ENDIF
   255             BACKSPACE (45)
                   READ (45,'(A80)',END = 260) rstring
                   WRITE (47,'(A80)') rstring
@@ -680,8 +682,8 @@ C-------Angular distribution (incident.ang)
           READ (45,'(A80)',END = 270) rstring
           WRITE (47,'(A80)') rstring
           DO j = 1, itmp2*nang ! ecis06
-            READ (45,'(i4,A80)',END = 270) kk,rstring
-            if(kk.eq.0) WRITE (47,'(A80)') rstring
+            READ  (45,'(3x,A80)',END = 270) rstring
+            WRITE (47,'(3x,A80)') rstring
           ENDDO
         ENDDO
   270   CLOSE (45,STATUS = 'DELETE')
@@ -827,7 +829,7 @@ C--------Corrected scattering radius
            IF(sel(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
-	   IF(selast.gt.0.d0) then
+         IF(selast.gt.0.d0) then
            selast = selast *  10.d0*PI/ak2
            WRITE(8,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
      &              6H(ECIS:,F10.3,1H),1x,2hmb)') 
@@ -865,7 +867,7 @@ C--------Corrected scattering radius
      &     '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
            WRITE (8,*)
            WRITE (12,*)
-	    ELSE
+          ELSE
            WRITE (8,89006)
            WRITE (12,89006)
            WRITE (53,89006)
@@ -888,7 +890,7 @@ C--------Corrected scattering radius
      &     '      Sreact = Sfusion + SUM_over_exc.lev.j {Sinl(j)}'
            WRITE (8,*)
            WRITE (12,*)
-	    ENDIF
+          ENDIF
       ENDIF
 
       IF (INT(AEJc(0)).GT.0)
