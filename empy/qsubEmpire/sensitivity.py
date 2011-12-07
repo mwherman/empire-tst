@@ -33,7 +33,7 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'FCD', 'GAPN', 'GAPP', 'GCROA', 'GCROD', 'GCROE0', 'GCROT', 
         'GCROUX', 'GDIV', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1', 
         'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY',
-        'TRUNC', 'WIDEX')
+        'TRUNC', 'WIDEX', 'DEFNUC')
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 
 # these global parameters don't need Z,A of isotope specified
@@ -114,7 +114,11 @@ def init(proj):
         tmp = inpString.split('!')[0].split()
         while len(tmp)<6:
             tmp.extend('0')
-        return [tmp[0],float(tmp[1]),int(tmp[2]),int(tmp[3]),
+        if len(tmp[0])>6:
+            return [inpString[0:6],float(inpString[6:16]),int(tmp[1]),int(tmp[2]),
+                int(tmp[3]),int(tmp[4])]
+        else:
+            return [tmp[0],float(tmp[1]),int(tmp[2]),int(tmp[3]),
                 int(tmp[4]),int(tmp[5])]
     
     # convert options to [string, float, int*4] for easier comparison:
@@ -179,7 +183,7 @@ def init(proj):
             optIdx -= 1
         
         # write new input files with variations:
-        template = "%-6s%10.3f%5i%5i%5i%5i\n"
+        template = "%-6s%10.3E%5i%5i%5i%5i\n"
         
         # make unique names for 'val+sigma' and 'val-sigma' directories:
         nameP, nameM = genNames(line,proj)
@@ -261,7 +265,7 @@ def copyTLs(proj):
     for line in sens:
         if line.strip()=='' or line[0] in ('!','#','*'):
             continue
-        if line.startswith("UOM"):
+        if line.startswith("UOM") or line.startswith("DEFNUC"):
             # don't copy tls when we vary the optical model parameters
             continue
     
