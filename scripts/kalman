@@ -43,9 +43,14 @@ if [ ! -s $file-mat.sen ]; then
    echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
    exit 3
 fi
-if [ ! -s $file.c4 ]; then
-   echo "C4 FILE NOT FOUND ($file.c4)"
-   exit 4
+if [ ! -s $file-kal.c4 ]; then
+   echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
+   if [ ! -s $file.c4 ]; then
+     echo "C4 FILE NOT FOUND ($file.c4)"
+     exit 4
+   else
+     cp $file.c4 $file-kal.c4
+   fi
 fi
 
 
@@ -60,7 +65,7 @@ rm $file-{c4,par,*-err}.kal 2>/dev/null
 
 # parse .c4 file for only reactions (MT #s) of interest:
 for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
-    grep "^.\{12,19\}  3 $j " $file.c4 >>$file-c4.kal
+    grep "^.\{12,19\}  3 $j " $file-kal.c4 >>$file-c4.kal
 done
 
 for k in $MT; do
