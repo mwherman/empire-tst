@@ -41,7 +41,7 @@ $EMPIREDIR/util/stanef/stanef <INPUT
 
 #$work/$file.endf is the final ENDF output file
 
-# $EMPIREDIR/scripts/process $file
+$EMPIREDIR/scripts/process $file
 
 # remove left-over files
 rm INPUT 2>/dev/null
