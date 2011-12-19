@@ -1,6 +1,6 @@
-# $Rev: 2170 $
+# $Rev: 2171 $
 # $Author: gnobre $
-# $Date: 2011-12-19 20:48:11 +0100 (Mo, 19 Dez 2011) $
+# $Date: 2011-12-19 21:55:18 +0100 (Mo, 19 Dez 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8292,6 +8292,10 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         -label {Reconstruct elastic} 
     $site_3_0.menu93 add command \
         \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-total $file &} \
+        -label {Reconstruct total} 
+    $site_3_0.menu93 add command \
+        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file &} \
         -label {Reconstruct (n,p), (n,a) and inel} 
     $site_3_0.menu93 add command \
@@ -8355,6 +8359,10 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
         -label {(z,3n) MT=17} 
+    $site_4_0.men87 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 18 $mat $EXPDAT} \
+        -label {(z,f) MT=18} 
     $site_4_0.men87 add command \
         \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
