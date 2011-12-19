@@ -1,6 +1,6 @@
-# $Rev: 2152 $
-# $Author: mherman $
-# $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
+# $Rev: 2170 $
+# $Author: gnobre $
+# $Date: 2011-12-19 20:48:11 +0100 (Mo, 19 Dez 2011) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8371,6 +8371,82 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
         \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label {all MTs} 
+    $site_3_0.menu93 add cascade \
+        -menu "$site_3_0.menu93.men89" \
+        -command {} -label {Plot Sensitivity Matrix for} 
+    set site_4_0 $site_3_0.menu93
+    menu $site_4_0.men89 \
+        -activebackground #f9f9f9 -activeforeground black -foreground black \
+        -tearoff 1 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 1 $mat $EXPDAT} \
+        -label {Total MT=1} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 2 $mat $EXPDAT} \
+        -label {Elastic MT=2} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 3 $mat $EXPDAT} \
+        -label {Nonelastic MT=3} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 4 $mat $EXPDAT} \
+        -label {Inelastic MT=4} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 11 $mat $EXPDAT} \
+        -label {(z,2nd) MT=11} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 16 $mat $EXPDAT} \
+        -label {(z,2n) MT=16} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 18 $mat $EXPDAT} \
+        -label {Fission MT=18} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 22 $mat $EXPDAT} \
+        -label {(z,na) MT=22} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 24 $mat $EXPDAT} \
+        -label {(z,2na) MT=24} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 45 $mat $EXPDAT} \
+        -label {(z,npa) MT=45} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 102 $mat $EXPDAT} \
+        -label {(z,gamma) MT=102} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 103 $mat $EXPDAT} \
+        -label {(z,p) MT=103} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 104 $mat $EXPDAT} \
+        -label {(z,d) MT=104} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 105 $mat $EXPDAT} \
+        -label {(z,t) MT=105} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 107 $mat $EXPDAT} \
+        -label {(z,a) MT=107} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 112 $mat $EXPDAT} \
+        -label {(z,pa) MT=112} 
+    $site_4_0.men89 add command \
+        \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 115 $mat $EXPDAT} \
+        -label {(z,pd) MT=115} 
+
     $site_3_0.menu93 add command \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/mergeMF33 $file 
