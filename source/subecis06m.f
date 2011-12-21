@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 2173 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -12964,8 +12964,10 @@ C COMPUTATION OF FIRST ORDER.                                           ROTZ-130
 C 15/11/06                                                      ECIS06  WOSA-000
 C     SUBROUTINE WOSA(V,A,P,CC,R,N,LX)                                  WOSA-001
 
-
       SUBROUTINE WOSA(VRR,A,P,CC,R,N,LX)                                RCN
+
+
+
 C COMPUTATION OF WOODS-SAXON FORM-FACTORS AT SOME POWER AND THEIR       WOSA-002
 C DERIVATIVES.                                                          WOSA-003
 C LIMITED TO THE SIXTH DERIVATIVE (THE FOURTH ONE ONLY IS USED IN ECIS).WOSA-004
@@ -13000,14 +13002,12 @@ C FORM-FACTOR AND ITS DERIVATIVES.                                      WOSA-020
       IF (N.EQ.6) GO TO 2                                               WOSA-033
       V(7)=B*((P*C+3.D0*C-3.D0)*V(6)-((2.D0*P*C+3.D0*C+3.D0)*V(5)-(P*C+CWOSA-034
      1-1.D0)*V(4)/A)/A)/A                                               WOSA-035
+
+
+
     2 DO 21L=1,N                                                        RCN
-
-
       VRR(L)=V(L)                                                       RCN   
-
-
    21 CONTINUE                                                          RCN
-
 
       IF (LX) RETURN                                                    WOSA-036
 C STORAGE OF INTERMEDIATE RESULTS FOR SYMMETRISATION.                   WOSA-037
@@ -13026,15 +13026,9 @@ C SYMMETRISATION.                                                       WOSA-043
     4 V(L)=V(L)+A1*VV(L-J+1,1)*VV(J,2)                                  WOSA-050
     5 CONTINUE                                                          WOSA-051
 
-
       DO 51 L=1,7                                                       RCN
-
-
       VRR(L)=V(L)                                                       RCN   
-
-
    51 CONTINUE                                                          RCN
-
 
       RETURN                                                            WOSA-052
     6 WRITE (MW,1000) N                                                 WOSA-053
@@ -20932,6 +20926,9 @@ C COMPOUND NUCLEUS RESULTS.                                             RESU-357
       WRITE (MW,1015) RX                                                RESU-361
 
       IF (LO(59)) WRITE (55,'(1x,F10.2,$)') RX                          RCN
+
+
+
       IF (LO(85)) WRITE (MW,1016) TX(NDP+1)                             RESU-362
       IF (LO(86)) WRITE (MW,1017) TX(NDP+2)                             RESU-363
       RX=TX(NDP+1)+TX(NDP+2)                                            RESU-364
@@ -21011,7 +21008,12 @@ C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
       IF (.NOT.LO(59)) GO TO 47                                         RESU-438
       IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-439
 
+
+
       IF (INIV.EQ.1) WRITE (55,'(1x,F10.2)') RX                         RCN
+
+
+
       IF (INIV.NE.1) WRITE (59,1034) RX,INIV-1                          RESU-440
    47 IF (LO(81)) WRITE (MW,1035) TX(NCOLL+INIV+1)                      RESU-441
       IF (LO(66)) GO TO 62                                              RESU-442
@@ -21039,10 +21041,39 @@ C PSEUDO DO LOOP ON ANGLES.                                             RESU-447
       GO TO 51                                                          RESU-464
    52 WRITE (MW,1036) THETB,EX(2,1),EX(I3+1,1),EX(I4,1)                 RESU-465
    53 IF (.NOT.LO(64)) GO TO 54                                         RESU-466
-      WRITE (66,1038) (MF(2,NIX+K-2),THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10RESU-467
-     1),K=2,I3)                                                         RESU-468
-      IF (LO(81)) WRITE (66,1039) THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,ERESU-469
-     1X(I4,1),(LG(K),K=6,10)                                            RESU-470
+
+
+
+C     WRITE (66,1038) (MF(2,NIX+K-2),THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10RESU-467
+
+
+C    1),K=2,I3)                                                         RESU-468
+
+
+C     Printing only cross sections (MF(2,NIX+K-2)=0)                  
+
+
+      WRITE (66,10381)(THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10),K=2,2)        RCN
+
+
+C     IF (LO(81)) WRITE (66,1039) THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,ERESU-469
+
+
+C    1X(I4,1),(LG(K),K=6,10)                                            RESU-470
+
+
+
+
+
+      IF (LO(81)) WRITE (66,10391)THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,E  RCN
+
+
+     1X(I4,1),(LG(K),K=6,10)                                              RCN
+
+
+
+
+
    54 IF (I7.LE.0) GO TO 56                                             RESU-471
       DO 55 K=1,I7                                                      RESU-472
       IJ=IJ+1                                                           RESU-473
@@ -21132,7 +21163,18 @@ C FOR EQUIDISTANT ANGLES.                                               RESU-539
       WRITE (MW,1042) (CQ(L,NIX),L=6,10),LG                             RESU-557
       GO TO 70                                                          RESU-558
    69 WRITE (MW,1042) (CQ(L,NIX),L=6,10),LG,((CQ(L,K),L=6,10),K=NJX,NGX)RESU-559
-   70 IF (LO(64)) WRITE (66,1043) INIV,SP2,SIGM(IPI(1,INIV)+1),I8,JG    RESU-560
+C  70 IF (LO(64)) WRITE (66,1043) INIV,SP2,SIGM(IPI(1,INIV)+1),I8,JG    RESU-560
+
+
+C     Printing only cross sections (01 instead of I8)
+
+
+   70 IF (LO(64)) WRITE (66,1043) INIV,SP2,SIGM(IPI(1,INIV)+1),01,JG    RCN 
+
+
+
+
+
       IF (NGX.EQ.NFX) GO TO 71                                          RESU-561
       NJX=NGX+1                                                         RESU-562
       NGX=MIN0(NFX,NJX+4)                                               RESU-563
@@ -21221,7 +21263,15 @@ C FOR EQUIDISTANT ANGLES.                                               RESU-539
  1036 FORMAT (1X,F10.3,D16.5,2X,5F18.7)                                 RESU-646
  1037 FORMAT (29X,5F18.7)                                               RESU-647
  1038 FORMAT (I3,1P,2D12.5,5X,4A4,A2)                                   RESU-648
+10381 FORMAT (3X,1P,2D12.5,5X,4A4,A2)                                   RCN
+
+
  1039 FORMAT (' -4',1P,2D12.5,5X,4A4,A2/' -5',2D12.5,5X,4A4,A2)         RESU-649
+
+
+10391 FORMAT (3X,1P,2D12.5,5X,4A4,A2/3X,2D12.5,5X,4A4,A2)               RCN
+
+
  1040 FORMAT (/' ANGULAR DISTRIBUTION OF COMPOUND SCATTERING ON LEVELS',RESU-650
      1I3,' TO',I3//6X,'ANGLE',6(I6,'-LEVEL',F5.1,A1))                   RESU-651
  1041 FORMAT (1X,F10.3,6F18.7)                                          RESU-652

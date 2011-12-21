@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2159 $
+Ccc   * $Rev: 2173 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-29 13:19:15 +0100 (Di, 29 Nov 2011) $
+Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -264,7 +264,7 @@ C
          FISspe = 0
          IOMwritecc = 0
          MODelecis = 0
-         EXClusiv = .TRUE.
+         EXClusiv = .TRUE. ! Default: All exclusive calculation
          WIDcoll = 0.05d0  ! Default = 50 keV resolution  
          DXSred = 1.d0     ! scaling factor for direct processes in deuteron induced reactions
          DEFdyn = 1.d0
@@ -800,25 +800,17 @@ C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
          NNUct = nnuc
 
-	   NEXclusive = 0
+         NEXclusive = 0
          DO nnuc = 1, NNUcd
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
 
             ENDf(nnuc)=1
+
             irepeated = 0
             do i=1,nnuc-1
               IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
             enddo
-
-            if(irepeated.eq.0) then
-              NEXclusive = NEXclusive + 1 
-              IF(NEXclusive.GT.NDExclus) THEN
-                WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
-                WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
-                WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
-                STOP 'INSUFFICIENT DIMENSION NDExclus'
-              ENDIF
-            endif
+            if(irepeated.eq.0) NEXclusive = NEXclusive + 1 
 
             DO nejc = 1, NEJcm
 C--------------To find inelastic channel
@@ -895,6 +887,10 @@ C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 
+         IF(ENDf(NTArget).EQ.10) ENDf(NTArget)=1
+         IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
+         IF(ENDf(0).EQ.10) ENDf(0)=1 ! for compound
+
          IF(NENdf.EQ.0) THEN
 
            ENDF = 0
@@ -929,17 +925,18 @@ C             residues must be heavier than alpha
               CALL WHERE(izatmp,nnuc,iloc)
 
               IF(ENDf(nnuc).EQ.2 .or. nnuc.EQ.NTArget) cycle
-
+              irepeated = 0
               do i=1,nnuc-1
                 IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
               enddo
-	        if(irepeated.eq.1) cycle
+              if(irepeated.eq.1) cycle
 
-              IF(mulem.GT.NENdf) THEN
+              IF(mulem.GT.NENdf .AND. ENDf(nnuc).NE.10) THEN
                 EXClusiv = .FALSE.
                 ENDf(nnuc) = 2
               ENDIF
-
+C             This nucleus requested as exclusive in the optional input
+              IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  
             ENDDO
             ENDDO
             ENDDO
@@ -970,6 +967,13 @@ C           write(*,*) '***',NEXclusive
 C
 C--------check input for consistency
 C
+         IF(NEXclusive.GT.NDExclus) THEN
+            WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
+            WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
+            WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
+            STOP 'INSUFFICIENT DIMENSION NDExclus'
+         ENDIF
+
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
@@ -1002,7 +1006,7 @@ C
             WRITE (8,*) ' WARNING: For DEGAS the gamma cascade must be'
             WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
             WRITE (8,*) ' '
-	   ENDIF
+         ENDIF
 C
          IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
             GCAsc = 1.
@@ -1010,7 +1014,7 @@ C
             WRITE (8,*) ' WARNING: For PCROSS the gamma cascade must be' 
             WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
             WRITE (8,*) ' '
-	   ENDIF
+         ENDIF
 C
          IF (MSC*MSD.EQ.0 .AND. (MSD + MSC).NE.0 .AND. A(nnuc)
      &       .GT.1.0D0 .AND. AEJc(0).LE.1.D0) THEN
@@ -1670,9 +1674,9 @@ C-----check whether any residue excitation is higher than CN
             ichanmin = i
          ENDIF
       ENDDO
-	
+      
       IF(qmin.lt.0.d0) THEN
-        WRITE(8,'(1x,A19)')	'Exotermic reaction '
+        WRITE(8,'(1x,A19)')   'Exotermic reaction '
         CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
 C-------check whether population array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
@@ -1889,8 +1893,9 @@ Cpr         END DO
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
 
       IF(ENDF(1).GT.0) THEN
-        WRITE(8,*) 'Spectra marked with < are inclusive' 
-        WRITE(8,*) 'Number of exclusive nuclei :',NEXclusive
+        WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
+        WRITE(8,*) 'Nuclei marked with < in the table below produce excl
+     &usive emission spectra'
       ENDIF
 
       WRITE (8,*) ' '
@@ -2943,7 +2948,7 @@ C     GOTO 10
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2159 $  |'
+      WRITE (8,*)'                       |    Rivoli, $Rev: 2173 $  |'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -4822,10 +4827,10 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-             IF(i1.eq.0 .OR. i2.eq.0) THEN
-C             Setting ENDF for all emission loops
-              NENdf = INT(val)
-              IF(NENdf.GT.0) THEN
+             IF(i1.eq.0 .AND. i2.eq.0) THEN
+C              Setting ENDF for all emission loops
+               NENdf = INT(val)
+               IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
                  WRITE (8,'(
      &            '' Exclusive spectra available up to'',
@@ -4835,12 +4840,12 @@ C             Setting ENDF for all emission loops
      &            '' Exclusive spectra available up to'',
      &            '' emission loop # '',I2)') NENdf
                      GOTO 100
-              ENDIF
-              IF(NENdf.EQ.0) THEN
+               ENDIF
+               IF(NENdf.EQ.0) THEN
                  WRITE ( 8,'('' ENDF formatting disabled'')')
                  WRITE (12,'('' ENDF formatting disabled'')')
                  GOTO 100
-              ENDIF
+               ENDIF
              ENDIF
              IF(val.LT.0) THEN
                WRITE (8,'('' WRONG ENDF value in input'',I3)')
@@ -4859,6 +4864,7 @@ C           Setting ENDF for a single nucleus
             ENDIF
             ENDf(nnuc) = INT(val)
             IF (ENDf(nnuc).EQ.1) THEN
+              ENDf(nnuc) = 10  ! using as a flag 
               WRITE (8,
      &       '('' Exclusive spectra will be available for emission'',
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
@@ -6911,7 +6917,7 @@ C
          IF (iloc.EQ.0) THEN
 C
 C           Taking the default number of discrete levels from the EMPIRE file  
-C					 ../data/level-density-param.dat
+C                              ../data/level-density-param.dat
             NLV(nnuc)   = MIN(NDLV,nlevc)
             NCOmp(nnuc) = MIN(NDLV,nlevc)
 C

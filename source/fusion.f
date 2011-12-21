@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2165 $
+Ccc   * $Rev: 2173 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-06 11:24:56 +0100 (Di, 06 Dez 2011) $
+Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -49,7 +49,7 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
-     &        nang, itmp2, itmp3, indic
+     &        nang, itmp2 
       INTEGER IDNINT, INT, MIN0
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
@@ -141,7 +141,6 @@ C-------If (energy read from file do not coincide
 C-------this nucleus should be recalculated (goto 300)
 C
    50    CLOSE (45,STATUS = 'DELETE')
-
          IF (FITomp.EQ.0) THEN
          WRITE (8,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
@@ -149,7 +148,6 @@ C
      &               ' FOR INC.CHANNEL HAS BEEN DELETED'
           ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
-
       ENDIF
 C-----Calculation of fusion cross section for photon induced reactions
       IF (INT(AEJc(Npro)).EQ.0) THEN
@@ -348,6 +346,7 @@ C--------calculation of o.m. transmission coefficients for absorption
          einlab = -EINl
          IWArn = 0
          ldbwacalc = .FALSE.
+
          CCCalc = .FALSE.
          ltlj = .FALSE.
          lodd = .false.
@@ -425,6 +424,7 @@ C--------------Saving KTRlom(0,0)
             ENDIF
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
+
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
               CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab) 
@@ -436,6 +436,7 @@ C             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
                 CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
               ENDIF
             ELSE
+
               IF (DEFormed) THEN
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
                 CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
@@ -505,17 +506,20 @@ C--------------Inelastic cross section (incident.ics)
                CLOSE (47)
 C--------------Angular distribution (incident.ang)
                OPEN (45,FILE = 'dwba.ANG',STATUS = 'OLD',ERR = 240)
+
                READ (45,'(A80)',ERR = 240, END = 240) rstring
                OPEN (46,FILE = 'ccm.ANG' ,STATUS = 'OLD',ERR = 240)
                READ (46,'(A80)',ERR = 230, END = 230) ! first line is taken from dwba
   230          OPEN (47,FILE = 'INCIDENT.ANG',STATUS = 'UNKNOWN')
+
                WRITE (47,'(A80)') rstring
                DO i = 1, ND_nlv
 C-----------------checking the correspondence of the excited states
                   READ (45,'(i5,6x,i4,i5)',END = 240,ERR = 240) 
      &                 istat1, itmp2, nang
-                  READ (46,'(i5,6x,i4))',END = 235,ERR = 235) 
-     &                 istat2, itmp3
+                  READ (46,'(i5,6x,i4)',END = 235,ERR = 235) 
+
+     &                 istat2
 C-----------------checking the correspondence of the excited states for even-even targets
                   IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   
                     WRITE (8,*)
@@ -528,22 +532,13 @@ C-----------------checking the correspondence of the excited states for even-eve
                   GOTO 2351 
   235             BACKSPACE (45)
                   READ (45,'(A80)',ERR = 240, END = 240) rstring
-C                 Setting the number of lines to 1 (only cross sections written)
- 2351                 rstring(15:15)='1' 
-                  WRITE (47,'(A80)') rstring
+ 2351             WRITE (47,'(A80)') rstring
                   DO j = 1, itmp2*nang ! ecis06
-                     READ (45,'(i3,A80)',ERR = 240,END = 240) 
-     &                 indic, rstring
-                     if(ICOllev(i).GE.LEVcc .and. indic.eq.0)
-     &                 WRITE (47,'(3x,A80)') rstring 
+                     READ (45,'(A80)',ERR = 240,END = 240) rstring
+                     READ (46,'(A80)',ERR = 236,END = 236) rstring
+  236                WRITE (47,'(A80)') rstring
                   ENDDO
-                  DO j = 1, itmp3*nang ! ecis06
-                     READ (46,'(i3,A80)',ERR = 236,END = 236) 
-     &                 indic, rstring
-                     if(ICOllev(i).LT.LEVcc .and. indic.eq.0)
-     &                 WRITE (47,'(3x,A80)') rstring 
-                  ENDDO
-  236          ENDDO
+               ENDDO
   240          CLOSE (45) ! ,STATUS = 'DELETE')
                CLOSE (46) ! ,STATUS = 'DELETE')
                CLOSE (47)
@@ -670,34 +665,7 @@ C
 C-----Moving incident channel results to TL/ directory
 C
       IF (KTRlom(Npro,Ntrg).GT.0) THEN
-C       only for ecis06, Processing INCIDENT.ANG
-C-------Angular distribution (incident.ang)
-        OPEN (45,FILE = 'INCIDENT.ANG',STATUS = 'OLD',ERR = 270 )
-        READ (45,'(A80)',END = 270) rstring
-        OPEN (47,FILE = 'tmp.ang',STATUS = 'UNKNOWN')
-        WRITE (47,'(A80)') rstring
-        DO i = 1, max(ND_nlv,1)
-          READ (45,'(12x,i3,i5)',END = 270) itmp2, nang
-          BACKSPACE (45)
-          READ (45,'(A80)',END = 270) rstring
-          WRITE (47,'(A80)') rstring
-          DO j = 1, itmp2*nang ! ecis06
-            READ  (45,'(3x,A80)',END = 270) rstring
-            WRITE (47,'(3x,A80)') rstring
-          ENDDO
-        ENDDO
-  270   CLOSE (45,STATUS = 'DELETE')
-        CLOSE (47)
         IF (IOPsys.EQ.0) THEN
-C---------LINUX
-          ctmp = 'mv tmp.ang INCIDENT.ANG'
-          iwin = PIPE(ctmp)
-        ELSE
-          ctmp = 'move tmp.ang INCIDENT.ANG >NUL'
-          iwin = PIPE(ctmp)
-      ENDIF
-
-      IF (IOPsys.EQ.0) THEN
 C--------LINUX
          ctmp = 'mv INCIDENT.CS '//ctldir//ctmp23//'.CS'
          iwin = PIPE(ctmp)
@@ -715,7 +683,7 @@ C--------LINUX
          iwin = PIPE(ctmp)
          ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ'
          iwin = PIPE(ctmp)
-      ELSE
+        ELSE
 C--------WINDOWS
          ctmp = 'move INCIDENT.CS '//ctldir//ctmp23//'.CS >NUL'
          iwin = PIPE(ctmp)
@@ -733,7 +701,7 @@ C--------WINDOWS
          iwin = PIPE(ctmp)
          ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ >NUL'
          iwin = PIPE(ctmp)
-      ENDIF
+        ENDIF
       ENDIF
 C
 C-----Save TLs, SINl
@@ -829,6 +797,7 @@ C--------Corrected scattering radius
            IF(sel(l+1).LT.1.d-15) EXIT
            selast = selast + (2*l+1)*sel(l + 1)
          ENDDO
+
          IF(selast.gt.0.d0) then
            selast = selast *  10.d0*PI/ak2
            WRITE(8,'(7x,28HSHAPE ELASTIC CROSS SECTION=,F10.3,1x,
@@ -967,6 +936,7 @@ C
          IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
       ENDDO
 
+
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
 C-----Plujko_new-2005
@@ -1054,13 +1024,10 @@ C
          ENDIF
    50    IF (Ein.GT.ee2) Crl = le2
          IF (Ein.LT.E1) Crl = Crl + (Ein - vmax)/(vmm - vmax)
-
          Csfus = 657.*(Ap + At)*Crl**2/(Ap*At*Ein)
       ELSE
          WRITE (8,'(1X,
-
      >  ''WARNING: Incident energy below fusion barrier'')')
-
          Csfus = 0.d0
       ENDIF
       RETURN
