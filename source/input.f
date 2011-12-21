@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2173 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
+Ccc   * $Rev: 2174 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2011-12-21 17:47:30 +0100 (Mi, 21 Dez 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2913,10 +2913,11 @@ C
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
       INTEGER IPArCOV
       INTEGER INT
+      CHARACTER*5 source_rev,emp_rev
       CHARACTER*6 name, namee
       CHARACTER*35 char
       CHARACTER*13 char1
-      LOGICAL fexist
+      LOGICAL fexist,file_exists
       DOUBLE PRECISION val,vale,sigma,shelss,quant
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
@@ -2944,11 +2945,25 @@ C-----Go to the end of the COVAR.DAT file
 C  10 READ(95,*,END=11) dum
 C     GOTO 10
    11 CONTINUE
+      INQUIRE(FILE=trim(empiredir)//"/source/.svn/entries",
+     & EXIST=file_exists)
       WRITE (8,*)'                        __________________________'
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Rivoli, $Rev: 2173 $  |'
+      WRITE (8,*)'                       |          Rivoli          |'
+      if(file_exists) then
+        open(200,file=trim(empiredir)//"/source/.svn/entries",
+     &status='OLD')
+        read(200,'(3/,A5,7/,A5)') emp_rev,source_rev
+        close(200)
+        WRITE(8,20) emp_rev
+   20   FORMAT(24X,'| SVN empire     rev. ',A5,'|')
+        WRITE(8,30) source_rev
+   30   FORMAT(24X,'| empire/source  rev. ',A5,'|')
+       ELSE
+        WRITE (8,*)'                       |       Not under SVN      |'
+      endif
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
       WRITE (8,*)'                       |     Brazil, Dec 2011     |'
@@ -2969,9 +2984,15 @@ C     GOTO 10
       WRITE (12,*) 'nuclear reaction model calculations.               '
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Available experimental data were interpreted  using'
-      WRITE (12,*) 'nuclear reaction model code EMPIRE-3 by M. Herman  '
-      WRITE (12,*) 'et al [EMP]. This code integrates into a single    '
-      WRITE (12,*) 'system a number of important modules and features: '                                         '
+      WRITE (12,*) 'nuclear reaction model code EMPIRE-3.1 Rivoli      '
+      if(file_exists) then
+      WRITE (12,35) trim(emp_rev)
+   35 FORMAT(1X,'(SVN revision ',A,') by M. Herman et al [EMP].',5X,' ')
+      else
+      WRITE (12,*) '(not under SVN) by M. Herman et al [EMP].          '
+      endif
+      WRITE (12,*) 'This code integrates into a single system a number '
+      WRITE (12,*) 'of important modules and features:                 '
       WRITE (12,*) '                                                   '
       WRITE (12,*) '- Spherical and deformed Optical Model including   '
       WRITE (12,*) '  coupled-channels-ECIS06 by J. Raynal             '
