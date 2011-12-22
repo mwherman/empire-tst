@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 2179 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-12-22 11:57:38 +0100 (Do, 22 Dez 2011) $
 
       SUBROUTINE THORA(IOUT)
 C
@@ -44,9 +44,9 @@ C
       RETURN
  1001 FORMAT
      >(/22X,'Start time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
- 1002 FORMAT(1X,' Calculation time: ',I3,' min ',I2,' s')
+ 1002 FORMAT(2X,'Calculation time: ',I3,' min ',I2,' s')
  1003 FORMAT
-     >(/22X,'End   time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
+     >(/2X,'End time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
 
 
 C====================================================================
