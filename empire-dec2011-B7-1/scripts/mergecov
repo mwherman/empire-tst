@@ -1,0 +1,38 @@
+#! /bin/sh -
+#script to merge covariances for individual reactions into a single MT33 file
+#MF32 is added at the begining if exists
+file=$1
+MAT=$2
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *endf
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
+fi                          
+
+# merge all covariance files
+
+rm MT33 2>/dev/null
+
+cat $file-32.cov >MT33 2>/dev/null
+cat $file-33-?.cov >>MT33 2>/dev/null
+cat $file-33-??.cov >>MT33 2>/dev/null
+cat $file-33-???.cov >>MT33 2>/dev/null
+
+#Lines below can be used to merge file MT33 into the original ENDF using vi
+#vi $file.endf <<EOF
+#G
+#3k
+#yy p
+#3k
+#:read MT33
+#ZZ
+#EOF
+#
+#rm MT33
+
+exit

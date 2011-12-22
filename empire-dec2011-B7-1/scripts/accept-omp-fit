@@ -1,0 +1,18 @@
+#! /bin/sh -
+#SCRIPT TO COPY FILES RESULTING FROM THE OMP FIT ONTO THOSE USED IN 
+#CALCULATIONS. THESE CAN ALSO BE USED AS AN INTERMEDIATE STEP IN FITTING.
+file=$1
+
+# COPY OM POTENTIAL                   
+if [ -s OMPAR.DIR ]; then
+   mv $file-omp.dir $file-omp.dir.prev
+   mv OMPAR.DIR $file-omp.dir
+   echo 'Will use last fit of OMP from now on. Previous OMP stored at:'  $file-omp.dir.prev
+fi
+# COPY COLLECTIVE LEVELS
+if [ -s TARGET_COLL0.DAT ]; then
+   mv $file-lev.col $file-lev.col.prev
+   mv  TARGET_COLL0.DAT $file-lev.col
+   echo 'Will use last fit of collective levels from now on. Previous collective levels stored at:'  $file-omp.dir.prev
+fi
+exit

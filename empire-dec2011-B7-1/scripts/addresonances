@@ -1,0 +1,48 @@
+#! /bin/sh -
+#script to add resonance parameters to the ENDF-6 formatted file
+# RUN ENDRES TO INCLUDE RESONANCE PARAMETRS (FILE 2)
+#
+# by default resonance parameters are taken from 'resonances.endf' file
+# If "$file-res.endf" is present in project directory, this is used instead.
+file=$1
+work=`pwd`
+
+#If local file with resonance parameters exist then use it
+if [ ! -f $file-res.endf ]; then
+    echo "Resonance file ($file-res.endf) not found."
+    echo "Using resonance info from $EMPIREDIR/data/resonances.endf"
+    
+    ln -sf $EMPIREDIR/data/resonances.endf ENDRES.DAT
+else
+    ln -sf $file-res.endf ENDRES.DAT
+fi
+
+ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
+
+rm empire.end endf.dat 2>/dev/null
+ln -sf $file-e.endf empire.end
+$EMPIREDIR/util/endres/endres <ENDRES.INP
+#clean up:
+rm empire.end ENDRES.DAT ENDRES.INP
+mv endf.dat $file-endres.endf
+mv endres.lst $file-log.endres
+
+# RUN STANEF
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file-endres.endf
+$file.endf
+0
+
+DONE
+EOF
+$EMPIREDIR/util/stanef/stanef <INPUT
+
+#$work/$file.endf is the final ENDF output file
+
+$EMPIREDIR/scripts/process $file
+
+# remove left-over files
+rm INPUT 2>/dev/null
+

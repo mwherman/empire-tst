@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ -z $EMPIREDIR ]; then
+    echo "EMPIREDIR not set, using '..' for now"
+    EMPIREDIR='..'
+    export EMPIREDIR
+fi
+
+$EMPIREDIR/scripts/Xrun.tcl &
+exit

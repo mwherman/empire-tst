@@ -1,0 +1,171 @@
+      PROGRAM C4TOKAL
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      IMPLICIT INTEGER (I-N)
+      PARAMETER(NDATA=2000000,NSEC=1000,NR=60)
+      DIMENSION X(NDATA),Y(NDATA),Z(NDATA),DAT(8)
+      DIMENSION M(NR),N(NSEC)
+      CHARACTER*4  XSC
+      CHARACTER*6  PNAME
+      CHARACTER*7  C4
+      CHARACTER*8  INPSEN
+      CHARACTER*12 REACTION(NR)
+      CHARACTER*25 FILE,REF
+      CHARACTER*5 KENTOLD, KENTRY
+      DATA KENTOLD,KSUBOLD/'0',0/
+
+      C4='-c4.kal'
+      XSC='.xsc'
+      INPSEN='-inp.sen'
+
+      READ(5,*) FILE,MT1,MAT,NEX
+
+      CALL STRLEN(FILE,L1,L2)
+
+C GET NUMBER OF PARAMETERS FROM SENSITIVITY INPUT FILE
+
+      OPEN(13,FILE=FILE(L1:L2)//INPSEN,STATUS='OLD',ERR=200)
+      I=1
+ 201  READ(13,*,END=202) PNAME
+      IF (PNAME(1:1).EQ.'!') GOTO 201
+      I=I+1
+      GOTO 201
+ 202  CONTINUE
+      CLOSE(13)
+
+      NPARAM=I-1
+
+
+C GET THE SEQUENCE OF REACTIONS IN XSC FILE
+
+      OPEN(13,FILE=FILE(L1:L2)//XSC,STATUS='OLD',ERR=100)
+      READ(13,'(1X,I3)') NNUCD
+      IF (NNUCD .GT. NR) STOP 'TOO MANY REACTIONS'
+      READ(13,'(12X,(90A12))') (REACTION(I),I=1,NNUCD)
+      CLOSE(13)
+
+
+      DO 10 I=1,NNUCD
+         CALL RCTN(REACTION(I),M(I))
+ 10      CONTINUE
+
+
+      J1=0
+      DO 20 I=1,NNUCD
+         IF (M(I) .EQ. MT1) THEN
+            J1=I
+            GOTO 21
+         ENDIF
+ 20      CONTINUE
+ 21      CONTINUE
+
+
+      OPEN(13,FILE=FILE(L1:L2)//C4,STATUS='OLD',ERR=300)
+      MSEC=0
+      J=1
+      K=1
+      READ(13,1000        ) IZA,MF,MT,(DAT(I),I=1,8),REF,KENTOLD,KSUBOLD
+ 101  READ(13,1000,END=102) IZA,MF,MT,(DAT(I),I=1,8),REF,KENTRY ,KSUBENT
+      IF ((KENTRY.NE.KENTOLD) .OR. (KSUBENT.NE.KSUBOLD)) THEN
+         KENTOLD  = KENTRY
+         KSUBOLD  = KSUBENT
+         N(K)     = J
+         J        = 1
+         K        = K+1
+      ELSE
+         J        = J+1
+      ENDIF
+      GOTO 101
+ 102  N(K) = J
+      MSEC = K
+
+      IF (NEX .NE. 0) THEN
+         MS=MSEC
+      ELSE
+         MS=0
+      ENDIF
+
+      REWIND(13)
+
+
+ 150  WRITE(6,*)  'INPUT'
+      WRITE(6,2001) MS,NPARAM,0,0,1,1.0,0.0,0.0
+      WRITE(6,2000)(I,I=1,NPARAM)
+
+      DO 30 K=1,MSEC
+         DO 31 J=1,N(K)
+            READ(13,1000) IZA,MF,MT2,(DAT(I),I=1,8),REF,KENTRY ,KSUBENT
+            X(J) = DAT(1)*1E-06
+            Y(J) = DAT(3)*1000.0
+            Z(J) = DAT(4)*1000.0
+C FOR PLOTTING EXP. DATA
+            MTTMP=MT2
+            IF (MTTMP.EQ.MT2.AND.Z(J).GT.0.D0) THEN
+               WRITE(75,999) X(J),Y(J)*1.E-03,Z(J)*1.E-03,MT2
+            ENDIF
+C
+            IF (Y(J) .EQ. 0.0) THEN
+               Z(J) = 0.0
+            ELSE
+               Z(J) = Z(J) / Y(J)
+c               WRITE(0,*) Z(J)*100.D0
+            ENDIF
+ 31      CONTINUE
+         CALL DATAOUT(NDATA,N(K),KENTRY,KSUBENT,REF,X,Y,Z)
+
+         J2=NR
+         DO 32 I=1,NNUCD
+            IF (MT2 .EQ. M(I)) THEN
+               J2=I
+               GOTO 33
+            ENDIF
+ 32         CONTINUE
+ 33      CONTINUE
+
+         WRITE(6,2000) J2,1
+         IF (J2 .EQ. J1 .AND. NEX .EQ. 1) THEN
+            WRITE(6,3001) 1.0,REF
+         ELSEIF (NEX .EQ. 2 ) THEN
+            WRITE(6,3001) 1.0,REF
+         ELSE
+            WRITE(6,3000) 0.0
+         ENDIF
+
+ 30      CONTINUE
+      CLOSE(13)
+
+
+      STOP
+ 100  WRITE(0,*) 'CROSS SECTION DATA FILE NOT FOUND: ',FILE(1:L)//XSC
+      STOP
+ 200  WRITE(0,*) 'PARAMETER FILE NOT FOUND: ',FILE(1:L)//INPSEN
+      STOP
+ 300  WRITE(0,*) 'C4 FILE NOT FOUND: ',FILE(1:L)//C4
+      STOP
+ 999  FORMAT(3(1X,E12.5),I4)
+ 1000 FORMAT(5X,I6,2I4,3X,8E9.3,3X,A25,A5,I3)
+ 2000 FORMAT(14I5)
+ 2001 FORMAT(5I5,5X,3E10.3)
+ 3000 FORMAT(1PE10.3)
+ 3001 FORMAT(1PE10.3,5X,A25)
+      END
+
+      SUBROUTINE DATAOUT(NDATA,N,KENT,KSUB,REF,X,Y,Z)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      IMPLICIT INTEGER (I-N)
+      DIMENSION X(NDATA),Y(NDATA),Z(NDATA)
+      CHARACTER*25 REF
+      CHARACTER*5 KENT
+      DATA COR/0.2/
+
+      WRITE(10,100) REF,KENT,KSUB, N
+      WRITE(11,100) REF,KENT,KSUB, N
+      WRITE(12,100) REF,KENT,KSUB,-N
+      WRITE(10,200) (X(I),Y(I),I=1,N)
+      WRITE(11,200) (X(I),Z(I),I=1,N)
+      WRITE(12,300) COR
+
+ 100  FORMAT(A25,4X,1X,A5,I3,5X,I5)
+ 200  FORMAT(6(1PE11.4))
+ 300  FORMAT(F6.3)
+      RETURN
+      END

@@ -1,0 +1,1003 @@
+ Type yes to sort tables on Z, A, and EMAX.
+ Otherwise, sorting is on RIPL2 reference number.
+    1         1   0   1   0   0
+ neutrons: 1
+    2         2   0   1   0   0
+ neutrons: 2
+    3         1   0   1   0   0
+ neutrons: 3
+    4         1   0   1   0   0
+ neutrons: 4
+    5         1   0   1   0   0
+ neutrons: 5
+    6         1   0   1   0   0
+ neutrons: 6
+    7         1   0   1   0   0
+ neutrons: 7
+    8         1   0   1   0   0
+ neutrons: 8
+    9         0   0   1   0   0
+ neutrons: 9
+   10         0   0   1   0   0
+ neutrons: 10
+   11         0   0   1   0   0
+ neutrons: 11
+   12         0   0   1   0   0
+ neutrons: 12
+   13         0   0   1   0   0
+ neutrons: 13
+   14         0   0   1   0   0
+ neutrons: 14
+   15         0   0   1   0   0
+ neutrons: 15
+   16         0   0   1   0   0
+ neutrons: 16
+   17         0   0   1   0   0
+ neutrons: 17
+   18         0   0   1   0   0
+ neutrons: 18
+   19         0   0   1   0   0
+ neutrons: 19
+   20         0   0   1   0   0
+ neutrons: 20
+   21         0   0   1   0   0
+ neutrons: 21
+  100         0   0   1   0   0
+ neutrons: 22
+  101         0   0   1   0   0
+ neutrons: 23
+  102         0   0   1   0   0
+ neutrons: 24
+  103         0   0   1   0   0
+ neutrons: 25
+  104         0   0   1   0   0
+ neutrons: 26
+  105         0   0   1   0   0
+ neutrons: 27
+  106         0   0   1   0   0
+ neutrons: 28
+  107         0   0   1   0   0
+ neutrons: 29
+  108         0   0   1   0   0
+ neutrons: 30
+  109         0   0   1   0   0
+ neutrons: 31
+  110         0   0   1   0   0
+ neutrons: 32
+  111         0   0   1   0   0
+ neutrons: 33
+  112         0   0   1   0   0
+ neutrons: 34
+  113         0   0   1   0   0
+ neutrons: 35
+  114         0   0   1   0   0
+ neutrons: 36
+  115         0   0   1   0   0
+ neutrons: 37
+  116         0   0   1   0   0
+ neutrons: 38
+  117         0   0   1   0   0
+ neutrons: 39
+  118         0   0   1   0   0
+ neutrons: 40
+  119         1   0   1   0   0
+ neutrons: 41
+  120         1   0   1   0   2
+ neutrons: 42
+  121         0   0   1   1   2
+ neutrons: 43
+  122         0   0   1   1   2
+ neutrons: 44
+  123         2   0   1   0   0
+ neutrons: 45
+  124         1   0   1   0   0
+ neutrons: 46
+  125         0   0   1   0   0
+ neutrons: 47
+  126         0   0   1   0   0
+ neutrons: 48
+  127         0   0   1   0   0
+ neutrons: 49
+  128         0   0   1   0   0
+ neutrons: 50
+  129         0   0   1   0   0
+ neutrons: 51
+  130         0   0   1   0   0
+ neutrons: 52
+  131         2   0   1   0   0
+ neutrons: 53
+  132         0   0   1   0   0
+ neutrons: 54
+  133         0   0   1   0   0
+ neutrons: 55
+  134         0   0   1   0   0
+ neutrons: 56
+  136         0   0   1   0   0
+ neutrons: 57
+  137         0   0   1   0   0
+ neutrons: 58
+  138         0   0   1   0   0
+ neutrons: 59
+  139         1   0   1   0   0
+ neutrons: 60
+  140         1   0   1   0   0
+ neutrons: 61
+  200         0   0   1   0   0
+ neutrons: 62
+  201         0   0   1   0   0
+ neutrons: 63
+  202         0   0   1   0   0
+ neutrons: 64
+  203         0   0   1   0   0
+ neutrons: 65
+  204         0   0   1   0   0
+ neutrons: 66
+  205         0   0   1   0   0
+ neutrons: 67
+  206         0   0   1   0   0
+ neutrons: 68
+  207         0   0   1   0   0
+ neutrons: 69
+  208         0   0   1   0   0
+ neutrons: 70
+  209         0   0   1   0   0
+ neutrons: 71
+  210         0   0   1   0   0
+ neutrons: 72
+  211         0   0   1   0   0
+ neutrons: 73
+  212         0   0   1   0   0
+ neutrons: 74
+  213         0   0   1   0   0
+ neutrons: 75
+  214         0   0   1   0   0
+ neutrons: 76
+  215         0   0   1   0   0
+ neutrons: 77
+  216         0   0   1   0   0
+ neutrons: 78
+  217         0   0   1   0   0
+ neutrons: 79
+  218         0   0   1   0   0
+ neutrons: 80
+  219         0   0   1   0   0
+ neutrons: 81
+  220         0   0   1   0   0
+ neutrons: 82
+  221         0   0   1   0   0
+ neutrons: 83
+  222         0   0   1   0   0
+ neutrons: 84
+  223         0   0   1   0   0
+ neutrons: 85
+  240         0   0   1   0   0
+ neutrons: 86
+  241         0   0   1   0   0
+ neutrons: 87
+  242         0   0   1   0   0
+ neutrons: 88
+  243         0   0   1   0   0
+ neutrons: 89
+  400         1   0   1   0   0
+ neutrons: 90
+  401         0   0   1   0   0
+ neutrons: 91
+  402         0   0   1   0   0
+ neutrons: 92
+  403         0   0   1   0   0
+ neutrons: 93
+  404         0   0   1   0   0
+ neutrons: 94
+  406         1   0   1   0   0
+ neutrons: 95
+  408         1   0   1   0   0
+ neutrons: 96
+  409         1   0   1   0   0
+ neutrons: 97
+  410         1   0   1   0   0
+ neutrons: 98
+  411         1   0   1   0   0
+ neutrons: 99
+  412         1   0   1   0   0
+ neutrons: 100
+  413         1   0   1   0   0
+ neutrons: 101
+  414         1   0   1   0   0
+ neutrons: 102
+  415         1   0   1   0   0
+ neutrons: 103
+  416         1   0   1   0   0
+ neutrons: 104
+  417         1   0   1   0   0
+ neutrons: 105
+  418         0   0   1   1   2
+ neutrons: 106
+  419         0   0   1   0   2
+ neutrons: 107
+  420         2   0   1   0   0
+ neutrons: 108
+  421         1   0   1   0   0
+ neutrons: 109
+  422         0   0   1   0   0
+ neutrons: 110
+  423         1   0   1   0   0
+ neutrons: 111
+  424         2   0   1   0   0
+ neutrons: 112
+  425         2   0   1   0   0
+ neutrons: 113
+  426         2   0   1   0   0
+ neutrons: 114
+  427         2   0   1   0   0
+ neutrons: 115
+  428         2   0   1   0   0
+ neutrons: 116
+  429         2   0   1   0   0
+ neutrons: 117
+  430         0   0   1   0   0
+ neutrons: 118
+  500         0   0   1   0   0
+ neutrons: 119
+  501         0   0   1   0   0
+ neutrons: 120
+  502         0   0   1   0   0
+ neutrons: 121
+  503         0   0   1   0   0
+ neutrons: 122
+  504         0   0   1   0   0
+ neutrons: 123
+  505         0   0   1   0   0
+ neutrons: 124
+  506         0   0   1   0   0
+ neutrons: 125
+  507         0   0   1   0   0
+ neutrons: 126
+  508         0   0   1   0   0
+ neutrons: 127
+  509         0   0   1   0   0
+ neutrons: 128
+  510         0   0   1   0   0
+ neutrons: 129
+  511         0   0   1   0   0
+ neutrons: 130
+  512         0   0   1   0   0
+ neutrons: 131
+  513         0   0   1   0   0
+ neutrons: 132
+  514         0   0   1   0   0
+ neutrons: 133
+  515         0   0   1   0   0
+ neutrons: 134
+  516         0   0   1   0   0
+ neutrons: 135
+  517         0   0   1   0   0
+ neutrons: 136
+  518         0   0   1   0   0
+ neutrons: 137
+  519         0   0   1   0   0
+ neutrons: 138
+  520         0   0   1   0   0
+ neutrons: 139
+  521         0   0   1   0   0
+ neutrons: 140
+  522         0   0   1   0   0
+ neutrons: 141
+  523         0   0   1   0   0
+ neutrons: 142
+  524         0   0   1   0   0
+ neutrons: 143
+  525         0   0   1   0   0
+ neutrons: 144
+  526         0   0   1   0   0
+ neutrons: 145
+  527         0   0   1   0   0
+ neutrons: 146
+  528         0   0   1   0   0
+ neutrons: 147
+  529         0   0   1   0   0
+ neutrons: 148
+  530         0   0   1   0   0
+ neutrons: 149
+  531         0   0   1   0   0
+ neutrons: 150
+  532         0   0   1   0   0
+ neutrons: 151
+  533         0   0   1   0   0
+ neutrons: 152
+  534         0   0   1   0   0
+ neutrons: 153
+  535         0   0   1   0   0
+ neutrons: 154
+  536         0   0   1   0   0
+ neutrons: 155
+  537         0   0   1   0   0
+ neutrons: 156
+  538         0   0   1   0   0
+ neutrons: 157
+  539         0   0   1   0   0
+ neutrons: 158
+  540         0   0   1   0   0
+ neutrons: 159
+  541         0   0   1   0   0
+ neutrons: 160
+  542         0   0   1   0   0
+ neutrons: 161
+  543         0   0   1   0   0
+ neutrons: 162
+  544         0   0   1   0   0
+ neutrons: 163
+  545         0   0   1   0   0
+ neutrons: 164
+  546         0   0   1   0   0
+ neutrons: 165
+  547         0   0   1   0   0
+ neutrons: 166
+  548         0   0   1   0   0
+ neutrons: 167
+  549         0   0   1   0   0
+ neutrons: 168
+  550         0   0   1   0   0
+ neutrons: 169
+  551         0   0   1   0   0
+ neutrons: 170
+  552         0   0   1   0   0
+ neutrons: 171
+  553         0   0   1   0   0
+ neutrons: 172
+  554         0   0   1   0   0
+ neutrons: 173
+  555         0   0   1   0   0
+ neutrons: 174
+  556         0   0   1   0   0
+ neutrons: 175
+  557         0   0   1   0   0
+ neutrons: 176
+  558         0   0   1   0   0
+ neutrons: 177
+  559         0   0   1   0   0
+ neutrons: 178
+  560         0   0   1   0   0
+ neutrons: 179
+  561         0   0   1   0   0
+ neutrons: 180
+  562         0   0   1   0   0
+ neutrons: 181
+  563         0   0   1   0   0
+ neutrons: 182
+  564         0   0   1   0   0
+ neutrons: 183
+  565         0   0   1   0   0
+ neutrons: 184
+  566         0   0   1   0   0
+ neutrons: 185
+  567         0   0   1   0   0
+ neutrons: 186
+  568         0   0   1   0   0
+ neutrons: 187
+  569         0   0   1   0   0
+ neutrons: 188
+  570         0   0   1   0   0
+ neutrons: 189
+  571         0   0   1   0   0
+ neutrons: 190
+  572         0   0   1   0   0
+ neutrons: 191
+  573         0   0   1   0   0
+ neutrons: 192
+  574         0   0   1   0   0
+ neutrons: 193
+  575         0   0   1   0   0
+ neutrons: 194
+  576         0   0   1   0   0
+ neutrons: 195
+  577         0   0   1   0   0
+ neutrons: 196
+  578         0   0   1   0   0
+ neutrons: 197
+  579         0   0   1   0   0
+ neutrons: 198
+  580         0   0   1   0   0
+ neutrons: 199
+  581         0   0   1   0   0
+ neutrons: 200
+  582         0   0   1   0   0
+ neutrons: 201
+  583         0   0   1   0   0
+ neutrons: 202
+  584         0   0   1   0   0
+ neutrons: 203
+  585         0   0   1   0   0
+ neutrons: 204
+  586         0   0   1   0   0
+ neutrons: 205
+  587         0   0   1   0   0
+ neutrons: 206
+  600         1   0   1   0   0
+ neutrons: 207
+  601         1   0   1   1   0
+ neutrons: 208
+  602         1   0   1   1   0
+ neutrons: 209
+  603         1   0   1   0   0
+ neutrons: 210
+  604         1   0   1   0   0
+ neutrons: 211
+  605         1   0   1   1   3
+ neutrons: 212
+  606         1   0   1   1   3
+ neutrons: 213
+  607         1   0   1   1   3
+ neutrons: 214
+  608         1   0   1   1   3
+ neutrons: 215
+  609         3   0   1   1   3
+ neutrons: 216
+  800         0   0   1   0   0
+ neutrons: 217
+ 1400         0   0   1   1   0
+ neutrons: 218
+ 1401         0   0   1   1   0
+ neutrons: 219
+ 1402         0   0   1   1   0
+ neutrons: 220
+ 1403         0   0   1   1   0
+ neutrons: 221
+ 1404         0   0   1   1   0
+ neutrons: 222
+ 1405         0   0   1   1   0
+ neutrons: 223
+ 1406         0   0   1   1   0
+ neutrons: 224
+ 1407         0   0   1   1   0
+ neutrons: 225
+ 1408         0   0   1   1   0
+ neutrons: 226
+ 1409         0   0   1   1   0
+ neutrons: 227
+ 1410         0   0   1   1   0
+ neutrons: 228
+ 1411         0   0   1   1   0
+ neutrons: 229
+ 1412         0   0   1   1   0
+ neutrons: 230
+ 1413         0   0   1   1   0
+ neutrons: 231
+ 1414         0   0   1   1   0
+ neutrons: 232
+ 1415         0   0   1   1   0
+ neutrons: 233
+ 1416         0   0   1   1   0
+ neutrons: 234
+ 1417         0   0   1   1   0
+ neutrons: 235
+ 1418         0   0   1   1   0
+ neutrons: 236
+ 1419         0   0   1   1   0
+ neutrons: 237
+ 1420         0   0   1   1   0
+ neutrons: 238
+ 1421         0   0   1   1   0
+ neutrons: 239
+ 1422         0   0   1   1   0
+ neutrons: 240
+ 1423         0   0   1   1   0
+ neutrons: 241
+ 1424         0   0   1   1   0
+ neutrons: 242
+ 1425         0   0   1   1   0
+ neutrons: 243
+ 1426         0   0   1   1   0
+ neutrons: 244
+ 1427         0   0   1   1   0
+ neutrons: 245
+ 1428         0   0   1   1   0
+ neutrons: 246
+ 1429         0   0   1   1   0
+ neutrons: 247
+ 1430         0   0   1   1   0
+ neutrons: 248
+ 1431         0   0   1   1   0
+ neutrons: 249
+ 1432         0   0   1   1   0
+ neutrons: 250
+ 1433         0   0   1   1   0
+ neutrons: 251
+ 1434         0   0   1   1   0
+ neutrons: 252
+ 1435         0   0   1   1   0
+ neutrons: 253
+ 1436         0   0   1   1   0
+ neutrons: 254
+ 1437         0   0   1   1   0
+ neutrons: 255
+ 1438         0   0   1   1   0
+ neutrons: 256
+ 1439         0   0   1   1   0
+ neutrons: 257
+ 1440         0   0   1   1   0
+ neutrons: 258
+ 1441         0   0   1   1   0
+ neutrons: 259
+ 1442         0   0   1   1   0
+ neutrons: 260
+ 1443         0   0   1   1   0
+ neutrons: 261
+ 1444         0   0   1   1   0
+ neutrons: 262
+ 1445         0   0   1   1   0
+ neutrons: 263
+ 1446         0   0   1   1   0
+ neutrons: 264
+ 1447         0   0   1   1   0
+ neutrons: 265
+ 1448         0   0   1   1   0
+ neutrons: 266
+ 1449         0   0   1   1   0
+ neutrons: 267
+ 1450         0   0   1   1   0
+ neutrons: 268
+ 1451         0   0   1   1   0
+ neutrons: 269
+ 1452         0   0   1   1   0
+ neutrons: 270
+ 1453         0   0   1   1   0
+ neutrons: 271
+ 1454         0   0   1   1   0
+ neutrons: 272
+ 1455         0   0   1   1   0
+ neutrons: 273
+ 1456         0   0   1   1   0
+ neutrons: 274
+ 1457         0   0   1   1   0
+ neutrons: 275
+ 1458         0   0   1   1   0
+ neutrons: 276
+ 1459         0   0   1   1   0
+ neutrons: 277
+ 1460         0   0   1   1   0
+ neutrons: 278
+ 1461         0   0   1   1   0
+ neutrons: 279
+ 1462         0   0   1   1   0
+ neutrons: 280
+ 1463         0   0   1   1   0
+ neutrons: 281
+ 1464         0   0   1   1   0
+ neutrons: 282
+ 1465         0   0   1   1   0
+ neutrons: 283
+ 1466         0   0   1   1   0
+ neutrons: 284
+ 1467         0   0   1   1   0
+ neutrons: 285
+ 1468         0   0   1   1   0
+ neutrons: 286
+ 1469         0   0   1   1   3
+ neutrons: 287
+ 1470         0   0   1   1   3
+ neutrons: 288
+ 1471         0   0   1   1   3
+ neutrons: 289
+ 1472         0   0   1   1   3
+ neutrons: 290
+ 1473         0   0   1   1   3
+ neutrons: 291
+ 1474         0   0   1   1   3
+ neutrons: 292
+ 1475         0   0   1   1   3
+ neutrons: 293
+ 1476         0   0   1   1  -2
+ neutrons: 294
+ 1477         0   0   1   1  -2
+ neutrons: 295
+ 1479         1   0   1   1   3
+ neutrons: 296
+ 1480         1   0   1   1   3
+ neutrons: 297
+ 1481         1   0   1   1   3
+ neutrons: 298
+ 1482         1   0   1   1   3
+ neutrons: 299
+ 1483         1   0   1   1   3
+ neutrons: 300
+ 1484         1   0   1   1   3
+ neutrons: 301
+ 1485         1   0   1   1   3
+ neutrons: 302
+ 1486         1   0   1   1   3
+ neutrons: 303
+ 1487         1   0   1   1   3
+ neutrons: 304
+ 1488         1   0   1   1   3
+ neutrons: 305
+ 2001         0   0   1   2   0
+ neutrons: 306
+ 2002         1   0   1   0   0
+ neutrons: 307
+ 2003         1   0   1   0   0
+ neutrons: 308
+ 2004         1   0   1   0   0
+ neutrons: 309
+ 2005         1   0   1   0   0
+ neutrons: 310
+ 2006         1   0   1   0   0
+ neutrons: 311
+ 2007         1   0   1   0   0
+ neutrons: 312
+ 2008         1   0   1   0   0
+ neutrons: 313
+ 2009         1   0   1   0   0
+ neutrons: 314
+ 2010         1   0   1   1   0
+ neutrons: 315
+ 2011         1   0   1   0   0
+ neutrons: 316
+ 2012         1   0   1   0   0
+ neutrons: 317
+ 2100         0   0   1   0   0
+ neutrons: 318
+ 2101         0   0   1   0   0
+ neutrons: 319
+ 2300         1   0   1   1   0
+ neutrons: 320
+ 2301         1   0   1   1   0
+ neutrons: 321
+ 2302         1   0   1   1   0
+ neutrons: 322
+ 2303         1   0   1   0   0
+ neutrons: 323
+ 2404         0   0   1   0   0
+ neutrons: 324
+ 2405         0   0   1   1   0
+ neutrons: 325
+ 2406         1   0   1   0   0
+ neutrons: 326
+ 2407         0   0   1   1   3
+ neutrons: 327
+ 2408         1   0   1   1   3
+ neutrons: 328
+ 2409         1   0   1   1   3
+ neutrons: 329
+ 2410         0   0   1   1   3
+ neutrons: 330
+ 2411         0   0   1   1   3
+ neutrons: 331
+ 2600         1   0   1   1   0
+ neutrons: 332
+ 2601         1   0   1   1   0
+ neutrons: 333
+ 2602         3   0   1   1   0
+ neutrons: 334
+ 2700         0   0   1   0   0
+ neutrons: 335
+ 4000         0   1   1   0   0
+ protons: 336
+ 4001         0   1   1   0   0
+ protons: 337
+ 4002         0   1   1   0   0
+ protons: 338
+ 4003         0   1   1   0   0
+ protons: 339
+ 4004         1   1   1   0   0
+ protons: 340
+ 4015         0   1   1   0   0
+ protons: 341
+ 4016         0   1   1   0   0
+ protons: 342
+ 4017         0   1   1   0   0
+ protons: 343
+ 4018         0   1   1   0   0
+ protons: 344
+ 4019         0   1   1   0   0
+ protons: 345
+ 4020         0   1   1   0   0
+ protons: 346
+ 4100         0   1   1   0   0
+ protons: 347
+ 4101         0   1   1   0   0
+ protons: 348
+ 4102         0   1   1   0   0
+ protons: 349
+ 4108         0   1   1   0   0
+ protons: 350
+ 4109         0   1   1   0   0
+ protons: 351
+ 4110         0   1   1   0   0
+ protons: 352
+ 4111         0   1   1   0   0
+ protons: 353
+ 4112         0   1   1   0   0
+ protons: 354
+ 4113         0   1   1   0   0
+ protons: 355
+ 4114         0   1   1   0   0
+ protons: 356
+ 4115         0   1   1   0   0
+ protons: 357
+ 4116         0   1   1   0   0
+ protons: 358
+ 4117         0   1   1   0   0
+ protons: 359
+ 4118         0   1   1   0   0
+ protons: 360
+ 4119         0   1   1   0   0
+ protons: 361
+ 4120         0   1   1   0   0
+ protons: 362
+ 4121         0   1   1   0   0
+ protons: 363
+ 4122         0   1   1   0   0
+ protons: 364
+ 4123         0   1   1   0   0
+ protons: 365
+ 4124         0   1   1   0   0
+ protons: 366
+ 4125         0   1   1   0   0
+ protons: 367
+ 4126         0   1   1   0   0
+ protons: 368
+ 4127         0   1   1   0   0
+ protons: 369
+ 4128         0   1   1   0   0
+ protons: 370
+ 4129         0   1   1   0   0
+ protons: 371
+ 4130         0   1   1   0   0
+ protons: 372
+ 4131         0   1   1   1   0
+ protons: 373
+ 4300         1   1   1   1   0
+ protons: 374
+ 4301         1   1   1   1   0
+ protons: 375
+ 4302         1   1   1   1   0
+ protons: 376
+ 4303         1   1   1   0   0
+ protons: 377
+ 4416         0   1   1   1   0
+ protons: 378
+ 4417         0   1   1   1   0
+ protons: 379
+ 4418         0   1   1   1   0
+ protons: 380
+ 4419         0   1   1   1   0
+ protons: 381
+ 4420         0   1   1   1   0
+ protons: 382
+ 4421         0   1   1   1   0
+ protons: 383
+ 4422         0   1   1   1   0
+ protons: 384
+ 4423         0   1   1   1   0
+ protons: 385
+ 4424         0   1   1   1   0
+ protons: 386
+ 4425         0   1   1   1   0
+ protons: 387
+ 4426         0   1   1   1   0
+ protons: 388
+ 4427         0   1   1   1   0
+ protons: 389
+ 4428         0   1   1   1   0
+ protons: 390
+ 4429         0   1   1   1   0
+ protons: 391
+ 4430         1   1   1   1   3
+ protons: 392
+ 4431         1   1   1   1   3
+ protons: 393
+ 4432         1   1   1   1   3
+ protons: 394
+ 4433         1   1   1   1   3
+ protons: 395
+ 4434         1   1   1   1   3
+ protons: 396
+ 4435         1   1   1   1   3
+ protons: 397
+ 4436         1   1   1   1   3
+ protons: 398
+ 4437         1   1   1   1   3
+ protons: 399
+ 4438         1   1   1   1   3
+ protons: 400
+ 4601         1   1   1   1   0
+ protons: 401
+ 4602         1   1   1   1   0
+ protons: 402
+ 4603         1   1   1   0   0
+ protons: 403
+ 4604         1   1   1   0   0
+ protons: 404
+ 4605         1   1   1   1   3
+ protons: 405
+ 4606         1   1   1   1   3
+ protons: 406
+ 4607         1   1   1   1   3
+ protons: 407
+ 4608         1   1   1   1   3
+ protons: 408
+ 4609         3   1   1   1   3
+ protons: 409
+ 4650         0   1   1   0   0
+ protons: 410
+ 4651         0   1   1   0   0
+ protons: 411
+ 4652         0   1   1   0   0
+ protons: 412
+ 4653         0   1   1   0   0
+ protons: 413
+ 4654         0   1   1   0   0
+ protons: 414
+ 4655         0   1   1   0   0
+ protons: 415
+ 4656         0   1   1   0   0
+ protons: 416
+ 4657         0   1   1   0   0
+ protons: 417
+ 4658         0   1   1   0   0
+ protons: 418
+ 4659         0   1   1   0   0
+ protons: 419
+ 4660         0   1   1   0   0
+ protons: 420
+ 4661         0   1   1   0   0
+ protons: 421
+ 4662         0   1   1   0   0
+ protons: 422
+ 4663         0   1   1   0   0
+ protons: 423
+ 4664         0   1   1   0   0
+ protons: 424
+ 4665         0   1   1   0   0
+ protons: 425
+ 4666         0   1   1   0   0
+ protons: 426
+ 4667         0   1   1   0   0
+ protons: 427
+ 4668         0   1   1   0   0
+ protons: 428
+ 4669         0   1   1   0   0
+ protons: 429
+ 4670         0   1   1   0   0
+ protons: 430
+ 4671         0   1   1   0   0
+ protons: 431
+ 4672         0   1   1   0   0
+ protons: 432
+ 4673         0   1   1   0   0
+ protons: 433
+ 4674         0   1   1   0   0
+ protons: 434
+ 4675         0   1   1   0   0
+ protons: 435
+ 4676         0   1   1   0   0
+ protons: 436
+ 4677         0   1   1   0   0
+ protons: 437
+ 4678         0   1   1   0   0
+ protons: 438
+ 4679         0   1   1   0   0
+ protons: 439
+ 4680         0   1   1   0   0
+ protons: 440
+ 4681         0   1   1   0   0
+ protons: 441
+ 4682         0   1   1   0   0
+ protons: 442
+ 4683         0   1   1   0   0
+ protons: 443
+ 4684         0   1   1   0   0
+ protons: 444
+ 4685         0   1   1   0   0
+ protons: 445
+ 4686         0   1   1   0   0
+ protons: 446
+ 5001         0   1   1   2   0
+ protons: 447
+ 5002         1   1   1   0   0
+ protons: 448
+ 5003         1   1   1   0   0
+ protons: 449
+ 5004         1   1   1   0   0
+ protons: 450
+ 5005         1   1   1   0   0
+ protons: 451
+ 5006         1   1   1   0   0
+ protons: 452
+ 5100         0   1   1   0   0
+ protons: 453
+ 5101         0   1   1   0   0
+ protons: 454
+ 5404         0   1   1   0   0
+ protons: 455
+ 5405         0   1   1   1   0
+ protons: 456
+ 5406         1   1   1   0   0
+ protons: 457
+ 5408         1   1   1   1   3
+ protons: 458
+ 5409         1   1   1   1   3
+ protons: 459
+ 5410         0   1   1   1   3
+ protons: 460
+ 5411         0   1   1   1   3
+ protons: 461
+ 5501         0   1   1   0   3
+ protons: 462
+ 5600         1   1   1   1   0
+ protons: 463
+ 5601         1   1   1   1   0
+ protons: 464
+ 5602         3   1   1   1   0
+ protons: 465
+ 6100         0   1   2   0   0
+ deut: 466
+ 6101         0   1   2   0   0
+ deut: 467
+ 6112         0   1   2   0   0
+ deut: 468
+ 6113         0   1   2   0   0
+ deut: 469
+ 6114         0   1   2   0   0
+ deut: 470
+ 6115         0   1   2   0   0
+ deut: 471
+ 6116         0   1   2   0   0
+ deut: 472
+ 6200         0   1   2   0   0
+ deut: 473
+ 6201         0   1   2   0   0
+ deut: 474
+ 6202         0   1   2   0   0
+ deut: 475
+ 6203         0   1   2   0   0
+ deut: 476
+ 6204         0   1   2   0   0
+ deut: 477
+ 6400         0   1   2   0   0
+ deut: 478
+ 7100         0   1   3   0   0
+ t: 479
+ 7200         0   1   3   0   0
+ t: 480
+ 8100         0   2   3   0   0
+ He-3: 481
+ 8101         0   2   3   0   0
+ He-3: 482
+ 8102         0   2   3   0   0
+ He-3: 483
+ 9000         0   2   4   0   0
+ alpha: 484
+ 9001         0   2   4   0   0
+ alpha: 485
+ 9018         0   2   4   0   0
+ alpha: 486
+ 9019         0   2   4   0   0
+ alpha: 487
+ 9020         0   2   4   0   0
+ alpha: 488
+ 9100         0   2   4   0   0
+ alpha: 489
+ 9101         0   2   4   0   0
+ alpha: 490
+ 9400         0   2   4   0   0
+ alpha: 491
+ 9401         0   2   4   0   0
+ alpha: 492
+ 9600         0   2   4   0   0
+ alpha: 493
+ 9601         0   2   4   0   0
+ alpha: 494
+ 9602         0   2   4   0   0
+ alpha: 495
+ End of RIPL-3 optical potential library reached.
+
+    SUMMARY:
+ Number of library entries =  495
+ Number of spherical potentials =  384
+ Number of coupled channel vibrational potentials =  10
+ Number of coupled channel rigid rotor potentials =  97
+ Number of coupled channel soft rotor  potentials =  4
+ Number of dispersive potentials =  53
+ Number of potentials defined above 100 MeV =  182
+ Number of references =  135

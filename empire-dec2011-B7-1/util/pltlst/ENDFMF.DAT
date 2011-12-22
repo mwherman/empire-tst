@@ -1,0 +1,23 @@
+    3  251  253 PARAMETERS                      * MF - DATA TYPE                
+    3 9000 9000 NEUTRON INDUCED                 * EQUIVALENCE TABLE             
+    3 9001 9001 PROTON INDUCED                  *                               
+    3 9002 9002 DEUTERON INDUCED                *                               
+    3 9003 9003 TRITON INDUCED                  *                               
+    3 9004 9004 2-HE-3 INDUCED                  *                               
+    3 9005 9005 ALPHA INDUCED                   *                               
+    3    1 9999 CROSS SECTIONS                  *                               
+    4 9000 9000 NEUTRON INDUCED                 * FORMAT                        
+    4    1 9999 ANGULAR DISTRIBUTION            * ======                        
+    5    1 9999 ENERGY DISTRIBUTION             * COLUMNS  DESCRIPTION          
+    6    1 9999 DOUBLE DIFFERENTIAL             * =======  ===========          
+   13    1 9999 PHOTON PROD. X-SECTN.           * =======  ===========          
+   15    1 9999 PHOTON PROD. SPECTRUM           * =======  ===========          
+   20    1 9999 PHOTON INDUCED                  * =======  ===========          
+  154    1 9999 LEGENDRE COEFFICIENTS           *   1- 5   MF                   
+  203    1 9999 RATIO                           *   6-10   LOWER MT             
+  402    1 9999 RESONANCE PARAMETERS            *  11-15   UPPER MT             
+  801    1 9999 YIELD DATA                      *  17-48   DEFINITION           
+  900    1 9999 LEVEL DENSITY PARAMETERS        *                               
+                                                *                               
+                                                *                               
+                                                * BLANK LINES IGNORED           

@@ -1,0 +1,54 @@
+#!/bin/bash
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+
+
+proj=$1
+MT=$2
+
+if [ -z $proj ]; then
+echo "INPUT PROJECT NOT ENTERED"
+exit
+fi
+if [ -z $MT ]; then
+echo "MT NOT ENTERED"
+exit
+fi
+
+file=$proj-mat.sen
+if [ ! -s $file ]; then
+   echo "SENSITIVITY-MATRIX FILE NOT FOUND  ($file)"
+   exit 0
+fi
+
+input=plotsenmat.in
+output=plotsenmat.out
+
+
+rm -f $input
+cat > $input <<EOF
+$proj
+$MT
+EOF
+
+rm -f $output
+$EMPIREDIR/util/pltsenmat/plotsenmat <$input >$output
+rm -f $input
+
+
+plotfile=$proj-sen-MT$MT.zvd
+
+XWIN=`uname`
+if [ "$XWIN" = "Darwin" ] 
+then
+export DISPLAY=:0
+fi
+
+ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+$EMPIREDIR/util/c4zvd/zvview.exe $plotfile ps01.tit/c
+rm ps01.tit
+exit

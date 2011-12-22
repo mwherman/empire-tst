@@ -1,0 +1,9 @@
+#! /bin/sh -
+#script to clean work directory
+file=$1
+mv $file.inp ttt987654321.qqq  2>/dev/null 
+rm $file\.* $file-*\.*  core 2>/dev/null 
+mv ttt987654321.qqq $file.inp  2>/dev/null
+rm -r $file-tl 2>/dev/null
+exit
+

@@ -1,0 +1,82 @@
+#! /bin/sh -
+#script to process ENDF file (originating from EMPIRE) 
+#through PREPRO in preparation for plotting
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Files ready to run'
+echo ' '
+ls *endf
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
+fi                          
+
+# RUN LINEAR
+
+rm LINEAR.INP 2>/dev/null
+ln -sf $file.endf ENDFB.IN
+$EMPIREDIR/util/linear/linear
+mv ENDFB.OUT  $work/$file-lin.endf
+mv LINEAR.LST $work/$file-log.linear
+
+# RUN RECENT
+
+rm RECENT.INP 2>/dev/null
+ln -sf $work/$file-lin.endf ENDFB.IN
+$EMPIREDIR/util/recent/recent
+mv ENDFB.OUT  $work/$file-rec.endf
+mv RECENT.LST $work/$file-log.recent
+
+# RUN SIGMA1
+
+rm SIGMA1.INP 2>/dev/null
+ln -sf $work/$file-rec.endf ENDFB.IN
+$EMPIREDIR/util/sigma1/sigma1
+mv ENDFB.OUT  $work/$file-sig.endf
+mv SIGMA1.LST $work/$file-log.sigma1
+rm ENDFB.IN
+
+# RUN LEGEND
+
+rm $file-l.endf 2>/dev/null
+ln -sf $work/$file-sig.endf ENDF.IN
+ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
+
+$EMPIREDIR/util/legend/legend < LEGEND.INP
+rm ENDF.IN
+rm LEGEND.INP LEGEND.TMP
+mv LEGEND.OUT $work/$file-l.endf
+mv LEGEND.LST $work/$file-log.legend
+
+# RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+rm $file-s.endf 2>/dev/null
+ln -sf $work/$file-l.endf ENDF.IN
+ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
+
+$EMPIREDIR/util/sixtab/sixtab < SIXTAB.INP
+rm ENDF.IN 
+rm SIXTAB.INP SIXTAB.TMP
+mv ENDF.OUT $work/$file-s.endf
+
+# RUN PLTLST TO PRODUCE LISTING OR PLOTC4
+
+$EMPIREDIR/scripts/plotlst $file
+
+# REMOVE INTERMEDIATE ENDF FILES
+
+# rm $work/$file-l.endf 2>/dev/null
+# rm $work/$file-lin.endf 2>/dev/null
+# rm $work/$file-f.endf 2>/dev/null
+# rm $work/$file-f2.endf 2>/dev/null
+# rm $work/$file-rec.endf 2>/dev/null
+
+exit

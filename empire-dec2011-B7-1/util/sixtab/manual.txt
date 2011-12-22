@@ -1,0 +1,111 @@
+Title  : SIXTAB
+Purpose: Convert ENDF file MF6 to Law 7 representation
+Author : Andrej Trkov                        e-mail: A.Trkov@iaea.org
+         International Atomic Energy Agency     tel: +43 1 2600 21712
+         Nuclear Data Section                   fax: +43 1 2600 7
+         Wagramerstrasse 5
+         P.O.Box 100
+         A-1400 Vienna
+         AUSTRIA
+Version: Original code March 2001
+ 
+   Manual for Program SIXTAB
+   =========================
+ 
+   The SIXTAB program belongs to a group of codes, which form
+   a supplement to the IAEA sequence of ENDF Pre-Processing codes
+   (PrePro) by D.E.Cullen [1], which are designed to perform
+   various operations on the basic ENDF-formatted evaluated nuclear
+   data files. They provide basic tools to the user for simple,
+   machine-independent interpretation and visualisation of the
+   contents of the evaluated nuclear data files.
+ 
+   The double differential data in an ENDF file MF 6 can be
+   represented in various forms, including Legendre coefficients,
+   Kalback-Mann formalism, pointwise representation, CM or Lab
+   frame of reference, etc. This may make subsequent handling of
+   the files rather difficult. The purpose of SIXTAB is to convert
+   MF 6 data into pointwise representation in the Lab system
+   (Law 7 ENDF format option).
+ 
+   WARNINGS:
+   1. The resulting file is generally not a substitute for the
+      original file due to the assumed limitations built into
+      the code. The number of angles in general may be insufficient
+      to accurately represent the original data.
+   2. The full complexity of the ENDF file MF 6  representation is
+      not coded at present:
+       - Only Law 1 Legendre (LANG=1,2) or tabulated (LANG>10)
+         representations are allowed. Laws 0, 3 and 4 have the
+         distributions defined by kinematics and are not affected.
+         Data for Laws 2 and 3 are not converted. They are copied
+         as they are.
+       - Conversion to Lab from CM co-ordinate system is done
+         only for neutrons, which is assumed to be the first
+         outgoing particle.
+       - It is assumed that neutron is the incident particle.
+ 
+   Instructions
+   ------------
+   Several forms of input are allowed:
+ 
+    A.  If the file "SIXTAB.INP" exists, the file is scanned for
+        input instructions. They may be given in the "old style"
+        or in the more flexible keyword-oriented style.
+ 
+    B.  If the file "SIXTAB.INP" does not exist, and the first record
+        on the default input does NOT begin with the string "$* ",
+        then the default input is assumed to be the source ENDF file
+        and the default output is the reformatted output ENDF file.
+        This allows the use of "pipes" on Unix. On PC-Dos it is
+        compiler-dependent.
+ 
+    C.  If the file "SIXTAB.INP" does not exist, and the first record
+        on the default input begins with the string "$* ", the
+        default input is read as a set of keyword-oriented input
+        instructions. This option is useful to divert the default
+        input to a real input file from command line.
+        WARNING: To use this feature make sure that SIXTAB.INP file
+                 does not exist on the default directory.
+ 
+   Old-style input instructions format:
+   Two records are expected from input:
+   - Name of the source ENDF file.
+   - Name of the target ENDF file to be written.
+ 
+   Keyword-oriented input instructions:
+   The format follows a few simple rules, which are worth noting
+   - Parameters are read in columns of 10. 
+   - The first 10 columns are interpreted as the keyword.
+   - Records with blanks in the first 10 columns are ignored, so
+     comments may be entered freely in the input file, provided
+     they appear on separate records and start after column 10.
+   - Only keywords that are recognised by the program are processed.
+   - The absence of a keyword for a particular parameter activates
+     the default value of the parameter preset in the code.
+   These rules allow the input instructions for several programs to
+   appear on the same input file, provided all programs follow the
+   above rules. This significantly reduces input file maintenance
+   for more complicated sequences of code execution and possible
+   archival of the input file for Quality Assurance purposes.
+ 
+   Keyword
+   '$* SIXTAB ' The main keyword of the SIXTAB program. All
+                preceeding input is ignored.
+   '   FLNINP ' Name of the source ENDF input file is given in
+                columns 11-50.
+   '   FLNOUT ' Name of the target ENDF output file is given in
+                columns 11-50.
+   '   NANGLES' Number of discrete angles for tabulation are defined
+                columns 11-20.
+   '   ENDSIX ' This keyword signals the end of SIXTAB input. All
+                instructions that follow are ignored.
+ 
+   File units:
+    Name No. Description:
+     LIN  1  Input instructions file, if not read from default input.
+     LEN  2  Source ENDF input file, if not read from default input.
+     LOU  3  Target ENDF output file, if not written to the default
+             output.
+     LKB  5  Default input.
+     LTT  6  Default output.

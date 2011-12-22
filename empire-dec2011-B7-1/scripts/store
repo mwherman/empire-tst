@@ -1,0 +1,33 @@
+#! /bin/sh -
+#script to move all results of the calculations to another directory
+if [ -d $1 ]; then
+   echo 'O.K. directory:'  $1 ' exists'
+   else
+   mkdir $1              
+   touch $1/ho
+   echo 'Have created directory:'  $1
+fi                          
+file=$2
+
+cp -p -f $file.inp tmp1234567.inp 2>/dev/null
+cp -p -f $file.lev tmp1234567.lev 2>/dev/null
+cp -p -f $file-omp.int tmp1234567-omp.int 2>/dev/null
+cp -p -f $file-omp.ripl tmp1234567-omp.ripl 2>/dev/null
+cp -p -f $file.exf tmp1234567.exf 2>/dev/null
+cp -p -f $file.c4 tmp1234567.c4 2>/dev/null
+cp -p -f $file-lev.col tmp1234567-lev.col 2>/dev/null
+
+mv -f $file* $1/ 2>/dev/null
+
+mv -f tmp1234567.inp $file.inp 2>/dev/null 
+mv -f tmp1234567.lev $file.lev  2>/dev/null
+mv -f tmp1234567-omp.int $file-omp.int  2>/dev/null
+mv -f tmp1234567-omp.ripl $file-omp.ripl  2>/dev/null
+mv -f tmp1234567.exf $file.exf  2>/dev/null
+mv -f tmp1234567.c4 $file.c4  2>/dev/null
+mv -f tmp1234567-lev.col $file-lev.col  2>/dev/null
+
+
+echo 'All files have been moved'
+echo 'All input, omp, EXFOR and levels files have been copied'
+exit

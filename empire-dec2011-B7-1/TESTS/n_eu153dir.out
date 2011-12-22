@@ -1,0 +1,19 @@
+  
+ REACTION   0-n -  1 +  63-Eu-153 INCIDENT ENERGY   1.00     MeV
+ COMPOUND NUCLEUS ENERGY    7.435 MeV
+ FUSION CROSS SECTION =   3301.59     mb
+  63-Eu-154 production cross section  175.889     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  862.67     mb
+ n  emission cross section  3125.7     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section 0.29260E-06 mb
+  63-Eu-153 production cross section  3125.65     mb
+    fission  cross section  0.0000     mb
+ g  emission cross section  3038.1     mb
+ n  emission cross section  0.0000     mb
+ p  emission cross section  0.0000     mb
+ He emission cross section  0.0000     mb
+  
+ Tot. fission cross section    0.000     mb
+  

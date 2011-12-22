@@ -1,0 +1,103 @@
+Directory: resonances/
+File: resonances.readme (29 April 2002)
+***************************************
+       
+
+                    resonances0.dat & resonances1.dat
+
+         Average parameters of s- and p- wave neutron resonances
+             (provided by A.V. Ignatyuk on April 29, 2002)
+             (revised by Roberto Capote on May 23, 2005  )
+           -  format for Gg and Gg uncertainty (f4.1 to f5.1)  
+           -  databases corrected to add a decimal point to Gg
+         ********************************************************
+
+
+Content
+-------
+The average resonance parameters recommended for RIPL-2 were prepared on the
+basis of the evaluations performed by the Obninsk group taking into account the
+analysis of discrepancies between similar evaluations by other groups. Careful
+attention was paid to the estimation of uncertainties for the recommended
+parameters, based on experienced guesswork of systematic errors beside
+statistical uncertainties. For some nuclei new analysis of average parameters
+was performed on the basis of the recent compilation of neutron resonance
+parameters [00S] bringing total number of Dobs in the file to 296. The average
+resonance parameters for p-wave neutron resonances were also analyzed and
+compiled for 82 isotopes[00I] . The recommended parameters are given separately
+for s- and p-wave resonances in files resonances0.dat and resonances1.dat
+respectively.
+
+
+Format
+------
+Each record of the both files contains:
+
+   Z       : charge number of the target nucleus
+   A       : mass number of the target nucleus
+   El      : element symbol of the target nucleus
+   Io      : spin of the ground state of the target nucleus
+   Bn      : neutron binding energy for the corresponding compound 
+             nucleus in MeV
+   D0 or D1: average resonance spacing in keV
+   dD      : uncertainty of DL in keV
+   S0 or S1: s-wave or p-wave neutron strength function in 10**(-4)
+   dSo     : uncertainty of So in 10**(-4)
+   Gam     : average radiative width in meV
+   dGam    : uncertainty of Gam in meV
+   Ref     : reference to the work in which the analysis was performed
+
+The corresponding FORTRAN format is
+(2(i4),1x,a2,2x,f3.1,1x,f6.3,2x,2(e9.2,2x),2(f4.2,2x),2(f5.1,1x),2x,a3).
+
+
+References
+----------
+78M    Musgrov, A.R., et al., in Proc. Conf. on Neutron Physics. Harwell, 1978,
+        p. 449.
+79B    Benzi, V. et al. in Proc. Meeting on Neutron Cross Sections of Fission
+        Product Nuclei (Bologna, 1979), Ed. Coceva C., Panini G.C.
+        NEANDC(E)-209, p. 169.
+79D    Delfini, G., Gruppellaar, H. - Ibid., p. 169.
+79F    Fort, E., Derrien, H., Lafond, O. Ibid., p.121.
+79R    Rohr, G. et al.: Ibid., p.197.  
+81G    Garg, J.B., Tikku, V.K., Harvay, J.A., Phys. Rev. C23(1981)671;
+        C24(1981)1922.
+81M    Mughabghab,  S.F., Divadeenam, M., Holden, N.E. Neutron Cross Sections. v. 
+        1, part A, N.Y.- London: Academic Press, 1981.
+83F    Frohner, F.H. in IAEA Advisory Group Meeting on Basic and Applied Problems
+        of Nuclear Level Densities. Ed. Bhat M.R., N.Y., BNL-NCS-51694, 1983,
+        p. 219.
+83H    Harvy, J.A. et al., Phys. Rev. C28(1983)24.
+83R    Ribon, P. in IAEA Advisory Group Meeting on Basic and Applied Problems of
+        Nuclear Level Densities. Ed. Bhat M.R., N.Y., BNL-NCS-51694, 1983,
+        p. 245.
+84M    Mughabghab, S.F. Neutron Cross Sections. v. 1, part B, N.Y.- London,
+        Academic Press, 1984.
+86W    Winter, R.R. et al., Phys. Rev. C34(1986)840.
+88P    Perey, C.M. et al., Report ORNL/TM-10841, 1988.
+88V    Vonach, H. et al., Phys. Rev.C38(1988)2541.
+89R    Rohr, G. et al., Phys.Rev. C39(1989)426.
+90P    Perey, C.M. et al., Report ORNL/TM-11742, 1990.
+93M    Maklin, R.L. et al., Phys. Rev. C48(1993)1120.
+94B    Brusegan, A. et al. in Nuclear Data for Science and Technology (Gatlinburg,
+        1994). Ed. Dickens J.K., ORNL, 1994, p. 224 & 227.
+94F    Frankle, C.M. et al., Phys. Rev. C50(1994)2774.
+96C    Carlton, R.F., Harvey, J.A., Hill, N.W.: Phys. Rev. C54(1996)2445.
+96F    Frankle, C.M. et al., Phys. Rev. C54(1996)2051.
+96I    Ignatyuk, A.V. Contribution to the Second CRP Meeting on RIPL (Vienna, 
+        November 1996).
+96K    Koehler, P.E. et al., Phys. Rev. C54(1996)1463.
+97I    Ignatyuk A.V. Contribution to the Third CRP Meeting on RIPL(Trieste, May 
+        1997).
+00G    Gunsig, F. et al., Phys. Rev. C61(2000)054608.
+00I    Ignatyuk A.V. Contribution to the Second CRP Meeting on RIPL-2 
+        (Varena, June 2000).
+00K    Koehler, P.E. et al., Phys. Rev. C62(2000)055803.
+00S    Sukhoruchkin, S.I. et al. in Low Energy Neutrons and their Interaction with
+        Nuclei and Matter. Ed. H.Schopper, Springer-Verlag, Berlin, 2000, v.16B.
+01I    Ignatyuk A.V. in Low Energy Neutrons and their Interaction with Nuclei and
+        Matter. Ed. H.Schopper, Springer-Verlag, Berlin, 2001, v. 16A, part 2,
+        ch. 11.
+
+

@@ -1,0 +1,53 @@
+Directory: fission/
+File:      fis-barrier-exp.readme (April 30, 2002)
+*******************************************************
+
+
+                        fis-barrier-exp.dat
+
+		      Fission barrier parameters
+	    (provided by A. V. Ignatyuk on April 30, 2002)
+            **********************************************
+
+	       
+Content
+-------
+Fission barrier parameters recommended for the trans-thorium nuclei by
+V.M.Maslov [1] and for the pre-actinides by G.N.Smirenkin [2]. The
+fission barrier parameters are strongly correlated with the
+corresponding level density description and the symmetry of the
+fission barriers should always be taken into account for the
+consistent description of fission cross sections.
+
+For nuclei with Z<80 the liquid drop barriers described by Sierk's
+code [3] are recommended with the addition of the ground-state shell
+corrections estimated by the Moeller-Nix (Segment 1) or the
+Myers-Swiatecki (Segment 5) mass formulae.
+
+More details on fission level densities are given in Chapter 7 of the
+RIPL-2 Handbook.
+
+
+Format
+------
+Each record of the file contains:
+
+   Z   : charge number of the fissioning nucleus
+   A   : mass number of the fissioning nucleus
+   El  : element symbol of the fissioning nucleus
+   Ea  : inner barrier height in MeV
+   SymA: symmetry of the inner-barrier saddle point
+   Eb  : outer barrier height in MeV
+   SymA: symmetry of the outer-barrier saddle point
+   Delf: correlation function of the fission channel recommended
+           for the fission level density calculation in MeV
+
+The corresponding FORTRAN format is (2(i3,1x),a2,2(f8.3,4a),f9.3)
+
+
+References
+----------
+[1] V. M. Maslov. RIPL-1 Handbook. TEXDOC-000, IAEA, Vienna, 1998, Ch. 5.
+[2] G. N. Smirenkin. IAEA-Report INDC(CCP)-359,IAEA, Vienna, 1993.
+[3] A. Sierk. Phys. Rev. C33 (1986) 2039.
+

@@ -1,0 +1,64 @@
+#!/bin/bash
+#Script to produce ZVV plots comparing four sets of calculations
+#with experimental data (all MTs for a single material)
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+suf=$1
+root=$2
+dir1=$3
+name1=$4
+dir2=$5
+name2=$6
+dir3=$7
+name3=$8
+dir3=$9
+name3=$10
+
+$EMPIREDIR/scripts/mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 4   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 16  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 17  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 18  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 22  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 28  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 45  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 102 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 103 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 107 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 112 $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 51  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 52  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 53  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 54  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 55  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 56  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 57  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 58  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 59  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 60  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 61  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 62  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 63  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 64  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 65  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 66  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 67  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 68  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 69  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 70  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 71  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 72  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 73  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 74  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 75  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 76  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 77  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 78  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 79  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 80  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+exit

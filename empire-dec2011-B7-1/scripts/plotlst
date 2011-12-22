@@ -1,0 +1,44 @@
+#! /bin/sh -
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Data ready for plotting:'
+echo ' '
+ls *.c4
+echo ' '
+echo -n 'Choose one of the above (without .c4 extention!): '
+read file
+fi                          
+
+if [ ! -f $file.c4 ]; then
+   echo ' '
+   echo ' '
+   echo 'Error in pltlst; can not find: '$file.c4 
+#  read bye
+   exit
+fi    
+
+# RUN PLTLST TO PRODUCE LIST OF DATA 
+
+ln -sf $work/$file.c4 C4.DAT  
+echo ' '
+echo 'R U N N I N G    P L T L S T'
+
+# plotlst requires several files present in the working directory:
+ln -sf $EMPIREDIR/util/pltlst/ENDFMF.DAT ENDFMF.DAT
+ln -sf $EMPIREDIR/util/pltlst/ENDFMT.DAT ENDFMT.DAT
+ln -sf $EMPIREDIR/util/pltlst/ENDFZA.DAT ENDFZA.DAT
+ln -sf $EMPIREDIR/util/pltlst/PLOT.CHR PLOT.CHR
+ln -sf $EMPIREDIR/util/pltlst/PLTLST.INP PLTLST.INP
+
+$EMPIREDIR/util/pltlst/pltlst
+rm C4.DAT ENDFMF.DAT ENDFMT.DAT ENDFZA.DAT PLOT.CHR PLTLST.INP
+mv PLOTC4.LST $work/$file-log.plotc4 2>|/dev/null #ignore if same
+exit

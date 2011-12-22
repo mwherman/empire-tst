@@ -1,0 +1,465 @@
+
+
+     program legend
+
+     vers. 2000-1 (february 2000)
+
+     owned, maintained and distributed by
+     ------------------------------------
+     the nuclear data section
+     international atomic energy agency
+     p.o. box 100
+     a-1400, vienna, austria
+     europe
+
+     originally written by
+     ------------------------------------
+     dermott e. cullen
+     current address
+     university of california
+     lawrence livermore national laboratory
+     l-86
+     p.o. box 808
+     livermore, ca 94550
+     u.s.a.
+     telephone  925-423-7359
+     e. mail    cullen1@llnl.gov
+     website    http://reddog1.llnl.gov
+
+     purpose
+     -------
+     calculate linearly interpolable tabulated angular distributions
+     starting from data in the endf/b format. angular distributions
+     may be described in the endf/b format in one of three ways.
+     for each of these three forms the user may choose (see, input
+     options) to either copy each type of data or to process it at
+     as follows,
+
+     (1) angular distribution is isotropic at all energies (ltt=0)
+     -------------------------------------------------------------
+     in this case the input data does not include any angular
+     distributions. a section merely contains a flag to indicate
+     the angular distribution is isotropic at all energies. in this
+     case the section is output in exactly the same form in which it
+     was read from the input.
+
+     (2) angular distributions given by legendre coefficients (ltt=1)
+     ----------------------------------------------------------------
+     legendre coefficients are given at a series of energies. an
+     interpolation law is given between energies. the interpolation
+     law between energies is copied as input (i.e., no attempt is
+     made to linearize the variation with energy). for each energy at
+     which legendre coefficients are given a linearly interpolable
+     angular disitribution is reconstructed in the system in which the
+     the coefficients are given (i.e., cm or lab - no attempt is made
+     to convert from one system to the other). a maximum of 30 legendre
+     coefficients is allowed. regardless of the number of coefficients
+     input the program will only use coefficients up to the last order
+     at which the coefficients are non-zero (e.g. if coefficients p1
+     through p12 are read, but p9=p10=p11=p12=0.0, the program will
+     only use coefficients up to p8). if over 30 non-zero coefficients
+     are read only the first 30 will be used.
+
+     (2) angular distributions is tabulated (ltt=2)
+     ----------------------------------------------------------------
+     angular distributions are given at a series of energies. an
+     interpolation law is given between energies and a second
+     interpolation law is given at each energy to interpolate between
+     the points in each tabulated distribution. at each energy the
+     angular distribution will be converted to linearly interpolable
+     form. the interpolation between energies is output exactly as
+     input. the interpolation law at each energy is output to indicate
+     the now linearly interpolable angular distribution.
+
+     point values - normalized vs. unnormalized
+     ------------------------------------------------------------------
+     the value of an angular distribution at any cosine will be
+     correctly calculated by this code, based either directly on the
+     angular distribution, or on the sum of the contributing legendre
+     moments.
+
+     endf/b angular distributions are by definition normalized when
+     integrated over cosine. therefore this code will normalize each
+     angular distribution before it is output. the output report from
+     this code will indicate the normalization factor used.
+
+     the reason that an angular distribution may not be normalized is
+     due to the approximation of creating linearly interpolable
+     tabulated angular distributions - the more accurately this is
+     done the closer the normalization factor will be to unity. as you
+     decrease the allowable error the normalized values will approach
+     the correct point values calculated by the code.
+
+     since the data is normalized prior to output the results in the
+     endf/b format may differ slightly from values referred to be error
+     messages, etc. printed by the code during execution. in all cases
+     the values printed by the code in error messages, etc. should be
+     considered to be the correct values and the output tabulated
+     angular distributions approximate due to the re-normalization -
+     to re-iterate, the output tabulated values are approximate due
+     to the approximations used in constructing linear interpolable
+     angular distributions to within some allowable tolerance.
+
+     elimination of negative values
+     ------------------------------
+     the reconstructed angular distribution will be tested and if it
+     is negative at one or more cosines an error message will be output
+     and based on the input option selected one of the following
+     corrective actions will be taken (see, input options),
+     (1) no correction
+     (2) change individual legendre coefficients (each by less than
+         1.0 per-cent) until the reconstructed angular distribution
+         is positive (minimum more than 1 milli-barn). the allowable
+         per-cent change in coefficients and minimum cross section can
+         be changed by input.
+     (3) change all legendre coefficients to force distribution to be
+         positive (minimum more than 1 milli-barn). with this option
+         there is no restriction on the amount that each coefficient
+         is changed and as such this option should be used with
+         caution and only as a last resort if no other approach can
+         be used to make the distribution positive.
+
+     output
+     ------
+     the user may request output of either,
+     (1) tabulated values - possibly corrected to eliminate negative
+         values. the tabulated distribution will be normalized before
+         output.
+     (2) legendre coefficients - possibly corrected to eliminate
+         negative values and without higher order zero coefficients.
+         by definition distributions defined by legendre coefficients
+         are normalized to unity.
+
+     (3) angular distributions given by a tabulation (ltt=2)
+     -------------------------------------------------------
+     tabulated angular distributions are given at a series of energies.
+     an interpolation law is given between energies. the interpolation
+     law between energies is copied as input (i.e., no attempt is
+     made to linearize the variation with energy). for each energy at
+     at which tabulated data are given a linearly interpolable angular
+     disitribution is constructed in the system in which the tabulated
+     data are given (i.e., cm or lab - no attempt is made to convert
+     from one system to the other). a maximum of 20000 points is allowe
+     to represent the angular distribution at each energy.
+
+     elimination of negative values
+     ------------------------------
+     the reconstructed angular distribution will be tested and if it
+     is negative at one or more cosines an error message will be output
+     and based on the input option selected one of the following
+     corrective actions will be taken (see, input options),
+     (1) no correction
+     (2) change all tabulated values to force distribution to be
+         positive (minimum more than 1 milli-barn). the minimum value
+         may be changed by input. with this option there is no
+         restriction on the amount that each value is changed and as
+         such this option should be used with caution and only as a
+         last resort if no other approach can be used to make the
+         distribution positive.
+
+     output
+     ------
+     the output will be the linearized angular distribution. the
+     tabulated distribution will be normalized to unity before output.
+
+     correcting negative angular distribution
+     ----------------------------------------
+     if an angular distribution is negative an error message will be
+     printed and the user may decide (based on input option) to,
+     (1) not perform any corrective action.
+     (2) for tabulated distributions - add the same value to each point
+         value such that when the distribution is re-normalized the
+         minimum value is 0.001 (1 milli-barn). the minimum value can
+         be changed by input. warning...except for selection of the
+         minimum value (by input) the user has no control over how
+         much the distribution is changed. therefore this option should
+         be used with caution.
+     (3) for legendre coefficients one of two options may be selected,
+     (a) change individual coefficients (no one coefficient by more
+         than 1 per-cent) to make the distribution positive with a
+         minimum value of 0.001 (1 milli-barn). the maximum per-cent
+         change in each coefficient and minimum value may be changed
+         by input. input the program cannot make the distribution
+         positive by changing each coefficient by up to the maximum
+         allowable amount, the original angular distribution or
+         coefficients will be output. only in the latter case should
+         one consider using option (b) described below.
+     (b) logically add the same value to each point value such that
+         when the distribution is re-normalized the minimum value is
+         0.001 (1 milli-barn). this is equivalent at increasing p0
+         by a certain amount and re-normalization is equivalent to then
+         dividing each coefficient by a certain amount. therefore,
+         what is physically done by the program is to divide each
+         coefficient by the same amount. warning..except for selection
+         of the minimum value (by input) the user has no control over
+         how much the distribution is changed. therefore this option
+         should be used with caution.
+
+     warning messages from program
+     -----------------------------
+     the warning messages printed by this program should only be
+     considered to be exactly that..warnings..not an absolute judgement
+     by this program that there is something wrong with the data. when
+     warning messages are printed examine the data and either take no
+     action (if you feel that the data is o.k.) or correct the data
+     (if you feel that the data is incorrect and you can correct it).
+
+     validity of modified data
+     -------------------------
+     before believing and using data which has been modified (either
+     tabulated angular distributions or legendre coefficients) the user
+     should insure that the modified data is physically more acceptable
+     than the original data. in order to do this one or more of the
+     following methods should be used,
+
+     (1) use the energy variation tests built-in to this program and
+         evalplot to plot the energy dependence of the legendre
+         coefficients in order to identify and correct (by hand...not
+         by this program) any coefficients which have unrealistic
+         energy and l order variations. this should always be done
+         first to eliminate major problems before using this program
+         to automatically make minor corrections.
+     (1) output and plot the uncorrected and corrected angular
+         distributions. compare the plots to insure that the corrected
+         data does not seriously change the energy dependence of the
+         angular distribution.
+     (2) if plotting capability is not avaialable, use the printed out
+         of this program to determine how much the tabulated angular
+         distribution or legendre coefficients have been modified.
+         generally if one coefficient has been only slightly modified
+         the distribution will be acceptable. however if many
+         coefficients have been modified the result will not be
+         reliable.
+
+     seeing angular distributions and legendre coefficients
+     ------------------------------------------------------
+     program evalplot can be used to plot angular distribution and
+     legendre coefficients - when it comes to checking this type of
+     data there is no substitute for plots of the data to make the
+     job easy and straightforward.
+
+     for legendre coefficients evalplot can be used to see the energy
+     dependence of each coefficient - this is an extremely easy and
+     useful way to check for errors in the basic data.
+
+     for angular distribution evalplot can be used to plot them at
+     each energy that they are tabulated - this is also an easy and
+     useful way to check for errors.
+
+     i/o unit definitions
+     --------------------
+     unit  description
+     ----  -----------
+       2   input cards
+       3   output report
+      10   original data in endf/b format
+      11   final data in endf/b format
+
+     optional standard file names (see subroutine filio1 and filio2)
+     ---------------------------------------------------------------
+     unit  file name
+     ----  ----------
+       2   legend.inp
+       3   legend.lst
+      10   endfb.in
+      11   endfb.out
+
+     input card
+     ----------
+ card cols.  format  description
+ ---- -----  ------ -----------
+  1    1-11   e11.4 fractional thinning criteria
+      12-22   i11   maximum number of points in angular distribution
+                    reconstructed from legendre coefficients (present
+                    limits are 11 to 20000 points)
+                   *this option can be used to run quick, but not
+                    necessarily so accurate calculations - to roughly
+                    see what the angular distributions look like.
+                   *it is recommended that you use 0 as input - in
+                    which case the program will use the maximum
+                    allowable number of points = 20000.
+      23-33   i11   tabulated angular distribution treatment
+                    = 0 - copy tables
+                    = 1 - linearize tables (output tables)
+                    = 2 - linearize and thin tables (output tables)
+      34-44   i11   legendre coefficient treatment
+                    = 0 - copy legendre coefficients
+                    = 1 - reconstruct tabulated angular distribution.
+                          (output tables).
+                    = 2 - reconstruct tabulated angular distribution.
+                          (output legendre coefficients).
+      45-55   i11   negative angular distribution treatment.
+                    = 0 - no correction
+                    = 1 - tabulate data - no correction.
+                        - legendre data - change coefficients
+                          (none by more than 1.0 per-cent - can be
+                          changed by input).
+                    = 2 - force distributions to be positive
+                          (tabulated or legendre data).
+      56-66   i11   legendre coefficient variation test flag.
+                    = 0 - test tests.
+                    = 1 - perform tests,
+                          (a) legendre order increases with energy.
+                          (c) monotonic variation of coefficients
+                              as a function of energy.
+                          (c) coefficients decrease as a function of
+                              legendre order.
+   2   1-60   60a1  endf/b input data filename
+                    (standard option = endfb.in)
+   3   1-60   60a1  endf/b output data filename
+                    (standard option = endfb.out)
+ 4-n   1- 6    i6   lower mat limit
+       7- 8    i2   lower mf limit
+       9-11    i3   lower mt limit
+      12-17    i6   upper mat limit
+      18-19    i2   upper mf limit
+      20-22    i3   upper mt limit
+      23-33  e11.4  lower energy limit
+      34-44  e11.4  upper energy limit
+      45-55  e11.4  minimum allowable value of angular distribution
+      56-66  e11.4  allowable fraction (not per-cent) change in any
+                    one legendre coefficient to make the angular
+                    distribution positive (and at least equal to the
+                    input minimum allowable value).
+
+     *up to 100 mat/mt/e ranges may be input, each specifying an
+      allowable minimum sigma and maximum change in coefficients.
+     *input is terminated by a blank card.
+     *all may/mt/e ranges not specified by input will be treated by
+      allowing a minimum sigma of 0.001 (1 milli-barn) and a change
+      in each coefficient by up to 0.01 (1 per-cent).
+     *these mat/mt/e ranges are not used to correct all angular
+      distributions where sigma is less than the minimum. they are
+      only used to correct distribution that are negative and to
+      insure that the cross section at the cosines where the angular
+      distribution are initially negative are corrected to be positive
+      and at least as large as the minimum allowable sigma (specified
+      by input).
+
+     example input no. 1
+     -------------------
+     process both legendre coefficients and tabulated data to obtain
+     angular distribution which are accurate to within 0.1 per-cent
+     and output uncorrected tabulated angular distribution using
+     a maximum of 501 points in each tabulated angular distribution.
+     since legendre coefficients will not be corrected the input need
+     not specify mat/mt/e ranges.
+
+     read /endfb6/k300/lead.in and write /endfb6/k300/lead.out
+
+     the following 4 input lines are required,
+
+ 1.00000- 3        501          2          1          0
+ /endfb6/k300/lead.in
+ /endfb6/k300/lead.out
+     (blank card terminated input)
+
+     example input no. 2
+     -------------------
+     process both legendre coefficients and tabulated data to obtain
+     angular distribution which are accurate to within 0.1 per-cent
+     and output corrected tabulated angular distribution (only those
+     re-constructed from legendre coefficients will be corrected).
+     for all mat/mt/e correct negative angular distribution to a value
+     of 0.01 (10 milli-barns) and allow legendre coefficients to be
+     changed by up to 0.02 (2 per-cent).
+
+     use the default filenames endfb.in and endfb.out (this can be
+     done by leaving the second and third input lines blank).
+
+     the following 5 input lines are required,
+
+ 1.00000- 3        501          2          1          1
+
+
+     1 1  1  999999999 0.00000+ 0 3.00000+ 7 1.00000- 2 2.00000- 2
+     (blank card terminated input)
+
+     example input no. 3
+     -------------------
+     process both legendre coefficients and tabulated data to obtain
+     angular distribution which are accurate to within 0.1 per-cent
+     and output corrected legendre coefficients and uncorrected
+     tabulated angular distributions. for mat=1800, mt=2 correct
+     negative angular distributions to insure the minimum is 0.01
+     (10 milli-barns) allowing each legendre coefficient to change by
+     up to 0.02 (2 per-cent). all other mat/mt/e will be corrected
+     to a minimum of 0.001 (1 milli-barn) allowing a 0.01 (1 per-cent)
+     change (built-in option).
+
+     read /endfb6/k300/lead.in and write /endfb6/k300/lead.out
+
+     the following 5 input lines are required,
+
+ 1.00000- 3        501          2          2          1
+ /endfb6/k300/lead.in
+ /endfb6/k300/lead.out
+  1800 4  2  1800 4  2 0.00000+ 0 3.00000+ 7 1.00000- 2 2.00000- 2
+     (blank card terminated input)
+
+     example input no. 4
+     -------------------
+     to copy tabulated angular distribution and convert legendre
+     coefficients to uncorrected tabular distributions.
+
+     use the default filenames endfb.in and endfb.out (this can be
+     done by leaving the second and third input lines blank).
+
+     the following 4 input lines are required,
+
+ 1.00000- 3        501          0          1          0
+
+
+     (blank card terminated input)
+
+     version 80-1 (september 1980)
+     version 84-1 (november 1984)
+     version 86-1 (january 1986) *corrected based on user comments
+                                 *fortran-77/h version
+     version 87-1 (january 1987) *corrected based on user comments
+     version 88-1 (july 1988)    *option...internally define all i/o
+                                  file names (see, subroutine fileio
+                                  for details).
+                                 *improved based on user comments.
+     version 89-1 (january 1989) *psychoanalyzed by program freud to
+                                  insure program will not do anything
+                                  crazy.
+                                 *updated to use new program convert
+                                  keywords.
+                                 *added livermore civic compiler
+                                  conventions.
+     version 92-1 (january 1992) *for angular distributions calculated
+                                  from legendre coefficients, interval
+                                  half to convergence.
+                                 *updated based on user comments
+                                 *added fortran save option
+                                 *added selected of data to process
+                                  by mat/mf/mt/energy ranges.
+                                 *warning...the input parameter format
+                                  has been changed - for details see
+                                  below.
+     version 92-2 (sept. 1992)   *corrected processing of isotropic
+                                  angular distributions
+     version 94-1 (january 1994) *variable endf/b data filenames
+                                  to allow access to file structures
+                                  (warning - input parameter format
+                                  has been changed)
+                                 *close all files before terminating
+                                  (see, subroutine endit)
+     version 96-1 (january 1996) *complete re-write
+                                 *improved computer independence
+                                 *all double precision
+                                 *on screen output
+                                 *uniform treatment of endf/b i/o
+                                 *improved output precision
+                                 *increased max. points from 5,000
+                                  to 20,000.
+     version 99-1 (march 1999)   *corrected character to floating
+                                  point read for more digits
+                                 *updated test for endf/b format
+                                  version based on recent format change
+                                 *general improvements based on
+                                  user feedback
+     vers. 2000-1 (february 2000)*general improvements based on
+                                  user feedback
+

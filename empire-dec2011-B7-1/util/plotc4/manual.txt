@@ -1,0 +1,986 @@
+Title  : Program PLOTC4
+Version: 86-1 (August 1986)
+        87-1 (June 1987)   *Software upper and lower case
+                            characters.
+      2001-3 (March 2001)  *Upgrade to compare measured
+                            differential data with curves from
+                            evaluated data files.
+                           *Modifications for compatibility with
+                            character plotting package of the
+                            Pre-Pro codes.
+Purpose: Plot experimental and evaluated nuclear data
+Author:
+  OWNED, MAINTAINED AND DISTRIBUTED BY:
+  -------------------------------------
+  The Nuclear Data Section
+  International Atomic Energy Agency
+  P.O. Box 100
+  A-1400, VIENNA, AUSTRIA
+  EUROPE
+
+  ORIGINALLY WRITTEN BY:
+  ----------------------
+  Dermott E. Cullen
+  University of California
+  Lawrence Livermore National Laboratory
+  L-86
+  P.O. Box 808
+  Livermore, CA 94550
+  U.S.A.
+  Telephone  925-423-7359
+  e-mail     CULLEN1@LLNL.GOV
+  Website    HTTP://REDDOG1.LLNL.GOV
+
+  VERSION 2001-3 IMPLEMENTED BY:
+  ------------------------------
+  Andrej Trkov
+  The Nuclear Data Section
+  International Atomic Energy Agency
+  P.O. Box 100
+  A-1400, VIENNA, AUSTRIA
+  EUROPE
+
+
+  USERS' GUIDE FOR PROGRAM PLOTC4
+  ===============================
+
+  PURPOSE
+  -------
+  The function of the PLOTC4 program is to plot and compare
+  experimental data, which are in a computation format with
+  evaluated data in ENDF format.
+
+  This program has been designed to use the computation format
+  and conventions which are used by program X4TOC4 to translate
+  experimentally measured data from the EXFOR to a computation
+  format.
+
+  The evaluated data in ENDF format need some pre-processing to
+  reduce the complexity of format representations, which are
+  allowed in the general ENDF format. The codes of the Pre-Pro
+  sequence are used for this purpose. It is recommended that
+  the following are executed:
+    LINEAR   to convert all cross sections to linearly interpolable
+             form.
+    RECENT   to reconstruct the resonances from resonance parameters.
+    SIGMA1   to Doppler broaden the cross sections to room
+             temperature (optional but recommended when comparing
+             to experimental data since measurements are usually
+             done at room temperature).
+    ACTIVATE to generate cross sections for excitation into discrete
+             excited state (file MF10) from the data in files MF3
+             and MF9.
+    LEGEND   to convert angular distributions in arbitrary ENDF
+             representation into tabular ENDF representation.
+    SIXTAB   to convert double differential data in arbitrary ENDF
+             representation into tabular (law-7) ENDF representation.
+
+  GRAPHICS INTERFACE
+  ------------------
+  This program uses a simple CALCOMP like graphics interface which
+  requires only 3 subroutines...PLOTS, PLOT and PEN (described in
+  detail below). All characters and symbols are drawn using tables
+  of pen strokes (supplied with this program). Using this method
+  the program should be simple to interface to virtually any plotter
+  or graphics terminal and the appearance and layout of the plots
+  should be independent of which plotter is used.
+
+  WHAT CAN BE PLOTTED
+  -------------------
+  At the present time the following types of data can be plotted:
+
+  (1) MF =   3 - Cross sections. ENDF and EXFOR data can be
+                 compared (only MF = 3 ENDF data can be compared).
+  (2) MF =   4 - Angular distributions. ENDF and EXFOR data can be
+                 compared.
+  (3) MF =   5 - Energy distributions. ENDF and EXFOR data can be
+                 compared.
+  (4) MF =   6 - Double differential cross sections. ENDF and EXFOR
+                 data can be compared.
+  (5) MF = 154 - Legendre coefficients (only EXFOR).
+  (6) MF = 203 - Cross section ratios (only EXFOR).
+  (7) MF = 402 - Resonance parameters (only EXFOR).
+  (8) MF = 801 - Fission yield data (only EXFOR).
+
+  All other data will be skipped.
+
+  WHAT DATA WILL BE PLOTTED
+  -------------------------
+  Based on input options the user may specify whether the program
+  should plot only EXFOR data or EXFOR and ENDF data. In addition
+  the user may specify up to 100 ZA/MF/MT ranges to select data.
+
+  HOW MUCH DATA CAN BE PLOTTED
+  ----------------------------
+  ENDF DATA
+  Each section of ENDF cross sections (MF =3, any MT) may contain
+  any number of data points. If a section contains MXPNT or fewer
+  points all of the data will be in core. If the section contains
+  more than MXPNT points the data will be written to a scratch file
+  and read as needed.
+  Parameter MXPNT is currently set at 90000.
+
+  EXFOR DATA
+  Based on input parameters the user may control how much EXFOR data
+  will appear on each plot. This program allows the user to specify
+  that up to MXPGP data points may appear on each plot. If there are
+  more physically comparable points (e.g., same ZA, MF, MT) than
+  specified by the user the program will create a series of plots
+  each containing not more than the maximum number of points per
+  plot specified by the user.
+  Parameter MXPGP is currently set at 10000.
+
+  WHAT COMPUTERS WILL THE PROGRAM RUN ON
+  --------------------------------------
+  The program has been implemented on a variety of computers from
+  Cray and IBM mainframe to Sun workstations to a PC. The
+  program is small enough to run on virtually any computer.
+
+  The program uses a simple Calcomp-like graphics interface
+  (described below) and allows the user specify the physical size
+  of the plotter being used, by input parameters. Using these
+  conventions this program can be easily interfaced to virtually
+  any plotter.
+
+  For special considerations see the sections below on,
+  (1) Computer dependent coding.
+  (2) Plotter/graphics terminal interface.
+
+  COMPUTATION FORMAT
+  ------------------
+  The computation format uses a classification system and units
+  which are compatible with ENDF. Data is classified by (1) ZA
+  of projectile, (2) ZA of target, (3) metastable state of target,
+  (4) MF - type of data, (5) MT - reaction, (6) metastable state
+  of residual nucleus. To identify the source of the data the first
+  author and year and the EXFOR accession and sub-accession number
+  are included in the format. In addition, fields are assigned to
+  define the status of the EXFOR data (e.g., S = superceded),
+  whether data is in the laboratory or center-of-mass frame of
+  reference and the physical significance of the last 2 output
+  fields (LVL = level energy, HL = half-life). Finally the format
+  includes 8 fields in which the output data are contained (e.g.,
+  incident energy, data, cosine, uncertainties, etc.)
+
+  Columns   Description
+  -------   -----------
+    1-  5   Projectile ZA (e.g. neutron =1, proton =1001)
+    6- 11   Target ZA (e.g. 26-Fe-56 =  26056)
+       12   Target metastable state (e.g. 26-FE-56m = M)
+   13- 15   MF (ENDF conventions, plus additions).
+   16- 19   MT (ENDF conventions, plus additions).
+       20   Product metastable state (e.g. 26-FE-56M = M)
+       21   EXFOR status
+       22   Center-of-mass flag (C=center-of-mass, blank=lab)
+   23- 94   8 data fields (each in E9.3 format). defined below.
+   95- 97   Identification of data fields 7 and 8
+            (e.g., LVL=level, HL=half-life, etc.)
+   98-122   Reference (first author and year)
+  123-127   EXFOR accession number
+  128-130   EXFOR sub-accession number
+      131   Multi-dimension table flag
+
+  DEFINITION OF 8 COMPUTATION FORMAT DATA FIELDS
+  In order to plot data this program assumes that the following
+  conventions have been used for data in the computation format.
+
+  Data Field   Definition
+  ----------   ----------
+    1          Projectile incident energy
+    2          Projectile incident energy uncertainty
+    3          Data, e.g., cross section, angular distribution, etc.
+    4          Data uncertainty
+    5          Cosine or legendre order
+    6          Cosine uncertainty
+    7          Identified by columns 95-97 (e.g.,level E, half-life)
+    8          Identified by columns 95-97 (e.g.,level E, uncertainty)
+
+  The physical significance of the first 6 data fields is defined by
+  the MF (data type). The physical significance of fields 7 and 8
+  are defined by columns 95 through 97 (e.g. LVL = level energy and
+  its uncertainty).
+
+  SPECIAL CONVENTIONS
+  The above conventions are appropriate for most types of data
+  in the ENDF system. In order to allow this program to plot
+  additional types of data the following special conventions have
+  been adopted:
+
+  Cross section ratios  - Field 5 = MT of denominator.
+  (MF = 203)              Field 6 = ZA of denominator.
+  Fission yield data    - Field 5 = ZA of fission fragment.
+  (MF = 801)              Field 6 = mass of fission fragment.
+  Production            - Field 6 = ZA of product.
+  (MT = 9000-9999)
+
+  See, remarks below on metastable state flags.
+
+  BLANK VS. ZERO DATA FIELDS
+  The 8 data fields on each computation format line are read as
+  characters and internally converted to floating point numbers
+  (see, subroutine FLOAT9). By testing before converting this
+  program can determine whether any given field is blank (no data
+  given) as opposed to zero. It is often important to make this
+  distinction, particularly for fields 7 and 8, e.g. the difference
+  between 0.0 indicating ground state as opposed to no data given.
+  The EXFOR to computation format conversion program X4TOC4 also
+  makes this distinction and leaves undefined fields blank (not
+  zero). Therefore, any data converted to the computation format
+  format using program X4TOC4 will follow the correct conventions.
+
+  However, if the user of this program directly codes data in the
+  computation format it is important to maintain this convention.
+  Remember---any undefined fields should be left blank and not set
+  to zero.
+
+  COMPUTATION FORMAT UNITS
+  In order to plot data this program assumes that the following
+  units have been used for data in the computation format.
+
+  eV         = energy
+  barns      = cross section
+  steradians = solid angle
+  seconds    = time
+  kelvin     = temperature
+
+  For example double differential data (MF=6) will be in,
+
+  barns/eV/steradian
+
+  METASTABLE STATE
+  The computation format allows the metastable state of the target
+  and residual nucleus to be identified. For ratio data metastable
+  state of both numerator and denominator of the ratio should be
+  defined.
+
+  The metastable state of the target is identified in column 12 and
+  the metastable state of the residual nucleus in column 20. For
+  ratio data the metastable state of the denominator target and
+  residual nucleus are identified by having the denominator ZA and
+  MT in the form ZA.m AND MT.m (e.g., 26056.9 and 102.1). Columns
+  12 and 20 may contain characters such as M, but to maintain the
+  eight output fields in strictly numerical form the denominator
+  ZA.m and MT.m will be in numerical form. The possible characters
+  that may appear in columns 12 or 20 and their numerical
+  equivalents used with ratio denominator za and mt include:
+
+  Definition    Column 12 or 20     Equivalent   Plotted as
+  ----------    ---------------     ----------   ----------
+  ground              G                0           -G
+  m1                  1                1           -M1
+  m2                  2                2           -M2
+  m3                  3                3           -M3
+  m4                  4                4           -M4
+  m5                  5                5           -M5
+  unknown             ?                6           -M?
+  m                   M                7           -M
+  more than 1         +                8           -M+
+  all or total        T                9           blank
+  all or total      blank              9           blank
+
+  By convention if an EXFOR reaction does not specify a metastable
+  state the state is defined in the computation format to be..ALL..
+  (i.e., blank in column 12 or 20, 9 in ratio ZA or MT).
+
+  For example, for a ratio if the ZA.m and MT.m are output as
+  26056.9 and 102.1, respectively the ratio denominator target is
+  26-Fe-56 (all) and the reaction is capture (MT=102) leaving the
+  residual nucleus in the m1 state.
+
+  EXFOR STATUS
+  Column 21 of each computation format record may contain blank
+  (status not specified) or one to the following characters:
+
+  Column 21   Definition
+  ---------   ----------
+     U        Unnormalized (has priority over EXFOR status and is
+              used to indicate that the data is not in standard
+              output units. y axis label will say..UNNORMALIZED..).
+     A        Approved by author
+     C        Correlated
+     D        Dependent
+     O        Outdated
+     P        Preliminary
+     R        Renormalized
+     S        Superceded
+
+  If data has any other EXFOR status (e.g., translated from SCISRS)
+  the status field will be blank.
+
+  CONTROL OF PLOTTING
+  -------------------
+  The user has control over how data in the computation format
+  is interpreted by this program.
+
+  Data on each plot is identified by plotting a character equivalent
+  of target za and metastable state (ZA), data type (MF), reaction
+  (MT) and residual metastable state. The ZA, MF and MT may be
+  interpreted in any manner that the user chooses.
+
+  This is accomplished by using three dictionaries which control
+  the plotting. All three of these dictionaries are distributed
+  with this program. Each dictionary is a simple card image file
+  which may be modified by the user at any time to meet specific
+  needs. The three dictionaries are:
+
+  (1) INTERPRETATION OF SPECIAL ZA
+      For all target or residual nuclei this program will use the
+      ENDF convention of assuming ZA = 1000*Z + A. For special
+      materials which do not easily fit into this scheme (e.g.,
+      water) the ENDF convention is to define Z =0 and to assign
+      a numerical equivalent for each special material. For normal
+      materials this program will use ZA to define the material or
+      isotope. For special material (Z=0) this program will use this
+      dictionary to define the material. As distributed this
+      dictionary contains all of the special materials defined in
+      the ENDF system. The user may code data for any special
+      material in the computation format and assign it a special
+      ZA. By adding the definition to this dictionary the user may
+      obtain plots on which the special material is properly
+      identified.
+
+  (2) INTERPRETATION OF MF
+      This dictionary defines the titles that will appear for each
+      MF read from the computation format. In addition this
+      dictionary allows the user to specify different titles for
+      the same MF and different MT ranges, e.g.:
+
+      MF =3, MT =  251 - 253 = parameters (used for MU, XI, GAMMA)
+      MF =3, MT = 9000       = neutron induced (used for production)
+      MF =3, MT = other      = cross section
+
+      If the user does not like the titles normally output by this
+      program it is merely necessary to modify this dictionary.
+
+  (3) INTERPRETATION OF MT
+      This dictionary defines the titles that will appear for each
+      MT read from the computation format, e.g.:
+
+      MT  =    1 = total
+          = 9000 = production
+
+      If the user does not like the titles normally output by this
+      program it is merely necessary to modify this dictionary.
+
+  Used in combination with the translation of the ZA, MF and MT serve
+  to identify the data being plotted. By using the dictionaries
+  described above the user has complete control over how ZA, MF and
+  MT are interpreted and as such may select any form to identify
+  data.
+
+  PROGRAM OPERATION
+  -----------------
+  EXFOR DATA INDEX TABLE
+  The entire computation format file will first be read and compared
+  to the requested ZA/MF/MT ranges specified by the user. If no
+  comparable data is found the program will terminate execution. If
+  comparable data is found the program will create an index table
+  specifying (1) ZA, (2) MF, (3) MT, (4) starting record number,
+  (5) ending record number, (6) number of data points with this ZA,
+  MF and MT. During execution this index table will be used to,
+  (1) select the next ZA, MF, MT to be plotted if only plotting
+  EXFOR data, or (2) to determine whether or not there is comparable
+  EXFOR data (without again searching the EXFOR data file) when
+  comparing EXFOR and ENDF data. Once it has been decided to plot
+  EXFOR data which has a given ZA, MF and MT the starting record
+  index is used to quickly position to the first record to read and
+  the ending record index is used to define when to stop reading
+  (instead of reading the entire computation format data file).
+
+  ONLY PLOTTING EXFOR DATA
+  The program will use the index table to define the ZA, MF and MT
+  of the next set of data to plot. Based on user input the program
+  will then plot either one reference (reference = author, year,
+  EXFOR accession and sub-accession number) per plot or all
+  comparable references on the same plot. The cycle of reading data
+  and producing plots will be continued until all data defined in
+  the index table have been plotted.
+
+  COMPARING ENDF/B AND EXFOR DATA
+  In the comparison mode the program will only plot data if there
+  is comparable data (same ZA, MF, MT) on both the ENDF formatted
+  and computation formatted files.
+
+  Based on the plotting requests (see below) the program will first
+  search the ENDF data file to find an acceptable section of cross
+  sections (MF=3,4,5,6). The program will then use the EXFOR index
+  to determine if there is comparable EXFOR data (same ZA, MF, MT).
+  If there is no comparable data the program will ignore the current
+  section of ENDF data and search for the next requested section
+  of ENDF data. The cycle of reading ENDF data and comparing to
+  the EXFOR index table will be continued until comparable ENDF
+  and EXFOR data are found. Only after the EXFOR index table shows
+  that the computation format file contains comparable data will
+  the file be read. As described above while reading EXFOR data the
+  program will use the starting and ending record number to quickly
+  position to the data to read and to stop reading when all required
+  data has been read.
+
+  Experimentally measured differential cross sections are seldom
+  measured for a particular reaction as defined in ENDF. Usually
+  they are "particle production cross sections", therefore
+  summation over several ENDF reactions is necessary. Differential
+  data in an ENDF file are marked available for comparison if file
+  MF4, 5 or 6 are found, but no action is taken until the
+  differential data are also found in the EXFOR file. At this
+  point the emitted particle, the incident particle energy, the
+  outgoing particle anergy and/or angle are known. At this point
+  the differential data retrieval routine is activated, extracting
+  the normalised distributions, multiplying by the appropriate
+  cross sections from file MF3 and summing contributions from all
+  reactions that produce that outgoing particle.
+
+  To simplify coding a restriction on the formats of the
+  differential data exists. The retrieval routine only accepts
+  tabular representation. ENDF files in other format representations
+  can be converted using codes LEGEND for the angular distributions
+  and SIXTAB for the double differential data.
+
+  At present the assembly of the differential data is limited to
+  the neutron production reactions.
+
+  ONE REFERENCE PER PLOT
+  When plotting one reference per plot the program will use the
+  EXFOR index table to determine where to start reading. After one
+  data point has been read the program will continue to read data
+  points until (1) a point is found with a different ZA, MF, MT or
+  reference, (2) the index table last record number indicates that
+  the last point has been read, or (3) the maximum number of points
+  per plot have been read.
+
+  WARNING...When plotting one reference per plot in order to produce
+  a plot the program must find at least the minimum number of points
+  required (see, input description below) on suceessive records.
+  therefore the computation format should be sorted to insure that
+  all data with the same ZA, MF, MT, reference appear on successive
+  records.
+
+  ALL COMPARABLE EXFOR DATA ON SAME PLOT
+  When plotting all comparable data on the same plot the program
+  will use the EXFOR index table to define where to start reading.
+  The program will continue to read data until (1) the index table
+  last record number indicates that the last point has been read, or
+  (2) the maximum number of points per plot have been read.
+
+  In this mode the EXFOR data need not be sorted by ZA, MF, MT,
+  reference since the EXFOR index table will define where all
+  comparable data are located on the computation format data file.
+  However, to minimize the time required to search the computation
+  format file the user should sort the data by ZA, MF, MT.
+
+  OPTIMIZING PROGRAM OPERATION
+  ----------------------------
+  Program operation can be optimized by minimizing the size of the
+  ENDF and computation formatted files. If you wish to compare
+  a limited number of reactions it is suggested that you first
+  prepare ENDF and computation formatted data files that only
+  contain the data which will be plotted, i.e., never use this
+  program to try to compare two enormous files of ENDF and EXFOR
+  data unless you are willing to spend a correspendingly enormous
+  amount of computer time. In addition the EXFOR data file
+  should be sorted by ZA, MF, MT, reference.
+
+  SCALING OF PLOTS
+  ----------------
+  ENDF/B AND/OR EXFOR
+  If only plotting EXFOR data this program will scale the X and Y
+  range of each plot to include only EXFOR data. If plotting EXFOR
+  and ENDF data the user may specify by input (input described
+  below) to scale plots to include all ENDF and EXFOR data or
+  only all ENDF data or only all EXFOR data. Although this option
+  may be used for special purposes to obtain special scaling it is
+  recommended that the user always scale plots to include all ENDF
+  and EXFOR data.
+
+  ENERGY RANGE
+  Regardless of the energy range specified by plotting requests
+  (see description of requests below) this program will never extend
+  the energy range of plots beyond where there are data. For example
+  to plot (n,2n) over the entire energy range where there are data
+  the user can specify 0.0 to 100 MeV. This program will produce
+  plots from threshold up to the highest energy below 100 MeV where
+  data are given.
+
+  COSINE RANGE
+  For angular (MF=4) and double differential (MF=6) distributions
+  where the X variable is cosine, plots will always be produced over
+  the cosine range -1.0 to 1.0.
+
+  INPUT LOGICAL FILE UNITS
+  ------------------------
+  Note that input instructions for PLOTC4 are on unit 4, rather than
+  the usual Fortran unit 5. This is so for historic reasons to allow
+  the program to be used on an IBM-PC where unit 5 was reserved for
+  keyboard interaction.
+
+  Unit   Description
+  ----   -----------
+    4    Input options              (BCD - 80 columns/record)
+   10    Computation formatted data (BCD - 131 columns/record)
+   11    ENDF formatted data        (BCD - 80 columns/record)
+   12    Special ZA definitions     (BCD - 80 columns/record)
+   14    MF definitions             (BCD - 80 columns/record)
+   15    MT definitions             (BCD - 80 columns/record)
+   17    Software characters        (BCD - 80 columns/record)
+
+  OUTPUT UNITS
+  ------------
+  Unit   Description
+  ----   -----------
+    6    Output report              (BCD - 120 columns/record)
+
+  SCRATCH UNITS
+  -------------
+  UNIT   DESCRIPTION
+  ----   -----------
+   18    ENDF data paging unit      (Binary - 6000 words/record)
+
+  INPUT CARDS
+  -----------
+  The user must input at least teo cards to specify plotting options.
+  In the simplest case this first card can be completely blank (see
+  Example input No. 1 below). To select data by ZA/MF/MT/Incident
+  energy range the user may input up to 100 additional cards.
+
+  Card  Columns  Format  Description
+  ----  -------  ------  -----------
+    1     1-10     F10   Paper offset in the horizontal direction.
+         11-20     F10   Total paper width in the horizontal
+                         direction.
+         21-30     F10   Paper offset in the vertical direction.
+         31-40     F10   Total paper width in the vertical
+                         direction.
+    2     1- 5     I5    Compare EXFOR data to ENDF
+                         0 = No
+                         1 = Yes
+                         2 = Yes (identify ENDF points by plotting
+                                  a small diamond round each point).
+                         NOTE: If comparing data plots will only
+                         be produced if comparable data is found
+                         on both the ENDF and computation format
+                         files.
+          6-10     I5    All comparable exfor data on same plot
+                          0 = No
+                         <0 = Yes, each reference on a seperate plot
+                         >O = Yes, the value entered is the maximum
+                              number of references per plot (current
+                              upper limit=48).
+         11-15     I5    Plot scaling
+                         0 = ENDF and EXFOR (recommended)
+                         1 = ENDF
+                         2 = EXFOR
+                         (automatically set to 2 if not comparing)
+         16-20     I5    Plot X error bars (energy, cosine, etc.)
+                         0 = No, 1 = Yes
+         21-25     I5    Plot Y error bars (cross section, etc.)
+                         0 = No, 1 = Yes
+         26-30     I5    Identify all references by symbol
+                         0 = No, 1 = Yes
+                         (0 = If only one reference on plot do not
+                         plot box and reference symbol around each
+                         data point...recommended).
+         31-35     I5    Allow variable E2 on same plot
+                         0 = No, 1 = Yes
+                         (Normally only data with same ZA/MF/MT/E2
+                         will appear on same plot. 1 = collect data
+                         from 1 reference for same ZA/MF/MT and
+                         a number of values of E2. Identify data on
+                         plot by each value of E2).
+         36-40     I5    Minimum EXFOR points per plot
+                         (If there are fewer comparable EXFOR points
+                         they will be skipped...default 8, minimum
+                         valid entry 2).
+         41-45     I5    Maximum number of EXFOR points per plot
+                         (Minimum defined by columns 36-40 up to
+                         MXPGP...DEFAULT MXPGP1000).
+                         Currently parameter MXPGP is set to 10000.
+                         HINT: The limit applies to the total number
+                               of points extracted from the EXFOR
+                               file. If plots are defined by
+                               explicitly requested ranges (see the
+                               next input line) and all comparable
+                               points are to be displayed on the
+                               same plot, use the default value.
+         46-50     I5    Grid type
+                         = 0 - Tick marks on each axis..recommended.
+                         = 1 - Full grid.
+         51-55     I5    Plot size
+                         = 0 - Full size plots.
+                         = 1 - Half size (4 sub-plots per plot).
+         56-70   3A4,A3  ENDF library identification.
+                         e.g., ENDF/B-V (only used if comparing).
+  3-N     1- 7     I7    Lower ZA limit
+          8-11     I4    Lower MF limit
+         12-15     I4    Lower MT limit
+         16-26   E11.4   Lower incident energy limit (eV)
+         27-33     I7    Upper ZA limit
+         34-37     I4    Upper MF limit
+         38-41     I4    Upper MT limit
+         42-52   E11.4   Upper incident energy limit (eV)
+         53-55     I3    Plot scales (ENDF convention):
+                          2  Linear abscisa and ordinate
+                          3  Logarithmic abscisa and linear ordinate
+                          4  Linear abscisa and logarithmic ordinate
+                          5  Logarithmic abscisa and ordinate
+         56-66   E11.4   Smearing parameter for elastic and
+                         discrete level inelastic scattering energy
+                         distributions given in terms of a
+                         fractional energy increment at which a
+                         gaussian curve is half maximum. This is
+                         only used to simulate resolution broadening
+                         of the distributions, which are ideally
+                         delta-functions (e.g. elastic and discrete
+                         inelastic scattering reactions when
+                         assembling total neutron emission
+                         energy distribution).
+
+ * The request list is terminated by a blank line. The remainder
+   of the input file will be ignored.
+
+ * There may be up to 100 ZA/MF/MT/Energy range requests. If there
+   are more than 100 requests only the first 100 will be used.
+ * Each request independently specifies a range of ZA/MF/MT/Energy
+   to be plotted.
+ * For each set of data, ZA must be between the lower and upper ZA
+   limit, MF must be between the lower and upper MF limit, MT must
+   be between the lower and upper mt limit and the incident energy
+   must be between the lower and upper energy limit.
+ * e.g., Z=1 to 90000, MF=3 to 3, MT=1 TO 1, E=0.0 to 2.0E+7 eV
+   will select all ZA between 1 to 90000 which have MF=3 and MT=1
+   and data points with incident energy between 0 and 20 MeV.
+ * If there are no request cards all data will be plotted.
+
+  EXAMPLE INPUT NO. 1
+  ...................
+  To plot all EXFOR data without comparison to ENDF and without
+  error bars the user need only enter a single blank card, or,
+
+      0   13.9947    0      10.3
+      0    0    0    0    0    0    0    0    0    0    0
+
+  EXAMPLE INPUT NO. 2
+  ...................
+  Plot all EXFOR data 1 reference per plot with X and Y error bars.
+  Do not plot data unless there are 8 or more points. Plot a full
+  grid. Input the following 1 card,
+
+      0    0    0    1    1    0    1    8    0    1    0
+
+  NOTE: This is a good set of input parameters to use in order to
+  produce all possible plots of all EXFOR data translated from a
+  given EXFOR tape. It is recommended to specify 8 as the minimum
+  number of points per plot in order to avoid obtaining a large
+  number of plots each containing only 1 or 2 data points.
+
+  EXAMPLE INPUT NO. 3
+  ...................
+  Plot Co-59 (n,2n) ENDF cross sections and all comparable
+  EXFOR data on the same plot with cross section error bars, one
+  plot from 0.0 eV (scaled to threshold) to 20.0 MeV and a second
+  plot from 12.0 to 15.0 MeV. Do not plot data unless there are at
+  least 8 experimental data points. Only tick marks on axis. ENDL84
+  is the identification for the ENDF library. Input the following
+  3 cards.
+
+      1    1    0    0    1    0    0    8    0    0    0  ENDL84
+    27059   3  16 0.00000+ 0  27059   3  16 2.00000+ 7
+    27059   3  16 1.20000+ 7  27059   3  16 1.50000+ 7
+
+  REPORTING ERRORS
+  ----------------
+  In order to improve this code and make future versions more
+  compatible for use on as many different types of computers as
+  possible please report all compiler diagnostics and/or operating
+  problems to the author at the above address.
+
+  Please remember if you simply report "I'VE GOT A PROBLEM" and do
+  not adequately describe exactly how you were using the program
+  it will be impossible for the author to help you. When a problem
+  arises please write to the author, describe the problem in as much
+  detail as possible, identify the version of the program that you
+  are using (e.g. Version 2001-3) and send the following information
+  in computer-readable form (e-mail, floppy disc, etc.) to the author:
+
+  (1) A copy of the program you are using
+  (2) A copy of compiler diagnostics (if any)
+  (3) A copy of the jcl deck you used to execute the program
+  (4) A copy of the 3 translation dictionaries you are using
+  (5) A copy of the computation format data you using
+  (6) A copy of the output report from the program.
+
+  Also send copies of any plots which you have obtained as output
+  from this program, if possible and/or applicable.
+
+  Without all of this information it is impossible to exactly
+  simulate the problem that you ran and to determine the source
+  of your problem.
+
+*** RETRIEVAL OF DIFFERENTIAL AND DOUBLE DIFFERENTIAL DATA **********
+
+  RETRIEVAL OF DIFFERENTIAL AND DOUBLE DIFFERENTIAL DATA
+  ------------------------------------------------------
+
+  Retrieval of differential and double differential data is done
+  through the DXSEND package, which is provided as a separate
+  module. It is called by:
+
+     CALL DXSEND(LEF,ZA0,ZAP,MF0,MT0,KEA,EIN,PAR,EPS,ENR,DXS
+    1           ,RWO,NEN,MEN,MRW,LTT)
+
+  The DXSEND module reads an ENDF file and extract cross sections
+  (KEA=0), differential cross section (angular distributions KEA=1
+  or energy spectra KEA=2, parameter PAR < -2) and double
+  differential cross sections (correlated energy/angle distributions
+  with the same conventions for KEA. Parameter PAR is the requested
+  outgoing particle energy when the correlated angular distribution
+  are requested. Similarly, PAR is the cosine of the scattering
+  angle when the spectrum at a particular scattering angle is
+  requested. Differential cross sections are output in the Lab
+  co-ordinate system.
+    If a special MT number is requested (for example, MT=5 for
+  particle emission where particle is defined by its ZA designation
+  in ZAP), the retrieval is done recursively for all neutron emission
+  reactions and all contributions are summed.
+
+  Formal parameters are:
+  LEF  - File unit number from which the ENDF file is read.
+  ZA0  - Requested nuclide identification number. If ZA>0 it is
+         given in terms of Z*1000+A+LIS0/10 where Z is the atomic
+         number, A the mass number and LIS0 the metastable state
+         number. When ZA<0 it implies the ENDF material MAT number.
+  ZAP0 - Outgoing particle ZA designation (ZAP0=1 for neutrons).
+  MF0  - Requested MF number according to the ENDF conventions.
+  MT0  - Requested reaction MT number. Broadly this follows the
+         ENDF conventions.
+  KEA  - Control flag to select retrieval of cross section (KEA=0)
+         angular distributions (KEA=1) of energy spectra (KEA=2).
+  EIN  - Incident particle energy (eV).
+  PAR  - Fixed parameter when requesting differential data:
+         KEA=1, PAR is the requested outgoing particle energy.
+                A value PAR <= -2 implies integrated distribution
+                over all angles.
+         KEA=2, PAR is the requested scattering angle (cosine).
+                A value PAR <= -2 implies angle integrated energy
+                distribution.
+  EPS  - Resolution broadening parameter is used for the two-body
+         scattering reactions like the elastic and discrete inelastic
+         cross sections  where in principle the energy distribution
+         is a delta function. For such reactions the energy
+         distribution is displayed as a Gaussian distribution where
+         EPS the fractional half-width at half-maximum. Such
+         representation is convenient for comparison with measured
+         data.
+  ENR  - Argument vector of the assembled output cross section.
+  DXS  - Function vector of the assembled output cross section.
+  RWO  - Work array of length MRW.
+  NEN  - Number of points in the assembled output cross section
+         vector.
+  MEN  - Available size of ENR and DXS arrays.
+  MRW  - Available size of the RWO work array.
+  IER  - Error flag, which is zero on exit if data assembly is
+         completed successfully.
+
+  External routines called:
+   DXSEN1,SKIPSC,FINDMT,RDTAB1,RDTAB2,RDLIST,FINT2D,YTGEOU,FNGAUS,
+   FYTG2D,UNIGRD,FITGRD
+
+*** RETRIEVAL OF DIFFERENTIAL AND DOUBLE DIFFERENTIAL DATA **********
+*** COMPUTER DEPENDENT CODING ***************************************
+
+ COMPUTER DEPENDENT CODING
+ -------------------------
+
+ * This program is designed to be used with a Fortran-77 or
+  Fortran-90 compiler.
+
+ * The only compiler dependent format statements involve,
+  (1) CHARACTER*1 and CHARACTER*4
+  (2) Testing for errors and end of file during reads.
+
+ * It is assumed that characters are stored in successive storage
+   locations and that characters may be treated as continuous strings
+   of characters in either CHARACTER*4 or CHARACTER*1 format.
+
+ * For example, if one subroutine contains,
+
+   CHARACTER*4 BCD
+   DIMENSION BCD(10)
+
+  the array BCD is assumed to be an array of 40 characters in
+  successive byte locations.
+
+  It is assumed that this array can be passed as an argument to
+  another subroutine and used as CHARACTER*1, e.g.,
+
+   CALL DUMMY(BCD)
+
+   SUBROUTINE DUMMY(BCD)
+   CHARACTER*1 BCD
+   DIMENSION BCD(40)
+
+ * This convention will work on all 32 bit per word computers (e.g.,
+   IBM or IBM compatible computers).
+
+ * For longer word length computers (e.g., CDC or CRAY) it is
+   suggested that before implementing and using this program the
+   user first verify that character strings can be treated as
+   described above, e.g., write a simple program to read a character
+   string of 40 characters in CHARACTER*4 format, pass it to a
+   subroutine which uses the character string in CHARACTER*1 format
+   and print the character string in the subroutine. If the character
+   string is printed as a continuous string you will be able to use
+   this program. If the character string is not printed as a
+   continuous string it is not recommended that you use this program.
+
+ * This program using the Fortran-77 convention for testing for
+   reading errors and end of file during reads, e.g.,
+
+   READ(10,1000,END=100,ERR=200) A,B,C,D
+
+*** COMPUTER DEPENDENT CODING ***************************************
+*** PLOTTER/GRAPHICS TERMINAL INTERFACE *****************************
+
+   PLOTTER/GRAPHICS TERMINAL INTERFACE
+   -----------------------------------
+
+   This program uses a simple Calcomp-like interface involving
+   only 3 subroutines,
+
+   PLOTS(BUF,IBUF,IPLOT) - Initialize plotter
+         BUF    - Plotter buffer
+         IBUF   - Size of plotting buffer (5000 words used)
+         IPLOT  - Plotter unit (16)...usually a dummy unit
+
+   PLOT(X,Y,IPEN)        - Draw or move from last location to (X,Y),
+                           end of current plot or end of plotting.
+         IPEN =   2 - Draw
+              =   3 - Move
+              =  -1 - End of current plot...advance by X,Y
+              = 999 - End of plotting.
+
+   PEN(IPEN)             - Select color.
+        IPEN- Color = 1 to N (N = Any positive integer)
+
+  In order to interface this program for use on any plotter which
+  does not use the above conventions it is merely necessary for the
+  the user to write 3 subroutines with the names PLOTS, PLOT and PEN
+  with the subroutine arguments described above and to then call the
+  local equivalent routines.
+
+  AVAILABLE PLOTTER INTERFACES
+  ----------------------------
+  This program has available plotter interfaces to operate as
+  follows,
+  (1) Mainframe - hardcopy plots in black and white.
+  (2) Mainframe - screen plots in 7 colors on IBM graphics terminal.
+  (3) PC        - hardcopy plots in 6 colors on a Hewlett-Packard
+                  7475a plotter.
+
+  Contact the author to obtain copies of any of the above plotter
+  interfaces.
+
+  COLOR PLOTS
+  -----------
+  To select plotting colors subroutine PEN (described above) is used
+  to select one of the available colors. When running on a mainframe
+  using an IBM graphics terminal or on a PC using a Hewlett-
+  Packard plotter the graphics interface (described above) will
+  produce color plots.
+
+  BLACK AND WHITE PLOTS
+  ---------------------
+  When producing black and white hardcopy on a mainframe the user
+  should add a dummy subroutine PEN to the end of the program to
+  ignore attempts to change color. Add the following subroutine:
+
+  SUBROUTINE PEN(IPEN)
+  RETURN
+  END
+
+  CHARACTER SET
+  -------------
+  This program uses computer and plotter device independent software
+  characters. This program comes with a file that defines the pen
+  strokes required to draw all characters on the keyboard (upper
+  and lower case characters, numbers, etc.) plus an alternate set of
+  all upper and lower case greek characters and additional special
+  symbols.
+
+  The software character table contains X and Y and pen positions to
+  draw each character. If you wish to draw any additional characters
+  or to modify the font of the existing characters you need only
+  modify this table.
+
+  CONTROL CHARACTERS
+  In the software character table all characters to be plotted will
+  have pen position = 2 (draw) or = 3 (move). In addition the table
+  currently contains 4 control characters:
+
+  PEN POSITION = 0
+  Shift the next printed character by X and Y. 3 control characters
+  are presently included in the software character table to allow
+  shifting.
+
+  {   = Shift up (for superscripts..............X= 0.0, Y= 0.5)
+  }   = Shift down (for subscripts..............X= 0.0, Y=-0.5)
+  \   = Shift left 1 character (for backspace...X=-1.0, Y= 0.0)
+
+  PEN POSITION =-1
+  Select the next printed character from the alternate character
+  set. At present this control character is,
+
+  ]   = Switch to alternate character set
+
+  These 4 control characters are only defined by the value of the
+  pen position in the software character table (i.e., they are not
+  hard wired into this program). As such by modifying the software
+  character table the user has the option of defining any control
+  characters to meet specific needs.
+
+  These characters may be used in character strings to produce
+  special effects. For example, to plot subscript 5, B, superscript
+  10 use the string,
+
+  }5B{1{0
+
+  To plot B, subscript 5 and superscript 10 with the 5 directly
+  below the 1 of the 10 use the string,
+
+  B}5\{1{0
+
+  To plot upper case greek gamma followed by the words "Total Width"
+  use the string,
+
+  ]G Total Width
+
+  NOTE: When these control characters are used they only effect the
+  next 1 printed character (see, above example of plotting super-
+  script 10 where the shift up control character was used before the
+  1 and then again before the 0).
+
+  If these 4 control characters are not available on your computer
+  you can modify the software character table to use any other 4
+  characters that you do not normally use in character strings (for
+  details see the software character table).
+
+  STANDARD/ALTERNATE CHARACTER SETS
+  The software character table contains 2 sets of characters, which
+  are a standard set (all characters on an IBM keyboard) and an
+  alternate set (upper and lower case greek characters and special
+  characters). To draw a character from the alternate character set
+  put a vertical stroke character (]) before a character (see the
+  above example and the software character table for details). This
+  control character will only effect the next 1 plotted character.
+
+  SUB AND SUPER SCRIPTS
+  To draw subscript preceed a character by }. To draw superscript
+  preceed a character by { (see the above example and the software
+  character table for details). These control character will only
+  effect the next 1 plotted character.
+
+  BACKSPACING
+  To backspace one character preceed a character by \ (see, the
+  above example and the software character table for details). This
+  control character will perform a true backspace and will effect
+  all following characters in the same character string.
+

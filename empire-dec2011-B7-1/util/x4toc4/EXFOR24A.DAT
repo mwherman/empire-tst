@@ -1,0 +1,172 @@
+EXFOR COLUMN TITLE TO COMPUTATION FORMAT OUTPUT COLUMN TABLE                   1
+============================================================                   1
+COMMENT CARDS ARE DEFINED BY A 1 IN COLUMN 80                                  1
+REACTION DEFINITIONS MUST HAVE A BLANK COLUMN 80                               1
+WARNING...FAILURE TO FOLLOW THIS CONVENTION WILL RESULT IN ERRORS              1
+                                                                               1
+FORMAT                                                                         1
+======                                                                         1
+COLUMNS   DEFINITION                                                           1
+=======   ==========                                                           1
+  1- 10   EXFOR TITLE                                                          1
+ 11- 15   LOWEST MF NUMBER                                                     1
+ 16- 20   HIGHEST MF NUMBER                                                    1
+ 21- 25   COMPUTATION FORMAT OUTPUT FIELD (1 TO 8)                             1
+ 26- 30   OPERATION NUMBER (SEE, LIST BELOW FOR DEFINITIONS)                   1
+ 33- 35   DEFINITION OF FIELDS 7 AND 8...SEE BELOW LIST                        1
+          (DEFINITION MUST BE RIGHT ADJUSTED TO END IN COLUMN 35).             1
+          ONLY ONE OF THE FOLLOWING SHOULD BE USED,                            1
+          LVL=LEVEL         HL=HALF-LIFE    E2=SECONDARY ENERGY                1
+          DLV=LEVEL RANGE  EXC=EXCITATION  DE2=SECONDARY ENERGY RANGE          1
+          MIN=E-MIN        MAX=E-MAX                                           1
+                                                                               1
+REACTION DEFINED MF                                                            1
+===================                                                            1
+NOTE, THE REACTION DEFINED MF NUMBER CAN BE USED TO OPERATE ON AND             1
+OUTPUT THE SAME TITLE IN DIFFERENT WAYS FOR DIFFERENT TYPES OF DATA            1
+(E.G., SEE EN-MIN AND EN-MAX BELOW).                                           1
+                                                                               1
+DEFINED OPERATIONS                                                             1
+==================                                                             1
+TO PERFORM ANY OF THE FOLLOWING OPERATIONS ON AN EXFOR TITLE ENTER ONE         1
+OF THE FOLLOWING NUMBERS IN COLUMN 30 (E.G., TO SET THE CENTER-OF-MASS         1
+SYSTEM FLAG THE EXFOR TITLE DATA-CM HAS A 6 IN COLUMN 30).                     1
+                                                                               1
+(1) MULTIPLE FIELDS...ALWAYS CHOOSE THIS FIELD.                                1
+(2) MULTIPLE FIELDS...CHOOSE THE FIRST FIELD.                                  1
+(3) MULTIPLE FIELDS...NEVER CHOOSE THIS FIELD.                                 1
+(4) MULTIPLE FIELDS...CHOOSE THE LARGEST FIELD, E.G. ERRORS.                   1
+(5) MULTIPLE FIELDS...COMBINE FIELDS QUADRATICALLY, E.G. ERRORS,               1
+                      (EN-ERR = SQRT(EN-ERR1**2 + EN-ERR2**2)).                1
+(6) SET CENTER-OF-MASS SYSTEM FLAG IN OUTPUT                                   1
+(7) MULTIPLE FIELDS...COMBINE FIELDS TO DEFINE AVERAGE, BUT NOT ERROR,         1
+                      (EN-MIN AND EN-MAX TO DEFINE EN).                        1
+(8) MULTIPLE FIELDS...COMBINE FIELDS TO DEFINE AVERAGE AND ERROR,              1
+                      (EN-MIN AND EN-MAX TO DEFINE EN AND EN-ERR).             1
+(9) -MIN/-MAX MUST APPEAR TOGETHER, E.G. EN-MIN/EN-MAX - RESONANCE INTEGRAL,   1
+                     (IF MISSING DEFINE -MIN= 0 OR -MAX= 15 MEV).              1
+(10) MULTIPLE FIELDS..CHOOSE LARGEST AND SMALLEST IN 2 SUCCESSIVE FIELDS,      1
+                      (MULTIPLE E-LVL).                                        1
+(11) TAKE ABSOLUTE VALUE.                                                      1
+                                                                               1
+            MF  MF   OUTPUT                                                    1
+            LOW HIGH FIELD  OPERATION                                          1
+                                                                               1
+INITIAL ENERGY                                                                 1
+                                                                               1
+EN            1  999    1    1
+EN-MEAN       1  999    1    0
+EN-RSL-FW     1  999    2    0
+EN-RES        1  999    1    1
+EN-DUMMY      1  999    1    0
+EN-MIN      121  399    1    9
+EN-MAX      121  399    2    9
+EN-MIN        1  999    1    8
+EN-MAX        1  999    1    8
+EN-RSL        1  999    2    4
+EN-ERR        1  999    2    4
+EN-RES-ERR    1  999    2    4
+EN-NRM        1  999    0    0
+Add CM energy conversion table (V.Zerkin, A.Trkov, 08/09)                      1
+EN-CM         1  999    0    6
+EN-CM-MIN     1  999    1    8
+EN-CM-MAX     1  999    1    8
+                                                                               1
+DATA                                                                           1
+                                                                               1
+DATA          1  199    3    1
+DATA        200  209    3    0
+DATA        210  999    3    1
+DATA-APRX     1  999    3    0
+DATA-CM       1  999    3    6
+DATA-MIN      1  999    3    8
+DATA-MAX      1  999    3    8
+DATA-ERR      1  999    4    4
+Last flag in next 2 lines was changed from 4 to 5 (V.Zerkin 19-Oct-2006)       1
+DATA-ERR1     1  999    4    5
+DATA-ERR2     1  999    4    5
++DATA-ERR     1  999    4    4
+-DATA-ERR     1  999    4    4
+ERR-T         1  999    4    1
+ERR-S         1  999    4    3
+RATIO       200  209    3    1
+RATIO-APRX  200  209    3    0
+RATIO-ERR   200  209    4    0
+RATIO       802  802    3    0
+RATIO-APRX  802  802    3    0
+RATIO-ERR   802  802    4    0
+RATIO         1  999    0    0
+RATIO-APRX    1  999    0    0
+RATIO-ERR     1  999    0    0
+                                                                               1
+ANGULAR VARIABLES                                                              1
+                                                                               1
+COS           4  999    5    0
+COS-CM        4  999    5    6
+ANG           4  999    5    0
+ANG-CM        4  999    5    6
+ANG-RSL       4  999    6    4
+                                                                               1
+SECONDARY ENERGY                                                               1
+                                                                               1
+E             1  999    7   10   E2
+E-CM          1  999    7   10   E2
+E-LVL         1  999    7   10  LVL
+E-EXC         1  999    7   10  EXC
+E-EXC1        1  999    7   10  EXC
+E-EXC2        1  999    7   10  EXC
+E-EXC3        1  999    7   10  EXC
+E-MEAN        1  999    7    0   E2
+E1            1  999    7    0  DE2
+E2            1  999    8    0
+E-MIN         1  999    7    8   E2
+E-MAX         1  999    7    8   E2
+E1-MAX        1  999    7    0  DE2
+E1-MIN        1  999    8    0  DE2
+E-CM-MIN      1  999    7    8   E2
+E-CM-MAX      1  999    7    8   E2
+E-LVL-MIN     1  999    7    0  DE2
+E-LVL-MAX     1  999    8    0  DE2
+Interpret Q-VAL as (-ve) outgoing particle energy E2 (A.Trkov, 07/02           1
+Q-VAL         1  999    7   11   E2
+                                                                               1
+YIELD (USUALLY FISSION). OUTPUT ELEMENT IN FIELD 5, MASS IN FIELD 6.           1
+                                                                               1
+ELEMENT       3    3    5    1
+ELEMENT       4    4    0    0
+ELEMENT     801  802    5    1
+ELEMENT     804  804    0    0
+MASS          3    4    6    1
+MASS        801  804    6    1
+                                                                               1
+MISCELLANEOUS (USED)                                                           1
+                                                                               1
+MOMENTUM L    1  999    5    0
+NUMBER        1  999    5    0
+NUMBER-CM     1  999    5    6
+HL1           1  999    7    0   HL
+HL1-ERR       1  999    8    0
+                                                                               1
+MISCELLANEOUS (IGNORED)                                                        1
+                                                                               1
+MONIT1        1  999    0    0
+MONIT2        1  999    0    0
+MONIT3        1  999    0    0
+MONIT-ERR     1  999    0    0
+ASSUM         1  999    0    0
+ASSUM1        1  999    0    0
+ASSUM2        1  999    0    0
+MISC          1  999    0    0
+MISC1         1  999    0    0
+MISC2         1  999    0    0
+MISC3         1  999    0    0
+MISC4         1  999    0    0
+MISC-ERR      1  999    0    0
+MISC1-ERR     1  999    0    0
+MONIT         1  999    0    0
+MONIT1-ERR    1  999    0    0
+MONIT2-ERR    1  999    0    0
+ISOMER        1  999    0    0
+DECAY-FLAG    1  999    0    0
+FLAG          1  999    0    0
+N-OUT         1  999    0    0

@@ -1,0 +1,18 @@
+#!/bin/bash
+MT=$1
+file=$2 
+echo ' '
+echo 'Running ZVView plot for:'
+echo 'MT='$1
+echo $file'='$2 
+rm tmp.dat c4.zvd end.zvd $file-$MT.zvd
+./c4dat4l.exe c4 tmp.dat MF=3 MT=$1
+./datzvdl.exe tmp.dat c4.zvd
+./endzvdl.exe A $MT Present end.zvd
+echo #!zvview.exe >$file-$MT.zvd
+cat c4.zvd >$file-$MT.zvd
+cat end.zvd >>$file-$MT.zvd
+rm c4.zvd end.zvd tmp.dat 2>/dev/null         
+./zvview.exe $file-$MT.zvd ps01.tit/c
+
+

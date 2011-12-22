@@ -1,0 +1,18 @@
+ Collective levels selected automatically from available target levels (symm.rotational mod
+ Dyn.deformations are not used in symm.rot.model ( N < 50 for coupled levels )
+  42 100     nucleus is treated as deformed
+
+    Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)
+      10    4    4   0.0  0.231E+00  0.000E+00
+
+  N   E[MeV]  J   pi Nph L  K  Dyn.Def.
+  1  0.0000  0.0  1.  0  0  0  0.100E-01
+  2  0.5356  2.0  1.  0  0  0  0.100E-01
+  5  1.1361  4.0  1.  0  0  0  0.100E-01
+ 11  1.8469  6.0  1.  0  0  0  0.100E-01
+ 53  0.6951  0.0  1.  0  0  0  0.100E-01
+ 54  1.0638  2.0  1.  0  0  0  0.100E-01
+ 56  1.4639  2.0  1.  0  0  0  0.100E-01
+ 62  1.9083  3.0 -1.  0  0  0  0.218E+00
+ 69  2.1560  1.0 -1.  0  0  0  0.218E+00
+ 75  2.3390  5.0 -1.  0  0  0  0.218E+00

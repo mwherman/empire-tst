@@ -1,0 +1,202 @@
+#!/bin/bash
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+MT=$2
+MAT=$3
+EXPDAT=$4
+#CRCOV=$5
+
+if [ -z $file ]; then
+echo "INPUT FILE NOT FOUND"
+exit
+fi
+if [ -z $MT -o "$MT" = "0" ]; then
+   MT="1 2 3 4 16 17 18 102 103 107"
+fi
+if [ -z $MAT ]; then
+   MAT="1111"
+fi
+if [ -z $EXPDAT ]; then
+   EXPDAT="0"
+fi
+#if [ -z $CRCOV ]; then
+#   CRCOV="0"
+#fi
+if [ ! -s $file.endf ]; then
+   echo "ENDF FILE NOT FOUND ($file.endf)"
+   exit 0
+fi
+if [ ! -s $file.xsc ]; then
+   echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
+   exit 1
+fi
+if [ ! -s $file-inp.sen ]; then
+   echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
+   exit 2
+fi
+if [ ! -s $file-mat.sen ]; then
+   echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
+   exit 3
+fi
+if [ ! -s $file-kal.c4 ]; then
+   echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
+   if [ ! -s $file.c4 ]; then
+     echo "C4 FILE NOT FOUND ($file.c4)"
+     exit 4
+   else
+     cp $file.c4 $file-kal.c4
+   fi
+fi
+
+
+rm INPUT.D 2>/dev/null
+rm KALMAN.INP 2>/dev/null
+rm fort.* 2>/dev/null
+rm check.out 2>/dev/null
+rm $file-*-c4.gpd 2>/dev/null
+rm $file-{c4,par,*-err}.kal 2>/dev/null
+#rm $file-33-*.cov  2>/dev/null
+
+
+# parse .c4 file for only reactions (MT #s) of interest:
+for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
+    grep "^.\{12,19\}  3 $j " $file-kal.c4 >>$file-c4.kal
+done
+
+for k in $MT; do
+    echo "MT= ${k}"
+
+    if [ -s INPUT.D ]; then
+       rm INPUT.D
+    fi
+
+    cat >INPUT.D <<EOF
+$file ${k} $MAT $EXPDAT
+EOF
+    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
+
+
+    if [ -s check.out ]; then
+       exit
+    fi
+
+
+    if [ -s KALMAN.INP ]; then
+       rm KALMAN.INP
+    fi
+
+    $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+
+# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
+for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
+    l=`echo ${j}`
+    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
+done
+
+# EXPERIMENTAL DATA AND THEIR CORRELATIONS
+
+    if [ "$EXPDAT" != 0 ]; then
+       if [ ! -s $file-expxsc.kal ]; then
+	  cp fort.10 $file-expxsc.kal
+       else
+	  cp $file-expxsc.kal fort.10
+       fi
+       if [ ! -s $file-expcorr.kal ]; then
+	  cp fort.12 $file-expcorr.kal
+       else
+	  cp $file-expcorr.kal fort.12
+       fi
+    else
+       rm fort.10
+       rm fort.11
+       rm fort.12
+    fi
+
+# CORRELATIONS AMONG MODEL PARAMETERS
+    if [ ! -s $file-parcorr.kal ]; then
+       cp fort.52 $file-parcorr.kal
+    else
+       cp $file-parcorr.kal fort.52
+    fi
+
+    if [ "$EXPDAT" != 0 ]; then
+        kalinp=''
+        if [ -s $file-inp.kal ]; then
+            echo "use existing Kalman input y/N?"
+            read kalinp
+        fi
+        if [ -n "$kalinp" ] && ( [ ${kalinp:0:1} = "y" ] || [ ${kalinp:0:1} = "Y" ] ); then
+            cp $file-inp.kal KALMAN.INP
+        else
+            echo 'EDIT KALMAN INPUT'
+            emacs KALMAN.INP
+        fi
+    fi
+
+    $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
+
+    mv fort.13 $file-xsc.kal
+    mv fort.14 $file-cov.kal
+    mv fort.15 $file-par.kal
+    cat fort.16 fort.32 > fort.48
+ 
+    $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
+
+
+    if [ -s check.out ]; then
+       exit
+    fi
+
+    # generate ENDF-formatted covariance matrix
+    sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
+    awk ' BEGIN{}
+    { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
+
+    mv fort.18 $file-${k}-err.kal
+
+
+    cp $file-${k}-c4.gpd expxscplot.d
+
+
+#PLOT DATA ONLY WITH EXPERIMENTAL DATA
+    if [ "$EXPDAT" != 0 ]; then
+       gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
+    fi
+
+    mv corrplot.d $file-${k}-cov.gpd
+    mv xscplot.d  $file-${k}-xsc.gpd
+
+    rm fort.17
+    rm fort.20
+    rm expxscplot.d
+
+# CROSS-REACTION CORRELATIONS TAKEN FROM KALMAN
+#    if [ "$CRCOV" != 0 ]; then
+#     rm $file-33-*.cov
+#     $EMPIREDIR/util/kalman/kalend3.exe <INPUT.D
+##     for j in "  1" "  2" "  3" "  4" " 16" " 18" "102" "103" "107"; do
+#     for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102"; do
+#      l=`echo ${j}`
+#      grep "^.\{70,75\}33$j" fort.112 >$file-33-$l.cov
+#      echo "                                                                 0${MAT}33  099999" >> $file-33-$l.cov
+#     done
+#    fi
+
+    echo 'COMPLETE ...'
+
+done
+
+rm INPUT.D
+rm KALMAN.INP
+rm fort.{1*,50,52,75}
+rm check.out
+
+exit
+
+
+# l=`echo ${#k}` IT GIVES THE LENGTH OF THE STRING K

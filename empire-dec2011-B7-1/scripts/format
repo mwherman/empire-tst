@@ -1,0 +1,72 @@
+#! /bin/sh -
+#script to format EMPIRE II output
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+MATid=$2
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *out
+echo ' '
+echo -n 'Choose one of the above (without .out extention!): '
+read file
+fi
+
+#run EMPEND to format EMPIRE output into ENDF
+
+# EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
+cat >EMPEND.INP <<EOF
+$file.out
+$file-e.endf
+1 
+-1.0
+$2
+EOF
+$EMPIREDIR/util/empend/empend <EMPEND.INP
+mv empend.log $file-log.empend
+rm EMPEND.INP empmf1.tmp
+
+# RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
+# moved to a new script "rec-ch-part" called from a GUI(Execute)
+
+# RUN ENDRES (IF RESONANCE FILE IS PRESENT)
+if [ -s $file-res.endf ]; then
+   ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
+   rm $file.endf 2>/dev/null
+   ln -sf $file-e.endf empire.end
+   ln -sf $file-res.endf ENDRES.DAT
+   $EMPIREDIR/util/endres/endres < ENDRES.INP
+   mv endf.dat $file-endres.endf
+   mv endres.lst $file-log.endres
+   rm ENDRES.INP empire.end ENDRES.DAT 2>/dev/null
+else
+   cp $file-e.endf $file-endres.endf
+fi
+
+# RUN STANEF
+
+rm -f INPUT 2>/dev/null
+cat >INPUT <<EOF
+$file-endres.endf
+$file.endf
+0
+
+DONE
+EOF
+$EMPIREDIR/util/stanef/stanef <INPUT
+
+#$work/$file.endf is the final ENDF output file
+
+# remove left-over files
+rm INPUT 2>/dev/null
+rm angdis.cur 2>/dev/null
+rm angdis.pnt 2>/dev/null
+
+exit

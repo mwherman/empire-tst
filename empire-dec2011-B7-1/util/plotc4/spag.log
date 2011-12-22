@@ -1,0 +1,307 @@
+SPAG - Version 6.20Rc
+Copyright (C) Polyhedron Software - 1986-2000 - All rights reserved
+ 
+Licensee : International Atomic Energy Agency
+         : COMMERCIAL SINGLE user Licence (Intel Linux) SN P33471
+ 
+Licence data             read from /home/mike/download/fortran/plusFORT/plusFORT.fig
+This version dated       May 2000
+Maintenance Expiry Date  Jan 2001
+KIND information         read from /home/mike/download/fortran/plusFORT/f77kinds.f90
+INTRINSIC function names read from /home/mike/download/fortran/plusFORT/vaxfunc.txt
+Configuration data       read from /home/mike/download/fortran/plusFORT/spag.fig
+--------------------------------------------------------------------
+Finished reading DXSEND from file dxsend.f
+Re-structuring..Writing DXSEND
+--------------------------------------------------------------------
+<>I Unreachable or redundant statement
+      CALL FINDMT(LEF, ZA0, ZA, AWR, L1, L2, N1, N2, MAT, MF, MT, IER)
+<>I Unreachable or redundant statement
+      IER = 99
+<>I Unreachable or redundant statement
+      IER = 99
+Finished reading DXSEN1 from file dxsend.f
+<>I Subprogram argument inconsistency        arg  7 of YTGEOU       (I4A/I4V)
+Re-structuring..Writing DXSEN1
+--------------------------------------------------------------------
+Finished reading SPWATT from file dxsend.f
+<>I Variable assigned a value but not used   E5
+Re-structuring..Writing SPWATT
+--------------------------------------------------------------------
+Finished reading FINDMT from file dxsend.f
+<>I Variable assigned a value but not used   DD
+<>I Variable assigned a value but not used   LIS
+Re-structuring..Writing FINDMT
+--------------------------------------------------------------------
+Finished reading SKIPSC from file dxsend.f
+<>I Variable assigned a value but not used   C66
+<>I Variable assigned a value but not used   MAT
+<>I Variable assigned a value but not used   MF
+Re-structuring..Writing SKIPSC
+--------------------------------------------------------------------
+Finished reading RDTAB1 from file dxsend.f
+Re-structuring..Writing RDTAB1
+--------------------------------------------------------------------
+Finished reading RDTAB2 from file dxsend.f
+<>I Argument is not used                     IER
+Re-structuring..Writing RDTAB2
+--------------------------------------------------------------------
+Finished reading RDLIST from file dxsend.f
+<>I Argument is not used                     IER
+Re-structuring..Writing RDLIST
+--------------------------------------------------------------------
+Finished reading FINTXS from file dxsend.f
+Re-structuring..Writing FINTXS
+--------------------------------------------------------------------
+Finished reading WRTEXT from file dxsend.f
+Re-structuring..Writing WRTEXT
+--------------------------------------------------------------------
+Finished reading WRCONT from file dxsend.f
+Re-structuring..Writing WRCONT
+--------------------------------------------------------------------
+Finished reading WRTAB1 from file dxsend.f
+<>W Local variable used but not set          INR
+<>I Argument is not used                     INT
+No clutter removal attempted
+<>I INTRINSIC functn name used for variable  INT
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing WRTAB1
+--------------------------------------------------------------------
+Finished reading WRTAB2 from file dxsend.f
+Re-structuring..Writing WRTAB2
+--------------------------------------------------------------------
+Finished reading WRLIST from file dxsend.f
+Re-structuring..Writing WRLIST
+--------------------------------------------------------------------
+Finished reading CHENDF from file dxsend.f
+Re-structuring..Writing CHENDF
+--------------------------------------------------------------------
+Finished reading FINT2D from file dxsend.f
+Re-structuring..Writing FINT2D
+--------------------------------------------------------------------
+Finished reading UNIGRD from file dxsend.f
+Re-structuring..Writing UNIGRD
+--------------------------------------------------------------------
+Finished reading FITGRD from file dxsend.f
+Re-structuring..Writing FITGRD
+--------------------------------------------------------------------
+Finished reading FNGAUS from file dxsend.f
+Re-structuring..Writing FNGAUS
+--------------------------------------------------------------------
+Finished reading YTGEOU from file dxsend.f
+Re-structuring..Writing YTGEOU
+--------------------------------------------------------------------
+Finished reading FYTG2D from file dxsend.f
+Re-structuring..Writing FYTG2D
+--------------------------------------------------------------------
+Finished reading ERRFN1 from file dxsend.f
+Re-structuring..Writing ERRFN1
+--------------------------------------------------------------------
+Finished reading POLYNX from file dxsend.f
+Re-structuring..Writing POLYNX
+--------------------------------------------------------------------
+Finished reading PLOTC4 from file plotc4.f
+<>I COMMON block is not used                 /LIBC/
+<>I COMMON block is not used                 /LIBI/
+<>I COMMON block is not used                 /SYSSTA/
+<>I COMMON block is not used                 /WAYS/
+<>I COMMON block is not used                 /XYLIM/
+<>I COMMON block is not used                 /XYREAL/
+<>I Variable declared but not used           BLANK
+<>I Variable declared but not used           FIELDI
+<>I Variable declared but not used           LAB
+<>I Variable declared but not used           STAT
+Reference to LAB removed
+Reference to STAT removed
+Reference to FIELDI removed
+Re-structuring..Writing PLOTC4
+--------------------------------------------------------------------
+Finished reading SETUP from file plotc4.f
+<>I Variable declared but not used           BUFF
+Reference to BUFF removed
+Re-structuring..Writing SETUP
+--------------------------------------------------------------------
+Finished reading NXTPLT from file plotc4.f
+<>I COMMON block is not used                 /HPINCH/
+<>I COMMON block is not used                 /PAINT/
+<>I COMMON block is not used                 /PLOTN/
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing NXTPLT
+--------------------------------------------------------------------
+Finished reading SPOTER from file plotc4.f
+Re-structuring..Writing SPOTER
+--------------------------------------------------------------------
+Finished reading READIN from file plotc4.f
+Re-structuring..Writing READIN
+--------------------------------------------------------------------
+Finished reading SHIFTY from file plotc4.f
+Re-structuring..Writing SHIFTY
+--------------------------------------------------------------------
+Finished reading GETEV from file plotc4.f
+<>I CHARACTER & Numeric data mixed in COMMON /WHEREC/
+<>I Variable assigned a value but not used   HEADER
+<>I Variable assigned a value but not used   IMF6
+<>I Variable assigned a value but not used   L1
+<>I Variable assigned a value but not used   L2
+<>I Variable assigned a value but not used   LIS
+<>I Variable assigned a value but not used   MFS
+<>I Variable assigned a value but not used   NBT
+Re-structuring..Writing GETEV
+--------------------------------------------------------------------
+Finished reading X from file plotc4.f
+Re-structuring..Writing X
+--------------------------------------------------------------------
+Finished reading Y from file plotc4.f
+Re-structuring..Writing Y
+--------------------------------------------------------------------
+Finished reading RQUEST from file plotc4.f
+Re-structuring..Writing RQUEST
+--------------------------------------------------------------------
+Finished reading SCALER from file plotc4.f
+<>I Variable assigned a value but not used   IMHI
+Re-structuring..Writing SCALER
+--------------------------------------------------------------------
+Finished reading UNITED from file plotc4.f
+Re-structuring..Writing UNITED
+--------------------------------------------------------------------
+Finished reading WHAT78 from file plotc4.f
+Re-structuring..Writing WHAT78
+--------------------------------------------------------------------
+Finished reading SPACER from file plotc4.f
+Re-structuring..Writing SPACER
+--------------------------------------------------------------------
+Finished reading BORDER from file plotc4.f
+<>I Subprogram argument inconsistency        arg  4 of SYMBLH       (C4A/C*E)
+<>I COMMON block is not used                 /PLTSIZ/
+<>I Variable declared but not used           BLANK
+<>I Variable declared but not used           DATAO
+<>I Variable declared but not used           MSTATP
+<>I Variable declared but not used           UNITO
+Reference to UNITO removed
+Reference to MSTATP removed
+Re-structuring..   4 duplicated statements inserted
+Re-structuring..Writing BORDER
+--------------------------------------------------------------------
+Finished reading EUNIT from file plotc4.f
+Re-structuring..Writing EUNIT
+--------------------------------------------------------------------
+Finished reading HLUNIT from file plotc4.f
+Re-structuring..Writing HLUNIT
+--------------------------------------------------------------------
+Finished reading CSUNIT from file plotc4.f
+Re-structuring..Writing CSUNIT
+--------------------------------------------------------------------
+Finished reading PERUN from file plotc4.f
+<>I Argument is not used                     IDOUB
+Re-structuring..Writing PERUN
+--------------------------------------------------------------------
+Finished reading GRID0 from file plotc4.f
+Re-structuring..Writing GRID0
+--------------------------------------------------------------------
+Finished reading GRID1 from file plotc4.f
+Re-structuring..Writing GRID1
+--------------------------------------------------------------------
+Finished reading EVALP from file plotc4.f
+<>I COMMON block is not used                 /WAYS/
+<>I COMMON block is not used                 /XYLIM/
+Re-structuring..Writing EVALP
+--------------------------------------------------------------------
+Finished reading EXFORP from file plotc4.f
+<>I Subprogram argument inconsistency        arg  4 of SYMBLH       (C4A/C*E)
+<>I COMMON block is not used                 /GETEM/
+<>I COMMON block is not used                 /XYLABC/
+<>I Variable declared but not used           HEADER
+Reference to HEADER removed
+Re-structuring..Writing EXFORP
+--------------------------------------------------------------------
+Finished reading PLOTP from file plotc4.f
+Re-structuring..Writing PLOTP
+--------------------------------------------------------------------
+Finished reading PLOTI from file plotc4.f
+Re-structuring..Writing PLOTI
+--------------------------------------------------------------------
+Finished reading GETEX from file plotc4.f
+<>I Variable assigned a value but not used   DUMMY
+<>I Variable assigned a value but not used   MOR10
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing GETEX
+--------------------------------------------------------------------
+Finished reading FLOAT9 from file plotc4.f
+<>I Variable declared but not used           OTAPE
+Reference to OTAPE removed
+Re-structuring..   1 duplicated statements inserted
+Re-structuring..Writing FLOAT9
+--------------------------------------------------------------------
+Finished reading RQEX from file plotc4.f
+Re-structuring..Writing RQEX
+--------------------------------------------------------------------
+Finished reading ZAMFMT from file plotc4.f
+Re-structuring..Writing ZAMFMT
+--------------------------------------------------------------------
+Finished reading ZAHOL from file plotc4.f
+Re-structuring..Writing ZAHOL
+--------------------------------------------------------------------
+Finished reading PACKZA from file plotc4.f
+<>I Variable declared but not used           DASH
+Re-structuring..Writing PACKZA
+--------------------------------------------------------------------
+Finished reading MTHOL from file plotc4.f
+<>I Variable declared but not used           MSTATP
+<>I Variable declared but not used           OUTP
+Reference to OUTP removed
+Reference to MSTATP removed
+Re-structuring..Writing MTHOL
+--------------------------------------------------------------------
+Finished reading METAST from file plotc4.f
+Re-structuring..Writing METAST
+--------------------------------------------------------------------
+Finished reading SIZER from file plotc4.f
+Re-structuring..Writing SIZER
+--------------------------------------------------------------------
+Finished reading LEFTY from file plotc4.f
+Re-structuring..Writing LEFTY
+--------------------------------------------------------------------
+Finished reading MFHOL from file plotc4.f
+Re-structuring..Writing MFHOL
+--------------------------------------------------------------------
+Finished reading PAKZAP from file plotc4.f
+Re-structuring..Writing PAKZAP
+--------------------------------------------------------------------
+Finished reading COMPND from file plotc4.f
+Re-structuring..Writing COMPND
+--------------------------------------------------------------------
+Finished reading META10 from file plotc4.f
+Re-structuring..Writing META10
+--------------------------------------------------------------------
+Finished reading NUMBRH from file plotc4.f
+Re-structuring..Writing NUMBRH
+--------------------------------------------------------------------
+Finished reading SYMBLH from file plotc4.f
+Re-structuring..Writing SYMBLH
+--------------------------------------------------------------------
+Finished reading SYMIN from file plotc4.f
+Re-structuring..Writing SYMIN
+--------------------------------------------------------------------
+Finished reading PLOTH from file plotc4.f
+Re-structuring..Writing PLOTH
+--------------------------------------------------------------------
+ 
+End of input after   66 sub-programs (  6937 lines)
+ 
+  66 were re-structured
+  66 were re-labelled
+  66 were beautified
+ 
+    57 diagnostics generated
+ 
+     3 occurrences of Unreachable or redundant statement
+     1 occurrences of CHARACTER & Numeric data mixed in COMMON
+     3 occurrences of Subprogram argument inconsistency
+    14 occurrences of Variable declared but not used
+     1 occurrences of Local variable used but not set
+     4 occurrences of Argument is not used
+    14 occurrences of COMMON block is not used
+    16 occurrences of Variable assigned a value but not used
+     1 occurrences of INTRINSIC functn name used for variable
+ 
+SPAG finished normally

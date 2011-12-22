@@ -1,0 +1,84 @@
+#!/bin/sh
+# Merge MT33 file with covariance data into the basic ENDF file
+#Usage: mergeMT33 root_file_name [MF] [MAT]
+# the next line restarts using wish\
+exec wish "$0" "$@"
+
+set MFR 33
+set MATR 0
+
+if {$argc > 0} {set file [lindex $argv 0]}
+if {$argc > 1} {set MFR [lindex $argv 1]}
+if {$argc > 2} {set MATR [lindex $argv 2]}
+
+# merge all covariance files
+exec xterm -e ../scripts/mergecov $file
+
+set basefile $file.endf
+if {[file exists $basefile] == 0} return
+
+
+set MF 0
+set MATo 1
+set basendf [open $basefile r]
+set outendf [open $file-m.endf w]
+#copy basic file up to the point of insertion
+gets $basendf line
+while { $MF < $MFR &&  $MATo > 0 && [string length $line] > 0 } {
+puts $outendf $line
+gets $basendf line
+set MATo [string trim [string range $line 66 69]]
+set MF   [string trim [string range $line 70 71]]
+set MT   [string trim [string range $line 72 74]]
+#take the first MAT if not specified
+if { $MATR == 0 } {
+        set MATR $MATo
+  }
+}
+set line_mem $line
+if { $MF == $MFR } {set line_mem ""}
+# merge all covariance files
+exec xterm -e ../scripts/mergecov $file $MATR
+set modfile MT33
+if {[file exists $modfile] == 0} return
+#read modification file and insert
+set modendf [open $modfile r]
+gets $modendf line
+while { [string length $line] > 0 } {
+       set MATm [string trim [string range $line 66 69]]
+       set MF   [string trim [string range $line 70 71]]
+       set MT   [string trim [string range $line 72 74]]
+       if { $MF < $MFR || $MATm < $MATR } {
+               gets $modendf line
+               continue
+       }
+       if { $MF == $MFR && $MATR == $MATm } {
+       puts $outendf $line
+       gets $modendf line
+       }
+       if { $MF > $MFR || $MATm > $MATR } {
+               break
+       }
+}
+if { $line_mem != "" } {
+   #Add FEND record
+   puts  $outendf [format "                                                                  %s 0  0    0" $MATR ]
+   puts $outendf $line_mem
+}
+#Copy rest of the original file
+gets $basendf line
+while { [string length $line] > 0 } {
+       set MATm [string trim [string range $line 66 69]]
+       set MF   [string trim [string range $line 70 71]]
+       set MT   [string trim [string range $line 72 74]]
+       if { $MF != $MFR || $MATm != $MATR } {
+          puts $outendf $line
+       }
+       gets $basendf line
+}
+
+close $basendf
+close $modendf
+close $outendf
+
+exit

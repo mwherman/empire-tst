@@ -1,0 +1,90 @@
+#! /bin/sh -
+#script to produce ZVView plots from the *.xsc files
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Cross sections ready to be plotted'
+echo ' '
+ls *xsc
+echo ' '
+echo -n 'Choose one of the above (without .xsc extention!): '
+read file
+fi                          
+
+# Deleting previous plots
+if [ -f "$file-ztot.zvd" ]; then
+ rm "$file-ztot.zvd" 
+fi
+if [ -f "$file-zel.zvd" ]; then
+ rm "$file-zel.zvd" 
+fi
+if [ -f "$file-znon.zvd" ]; then
+ rm "$file-znon.zvd" 
+fi
+if [ -f "$file-zg.zvd" ]; then
+ rm "$file-zg.zvd" 
+fi
+if [ -f "$file-zf.zvd" ]; then
+ rm "$file-zf.zvd" 
+fi
+if [ -f "$file-zn.zvd" ]; then
+ rm "$file-zn.zvd" 
+fi
+if [ -f "$file-zp.zvd" ]; then
+ rm "$file-zp.zvd" 
+fi
+if [ -f "$file-za.zvd" ]; then
+ rm "$file-za.zvd" 
+fi
+if [ -f "$file-z2n.zvd" ]; then
+ rm "$file-z2n.zvd" 
+fi
+if [ -f "$file-z3n.zvd" ]; then
+ rm "$file-z3n.zvd" 
+fi
+#run cs2zvd to produce ZVView plots
+cp $file.xsc XSECTIONS.OUT
+rm -f CS2ZVD.INP
+ln -sf $EMPIREDIR/util/cs2zvd/CS2ZVD.INP CS2ZVD.INP
+#vi CS2ZVD.INP	
+$EMPIREDIR/util/cs2zvd/cs2zvd.exe 
+if [ -f "XS_(z,tot).zvd" ]; then
+ mv "XS_(z,tot).zvd" $file-ztot.zvd
+fi
+if [ -f "XS_(z,nel).zvd" ]; then
+  mv "XS_(z,nel).zvd" $file-zel.zvd
+fi
+if [ -f "XS_(z,nonel).zvd" ]; then
+  mv "XS_(z,nonel).zvd" $file-znon.zvd
+fi
+if [ -f "XS_(z,gamma).zvd" ]; then
+  mv "XS_(z,gamma).zvd" $file-zg.zvd
+fi
+if [ -f "XS_(z,f).zvd" ]; then
+  mv "XS_(z,f).zvd" $file-zf.zvd
+fi
+if [ -f "XS_(z,n).zvd" ]; then
+  mv "XS_(z,n).zvd" $file-zn.zvd
+fi
+if [ -f "XS_(z,p).zvd" ]; then
+  mv "XS_(z,p).zvd" $file-zp.zvd
+fi
+if [ -f "XS_(z,a).zvd" ]; then
+  mv "XS_(z,a).zvd" $file-za.zvd
+fi
+if [ -f "XS_(z,2n).zvd" ]; then
+  mv "XS_(z,2n).zvd" $file-z2n.zvd
+fi
+if [ -f "XS_(z,3n).zvd" ]; then
+  mv "XS_(z,3n).zvd" $file-z3n.zvd
+fi
+rm XSECTIONS.OUT
+rm CS2ZVD.INP
+exit

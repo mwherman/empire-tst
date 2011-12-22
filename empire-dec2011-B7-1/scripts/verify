@@ -1,0 +1,59 @@
+#! /bin/sh -
+#script to verify ENDF formatting and perform physics check 
+#on the file originating from EMPIRE 
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *\.endf
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
+fi                          
+
+
+# RUN CHECKR
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.checkr
+
+DONE
+EOF
+$EMPIREDIR/util/checkr/checkr <INPUT
+
+# RUN FIZCON
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.fizcon
+
+DONE
+EOF
+$EMPIREDIR/util/fizcon/fizcon <INPUT
+
+
+# RUN PSYCHE
+
+rm -f INPUT
+cat >INPUT <<EOF
+$file.endf
+$file-log.psyche
+Y
+
+EOF
+$EMPIREDIR/util/psyche/psyche <INPUT
+
+
+rm -f INPUT
+exit
