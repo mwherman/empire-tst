@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2173 $
+Ccc   * $Rev: 2180 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -742,14 +742,6 @@ C
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
-      ElasticCorr = 0.d0
-      IF(TOTred.ne.1.d0 .or. FUSred.ne.1.d0 
-     &                  .or. FCCred.ne.1.d0 .or. FDWred.ne.1.d0 )
-     &  ElasticCorr = (TOTred - 1.d0)*TOTcs            
-     &              + (1.d0 - FUSred)*CSFus   ! Here CSFus is not scaled yet 
-     &              + (1.d0 - FCCred)*(SINl + SINlcc)
-     &              + (1.d0 - FDWred)*SINlcont
-
       IF (EINl.LT.0.3D0 .AND. ZEJc(Npro).EQ.0) THEN
          s0 = FUSred * stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
@@ -759,7 +751,7 @@ C
          p2 = (ak2*r2)**2/(9.0D+00+3.0D+00*ak2*r2+(ak2*r2)**2)
          s2a = FUSred * stl(3)/(2.0D+00*PI*p2*SQRT(1.0D+06*EINl))
 C--------Corrected scattering radius
-         rp = SQRT((ELAcs + ElasticCorr)/(4.0D+00*PI*10.D+00))
+         rp = SQRT((ELAred*ELAcs)/(4.0D+00*PI*10.D+00))
          WRITE (8,*)
          IF(S0_obs.GT.0.)   THEN
            WRITE (8,99004) S0_obs,S0_unc

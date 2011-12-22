@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2152 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
+Ccc   * $Rev: 2180 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1862,7 +1862,7 @@ Ccc
      &        ndreac, ndkeys
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=131)
+      parameter (ndreac=90, ndkeys=132)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1895,8 +1895,9 @@ C
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
-     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 
-     &  'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP'/
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP',  
+     &  'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP',
+     &  'ELARED'/
       data namecat /
      &  'A'     , 'A'     , 'T'     , 'T'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'T'     , 'A'     ,   
@@ -1919,7 +1920,7 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'T' /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1930,7 +1931,7 @@ C-----F - variation of the parameter not allowed (discrete value keyword)
 ccc
 C-----T - variation of the parameter allowed; the parameters
 C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
-C-----    DEFPAR, TOTRED, FUSRED, ...
+C-----    DEFPAR, TOTRED, FUSRED, ELARED ...
 ccc
       LINUX = .TRUE.
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)

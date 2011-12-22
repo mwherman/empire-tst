@@ -1,6 +1,6 @@
-C $Rev: 2155 $
+C $Rev: 2180 $
 C $Author: rcapote $
-C $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+C $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -105,7 +105,8 @@ C
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
-     &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc)
+     &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
+     &				   ELAred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -139,9 +140,7 @@ C
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED 
-
-
+      DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED, rELAred 
       DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
 
@@ -186,7 +185,8 @@ C
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
-     &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg
+     &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
+     &                 rELAred
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,

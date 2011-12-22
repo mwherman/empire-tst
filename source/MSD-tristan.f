@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
+Ccc   * $Rev: 2180 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3127,7 +3127,8 @@ C              Population increased to preserve total flux
 C              as calculated by PCROSS/MSD+MSC
 C
                pops = CSEmsd(icsp,Nejc)
-               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+C              Commented on Dec 2011 by RCN, to keep integral of spectra = XS
+C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops

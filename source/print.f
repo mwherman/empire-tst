@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2138 $
+Ccc   * $Rev: 2180 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-03 16:28:53 +0100 (Do, 03 Nov 2011) $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -70,35 +70,35 @@ C
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
          WRITE (8,99005)
-99005    FORMAT (1X,///,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
+99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
       ELSE
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
-99015 FORMAT (1X,///,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
+99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99020)
-99020 FORMAT (1X,///,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
+99020 FORMAT (1X,/,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99025)
-99025 FORMAT (1X,///,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
+99025 FORMAT (1X,/,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99026)
-99026 FORMAT (1X,///,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
+99026 FORMAT (1X,/,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99027)
-99027 FORMAT (1X,///,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
+99027 FORMAT (1X,/,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99028)
-99028 FORMAT (1X,///,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
+99028 FORMAT (1X,/,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
          ENDIF
          IF ( AEJc(Nejc).GT.4.0D0) THEN
           WRITE (8,99010) ia, SYMbe(Nejc)
-99010 FORMAT (1X,///,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
+99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
          ENDIF
       ENDIF
       

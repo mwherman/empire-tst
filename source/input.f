@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2174 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2011-12-21 17:47:30 +0100 (Mi, 21 Dez 2011) $
+Ccc   * $Rev: 2180 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -247,10 +247,12 @@ C--------fusion parameters
          FCCred = 1.d0
          FDWred = 1.d0
          TOTred = 1.d0
+         ELAred = 1.d0
          rFUSred = 1.d0
          rFCCred = 1.d0
          rFDWred = 1.d0
          rTOTred = 1.d0
+         rELAred = 1.d0
          REDsef = 1.d0
          LEVtarg = 1
 C
@@ -582,9 +584,6 @@ C--------cluster ejectile
             SYMbe(NDEJC) = SMAT(iz)
          ENDIF
 C--------cluster ejectile *** done ***
-C        wrong position  
-C        Irun = 0
-C        CALL READIN(Irun)   !optional part of the input
 
 C--------ascribing location to each nucleus
 C--------compound nucleus 1
@@ -972,6 +971,23 @@ C
             WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
             WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
             STOP 'INSUFFICIENT DIMENSION NDExclus'
+         ENDIF
+
+         IF(TOTred.NE.1.d0) THEN
+            IF(FUSred.EQ.1 .AND. ELAred.EQ.1) THEN
+               FUSred = TOTred
+               ELAred = TOTred
+               WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
+            ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
+               WRITE (8,*) 'WARNING: TOTRED ignored as both'
+               WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
+            ELSEIF(FUSred.NE.1) THEN
+               WRITE (8,*) 'WARNING: TOTRED ignored as both'
+               WRITE (8,*) 'WARNING: TOTRED and FUSRED are in the INPUT'
+            ELSEIF(ELAred.NE.1) THEN
+               WRITE (8,*) 'WARNING: TOTRED ignored as both'
+               WRITE (8,*) 'WARNING: TOTRED and ELARED are in the INPUT'
+	      ENDIF
          ENDIF
 
          WRITE (8,*)
@@ -3706,6 +3722,37 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'ELARED') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+                WRITE (8,
+     &          '('' Shape elastic cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                sigma = val*i1*0.01
+                IF(IOPran.gt.0) then
+                   IF(rELAred.eq.1.d0) rELAred = grand()
+                   ELAred = val + rELAred*sigma
+                ELSE
+                   IF(rELAred.eq.1.d0) rELAred = drand()
+                   ELAred = val + 1.732d0*(2*rELAred-1.)*sigma
+                ENDIF
+                WRITE (8,
+     &          '('' Shape elastic cross section was scaled by factor ''
+     &          ,f6.3)') ELAred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, ELAred, INDexf,INDexb
+            else
+                ELAred = val
+                WRITE (8,
+     &      '('' Shape elastic cross section was scaled by factor '',
+     &          F6.3)') ELAred
+                WRITE (12,
+     &      '('' Shape elastic cross section was scaled by factor '',
+     &          F6.3)') ELAred
+            endif
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'CSREAD') THEN
             CSRead = val
             IF (CSRead.GT.0.0D0) WRITE (8,
@@ -3894,11 +3941,7 @@ C-----
 C-----
          IF (name.EQ.'NEX   ') THEN
             NEXreq = val
-
-
             IF (val.GT.NDEX-1) NEXreq = NDEX-1
-
-
             WRITE (8,
      &'('' Number of energy steps in the integration set to '',
      &I3)') NEXreq
@@ -8218,16 +8261,32 @@ C
             ENDIF
 
            ENDDO
-         endif
+         ENDIF
          WRITE(12,*) ' '
          CLOSE (32)
+
+	   icoupled = 0 
+         DO i = 1,ND_nlv
+          if(ICOllev(i).LT.LEVcc) icoupled = icoupled + 1
+	   ENDDO
+         write(8,*)
+         write(8,*)
+     >       '----------------------------------------------------'
+         write(8,*)'  States with number < ',LEVcc, 
+     >             '  in the file *-lev.col coupled'
+         write(8,*)'  Number of coupled states =',icoupled
+         write(8,*)
+     >       '----------------------------------------------------'
+         write(8,*)
+         write(8,*)
+     >       ' (You can add these resonances to collective levels)'
+           write(8,*) '            EWSR       Uexc    Width    Beta '
          if(igreson.eq.0 .and.
      &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            if (sgmr.gt.0.) betagmr=sqrt(sgmr/egrcoll(0,1))
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
            betahegor=sqrt(sheor/egrcoll(3,2))
-           write(8,*)
            write(8,*)
      >       '===================================================='
            write(8,*)'  Energy Weighted Sum Rules for GIANT RESONANCES'

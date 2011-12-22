@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1968 $
+Ccc   * $Rev: 2180 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-28 02:53:16 +0100 (Fr, 28 Jän 2011) $
+Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
 C
 C
       SUBROUTINE HRTW
@@ -1218,6 +1218,7 @@ C
       icount = icount + 1
       IF (icount.GT.1000) THEN
          WRITE (8,*) ' Maximum iteration number reached in AUSTER'
+         WRITE (8,*) 
          RETURN
       ENDIF
       sum = sv
@@ -1225,9 +1226,9 @@ C
       DO i = 1, Lch
 C
 C--------relative accuracy of V is set below and may be altered
-C--------to any resonable value.  1.D-99 avoids division by 0.
+C--------to any resonable value.  
 C
-         IF ((ABS(vd(i)-vp(i))/(vp(i)+1.D-99)).GT.1.0D-6) GOTO 200
+         IF (ABS(vd(i)-vp(i)).GT.0.001D0*vp(i)) GOTO 200
       ENDDO
       DO i = 1, Lch
          V(i,1) = vp(i)
