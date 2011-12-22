@@ -1,7 +1,0 @@
-          0          0 0.0                 0
-ENDF.IN
-LINEAR.OUT
-     0 0  0  999999999
-                        (BLANK CARD TERMINATES MAT REQUEST RANGES)
- 0.00000-00 1.00000-03
-                        (BLANK CARD TERMINATES FILE 3 ERROR LAW)
