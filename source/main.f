@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2173 $
+Ccc   * $Rev: 2175 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
+Ccc   * $Date: 2011-12-22 09:31:37 +0100 (Do, 22 Dez 2011) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -23,7 +23,7 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD), ELTl(NDLW)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -54,7 +54,11 @@ C
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+
+      COMMON /ELASTIC/ ELTl
+
       COMMON /R250COM/ INDexf,INDexb,BUFfer
+
       COMMON /KALB/ XCOs
 
       DOUBLE PRECISION eenc(200),signcf(200)
@@ -1510,7 +1514,14 @@ C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
 C--------Account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
+C
+C           Renormalizing transmission coefficients to consider 
+C           PE emission (PCROSS or MSD/MSC) before calling HRTW
+            DO i = 1, NDLW
+              ELTl(i) = ELTl(i) * corrmsd
+            ENDDO
             CALL HRTW
+
             IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
      &        CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
             kemax = max(NEX(nnuc) - 1,1)
