@@ -90,9 +90,10 @@ C-V        - Fix number of photons in MF14 to match MF12.
 C-V  11/04 - Set LRF to MLBW because NJOY does not like anything else
 C-V          when energy-dependent scattering radius is given.
 C-V        - Update the comments and input instructions.
-C-V  11/06 - Fix calculation of level energy when no recoils given
+C-V  11/06 - Fix calculation of outgoing energy when no recoils given
 C-V        - Print warning when no recoils given on output
 C-V        - Improved identification of insignificant cross sections.
+C-V  12/12 - Fix to previous fix when recoils spectra are given.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -4231,10 +4232,10 @@ C* Read the energy/angle distribution data
       E0 =EE
 C* Check if particle is to be processed
       PTST=REC(15:22)
+      IF(PTST.EQ.'recoils ') IRCOIL=1
       IF(PTST.NE.POUT(IK)) GO TO 210
       READ (REC(35:58),808) KZAK
       IF(PTST.EQ.'recoils ') THEN
-        IRCOIL=1
 c...
 c...    print *,rec(15:41),pout(ik),izak(ik)
 c...
