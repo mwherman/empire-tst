@@ -22,6 +22,7 @@ C-V        - Fix rare cases of E-threshold mismatch in TAB2 for LAW=2
 C-V        - Fix copying of MF33 (no adjustment to energy boundaries)
 C-V  08/04 - Fix conversion MF10/MT102 to MF9/MT102 when MF8 present.
 C-V  11/06 Take temperature from the source and not the resonance file.
+C-V  11/12 Add MT 19 to the list of adjusted reactions, if present.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -439,7 +440,8 @@ C* First energy point for the present reaction
       E1 =RWO(K1)
 C*
 C* Correct first energy for the total, elastic, fission, capture
-      IF(MT.EQ.1 .OR. MT.EQ.2 .OR. MT.EQ.18 .OR. MT.EQ.102) THEN
+      IF(MT.EQ.1 .OR. MT.EQ.2 .OR. MT.EQ.18 .OR. MT. EQ. 19 .OR.
+     &   MT.EQ.102) THEN
 C* Check the first energy on the file
         IF(E1.GT.ERH) THEN
           WRITE(LTT,692) ' WARNING - ERH < first data point of MT ',MT
