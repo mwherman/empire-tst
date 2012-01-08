@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2180 $
+Ccc   * $Rev: 2183 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+Ccc   * $Date: 2012-01-08 16:06:42 +0100 (So, 08 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6911,6 +6911,7 @@ C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
      &                 atilave, atilsum, del, delp, dob, econd, gamma,
      &                 pi2, qn, tcrt, uexc, xr, ddob, esh, dap, dam
+      DOUBLE PRECISION om2_gsm,delp_gsm,asys_gsm,asyserr_gsm,dshift_gsm
 
       REAL FLOAT
       DOUBLE PRECISION FSHELL
@@ -6967,13 +6968,16 @@ C-----Set EGSM normalization factors for each Z
          WRITE(8,'(4X,54(''-''))')
       ENDIF
 C
-C     reading from the RIPL level-densities-param.dat file (EGSM & GC)
+C     reading from the RIPL level-densities-par.dat file 
+C       EGSM[RIPL-3], G&C[old EMPIRE] and GSM[RIPL-2]
 C
 C     Skipping header
 C
       READ (24,'(///)')
-  100 READ (24,'(2I4,8x,F7.3,3E14.5,5f8.4)',END = 200)
-     &  nixz, nixa, qn, dob, ddob, esh, dap,aroc,dam,ftmp,arogc,nlevc 
+C               (2I4,1x,a2,f4.1,1x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))
+  100 READ (24,'(2I4,8x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))',END = 200)
+     &  nixz, nixa, qn, dob, ddob, esh, dap,aroc,dam,ftmp,arogc,nlevc,
+     &  om2_gsm,delp_gsm,asys_gsm,asyserr_gsm,dshift_gsm
 
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
@@ -6981,7 +6985,7 @@ C
          IF (iloc.EQ.0) THEN
 C
 C           Taking the default number of discrete levels from the EMPIRE file  
-C                              ../data/level-density-param.dat
+C                              ../data/level-density-par.dat
             NLV(nnuc)   = MIN(NDLV,nlevc)
             NCOmp(nnuc) = MIN(NDLV,nlevc)
 C
