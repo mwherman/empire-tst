@@ -1,6 +1,6 @@
-Ccc   * $Rev:  $
-Ccc   * $Author:  $
-Ccc   * $Date:  $
+Ccc   * $Rev:      $
+Ccc   * $Author:        $
+Ccc   * $Date:                                              $
 
 Ccc
 Ccc   ********************************************************************
@@ -23,7 +23,7 @@ Ccc
 
         IMPLICIT REAL*8(A-H,O-Z)
 	 
-	PARAMETER(MAXPARAM=30,MAXREAC=50,MAXENERG=100)
+	PARAMETER(MAXPARAM=80,MAXREAC=50,MAXENERG=100)
 
         CHARACTER*40 PROJFILE,PARAM(MAXPARAM)
 	CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
@@ -41,7 +41,8 @@ C	Reading which reaction to plot
 
 
 C	Reading and storing the sensitivity matrices in variable SENMAT
-	CALL READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR)
+	CALL READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
+     +MAXPARAM)
 
 
 C	Finding index of reaction to be plotted
@@ -50,7 +51,7 @@ C	Finding index of reaction to be plotted
 	
 C	Creates ZVD file with the sensitivities for all parameters
 	CALL ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT)
+     +PLOTREAC,IPLOT,MT,MAXPARAM)
 
 
 
@@ -229,11 +230,12 @@ c  	  WRITE(*,*) 'No match...'
 c	Reads the full sensitivity matrices from file -mat.sen and stores
 c	in variable SENMAT(parameter,energy,reaction). Reaction index=0 in 
 c	SENMAT stores energy values.
-	SUBROUTINE READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR)
+	SUBROUTINE READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
+     +MAXPARAM)
 	
         IMPLICIT REAL*8(A-H,O-Z)
 	 
-	PARAMETER(MAXPARAM=30,MAXREAC=50,MAXENERG=100)
+	PARAMETER(MAXREAC=50,MAXENERG=100)
 
         CHARACTER*40 PROJFILE,FILENAME,PARAM(MAXPARAM)
 	CHARACTER*10 REAC(0:MAXREAC)
@@ -252,18 +254,21 @@ c	SENMAT stores energy values.
 
 	DO IP=1,MAXPARAM
 
-
 C	  Reading the number of reactions
 	  READ(10,10,END=300) NR
 10	  FORMAT(1X,I3)
 
 C	  Reading the name of the parameter
+          IF(IP.EQ.MAXPARAM) THEN
+	    WRITE(*,*)'The maximum number of parameters has been reached!'
+	    STOP
+	  ENDIF
 	  READ(10,20) PARAM(IP)
 20	  FORMAT(13X,A20)
 	  CALL SINGSPACE(PARAM(IP))
 
 
-C	  Reading the name of the reactions		  
+C	  Reading the name of the reactions  
 	  READ(10,'(A10,50(1X,A11))') (REAC(IR),IR=0,NR)
 
 
@@ -340,13 +345,13 @@ c	spacing.
 	
 c	Creates zvd file to be plotted with zvview	
 	SUBROUTINE ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT)
+     +PLOTREAC,IPLOT,MT,MAXPARAM)
 
 
 
         IMPLICIT REAL*8(A-H,O-Z)
 	 
-	PARAMETER(MAXPARAM=30,MAXREAC=50,MAXENERG=100)
+	PARAMETER(MAXREAC=50,MAXENERG=100)
 
         CHARACTER*40 PROJFILE,FILENAME,PARAM(MAXPARAM)
 	CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
