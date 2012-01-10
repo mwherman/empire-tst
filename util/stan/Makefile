@@ -17,8 +17,11 @@ else
   FFLAGS =
 endif
 
-stan:
+stan: stanef.f90
 	$(FC) $(FFLAGS) -I ../IO/ -o stan stan.f90 ../IO/endf_io.a
+
+stanef.f90:
+	
 
 clean:
 	rm stan
