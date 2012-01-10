@@ -1,9 +1,9 @@
 #----GNU FORTRAN compiler
-FC     =  gfortran
+#FC     =  gfortran
 #----flags for production compilation with gfortran
 FFLAGS = -std=legacy -O3
 #----Intel FORTRAN compiler
-#FC     = ifort
+FC     = ifort
 #----GNU FORTRAN95 compiler (FEDORA 6)
 #FC     = g95
 #----Lahey/Fujitsu FORTRAN95 compiler
