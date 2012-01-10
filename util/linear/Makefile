@@ -1,7 +1,11 @@
 #----GNU FORTRAN compiler
-FC     =  gfortran
+#FC     =  gfortran
 #----flags for production compilation with gfortran
 FFLAGS = -std=legacy -O3
+#----Intel FORTRAN compiler
+FC     =  ifort
+#----flags for production compilation with ifort
+FFLAGS =  -O3 -x=host
 #----GNU g77 FORTRAN compiler
 #FC     = g77
 #----flags for production compilation with g77
