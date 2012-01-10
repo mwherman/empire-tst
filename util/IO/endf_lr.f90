@@ -34,7 +34,7 @@ module endf_line_io
     if(qwrite) then
         open(lun,file=efil,action='write',status='new',iostat=stat)
     else
-        open(lun,file=efil,readonly,action='read',status='old',iostat=stat)
+        open(lun,file=efil,action='read',status='old',iostat=stat)
     endif
 
     open_endf_file = stat
@@ -44,7 +44,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function get_endf_line
+    integer*4 function get_endf_line()
 
     implicit none
 
@@ -59,7 +59,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function put_endf_line
+    integer*4 function put_endf_line()
 
     implicit none
 
@@ -75,7 +75,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function close_endf_file
+    integer*4 function close_endf_file()
 
     implicit none
 

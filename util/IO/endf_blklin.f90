@@ -95,7 +95,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function get_endf_line
+    integer*4 function get_endf_line()
 
     implicit none
 
@@ -136,7 +136,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function put_endf_line
+    integer*4 function put_endf_line()
 
     implicit none
 
@@ -176,7 +176,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function close_endf_file
+    integer*4 function close_endf_file()
 
     implicit none
 

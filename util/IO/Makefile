@@ -5,14 +5,15 @@ CC     =  gcc
 CFLAGS = -O3
 
 # choose your fortran compiler:
-#FC     =  gfortran
+#FC     =  f90
+FC     =  gfortran
 #FC     =  f95
-FC     =  ifort
+#FC     =  ifort
 # define IPO for ifort with full cross-file optimization
-IPO = TRUE
+#IPO = TRUE
 
 # define MODE = BLK if using unix block-mode I/O
-MODE = BLK
+#MODE = BLK
 
 # make sure MAKE knows f90 extension
 %.o : %.f90

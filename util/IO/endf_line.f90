@@ -255,7 +255,7 @@ module endf_lines
 
 !--------------------------------------------------------------------------------
 
-    integer function next_mt
+    integer function next_mt()
 
     ! transition when done reading a section
     ! next line should have MT=0
@@ -310,7 +310,7 @@ module endf_lines
 
 !--------------------------------------------------------------------------------
 
-    integer function get_mt
+    integer function get_mt()
 
     ! get MT from current line
 
@@ -337,7 +337,7 @@ module endf_lines
 
 !--------------------------------------------------------------------------------
 
-    integer function get_mf
+    integer function get_mf()
 
     ! get MT from current line
 
@@ -364,7 +364,7 @@ module endf_lines
 
 !--------------------------------------------------------------------------------
 
-    integer function get_mat
+    integer function get_mat()
 
     ! get MAT from current line
 
