@@ -793,7 +793,9 @@ C* Calculate the probability from pointwise representation
         FMU =FINEND(INT,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
       ELSE
         IF(LTT.GT.0)
-     &  WRITE(LTT,902) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
+C    &  WRITE(LTT,902) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
+     &  WRITE(LTT,350) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
+  350   FORMAT(A,I3)
         STOP 'SIXTAB ERROR - Illegal value of LANG'
       END IF
 C* Processing of distribution for one outgoing energy point completed

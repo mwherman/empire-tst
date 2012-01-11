@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1971 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-29 08:10:18 +0100 (Sa, 29 Jän 2011) $
+Ccc   * $Rev: 2196 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-11 16:37:52 +0100 (Mi, 11 Jän 2012) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
@@ -344,7 +344,7 @@ C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc)
       fniuA = (Erel + uexcit - Ekin_ave - eg0)/(eps + Sn + egn)
       write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
      &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f5.3)')
+     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f9.3)')
      &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuA
 
       S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
@@ -366,7 +366,7 @@ C    &          ''  eps='',f6.2, '' nu='',f5.3)')
 C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
       write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
      &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f5.3)')
+     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f9.3)')
      &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuB
 
       return
@@ -740,7 +740,7 @@ c     bind = dble(e)
 C     Rounded values
 C
 C mn    neutron mass  1.008 665 amu 
-C me    electron mass 5.485 799�10-4 amu 
+C me    electron mass 5.485 799�10-4 amu 
 C mp    proton mass   1.007 276 amu 
 C md    deuteron mass 2.013 553 amu 1
 C mt    triton mass   3.015 501 amu 3

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2180 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+Ccc   * $Rev: 2196 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-11 16:37:52 +0100 (Mi, 11 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2578,9 +2578,9 @@ C    &              CSPfis(Nnuc)/TOTcsfis
                WRITE
      &     (12,'(''  Binding energy of fissioning nucleus '',G12.5)')
      &            Q(1,nnuc)
-               WRITE (12,'(''  Postfission multiplicity  '',F6.3)')
+               WRITE (12,'(''  Postfission multiplicity  '',F8.3)')
      &            fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
-               WRITE  (12,'(''  Partial multiplicity      '',F6.3)')
+               WRITE  (12,'(''  Partial multiplicity      '',F8.3)')
      &            fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
 C--------------Summing total multiplicity
                fniuS = fniuS + fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
@@ -2931,10 +2931,10 @@ C
      &   '(''  PFNS normalized to experimental multiplicity '',F6.3)')
      &         fniuEVAL
               else
-                WRITE (12,'(''  Multiplicity (nue) '',F6.3,5x,
+                WRITE (12,'(''  Multiplicity (nue) '',F8.3,5x,
      &           ''(Th-232 mult. '',f6.3,'')'')')
      &         fniuS, fniuEVAL
-                WRITE (8, '(''  Multiplicity (nue) '',F6.3,5x,
+                WRITE (8, '(''  Multiplicity (nue) '',F8.3,5x,
      &           ''(Th-232 mult. '',f6.3,'')'')')
      &         fniuS, fniuEVAL
                 WRITE (8, '(''  PFN average energy '',G12.5)')
