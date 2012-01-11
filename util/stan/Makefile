@@ -2,19 +2,15 @@
 #
 
 # choose your fortran compiler:
-#FC     =  gfortran
+FC     =  gfortran
 #FC     =  f95
-FC     =  ifort
+#FC     =  ifort
 
 # set compiler options
-ifeq ($(FC),gfortran)
-  FFLAGS = -O3 -fdefault-real-8
-else ifeq ($(FC),f95)
-  FFLAGS = -O3 -fdefault-real-8
-else ifeq ($(FC),ifort)
+ifeq ($(FC),ifort)
   FFLAGS = -x=host -O3 -real-size 64
 else
-  FFLAGS =
+  FFLAGS = -O3 -fdefault-real-8
 endif
 
 stan: stanef.f90
