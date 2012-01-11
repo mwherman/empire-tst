@@ -18,6 +18,7 @@ module endf_line_io
     integer*4 :: handl                      ! file handle
     integer*4 :: numrec                     ! # 81-byte records in input file
     integer*4 :: curek                      ! "current" record in buffer
+    integer*4 :: filin                      ! line # in file
     logical*4 :: qwrite                     ! true if writing output; false for input
 
     integer*4, external :: open_endf_blkfile
@@ -37,6 +38,7 @@ module endf_line_io
 ! -----------  Public interface ---------------------------------------------
 
     character*80, public, pointer :: endline                ! current line
+    public filin                                            ! line #
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file
 
 !------------------------------------------------------------------------------
@@ -64,6 +66,7 @@ module endf_line_io
     endif
 
     qwrite = qwrt
+    filin = 0
 
     if(qwrite) then
 
@@ -107,21 +110,20 @@ module endf_line_io
         num = min(numrec - curek, nrc)
         numbyt = get_endf_buffer(handl,num,erc)
         if(numbyt .lt. 0) then
+            status = close_endf_file()
             get_endf_line = numbyt
-            status = close_endf_blkfile(handl)
-            nullify(endline)
             return
         else if(numbyt .ne. num*81) then
-            status = close_endf_blkfile(handl)
             write(6,*) ' Bytes requested = ',num*81
             write(6,*) ' Bytes read      = ',numbyt
-            nullify(endline)
+            status = close_endf_file()
             get_endf_line = -1
             return
         endif
     endif
 
     curek = curek + 1
+    filin = filin + 1
 
     if(curek .le. numrec) then
         endline => erc(inx+1)%chr
@@ -142,6 +144,8 @@ module endf_line_io
 
     integer*4 numbyt,status
 
+    filin = filin + 1
+
     if(curek .lt. nrc) then
         curek = curek + 1
         endline => erc(curek)%chr
@@ -153,15 +157,13 @@ module endf_line_io
     numbyt = put_endf_buffer(handl,nrc,erc)
 
     if(numbyt .lt. 0) then
+        status = close_endf_file()
         put_endf_line = numbyt
-        status = close_endf_blkfile(handl)
-        nullify(endline)
         return
     else if(numbyt .ne. nrb) then
-        status = close_endf_blkfile(handl)
         write(6,*) ' Bytes requested = ',nrb
         write(6,*) ' Bytes written   = ',numbyt
-        nullify(endline)
+        status = close_endf_file()
         put_endf_line = -1
         return
     endif
@@ -183,6 +185,7 @@ module endf_line_io
     integer*4 numbyt,status
 
     nullify(endline)
+    filin = 0
 
     if(qwrite) then
         ! flush buffer to file

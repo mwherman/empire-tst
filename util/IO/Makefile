@@ -27,14 +27,10 @@ else
 endif
 
 # set compiler options
-ifeq ($(FC),gfortran)
-  FFLAGS = -O3 -fdefault-real-8
-else ifeq ($(FC),f95)
-  FFLAGS = -O3 -fdefault-real-8
-else ifeq ($(FC),ifort)
+ifeq ($(FC),ifort)
   FFLAGS = -x=host -O3 -real-size 64
 else
-  FFLAGS =
+  FFLAGS = -O3 -fdefault-real-8
 endif
 
 # build library
@@ -42,7 +38,7 @@ endif
 ifeq ($(IPO),TRUE)
 
   # use ifort with block-mode I/O and cross-file optimization
-  # this provides the fastest executable
+  # this provides the fastest executable on unix
 
   lib: endf_blk.o ipo_out.o
 	ar -csr endf_io.a *.o

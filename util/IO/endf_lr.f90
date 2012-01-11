@@ -16,6 +16,7 @@ module endf_line_io
     ! -----------  Public interface ------------------------------------------
 
     character*80, public :: endline     ! current line
+    integer*4, public :: filin          ! file line #
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file
 
 !------------------------------------------------------------------------------
@@ -37,6 +38,9 @@ module endf_line_io
         open(lun,file=efil,action='read',status='old',iostat=stat)
     endif
 
+    endline = ' '
+    filin = 0
+
     open_endf_file = stat
 
     return
@@ -51,6 +55,7 @@ module endf_line_io
     integer*4 stat
 
     read(lun,'(a80)',iostat=stat) endline
+    filin = filin + 1
 
     get_endf_line = stat
     return
@@ -67,6 +72,7 @@ module endf_line_io
 
     write(lun,'(a80)',iostat=stat) endline
     endline = ' '
+    filin = filin + 1
 
     put_endf_line = stat
 
@@ -82,6 +88,7 @@ module endf_line_io
     integer*4 stat
 
     close(lun,iostat=stat)
+    filin = 0
 
     close_endf_file = stat
 

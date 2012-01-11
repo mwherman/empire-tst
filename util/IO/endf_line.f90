@@ -101,12 +101,12 @@ module endf_lines
     endif
 
     if(qwrt) then
-        write(6,*) ' Last line written:'
+        write(6,*) ' Last line written line number:',filin
         write(6,'(a80)') endline
         call close_endfile
         stop ' WRITE_ENDF aborted'
     else
-        write(6,*) ' Last line read:'
+        write(6,*) ' Last line read line number:',filin
         write(6,'(a80)') endline
         call close_endfile
         stop ' READ_ENDF aborted'
