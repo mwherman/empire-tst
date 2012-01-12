@@ -17,6 +17,7 @@ module BASE_ENDF_IO
 
     ! character*9 :: rfmt = '(1PE11.6)'          ! strict format
     character*9 :: rfmt = '(F11.0)'              ! more forgiving
+    character*200 erlin                          ! for error reporting
 
     type int_pair
         sequence
@@ -89,7 +90,7 @@ module BASE_ENDF_IO
 
     ! -----------------  public interface  ------------------------------------
 
-    public endline, ipos, zero, tab1, lc_tab1, real_pair, int_pair
+    public endline, erlin, ipos, zero, tab1, lc_tab1, real_pair, int_pair, set_ignore_badmat
     public write_endf, put_endf, read_endf, get_endf, write_send, write_fend
     public open_endfile, get_endline, put_endline, close_endfile, set_io_verbose
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
@@ -107,13 +108,13 @@ module BASE_ENDF_IO
     type (tab1), intent(out) :: tb
 
     if(tb%nr .le. 0) then
-        write(6,*) ' TAB1 record with NR .LE. 0 : ',tb%nr
-        call endf_error
+        write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
+        call endf_error(erlin)
     endif
 
     if(tb%np .le. 0) then
-        write(6,*) ' TAB1 record with NP .LE. 0 : ',tb%nr
-        call endf_error
+        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
+        call endf_error(erlin)
     endif
 
     allocate(tb%itp(tb%nr),tb%dat(tb%np))
@@ -143,8 +144,7 @@ module BASE_ENDF_IO
     ipos = 6
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_6r
 
@@ -192,8 +192,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading tri-diagonal matrix from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading tri-diagonal matrix from ENDF file')
 
     end subroutine get_tri
 
@@ -209,8 +208,8 @@ module BASE_ENDF_IO
     real, intent(out) :: x(n,m)    ! output array
 
     if((n .le. 0) .or. (m .le. 0)) then
-        write(6,*) ' Read matrix with zero or negative size:',n,m
-        call endf_error
+        write(erlin,*) 'Read matrix with zero or negative size:',n,m
+        call endf_error(erlin)
     endif
 
     call get_endline
@@ -234,8 +233,8 @@ module BASE_ENDF_IO
     real xx
 
     if((n .le. 0) .or. (m .le. 0)) then
-        write(6,*) ' Read matrix with zero or negative size:',n,m
-        call endf_error
+        write(erlin,*) 'Read matrix with zero or negative size:',n,m
+        call endf_error(erlin)
     endif
 
     do i = 1,n
@@ -249,8 +248,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading matrix from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading matrix from ENDF file')
 
     end subroutine get_mtx
 
@@ -279,8 +277,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_r
 
@@ -305,8 +302,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_r
 
@@ -351,8 +347,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_real_pair
 
@@ -372,8 +367,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_1r
 
@@ -395,8 +389,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_1r
 
@@ -427,8 +420,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_int_pair
 
@@ -459,8 +451,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_i
 
@@ -483,11 +474,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
-
-20  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
+20  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_2r4i
 
@@ -509,11 +497,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading reals from ENDF file'
-    call endf_error
-
-20  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading reals from ENDF file')
+20  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine get_2r4i
 
@@ -533,8 +518,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_4i
 
@@ -553,8 +537,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured reading integers from ENDF file'
-    call endf_error
+10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine get_4i
 
@@ -569,13 +552,13 @@ module BASE_ENDF_IO
     type (tab1), intent(in) :: tb
 
     if(tb%nr .le. 0) then
-        write(6,*) ' TAB1 record with NR .LE. 0 : ',tb%nr
-        call endf_error
+        write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
+        call endf_error(erlin)
     endif
 
     if(tb%np .le. 0) then
-        write(6,*) ' TAB1 record with NP .LE. 0 : ',tb%nr
-        call endf_error
+        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
+        call endf_error(erlin)
     endif
 
     call write_int_pair(tb%itp, tb%nr)
@@ -860,8 +843,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing integers'
-    call endf_error
+10  call endf_error('Error occured writing integers')
 
     end subroutine write_int_pair
 
@@ -895,8 +877,7 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing integers'
-    call endf_error
+10  call endf_error('Error occured writing integers')
 
     end subroutine write_i
 
@@ -920,8 +901,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing integers:',i1,i2,i3,i4
-    call endf_error
+10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
+    call endf_error(erlin)
 
     end subroutine write_2r4i
 
@@ -943,8 +924,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing integers:',i1,i2,i3,i4
-    call endf_error
+10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
+    call endf_error(erlin)
 
     end subroutine write_4i
 
@@ -961,8 +942,8 @@ module BASE_ENDF_IO
 
     ! insist that i0 be 0
     if(i0 .ne. 0) then
-        write(6,*) ' Put 2f,4i line with leading blanks with non-zero leading int:',i0
-        call endf_error
+        write(erlin,*) 'Put 2f,4i line with leading blanks with non-zero leading int:',i0
+        call endf_error(erlin)
     end if
 
     if(ipos .ne. 0) call put_endline
@@ -972,8 +953,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing integers:',i1,i2,i3,i4
-    call endf_error
+10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
+    call endf_error(erlin)
 
     end subroutine write_5i
 
@@ -1000,8 +981,8 @@ module BASE_ENDF_IO
 
     return
 
-10  write(6,*) ' Error occured writing real value:',xx
-    call endf_error
+10  write(erlin,*) 'Error occured writing real value:',xx
+    call endf_error(erlin)
 
     end function rlw
 

@@ -83,18 +83,18 @@ module ENDF_MF35_IO
     call read_endf(lst%e1, lst%e2, lst%ls, lst%lb, lst%nt, lst%ne)
 
     if(lst%ls .ne. 1) then
-        write(6,*) ' Undefined value for LS found in MF35:',lst%ls
-        call endf_error
+        write(erlin,*) 'Undefined value for LS found in MF35:',lst%ls
+        call endf_error(erlin)
     endif
 
     if(lst%lb .ne. 7) then
-        write(6,*) ' Undefined value for LB found in MF35:',lst%lb
-        call endf_error
+        write(erlin,*) 'Undefined value for LB found in MF35:',lst%lb
+        call endf_error(erlin)
     endif
 
     if(lst%nt .ne. (lst%ne*(lst%ne+1)/2)) then
-        write(6,*) ' Inconsistent NT, NE in MF35 matrix:',lst%nt,lst%ne
-        call endf_error
+        write(erlin,*) 'Inconsistent NT, NE in MF35 matrix:',lst%nt,lst%ne
+        call endf_error(erlin)
     endif
 
     allocate(lst%ek(lst%ne), lst%cov(lst%ne-1,lst%ne-1))
@@ -142,13 +142,13 @@ module ENDF_MF35_IO
     type (MF35_list), intent(in) :: lst
 
     if(lst%ls .ne. 1) then
-        write(6,*) ' Undefined value for LS found in MF35:',lst%ls
-        call endf_error
+        write(erlin,*) 'Undefined value for LS found in MF35:',lst%ls
+        call endf_error(erlin)
     endif
 
     if(lst%lb .ne. 7) then
-        write(6,*) ' Undefined value for LB found in MF35:',lst%lb
-        call endf_error
+        write(erlin,*) 'Undefined value for LB found in MF35:',lst%lb
+        call endf_error(erlin)
     endif
 
     call write_endf(lst%e1, lst%e2, lst%ls, lst%lb, (lst%ne*(lst%ne+1))/2, lst%ne)
@@ -175,12 +175,12 @@ module ENDF_MF35_IO
         l = 1
         do i = 1,rc%nk
             if(rc%sct(i)%ls .ne. 1) then
-                write(6,*) ' Undefined value for LS found in MF35:',rc%sct(i)%ls
-                call endf_error
+                write(erlin,*) 'Undefined value for LS found in MF35:',rc%sct(i)%ls
+                call endf_error(erlin)
             endif
             if(rc%sct(i)%lb .ne. 7) then
-                write(6,*) ' Undefined value for LB found in MF35:',rc%sct(i)%lb
-                call endf_error
+                write(erlin,*) 'Undefined value for LB found in MF35:',rc%sct(i)%lb
+                call endf_error(erlin)
             endif
             l = l + ((rc%sct(i)%ne*(rc%sct(i)%ne+1))/2+5)/6 + 1
         end do

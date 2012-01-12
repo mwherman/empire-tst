@@ -88,8 +88,8 @@ module ENDF_MF4_IO
             call read_list(r4)
             call read_tab(r4)
         else
-            write(6,*) ' Unrecognized combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error
+            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
+            call endf_error(erlin)
         endif
 
         i = next_mt()
@@ -183,8 +183,8 @@ module ENDF_MF4_IO
             call write_list(r4)
             call write_tab(r4)
         else
-            write(6,*) ,' Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error
+            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
+            call endf_error(erlin)
         endif
 
         call write_send
@@ -280,8 +280,8 @@ module ENDF_MF4_IO
                 l = l + lc_tab1(r4%tb2%lst(i)%tab) + 1
             end do
         else
-            write(6,*) ,' Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error
+            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
+            call endf_error(erlin)
         endif
         mtc = mtc + 1
         r4%lc = l

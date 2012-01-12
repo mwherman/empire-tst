@@ -195,8 +195,8 @@ module ENDF_MF1_IO
             allocate(r1%mt460)
             call read_460(r1%mt460)
         case default
-            write(6,*) ' Undefined MT encountered in MF1: ', r1%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
+            call endf_error(erlin)
         end select
 
         i = next_mt()
@@ -273,8 +273,8 @@ module ENDF_MF1_IO
         call read_endf(n, n, r2%tb%nr, r2%tb%np)
         call read_endf(r2%tb)
     else
-        write(6,*) ' Undefined LNU specified in MF1,MT452:',r2%lnu
-        call endf_error
+        write(erlin,*) 'Undefined LNU specified in MF1,MT452:',r2%lnu
+        call endf_error(erlin)
     end if
 
     return
@@ -337,8 +337,8 @@ module ENDF_MF1_IO
 
     else
 
-        write(6,*) ' Undefined LDF specified in MF1,MT455:',r5%ldg
-        call endf_error
+        write(erlin,*) 'Undefined LDF specified in MF1,MT455:',r5%ldg
+        call endf_error(erlin)
 
     end if
 
@@ -356,8 +356,8 @@ module ENDF_MF1_IO
         call read_endf(n, n, r5%tb%nr, r5%tb%np)
         call read_endf(r5%tb)
     else
-        write(6,*) ' Undefined LNU specified in MF1,MT455:',r5%lnu
-        call endf_error
+        write(erlin,*) 'Undefined LNU specified in MF1,MT455:',r5%lnu
+        call endf_error(erlin)
     end if
 
     return
@@ -376,8 +376,8 @@ module ENDF_MF1_IO
     call get_endf(r8%za, r8%awr, n, n, n, n)
     call read_endf(n, r8%nply, i, j)
     if((i .ne. (18*(r8%nply+1))) .or. (j .ne. (9*(r8%nply+1)))) then
-        write(6,*)  'Inconsistent value for NPLY in MF1/458 found: ',r8%nply
-        call endf_error
+        write(erlin,*)  'Inconsistent values for NT, NPLY in MF1/458 found: ',i,r8%nply
+        call endf_error(erlin)
     endif
 
     allocate(r8%cmp(0:r8%nply))
@@ -418,8 +418,8 @@ module ENDF_MF1_IO
         r6%ng = 0
         nullify(r6%e,r6%phot)
     else
-        write(6,*) ' Undefined LO specified in MF1,MT460:',r6%lo
-        call endf_error
+        write(erlin,*) 'Undefined LO specified in MF1,MT460:',r6%lo
+        call endf_error(erlin)
     end if
 
     return
@@ -457,8 +457,8 @@ module ENDF_MF1_IO
         case(460)
             call write_460(r1%mt460)
         case default
-            write(6,*) ' Undefined MT encountered in MF1: ', r1%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
+            call endf_error(erlin)
         end select
 
         call write_send
@@ -522,8 +522,8 @@ module ENDF_MF1_IO
         call write_endf(0, 0, r2%tb%nr, r2%tb%np)
         call write_endf(r2%tb)
     else
-        write(6,*) ' Undefined LNU specified in MF1,MT452:',r2%lnu
-        call endf_error
+        write(erlin,*) 'Undefined LNU specified in MF1,MT452:',r2%lnu
+        call endf_error(erlin)
     end if
 
     return
@@ -570,8 +570,8 @@ module ENDF_MF1_IO
 
     else
 
-        write(6,*) ' Undefined LDF specified in MF1,MT455:',r5%ldg
-        call endf_error
+        write(erlin,*) 'Undefined LDF specified in MF1,MT455:',r5%ldg
+        call endf_error(erlin)
 
     end if
 
@@ -584,8 +584,8 @@ module ENDF_MF1_IO
         call write_endf(0, 0, r5%tb%nr, r5%tb%np)
         call write_endf(r5%tb)
     else
-        write(6,*) ' Undefined LNU specified in MF1,MT455:',r5%lnu
-        call endf_error
+        write(erlin,*) 'Undefined LNU specified in MF1,MT455:',r5%lnu
+        call endf_error(erlin)
     end if
 
     return
@@ -631,8 +631,8 @@ module ENDF_MF1_IO
         call write_endf(0, 0, r6%nnf, 0)
         call write_endf(r6%lambda,r6%nnf)
     else
-        write(6,*) ' Undefined LO specified in MF1,MT460:',r6%lo
-        call endf_error
+        write(erlin,*) 'Undefined LO specified in MF1,MT460:',r6%lo
+        call endf_error(erlin)
     end if
 
     return
@@ -662,8 +662,8 @@ module ENDF_MF1_IO
             else if(r1%mt452%lnu .eq. 2) then
                 l = l + lc_tab1(r1%mt452%tb) + 1
             else
-                write(6,*) ' Undefined LNU specified in MF1,MT452:',r1%mt452%lnu
-                call endf_error
+                write(erlin,*) 'Undefined LNU specified in MF1,MT452:',r1%mt452%lnu
+                call endf_error(erlin)
             end if
         case(455)
             l = 1
@@ -675,16 +675,16 @@ module ENDF_MF1_IO
                     l = l + (2*r1%mt455%nff+5)/6 + 1
                 end do
             else
-                write(6,*) ' Undefined LDG specified in MF1,MT455:',r1%mt455%ldg
-                call endf_error
+                write(erlin,*) 'Undefined LDG specified in MF1,MT455:',r1%mt455%ldg
+                call endf_error(erlin)
             end if
             if(r1%mt455%lnu .eq. 1) then
                 l = l + (r1%mt455%nc+5)/6 + 1
             else if(r1%mt455%lnu .eq. 2) then
                 l = l + lc_tab1(r1%mt455%tb) + 1
             else
-                write(6,*) ' Undefined LNU specified in MF1,MT455:',r1%mt455%lnu
-                call endf_error
+                write(erlin,*) 'Undefined LNU specified in MF1,MT455:',r1%mt455%lnu
+                call endf_error(erlin)
             end if
         case(456)
             l = 1
@@ -693,8 +693,8 @@ module ENDF_MF1_IO
             else if(r1%mt456%lnu .eq. 2) then
                 l = l + lc_tab1(r1%mt456%tb) + 1
             else
-                write(6,*) ' Undefined LNU specified in MF1,MT456:',r1%mt456%lnu
-                call endf_error
+                write(erlin,*) 'Undefined LNU specified in MF1,MT456:',r1%mt456%lnu
+                call endf_error(erlin)
             end if
         case(458)
             l = 3*(r1%mt458%nply+1) + 2
@@ -707,12 +707,12 @@ module ENDF_MF1_IO
             else if(r1%mt460%lo .eq. 2) then
                 l = (r1%mt460%nnf+5)/6 + 2
             else
-                write(6,*) ' Undefined LO specified in MF1,MT460:',r1%mt460%lo
-                call endf_error
+                write(erlin,*) 'Undefined LO specified in MF1,MT460:',r1%mt460%lo
+                call endf_error(erlin)
             end if
         case default
-            write(6,*) ' Undefined MT encountered in MF1: ', r1%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
+            call endf_error(erlin)
         end select
         mtc = mtc + 1
         r1%lc = l

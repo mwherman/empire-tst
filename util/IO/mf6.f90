@@ -182,8 +182,8 @@ module ENDF_MF6_IO
                 allocate(sc%law7)
                 call read_law7(sc%law7)
             case default
-                write(6,*) ' Undefined LAW encountered in MF6:',sc%law
-                call endf_error
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
             end select
 
         end do
@@ -220,8 +220,8 @@ module ENDF_MF6_IO
         l1 => law1%ll(i)
         call read_endf(xx, l1%e1, l1%nd, l1%na, nw, l1%nep)
         if(nw .ne. l1%nep*(l1%na+2)) then
-            write(6,*) ' Word count NW inconsistent with NEP,NA in MF6 LAW1:',nw,l1%nep,l1%na
-            call endf_error
+            write(erlin,*) 'Word count NW inconsistent with NEP,NA in MF6 LAW1:',nw,l1%nep,l1%na
+            call endf_error(erlin)
         endif
         allocate(l1%prm(l1%nep))
         do j = 1,l1%nep
@@ -260,8 +260,8 @@ module ENDF_MF6_IO
             nx = 2*l2%nl
         endif
         if(nw .ne. nx) then
-            write(6,*) ' Inconsistent NW, LANG, NL in MF6 LAW2:',nw,l2%lang,l2%nl
-            call endf_error
+            write(erlin,*) 'Inconsistent NW, LANG, NL in MF6 LAW2:',nw,l2%lang,l2%nl
+            call endf_error(erlin)
         endif
         allocate(l2%a(nw))
         call read_endf(l2%a,nw)
@@ -296,20 +296,20 @@ module ENDF_MF6_IO
             else if(law5%lidp .eq. 1) then
                 nx = 3*l5%nl + 3
             else
-                write(6,*) ' Undefined LIDP in MF6, LAW5 encountered:',law5%lidp
-                call endf_error
+                write(erlin,*) 'Undefined LIDP in MF6, LAW5 encountered:',law5%lidp
+                call endf_error(erlin)
             endif
         case(2)
             nx = l5%nl + 1
         case(3:)
             nx = 2*l5%nl
         case default
-            write(6,*) ' Undefined LTP ecountered in MF6, LAW5:',l5%ltp
-            call endf_error
+            write(erlin,*) 'Undefined LTP ecountered in MF6, LAW5:',l5%ltp
+            call endf_error(erlin)
         end select
         if(nx .ne. nw) then
-            write(6,*) ' Inconsistent NW,LTP,NL in MF6 LAW5:',nw,l5%ltp,l5%nl
-            call endf_error
+            write(erlin,*) 'Inconsistent NW,LTP,NL in MF6 LAW5:',nw,l5%ltp,l5%nl
+            call endf_error(erlin)
         endif
         allocate(l5%a(nw))
         call read_endf(l5%a,nw)
@@ -389,8 +389,8 @@ module ENDF_MF6_IO
             case(7)
                 call write_law7(sc%law7)
             case default
-                write(6,*) ' Undefined LAW encountered in MF6:',sc%law
-                call endf_error
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
             end select
 
         end do
@@ -484,16 +484,16 @@ module ENDF_MF6_IO
             else if(law5%lidp .eq. 1) then
                 nx = 3*l5%nl + 3
             else
-                write(6,*) ' Undefined LIDP in MF6, LAW5 encountered:',law5%lidp
-                call endf_error
+                write(erlin,*) 'Undefined LIDP in MF6, LAW5 encountered:',law5%lidp
+                call endf_error(erlin)
             endif
         case(2)
             nx = l5%nl + 1
         case(3:)
             nx = 2*l5%nl
         case default
-            write(6,*) ' Undefined LTP ecountered in MF6, LAW5:',l5%ltp
-            call endf_error
+            write(erlin,*) 'Undefined LTP ecountered in MF6, LAW5:',l5%ltp
+            call endf_error(erlin)
         end select
         call write_endf(zero, l5%e1, l5%ltp, 0, nx, l5%nl)
         call write_endf(l5%a,nx)
@@ -581,16 +581,16 @@ module ENDF_MF6_IO
                         else if(sc%law5%lidp .eq. 1) then
                             nx = 3*sc%law5%ll(j)%nl + 3
                         else
-                            write(6,*) ' Undefined LIDP in MF6, LAW5 encountered:',sc%law5%lidp
-                            call endf_error
+                            write(erlin,*) 'Undefined LIDP in MF6, LAW5 encountered:',sc%law5%lidp
+                            call endf_error(erlin)
                         endif
                     case(2)
                         nx = sc%law5%ll(j)%nl + 1
                     case(3:)
                         nx = 2*sc%law5%ll(j)%nl
                     case default
-                        write(6,*) ' Undefined LTP ecountered in MF6, LAW5:',sc%law5%ll(j)%ltp
-                        call endf_error
+                        write(erlin,*) 'Undefined LTP ecountered in MF6, LAW5:',sc%law5%ll(j)%ltp
+                        call endf_error(erlin)
                     end select
                     l = l + (nx+5)/6 + 1
                 end do
@@ -605,8 +605,8 @@ module ENDF_MF6_IO
                     end do
                 end do
             case default
-                write(6,*) ' Undefined LAW encountered in MF6:',sc%law
-                call endf_error
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
             end select
 
         end do

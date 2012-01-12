@@ -65,8 +65,8 @@ module ENDF_MF28_IO
             shl => r28%shl(i)
             call read_endf(shl%subi, xx, n, n, nw, shl%ntr)
             if(nw .ne. 6*(shl%ntr+1)) then
-                write(6,*) ' Inconsistent NW, NTR found in MF28'
-                call endf_error
+                write(erlin,*) ' Inconsistent NW, NTR found in MF28'
+                call endf_error(erlin)
             endif
             allocate(shl%trn(shl%ntr))
             call read_endf(shl%ebi, shl%eln, xx, xx, xx, xx)

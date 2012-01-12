@@ -97,8 +97,8 @@ module ENDF_MF7_IO
                 allocate(r7%iel)
                 call read_incoh_elas(r7%iel)
             else
-                write(6,*) ' Unrecognized LTHR MF7/MT2:',r7%lthr
-                call endf_error
+                write(erlin,*) 'Unrecognized LTHR MF7/MT2:',r7%lthr
+                call endf_error(erlin)
             end if
         else if(r7%mt .eq. 4) then
             allocate(r7%iin)
@@ -106,8 +106,8 @@ module ENDF_MF7_IO
             r7%iin%lasym = n2
             call read_incoh_inelas(r7%iin)
         else
-            write(6,*) ,' Undefined MT found in MF7 :',r7%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT found in MF7 :',r7%mt
+            call endf_error(erlin)
         end if
 
         i = next_mt()
@@ -152,10 +152,7 @@ module ENDF_MF7_IO
 
     do i = 1,r7%lt
         call read_endf(r7%t(i), xx, r7%li(i), n, np, n)
-        if(np .ne. r7%np) then
-            write(6,*) ,' Inconsistent values for NP encounted in coherent MF7/MT2'
-            call endf_error
-        end if
+        if(np .ne. r7%np) call endf_error('Inconsistent values for NP encounted in coherent MF7/MT2')
         call read_endf(r7%s(1:r7%np,i),r7%np)
     end do
 
@@ -193,8 +190,8 @@ module ENDF_MF7_IO
 
     call read_endf(ic%lln, n, ic%ni, ic%ns)
     if(ic%ni .ne. 6*(ic%ns+1)) then
-        write(6,*) ,' Inconsistent values for NI, NS encountered in MF7/MT4:',ic%ni,ic%ns
-        call endf_error
+        write(erlin,*) 'Inconsistent values for NI, NS encountered in MF7/MT4:',ic%ni,ic%ns
+        call endf_error(erlin)
     endif
 
     allocate(ic%b(ic%ni))
@@ -216,21 +213,12 @@ module ENDF_MF7_IO
             ic%nra = nra
             ic%temp(0) = xt
         else
-            if(lt .ne. ic%lt) then
-                write(6,*) ,' Inconsistent values for LT encountered in MF7/MT4'
-                call endf_error
-            endif
-            if(np .ne. ic%np) then
-                write(6,*) ,' Inconsistent values for NP encountered in MF7/MT4'
-                call endf_error
-            endif
-            if(nra .ne. ic%nra) then
-                write(6,*) ,' Inconsistent values for alpha-NR encountered in MF7/MT4'
-                call endf_error
-            endif
+            if(lt .ne. ic%lt) call endf_error('Inconsistent values for LT encountered in MF7/MT4')
+            if(np .ne. ic%np) call endf_error('Inconsistent values for NP encountered in MF7/MT4')
+            if(nra .ne. ic%nra) call endf_error('Inconsistent values for alpha-NR encountered in MF7/MT4')
             if(xt .ne. ic%temp(0)) then
-                write(6,*) ,' Inconsistent temperatures encountered in MF7/MT4:',xt,ic%temp(0)
-                call endf_error
+                write(erlin,*) 'Inconsistent temperatures encountered in MF7/MT4:',xt,ic%temp(0)
+                call endf_error(erlin)
             endif
         end if
 
@@ -248,20 +236,14 @@ module ENDF_MF7_IO
 
         do j = 1,ic%lt
             call read_endf(xt,beta,ic%li(j), n, np, n)
-            if(np .ne. ic%np) then
-                write(6,*) ,' Inconsistent values for NP encountered in MF7/MT4'
-                call endf_error
-            endif
-            if(beta .ne. ic%beta(i)) then
-                write(6,*) ,' Inconsistent values for beta encountered in MF7/MT4'
-                call endf_error
-            endif
+            if(np .ne. ic%np) call endf_error('Inconsistent values for NP encountered in MF7/MT4')
+            if(beta .ne. ic%beta(i)) call endf_error('Inconsistent values for beta encountered in MF7/MT4')
             if(i .eq. 1) then
                 ic%temp(j) = xt
             else
                 if(xt .ne. ic%temp(j)) then
-                    write(6,*) ,' Inconsistent temperatures encountered in MF7/MT4:',xt,ic%temp(0)
-                    call endf_error
+                    write(erlin,*) 'Inconsistent temperatures encountered in MF7/MT4:',xt,ic%temp(0)
+                    call endf_error(erlin)
                 endif
             end if
             call read_endf(ic%s(1:ic%np,i,j),ic%np)
@@ -310,15 +292,15 @@ module ENDF_MF7_IO
             else if(r7%lthr .eq. 2) then
                 call write_incoh_elas(r7%iel)
             else
-                write(6,*) ,' Undefined LTHR MF7/MT2:',r7%lthr
-                call endf_error
+                write(erlin,*) 'Undefined LTHR MF7/MT2:',r7%lthr
+                call endf_error(erlin)
             end if
         else if(r7%mt .eq. 4) then
             call write_endf(r7%za, r7%awr, r7%lthr, r7%iin%lat, r7%iin%lasym, 0)
             call write_incoh_inelas(r7%iin)
         else
-            write(6,*) ,' Undefined MT found in MF7 :',r7%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT found in MF7 :',r7%mt
+            call endf_error(erlin)
         end if
         call write_send
         r7 => r7%next
@@ -389,8 +371,8 @@ module ENDF_MF7_IO
     real, allocatable :: xp(:)
 
     if(ic%ni .ne. 6*(ic%ns+1)) then
-        write(6,*) ,' Inconsistent values for NI, NS encountered in MF7/MT4:',ic%ni,ic%ns
-        call endf_error
+        write(erlin,*) 'Inconsistent values for NI, NS encountered in MF7/MT4:',ic%ni,ic%ns
+        call endf_error(erlin)
     endif
 
     call write_endf(ic%lln, 0, ic%ni, ic%ns)
@@ -462,13 +444,13 @@ module ENDF_MF7_IO
             else if(r7%lthr .eq. 2) then
                 l = l + lc_tab1(r7%iel%w) + 1
             else
-                write(6,*) ,' Undefined LTHR MF7/MT2:',r7%lthr
-                call endf_error
+                write(erlin,*) 'Undefined LTHR MF7/MT2:',r7%lthr
+                call endf_error(erlin)
             end if
         else if(r7%mt .eq. 4) then
             if(r7%iin%ni .ne. 6*(r7%iin%ns+1)) then
-                write(6,*) ,' Inconsistent values for NI, NS encountered in MF7/MT4:',r7%iin%ni,r7%iin%ns
-                call endf_error
+                write(erlin,*) 'Inconsistent values for NI, NS encountered in MF7/MT4:',r7%iin%ni,r7%iin%ns
+                call endf_error(erlin)
             endif
             l = (r7%iin%ni+5)/6 + (2*r7%iin%nrb+5)/6 + 3
             do i = 1,r7%iin%nb
@@ -485,8 +467,8 @@ module ENDF_MF7_IO
                 l = l + lc_tab1(r7%iin%tef(i)) + 1
             end do
         else
-            write(6,*) ,' Undefined MT found in MF7 :',r7%mt
-            call endf_error
+            write(erlin,*) 'Undefined MT found in MF7 :',r7%mt
+            call endf_error(erlin)
         end if
         mtc = mtc + 1
         r7%lc = l

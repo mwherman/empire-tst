@@ -332,8 +332,8 @@ module ENDF_MF2_IO
             case(1)
                 qape = .true.
             case default
-                write(6,*) ' Invalid AP flag NRO found in MF2:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF2:',rng%nro
+                call endf_error(erlin)
             end select
 
             nullify(rng%sc, rng%bw, rng%rm, rng%aa, rng%ml, rng%ur)
@@ -360,8 +360,8 @@ module ENDF_MF2_IO
                     allocate(rng%ml)
                     call read_ml(rng%ml)
                 case default
-                    write(6,*) ' Invalid resonance format LRF found in MF2:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF2:',rng%lrf
+                    call endf_error(erlin)
                 end select
 
             case(2)
@@ -371,8 +371,8 @@ module ENDF_MF2_IO
 
             case default
 
-                write(6,*) ' Undefined resonance range LRU found in MF2:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF2:',rng%lru
+                call endf_error(erlin)
 
             end select
 
@@ -382,8 +382,7 @@ module ENDF_MF2_IO
     i = next_mt()
     if(i .eq. 0) return
 
-    write(6,*) ' FEND record not found for MF2'
-    call endf_error
+    call endf_error('FEND record not found for MF2')
 
     end subroutine read_mf2
 
@@ -498,8 +497,8 @@ module ENDF_MF2_IO
             call read_endf(lm%bck%af,6)
             call read_endf(lm%bck%ac,6)
         case default
-            write(6,*) ' Undefined NX encountered in Adler-Adler in MF2:',lm%nx
-            call endf_error
+            write(erlin,*) 'Undefined NX encountered in Adler-Adler in MF2:',lm%nx
+            call endf_error(erlin)
         end select
 
         call read_endf(lm%l, n, lm%njs, n)
@@ -620,8 +619,8 @@ module ENDF_MF2_IO
                 call get_endf(bk%s0)
                 call get_endf(bk%ga)
             case default
-                write(6,*) ' Undefined value for R-Matrix background LBK:', bk%lbk
-                call endf_error
+                write(erlin,*) 'Undefined value for R-Matrix background LBK:', bk%lbk
+                call endf_error(erlin)
             end select
 
         end if
@@ -644,8 +643,8 @@ module ENDF_MF2_IO
                     call read_endf(n, n, ps%psi%nr, ps%psi%np)
                 call read_endf(ps%psi)
             case default
-                write(6,*) ' Undefined value for MF2 R-Matrix phase shift LPS:', ps%lps
-                call endf_error
+                write(erlin,*) 'Undefined value for MF2 R-Matrix phase shift LPS:', ps%lps
+                call endf_error(erlin)
             end select
 
         end if
@@ -743,8 +742,8 @@ module ENDF_MF2_IO
 
     else
 
-        write(6,*) ' Unrecognized pair of LFW,LRF in MF2 URR:',lfw,lrf
-        call endf_error
+        write(erlin,*) 'Unrecognized pair of LFW,LRF in MF2 URR:',lfw,lrf
+        call endf_error(erlin)
 
     endif
 
@@ -784,8 +783,8 @@ module ENDF_MF2_IO
             case(1)
                 qape = .true.
             case default
-                write(6,*) ' Undefined AP flag NRO found in MF2:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF2:',rng%nro
+                call endf_error(erlin)
             end select
 
             select case(rng%lru)
@@ -805,8 +804,8 @@ module ENDF_MF2_IO
                 case(7)
                     call write_ml(rng%ml)
                 case default
-                    write(6,*) ' Undefined resonance format LRF found in MF2:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF2:',rng%lrf
+                    call endf_error(erlin)
                 end select
 
             case(2)
@@ -815,8 +814,8 @@ module ENDF_MF2_IO
 
             case default
 
-                write(6,*) ' Undefined resonance range LRU found in MF2:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF2:',rng%lru
+                call endf_error(erlin)
 
             end select
 
@@ -928,8 +927,8 @@ module ENDF_MF2_IO
             call write_endf(lm%bck%af,6)
             call write_endf(lm%bck%ac,6)
         case default
-            write(6,*) ' Undefined MF2 NX encountered in Adler-Adler in MF2:',lm%nx
-            call endf_error
+            write(erlin,*) 'Undefined MF2 NX encountered in Adler-Adler in MF2:',lm%nx
+            call endf_error(erlin)
         end select
 
             call write_endf(lm%l, 0, lm%njs, 0)
@@ -1024,8 +1023,8 @@ module ENDF_MF2_IO
                 call put_endf(zero)
                 call put_endf(zero)
             case default
-                write(6,*) ' Undefined value for MF2 R-Matrix background LBK:', sg%bck%lbk
-                call endf_error
+                write(erlin,*) 'Undefined value for MF2 R-Matrix background LBK:', sg%bck%lbk
+                call endf_error(erlin)
             end select
 
         end if
@@ -1045,8 +1044,8 @@ module ENDF_MF2_IO
                 call write_endf(0, 0, sg%psf%psi%nr, sg%psf%psi%np)
                 call write_endf(sg%psf%psi)
             case default
-                write(6,*) ' Undefined value for MF2 R-Matrix phase shift LPS:', sg%psf%lps
-                call endf_error
+                write(erlin,*) 'Undefined value for MF2 R-Matrix phase shift LPS:', sg%psf%lps
+                call endf_error(erlin)
             end select
 
         end if
@@ -1126,8 +1125,8 @@ module ENDF_MF2_IO
 
     else
 
-        write(6,*) ' Unrecognized pair of LFW,LRF in MF2 URR:',lfw,lrf
-        call endf_error
+        write(erlin,*) 'Unrecognized pair of LFW,LRF in MF2 URR:',lfw,lrf
+        call endf_error(erlin)
 
     endif
 
@@ -1170,8 +1169,8 @@ module ENDF_MF2_IO
             case(1)
                 qape = .true.
             case default
-                write(6,*) ' Invalid AP flag NRO found in MF2:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF2:',rng%nro
+                call endf_error(erlin)
             end select
 
             select case(rng%lru)
@@ -1214,8 +1213,8 @@ module ENDF_MF2_IO
                             case(1)
                                 l = l + lc_tab1(sg%bck%rbr) + lc_tab1(sg%bck%rbi) + 4
                             case default
-                                write(6,*) ' Undefined value for MF2 R-Matrix background LBK:', sg%bck%lbk
-                                call endf_error
+                                write(erlin,*) 'Undefined value for MF2 R-Matrix background LBK:', sg%bck%lbk
+                                call endf_error(erlin)
                             end select
                         endif
                         if(sg%kps .gt. 0) then
@@ -1226,14 +1225,14 @@ module ENDF_MF2_IO
                             case(1)
                                 l = l + lc_tab1(sg%psf%psr) + lc_tab1(sg%psf%psi) + 3
                             case default
-                                write(6,*) ' Undefined value for MF2 R-Matrix phase shift LPS:', sg%psf%lps
-                                call endf_error
+                                write(erlin,*) 'Undefined value for MF2 R-Matrix phase shift LPS:', sg%psf%lps
+                                call endf_error(erlin)
                             end select
                         end if
                     end do
                 case default
-                    write(6,*) ' Undefined resonance format LRF found in MF2:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF2:',rng%lrf
+                    call endf_error(erlin)
                 end select
             case(2)
                 if((iso%lfw .eq. 0) .and. (rng%lrf .eq. 1)) then
@@ -1255,13 +1254,13 @@ module ENDF_MF2_IO
                         end do
                     end do
                 else
-                    write(6,*) ' Unrecognized pair of LFW,LRF in MF2 URR:', iso%lfw, rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Unrecognized pair of LFW,LRF in MF2 URR:', iso%lfw, rng%lrf
+                    call endf_error(erlin)
 
                 endif
             case default
-                write(6,*) ' Undefined resonance range LRU found in MF2:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF2:',rng%lru
+                call endf_error(erlin)
             end select
         end do
     end do

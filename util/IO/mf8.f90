@@ -236,8 +236,8 @@ module ENDF_MF8_IO
             pr%nd = 0
             nullify(pr%br)
         else
-            write(6,*) ' Undefined value for NO encounted in MF8/MT:',get_mt()
-            call endf_error
+            write(erlin,*) 'Undefined value for NO encounted in MF8:',nc%no
+            call endf_error(erlin)
         endif
     end do
 
@@ -264,8 +264,8 @@ module ENDF_MF8_IO
     ep => yld%ep(1)
     call read_endf(ep%e, xx, n, n, nn, ep%nfp)
     if(nn .ne. 4*ep%nfp) then
-        write(6,*) ' Inconsistent NFP, item count found in MF8:',ep%nfp,nn
-        call endf_error
+        write(erlin,*) 'Inconsistent NFP, item count found in MF8:',ep%nfp,nn
+        call endf_error(erlin)
     end if
     ep%itp = 0
 
@@ -276,8 +276,8 @@ module ENDF_MF8_IO
         ep => yld%ep(i)
         call read_endf(ep%e, xx, ep%itp, n, nn, ep%nfp)
         if(nn .ne. 4*ep%nfp) then
-            write(6,*) ' Inconsistent NFP, item count found in MF8:',ep%nfp,nn
-            call endf_error
+            write(erlin,*) 'Inconsistent NFP, item count found in MF8:',ep%nfp,nn
+            call endf_error(erlin)
         end if
         allocate(ep%c(ep%nfp))
         call read_reals(ep%c(1)%zafp,nn)
@@ -313,8 +313,8 @@ module ENDF_MF8_IO
         call read_endf(rc%spi, rc%par, n, n, nc, rc%ndk)
 
         if(nc .ne. 6*rc%ndk) then
-            write(6,*) ' Inconsistent NDK, NT found in MF8/MT457:',rc%ndk,nc
-            call endf_error
+            write(erlin,*) 'Inconsistent NDK, NT found in MF8/MT457:',rc%ndk,nc
+            call endf_error(erlin)
         endif
 
         if(rc%ndk .gt. 0) then
@@ -394,8 +394,8 @@ module ENDF_MF8_IO
 
     case default
 
-        write(6,*) ' Undefined value for NST encounted in MF8/MT457:',rc%nst
-        call endf_error
+        write(erlin,*) 'Undefined value for NST encounted in MF8/MT457:',rc%nst
+        call endf_error(erlin)
 
     end select
 
@@ -455,8 +455,8 @@ module ENDF_MF8_IO
                 call write_reals(pr%br(j)%hl,6)
             end do
         else if(nc%no .ne. 1) then
-            write(6,*) ' Undefined value for NO encounted in MF8/MT:',get_mt()
-            call endf_error
+            write(erlin,*) 'Undefined value for NO encounted in MF8:', nc%no
+            call endf_error(erlin)
         endif
     end do
 
@@ -546,8 +546,8 @@ module ENDF_MF8_IO
 
     case default
 
-        write(6,*) ' Undefined value for NST encounted in MF8/MT457:',rc%nst
-        call endf_error
+        write(erlin,*) 'Undefined value for NST encounted in MF8/MT457:',rc%nst
+        call endf_error(erlin)
 
     end select
 
@@ -597,8 +597,8 @@ module ENDF_MF8_IO
             else if(r8%rdd%nst .eq. 1) then
                 l = 5    ! stable
             else
-                write(6,*) ' Undefined value for NST encounted in MF8/MT457:',r8%rdd%nst
-                call endf_error
+                write(erlin,*) 'Undefined value for NST encounted in MF8/MT457:',r8%rdd%nst
+                call endf_error(erlin)
             end if
         case default
             l = 1
@@ -608,8 +608,8 @@ module ENDF_MF8_IO
                 if(r8%ncl%no .eq. 0) then
                     l = l + r8%ncl%prd(i)%nd
                 else if(r8%ncl%no .ne. 1) then
-                    write(6,*) ' Undefined value for NO encounted in MF8/MT:',get_mt()
-                    call endf_error
+                    write(erlin,*) 'Undefined value for NO encounted in MF8:', r8%ncl%no
+                    call endf_error(erlin)
                 endif
             end do
 

@@ -19,6 +19,7 @@ module endf_lines
     integer*4, parameter :: idata = 3     ! state when within a MT section
 
     logical*4 :: verbose = .false.        ! type MAT, MF, MT whenever MT changes
+    logical*4 :: matok = .false.          ! if true, ignore when MAT changes unexpectedly
 
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
@@ -27,13 +28,14 @@ module endf_lines
     character*9 lmft                      ! MAT, MF, MT in cols 66-75 of last section read
     character*9 cmft                      ! MAT, MF, MT in cols 66-75 of current line
     integer*4 istate                      ! current 'state' on input
+    character*200 erlin                   ! for error reporting
 
 ! -------------------- Public interface ----------------------------------------
 
     public endline                        ! line supplied by endf_line_io
     integer, public :: ipos               ! current position on line
 
-    public open_endfile, get_endline, put_endline, close_endfile, set_io_verbose
+    public open_endfile, get_endline, put_endline, close_endfile, set_io_verbose, set_ignore_badmat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
 
 !------------------------------------------------------------------------------
@@ -49,16 +51,12 @@ module endf_lines
 
     integer*4 status
 
-    if(qopen) then
-        write(6,*) ' Attempting to open an ENDF file when another already open'
-        stop ' ENDF IO aborted'
-    endif
+    if(qopen) call endf_error('Attempting to open an ENDF file when another already open')
 
     status = open_endf_file(efil,qwrite)
     if(status .lt. 0) then
-        write(6,*) ' Error opening file ',efil
-        write(6,*) ' Error returned = ',status
-        stop ' ENDF IO aborted'
+        write(erlin,*) 'Error opening ',efil,'  Error status =',status
+        call endf_error(erlin)
     endif
 
     lnum = -1
@@ -82,7 +80,7 @@ module endf_lines
 
     status = close_endf_file()
     if(status .lt. 0) then
-        write(6,*) ' Close returned error code :',status
+        write(6,*) '  Close returned error code :',status
     endif
     qopen = .false.
 
@@ -91,25 +89,34 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
-    subroutine endf_error
+    subroutine endf_error(errline)
 
     implicit none
 
+    character*(*), intent(in) :: errline
+
+    write(6,*) ' ****** ERROR ******',char(7)
+    write(6,*)
+    write(6,*) '    ',errline(1:len_trim(errline))
+    write(6,*)
+
     if(.not.qopen) then
-        write(6,*) ' No ENDF file open'
-        stop ' ENDF-IO aborted'
+        write(6,*) '     No ENDF file open'
+        stop '  ENDF-IO aborted'
     endif
 
     if(qwrt) then
-        write(6,*) ' Last line written line number:',filin
-        write(6,'(a80)') endline
+        write(6,*) '     Last line written line number:',filin
+        write(6,'(5x,a80)') endline
+        write(6,*)
         call close_endfile
-        stop ' WRITE_ENDF aborted'
+        stop '  WRITE_ENDF aborted'
     else
-        write(6,*) ' Last line read line number:',filin
-        write(6,'(a80)') endline
+        write(6,*) '     Last line read line number:',filin
+        write(6,'(5x,a80)') endline
+        write(6,*)
         call close_endfile
-        stop ' READ_ENDF aborted'
+        stop '  READ_ENDF aborted'
     endif
 
     end subroutine endf_error
@@ -126,22 +133,18 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) then
-        write(6,*) ' Attempt to read from ENDF output file'
-        call endf_error
-    endif
+    if(qwrt) call endf_error('Attempt to read from ENDF output file')
 
     status = get_endf_line()
     if(present(stat)) stat = status
     if(status .lt. 0) then
         if(present(stat)) return
         if(status .eq. -1) then
-            write(6,*) ' Hit end-of-file during read'
+            write(erlin,*) 'Hit end-of-file during read'
         else
-            write(6,*) ' Read returned error code :',status
+            write(erlin,*) 'Read returned error code :',status
         endif
-        write(6,*) ' MAT = ',cmft(1:4),'  MF = ',cmft(5:6),' MT = ',cmft(7:9)
-        call endf_error
+        call endf_error(erlin)
     endif
 
     ipos = 0
@@ -159,19 +162,23 @@ module endf_lines
 
         if(endline(73:75) .ne. cmft(7:9)) then
             if(cmft(7:9) .eq. '  0') then
-                write(6,*) ' SEND record (MT=0) not found for MF=',lmft(5:6),',  MT=',lmft(7:9)
+                write(erlin,*) 'SEND record (MT=0) not found for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else if(endline(73:75) .eq. '  0') then
-                write(6,*) ' Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
+                write(erlin,*) 'Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else
-                write(6,*) ' MT number changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
+                write(erlin,*) 'MT number changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
             endif
         else if(endline(71:72) .ne. cmft(5:6)) then
-            write(6,*) ' MF number changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
+            write(erlin,*) 'MF number changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
         else
-            write(6,*) ' MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            if(matok) then
+                write(6,'(a)') erlin(1:len_trim(erlin))
+                return
+            endif
         endif
 
-        call endf_error
+        call endf_error(erlin)
 
     case(isend)
 
@@ -179,8 +186,12 @@ module endf_lines
         ! see if next line has new MT or end of file with MF=0
 
         if(endline(67:70) .ne. cmft(1:4)) then
-            write(6,*) ' MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
-            call endf_error
+            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            if(matok) then
+                write(6,'(a)') erlin(1:len_trim(erlin))
+            else
+                call endf_error(erlin)
+            endif
         endif
 
         if(endline(71:72) .eq. cmft(5:6)) then
@@ -194,20 +205,20 @@ module endf_lines
                 if(verbose) write(6,*) '  READING MAT=',cmft(1:4),'   MF=',cmft(5:6),'   MT=',cmft(7:9)
                 return
             endif
-            write(6,*) ' In MF',cmft(5:6),' found MT=',endline(73:75),' <= to previous MT=',lmft(7:9)
-            call endf_error
+            write(erlin,*) 'In MF',cmft(5:6),' found MT=',endline(73:75),' <= to previous MT=',lmft(7:9)
+            call endf_error(erlin)
         else if(endline(71:72) .eq. ' 0') then
             ! MF=0 -> changing files
             ! make sure MT is also still 0
             if(endline(73:75) .ne. '  0') then
-                write(6,*) ' FEND record (MF=0) encountered with non-zero MT:',endline(73:75)
-                call endf_error
+                write(erlin,*) 'FEND record (MF=0) encountered with non-zero MT:',endline(73:75)
+                call endf_error(erlin)
             endif
             istate = ifend
             return
         else
-            write(6,*) ' MEND (MF=0) record not found for MF=',lmft(5:6)
-            call endf_error
+            write(erlin,*) 'MEND (MF=0) record not found for MF=',lmft(5:6)
+            call endf_error(erlin)
         endif
 
     case(ifend)
@@ -220,8 +231,12 @@ module endf_lines
                 istate = imend
                 return
             endif
-            write(6,*) ' MEND (MAT=0) record not found for MAT=',lmft(1:4)
-            call endf_error
+            write(erlin,*) 'MEND (MAT=0) record not found for MAT=',lmft(1:4)
+            if(matok) then
+                write(6,'(a)') erlin(1:len_trim(erlin))
+            else
+                call endf_error(erlin)
+            endif
         endif
 
         ! same MAT - must be reading new MF file
@@ -235,8 +250,8 @@ module endf_lines
             return
         endif
 
-        write(6,*) ' Found MF=',endline(71:72),' <= to previous MF=',lmft(5:6)
-        call endf_error
+        write(erlin,*) 'Found MF=',endline(71:72),' <= to previous MF=',lmft(5:6)
+        call endf_error(erlin)
 
     case(imend)
 
@@ -245,8 +260,8 @@ module endf_lines
 
     case default
 
-        write(6,*) ' Internal logic error in reading file, state = ', istate
-        call endf_error
+        write(erlin,*) 'Internal logic error in reading file, state = ', istate
+        call endf_error(erlin)
 
     end select
 
@@ -283,10 +298,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(.not.qwrt) then
-        write(6,*) ' Attempt to write to ENDF input file'
-        call endf_error
-    endif
+    if(.not.qwrt) call endf_error('Attempt to write to ENDF input file')
 
     endline(67:75) = cmft
 
@@ -298,9 +310,8 @@ module endf_lines
     if(present(stat)) stat = status
     if(status .lt. 0) then
         if(present(stat)) return
-        write(6,*) ' Write returned error code :',status
-        write(6,*) ' MAT = ',cmft(1:4),'  MF = ',cmft(5:6),' MT = ',cmft(7:9)
-        call endf_error
+        write(erlin,*) 'Write returned error code :',status
+        call endf_error(erlin)
     endif
 
     ipos = 0
@@ -320,18 +331,14 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) then
-        write(6,*) ' Attempt to read MT from output file'
-        call endf_error
-    endif
+    if(qwrt) call endf_error('Attempt to read MT from output file')
 
     read(endline(73:75),'(i3)',err=10) i
     get_mt = i
 
     return
 
-10  write(6,*) ' Error reading MT from file'
-    call endf_error
+10  call endf_error('Error reading MT from file')
 
     end function get_mt
 
@@ -347,18 +354,14 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) then
-        write(6,*) ' Attempt to read MF from output file'
-        call endf_error
-    endif
+    if(qwrt) call endf_error('Attempt to read MF from output file')
 
     read(endline(71:72),'(i2)',err=10) i
     get_mf = i
 
     return
 
-10  write(6,*) ' Error reading MF from file'
-    call endf_error
+10  call endf_error('Error reading MF from file')
 
     end function get_mf
 
@@ -374,18 +377,14 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) then
-        write(6,*) ' Attempt to read MAT from output file'
-        call endf_error
-    endif
+    if(qwrt) call endf_error('Attempt to read MAT from output file')
 
     read(endline(67:70),'(i4)',err=10) i
     get_mat = i
 
     return
 
-10  write(6,*) ' Error reading MAT from file'
-    call endf_error
+10  call endf_error('Error reading MAT from file')
 
     end function get_mat
 
@@ -407,8 +406,8 @@ module endf_lines
         ! only allow end of material (MAT=) when MF=0
 
         if(mat .ne. 0) then
-            write(6,*)  'Attempting to set MAT to new value:',mat
-            call endf_error
+            write(erlin,*)  'Attempting to set MAT to new value:',mat
+            call endf_error(erlin)
         endif
 
         istate = imend
@@ -419,8 +418,8 @@ module endf_lines
 
         select case(mat)
         case(:-2,0)
-            write(6,*) ' Attempting to set MAT to undefined value :',mat
-            call endf_error
+            write(erlin,*) 'Attempting to set MAT to undefined value :',mat
+            call endf_error(erlin)
         case(-1)
             ! writing final TEND record
             ! only allowed if current MAT=0
@@ -432,8 +431,8 @@ module endf_lines
 
     case default
 
-        write(6,*) ' Out-of-sequence SET_MAT to :',mat
-        call endf_error
+        write(erlin,*) 'Out-of-sequence SET_MAT to :',mat
+        call endf_error(erlin)
 
     end select
 
@@ -442,8 +441,8 @@ module endf_lines
 
     return
 
-10  write(6,*) ' Error setting MAT to requested value =',mat
-    call endf_error
+10  write(erlin,*) 'Error setting MAT to requested value =',mat
+    call endf_error(erlin)
 
     end subroutine set_mat
 
@@ -465,8 +464,8 @@ module endf_lines
 
         ! if between materials, don't allow MF to be set
 
-        write(6,*) ' Attempting to set MF with no MAT number defined :',mf
-        call endf_error
+        write(erlin,*) 'Attempting to set MF with no MAT number defined :',mf
+        call endf_error(erlin)
 
     case(ifend)
 
@@ -474,8 +473,8 @@ module endf_lines
 
         read(lmft(5:6),'(i2)') omf
         if(mf .le. omf) then
-            write(6,*) ' Attempting to set MF ',mf ,' which is .LE. to previous MF=',lmft(5:6)
-            call endf_error
+            write(erlin,*) 'Attempting to set MF ',mf ,' which is .LE. to previous MF=',lmft(5:6)
+            call endf_error(erlin)
         endif
         istate = isend
         lmft(7:9) = '  0'
@@ -485,14 +484,14 @@ module endf_lines
         ! only allow end of file MF=0
 
         if(mf .ne. 0) then
-            write(6,*)  'Attempting to set MF to new value:',mf
-            call endf_error
+            write(erlin,*) 'Out-of-sequence SET_MF to :',mf
+            call endf_error(erlin)
         endif
         istate = ifend
 
     case default
-        write(6,*) ' Out-of-sequence SET_MF to :',mf
-        call endf_error
+        write(erlin,*) 'Out-of-sequence SET_MF to :',mf
+        call endf_error(erlin)
     end select
     
     lnum = -1
@@ -500,8 +499,8 @@ module endf_lines
 
     return
 
-10  write(6,*) ' Error setting MF to requested value =',mf
-    call endf_error
+10  write(erlin,*) 'Error setting MF to requested value =',mf
+    call endf_error(erlin)
 
     end subroutine set_mf
 
@@ -523,8 +522,8 @@ module endf_lines
 
         ! if between materials or files. don't allow MT to be set
 
-        write(6,*) ' Attempting to set MT with no MAT or MF number defined :',mt
-        call endf_error
+        write(erlin,*) 'Attempting to set MT with no MAT or MF number defined :',mt
+        call endf_error(erlin)
 
     case(isend)
 
@@ -532,8 +531,8 @@ module endf_lines
 
         read(lmft(7:9),'(i3)') omt
         if(mt .le. omt) then
-            write(6,*) ' Attempting to set MT to',mt ,' which is .LE. to previous MT=',lmft(7:9)
-            call endf_error
+            write(erlin,*) 'Attempting to set MT to',mt ,' which is .LE. to previous MT=',lmft(7:9)
+            call endf_error(erlin)
         endif
         lmft = cmft
         istate = idata
@@ -546,8 +545,8 @@ module endf_lines
         ! only allow end of data MT=0
 
         if(mt .ne. 0) then
-            write(6,*) ' Out-of-sequence SET_MT to :',mt
-            call endf_error
+            write(erlin,*) 'Out-of-sequence SET_MT to :',mt
+            call endf_error(erlin)
         endif
         if(qwrt) istate = isend
         lnum = 99998
@@ -555,15 +554,14 @@ module endf_lines
 
     case default
 
-        write(6,*) ' Internal I/O inconsistency'
-        call endf_error
+        call endf_error('Internal I/O inconsistency - please send bug report')
 
     end select
 
     return
 
-10  write(6,*) ' Error setting MT to requested value =',mt
-    call endf_error
+10  write(erlin,*) 'Error setting MT to requested value =',mt
+    call endf_error(erlin)
 
     end subroutine set_mt
 
@@ -577,5 +575,16 @@ module endf_lines
 
     return
     end subroutine set_io_verbose
+
+!------------------------------------------------------------------------------
+
+    subroutine set_ignore_badmat(qmt)
+
+    logical*4, intent(in) :: qmt
+
+    matok = qmt
+
+    return
+    end subroutine set_ignore_badmat
 
 end module endf_lines

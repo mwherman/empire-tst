@@ -13,7 +13,7 @@ FC     =  gfortran
 #IPO = TRUE
 
 # define MODE = BLK if using unix block-mode I/O
-#MODE = BLK
+MODE = BLK
 
 # make sure MAKE knows f90 extension
 %.o : %.f90
@@ -38,7 +38,7 @@ endif
 ifeq ($(IPO),TRUE)
 
   # use ifort with block-mode I/O and cross-file optimization
-  # this provides the fastest executable on unix
+  # this generally provides the fastest executable on unix
 
   lib: endf_blk.o ipo_out.o
 	ar -csr endf_io.a *.o

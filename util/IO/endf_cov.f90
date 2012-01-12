@@ -47,6 +47,8 @@ module ENDF_COV_IO
         real, pointer :: cov(:,:)             ! covariance matrix (nnn,nnn)
     end type
 
+    ! ----------------- private data -------------------------------------
+
     integer, private :: nrow
     real, private :: fx
     character*15, private :: fmt
@@ -73,8 +75,8 @@ module ENDF_COV_IO
         ncs%nei = 0
 
         if(nt .ne. 2*ncs%nci) then
-            write(6,*) ' Incompatible NT, NCI in NC LTY=0 record : ',nt,ncs%nci
-            call endf_error
+            write(erlin,*) 'Incompatible NT, NCI in LTY=0 NC-covariance matrix : ',nt,ncs%nei
+            call endf_error(erlin)
         endif
 
         allocate(ncs%pt(ncs%nci))
@@ -86,8 +88,8 @@ module ENDF_COV_IO
         ncs%nci = 0
 
         if(nt .ne. (2*ncs%nei+2)) then
-            write(6,*) ' Incompatible NT, NEI in NC LTY=1-3 record : ',nt,ncs%nei
-            call endf_error
+            write(erlin,*) 'Incompatible NT, NEI in LTY=1-3 NC-covariance matrix : ',nt,ncs%nei
+            call endf_error(erlin)
         endif
 
         allocate(ncs%pt(ncs%nei))
@@ -97,8 +99,8 @@ module ENDF_COV_IO
 
     case default
 
-        write(6,*) ' Undefined LTY found in NC record : ',ncs%lty
-        call endf_error
+        write(erlin,*) 'Undefined LTY found in NC-covariance matrix: ',ncs%lty
+        call endf_error(erlin)
 
     end select
 
@@ -125,8 +127,8 @@ module ENDF_COV_IO
         call put_endf(ncs%xlfss)
         call put_endf(ncs%pt, ncs%nei)
     case default
-        write(6,*) ' Invalid LTY found in NC record : ',ncs%lty
-        call endf_error
+        write(erlin,*) 'Undefined LTY found in NC-covariance matrix: ',ncs%lty
+        call endf_error(erlin)
     end select
 
     return
@@ -148,8 +150,8 @@ module ENDF_COV_IO
     case(1:3)
         l = (2*(ncs%nei+1)+5)/6 + 2
     case default
-        write(6,*) ' Invalid LTY found in NC record : ',ncs%lty
-        call endf_error
+        write(erlin,*) 'Undefined LTY found in NC-covariance matrix: ',ncs%lty
+        call endf_error(erlin)
     end select
 
     lc_nc = l
@@ -179,8 +181,8 @@ module ENDF_COV_IO
     case(-1:2,8,9)
 
         if((mf .ne. 32) .and. (nis%lt .ne. 0)) then
-            write(6,*) ' NI-covariance matrix non-zero LT found with LB=',nis%lb
-            call endf_error
+            write(erlin,*) 'NI-covariance matrix with non-zero LT with LB=',nis%lb
+            call endf_error(erlin)
         endif
 
           allocate(nis%kl(nis%ne))
@@ -192,8 +194,8 @@ module ENDF_COV_IO
         nk = nis%ne - nis%lt
 
         if(nk .lt. 0) then
-            write(6,*) ' NI-covariance matrix with LT larger than NP in LB=3,4 record:',nis%lt,nis%ne
-            call endf_error
+            write(erlin,*) 'NI-covariance LB=3,4 matrix with LT larger than NP:',nis%lt,nis%ne
+            call endf_error(erlin)
         endif
 
         allocate(nis%kl(nk),nis%ll(nl))
@@ -210,22 +212,22 @@ module ENDF_COV_IO
         case(0)
             ! asymmetric matrix
             if(nis%nt .ne. (ne*(ne-1)+1)) then
-                write(6,*) ' Inconsistent NT, NE in asymmetric LB=5,7 matrix:',nis%nt,nis%ne
-                call endf_error
+                write(erlin,*) 'Inconsistent NT, NE in asymmetric LB=5,7 NI-covariance matrix:',nis%nt,nis%ne
+                call endf_error(erlin)
             endif
             call read_endf(nis%e,nis%ne)
             call get_endf(nis%cov,ne-1,ne-1)
         case(1)
             ! symmetric matrix
             if(nis%nt .ne. (ne*(ne+1)/2)) then
-                write(6,*) ' Inconsistent NT, NE in symmetric LB=5,7 matrix:',nis%nt,nis%ne
-                call endf_error
+                write(erlin,*) 'Inconsistent NT, NE in symmetric LB=5,7 NI-covariance matrix:',nis%nt,nis%ne
+                call endf_error(erlin)
             endif
             call read_endf(nis%e,nis%ne)
             call get_endf(nis%cov,ne-1)
         case default
-            write(6,*) ' Undefined LB=5,6 LS encountered = ',nis%ls
-            call endf_error
+            write(erlin,*) 'Undefined LS found in LB=5,6 covariance matrix:',nis%ls
+            call endf_error(erlin)
         end select
 
     case(6)
@@ -235,8 +237,8 @@ module ENDF_COV_IO
         nec = int(xec)
 
         if(real(nec) .ne. xec) then
-            write(6,*) ' Inconsistent NI LB=6  NEC, NER : ',nec,ner
-            call endf_error
+            write(erlin,*) 'Inconsistent LB=6 NI-covariance NEC, NER : ',nec,ner
+            call endf_error(erlin)
         endif
 
         allocate(nis%er(ner),nis%ec(nec), nis%cov(ner-1,nec-1))
@@ -246,8 +248,8 @@ module ENDF_COV_IO
 
     case default
 
-        write(6,*) ' Undefined LB found in NI record : ',nis%lb
-        call endf_error
+        write(erlin,*) 'Undefined LB found in NI-covariance matrix: ',nis%lb
+        call endf_error(erlin)
 
     end select
 
@@ -284,8 +286,8 @@ module ENDF_COV_IO
         nk = nis%ne - nis%lt
 
         if(nk .lt. 0) then
-            write(6,*) ' LT larger than NP in NI LB=3,4 record:',nis%lt,nis%ne
-            call endf_error
+            write(erlin,*) 'LT larger than NP in LB=3,4 NI-covariance matrix:',nis%lt,nis%ne
+            call endf_error(erlin)
         endif
 
         call write_endf(nis%lt, nis%lb, 2*nis%ne, nis%ne)
@@ -316,8 +318,8 @@ module ENDF_COV_IO
             call write_endf(nis%e,nis%ne)
             call put_endf(nis%cov,nis%ne-1)
         case default
-            write(6,*) ' Undefined LB=5,6 LS encountered = ',ls
-            call endf_error
+            write(erlin,*) 'Undefined LS found in LB=5,6 covariance matrix:',ls
+            call endf_error(erlin)
         end select
 
     case(6)
@@ -327,8 +329,8 @@ module ENDF_COV_IO
         nec = int(xec)
 
         if(real(nec) .ne. xec) then
-            write(6,*) ' Inconsistent NI LB=6 NEC, NER : ',nec,ner
-            call endf_error
+            write(erlin,*) 'Inconsistent LB=6 NI-covariance NEC, NER : ',nec,ner
+            call endf_error(erlin)
         endif
 
         call write_endf(0, nis%lb, nis%nt, nis%ne)
@@ -338,8 +340,8 @@ module ENDF_COV_IO
 
     case default
 
-        write(6,*) ' Undefined LB found in NI record : ',nis%lb
-        call endf_error
+        write(erlin,*) 'Undefined LB found in NI-covariance record: ',nis%lb
+        call endf_error(erlin)
 
     end select
 
@@ -376,14 +378,14 @@ module ENDF_COV_IO
             ! symmetric matrix
             l = ((nis%ne*(nis%ne+1))/2+5)/6 + 1
         case default
-            write(6,*) ' Undefined LB=5,6 LS encountered = ',ls
-            call endf_error
+            write(erlin,*) 'Undefined LS found in LB=5,6 covariance matrix:',ls
+            call endf_error(erlin)
         end select
     case(6)
         l = (nis%nt+5)/6 + 1
     case default
-        write(6,*) ' Undefined LB found in NI record : ',nis%lb
-        call endf_error
+        write(erlin,*) 'Undefined LB found in NI-covariance record: ',nis%lb
+        call endf_error(erlin)
     end select
 
     lc_ni = l
@@ -436,8 +438,7 @@ module ENDF_COV_IO
 
     return
 
-10  write(6,*) ' Error reading compact covariance matrix'
-    call endf_error
+10  call endf_error('Error reading compact covariance matrix')
 
     end subroutine read_cmpt
 
@@ -483,8 +484,7 @@ module ENDF_COV_IO
 
     return
 
-10  write(6,*) ' Error writing compact covariance matrix'
-    call endf_error
+10  call endf_error('Error writing compact covariance matrix')
 
     end subroutine write_cmpt
 
@@ -554,8 +554,8 @@ module ENDF_COV_IO
         nrow = 8
         fmt = '(i5,i5,8i7)    '
     case default
-        write(6,*) ' Undefined value of NDIGIT found in MF32 LCOMP=2:',ndig
-        call endf_error
+        write(erlin,*) 'Undefined value of NDIGIT found in Compact covariance :',ndig
+        call endf_error(erlin)
     end select
 
     return

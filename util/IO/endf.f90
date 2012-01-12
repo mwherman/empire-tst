@@ -171,7 +171,7 @@ module ENDF_IO
     private lc_mf1,lc_mf2,lc_mf3,lc_mf4,lc_mf5,lc_mf6,lc_mf7,lc_mf8,lc_mf9,lc_mf10
     private lc_mf12,lc_mf13,lc_mf14,lc_mf15,lc_mf23,lc_mf26,lc_mf27,lc_mf28,lc_mf31
     private lc_mf32,lc_mf33,lc_mf34,lc_mf35,lc_mf40
-    private get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
+    private get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, erlin
     private read_endf, get_endf, write_endf, put_endf, get_endline, put_endline, endline, ipos
     private clear_mat, mtmod, process_material
 
@@ -232,8 +232,8 @@ module ENDF_IO
                 call close_endfile
                 return
             endif
-            write(6,*) ' Error returned from READ:',status
-            call endf_error
+            write(erlin,*) 'Error returned from READ:',status
+            call endf_error(erlin)
         endif
         mat = get_mat()
         if(mat .eq. -1) then
@@ -245,8 +245,8 @@ module ENDF_IO
             allocate(mx%next)
             mx => mx%next
         else
-            write(6,*) ' Undefined MAT number encountered in file:',mat
-            call endf_error
+            write(erlin,*) 'Undefined MAT number encountered in file:',mat
+            call endf_error(erlin)
         endif
     end do
 

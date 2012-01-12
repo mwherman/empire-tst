@@ -117,8 +117,8 @@ module ENDF_MF5_IO
                 call read_endf(sc%efl, sc%efh, n, n, sc%tm%nr, sc%tm%np)
                 call read_endf(sc%tm)
             case default
-                write(6,*) ' Undefined LF found in MF5:',sc%lf
-                call endf_error
+                write(erlin,*) 'Undefined LF found in MF5:',sc%lf
+                call endf_error(erlin)
             end select
 
         end do
@@ -189,8 +189,8 @@ module ENDF_MF5_IO
                 call write_endf(sc%efl, sc%efh, 0, 0, sc%tm%nr, sc%tm%np)
                 call write_endf(sc%tm)
             case default
-                write(6,*) ' Undefined LF found in MF5:',sc%lf
-                call endf_error
+                write(erlin,*) 'Undefined LF found in MF5:',sc%lf
+                call endf_error(erlin)
             end select
 
         end do
@@ -239,8 +239,8 @@ module ENDF_MF5_IO
             case(12)
                 l = l + lc_tab1(r5%sct(i)%tm) + 1
             case default
-                write(6,*) ' Undefined LF found in MF5:',sc%lf
-                call endf_error
+                write(erlin,*) 'Undefined LF found in MF5:',sc%lf
+                call endf_error(erlin)
             end select
 
         end do

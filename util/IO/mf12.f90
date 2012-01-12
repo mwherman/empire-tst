@@ -97,8 +97,8 @@ module ENDF_MF12_IO
             allocate(r12%par)
             r12%par%lg = lg
             if((lg .lt. 1) .or. (lg .gt. 2)) then
-                write(6,*) ' Undefined value for LG in MF12:',lg
-                call endf_error
+                write(erlin,*) 'Undefined value for LG in MF12:',lg
+                call endf_error(erlin)
             endif
             call read_endf(r12%par%esp, xx, r12%par%lp, n, np, r12%par%nt)
             allocate(r12%par%tpb(r12%par%nt))
@@ -113,8 +113,8 @@ module ENDF_MF12_IO
                 endif
             end do
         case default
-            write(6,*) ' Undefined value of LO found in MF12:',r12%lo
-            call endf_error
+            write(erlin,*) 'Undefined value of LO found in MF12:',r12%lo
+            call endf_error(erlin)
         end select
 
         i = next_mt()
@@ -162,8 +162,8 @@ module ENDF_MF12_IO
             end do
         case(2)
             if((r12%par%lg .lt. 1) .or. (r12%par%lg .gt. 2)) then
-                write(6,*)  ' Undefined value for LG in MF12:',r12%par%lg
-                call endf_error
+                write(erlin,*)  'Undefined value for LG in MF12:',r12%par%lg
+                call endf_error(erlin)
             endif
             call write_endf(r12%za, r12%awr, r12%lo, r12%par%lg, r12%ns, 0)
             call write_endf(r12%par%esp, zero, r12%par%lp, 0, (r12%par%lg+1)*r12%par%nt, r12%par%nt)
@@ -174,8 +174,8 @@ module ENDF_MF12_IO
                 if(r12%par%lg .gt. 1) call put_endf(tp%gp)
             end do
         case default
-            write(6,*) ' Unrecognized value of LO found in MF12:',r12%lo
-            call endf_error
+            write(erlin,*) 'Undefined value of LO found in MF12:',r12%lo
+            call endf_error(erlin)
         end select
 
         call write_send
@@ -214,8 +214,8 @@ module ENDF_MF12_IO
         case(2)
             l = ((r12%par%lg+1)*r12%par%nt+5)/6 + 2
         case default
-            write(6,*) ' Unrecognized value of LO found in MF12:',r12%lo
-            call endf_error
+            write(erlin,*) 'Undefined value of LO found in MF12:',r12%lo
+            call endf_error(erlin)
         end select
         r12%lc = l
         mtc = mtc + 1

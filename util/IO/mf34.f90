@@ -113,8 +113,8 @@ module ENDF_MF34_IO
         case(0:2,5,6)
             ! allowed
         case default
-            write(6,*) ' Undefined LB encountered in MF34 : ',nis%lst(i)%lb
-            call endf_error
+            write(erlin,*) 'Undefined LB encountered in MF34 : ',nis%lst(i)%lb
+            call endf_error(erlin)
         end select
     end do
 
@@ -179,8 +179,8 @@ module ENDF_MF34_IO
         case(0:2,5,6)    ! allowed
             call write_ni(nis%lst(i),34)
         case default
-            write(6,*) ' Undefined LB encountered in MF34 : ',nis%lst(i)%lb
-            call endf_error
+            write(erlin,*) 'Undefined LB encountered in MF34 : ',nis%lst(i)%lb
+            call endf_error(erlin)
         end select
     end do
 
@@ -220,8 +220,8 @@ module ENDF_MF34_IO
                         case(0:2,5,6)    ! allowed
                             l = l + lc_ni(sc%ssc(j,k)%lst(m),34)
                         case default
-                            write(6,*) ' Undefined LB encountered in MF34 : ',sc%ssc(j,k)%lst(m)%lb
-                            call endf_error
+                            write(erlin,*) 'Undefined LB encountered in MF34 : ',sc%ssc(j,k)%lst(m)%lb
+                            call endf_error(erlin)
                         end select
                     end do
                 end do

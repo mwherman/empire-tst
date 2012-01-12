@@ -127,8 +127,8 @@ module ENDF_MF26_IO
                 call read_endf(xx, xx, n, n, sc%law8%etab%nr, sc%law8%etab%np)
                 call read_endf(sc%law8%etab)
             case default
-                write(6,*) ' Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error
+                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+                call endf_error(erlin)
             end select
 
         end do
@@ -165,8 +165,8 @@ module ENDF_MF26_IO
         l1 => law1%ll(i)
         call read_endf(xx, l1%e1, l1%nd, l1%na, nw, l1%nep)
         if(nw .ne. l1%nep*(l1%na+2)) then
-            write(6,*) ' Bad Word count, NEP,NA in MF26 LAW1:',l1%nep,l1%na
-            call endf_error
+            write(erlin,*) 'Bad Word count, NEP,NA in MF26 LAW1:',l1%nep,l1%na
+            call endf_error(erlin)
         endif
         allocate(l1%prm(l1%nep))
         do j = 1,l1%nep
@@ -205,8 +205,8 @@ module ENDF_MF26_IO
             nx = 2*l2%nl
         endif
         if(nw .ne. nx) then
-            write(6,*) ' Inconsistent NW, LANG, NL in MF6 LAW2:',nw,l2%lang,l2%nl
-            call endf_error
+            write(erlin,*) 'Inconsistent NW, LANG, NL in MF6 LAW2:',nw,l2%lang,l2%nl
+            call endf_error(erlin)
         endif
         allocate(l2%a(nw))
         call read_endf(l2%a,nw)
@@ -246,8 +246,8 @@ module ENDF_MF26_IO
                 call write_endf(zero, zero, 0, 0, sc%law8%etab%nr, sc%law8%etab%np)
                 call write_endf(sc%law8%etab)
             case default
-                write(6,*) ' Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error
+                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+                call endf_error(erlin)
             end select
         end do
         call write_send
@@ -350,8 +350,8 @@ module ENDF_MF26_IO
             case(8)
                 l = l + lc_tab1(sc%law8%etab) + 1
             case default
-                write(6,*) ' Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error
+                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+                call endf_error(erlin)
             end select
         end do
         r26%lc = l

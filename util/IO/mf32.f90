@@ -404,8 +404,8 @@ module ENDF_MF32_IO
                     call read_ni(rng%nis(n),33)    ! these are MF33-style covars
                 end do
             case default
-                write(6,*) ' Undefined AP flag NRO found in MF32:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF32:',rng%nro
+                call endf_error(erlin)
             end select
 
             nullify(rng%bw, rng%rm, rng%aa, rng%ml, rng%ur)
@@ -427,8 +427,8 @@ module ENDF_MF32_IO
                     allocate(rng%ml)
                     call read_ml(rng%ml)
                 case default
-                    write(6,*) ' Undefined resonance format LRF found in MF32:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF32:',rng%lrf
+                    call endf_error(erlin)
                 end select
 
             case(2)
@@ -438,8 +438,8 @@ module ENDF_MF32_IO
 
             case default
 
-                write(6,*) ' Undefined resonance range LRU found in MF32:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF32:',rng%lru
+                call endf_error(erlin)
 
             end select
 
@@ -449,8 +449,7 @@ module ENDF_MF32_IO
     i = next_mt()
     if(i .eq. 0) return
 
-    write(6,*) ' FEND record not found for MF32'
-    call endf_error
+    call endf_error('FEND record not found for MF32')
 
     end subroutine read_mf32
 
@@ -483,8 +482,8 @@ module ENDF_MF32_IO
             cp => bw%old(i)
             call read_endf(cp%awri, xx, cp%l, n, m, cp%nrs)
             if(m .ne. 18*cp%nrs) then
-                write(6,*) ' Incompatible LCOMP=0 total items, # parameters in MF32:',m,cp%nrs
-                call endf_error
+                write(erlin,*) 'Incompatible LCOMP=0 total items, # parameters in MF32:',m,cp%nrs
+                call endf_error(erlin)
             end if
             allocate(cp%res(cp%nrs))
             do j = 1,cp%nrs
@@ -518,8 +517,8 @@ module ENDF_MF32_IO
             case(-1,0,1,2,5)
                 ! allowed
             case default
-                write(6,*) ' Undefined MF32 long-range covar LB encountered:',bw%gen%lrc(i)%lb
-                call endf_error
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',bw%gen%lrc(i)%lb
+                call endf_error(erlin)
             end select
         end do
 
@@ -530,8 +529,8 @@ module ENDF_MF32_IO
         allocate(bw%cmp)
         call read_endf(bw%cmp%awri, bw%cmp%qx, n, bw%cmp%lrx, m, bw%cmp%nrsa)
         if(m .ne. 12*bw%cmp%nrsa) then
-            write(6,*) ' Incompatible LCOMP=2 total items, # parameters in MF32:',m,bw%cmp%nrsa
-            call endf_error
+            write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,bw%cmp%nrsa
+            call endf_error(erlin)
         end if
         allocate(bw%cmp%res(bw%cmp%nrsa))
         call read_reals(bw%cmp%res(1)%er,m)
@@ -539,8 +538,8 @@ module ENDF_MF32_IO
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',bw%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',bw%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -564,8 +563,8 @@ module ENDF_MF32_IO
     if(rm%isr .gt. 0) then
         call read_endf(n, n, rm%mls, n)
         if(rm%mls .lt. 1) then
-            write(6,*) ' Undefined value of MLS in MF32:',rm%mls
-            call endf_error
+            write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
+            call endf_error(erlin)
         else if(rm%mls .eq. 1) then
             allocate(rm%dap(0:0))
             call read_endf(rm%dap(0))
@@ -573,8 +572,8 @@ module ENDF_MF32_IO
             allocate(rm%dap(0:rm%mls))
             call read_endf(rm%dap,rm%mls+1)
         else
-            write(6,*) ' Undefined value of MLS in MF32:',rm%mls
-            call endf_error
+            write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
+            call endf_error(erlin)
         end if
     end if
 
@@ -606,8 +605,8 @@ module ENDF_MF32_IO
             case(-1,0,1,2,5)
                 ! allowed
             case default
-                write(6,*) ' Undefined MF32 long-range covar LB encountered:',rm%gen%lrc(i)%lb
-                call endf_error
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',rm%gen%lrc(i)%lb
+                call endf_error(erlin)
             end select
         end do
 
@@ -618,8 +617,8 @@ module ENDF_MF32_IO
         allocate(rm%cmp)
         call read_endf(rm%cmp%awri, rm%cmp%apl, n, n, m, rm%cmp%nrsa)
         if(m .ne. 12*rm%cmp%nrsa) then
-            write(6,*) ' Incompatible LCOMP=2 total items, # parameters in MF32:',m,rm%cmp%nrsa
-            call endf_error
+            write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,rm%cmp%nrsa
+            call endf_error(erlin)
         end if
         allocate(rm%cmp%res(rm%cmp%nrsa))
         call read_reals(rm%cmp%res(1)%er,m)
@@ -627,8 +626,8 @@ module ENDF_MF32_IO
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',rm%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',rm%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -719,8 +718,8 @@ module ENDF_MF32_IO
 
         call read_endf(n, n, n, ml%gen%nparb)
         if(ml%gen%nparb .ne. snj) then
-            write(6,*) ' Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
-            call endf_error
+            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
+            call endf_error(erlin)
         endif
         allocate(ml%gen%v(ml%gen%nparb,ml%gen%nparb))
         call read_endf(ml%gen%v,ml%gen%nparb)
@@ -774,14 +773,14 @@ module ENDF_MF32_IO
         call read_cmpt(ml%cmp%cpv)
 
         if(ml%cmp%cpv%nnn .ne. snj) then
-            write(6,*) ' Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
-            call endf_error
+            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
+            call endf_error(erlin)
         endif
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',ml%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',ml%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -808,7 +807,7 @@ module ENDF_MF32_IO
     do l = 1,ur%nls
         pm => ur%lpm(l)
         call read_endf(pm%awri, xx, pm%l, n, m, pm%njs)
-        if(m .ne. 6*pm%njs) write(6,*) ' Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
+        if(m .ne. 6*pm%njs) write(6,*) 'Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
         snj = snj + pm%njs
         allocate(pm%jpm(pm%njs))
         call read_reals(pm%jpm(1)%d,6*pm%njs)
@@ -816,11 +815,11 @@ module ENDF_MF32_IO
 
     call read_endf(ur%mpar, n, m, ur%npar)
     if(ur%npar .ne. ur%mpar*snj) then
-        write(6,*) ' Incorrect size of covariance matrix in unresolved MF32:',ur%npar
-        call endf_error
+        write(erlin,*) 'Incorrect size of covariance matrix in unresolved MF32:',ur%npar
+        call endf_error(erlin)
     endif
 
-    if(m .ne. ur%npar*(ur%npar+1)/2) write(6,*) ' Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
+    if(m .ne. ur%npar*(ur%npar+1)/2) write(6,*) 'Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
     allocate(ur%rv(ur%npar,ur%npar))
     call read_endf(ur%rv,ur%npar)
 
@@ -863,8 +862,8 @@ module ENDF_MF32_IO
                     call write_ni(rng%nis(n),33)     ! these are MF33-style covars
                 end do
             case default
-                write(6,*) ' Undefined AP flag NRO found in MF32:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF32:',rng%nro
+                call endf_error(erlin)
             end select
 
             select case(rng%lru)
@@ -879,14 +878,14 @@ module ENDF_MF32_IO
                 case(7)
                     call write_ml(rng%ml)
                 case default
-                    write(6,*) ' Undefined resonance format LRF found in MF32:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF32:',rng%lrf
+                    call endf_error(erlin)
                 end select
             case(2)
                 call write_ur(rng%ur)
             case default
-                write(6,*) ' Undefined resonance range LRU found in MF32:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF32:',rng%lru
+                call endf_error(erlin)
             end select
 
         end do
@@ -949,8 +948,8 @@ module ENDF_MF32_IO
             case(-1,0,1,2,5)
                 call write_ni(bw%gen%lrc(i),32)
             case default
-                write(6,*) ' Undefined MF32 long-range covar LB encountered:',bw%gen%lrc(i)%lb
-                call endf_error
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',bw%gen%lrc(i)%lb
+                call endf_error(erlin)
             end select
         end do
 
@@ -963,8 +962,8 @@ module ENDF_MF32_IO
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',bw%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',bw%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -987,15 +986,15 @@ module ENDF_MF32_IO
     if(rm%isr .gt. 0) then
         call write_endf(0, 0, rm%mls, 0)
         if(rm%mls .lt. 1) then
-            write(6,*) ' Undefined value of MLS in MF32:',rm%mls
-            call endf_error
+            write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
+            call endf_error(erlin)
         else if(rm%mls .eq. 1) then
             call write_endf(rm%dap(0))
         else if(rm%mls .le. rm%nls+1) then
             call write_endf(rm%dap,rm%mls+1)
         else
-            write(6,*) ' Undefined value of MLS in MF32:',rm%mls
-            call endf_error
+            write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
+            call endf_error(erlin)
         end if
     end if
 
@@ -1021,8 +1020,8 @@ module ENDF_MF32_IO
             case(-1,0,1,2,5)
                 call write_ni(rm%gen%lrc(i),32)
             case default
-                write(6,*) ' Undefined MF32 long-range covar LB encountered:',rm%gen%lrc(i)%lb
-                call endf_error
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',rm%gen%lrc(i)%lb
+                call endf_error(erlin)
             end select
         end do
 
@@ -1035,8 +1034,8 @@ module ENDF_MF32_IO
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',rm%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',rm%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -1119,8 +1118,8 @@ module ENDF_MF32_IO
         end do
 
         if(ml%gen%nparb .ne. snj) then
-            write(6,*) ' Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
-            call endf_error
+            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
+            call endf_error(erlin)
         endif
 
         ! write the general covariances
@@ -1173,16 +1172,16 @@ module ENDF_MF32_IO
         end do
 
         if(ml%cmp%cpv%nnn .ne. snj) then
-            write(6,*) ' Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
-            call endf_error
+            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
+            call endf_error(erlin)
         endif
 
         call write_cmpt(ml%cmp%cpv)
 
     case default
 
-        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',ml%lcomp
-        call endf_error
+        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',ml%lcomp
+        call endf_error(erlin)
 
     end select
 
@@ -1212,8 +1211,8 @@ module ENDF_MF32_IO
     end do
 
     if(ur%npar .ne. ur%mpar*snj) then
-        write(6,*) ' Incorrect size of covariance matrix in unresolved MF32:',ur%npar
-        call endf_error
+        write(erlin,*) 'Incorrect size of covariance matrix in unresolved MF32:',ur%npar
+        call endf_error(erlin)
     endif
 
     call write_endf(ur%mpar, 0, (ur%npar*(ur%npar+1))/2, ur%npar)
@@ -1268,8 +1267,8 @@ module ENDF_MF32_IO
                     l = l + lc_ni(rng%nis(n),33)    ! MF33 style covars
                 end do
             case default
-                write(6,*) ' Undefined AP flag NRO found in MF32:',rng%nro
-                call endf_error
+                write(erlin,*) 'Undefined AP flag NRO found in MF32:',rng%nro
+                call endf_error(erlin)
             end select
 
             select case(rng%lru)
@@ -1301,8 +1300,8 @@ module ENDF_MF32_IO
                         ! compact format
                         l = l + 2*rng%bw%cmp%nrsa + lc_cmpt(rng%bw%cmp%cpv) + 2
                     case default
-                        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',rng%bw%lcomp
-                        call endf_error
+                        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',rng%bw%lcomp
+                        call endf_error(erlin)
                     end select
                 case(3)
                     ! Riech-Moore
@@ -1310,15 +1309,15 @@ module ENDF_MF32_IO
                     if(rng%rm%isr .gt. 0) then
                         l = l + 1
                         if(rng%rm%mls .lt. 1) then
-                            write(6,*) ' Undefined value of MLS in MF32:',rng%rm%mls
-                            call endf_error
+                            write(erlin,*) 'Undefined value of MLS in MF32:',rng%rm%mls
+                            call endf_error(erlin)
                         else if(rng%rm%mls .eq. 1) then
                             l = l + 1
                         else if(rng%rm%mls .le. rng%rm%nls+1) then
                             l = l + rng%rm%mls/6 + 1
                         else
-                            write(6,*) ' Undefined value of MLS in MF32:',rng%rm%mls
-                            call endf_error
+                            write(erlin,*) 'Undefined value of MLS in MF32:',rng%rm%mls
+                            call endf_error(erlin)
                         end if
                     end if
                     select case(rng%rm%lcomp)
@@ -1338,8 +1337,8 @@ module ENDF_MF32_IO
                         ! compact format
                         l = l + 2*rng%rm%cmp%nrsa + lc_cmpt(rng%rm%cmp%cpv) + 2
                     case default
-                        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',rng%rm%lcomp
-                        call endf_error
+                        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',rng%rm%lcomp
+                        call endf_error(erlin)
                     end select
                 case(4)
                     ! Adler-Adler
@@ -1375,12 +1374,12 @@ module ENDF_MF32_IO
                         end do
                         l = l + lc_cmpt(rng%ml%cmp%cpv) + 1
                     case default
-                        write(6,*) ' Undefined value for LCOMP in MF32 encountered:',rng%ml%lcomp
-                        call endf_error
+                        write(erlin,*) 'Undefined value for LCOMP in MF32 encountered:',rng%ml%lcomp
+                        call endf_error(erlin)
                     end select
                 case default
-                    write(6,*) ' Undefined resonance format LRF found in MF32:',rng%lrf
-                    call endf_error
+                    write(erlin,*) 'Undefined resonance format LRF found in MF32:',rng%lrf
+                    call endf_error(erlin)
                 end select
             case(2)
                 l = l + 1
@@ -1389,8 +1388,8 @@ module ENDF_MF32_IO
                 end do
                 l = l + ((rng%ur%npar*(rng%ur%npar+1))/2+5)/6 + 1
             case default
-                write(6,*) ' Undefined resonance range LRU found in MF32:',rng%lru
-                call endf_error
+                write(erlin,*) 'Undefined resonance range LRU found in MF32:',rng%lru
+                call endf_error(erlin)
             end select
         end do
     end do

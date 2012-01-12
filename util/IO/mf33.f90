@@ -45,7 +45,6 @@ module ENDF_MF33_IO
     type (mf_33), intent(out), target :: mf33
 
     integer i,j,n
-    character cmt*3
 
     type (MF_33), pointer :: rc
     type (MF33_sect), pointer :: sc
@@ -59,9 +58,8 @@ module ENDF_MF33_IO
 
         if((rc%mtl .ne. 0) .and. (rc%nl .ne. 0)) then
             ! MTL .ne. 0 indicates lumped covars and NL == 0
-            write(cmt,'(i3)') rc%mt
-            write(6,*) ' Non-zero NL found with non-zero MTL in MF33/MT',cmt
-            call endf_error
+            write(erlin,*) 'Non-zero NL found with non-zero MTL in MF33:',rc%nl
+            call endf_error(erlin)
         end if
 
         allocate(rc%sct(rc%nl))
@@ -103,7 +101,6 @@ module ENDF_MF33_IO
     type (mf_33), intent(in), target :: mf33
 
     integer i,j
-    character cmt*3
 
     type (MF_33), pointer :: rc
     type (MF33_sect), pointer :: sc
@@ -118,9 +115,8 @@ module ENDF_MF33_IO
 
         if((rc%mtl .ne. 0) .and. (rc%nl .ne. 0)) then
             ! MTL .ne. 0 indicates lumped covars and NL == 0
-            write(cmt,'(i3)') rc%mt
-            write(6,*) ' Non-zero NL found with non-zero MTL in MF33/MT',cmt
-            call endf_error
+            write(erlin,*) 'Non-zero NL found with non-zero MTL in MF33:',rc%nl
+            call endf_error(erlin)
         end if
 
         do i = 1,rc%nl
@@ -153,7 +149,6 @@ module ENDF_MF33_IO
     type (mf_33), target :: mf33
 
     integer i,j,l,mtc
-    character cmt*3
 
     type (MF_33), pointer :: rc
     type (MF33_sect), pointer :: sc
@@ -166,9 +161,8 @@ module ENDF_MF33_IO
 
         if((rc%mtl .ne. 0) .and. (rc%nl .ne. 0)) then
             ! MTL .ne. 0 indicates lumped covars and NL == 0
-            write(cmt,'(i3)') rc%mt
-            write(6,*) ' Non-zero NL found with non-zero MTL in MF33/MT',cmt
-            call endf_error
+            write(erlin,*) 'Non-zero NL found with non-zero MTL in MF33:',rc%nl
+            call endf_error(erlin)
         end if
 
         do i = 1,rc%nl

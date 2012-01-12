@@ -86,10 +86,10 @@ module ENDF_MF14_IO
             ! nl = # of anisotropic photons. Make sure it makes sense
 
             if(nl .eq. 0) then
-                write(6,*) ' No ang dist data specified with LTT=0 in MF14'
+                write(6,*) 'No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
-                write(6,*) ' NK greater than NI in MF14:',r14%nk,r14%ni
-                call endf_error
+                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+                call endf_error(erlin)
             endif
 
             allocate(r14%isg(r14%ni),r14%aig(nl))
@@ -122,8 +122,8 @@ module ENDF_MF14_IO
                         call read_endf(tb%mut)
                     end do
                 else
-                    write(6,*) ' Undefined value of LTT encountered in MF14:',r14%ltt
-                    call endf_error
+                    write(erlin,*) 'Undefined value of LTT encountered in MF14:',r14%ltt
+                    call endf_error(erlin)
                 endif
 
             end do
@@ -134,8 +134,8 @@ module ENDF_MF14_IO
 
         case default
 
-            write(6,*) ' Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error
+            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
+            call endf_error(erlin)
 
         end select
 
@@ -183,10 +183,10 @@ module ENDF_MF14_IO
             ! nl = # of anisotropic photons. Make sure it makes sense
 
             if(nl .eq. 0) then
-                write(6,*) ' No ang dist data specified with LTT=0 in MF14'
+                write(6,*) 'No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
-                write(6,*) ' NK greater than NI in MF14:',r14%nk,r14%ni
-                call endf_error
+                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+                call endf_error(erlin)
             endif
 
             do i = 1,r14%ni
@@ -212,8 +212,8 @@ module ENDF_MF14_IO
                         call write_endf(tb%mut)
                     end do
                 else
-                    write(6,*) ' Unrecognized value of LTT encountered in MF14:',r14%ltt
-                    call endf_error
+                    write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',r14%ltt
+                    call endf_error(erlin)
                 endif
 
             end do
@@ -224,8 +224,8 @@ module ENDF_MF14_IO
 
         case default
 
-            write(6,*) ' Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error
+            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
+            call endf_error(erlin)
 
         end select
 
@@ -262,10 +262,10 @@ module ENDF_MF14_IO
             nl = r14%nk - r14%ni
             ! nl = # of anisotropic photons. Make sure it makes sense
             if(nl .eq. 0) then
-                write(6,*) ' No ang dist data specified with LTT=0 in MF14'
+                write(6,*) 'No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
-                write(6,*) ' NK greater than NI in MF14:',r14%nk,r14%ni
-                call endf_error
+                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+                call endf_error(erlin)
             endif
 
             l = l + r14%ni
@@ -282,15 +282,15 @@ module ENDF_MF14_IO
                         l = l + lc_tab1(ag%tab(j)%mut) + 1
                     end do
                 else
-                    write(6,*) ' Unrecognized value of LTT encountered in MF14:',r14%ltt
-                    call endf_error
+                    write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',r14%ltt
+                    call endf_error(erlin)
                 endif
             end do
         case(1)
             ! isotropic - nothing to write
         case default
-            write(6,*) ' Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error
+            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
+            call endf_error(erlin)
         end select
         mtc = mtc + 1
         r14%lc = l
