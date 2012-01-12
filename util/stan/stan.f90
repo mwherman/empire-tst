@@ -14,10 +14,10 @@
 
     call parse_cmd_line(outfile,nout,infile,nin)
 
-    write(6,*) ' Reading ',infile(1:nin)
+    write(6,'(a)') ' Reading '//infile(1:nin)
     call read_endf_file(infile(1:nin),endf)
 
-    write(6,*) ' Writing ',outfile(1:nout)
+    write(6,'(a)') ' Writing '//outfile(1:nout)
     call write_endf_file(outfile(1:nout),endf)
 
     end
@@ -41,23 +41,26 @@
     nout = 0
     infile = ' '
     outfile = ' '
+
     i = 1
-    call getarg(i,cmd,len)
+    call getarg(i,cmd)
+    len = len_trim(cmd)
 
     do while(len .gt. 0)
 
        if(cmd(1:len) .eq. '-o') then
 
            i = i + 1
-           call getarg(i,outfile,nout)
-           if(nout .le. 0) then
-               write(6,20) ' Error parsing output file',char(7)
-               stop '  stan aborted'
+           call getarg(i,outfile)
+           nout = len_trim(outfile)
+           if((nout .le. 0) .or. (outfile(1:1) .eq. '-')) then
+               write(6,20) char(7),' Error parsing output filename'
+               call abort_parsing
            endif
 
        else if(cmd(1:len) .eq. '-k') then
 
-           write(6,10) ' MAT changing while reading material set non-fatal'
+           write(6,10) ' Ignoring MAT numbers that change while processing materials'
            call set_ignore_badmat(.true.)
 
        else if(cmd(1:len) .eq. '-h') then
@@ -65,46 +68,57 @@
            write(6,10)
            write(6,10) ' stan  version 1.0'
            write(6,10)
-           write(6,10) ' usage: stan [-kh] [-o outfile] endf_file'
+           write(6,10) ' usage: stan [-hk] [-o outfile] endf_file'
            write(6,10)
-           write(6,10) ' k : keep going but report MAT numbers different from first MAT in file'
-           write(6,10) ' h : print this help message'
-           write(6,10) ' o : output file.'
-           write(6,10) '     if none specified, use input filename with extension ".STN"'
+           write(6,10) ' -h : prints this help message'
+           write(6,10) ' -k : when processing file, if MAT number changes during processing of a'
+           write(6,10) '      file, keep processing file. The MAT number for the material will'
+           write(6,10) '      be left as first in file, usually from MF1/451. A message will be'
+           write(6,10) '      printed to the screen when different MAT numbers are encountered.'
+           write(6,10) ' -o : output file. If not specified, the output filename is just the'
+           write(6,10) '      input filename with extension ".STN"'
            write(6,10)
-           call exit
+           call endf_quit(0)
 
        else if(cmd(1:1) .eq. '-') then
 
-           write(6,20) char(7)//'   Unknown option : ', cmd(1:len)
-           stop '  stan aborted'
+           write(6,20) char(7)//' Unknown option : ', cmd(1:len)
+           call abort_parsing
 
        else
 
-          if(i .ne. nargs()-1) then
-             write(6,20) char(7),' Too many parameters specified on command line'
-             stop ' stan aborted'
-          endif
+           ! if arg does not start with "-", assume input filename
 
-          infile = cmd
-          nin = len
+           infile = cmd
+           nin = len
+
+           ! insist that this is last item on command line
+
+           i = i + 1
+           call getarg(i,cmd)
+           len = len_trim(cmd)
+           if(len .gt. 0) then
+               write(6,20) char(7),' Too many parameters specified on command line'
+               call abort_parsing
+           endif
 
        endif
 
        i = i + 1
-       call getarg(i,cmd,len)
+       call getarg(i,cmd)
+       len = len_trim(cmd)
 
     end do
 
     if(nin .eq. 0) then
         write(6,10) ' Input ENDF file not specified'
-        stop ' stan aborted'
+        call abort_parsing
     endif
 
     inquire(file=infile(1:nin),exist=qx)
     if(.not.qx) then
         write(6,20) char(7)//' Specified input file does not exist:',infile(1:nin)
-        stop ' stan aborted'
+        call abort_parsing
     endif
 
     if(nout .eq. 0) then
@@ -121,12 +135,23 @@
     inquire(file=outfile(1:nout),exist=qx)
     if(qx) then
         write(6,20) char(7)//' Output file already exists:',outfile(1:nout)
-        stop ' stan aborted'
+        call abort_parsing
     endif
 
     return
 
 10  format(a)
 20  format(a,a)
+
+    contains
+
+    subroutine abort_parsing
+
+    implicit none
+
+    write(6,'(a)') ' stan aborted'
+    call endf_quit(1)
+
+    end subroutine abort_parsing
 
     end subroutine parse_cmd_line
