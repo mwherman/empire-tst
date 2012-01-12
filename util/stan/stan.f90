@@ -71,12 +71,14 @@
            write(6,10) ' usage: stan [-hk] [-o outfile] endf_file'
            write(6,10)
            write(6,10) ' -h : prints this help message'
-           write(6,10) ' -k : when processing file, if MAT number changes during processing of a'
-           write(6,10) '      file, keep processing file. The MAT number for the material will'
+           write(6,10) ' -k : with this modifier, if the MAT number changes while processing a'
+           write(6,10) '      material, keep processing. The MAT number for the material will'
            write(6,10) '      be left as first in file, usually from MF1/451. A message will be'
            write(6,10) '      printed to the screen when different MAT numbers are encountered.'
-           write(6,10) ' -o : output file. If not specified, the output filename is just the'
-           write(6,10) '      input filename with extension ".STN"'
+           write(6,10) '      Normally, MAT numbers changing unexpectely during processing'
+           write(6,10) '      is considered fatal and processing aborts.'
+           write(6,10) ' -o : output filename. If not specified, the output filename is just'
+           write(6,10) '      the input filename with extension ".STN"'
            write(6,10)
            call endf_quit(0)
 
