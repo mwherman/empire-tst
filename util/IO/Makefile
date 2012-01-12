@@ -21,7 +21,7 @@ MODE = BLK
 
 # set routines for line I/O
 ifeq ($(MODE),BLK)
-   LINIO = endf_blk.o endf_blklin.o
+   LINIO = endf_blklin.o
 else
    LINIO = endf_lr.o
 endif
@@ -40,7 +40,7 @@ ifeq ($(IPO),TRUE)
   # use ifort with block-mode I/O and cross-file optimization
   # this generally provides the fastest executable on unix
 
-  lib: endf_blk.o ipo_out.o
+  lib: endf_sys.o ipo_out.o
 	ar -csr endf_io.a *.o
 	rm *.o
 
@@ -56,11 +56,11 @@ else
        mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o\
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
-  lib: $(OBJF) $(LINIO) endf_line.o endf_base.o endf_cov.o endf.o
+  lib: $(OBJF) $(LINIO) endf_sys.o endf_line.o endf_base.o endf_cov.o endf.o
 	ar -csr endf_io.a *.o
 	rm *.o
 
-  endf_blklin.o : endf_blk.o
+  endf_blklin.o : endf_sys.o
   endf_line.o : $(LINIO)
   endf_base.o : endf_line.o
   endf_cov.o : endf_base.o

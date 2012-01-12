@@ -1,16 +1,17 @@
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 
 /*
   author: Sam Hoblit, NNDC, BNL
-  These jacket routines make block-mode I/O easier from
-  fortran. On linux fortran compilers tend to decorate
-  external reference names with a underscore, and the
-  flags for file open and the fstat structure need to
-  be put in by hand. Here just make a few C routines to
-  open file and do basic I/O & status. These routines are
-  used by endf_blklin.f90 only.
+  These jacket routines make some unix system calls like
+  block-mode I/O easier from fortran. On linux, fortran compilers
+  tend to decorate external names with a underscore and/or convert
+  the name to all upper or all lowercase. Also, the flags for file
+  open and the fstat structures need to be put in by hand. Here
+  make C jackets for a few useful unix funtions to make them more
+  easily available from fortran.
 */
 
 static struct stat file_stat;
@@ -68,4 +69,10 @@ int endf_file_size_(int *fhandl)
       return 0;
    else
       return file_stat.st_size;
+}
+
+void endf_quit_(int *status)
+{
+   exit(*status);
+   return ;
 }

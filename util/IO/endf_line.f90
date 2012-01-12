@@ -98,26 +98,23 @@ module endf_lines
     write(6,*) ' ****** ERROR ******',char(7)
     write(6,*)
     write(6,*) '    ',errline(1:len_trim(errline))
-    write(6,*)
 
     if(.not.qopen) then
-        write(6,*) '     No ENDF file open'
-        stop '  ENDF-IO aborted'
+        write(6,*) '    No ENDF file open'
+        write(6,*) '    ENDF-IO aborted'
+    else if(qwrt) then
+        write(6,*) '    Last line written line number:',filin
+        write(6,'(4x,a80)') endline
+        call close_endfile
+        write(6,*) '    WRITE_ENDF aborted'
+    else
+        write(6,*) '    Last line read line number:',filin
+        write(6,'(4x,a80)') endline
+        call close_endfile
+        write(6,*) '    READ_ENDF aborted'
     endif
 
-    if(qwrt) then
-        write(6,*) '     Last line written line number:',filin
-        write(6,'(5x,a80)') endline
-        write(6,*)
-        call close_endfile
-        stop '  WRITE_ENDF aborted'
-    else
-        write(6,*) '     Last line read line number:',filin
-        write(6,'(5x,a80)') endline
-        write(6,*)
-        call close_endfile
-        stop '  READ_ENDF aborted'
-    endif
+    call endf_quit(1)
 
     end subroutine endf_error
 
