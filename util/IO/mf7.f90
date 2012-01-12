@@ -435,7 +435,6 @@ module ENDF_MF7_IO
     mtc = 0
     r7 => mf7
     do while(associated(r7))
-        write(6,*) r7%mt
         if(r7%mt .eq. 2) then
             l = 1
             if(r7%lthr .eq. 1) then

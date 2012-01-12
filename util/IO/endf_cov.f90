@@ -185,7 +185,7 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-          allocate(nis%kl(nis%ne))
+        allocate(nis%kl(nis%ne))
         call read_endf(nis%kl, nis%ne)
 
     case(3:4)
@@ -401,8 +401,8 @@ module ENDF_COV_IO
 
     type (compact_cov_sect), intent(out) :: cx
 
-    real, parameter :: one = 1.0
-    real, parameter :: haf = 0.5
+    real, parameter :: one = 1.D0
+    real, parameter :: haf = 0.5D0
 
     integer i,j,n,jp,ii,jj,kij(18)
     real xx
@@ -534,23 +534,23 @@ module ENDF_COV_IO
 
     select case(ndig)
     case(2)
-        fx = 1.0E-02
+        fx = 1.0D-02
         nrow = 18
         fmt = '(i5,i5,1x,18i3)'
     case(3)
-        fx = 1.0E-03
+        fx = 1.0D-03
         nrow = 13
         fmt = '(i5,i5,1x,13i4)'
     case(4)
-        fx = 1.0E-04
+        fx = 1.0D-04
         nrow = 11
         fmt = '(i5,i5,1x,11i5)'
     case(5)
-        fx = 1.0E-05
+        fx = 1.0D-05
         nrow = 9
         fmt = '(i5,i5,1x,9i6) '
     case(6)
-        fx = 1.0E-06
+        fx = 1.0D-06
         nrow = 8
         fmt = '(i5,i5,8i7)    '
     case default

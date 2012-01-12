@@ -134,13 +134,13 @@ module ENDF_MF2_IO
     type MF2_ML_phas_tab                ! R-Matrix tabulated phase shifts LRF=7
         integer lps                     ! type of background
         type (tab1), pointer :: psr     ! real part of cmplx phase shift
-        type (tab1), pointer :: psi     ! real part of cmplx phase shift
+        type (tab1), pointer :: psi     ! imag part of cmplx phase shift
     end type
 
     type MF2_ML_back                    ! R-Matrix background LRF=7
         integer lbk                     ! type of background
         type (tab1), pointer :: rbr     ! real part of cmpl funct, LBK=1
-        type (tab1), pointer :: rbi     ! real part of cmpl funct, LBK=1
+        type (tab1), pointer :: rbi     ! imag part of cmpl funct, LBK=1
         real ed                         ! Sammy, Frohner params,   LBK=2,3
         real eu
         real r0
@@ -171,8 +171,8 @@ module ENDF_MF2_IO
         integer nrs                     ! # resonances
         integer nx                      ! # lines used for resonances
         real, pointer :: er(:)          ! E for each resonance (nrs)
-        type (MF2_ML_chn), pointer :: chn(:) ! channels
-        type (mf2_ml_back), pointer ::bck    ! background tables
+        type (MF2_ML_chn), pointer :: chn(:)     ! channels
+        type (mf2_ml_back), pointer ::bck        ! background tables
         type (mf2_ml_phas_tab), pointer :: psf   ! tabulated phase shifts
     end type
 
@@ -258,12 +258,12 @@ module ENDF_MF2_IO
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MF2 sections ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF2_range
-        integer lru                     ! flag for res params. 0=only AP, 1=res, 2=unres
-        integer lrf                     ! flag representation 1-7
-        integer nro                     ! flag E-dep of AP. 0=indep, 1=table.
-        integer naps                    ! flag for channel radius
-        real el                         ! lower limit E
-        real eh                         ! upper limit E
+        integer lru                                    ! flag for res params. 0=only AP, 1=res, 2=unres
+        integer lrf                                    ! flag representation 1-7
+        integer nro                                    ! flag E-dep of AP. 0=indep, 1=table.
+        integer naps                                   ! flag for channel radius
+        real el                                        ! lower limit E
+        real eh                                        ! upper limit E
         type (MF2_special_case),  pointer :: sc        ! special case      (LRF = 0)
         type (MF2_BW_subsection), pointer :: bw        ! Briet-Wigner      (LRF = 1,2)
         type (MF2_RM_subsection), pointer :: rm        ! Reich-Moore       (LRF = 3)
@@ -273,20 +273,20 @@ module ENDF_MF2_IO
     end type
 
     type MF2_isotope
-        real zai                               ! ZA for isotope
-        real abn                               ! number fraction of isotope in material
-        integer lfw                            ! ave fission widths given: 0=no, 1=yes.
-        integer ner                            ! # of res ranges for isotope
-        type (MF2_range), pointer :: rng(:)    ! energy ranges (NER)
+        real zai                               	! ZA for isotope
+        real abn                               	! number fraction of isotope in material
+        integer lfw                            	! ave fission widths given: 0=no, 1=yes.
+        integer ner                            	! # of res ranges for isotope
+        type (MF2_range), pointer :: rng(:)    	! energy ranges (NER)
     end type
 
     type MF_2
-        integer :: mt = 151                    ! only 1 MT for MF2
-        integer lc                             ! line count
-        real za                                ! ZA for material
-        real awr                               ! AWR for material
-        integer nis                            ! # of isotopes
-        type (MF2_isotope), pointer :: iso(:)  ! NIS isotopes
+        integer :: mt = 151                    	! only 1 MT for MF2
+        integer lc                             	! line count
+        real za                                	! ZA for material
+        real awr                               	! AWR for material
+        integer nis                            	! # of isotopes
+        type (MF2_isotope), pointer :: iso(:)  	! NIS isotopes
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ private ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

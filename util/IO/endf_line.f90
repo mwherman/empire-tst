@@ -168,9 +168,9 @@ module endf_lines
         else if(endline(71:72) .ne. cmft(5:6)) then
             write(erlin,*) 'MF number changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
         else
-            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
             if(matok) then
-                write(6,'(a)') erlin(1:len_trim(erlin))
+                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
                 return
             endif
         endif
@@ -183,9 +183,9 @@ module endf_lines
         ! see if next line has new MT or end of file with MF=0
 
         if(endline(67:70) .ne. cmft(1:4)) then
-            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
             if(matok) then
-                write(6,'(a)') erlin(1:len_trim(erlin))
+                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
             else
                 call endf_error(erlin)
             endif
@@ -228,10 +228,14 @@ module endf_lines
                 istate = imend
                 return
             endif
-            write(erlin,*) 'MEND (MAT=0) record not found for MAT=',lmft(1:4)
             if(matok) then
-                write(6,'(a)') erlin(1:len_trim(erlin))
+                ! if we're ignoring MAT numbers, just report this and keep going
+                write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
+                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
             else
+                ! assume a new material is starting w/o ending the last with a MAT=0 MEND record
+                ! report this error and quit processing
+                write(erlin,*) 'MEND (MAT=0) record not found for MAT=',lmft(1:4)
                 call endf_error(erlin)
             endif
         endif
