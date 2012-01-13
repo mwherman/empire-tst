@@ -58,27 +58,50 @@
                call abort_parsing
            endif
 
-       else if(cmd(1:len) .eq. '-k') then
+       else if(cmd(1:len) .eq. '-cm') then
 
            write(6,10) ' Ignoring MAT numbers that change while processing materials'
            call set_ignore_badmat(.true.)
 
+       else if(cmd(1:len) .eq. '-cf') then
+
+           write(6,10) ' Ignoring MF numbers that change while processing materials'
+           call set_ignore_badmf(.true.)
+
+       else if(cmd(1:len) .eq. '-ct') then
+
+           write(6,10) ' Ignoring MT numbers that change while processing materials'
+           call set_ignore_badmt(.true.)
+
+       else if(cmd(1:len) .eq. '-v') then
+
+           call set_io_verbose(.true.)
+
        else if(cmd(1:len) .eq. '-h') then
 
            write(6,10)
-           write(6,10) ' stan  version 1.0'
+           write(6,10) ' stan   version 1.0'
            write(6,10)
-           write(6,10) ' usage: stan [-hk] [-o outfile] endf_file'
+           write(6,10) ' usage: stan [-h,im,if,it,v] [-o outfile] endf_file'
            write(6,10)
-           write(6,10) ' -h : prints this help message'
-           write(6,10) ' -k : with this modifier, if the MAT number changes while processing a'
-           write(6,10) '      material, keep processing. The MAT number for the material will'
-           write(6,10) '      be left as first in file, usually from MF1/451. A message will be'
-           write(6,10) '      printed to the screen when different MAT numbers are encountered.'
-           write(6,10) '      Normally, MAT numbers changing unexpectely during processing'
-           write(6,10) '      is considered fatal and processing aborts.'
-           write(6,10) ' -o : output filename. If not specified, the output filename is just'
-           write(6,10) '      the input filename with extension ".STN"'
+           write(6,10) ' -h   : prints this help message'
+           write(6,10) ' -cm  : continue if the MAT number changes while processing a material.'
+           write(6,10) '        The MAT number for the material will be left as first encountered,'
+           write(6,10) '        usually from MF1/451. A message will be printed to the screen when'
+           write(6,10) '        different MAT numbers are encountered. Normally, MAT numbers changing'
+           write(6,10) '        unexpectely during processing is considered fatal.'
+           write(6,10) ' -cf  : continue if the MF number changes while processing a material.'
+           write(6,10) '        The MF number for the file will not change. A message will be printed'
+           write(6,10) '        to the screen if a different MF is encountered. Normally, MF numbers'
+           write(6,10) '        changing unexpectely during processing is considered fatal.'
+           write(6,10) ' -ct  : continue if the MT number changes while processing a section.'
+           write(6,10) '        The MT number for the section will not change. A message will be printed'
+           write(6,10) '        to the screen if a different MT is encountered. Normally, MT numbers'
+           write(6,10) '        changing unexpectely during processing is considered fatal.'
+           write(6,10) ' -v   : verbose mode. This modifier will cause stan to print out the MAT,'
+           write(6,10) '        MF and MT for each section encountered.'
+           write(6,10) ' -o   : output filename. If not specified, the output filename is just'
+           write(6,10) '        the input filename with extension ".STN"'
            write(6,10)
            call endf_quit(0)
 
