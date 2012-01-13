@@ -19,7 +19,9 @@ module endf_lines
     integer*4, parameter :: idata = 3     ! state when within a MT section
 
     logical*4 :: verbose = .false.        ! type MAT, MF, MT whenever MT changes
-    logical*4 :: matok = .false.          ! if true, ignore when MAT changes unexpectedly
+    logical*4 :: qmat = .false.           ! if true, chill when MAT changes unexpectedly
+    logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
+    logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
 
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
@@ -35,8 +37,9 @@ module endf_lines
     public endline                        ! line supplied by endf_line_io
     integer, public :: ipos               ! current position on line
 
-    public open_endfile, get_endline, put_endline, close_endfile, set_io_verbose, set_ignore_badmat
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
+    public open_endfile, get_endline, put_endline, close_endfile, endf_error
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt
 
 !------------------------------------------------------------------------------
     contains
@@ -163,19 +166,34 @@ module endf_lines
             else if(endline(73:75) .eq. '  0') then
                 write(erlin,*) 'Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else
-                write(erlin,*) 'MT number changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
-            endif
-        else if(endline(71:72) .ne. cmft(5:6)) then
-            write(erlin,*) 'MF number changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
-        else
-            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
-            if(matok) then
-                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
-                return
+                write(erlin,*) 'MT  changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
+                if(qmt) then
+                    write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'   on line',filin
+                else
+                    call endf_error(erlin)
+                endif
             endif
         endif
 
-        call endf_error(erlin)
+        if(endline(71:72) .ne. cmft(5:6)) then
+            write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
+            if(qmf) then
+                write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'     on line',filin
+            else
+                call endf_error(erlin)
+            endif
+        endif
+
+        if(endline(67:70) .ne. cmft(1:4)) then
+            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            if(qmat) then
+                write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
+            else
+                call endf_error(erlin)
+            endif
+        endif
+
+        return
 
     case(isend)
 
@@ -183,9 +201,9 @@ module endf_lines
         ! see if next line has new MT or end of file with MF=0
 
         if(endline(67:70) .ne. cmft(1:4)) then
-            write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
-            if(matok) then
-                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
+            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+            if(qmat) then
+                write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
             else
                 call endf_error(erlin)
             endif
@@ -214,8 +232,16 @@ module endf_lines
             istate = ifend
             return
         else
-            write(erlin,*) 'MEND (MF=0) record not found for MF=',lmft(5:6)
-            call endf_error(erlin)
+            if(qmf) then
+                ! if we're ignoring changing MFs, just report this and keep going with old MF
+                write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
+                write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'     on line',filin
+            else
+                ! assume a new file is starting w/o ending the last with a MF=0 FEND record
+                ! report this error and quit processing
+                write(erlin,*) 'FEND (MF=0) record not found for MF=',lmft(5:6)
+                call endf_error(erlin)
+            endif
         endif
 
     case(ifend)
@@ -228,10 +254,10 @@ module endf_lines
                 istate = imend
                 return
             endif
-            if(matok) then
+            if(qmat) then
                 ! if we're ignoring MAT numbers, just report this and keep going
-                write(erlin,*) 'MAT number changed unexpectedly from ',cmft(1:4),' to ',endline(67:70),' on line',filin
-                write(6,'(a)') ' WARNING: '//erlin(1:len_trim(erlin))
+                write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+                write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
             else
                 ! assume a new material is starting w/o ending the last with a MAT=0 MEND record
                 ! report this error and quit processing
@@ -240,7 +266,7 @@ module endf_lines
             endif
         endif
 
-        ! same MAT - must be reading new MF file
+        ! same MAT - must be starting new MF file
 
         read(lmft(5:6),'(i2)') omf
         i = get_mf()
@@ -261,7 +287,7 @@ module endf_lines
 
     case default
 
-        write(erlin,*) 'Internal logic error in reading file, state = ', istate
+        write(erlin,*) ' *********** Internal logic error while reading file, please send bug report'
         call endf_error(erlin)
 
     end select
@@ -555,7 +581,7 @@ module endf_lines
 
     case default
 
-        call endf_error('Internal I/O inconsistency - please send bug report')
+        call endf_error(' *********** Internal I/O inconsistency - please send bug report')
 
     end select
 
@@ -579,13 +605,35 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
-    subroutine set_ignore_badmat(qmt)
+    subroutine set_ignore_badmat(qm)
 
-    logical*4, intent(in) :: qmt
+    logical*4, intent(in) :: qm
 
-    matok = qmt
+    qmat = qm
 
     return
     end subroutine set_ignore_badmat
+
+!------------------------------------------------------------------------------
+
+    subroutine set_ignore_badmf(qm)
+
+    logical*4, intent(in) :: qm
+
+    qmf = qm
+
+    return
+    end subroutine set_ignore_badmf
+
+!------------------------------------------------------------------------------
+
+    subroutine set_ignore_badmt(qm)
+
+    logical*4, intent(in) :: qm
+
+    qmt = qm
+
+    return
+    end subroutine set_ignore_badmt
 
 end module endf_lines

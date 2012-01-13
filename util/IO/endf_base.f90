@@ -90,10 +90,11 @@ module BASE_ENDF_IO
 
     ! -----------------  public interface  ------------------------------------
 
-    public endline, erlin, ipos, zero, tab1, lc_tab1, real_pair, int_pair, set_ignore_badmat
+    public endline, erlin, ipos, zero, tab1, lc_tab1, real_pair, int_pair
     public write_endf, put_endf, read_endf, get_endf, write_send, write_fend
-    public open_endfile, get_endline, put_endline, close_endfile, set_io_verbose
+    public open_endfile, get_endline, put_endline, close_endfile
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
 
 !------------------------------------------------------------------------------
     contains

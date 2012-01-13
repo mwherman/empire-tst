@@ -61,6 +61,7 @@ module ENDF_MF26_IO
 
     type mf26_product
         real zap                           ! product ZA
+        real awi                           ! mass of incoming projectile in neutron masses
         integer law                        ! law type
         type (tab1) ytb                    ! yield table
         type (mf26_law1), pointer :: law1
@@ -110,7 +111,7 @@ module ENDF_MF26_IO
         do i = 1,r26%nk
 
             sc => r26%prd(i)
-            call read_endf(sc%zap, xx, n, sc%law, sc%ytb%nr, sc%ytb%np)
+            call read_endf(sc%zap, sc%awi, n, sc%law, sc%ytb%nr, sc%ytb%np)
             call read_endf(sc%ytb)
 
             nullify(sc%law1, sc%law2, sc%law8)
@@ -235,7 +236,7 @@ module ENDF_MF26_IO
         call write_endf(r26%za, r26%awr, 0, 0, r26%nk, 0)
         do i = 1,r26%nk
             sc => r26%prd(i)
-            call write_endf(sc%zap, zero, 0, sc%law, sc%ytb%nr, sc%ytb%np)
+            call write_endf(sc%zap, sc%awi, 0, sc%law, sc%ytb%nr, sc%ytb%np)
             call write_endf(sc%ytb)
             select case(sc%law)
             case(1)
