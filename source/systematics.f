@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 2208 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-15 22:19:34 +0100 (So, 15 Jän 2012) $
 
             
       
@@ -25,7 +25,7 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc 
        IMPLICIT NONE
-       REAL*4 Atrg, Ztrg,csnp, csna,  csng, csn2p, csnna, csnnp2, csnp2,
+       REAL*8 Atrg, Ztrg,csnp, csna,  csng, csn2p, csnna, csnnp2, csnp2,
      &        csna2, csn2n, s
        INTEGER iprojectile
        IF(iprojectile.NE.1) THEN
