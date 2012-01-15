@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-23 23:21:48 +0200 (So, 23 Okt 2011) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 22:13:38 +0100 (So, 15 Jän 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
@@ -437,17 +437,17 @@ c      Gauss=.false.
       Gauss=.true.
       DO k = 1, NRBar
          phase(k) = 0.D0
-         goto 31
-         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
-            IF(Gauss)THEN
-               dmom = GaussLegendre41(FmomentParab,
-     &                einters(2*k - 1),einters(2*k),abserr) 
-            ELSE
-               CALL SIMPS_phase(ee,einters(2*k - 1),einters(2*k),dmom)
-            ENDIF
-         ELSE
-            dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
-         ENDIF
+!         goto 31
+!         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
+!            IF(Gauss)THEN
+!               dmom = GaussLegendre41(FmomentParab,
+!     &                einters(2*k - 1),einters(2*k),abserr) 
+!            ELSE
+!               CALL SIMPS_phase(ee,einters(2*k - 1),einters(2*k),dmom)
+!            ENDIF
+!         ELSE
+!            dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
+!         ENDIF
 cms
  31      dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
          phase(k)   = min(dmom,50.d0)  
