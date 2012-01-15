@@ -1,8 +1,8 @@
-Ccc   * $Rev: 1994 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-04-02 01:54:43 +0200 (Sa, 02 Apr 2011) $
+Ccc   * $Rev: 2206 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
 C
-      SUBROUTINE CCFUS(Stl,rkey)
+      SUBROUTINE CCFUS(Stl,Rkey)
 C
 C     CCFUS $ FUSION COUPLED-CHANNELS KOBENHAVN CODE FOR CALCULATION OF
 C     CW POTENTIAL  (-20 MEV),   BARRIER PENETRATION PARAMETERS,  CROSS
@@ -21,7 +21,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Stl(NDLW)
+      DOUBLE PRECISION Stl(NDLW), Rkey
 C
 C Local variables
 C

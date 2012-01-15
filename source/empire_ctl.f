@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2180 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+Ccc   * $Rev: 2206 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -85,6 +85,7 @@ C
       dimension valx(mxfit),xvalx(mxfit),axx(mxfit)
       dimension pars(mxfit),dparmx(mxfit)
       dimension ipt(mxfit),ipotrng(6)
+      REAL*8 aat, zzt, aap, zzp, emin, culbar, eclmn
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
       common /fitwts/wt(15,2)
@@ -136,7 +137,7 @@ C--- taken to about 0.6 to 0.8 of the Coulomb barrier, for neutrons 1 keV.
       eclmn= max(culbar-0.75-0.5*(2*zzp-aap)-0.01*zzt,0.6*culbar)
       eclmn=int(disc*eclmn+0.5)/disc
       emin=int(disc*emin+0.5)/disc
-      emin=max(0.001,emin,eclmn)
+      emin=max(0.001d0,emin,eclmn)
       egrid(1)=emin
       ngrid=1
 

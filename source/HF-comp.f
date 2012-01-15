@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Rev: 2206 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1283,7 +1283,8 @@ C Local variables
 C
       DOUBLE PRECISION accn, ampl, atil, ekin, ekinm, erest, fisba,
      &                 fric, gamma, gpart, htom, shredt, sum1, sum2,
-     &                 sum3, sumf, sumgs, sumr, tau, temp
+     &                 sum3, sumf, sumgs, sumr, tau, temp, ap1, ap2, 
+     &                 del, delp
       INTEGER kn, knm
       DOUBLE PRECISION TLF
 C

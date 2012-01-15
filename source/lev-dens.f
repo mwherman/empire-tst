@@ -1,5 +1,5 @@
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2011-12-02 17:06:08 +0100 (Fr, 02 Dez 2011) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -335,7 +335,7 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
 
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-c      egsm=0
+      egsm=0
 c----
       RODEF = 0.D0
       T = DSQRT(E/Ac)
