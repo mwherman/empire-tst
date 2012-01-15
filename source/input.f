@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2183 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-08 16:06:42 +0100 (So, 08 Jän 2012) $
+Ccc   * $Rev: 2205 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-15 20:13:57 +0100 (So, 15 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -153,6 +153,7 @@ C--------neutralize tuning factors and OMP normalization factors
             DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
+            SHLlnor(nnuc) = 1.d0
             NRSmooth(nnuc) = 5
             DO j = 1, NDLV  ! bug found, used to be NDLW
                ISIsom(j,nnuc) = 0
@@ -186,7 +187,6 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.
             ATIlnor(nnuc) = 0.
             LDShif(Nnuc) = 0.d0
-            SHLlnor(nnuc) = 1.
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
             ATIlfi(nnuc) = 1.
@@ -5114,7 +5114,7 @@ C-----
               ELSE
                 shelss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
-              DO i = 1, NDNUC
+              DO i = 0, NDNUC
                 SHLlnor(i) = shelss
               ENDDO
               WRITE (8,
@@ -5124,7 +5124,7 @@ C-----
               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, shelss,INDexf,INDexb
              else
-              DO i = 1, NDNUC
+              DO i = 0, NDNUC
                 SHLlnor(i) = val
               ENDDO
               WRITE (8,
