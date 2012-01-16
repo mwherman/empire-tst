@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-16 02:52:02 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-16 19:50:12 +0100 (Mo, 16 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -158,7 +158,7 @@ C Local variables
 C
       REAL*8 ac, bsq, cigor, momort, mompar, stab, t, u
 
-c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
+c     REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
       LOGICAL bcs
       REAL*8 FSHELL, ROBCS, RODEF
       INTEGER i, ia, iz,egsm,lazy
@@ -166,7 +166,7 @@ c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
 
       bcs = .TRUE.
 c-----GSM (egsm=0) and EGSM (egsm=1)
-      egsm=1
+      egsm=0
       lazy=0
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
@@ -334,7 +334,6 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
 
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-      egsm=0
 c----
       RODEF = 0.D0
       T = DSQRT(E/Ac)
@@ -1433,8 +1432,8 @@ c            GOTO 500 !????
 
       IF (igna.NE.0D0) THEN
          DO i = 1, 10  
-C	      write(*,*) '***',a(nnuc),z(nnuc),ux
-C	      write(*,*) am, 6/t, atil
+C           write(*,*) '***',a(nnuc),z(nnuc),ux
+C           write(*,*) am, 6/t, atil
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
             am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
          ENDDO
@@ -2152,17 +2151,13 @@ C-----------dependent factor
 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)* RORed
-! --------The next two lines look like a mistake or some  left over trial
-! --------Mihaela please check.     
-!            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-!     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
+     &          YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
             IF (i.EQ.1) t = SQRT(u/ac)
          ENDIF
 
@@ -2790,10 +2785,10 @@ C Dummy arguments
       expmax=700.
       Bf=0.d0
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-      egsm=1
+
       RODEFF = 0.D0
       Yrast=0.d0 
-      
+      egsm=0
       ro =RODEF(A,E,Ac,Aj,Mompar,Momort,T,
      &                        Yrast,Ss,Bf,Argred,Expmax,def2,egsm)
       e1 = E - Yrast
