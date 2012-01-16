@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2210 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Rev: 2212 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-16 19:06:07 +0100 (Mo, 16 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -717,6 +717,7 @@ C
       parameter(mxind=5000,mxinda=5000,mxelvls=9,nexlvl=2)
       parameter(disc=1.0e4)
 
+	real*8 emin,emax 
       logical fexist
       character*64 empiredir
       character metat*1,metap*1,ex4st*1,cm*1,lvl*3
