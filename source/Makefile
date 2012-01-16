@@ -1,82 +1,46 @@
-#$Rev: 2152 $
+#$Rev: 2217 $
 #$Author: mherman $
-#$Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
-#
-#----Absoft FORTRAN compiler
-#FC     =  af95
-#----flags for production compilation with Absoft
-#FFLAGS = -O0
-#----We need to include Unix and Wax libraries to add etime, getenv, and system functions in Absoft 
-#LIBS =  -lV77  -lU77
-#
+#$Date: 2012-01-16 20:50:09 +0100 (Mo, 16 Jän 2012) $
+ 
+#---------------------------------
 #----GNU gfortran FORTRAN compiler
-FC     =  gfortran
+#---------------------------------
+#FC     =  gfortran
 #CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -std=legacy -ftree-vectorize
+#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
 #FFLAGS =  -g --bounds-check -std=legacy 
-
-#----GNU f95 FORTRAN compiler
-#FC     =  f95
-#----flags for production compilation with gfortran
-#FFLAGS = -O3 -std=legacy
-
-#---- pfg90 compiler
-#FC     =  pgf90
-#FFLAGS =  -O2
-
-#----GNU g77 FORTRAN compiler
-#FC     =  g77
-#----flags for production compilation with g77
-#FFLAGS = -O3
-#----flags for debuging using g77 compiler
-#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
-
-#----GNU g95 FORTRAN compiler
-#FC     =  g95
-#----flags for production compilation with g95
-#FFLAGS = -O
-#----flags for detailed warnings
-#FFLAGS = -Wall
-
-#----INTEL f95 compiler
-#FC     =  ifort
-#----flags for optimalization using ifort
-#FFLAGS = -arch pn4 -O3 -axPW -ipo
-#FFLAGS = -arch pn4 -O3 -ipo
-#FFLAGS = -arch pn4 -ipo
-#FFLAGS = -arch pn4 -O3 -ipo -parallel
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
-
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
-
-#----standard f77 FORTRAN compiler
-#FC   = f77
-
-#----Lahey/Fujitsu f95 FORTRAN compiler
-#FC    = lf95
-#----flag for Lahey/Fujitsu to optimize
-#FFLAGS = -O3
-#----flag for Lahey/Fujitsu to check boundaries and more
-#FFLAGS = -g --chk
-#----flag for Lahey/Fujitsu parallel
-#FFLAGS = --parallel
-
 #----From http://www.macresearch.org/best-fortran-compiler-leopard
 #----For Debugging under gfortran:
-#gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none\
-#-fno-automatic
-#----For optimized code under gfortran:
-#gfortran -O3 -ftree-vectorize
+#gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
+ 
+ 
+#---------------------------
+#----Absoft FORTRAN compiler
+#---------------------------
+FC     =  af90
+#----We need to include Unix and Vax libraries to add etime, getenv, and system functions in Absoft 
+LIBS =  -lV77  -lU77
+#----flags for  compilation with Absoft
+FFLAGS = -O3 -s
+#FFLAGS = -O0 -g
+
+ 
+#---------------------------
+#----INTEL f95 compiler
+#---------------------------
+#FC     =  ifort
+#----flags for production compilation using ifort
+#FFLAGS = -arch pn4 -O3 -ipo
+#FFLAGS = -arch pn4 -O3 -axPW -ipo
+#----flags for debuging using ifort compiler
+#FFLAGS =  -C -ftrapuv -g -debug all
+#----flags for automatic parallelization
+#FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+#----From http://www.macresearch.org/best-fortran-compiler-leopard
 #----For Debugging under ifort:
 #FFLAGS = -m64 -g -debug all -check all -warn unused\
 #-fp-stack-check -heap-arrays -ftrapuv -check pointers\
@@ -84,6 +48,25 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize
 #----For optimized code under ifort
 #ifort -m64 -fast
 #Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
+
+
+#---------------------------
+#---- pfg90 compiler
+#---------------------------
+#FC     =  pgf90
+#FFLAGS =  -O2
+
+
+#--------------------------------------
+#----Lahey/Fujitsu f95 FORTRAN compiler
+#--------------------------------------
+#FC    = lf95
+#----flag for Lahey/Fujitsu for production compilation
+#FFLAGS = -O3
+#----flag for Lahey/Fujitsu for debugging
+#FFLAGS = -g --chk
+
+
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
