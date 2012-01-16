@@ -1,5 +1,5 @@
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Date: 2012-01-16 02:52:02 +0100 (Mo, 16 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -2152,8 +2152,10 @@ C-----------dependent factor
 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)* RORed
-            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
+! --------The next two lines look like a mistake or some  left over trial
+! --------Mihaela please check.     
+!            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
+!     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
