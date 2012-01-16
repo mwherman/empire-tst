@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2196 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-11 16:37:52 +0100 (Mi, 11 Jän 2012) $
+Ccc   * $Rev: 2210 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -405,7 +405,7 @@ C            IF (echannel.GE.0.0001 .and. icsl.gt.0 .and. nejcec.le.2)
 C
 C--------------This level is not counted as a discrete one
 C--------------but it is embedded in the continuum
-C
+Cin
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
 C--------------Spreading it using resolution function

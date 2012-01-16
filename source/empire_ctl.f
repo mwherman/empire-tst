@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2206 $
+Ccc   * $Rev: 2210 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
+Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -85,7 +85,7 @@ C
       dimension valx(mxfit),xvalx(mxfit),axx(mxfit)
       dimension pars(mxfit),dparmx(mxfit)
       dimension ipt(mxfit),ipotrng(6)
-      REAL*8 aat, zzt, aap, zzp, emin, culbar, eclmn
+      REAL*8 aat, zzt, aap, zzp, emin, culbar, eclmn, emax
 
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
       common /fitwts/wt(15,2)
@@ -1039,6 +1039,7 @@ C
       logical LINUX
       integer*4 PIPE,itmp
       character*132 ctmp
+      REAL*8 emin
 
       common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),

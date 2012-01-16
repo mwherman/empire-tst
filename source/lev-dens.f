@@ -1,5 +1,5 @@
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
+Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -257,8 +257,8 @@ C
 C Local variables
 C
       REAL*8 const, det, dphi2, phi, phi2,
-     &       s, seff2, t, ro, ro_u, ro_j, ro_pi
-      REAL*8 rot_K,rot_Q,vib_KQ
+     &       s, seff2, t, ro_u, ro_j
+      REAL*8 rot_K,rot_Q,vib_KQ, exp1
 C
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
@@ -277,18 +277,17 @@ C-----CONST=1/(2*SQRT(2 PI))
       seff2 = momp*t
       IF (ABS(A2).GT.0.005D0) seff2 = momp**0.333D0*momo**0.6666D0*t
       IF (seff2.LE.0.0D0) RETURN
-      ro_u=exp(s)/sqrt(det)
-      ro_j=const*(2.d0*Aj + 1.d0)/seff2**1.5*
-     &       EXP(-(Aj+0.5)**2/(2.d0*seff2))
-      IF(ro_j.LT.1E-20)RETURN
-      ro_pi=0.5D0
-      ro = ro_u * ro_j * ro_pi 
-      IF(Bf.EQ.0.d0)THEN
-         ROBCS=ro
-      RETURN
-      ENDIF
+      ro_u=dexp(s)/dsqrt(det)
+      exp1=(Aj+0.5)**2/(2.d0*seff2)
+      IF(exp1.gt.20d0) RETURN
+      ro_j=const*(2.d0*Aj + 1.d0)/seff2**1.5*DEXP(-exp1)
+      IF(ro_j.LT.1d-15) RETURN
+!      ro_pi=0.5D0
+!      ROBCS = ro_u * ro_j * ro_pi 
+      ROBCS = ro_u * ro_j * 0.5d0
+      IF(Bf.EQ.0.d0) RETURN
       CALL COLL_KQ_EGSM(A,T,momo,A2,u,vib_KQ,rot_K,rot_Q)
-      ROBCS = ro *  rot_K * rot_Q * vib_KQ
+      ROBCS = ROBCS *  rot_K * rot_Q * vib_KQ
    
       RETURN
       END

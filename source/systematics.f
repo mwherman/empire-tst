@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2208 $
+Ccc   * $Rev: 2210 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-15 22:19:34 +0100 (So, 15 Jän 2012) $
+Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
 
             
       
@@ -25,12 +25,10 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc 
        IMPLICIT NONE
-       REAL*8 Atrg, Ztrg,csnp, csna,  csng, csn2p, csnna, csnnp2, csnp2,
+       REAL*4 Atrg, Ztrg,csnp, csna,  csng, csn2p, csnna, csnnp2, csnp2,
      &        csna2, csn2n, s
        INTEGER iprojectile
-       IF(iprojectile.NE.1) THEN
-          RETURN
-       ENDIF
+       IF(iprojectile.NE.1) RETURN
        s = (Atrg - 2*Ztrg)/Atrg
 C
 C------14.5 MeV
