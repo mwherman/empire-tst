@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-15 22:13:38 +0100 (So, 15 Jän 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-16 02:21:37 +0100 (Mo, 16 Jän 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
@@ -353,8 +353,9 @@ C================================================================
       REAL*8 phase(NFPARAB),phase_w(NFPARAB),phase_h(NFPARAB)
 
       LOGICAL discrete,Gauss
-      REAL*8 ftmp, es, ee, dmom, faza2, abserr
-      REAL*8  FmomentParab, GaussLegendre41
+      REAL*8 ftmp, es, ee, dmom, faza2
+      REAL*8 FmomentParab
+C     REAL*8 GaussLegendre41, abserr
       EXTERNAL FmomentParab
 
       INTEGER kbarr
