@@ -1,6 +1,400 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-16 02:21:37 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Date: 2012-01-16 19:10:00 +0100 (Mo, 16 Jän 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
+
+      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp, snc)
+C
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
+      COMMON /VARGS/ Uexc, Smiu, K
+
+
+      COMMON /VBAR  / vbarex, ho,faza2
+      REAL*8 VBArex(NFPARAB),HO(NFPARAB), enh_asym(NFPARAB) 
+
+      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
+      DOUBLE PRECISION ee,uexc
+      DOUBLE PRECISION phase(2*NFPARAB),phase_h(NFPARAB)
+
+      DOUBLE PRECISION dmom,dnum, rmiu, Smiu, W
+
+      DOUBLE PRECISION exp2del(NFPARAB), exm2del(NFPARAB)
+      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
+      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),deltt(NFPARAB),
+     &                 tfdd(NFPARAB), tdr
+
+      INTEGER j,k,kh,kw,iphas_opt
+
+ 
+      REAL*8  abserr, epsa, epsb, phase_sub, faza2, snc
+      LOGICAL discrete
+
+C     FUNCTIONS
+      REAL*8   Fmoment1,  GaussLegendre41
+      EXTERNAL Fmoment1
+
+      rmiu = 0.054d0 * A(Nnuc) * * (5.d0/3.d0)
+      smiu = DSQRT(0.5d0 * rmiu)
+      uexc = Ee
+      discrete = .TRUE.
+
+      DO k = 1, 2 * NRBar
+        phase(k) = 0.d0
+      ENDDO
+c-----reasigning humps and wells
+      DO kh = 1, NRBar,2
+         Vheigth(kh) = VBArex(int(kh/2)+1)
+         Vwidth(kh) = h(1,int(kh/2)+1)
+      ENDDO
+
+      DO kw = 2, NRBar,2
+         Vheigth(kw) = VBArex(NRHump+int(kw/2))
+         Vwidth(kw) = h(1,NRHump+int(kw/2))
+      ENDDO
+     
+      IF(FISbar(Nnuc).EQ.3.)THEN
+         DO j = 1, nextr
+            Vpos(j) = DEFfis(j)
+         ENDDO
+         Vpos(nextr+1) = 100.d0 
+      ENDIF
+c-----removing partially degeneracy
+      DO kh = 1, NRBar,2
+         IF(BFF(kh/2+1).EQ.2)THEN
+            enh_asym(kh/2+1)= 2.d0*snc+1.d0
+         ELSE
+            enh_asym(kh/2+1)=1.d0
+         ENDIF
+      ENDDO
+      
+C---- Momentum integrals are calculated
+      iphas_opt=0  ! phases calculated on decoupled parabolas
+
+      IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) iphas_opt=1
+      IF(FISbar(Nnuc).EQ.3)THEN
+        CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
+      ELSE
+        CALL PHASES_Parab(ee, nnuc, phase, discrete)
+      ENDIF
+
+C-----Calculating transmission from phases
+      DO ih = 1, nrbar, 2
+         TFDd(ih/2 + 1) = enh_asym(ih/2+1)/
+     &                    (1.d0 + DEXP(2.d0 *  phase(ih)))
+      ENDDO
+
+      IF(FISopt(Nnuc).EQ.0)RETURN  !!!!!!!!!!!!!!!!!!
+
+C-------Imaginary potential strengths
+      w = 0.d0
+      DO iw = 2, nrbar, 2
+         phasep(iw/2 + 1) = phase(iw)
+      ENDDO
+
+      DO iw = 2, nrbar,2
+         deltt(iw) = 0.d0
+         dmom = max(Vheigth(iw-1),Vheigth(iw+1))
+         W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
+     &       ((dmom - Vheigth(iw)) *
+     &       (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
+     &        dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
+Cccc &        dexp( - (Ee - dmom) / wimag(iw))))
+
+c         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
+c     &              wimag(3)*(Ee - Vheigth(iw))**2
+cc         IF(iw.eq.2)w = wimag(1)+wimag(3)*(Ee - Vheigth(iw))
+cc         IF(iw.eq.4)w = wimag(2)+wimag(3)*(Ee - Vheigth(iw))
+
+         if(Ee.le. Vheigth(iw)) W = 0.d0
+c         if(Ee.gt. dmom) W = 1.d0          
+         if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
+         deltt(iw) = W * phase(iw)
+      ENDDO
+
+      DO iw = 2, nrbar, 2
+         delt(iw/2 + 1) =(1.d0)* deltt(iw)
+      ENDDO
+      DO iw = 2, NRWel + 1
+         IF(2.d0*delt(iw).GT.EXPmax)delt(iw)=EXPmax/2.d0
+         exp2del(iw) = dexp( 2.d0*delt(iw))
+         exm2del(iw) = dexp(-2.d0*delt(iw))
+         if (delt(iw).eq.0.d0) exp2del(iw) = 1.d0
+         if (delt(iw).eq.0.d0) exm2del(iw) = 1.d0
+      ENDDO   
+c-----Direct transmission coefficients
+      DO ih = 1, nrhump
+         DO ih1 = 1, nrhump
+            tdirp(ih, ih1) = 0.d0
+            tdirp(ih1, ih) = 0.d0
+            IF(ih.EQ.ih1) tdirp(ih, ih1) = tfdd(ih)
+         ENDDO
+      ENDDO
+c-----direct forward
+      DO ih1 = nrhump, 2, -1
+         DO ih = ih1 - 1, 1, -1
+            dmom = (enh_asym(ih) - tdirp(ih, ih)) *
+     &           (1.d0 - tdirp(ih+1, ih1))
+            dnum= exp2del(ih + 1) + 2.d0*  dSQRT(dmom) *
+     &           dCOS(2.d0 * phasep(ih + 1)) +
+     &           dmom* exm2del(ih + 1)
+            
+            IF(dnum.eq.0.d0)THEN
+               tdirp(ih, ih1) = 0.d0
+            ELSE
+               tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                          dnum
+            ENDIF   
+         ENDDO
+      ENDDO
+
+c-----direct backward   
+      DO ih1 = 1, nrhump - 1
+         DO ih = ih1 + 1, nrhump - 1
+                 dmom = (enh_asym(ih) - tdirp(ih, ih)) *
+     &                  (1.d0 - tdirp(ih+1, ih1))
+                 tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(ih + 1)) +
+     &                          dmom * exm2del(ih + 1))
+         ENDDO
+      ENDDO
+c-----to be generalized, valid now only for Th like cases
+      IF(ee.LE.Vheigth(4))THEN
+         epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/
+     &                   (SMIu*Vwidth(3))
+                  epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/
+     &                   (SMIu*Vwidth(5))
+                  dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+                  IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+                     write(*,*) ' WARNING: For extremum ',k,
+     &                       ' phase integral is not accurate (',
+     &                  sngl(abserr/dmom*100.d0),' %)'
+                  ENDIF
+                  phase_sub = min(dmom,50.d0)
+                  tdirp(2,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+                  tdirp(3,2)=tdirp(2,3)
+      ENDIF
+
+c--------Absorption coefficients
+c--------forward
+       DO iw = 1, nrwel
+          DO iw1 = iw + 1, nrwel + 1
+             IF(delt( iw1).GT.0.D0) THEN
+                dmom = (enh_asym(iw) - tdirp(iw, iw1 - 1)) *
+     &                 (1.d0 - tdirp(iw1, nrhump))
+                tdr  = tdirp(iw, iw1 - 1) *  tdirp(iw1, nrhump)/
+     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(2.d0 * phasep(iw1)) +
+     &                  dmom * exm2del(iw1))
+
+                tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                           - (1.d0 - tdirp(iw1, nrhump)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1, nrhump)) /tdirp(iw1, nrhump)
+             ELSE
+                tabsp(iw, iw1) = 0.D0
+             ENDIF
+          ENDDO
+       ENDDO
+c------backward
+       DO iw = nrwel + 1, 3, -1
+          DO iw1 = iw -1, 2, -1
+             IF(delt( iw1).GT.0.D0) THEN
+                dmom = (1.d0 - tdirp(iw - 1, iw1)) *
+     &                 (1.d0 - tdirp(iw1-1, 1))
+                tdr  = tdirp(iw-1, iw1) *  tdirp(iw1-1, 1)/
+     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(2.d0 * phasep(iw1)) +
+     &                  dmom * exm2del(iw1))
+                tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                          - (enh_asym(1)-  tdirp(iw1-1, 1)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1-1, 1)) /tdirp(iw1-1, 1)
+             ELSE
+                tabsp(iw, iw1) = 0.D0
+             ENDIF
+          ENDDO
+       ENDDO
+  
+      RETURN
+      END
+
+c================================================================
+      SUBROUTINE PHASES_Parab(ee, nnuc, phase, discrete)
+C================================================================
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+
+      COMMON /VBAR  / vbarex, ho,faza2
+      COMMON/ PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
+      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
+
+      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
+      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
+     &       HO_p(NFPARAB)
+ 
+
+      REAL*8 uexc,smiu_p
+      REAL*8 rmiu
+      REAL*8 Einters(2*NFPARAB)
+      REAL*8 phase(NFPARAB)
+
+      LOGICAL discrete
+      REAL*8 ftmp, es, ee, dmom, faza2, abserr
+      REAL*8  FmomentParab, GaussLegendre41
+      EXTERNAL FmomentParab
+
+      INTEGER kbarr
+C     INTEGER iphas_opt
+
+      rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)        !mu in the formula
+      smiu = DSQRT(0.5d0*rmiu)
+      smiu_p=smiu
+      uexc=ee
+
+      DO k=1, NRBar,2
+         VJJ(k) = VBArex(int(k/2)+1)
+      ENDDO
+      DO k=2, NRBar,2
+         VJJ(k) = VBArex(NRHump+int(k/2))
+      ENDDO
+
+      DO k=1,NRBAR
+         ho_p(k)=ho(k)
+      ENDDO
+
+      IF(.NOT.discrete)THEN
+         DO k=1, NRBar,2
+            VJJ(k) = EFB(int(k/2)+1)
+            ho(k)  = hcont(int(k/2)+1)  
+         ENDDO
+         DO k=2, NRBar,2
+            VJJ(k) = EFB(NRHump+int(k/2))
+            ho(k)  = hcont(NRHump+int(k/2))
+         ENDDO
+      ENDIF
+
+C-----deformations at saddles and wells and matching points-----------
+C     Fission barriers are modelled by NRBar parabolas
+C     EPSil(i) are the parabolas vortex
+C     EJOin(i) are the corresponding deformation at which parabolas join
+      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))
+      EJOin(2) = EPSil(1)
+     &           + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
+     &           /(SMIu*HO(1))
+      EJOin(1) = 0.d0!2*EPSil(1) - EJOin(2)
+      DO k = 2, NRBar
+         EJOin(2*k - 1) = EJOin(2*(k - 1))
+         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
+     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
+         IF (k.LT.NRBar) EJOin(2*k) = EPSil(k)
+     &        + SQRT(( - 1)**k*(VJJ(k+1)- VJJ(k))
+     &        /(1.D0 + (HO(k)/HO(k+1))**2))/(SMIu*HO(k))
+      ENDDO
+      EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
+      EJOin(2*NRBar) = EPSil(NRBar) +SQRT(VJJ(NRBar))/(SMIu*HO(NRBar))
+
+      DO j = 1, 2*NRBar
+         einters(j) = -1.
+      ENDDO
+
+      DO j = 1, NRBar
+         ftmp = ( - 1)**j*(Ee - VJJ(j))
+         IF (ftmp.GE.0.D0) THEN
+            IF (Ee.EQ.VJJ(j)) THEN
+               einters(2*j - 1) = epsil(j)!Ee
+               einters(2*j) = epsil(j)!Ee
+               cycle
+            ENDIF
+            es = SQRT(ftmp)/(SMIu*HO(j))
+            einters(2*j - 1) = EPSil(j) - es
+            einters(2*j) = EPSil(j) + es
+         ENDIF
+      ENDDO    
+
+C     IF(iphas_opt.NE.0)THEN
+         DO j=2,2*NRBar-1,2
+            IF(einters(j).LT.ejoin(j))THEN
+               einters(j+1)=einters(j)
+            ELSE   
+               einters(j)=einters(j+1)
+            ENDIF
+         ENDDO 
+C     ENDIF
+
+C     Momentum integrals 
+      UEXc = ee
+      DO k = 1, NRBar
+         phase(k) = 0.D0
+         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
+            dmom = GaussLegendre41(FmomentParab,
+     &             einters(2*k - 1),einters(2*k),abserr) 
+         ELSE
+            dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
+         ENDIF
+         phase(k)   = min(dmom,50.d0)  
+      ENDDO              
+
+      RETURN
+      END
+C========================================================================
+      REAL*8 function FmomentParab(Eps)
+C
+C     Integrand (To be called from Gauss-Legendre integration routine)
+C     To be defined as external function
+C
+      IMPLICIT NONE
+      REAL*8 Eps, Vdef,Uexc, Smiu
+      INTEGER Kbarr
+      COMMON /VARGS/ Uexc, Smiu, Kbarr
+   
+      FmomentParab = 2.d0*Smiu* DSQRT( DABS (Uexc - Vdef(Eps)) )
+      RETURN
+      END
+
+
+      REAL*8 FUNCTION VDEF(Eps)
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C COMMON variables
+
+      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho
+      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
+ 
+      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
+     &       HO(NFPARAB), uexc,smiu_p,eps
+      INTEGER j
+C
+C     calculation of the deformation potential energy
+      VDEF = 0.D0
+c      IF (Eps.LE.EJOin(2)) THEN
+c         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
+c         RETURN
+c      ENDIF
+c      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
+c         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
+c         RETURN
+c      ENDIF
+
+c      DO j = 2, NRBar - 1
+      DO j = 1, NRBar
+         IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) THEN
+            VDEF = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))
+     &                **2
+            RETURN
+         ENDIF
+      ENDDO
+      RETURN
+      END
+
+C============NUMERICAL BARRIERS=================================
 
       SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
@@ -109,408 +503,6 @@ C     Vpos(0) = 0.d0
       RETURN
       END
 
-C===================================================================
-      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp,tabsp)
-C
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-
-      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
-      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
-
-      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
-      COMMON /VARGS/ Uexc, Smiu, K
-
-
-      COMMON /VBAR  / vbarex, ho,faza2
-      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
-
-      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
-      DOUBLE PRECISION ee,uexc
-      DOUBLE PRECISION phase(2*NFPARAB),phase_h(NFPARAB)
-
-      DOUBLE PRECISION dmom,dnum, rmiu, Smiu, W
-
-      DOUBLE PRECISION exp2del(NFPARAB), exm2del(NFPARAB)
-      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
-      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),deltt(NFPARAB),
-     &                 tfdd(NFPARAB), tdr
-
-      INTEGER j,k,iphas_opt
-
- 
-      REAL*8  abserr, epsa, epsb,phase_sub,faza2
-      LOGICAL discrete
-
-C     FUNCTIONS
-      REAL*8   Fmoment1,  GaussLegendre41
-      EXTERNAL Fmoment1
-
-      rmiu = 0.054d0 * A(Nnuc) * * (5.d0/3.d0)
-      smiu = DSQRT(0.5d0 * rmiu)
-      uexc = Ee
-      discrete = .TRUE.
-
-      DO k = 1, 2 * NRBar
-        phase(k) = 0.d0
-      ENDDO
-c-----reasigning humps and wells
-      DO k=1, NRBar,2
-         Vheigth(k) = VBArex(int(k/2)+1)
-      ENDDO
-      DO k=2, NRBar,2
-         Vheigth(k) = VBArex(NRHump+int(k/2))
-      ENDDO
-
-      IF(FISbar(Nnuc).EQ.3.)THEN
-          DO kh=1, NRBar,2
-             Vheigth(kh) = EFB(int(kh/2)+1)
-          ENDDO
-          DO kw=2, NRBar,2
-             Vheigth(kw) = EFB(NRHump+int(kw/2))
-          ENDDO
-          DO j = 1, nextr
-             Vpos(j) = DEFfis(j)
-          ENDDO
-          Vpos(nextr+1) = 100.d0 
-      ENDIF
-
-      DO kh=1, NRBar,2
-          Vwidth(kh) = h(1,int(kh/2)+1)
-      ENDDO
-      DO kw=2, NRBar,2
-          Vwidth(kw) = h(1,NRHump+int(kw/2))
-      ENDDO
-
-C---- Momentum integrals are calculated
-      iphas_opt=0
-      IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) iphas_opt=1
-      IF(FISbar(Nnuc).EQ.3)THEN
-        CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
-      ELSE
-        CALL PHASES_Parab(ee, nnuc, phase, phase_h, discrete)
-      ENDIF
-
-C-----Calculating transmission from phases
-      DO ih = 1, nrbar, 2
-         TFDd(ih/2 + 1) = 1.d0/(1.d0 + DEXP(2.d0 *  phase(ih)))
-      ENDDO  
-      IF(FISopt(Nnuc).EQ.0)RETURN
-
-C-------Imaginary potential strengths
-      w = 0.d0
-      DO iw = 2, nrbar, 2
-         phasep(iw/2 + 1) = phase(iw)
-      ENDDO
-
-      DO iw = 2, nrbar,2
-         deltt(iw) = 0.d0
-         dmom = max(Vheigth(iw-1),Vheigth(iw+1))
-         W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
-     &       ((dmom - Vheigth(iw)) *
-     &       (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
-     &        dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
-Cccc &        dexp( - (Ee - dmom) / wimag(iw))))
-
-c         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
-c     &              wimag(3)*(Ee - Vheigth(iw))**2
-         IF(iw.eq.2)w = wimag(1)+wimag(3)*(Ee - Vheigth(iw))
-         IF(iw.eq.4)w = wimag(2)+wimag(3)*(Ee - Vheigth(iw))
-
-         if(Ee.le. Vheigth(iw)) W = 0.d0
-         if(Ee.gt. dmom) W = 1.d0          
-         if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
-         deltt(iw) = W * phase(iw)
-      ENDDO
-
-      DO iw = 2, nrbar, 2
-         delt(iw/2 + 1) = deltt(iw)
-      ENDDO
-      DO iw = 2, NRWel + 1
-         IF(2.d0*delt(iw).GT.EXPmax)delt(iw)=EXPmax/2.d0
-         exp2del(iw) = dexp( 2.d0*delt(iw))
-         exm2del(iw) = dexp(-2.d0*delt(iw))
-         if (delt(iw).eq.0.d0) exp2del(iw) = 1.d0
-         if (delt(iw).eq.0.d0) exm2del(iw) = 1.d0
-      ENDDO   
-c-----Direct transmission coefficients
-      DO ih = 1, nrhump
-         DO ih1 = 1, nrhump
-            tdirp(ih, ih1) = 0.d0
-            tdirp(ih1, ih) = 0.d0
-            IF(ih.EQ.ih1) tdirp(ih, ih1) = tfdd(ih)
-         ENDDO
-      ENDDO
-c-----direct forward
-      DO ih1 = nrhump, 2, -1
-         DO ih = ih1 - 1, 1, -1
-            dmom = (1.d0 - tdirp(ih, ih)) * 
-     &           (1.d0 - tdirp(ih+1, ih1))
-            dnum= exp2del(ih + 1) + 2.d0*  dSQRT(dmom) *
-     &           dCOS(2.d0 * phasep(ih + 1)) +
-     &           dmom* exm2del(ih + 1)
-            
-            IF(dnum.eq.0.d0)THEN
-               tdirp(ih, ih1) = 0.d0
-            ELSE
-               tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
-     &                          dnum
-            ENDIF   
-         ENDDO
-      ENDDO
-c-----direct backward   
-      DO ih1 = 1, nrhump - 1
-         DO ih = ih1 + 1, nrhump - 1
-                 dmom = (1.d0 - tdirp(ih, ih)) *
-     &                  (1.d0 - tdirp(ih+1, ih1))
-                 tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
-     &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
-     &                          dCOS(2.d0 * phasep(ih + 1)) +
-     &                          dmom * exm2del(ih + 1))
-         ENDDO
-      ENDDO
-c-----to be generalized, valid now only for Th like cases
-      IF(ee.LE.Vheigth(4))THEN
-         epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/
-     &                   (SMIu*Vwidth(3))
-                  epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/
-     &                   (SMIu*Vwidth(5))
-                  dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
-                  IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-                     write(*,*) ' WARNING: For extremum ',k,
-     &                       ' phase integral is not accurate (',
-     &                  sngl(abserr/dmom*100.d0),' %)'
-                  ENDIF
-                  phase_sub = min(dmom,50.d0)
-                  tdirp(2,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
-                  tdirp(3,2)=tdirp(2,3)
-      ENDIF
-
-c--------Absorption coefficients
-c--------forward
-       DO iw = 1, nrwel
-          DO iw1 = iw + 1, nrwel + 1
-             IF(delt( iw1).GT.0.D0) THEN
-                dmom = (1.d0 - tdirp(iw, iw1 - 1)) *
-     &                 (1.d0 - tdirp(iw1, nrhump))
-                tdr  = tdirp(iw, iw1 - 1) *  tdirp(iw1, nrhump)/
-     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
-     &                  dCOS(2.d0 * phasep(iw1)) +
-     &                  dmom * exm2del(iw1))
-
-                tabsp(iw, iw1) = tdr * (exp2del(iw1)
-     &                           - (1.d0 - tdirp(iw1, nrhump)) *
-     &                           exm2del(iw1) -
-     &                           tdirp(iw1, nrhump)) /tdirp(iw1, nrhump)
-             ELSE
-                tabsp(iw, iw1) = 0.D0
-             ENDIF
-          ENDDO
-       ENDDO
-c------backward
-       DO iw = nrwel + 1, 3, -1
-          DO iw1 = iw -1, 2, -1
-             IF(delt( iw1).GT.0.D0) THEN
-                dmom = (1.d0 - tdirp(iw - 1, iw1)) *
-     &                 (1.d0 - tdirp(iw1-1, 1))
-                tdr  = tdirp(iw-1, iw1) *  tdirp(iw1-1, 1)/
-     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
-     &                  dCOS(2.d0 * phasep(iw1)) +
-     &                  dmom * exm2del(iw1))
-                tabsp(iw, iw1) = tdr * (exp2del(iw1)
-     &                          - (1.d0 -  tdirp(iw1-1, 1)) *
-     &                           exm2del(iw1) -
-     &                           tdirp(iw1-1, 1)) /tdirp(iw1-1, 1)
-             ELSE
-                tabsp(iw, iw1) = 0.D0
-             ENDIF
-          ENDDO
-       ENDDO
-  
-      RETURN
-      END
-
-c================================================================
-      SUBROUTINE PHASES_Parab(ee, nnuc, phase, phase_h, discrete)
-C================================================================
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-
-
-      COMMON /VBAR  / vbarex, ho,faza2
-      COMMON/ PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
-      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
-
-      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
-      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
-     &       HO_p(NFPARAB)
- 
-
-      REAL*8 uexc,smiu_p
-      REAL*8 rmiu
-      REAL*8 Einters(2*NFPARAB)
-      REAL*8 phase(NFPARAB),phase_w(NFPARAB),phase_h(NFPARAB)
-
-      LOGICAL discrete,Gauss
-      REAL*8 ftmp, es, ee, dmom, faza2
-      REAL*8 FmomentParab
-C     REAL*8 GaussLegendre41, abserr
-      EXTERNAL FmomentParab
-
-      INTEGER kbarr
-
-      rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)        !mu in the formula
-      smiu = DSQRT(0.5d0*rmiu)
-      smiu_p=smiu
-      uexc=ee
-
-      DO k=1, NRBar,2
-         VJJ(k) = VBArex(int(k/2)+1)
-      ENDDO
-      DO k=2, NRBar,2
-         VJJ(k) = VBArex(NRHump+int(k/2))
-      ENDDO
-
-      DO k=1,NRBAR
-         ho_p(k)=ho(k)
-      ENDDO
-
-      IF(.NOT.discrete)THEN
-         DO k=1, NRBar,2
-            VJJ(k) = EFB(int(k/2)+1)
-            ho(k)  = hcont(int(k/2)+1)  
-         ENDDO
-         DO k=2, NRBar,2
-            VJJ(k) = EFB(NRHump+int(k/2))
-            ho(k)  = hcont(NRHump+int(k/2))
-         ENDDO
-      ENDIF
-
-C-----deformations at saddles and wells and matching points-----------
-C     Fission barriers are modelled by NRBar parabolas
-C     EPSil(i) are the parabolas vortex
-C     EJOin(i) are the corresponding deformation at which parabolas join
-      EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))
-      EJOin(2) = EPSil(1)
-     &           + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
-     &           /(SMIu*HO(1))
-      EJOin(1) = 2*EPSil(1) - EJOin(2)
-      DO k = 2, NRBar
-         EJOin(2*k - 1) = EJOin(2*(k - 1))
-         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
-     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
-         IF (k.LT.NRBar) EJOin(2*k) = EPSil(k)
-     &        + SQRT(( - 1)**k*(VJJ(k+1)- VJJ(k))
-     &        /(1.D0 + (HO(k)/HO(k+1))**2))/(SMIu*HO(k))
-      ENDDO
-      EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
-
-      DO j = 1, 2*NRBar
-         einters(j) = -1.
-      ENDDO
-
-      DO j = 1, NRBar
-         ftmp = ( - 1)**j*(Ee - VJJ(j))
-         IF (ftmp.GE.0.D0) THEN
-            IF (Ee.EQ.VJJ(j)) THEN
-               einters(2*j - 1) = Ee
-               einters(2*j) = Ee
-               cycle
-            ENDIF
-            es = SQRT(ftmp)/(SMIu*HO(j))
-            einters(2*j - 1) = EPSil(j) - es
-            einters(2*j) = EPSil(j) + es
-         ENDIF
-      ENDDO
-
-      DO j=2,2*NRBar,2
-         IF(einters(j).LT.ejoin(j))THEN
-            einters(j+1)=einters(j)
-         ELSE   
-            einters(j)=einters(j+1)
-         ENDIF
-      ENDDO  
-
-C     Momentum integrals calculated by Gauss-Legendre integration
-      UEXc = ee
-c      Gauss=.false.
-      Gauss=.true.
-      DO k = 1, NRBar
-         phase(k) = 0.D0
-!         goto 31
-!         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
-!            IF(Gauss)THEN
-!               dmom = GaussLegendre41(FmomentParab,
-!     &                einters(2*k - 1),einters(2*k),abserr) 
-!            ELSE
-!               CALL SIMPS_phase(ee,einters(2*k - 1),einters(2*k),dmom)
-!            ENDIF
-!         ELSE
-!            dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
-!         ENDIF
-cms
- 31      dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
-         phase(k)   = min(dmom,50.d0)  
-      ENDDO
-
- 33   DO k=1, NRBAR  
-         IF(mod(k, 2).eq.1) then   
-            phase_h(k-int(k/2))=phase(k)
-         ELSE
-            phase_w(k-int(k/2))=phase(k)
-         ENDIF     
-      ENDDO
-      RETURN
-      END
-
-c=======================================================================
-      SUBROUTINE SIMPS_phase(ee,epsa,epsb,vmom)
-C-----Simpson integration
-      INCLUDE 'dimension.h' 
-      INCLUDE 'global.h'
-     
-      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho
- 
-      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
-     &       HO(NFPARAB)
-
-      REAL*8 epsa,epsb,eps,vmom,vdefs,step,ee,fmom
-      INTEGER i,np,nn,j
-C
-c      nrbar=3
-      vmom=0.d0
-      vdefs=0.d0
-      fmom=0.d0
-      np=500
-      step=(epsb-epsa)/np
-
-      DO i=1,np
-         eps=epsa+(i-1)*step 
-         IF (Eps.LE.EJOin(2))THEN
-            VDEFs = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
-            goto 22
-         ENDIF
-         IF (Eps.GE.EJOin(2*NRBar - 1))THEN 
-            VDEFs = VJJ(NRBar)-(SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
-            goto 22
-         ENDIF
-         DO j = 2, NRBar - 1
-            IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) 
-     &          VDEFs = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))
-     &                **2
-         ENDDO
-
- 22      nn = 2
-         IF ((i*0.5).EQ.INT(i/2)) nn = 4
-         IF (i.EQ.1 .OR. i.EQ.np) nn = 1
-
-         Fmom = 2.d0*SMIU* DSQRT( DABS (ee - Vdefs) )
-         vmom = vmom + nn * fmom
-      ENDDO
-      vmom = vmom * step/3.
-      RETURN
-      END
 
 c================================================================
       SUBROUTINE PHASES(uexcit1,phase,phase_h,nnuc,iphas_opt,discrete)
@@ -619,22 +611,6 @@ C
       END
 
 
-      REAL*8 function FmomentParab(Eps)
-C
-C     Integrand (To be called from Gauss-Legendre integration routine)
-C
-C     To be defined as external function
-C
-      IMPLICIT NONE
-      REAL*8 Eps, Vdef
-      REAL*8 Uexc, Smiu
-      INTEGER Kbarr
-      COMMON /VARGS/ Uexc, Smiu, Kbarr
-   
-      FmomentParab = 2.d0*Smiu* DSQRT( DABS (Uexc - Vdef(Eps)) )
-      return
-      end
-
       REAL*8 function Fmoment1(Eps)
 C
 C     Integrand (To be called from Gauss-Legendre integration routine)
@@ -650,67 +626,8 @@ C
       return
       end
 
-      REAL*8 FUNCTION VDEF(Eps)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C COMMON variables
 
-      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho
-      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
- 
-      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
-     &       HO(NFPARAB)
-
-      REAL*8 uexc,smiu_p
-
-C Dummy arguments
-C
-      DOUBLE PRECISION Eps
-C
-C Local variables
-C
-      INTEGER j
-C
-C     calculation of the deformation potential energy
-      VDEF = 0.D0
-      IF (Eps.LE.EJOin(2)) THEN
-         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
-         RETURN
-      ENDIF
-      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
-         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
-         RETURN
-      ENDIF
-
-      DO j = 2, NRBar - 1
-         IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) THEN
-            VDEF = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))
-     &                **2
-            RETURN
-         ENDIF
-      ENDDO
-	RETURN
-      END
-
-      REAL*8 function VdefParab(EPS)
-C
-C     This function calculates parabolic shape of the deformation energy
-C
-C     Called by gaussian integration
-C
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-      REAL*8 EPS
-      REAL*8 Uexc, Smiu
-      INTEGER K
-      COMMON /VARGS/ Uexc, Smiu, K
-      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
-      REAL*8 Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
-
-      VdefParab = Vheigth(K) + (-1)**K*(SMIU*Vwidth(K)*(EPS-Vpos(K)))**2
-      return
-      end
-
+      
       REAL*8 function Vdef1(EPS)
       REAL*8 EPS
 C
