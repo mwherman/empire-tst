@@ -220,6 +220,8 @@ def runE(proj):
     for line in listfile:
         if 'WARNING' in line:
             warnfile.write(line)
+        if 'ERROR' in line:
+            warnfile.write(line)
     warnfile.close()
     
     # Delete Temporary files
