@@ -316,10 +316,10 @@ def splashscreen():
     '                                                           '+'\n'+
     '                      R I V O L I release 3.1              '+'\n'+
     '                                                           '+'\n'+
-    '             Sao Jose dos Campos, Brazil, December 2011    '+'\n'+
+    '             Sao Jose dos Campos, Brazil, May 2011         '+'\n'+
+    '             Upton, New York, USA, January 2012            '+'\n'+
     '                                                           '+'\n']
     return splash[0]
-
 
 
 #from bash.py:
