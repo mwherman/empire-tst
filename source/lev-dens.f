@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-16 19:50:12 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Date: 2012-01-17 08:07:14 +0100 (Di, 17 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -103,17 +103,41 @@ C-----fit of cumulative low-lying discrete levels
          CALL BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
 
-      ellq = Q(1,Nnuc) - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
-      Ecrt = UCRt - DEL - dshift
+C     Ecrt = UCRt - DEL - dshift
+      Ecrt = UCRt - DEL  
+      IF(Ecrt .LT. Q(1,Nnuc)) THEN
+        ellq = Ecrt - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
+	ELSE
+        ellq = Q(1,Nnuc) - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
+        IF(FIRst_ein .AND. nnuc.eq.1) THEN
+          WRITE(8,*) 
+          WRITE(8,*) 
+     &   ' WARNING: Ecrt = Ucrt-DEL > Bn, Calculated D0 is not accurate'
+          WRITE(8,*) 
+     &   ' WARNING: Tuning of the CN ATILNO required'
+          WRITE(8,*) 
+        ENDIF
+	ENDIF
+
       DO kk = 1, NEX(Nnuc)
          IF (FITlev.LE.0.0D0 .OR. 
      &       EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc))
      &      THEN
-            IF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
-               dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
-            ELSE
-               dshif = 0.d0
-            ENDIF
+
+            IF(Ecrt .LT. Q(1,Nnuc)) THEN
+              IF (EX(kk,Nnuc).LT.Ecrt .AND. ellq.NE.0.0D0) THEN
+                 dshif = dshift*(Ecrt - EX(kk,Nnuc))/ellq
+              ELSE
+                 dshif = 0.d0
+              ENDIF
+	      ELSE
+              IF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
+                 dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
+              ELSE
+                 dshif = 0.d0
+              ENDIF
+            ENDIF  
+
             IF(BF.EQ.0.0d0)THEN
                CALL DAMIRO_FISHI(kk,Nnuc,Asaf,rotemp,aj)
             ELSE
@@ -358,8 +382,8 @@ c-----GSM
 c-----EGSM
       sum = 0.0
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
-         WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj
-         WRITE (8,*) 'WARNING: 0 level density returned by rodef'
+         WRITE (8,*)' WARNING: Negative moment of inertia for spin ', Aj
+         WRITE (8,*)' WARNING: 0 level density returned by rodef'
          RETURN
       ENDIF
 
@@ -586,12 +610,11 @@ C-----45.84 stands for (12/SQRT(pi))**2
       SCR = 2.*ACRt*TCRt
 
       if(iout.EQ.6.AND.ifis.EQ.0)
-     & WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
-     &      ''  Acrt='',F6.3,''  Ucrt='', F6.3, ''  Econd='', F5.3,
-     &      ''  Det='', G11.3, ''  Scrt='',F6.3)')
-     &      iz,SMAT(iz),ia,atil,acrt,ucrt,econd,detcrt,scr
+     &WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
+     &      ''  Acrt='',F6.3,''  Ucrt='', F6.3, ''  Ecrt='', F6.3,
+     &      ''  Econd='', F5.3,''  Det='', G11.3, ''  Scrt='',F6.3)')
+     &      iz,SMAT(iz),ia,atil,acrt,ucrt,ucrt-DEL,econd,detcrt,scr
 
-      
       RETURN
       END
 
@@ -2008,7 +2031,6 @@ C-----------decrease energy shift above the last level to become 0 at Qn
 
             CALL DAMIRO(kk,Nnuc,dshif,defit,rotemp,aj)
 
-
             DO ij = 1, NLWst
 C-----------Integration over energy. There should be factor 2 because of the
 C-----------parity but it cancels with the 1/2 steming from the trapezoid
@@ -2044,7 +2066,7 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
         write(8,*)
         WRITE (8,*) '*****   A=',nint(A(nnuc)),
      &   ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
-     &     ' LDshif=',LDShif(nnuc)
+     &     ' LDshif=',sngl(LDShif(nnuc))
           WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
      &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
      &    ' DEL = ',DEL          
@@ -2937,12 +2959,6 @@ C     frm=1.70   Chi**2=36 (per degree of freedom)
 C     ap1 = 0.74055E-01
 C     ap2 = 0.28598E-03
 C     gam = 0.57248
-C-----parameters of Jan 23, 2011
-C     ap1 =  0.76122d-01
-C     ap2 = -0.45559d-02
-C     gam =  0.58269d0
-C   frms  = 1.687
-C   Chi-2 = 34.6
 C-----parameters of Jan 26, 2011
 C  Do-fit using RIPL-3 database, 2.19 vibr enhancement (MINUIT)       
 C     alpha 0=  .0750000 delta alpha= .500000D-01
@@ -2950,19 +2966,31 @@ C     gam   0=  .5750000 delta gam  = .500000D-02
 C ---------------------------------
 C alpha=   7.488729E-02 gam=   5.697688E-01
 C frm=       1.687021929004768 Chi^2=      27.301609174895010
+C==================================================================
 C
-      ap1 =  7.488729d-02
+C-----parameters of Jan 16, 2012 (EMPIRE v.2182 for LD routines)
+C  Do-fit using RIPL-3 database, 2.19 vibr enhancement       
+C     alpha 0=  .0750000 delta alpha= .500000D-01
+C     gam   0=  .5750000 delta gam  = .500000D-02
+C---------------------------------
+C alpha=   7.481815E-02  beta=   0.000000E+00  gam=   5.609533E-01
+C frm=       1.672033623535850 Chi^2=      27.242032055693340
+C Ncalc=        255 Nres=        300 N(Ucrt>Bn)=         48
+C 48 nuclei having Ucrt>Bn skipped in the MINUIT fit
+C
+C   frms  = 1.672
+C   Chi-2 = 27.2
+C
+C   egsm=0 in LD meaning that the GSM-like model is used
+C             Closed formula for spin dependence instead of sum_K
+C
+      ap1 =  7.481815D-02
       ap2 =  0.d0
-      gam =  5.697688D-01
+      gam =  5.609533D-01
 
-c      ap1 = 0.74055E-01
-c      ap2 = 0.28598E-03
-c      gam = 0.57248
-      gamma = gam/A(Nnuc)**0.333333
+      gamma = gam/A(Nnuc)**(1.d0/3.d0)
       IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
       ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
       ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
       RETURN
       END
-
-
