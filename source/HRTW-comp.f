@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2180 $
+Ccc   * $Rev: 2225 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+Ccc   * $Date: 2012-01-17 08:14:49 +0100 (Di, 17 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -61,9 +61,19 @@ C-----do loop over decaying nucleus parity
       d0c   = 0.d0
       sumGg = 0.d0
       sumtg = 0.d0
-      IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
-      WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
-      WRITE(8,'(1x,''----------------------------------------------'')')
+      tgexper=0.d0
+      IF(FIRst_ein) THEN          
+        IF(EINl.LE.0.002d0) THEN
+          WRITE(8,
+     &    '(1x,''Renormalization of gamma-ray strength function'')')
+	  ELSE
+          WRITE(8,'(1x,
+     &    ''WARNING: First Einc must be < 2keV for Do and Gg calculation
+     &s'')')
+	  ENDIF
+        WRITE(8,'(1x,
+     &    ''------------------------------------------------------------
+     &-'')')
       ENDIF
       DO ipar = 1, 2
          ip = INT(( - 1.0)**(ipar + 1))
@@ -228,7 +238,7 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
+            IF(FIRst_ein .AND. EINl.LE.0.002d0) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn-1
               if( ip.eq.LVP(LEVtarg,0) .AND.
@@ -236,9 +246,10 @@ C
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
 !        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
-                WRITE(8,'(A12,f4.1,A5,I2,A36,d12.6)')
+                WRITE(8,'(A12,f4.1,A5,I2,A6,F5.3,A4,/,A35,d12.6)')
      &           'CN state J=',cnspin,', Par=',ip,
-     &           ' Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
+     &           ' at U=',EX(ke,nnuc),' keV',
+     &           'Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
                 sumtg = sumtg + sumg
               ENDIF
             ENDIF
@@ -246,65 +257,71 @@ C
       ENDDO          !loop over decaying nucleus parity
       IF(d0c.gt.0.d0) d0c = 1000.0/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
-      IF(EIN.LE.0.5d0  .AND. FIRst_ein) THEN
-         IF(Gg_obs.GT.0.d0) THEN
+      IF(EINl.LE.0.002d0  .AND. FIRst_ein) THEN
+         IF(D0_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(8,'(1x,
      &      ''Experimental information from capture channel'')')
             WRITE(8,'(1x,A13,D12.6)') '2*pi*Gg/D0 = ',tgexper
-            IF(GG_unc.GT.0.0D0) THEN
-              WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')
-     &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
-            ELSE
-              WRITE(8,'(1x,A5,F9.3,A18)')
-     &          'Gg = ', GG_obs,' meV (systematics)'
-            ENDIF
-            WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
+         ENDIF
+         IF(GG_unc.GT.0.0D0) THEN
+            WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')
+     &        'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
+         ELSE
+            WRITE(8,'(1x,A5,F9.3,A18)')
+     &        'Gg = ', GG_obs,' meV (systematics)'
+         ENDIF
+         WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')
      &          'Gg = ', GG_obs,' +/- ',GG_unc,' meV'
 
-            IF(D0_unc.GT.0.0D0) THEN
-              WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')
+         IF(D0_obs.GT.0.0D0) THEN
+            WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')
      &          'D0 = ', D0_obs,' +/- ',D0_unc,' keV'
-              WRITE(8,'(1x,A5,F11.6,A17)')
+            WRITE(8,'(1x,A5,F11.6,A17)')
      &          'D0 = ', d0c,' keV (calculated)'
-            ELSE
-              WRITE(8,'(1x,A5,F11.6,A17)')
-     &          'D0 = ', D0_obs,' keV (calculated)'
-            ENDIF
-            if(sumtg.gt.0.d0) then
-              WRITE(8,'(1x,''Normalization factor = '',F7.3)')
-     &           tgexper/sumtg
-            else
-              WRITE(8,'(1x,
-     &        ''Calculated Tgamma = 0, no Normalization'')')
-            endif
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')') D0_obs
-            IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
-              IF(D0_obs.gt.0.d0 .and. d0c.gt.0.d0) then
-                TUNe(0, Nnuc) = tgexper/sumtg
-                WRITE(8 ,
+         ELSE
+            WRITE(8,'(1x,A5,F11.6,A17)')
+     &          'D0 = ', d0c,' keV (calculated)'
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')') d0c
+         ENDIF
+
+         if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
+            WRITE(8,'(1x,''Normalization factor = '',F7.3)')
+     &          tgexper/sumtg
+         else
+            WRITE(8,'(1x,
+     &        ''Calculated Tgamma = 0'',
+     &        '' or D_obs not available, no Normalization'')')
+         endif
+
+         IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
+            if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
+              TUNe(0, Nnuc) = tgexper/sumtg
+              WRITE(8 ,
      &         '(1x,''Gamma emission width normalized ''/
      &           1x,''internally by a factor '',F7.3)')
      &         TUNe(0, Nnuc)
-               WRITE(8,*)
-              ELSE
-                WRITE(8 ,
-     &       '(1x,''Gamma emission width is not normalized to Do'')')
-              ENDIF
+              WRITE(8,*)
             ELSE
-              IF(ABS(TUNe(0, Nnuc)-1.d0).LT.0.00001D+0) THEN
-                 WRITE(8 ,
+              WRITE(8 ,
      &       '(1x,''Gamma emission width is not normalized to Do'')')
-              ELSE
-                 WRITE(8,
+            ENDIF
+         ELSE
+            IF(ABS(TUNe(0, Nnuc)-1.d0).LT.0.00001D+0) THEN
+              WRITE(8 ,
+     &       '(1x,''Gamma emission width is not normalized to Do'')')
+            ELSE
+              WRITE(8,
      &         '(1x,''Gamma emission width normalized ''/
      &           1x,''by setting TUNE in input to '',F7.3)')
      &         TUNe(0, Nnuc)
-              ENDIF
             ENDIF
-            WRITE(8,*)
          ENDIF
+         WRITE(8,*)
       ENDIF
+
+      RETURN
       END
 C
 C
