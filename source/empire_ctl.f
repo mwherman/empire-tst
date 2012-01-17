@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2212 $
+Ccc   * $Rev: 2223 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-16 19:06:07 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Date: 2012-01-17 08:08:12 +0100 (Di, 17 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -775,7 +775,10 @@ C--- It is obtained from the following file.
      &      //'/resonances0.dat',STATUS = 'old')
           READ (47,'(///)') ! Skipping first 4 title lines
           DO i = 1, 296
-            READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60)
+C           READ (47,'(2i4,37x,2f6.2)', END = 60, ERR = 60)
+C           Changed to RIPL-3 file
+C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x,a4).
+            READ (47,'(i3,4x,i3,36x,2(f4.2,2x))', END = 60, ERR = 60)
      &                           nztmp, natmp, ss0tmp, ss0_unc
             IF (nztmp.NE.izz .OR. natmp.NE.iaa) CYCLE
             six(1) = ss0tmp
