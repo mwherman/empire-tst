@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
 C
@@ -768,3 +768,5 @@ C
          Pl(i) = ((2*i - 3)*X*Pl(i - 1) - (i - 2)*Pl(i - 2))/(i - 1)
       ENDDO
       END
+
+

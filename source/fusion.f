@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2213 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-16 19:08:35 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -592,10 +592,10 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
          ENDIF
          IF (maxlw.GT.NDLW) THEN
             WRITE (8,*)
-     &            ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
-            WRITE (8,*) ' FATAL: INCREASE NDLW IN dimension.h UP TO',
+     &            ' ERROR: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
+            WRITE (8,*) ' ERROR: INCREASE NDLW IN dimension.h UP TO',
      &                  maxlw + 1
-            WRITE (8,*) ' FATAL: AND RECOMPILE THE CODE'
+            WRITE (8,*) ' ERROR: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
 C        NLW = maxlw
@@ -1296,3 +1296,5 @@ C--------WINDOWS
          iwin = PIPE(ctmp)
       ENDIF
       END
+
+

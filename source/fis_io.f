@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -105,14 +105,14 @@ C-----FISBAR(Nnuc)= 0 Empire internal library
      &               INT(A(Nnuc)), ' IN INTERNAL LIBRARY (fisbar.dat)'
          WRITE (8,*)
      &              ' CHANGE FISBAR OPTION(NOW=0). EXECUTION TERMINATED'
-         WRITE (8,*) ' FATAL: File ../data/fisbar.dat missing'
+         WRITE (8,*) ' ERROR: File ../data/fisbar.dat missing'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
 
-C-----FISBAR(Nnuc)= 1 RIPL-2 "experimental" values for barrier heights;
+C-----FISBAR(Nnuc)= 1 RIPL "experimental" values for barrier heights;
 C-----widths from Lynn systematics and wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
-         OPEN (52,FILE = trim(EMPiredir)//'/RIPL-2/fission'
+         OPEN (52,FILE = trim(EMPiredir)//'/RIPL/fission'
      &      //'/fis-barrier-exp.dat',STATUS = 'OLD',ERR = 200)
          READ (52,*,END = 200)
          READ (52,*)
@@ -128,12 +128,12 @@ C-----widths from Lynn systematics and wells' parameters provided by code
          ENDIF
          CLOSE (52)
          GOTO 300
-  200    WRITE (8,*) ' NO RIPL-2 EXPERIMENTAL FISSION BARRIER FOR Z=',
-     &               INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL-2'
+  200    WRITE (8,*) ' NO RIPL EXPERIMENTAL FISSION BARRIER FOR Z=',
+     &               INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL'
          WRITE (8,*)
      &              ' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
          WRITE (8,*)
-     &     ' FATAL: File empire/RIPL-2/fission/fis-barrier-exp.dat may b
+     &     ' ERROR: File empire/RIPL/fission/fis-barrier-exp.dat may b
      &e missing'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
@@ -185,14 +185,14 @@ c-----                data/HFB-fisbar.dat (default)
   401    WRITE (8,*) ' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=',
      &               INT(A(Nnuc)), ' IN HFB-fisbar.dat'
          WRITE (8,*)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
-         WRITE (8,*)' FATAL: File ../data/HFB-fisbar.dat missing'
+         WRITE (8,*)' ERROR: File ../data/HFB-fisbar.dat missing'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
 c
 c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (filename,99900)iz
-99900    FORMAT ('/RIPL-2/fission/HFB2007/z',i3.3,'.tab')
+99900    FORMAT ('/RIPL/fission/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//trim(filename)
      &      ,STATUS = 'old',ERR = 460)
  410     read(52,*,END=460) izrr,iarr,npoints
@@ -397,7 +397,7 @@ c-----------odd-even
          Hcont(i)= H(1,i)
       ENDDO
 
-C-----h**2/2J from RIPL-2
+C-----h**2/2J from RIPL
       IF (NRHump.EQ.1) HJ(Nnuc,1) = 0.005
       IF (NRBar.EQ.2) THEN
          HJ(Nnuc,1) = 0.0050
@@ -434,7 +434,7 @@ C     IF (A(Nnuc).GT.236) BFF(1) = 2.
       IF (A(Nnuc)-Z(Nnuc).GE.144) BFF(1) = 2
       BFF(2) = 3
       BFF(3) = 3
-C-----shell corrections at saddles according to RIPL-2
+C-----shell corrections at saddles according to RIPL
       SHCfis(1) = 2.6
       IF (Z(Nnuc).GT.97.) SHCfis(1) = 2.6 - 0.1*(Z(Nnuc) - 97.)
       SHCfis(2) = 0.6 + 0.1*(Z(Nnuc) - 97.)
@@ -443,7 +443,7 @@ C-----shell corrections at saddles according to RIPL-2
      &    = 0.6 + 0.04*(A(Nnuc) - Z(Nnuc) - 143.)
       SHCfis(3) = SHCfis(2)
       DO ib = 1, NRHump
-C--------pairing at saddles according to RIPL-2
+C--------pairing at saddles according to RIPL
          DELtafis(ib) = 14./SQRT(A(Nnuc))
 
 C--------EMPIRE-3.0-dependence
@@ -1123,7 +1123,7 @@ C
       WRITE (80,'(a8,f2.0,a36)') ' FISMOD = ', FISmod(Nnuc)
 
       IF (FISbar(Nnuc).EQ.0.) cara1 = '  EMPIRE  internal library'
-      IF (FISbar(Nnuc).EQ.1.) cara1 = '  RIPL-2  (Exp.) values'
+      IF (FISbar(Nnuc).EQ.1.) cara1 = '  RIPL  (Exp.) values'
       IF (FISbar(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB parabolic barriers'
       IF (FISbar(Nnuc).EQ.3.) cara1 = '  RIPL-3  HFB Numerical barriers'
 
@@ -1336,3 +1336,5 @@ c         pause
 
 
       END
+
+

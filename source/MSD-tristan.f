@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2180 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -445,7 +445,7 @@ c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilss
       DATA anp/0.4899D0, -0.1236D0, 0.4686D0, 0.0741D0/
       DATA eqqx/80.0D0/
       IF(Nebins.GT.3*(NDEx+25))THEN
-      WRITE(8,*)' FATAL:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
+      WRITE(8,*)' ERROR:   INCREASE DIMENSIONS FOR RESPONSE FUNCTIONS
      & ETC. TO: ',NEBINX
       STOP
       ENDIF
@@ -3763,7 +3763,7 @@ C
           Z(IP)=0.
 23      CONTINUE
 24    CONTINUE
-      PAUSE '50 iterations should never happen'
+      WRITE(8,*) 'WARNING: 50 iterations should never happen'
       RETURN
       END
 

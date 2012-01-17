@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2183 $
-Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2012-01-08 16:06:42 +0100 (So, 08 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $ 
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 Ccc   * $Id$
             
 c     NOTE UNITS OPENED IN MODULES
@@ -143,9 +143,10 @@ C     Added to check if file is not empty
  780  OMPAR_RIPLF=.FALSE.
       OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
  895  CONTINUE
+      write(8,*) 'Trim result', trim(empiredir)
       OPEN (24,FILE=trim(empiredir)//'/data'
      * //'/level-densities-par.dat',STATUS='OLD')
-      OPEN (26,FILE=trim(empiredir)//'/RIPL-2/optical/om-data'
+      OPEN (26,FILE=trim(empiredir)//'/RIPL/optical/om-data'
      * //'/om-parameter-u.dat',STATUS='OLD')
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
 C     OPEN (UNIT = 41,FILE='DEGASINPUT',  STATUS = 'UNKNOWN')

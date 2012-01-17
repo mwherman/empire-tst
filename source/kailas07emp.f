@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       SUBROUTINE KUMAR_OMP(AMASS,AZ,EX,ELAB,RCC,Vlib,Rlib,Alib)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -167,3 +167,6 @@ C
      1          7x,f9.3,1x,f9.3,7x,f9.3,1x,f9.3,5x,F9.3)
       RETURN
       END
+
+
+

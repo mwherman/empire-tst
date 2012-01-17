@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1921 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-18 06:28:56 +0100 (Di, 18 Jän 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -1598,3 +1598,5 @@ C     CALL AUERST(1, 2, 0)
 99110 FORMAT (1X,/)
 99115 FORMAT (1X,12E11.4)
       END
+
+

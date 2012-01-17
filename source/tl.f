@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2131 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-10-11 02:17:40 +0200 (Di, 11 Okt 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -4326,10 +4326,10 @@ c     Calculate radius and diffuseness parameters
      *       + rco(i,j,10)*atar**(1./3.)
      *       + rco(i,j,11)*atar**(-1./3.)
 C--------------------------------------------------------------------
-C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     RCN, 08/2004, to handle new extension to the OMP RIPL format
      *       + rco(i,j,2)*el + rco(i,j,12)*el*el
       else
-C     RCN, 09/2004, to handle new extension to the OMP RIPL-2 format
+C     RCN, 09/2004, to handle new extension to the OMP RIPL format
         nn = int(rco(i,j,7))
         rlib(i)= ( abs(rco(i,j,1)) + rco(i,j,2)*atar ) *
      *           ( 1.d0 - ( rco(i,j,3) + rco(i,j,4)*atar ) * elf**nn/
@@ -4530,7 +4530,7 @@ c         if(modtyp.eq.6) goto 154  ! modtyp = 5 for dispersive potentials
 c         Analytical DOM integral
           DWV=DOM_INT_Wv(Ef,Ep,AAv,Bv,EEE,n,DerDWV)
 
-C         Numerical DOM integral (used in RIPL-2 released interface)  
+C         Numerical DOM integral (used in RIPL released interface)  
 C         WVE=WVf(AAv,Bv,Ep,Ef,EEE,n)
 C         ftmp1=2*DOM_int(Delta_WV,WVf,Ef,Ef+5.*Bv,150000.d0,EEE,0.d0)
 
@@ -4754,7 +4754,7 @@ c        Lambda_R
          b(1,j,14)  =  pot(1,j,17)
 c        V^0_R + V^A_R*(A-232)
          b(1,j,15)  =  pot(1,j,14) + pot(1,j,15)*atar
-c        To preserve compatibility with RIPL-2 Koning database
+c        To preserve compatibility with RIPL Koning database
 c        b(i,j,15) must be equal to 1. !!! for Koning OMP
          if((pot(1,j,14) + pot(1,j,15)*atar + pot(1,j,16)).eq.0.)
      >          b(1,j,15) = 1.d0
@@ -5358,3 +5358,5 @@ C
       DOM_INT = (resg1*hlgth1 + resg2*hlgth2 + corr)*(E - Ef)
      &          /(ACOS( - 1.D0))
       END
+
+

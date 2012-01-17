@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $ 
+Ccc   * $Rev: 2228 $ 
 Ccc   * $Author: mherman $ 
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 Ccc   * $Id$            
 
       INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7
@@ -10,7 +10,7 @@ C
 C-----Parameter statement
 C
 C-----Parameter statement
-C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
+C     RCN, 08/2004, to handle new extension to the OMP RIPL format
 C     PARAMETER(NDIM1 = 10, NDIM2 = 13, NDIM3 = 24, NDIM4 = 30,
 C    &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
 C     RCN, 08/2008, to handle new extension to the OMP RIPL-3 format

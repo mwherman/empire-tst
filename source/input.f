@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2226 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-17 19:54:08 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -493,7 +493,7 @@ C        Starting value of the number of angular points
 
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(8,*)
-     &        'FATAL: INCREASE NANgecis IN dimension.h UP TO ',NANgela
+     &        'ERROR: INCREASE NANgecis IN dimension.h UP TO ',NANgela
            STOP 'FATAL: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
@@ -508,7 +508,7 @@ C--------set angles for inelastic calculations
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN
-            WRITE (8,*) 'FATAL: Z > A, please correct input file'
+            WRITE (8,*) 'ERROR: Z > A, please correct input file'
             STOP 'FATAL: Z > A, please correct input file'
          ENDIF
 
@@ -967,7 +967,7 @@ C
 C--------check input for consistency
 C
          IF(NEXclusive.GT.NDExclus) THEN
-            WRITE(8,*)'FATAL: NEXclusive =',NEXclusive
+            WRITE(8,*)'ERROR: NEXclusive =',NEXclusive
             WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
             WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
             STOP 'INSUFFICIENT DIMENSION NDExclus'
@@ -1065,8 +1065,8 @@ C
          IF (DEGa.NE.0 .AND. AEJc(0).NE.1.D0) THEN
             WRITE (8,*) ' '
             WRITE (8,*)
-     &                 'FATAL: DEGAS allowed only for incident nucleons'
-            WRITE (8,*) 'FATAL: Execution STOPPED'
+     &                 'ERROR: DEGAS allowed only for incident nucleons'
+            WRITE (8,*) 'ERROR: Execution STOPPED'
             STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
 C--------------------------------------------------------------------------
@@ -1089,17 +1089,17 @@ C--------reset angles for inelastic calculations
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
-c            WRITE (8,*) 'FATAL: NDAng IN dimension.h MUST BE 19 or 37'
+c            WRITE (8,*) 'ERROR: NDAng IN dimension.h MUST BE 19 or 37'
 c            WRITE (8,*)
-c     &'FATAL: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+c     &'ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
 c            WRITE (8,*)
-c     &'FATAL: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+c     &'ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
 c            STOP 'FATAL: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
 c         ENDIF
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (8,*) ' '
-            WRITE (8,*) 'FATAL: HMS allowed only for incident nucleons'
-            WRITE (8,*) 'FATAL: and gammas -  Execution STOPPED'
+            WRITE (8,*) 'ERROR: HMS allowed only for incident nucleons'
+            WRITE (8,*) 'ERROR: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
          IF (DIRect.GT.0 .AND. INT(AEJc(0)).EQ.0) THEN
@@ -1436,7 +1436,7 @@ C
      &     EJMass(NDEJC) = AEJc(NDEJC) + XMAss_ej(NDEJC)/AMUmev         
 C    &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele + XMAss_ej(NDEJC))/AMUmev
 
-C--------READ shell corrections of RIPL-2/3
+C--------READ shell corrections of RIPL
          CALL READ_SHELL_CORR
 C--------Read number of reasonably known levels and level density parameter 'a'
          CALL READLDP
@@ -2090,7 +2090,7 @@ C-----Check if FITLEV option was run
       INQUIRE (FILE = ('FITLEV.PS'),EXIST = fexist)
 C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
       IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
-        OPEN (47,FILE = trim(empiredir)//'/RIPL-2/resonances'
+        OPEN (47,FILE = trim(empiredir)//'/RIPL/resonances'
      &      //'/resonances0.dat',STATUS = 'old',ERR = 65)
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
@@ -2115,7 +2115,7 @@ C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x
    60   CLOSE (47)
         GOTO 70
    65   WRITE (8,*) ' WARNING: ',trim(empiredir)//
-     &   '/RIPL-2/resonances/resonances0.dat file not found '
+     &   '/RIPL/resonances/resonances0.dat file not found '
         WRITE (8,*) 
 
      &   ' WARNING: Experimental D0 and gamma width are not available '
@@ -2182,7 +2182,7 @@ C-----set ground state *** done ***
 C-------constructing input and filenames
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
-        OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+        OPEN (13,FILE = trim(empiredir)//'/RIPL/levels/'//finp
      &      ,STATUS = 'OLD',ERR = 400)
       ELSE
         REWIND (13)
@@ -2196,7 +2196,7 @@ C-------constructing input and filenames
         GOTO 100
       ELSE
 C----------nmax is a number of levels that constitute a complete scheme as
-C----------estimated by Belgya for RIPL-2. We find it generally much too high.
+C----------estimated by Belgya for RIPL. We find it generally much too high.
 C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
 C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
 c       IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
@@ -2360,12 +2360,12 @@ C    &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
   300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
         IF(FIRst_ein) WRITE (8,
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local file (.lev). Default RIPL-2 levels will be
+     &  '' not found in local file (.lev). Default RIPL levels will be
      & used'')') ia, iz
         CLOSE(13)
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
-        OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+        OPEN (13,FILE = trim(empiredir)//'/RIPL/levels/'//finp
      &      ,STATUS = 'OLD',ERR = 400)
         CLOSE(14)
         OPEN (UNIT = 14, FILE='LEVELS.ADD')
@@ -2683,7 +2683,7 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ipu*
 Ccc   *                      P T L E V R E                               *
 Ccc   *                                                                  *
-Ccc   *  Reads from RIPL-2 OM-DEFORMATIONS.DAT energies of collective 2+ *
+Ccc   *  Reads from RIPL OM-DEFORMATIONS.DAT energies of collective 2+ *
 Ccc   *  and 3- states (Raman & Kibedi values used). If experimental     *
 Ccc   *  is not available, then it will try to find them out in the file *
 Ccc   *  file with discrete levels. In any case will take from this file *
@@ -2731,7 +2731,7 @@ C
 C-----Avoiding searching of collective levels of the incident particle
       IF (Ia.EQ.AEJc(0) .and. Ia.le.4) GOTO 300
 C-----First try to find 2+ and 3- states in the RIPL om-deformations file
-      OPEN (47,FILE = trim(empiredir)//'/RIPL-2/optical/om-data'
+      OPEN (47,FILE = trim(empiredir)//'/RIPL/optical/om-data'
      &      //'/om-deformations.dat',STATUS = 'old',ERR = 100)
       READ (47,'(///)')
                        ! Skipping first 4 title lines
@@ -2746,7 +2746,7 @@ C-----First try to find 2+ and 3- states in the RIPL om-deformations file
       ENDDO
       GOTO 200
   100 WRITE (8,*) ' WARNING: ',trim(empiredir)//
-     &   '/RIPL-2/optical/om-data/om-deformations.dat not found '
+     &   '/RIPL/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
      &'E(2+) and E(3-) will be selected from the available target level
      &scheme'
@@ -2757,7 +2757,7 @@ C-----If missing in the RIPL om-deformations file try discrete levels file
 C-----constructing input and filenames
   300 WRITE (ctmp3,'(I3.3)') Iz
       finp = 'z'//ctmp3//'.dat'
-      OPEN (32,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+      OPEN (32,FILE = trim(empiredir)//'/RIPL/levels/'//finp
      &      ,STATUS = 'OLD', ERR = 500)
   400 READ (32,'(A5,6I5,2f12.6)',END = 500) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2
@@ -3090,12 +3090,12 @@ C-----------Print some final input options
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(8,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(8,
-     &         '('' GDR parameters from Plujko systematics(RIPL-2)'')')
+     &         '('' GDR parameters from Plujko systematics(RIPL)'')')
             IF(Key_gdrgfl.EQ.1)WRITE(8,
-     &         '('' GDR parameters from RIPL-2/Exp.data+'',
+     &         '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Plujko systematics'')')
             IF(Key_gdrgfl.EQ.2)WRITE(8,
-     &          '('' GDR parameters from RIPL-2/Exp.data+'',
+     &          '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Goriely calc.'')')
 C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
@@ -3135,12 +3135,12 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
-     &         '('' GDR parameters from RIPL-2/Plujko systematics'')')
+     &         '('' GDR parameters from RIPL/Plujko systematics'')')
             IF(Key_gdrgfl.EQ.1)WRITE(12,
-     &         '('' GDR parameters from RIPL-2/Exp.data+'',
+     &         '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Plujko systematics'')')
             IF(Key_gdrgfl.EQ.2)WRITE(12,
-     &          '('' GDR parameters from RIPL-2/Exp.data+'',
+     &          '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Goriely calc.'')')
 C-----      print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(12,
@@ -3314,7 +3314,7 @@ C
              IF (val.LT.0) THEN
                  val = -val
              ENDIF
-             ki = 26 ! file id for 'om-parameter-u.dat' in RIPL-2
+             ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
              ipoten = INT(val)
              CALL FINDPOT(ki,ieof,ipoten)
              IF (ieof.NE.0) THEN
@@ -3491,12 +3491,12 @@ C-----
             GOTO 100
          ENDIF
 C        Key_GDRGFL = 0 and Key_shape =0 -  GDR parameters from Messina systematics
-C        Key_GDRGFL > = 0 and and Key_shape > 0 -  GDR parameters of RIPL-2 introduced;
+C        Key_GDRGFL > = 0 and and Key_shape > 0 -  GDR parameters of RIPL introduced;
 C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f;
 C                          experimental values or systematics of GDR parameters are set.
 C        Key_GDRGFL = 2 -  GDR parameters and other data determined by gdrgfldata.f;
 C                          if experimental values of GDR parameters not found and Key_GDRGFL=2
-C                          they are going to be retrieved from the RIPL-2 Goriely theoretical
+C                          they are going to be retrieved from the RIPL Goriely theoretical
 C                          values and then from systematics.
 C
 C--------input MAXmult - maximal value (=< 10) of gamma-ray multipolarity for GSA
@@ -4972,7 +4972,7 @@ C-----
             IF (val.LT.0) THEN
                 val = -val
             ENDIF
-            ki = 26 ! file id for 'om-parameter-u.dat' in RIPL-2
+            ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
             ipoten = INT(val)
 C--------------Searching in the RIPL database for i1 catalog number
             CALL FINDPOT(ki,ieof,ipoten)
@@ -6667,7 +6667,7 @@ C-----
      &          name
       GOTO 100
   200 WRITE (8,
-     &'('' FATAL: INVALID FORMAT in KEY: '',A6,
+     &'('' ERROR: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
       END
@@ -6736,7 +6736,7 @@ Ccc   *                                                         class:iou*
 Ccc   *                         R E A D N I X                            *
 Ccc   *                                                                  *
 Ccc   *     Reads nuclear deformations masses and shell-corrections      *
-Ccc   *     from the RIPL-2 mass file mass-frdm95.dat                    *
+Ccc   *     from the RIPL mass file mass-frdm95.dat                    *
 Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
@@ -6747,11 +6747,11 @@ Ccc   *                                                                  *
 Ccc   * author: M.Herman & R.Sturiale                                    *
 Ccc   * date:   27.Sep.1996                                              *
 Ccc   * revision:1    by: R.Capote               on:09.2004              *
-Ccc   * RIPL-2 database used                                             *
+Ccc   * RIPL database used                                             *
 Ccc   ********************************************************************
 Ccc
       OPEN (UNIT = 27,STATUS = 'OLD',
-     &      FILE = trim(empiredir)//'/RIPL-2/masses/mass-frdm95.dat'
+     &      FILE = trim(empiredir)//'/RIPL/masses/mass-frdm95.dat'
      &      ,ERR = 300)
 C-----Skipping header lines
       READ (27,*,END = 300)
@@ -6883,9 +6883,9 @@ C-----Fermi energies calculated for all nuclei and projectile combinations
          ENDDO
       ENDDO
       RETURN
-  300 WRITE (8,*) 'FATAL: File '//
-     &  trim(empiredir)//'/RIPL-2/masses/mass-frdm95.dat missing'  
-      STOP 'FATAL: File ../RIPL-2/masses/mass-frdm95.dat missing'
+  300 WRITE (8,*) 'ERROR: File '//
+     &  trim(empiredir)//'/RIPL/masses/mass-frdm95.dat missing'  
+      STOP 'FATAL: File ../RIPL/masses/mass-frdm95.dat missing'
       END
 C
 C
@@ -6943,7 +6943,7 @@ C-----Set EGSM normalization factors for each Z
       ENDDO
       IF (ADIv.EQ.0.0D0) THEN
          OPEN(31, FILE= trim(empiredir)//
-     &   '/RIPL-2/densities/total/level-densities-egsm-norm.dat',
+     &   '/RIPL/densities/total/level-densities-egsm-norm.dat',
      &   STATUS='OLD')
          READ (31,'(///)')
    90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
@@ -6980,7 +6980,7 @@ C-----Set EGSM normalization factors for each Z
       ENDIF
 C
 C     reading from the RIPL level-densities-par.dat file 
-C       EGSM[RIPL-3], G&C[old EMPIRE] and GSM[RIPL-2]
+C       EGSM[RIPL-3], G&C[old EMPIRE] and GSM[RIPL]
 C
 C     Skipping header
 C
@@ -7020,7 +7020,7 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   asys = atil*(1.0 + SHC(nnuc)
      &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
                   atiln = arogc/asys
-C--------------EMPIRE specific (EGSM) with RIPL-2/3 shell corrections
+C--------------EMPIRE specific (EGSM) with RIPL/3 shell corrections
 C              ELSEIF (ADIv.EQ.0.0D0) THEN
                ELSE
                   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -7822,7 +7822,7 @@ C
       beta2 = 0.D0
       beta3 = 0.D0
       OPEN (84,FILE = trim(empiredir)//
-     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+     &      '/RIPL/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
       READ (84,'(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
@@ -7838,7 +7838,7 @@ c            CCFUS deformations
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
@@ -7850,7 +7850,7 @@ c            CCFUS deformations
              FLAm(iccfus) = 3
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
@@ -7864,7 +7864,7 @@ c            CCFUS deformations
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
-     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+     &        'E(3-) level not found in Kibedi database (RIPL)'
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
@@ -7875,7 +7875,7 @@ c            CCFUS deformations
       beta2 = 0.D0
       beta3 = 0.D0
       OPEN (84,FILE = trim(empiredir)//
-     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+     &      '/RIPL/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
       READ (84,'(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
@@ -7891,7 +7891,7 @@ c            CCFUS deformations
              FLAm(iccfus) = -2
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
@@ -7903,7 +7903,7 @@ c            CCFUS deformations
              FLAm(iccfus) = -3
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL-2):', 
+     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
@@ -7917,13 +7917,13 @@ c            CCFUS deformations
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
          WRITE (8,*) ' WARNING: ',
-     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+     &        'E(3-) level not found in Kibedi database (RIPL)'
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
       GOTO 350
   200 WRITE (8,*) ' WARNING: ',trim(empiredir)//
-     &   '/RIPL-2/optical/om-data/om-deformations.dat not found '
+     &   '/RIPL/optical/om-data/om-deformations.dat not found '
       WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ierr = 2
@@ -8365,7 +8365,7 @@ C
       IF (.NOT.FILevel) THEN
          WRITE (ctmp3,'(I3.3)') iz
          finp = 'z'//ctmp3//'.dat'
-         OPEN (13,FILE = trim(empiredir)//'/RIPL-2/levels/'//finp
+         OPEN (13,FILE = trim(empiredir)//'/RIPL/levels/'//finp
      &      ,STATUS = 'OLD',ERR = 600)
       ELSE
          REWIND (13)
@@ -8415,7 +8415,7 @@ C-----levels for target NNUC copied to file TARGET.lev
       beta2 = 0.D0
       beta3 = 0.D0
       OPEN (84,FILE = trim(empiredir)//
-     &      '/RIPL-2/optical/om-data/om-deformations.dat',
+     &      '/RIPL/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
       READ (84,'(///)')    ! Skipping first 4 title lines
       DO i = 1, 1700
@@ -8433,14 +8433,14 @@ C-----levels for target NNUC copied to file TARGET.lev
       ENDDO
       GOTO 300
   200 WRITE (8,*) ' WARNING: ',trim(empiredir)//
-     &   '/RIPL-2/optical/om-data/om-deformations.dat not found '
+     &   '/RIPL/optical/om-data/om-deformations.dat not found '
 C     WRITE (8,*) ' WARNING: ',
 C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       GOTO 400
   300 CLOSE (84)
       IF (beta2.NE.0.D0 .OR. beta3.NE.0.D0) THEN
          WRITE (8,'(/1x,A34/1x,A11,F7.3,A13,F7.4)')
-     &           'EXPERIMENTAL DEFORMATION (RIPL-2):', 'BETA (2+) =',
+     &           'EXPERIMENTAL DEFORMATION (RIPL):', 'BETA (2+) =',
      &          beta2, '  BETA (3-) =', beta3
          IF (DEFormed) THEN
             WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
@@ -8449,7 +8449,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ENDIF
       IF (beta2.EQ.0.D0) THEN
          WRITE (8,*) ' WARNING: ',
-     &    'E(2+) level not found in Raman 2001 database (RIPL-2)'
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
          IF(odd) then
             WRITE (8,*) ' WARNING: Odd nucleus, ',
      &            'FRDM deformation will be used for the gs band'
@@ -8463,7 +8463,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          WRITE (8,*) ' WARNING: ',
-     &        'E(3-) level not found in Kibedi database (RIPL-2)'
+     &        'E(3-) level not found in Kibedi database (RIPL)'
          WRITE (8,*) ' WARNING: ',
      &            'Default dynamical deformations 0.05(3-) will be used'
          beta3 = 0.05
@@ -8508,8 +8508,8 @@ C
          ENDIF
          IF (.NOT.(DEFormed)) THEN
 C-----------spherical even-even nuclei follow
-C-----------for spherical target taking dynamical deformation equal to RIPL-2 values.
-C-----------If RIPL-2 deformation file not found OR target nucleus not found in
+C-----------for spherical target taking dynamical deformation equal to RIPL values.
+C-----------If RIPL deformation file not found OR target nucleus not found in
 C-----------the database we take FRDM deformations
             IF (ilv.EQ.1) THEN
 C--------------ground state deformation for spherical nucleus is 0.0
@@ -9263,7 +9263,7 @@ C
       KAA = ka
       IF (KEYload.NE.1) THEN
          KEYload = 1
-         OPEN (81,FILE = trim(empiredir)//'/RIPL-2/gamma'
+         OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
      &      //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
          READ (81,'(///)') ! Skipping first 4 title lines
          DO i = 1, 270
@@ -9272,7 +9272,7 @@ C
      &            HE2(i), HCS2(i), HGW2(i)
          ENDDO
    50    CLOSE (81)
-  100    OPEN (81,FILE = trim(empiredir)//'/RIPL-2/gamma/'
+  100    OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma/'
      &      //'gdr-parameters-theor.dat',STATUS = 'old',ERR = 500)
          READ (81,'(///)') ! Skipping first 4 title lines
          DO i = 1, MAXGDR
@@ -9291,7 +9291,7 @@ C
      &            NANa(i), HALpha2(i)
          ENDDO
   250    CLOSE (82)
-  300    OPEN (84,FILE = trim(empiredir)//'/RIPL-2/optical/om-data'
+  300    OPEN (84,FILE = trim(empiredir)//'/RIPL/optical/om-data'
      &      //'/om-deformations.dat',STATUS = 'old',ERR = 600)
          READ (84,'(///)') ! Skipping first 4 title lines
          NUMram = 0
@@ -9306,16 +9306,16 @@ C-----------Selecting only 2+ states
             HENergygfl(NUMram) = etmp
             HBEtagfl(NUMram) = btmp
   350    ENDDO
-         WRITE (8,*) ' RIPL-2 GDR parameters used'
+         WRITE (8,*) ' RIPL GDR parameters used'
          GOTO 700
   400    CLOSE (84)
   450    WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
-     &                      'empire/RIPL-2/gamma/gdr-parameters-exp.dat'
+     &                      'empire/RIPL/gamma/gdr-parameters-exp.dat'
      &                          ,
-     &                     ' not found, theoretical RIPL-2 will be used'
+     &                     ' not found, theoretical RIPL will be used'
          GOTO 100
   500    WRITE (8,'(1x,A14,A43,A42)') ' WARNING: File ',
-     &                    'empire/RIPL-2/gamma/gdr-parameters-theor.dat'
+     &                    'empire/RIPL/gamma/gdr-parameters-theor.dat'
      &                        ,
      &                     ' not found, default GDR values will be used'
          GOTO 200
@@ -9325,7 +9325,7 @@ C-----------Selecting only 2+ states
      &             ' not found, default deformation values will be used'
          GOTO 300
   600    WRITE (8,*) ' WARNING: ',trim(empiredir)//
-     &   '/RIPL-2/optical/om-data/om-deformations.dat',
+     &   '/RIPL/optical/om-data/om-deformations.dat',
      &   ' not found, default dynamical deformation values used'
       ENDIF
   700 n = ka - kz
@@ -9355,7 +9355,7 @@ C-----Plujko_new-2005
 
 C-----Plujko_new-2005
 C     If experimental values of GDR parameters not found and Key_GDRGFL=2
-C     they are going to be retrieved from the RIPL-2 Goriely theoretical
+C     they are going to be retrieved from the RIPL Goriely theoretical
 C     values. Note that in accordance with Goriely data-file all nuclei are
 C     ELONGATED!?
       IF (Key_GDRGFL.EQ.2)THEN
@@ -9437,7 +9437,7 @@ C--------------parameters of the GFL model[BETagfl2=beta; ENErgygfl=E2+(MeV)]
                BETagfl2 = betagfl**2
 C--------------energygfl = henergygfl(i)*0.001
                energygfl = HENergygfl(i)
-C--------------RIPL-2 energies in MeV, RCN 06/2004
+C--------------RIPL energies in MeV, RCN 06/2004
                S2Plusgfl = BETagfl2*energygfl
 C--------------Plujko_new-2005
                RETURN
@@ -9663,7 +9663,7 @@ Ccc
       IF(INT(Energy/DE+1).LT.Limit) RETURN
    10 NEX(1) = NEX(1) - 1
       IF(NEX(1).EQ.1) THEN
-         WRITE(8,*) 'FATAL ERROR DEFINING ENERGY STEP'
+         WRITE(8,*) 'ERROR DEFINING ENERGY STEP'
          WRITE(8,*) 'REPORT TO mwherman@bnl.gov      '
          STOP ' FATAL ERROR DEFINING ENERGY STEP'
       ENDIF
@@ -9672,3 +9672,6 @@ Ccc
       WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
       RETURN
       END
+
+
+

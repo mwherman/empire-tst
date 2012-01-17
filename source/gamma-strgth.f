@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -116,7 +116,7 @@ C-------Plujko_new-2005
         GW2 = GDRpar(5, Nnuc)
         CS2 = GDRpar(6, Nnuc)
       ELSE
-C-------GDR parameters according to RIPL-2
+C-------GDR parameters according to RIPL
         CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
 C       Transferring to EMPIRE arrays 
         IF(GDRpar(1, Nnuc).EQ.0.0D0)GDRpar(1, Nnuc) = EG1
@@ -508,3 +508,6 @@ C  Then calculate the photoabsorption cross section
          SIGQD = Lqdfac*lqd0*Ztar*(Atar - Ztar)*sigmad*fermifac/Atar
       ENDIF
       END
+
+
+

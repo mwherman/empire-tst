@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2155 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-11-07 01:12:56 +0100 (Mo, 07 Nov 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2155 $
+C CVS Version Management $Revision: 2228 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -1964,7 +1964,7 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  ddhms version: $Revision: 2155 $')
+99005 FORMAT ('  ddhms version: $Revision: 2228 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $')
 C
@@ -6086,3 +6086,5 @@ C  nk must be odd and nph must even (Simpson)
       ENDDO
       QDPH = am*dsigkn/(pn*pp)
       END
+
+

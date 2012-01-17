@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2214 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-16 19:10:00 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1936,11 +1936,4 @@ C    &             (1.d0 + 2.d0 * dSQRT(dmom) * COS(arg1) + dmom)
       ENDDO
       RETURN
       END
-
-
-
-
-
-
-
 

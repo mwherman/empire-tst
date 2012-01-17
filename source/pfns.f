@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2196 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-11 16:37:52 +0100 (Mi, 11 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
@@ -759,6 +759,7 @@ C     print *, ' N=',nn,' Z=',nz,' B.E.=',e,' MassExcess=', exc
       
       SUBROUTINE MASS10(nx,nz,E)     ! Duflo-Zuker fevrier 1996
 c Calculation of binding energy E (nx neutrons,nz protons)
+      REAL*8 E
       dimension b(10),dyda(10),op(2),n2(2),dx(2),qx(2),os(2),
      &          onp(0:8,2,2),oei(2),dei(2),nn(2),noc(18,2),pp(2),y(2)
       data b/0.7043,17.7418,16.2562,37.5562,53.9017,0.4711,2.1307,
@@ -1391,3 +1392,6 @@ C
       Abserr = ABS((resk1 - resg1)*hlgth1)
 C     RETURN
       END
+
+
+

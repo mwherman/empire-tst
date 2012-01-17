@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -3212,3 +3212,5 @@ C
       RAC = SQRT(fn/FLOAT(IA + 1))
       IF (kase.EQ.3) RAC = -RAC
       END
+
+

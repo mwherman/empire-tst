@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1976 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-01-31 01:53:35 +0100 (Mo, 31 Jän 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -294,7 +294,7 @@ C              md    deuteron mass 2.013 553 amu
 C              mt    triton mass   3.015 501 amu 
 C              m3He  3He mass      3.014 932 amu 
 
-C              me    electron mass 5.485 799�10-4 amu 
+C              me    electron mass 5.485 79910-4 amu 
 
 C           ff1 = (2*Sin+1)*redmass
             IF (ao.EQ.1 .AND. zo.EQ.0) ff1 = 2.0173*ar/(ar + 1.0087) ! n
@@ -1191,7 +1191,7 @@ C-----ALPHA PARTICLES (M=4)
 
       REAL*8 FUNCTION DENSW(G,D,P,H,E)
 C
-C  RIPL-2 FORMULATION
+C  RIPL FORMULATION
 C
 C  G - LEVEL DENSITY PARAMETER
 C  D - PAIRING CORRECTION
@@ -1227,7 +1227,7 @@ C
       jmax = H
       IF(VV.LE.0.d0) jmax=0
 C
-C     Following RIPL-2 TECDOC (LD chapter)
+C     Following RIPL TECDOC (LD chapter)
 C
       a = .5D0*(P*P + H*H)
       sum = 0.d0
@@ -1245,7 +1245,7 @@ C       Changed Sept. 2010
 
       REAL*8 FUNCTION DENSW1(G,D,P,H,E)
 C
-C  RIPL-2 FORMULATION
+C  RIPL FORMULATION
 C
 C  G - LEVEL DENSITY PARAMETER
 C  D - PAIRING CORRECTION
@@ -1326,3 +1326,6 @@ C        SGAM = GAMMA ABSORPTION CROSS SECTION in mb
          SGAM = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
       ENDIF
       END
+
+
+

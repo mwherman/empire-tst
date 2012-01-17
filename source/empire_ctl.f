@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2223 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-17 08:08:12 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -768,10 +768,10 @@ C--- function. MF=3, MT=0 is used to specify it internally.
 
 C--- It is obtained from the following file.
         INQUIRE(
-     &   FILE=trim(empiredir)//'/RIPL-2/resonances/resonances0.dat',
+     &   FILE=trim(empiredir)//'/RIPL/resonances/resonances0.dat',
      &                                                   EXIST=fexist)
         IF(fexist .AND. iaa.NE.0) THEN
-          OPEN (47,FILE=trim(empiredir)//'/RIPL-2/resonances'
+          OPEN (47,FILE=trim(empiredir)//'/RIPL/resonances'
      &      //'/resonances0.dat',STATUS = 'old')
           READ (47,'(///)') ! Skipping first 4 title lines
           DO i = 1, 296
@@ -2270,7 +2270,7 @@ C-----------Relative sensitivity (per variation interval)
       WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
       GOTO 100 !Parameter done, return and get another parameter to vary
   200 WRITE (8,
-     &'('' FATAL: INVALID FORMAT in KEY: '',A6,
+     &'('' ERROR: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
 C-----Restore standard input
@@ -2295,3 +2295,5 @@ C-----Restore standard input
       ENDIF
       return
       end
+
+

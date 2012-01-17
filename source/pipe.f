@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2016 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-05-01 02:07:18 +0200 (So, 01 Mai 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C/*                                                    */
 C/* Subroutine to execute command line by FORTRAN code */
 C/* FORTRAN declaration:                               */
@@ -21,3 +21,6 @@ C
       CALL SYSTEM(STRINGP)
       RETURN
       END
+
+
+

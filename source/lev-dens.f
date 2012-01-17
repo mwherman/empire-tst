@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-17 08:07:14 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -182,7 +182,7 @@ C Local variables
 C
       REAL*8 ac, bsq, cigor, momort, mompar, stab, t, u
 
-c     REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
+c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
       LOGICAL bcs
       REAL*8 FSHELL, ROBCS, RODEF
       INTEGER i, ia, iz,egsm,lazy
@@ -190,7 +190,7 @@ c     REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
 
       bcs = .TRUE.
 c-----GSM (egsm=0) and EGSM (egsm=1)
-      egsm=0
+      egsm=1
       lazy=0
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
@@ -358,6 +358,7 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
 
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
+      egsm=0
 c----
       RODEF = 0.D0
       T = DSQRT(E/Ac)
@@ -388,7 +389,7 @@ c-----EGSM
       ENDIF
 
       IF (Ac.EQ.0.0D0) THEN
-         WRITE (8,'('' FATAL: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
+         WRITE (8,'(''ERROR: LEVEL DENS. PARAMETER a=0 IN RODEF'')')
          STOP
       ENDIF
       seff = 1.0/Mompar - 1.0/Momort
@@ -1455,8 +1456,8 @@ c            GOTO 500 !????
 
       IF (igna.NE.0D0) THEN
          DO i = 1, 10  
-C           write(*,*) '***',a(nnuc),z(nnuc),ux
-C           write(*,*) am, 6/t, atil
+C	      write(*,*) '***',a(nnuc),z(nnuc),ux
+C	      write(*,*) am, 6/t, atil
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
             am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
          ENDDO
@@ -1593,7 +1594,7 @@ Ccc   ********************************************************************
 Ccc   *                                                          class:au*
 Ccc   *             R E A D _ S H E L L _ C O R R                        *
 Ccc   *                                                                  *
-Ccc   * Reads MS Shell Corrections from RIPL-2                           *
+Ccc   * Reads MS Shell Corrections from RIPL                           *
 Ccc   *                                                                  *
 Ccc   * input: none (implicit - all considered nuclei)                   *
 Ccc   *                                                                  *
@@ -1613,7 +1614,7 @@ C
       CHARACTER*2 dum
 
 C-----Reading MS shell corrections and deformation energies
-      OPEN(11,FILE=trim(empiredir)//'/RIPL-2/densities/shellcor-ms.dat',
+      OPEN(11,FILE=trim(empiredir)//'/RIPL/densities/shellcor-ms.dat',
      &    STATUS='old')
 C-----Skipping header lines
       READ(11,*)
@@ -1714,7 +1715,7 @@ C
       ENDDO
       WRITE (filename,99005) iz
 
-99005 FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
+99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
       INQUIRE(file = trim(empiredir)//filename, exist = fexist)
       IF(.not.fexist) THEN
@@ -1772,7 +1773,7 @@ C       Corrections are read only if they are not given in the input,
 C       otherwise input values are taken
 C
         WRITE (filename,99007) iz
-99007   FORMAT ('/RIPL-2/densities/total/level-densities-hfb/z',i3.3,
+99007   FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
         INQUIRE(file = trim(empiredir)//filename, exist = fexist)
         IF(fexist) then
@@ -2173,13 +2174,17 @@ C-----------dependent factor
 
          IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)* RORed
+! --------The next two lines look like a mistake or some  left over trial
+! --------Mihaela please check.     
+!            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
+!     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &          YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
+     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
             IF (i.EQ.1) t = SQRT(u/ac)
          ENDIF
 
@@ -2381,7 +2386,7 @@ C
 
       WRITE (filename,99006) ib, iz
 99006 FORMAT
-     & ('/RIPL-2/fission/leveldensities/Max',i1,'/z',i3.3)
+     & ('/RIPL/fission/leveldensities/Max',i1,'/z',i3.3)
       INQUIRE(file = trim(empiredir)//filename, exist = fexist)
       IF(.NOT.fexist) THEN
         WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
@@ -2807,10 +2812,10 @@ C Dummy arguments
       expmax=700.
       Bf=0.d0
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-
+      egsm=1
       RODEFF = 0.D0
       Yrast=0.d0 
-      egsm=0
+      
       ro =RODEF(A,E,Ac,Aj,Mompar,Momort,T,
      &                        Yrast,Ss,Bf,Argred,Expmax,def2,egsm)
       e1 = E - Yrast
@@ -2852,7 +2857,7 @@ C-----rot_K
       rot_K  = 1.0
       IF(egsm.eq.0)rot_K  = momo*t
 C-----rot_Q
-      dmphalf = 120.d0*A**0.333*def2**2         !according to RIPL-2
+      dmphalf = 120.d0*A**0.333*def2**2         !according to RIPL
       dmpdiff =1400.*A**(-0.666)*def2**2
       Qr = 1./(1. + EXP((-dmphalf/dmpdiff)))
      &     - 1./(1. + EXP((e1-dmphalf)/dmpdiff))
@@ -2866,7 +2871,7 @@ Cccc
 Cccc  ********************************************************************
 Cccc  *                    R O G S M_sys                                 *
 Cccc  *                                                                  *
-Cccc  * GSM level density systematics  from RIPL-2             .         *
+Cccc  * GSM level density systematics  from RIPL             .         *
 Cccc  *                                                                  *
 Cccc  ********************************************************************
       INCLUDE 'dimension.h'
@@ -2882,7 +2887,7 @@ C Local variables
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
 
-      OPEN(23,FILE=trim(empiredir)//'/RIPL-2/densities/total/'//
+      OPEN(23,FILE=trim(empiredir)//'/RIPL/densities/total/'//
      &'level-densities-gsm-RIPL2.dat',  STATUS='old')
       READ(23,*)
       READ(23,*)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2206 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-15 21:17:44 +0100 (So, 15 Jän 2012) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
       SUBROUTINE CCFUS(Stl,Rkey)
 C
@@ -401,3 +401,5 @@ C
       Dur = -Ur/arg1/A0R
       Ddur = Dur*(1. - 2./arg1)/A0R
       END
+
+

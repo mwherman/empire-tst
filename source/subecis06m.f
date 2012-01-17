@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2173 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2011-12-21 15:08:51 +0100 (Mi, 21 Dez 2011) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -23916,3 +23916,5 @@ C ERROR CODE.                                                           FIT2-180
    29 IR=-1                                                             FIT2-181
    30 RETURN                                                            FIT2-182
       END                                                               FIT2-183
+
+

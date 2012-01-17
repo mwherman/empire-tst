@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2152 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2011-11-05 19:44:06 +0100 (Sa, 05 Nov 2011) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
             
       SUBROUTINE EMPIREDEGAS
@@ -3514,3 +3514,6 @@ C-----Analog of  Eq. (17) of the Report for E2
       IF (j1.LE.24.5) GOTO 100
       X22 = a*sum*(2*J + 1.)/(2*S + 1.)
 99999 END
+
+
+

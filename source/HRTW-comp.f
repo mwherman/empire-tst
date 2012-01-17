@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2225 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-17 08:14:49 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2228 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -1484,3 +1484,5 @@ C-----channel spin min and max
       ENDDO
       Ich = Ich - 1
       END
+
+

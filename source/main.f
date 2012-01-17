@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2210 $
+Ccc   * $Rev: 2228 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-16 02:47:24 +0100 (Mo, 16 Jän 2012) $
+Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3715,7 +3715,7 @@ C
           NANGela=NDAng
           IF(NANgela.GT.NDAngecis) THEN
           WRITE(8,*)
-     &         'FATAL: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
+     &        'ERROR: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
        ENDIF
@@ -3771,8 +3771,8 @@ C--------Saving random seeds
       ENDIF
       IF(EIN.LT.epre) THEN
          WRITE(8,*) EIN,epre
-         WRITE(8,*) 'FATAL: INPUT ENERGIES OUT OF ORDER !!'
-         WRITE(8,*) 'FATAL: CHECK YOUR INPUT FILE'
+         WRITE(8,*) 'ERROR: INPUT ENERGIES OUT OF ORDER !!'
+         WRITE(8,*) 'ERROR: CHECK YOUR INPUT FILE'
          PAUSE 'FATAL: INPUT ENERGIES OUT OF ORDER !!'
          STOP
       ENDIF
@@ -3797,7 +3797,7 @@ C         NDAng   = 91
 C       ENDIF
 C       IF(NANgela.GT.NDAngecis) THEN
 C         WRITE(8,*)
-C    &        'FATAL: increase NDAngecis in dimension.h up to ',NANgela
+C    &        'ERROR: increase NDAngecis in dimension.h up to ',NANgela
 C        STOP 'FATAL: increase NDAngecis in dimension.h'
 C       ENDIF
 C-------Set angles for inelastic calculations
@@ -4277,3 +4277,6 @@ C
          ENDDO
       ENDIF
       END
+
+
+
