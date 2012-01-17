@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2224 $
+Ccc   * $Rev: 2226 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-17 08:10:59 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-17 19:54:08 +0100 (Di, 17 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -987,7 +987,7 @@ C
             ELSEIF(ELAred.NE.1) THEN
                WRITE (8,*) 'WARNING: TOTRED ignored as both'
                WRITE (8,*) 'WARNING: TOTRED and ELARED are in the INPUT'
-	      ENDIF
+            ENDIF
          ENDIF
 
          WRITE (8,*)
@@ -2095,9 +2095,13 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
 C         READ (47,'(2i4,  17x,2(e9.2,2x),2(f4.2,2x),2(F5.1,1x))',
+
 C           Changed to RIPL-3 file
+
 C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x,a4).
+
           READ (47,'(i3,4x,i3,15x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x))',
+
      &     END = 60, ERR = 60) nztmp, natmp,
      &         dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
           IF (nztmp.NE.Iz .OR. natmp.NE.Ia) CYCLE
@@ -2113,6 +2117,7 @@ C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x
    65   WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL-2/resonances/resonances0.dat file not found '
         WRITE (8,*) 
+
      &   ' WARNING: Experimental D0 and gamma width are not available '
    70   CONTINUE
       ENDIF
@@ -2986,7 +2991,9 @@ C     GOTO 10
       endif
       WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |    Sao Jose dos Campos   |'
-      WRITE (8,*)'                       |     Brazil, Dec 2011     |'
+      WRITE (8,*)'                       |     Brazil, May 2011     |'
+      WRITE (8,*)'                       |    Upton, New York       |'
+      WRITE (8,*)'                       |      USA, Jan 2012       |'
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
@@ -6990,6 +6997,7 @@ C               (2I4,1x,a2,f4.1,1x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))
 C
 C           Taking the default number of discrete levels from the EMPIRE file  
 C                              ../data/level-density-par.dat
+
 C           NLV(nnuc)   = MIN(NDLV,nlevc)
 C           NCOmp(nnuc) = MIN(NDLV,nlevc)
 C
@@ -7043,6 +7051,7 @@ C--------------Print resulting level density parameters
                   WRITE (8,*) ' '
                   WRITE(8,'(1X)')
                   WRITE(8,
+
      &              '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
      &              ''ext. nor. a_final'')')
                   IF (ADIv.EQ.0.0D0)
@@ -8274,10 +8283,10 @@ C
          WRITE(12,*) ' '
          CLOSE (32)
 
-	   icoupled = 0 
+         icoupled = 0 
          DO i = 1,ND_nlv
           if(ICOllev(i).LT.LEVcc) icoupled = icoupled + 1
-	   ENDDO
+         ENDDO
          write(8,*)
          write(8,*)
      >       '----------------------------------------------------'
