@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2238 $
+Ccc   * $Rev: 2239 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 22:04:44 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 22:23:15 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1708,8 +1708,9 @@ C
      &       'Energy step in calculations ',DE*1000.d0,' keV'
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
-      WRITE(8,*)'WARNING: NDEX in dimension.h is ',NDEX, 'recommended',
-     &' value is', 2*NEXreq     
+	IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
+     & 'WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+     & ' value is ', 2*NEXreq     
 
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
