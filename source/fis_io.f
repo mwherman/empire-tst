@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2231 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-18 03:25:49 +0100 (Mi, 18 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -91,35 +91,37 @@ C-----FISBAR(Nnuc)=0 EMPIRE
 C-----FISBAR(Nnuc)=1 Maslov
 C-----FISBAR(Nnuc)=2 HFB parabolic
 C-----FISBAR(Nnuc)=3 HFB numeric
-c
+C
 C-----FISBAR(Nnuc)= 0 Empire internal library
       IF (FISbar(Nnuc).EQ.0.) THEN
          OPEN (81,FILE = trim(EMPiredir)//'/data/fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 400)
-  350    READ (81,*,END = 400) kz, ka, NRBar, NRWel,
+  350    READ (81,*,ERR=400, END = 400) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 350
          CLOSE (81)
          GOTO 500
-  400    WRITE (8,*) ' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=',
-     &               INT(A(Nnuc)), ' IN INTERNAL LIBRARY (fisbar.dat)'
+  400    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
+     &    ' A=',INT(A(Nnuc)),' in internal EMPIRE library (fisbar.dat)'
+         WRITE (8,*) 
+     &    ' ERROR: or the file ../data/fisbar.dat may be missing'
          WRITE (8,*)
-     &              ' CHANGE FISBAR OPTION(NOW=0). EXECUTION TERMINATED'
-         WRITE (8,*) ' ERROR: File ../data/fisbar.dat missing'
+     &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of loca
+     &l barriers (FISBAR 0) in your input file'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
-
+C
 C-----FISBAR(Nnuc)= 1 RIPL "experimental" values for barrier heights;
 C-----widths from Lynn systematics and wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
          OPEN (52,FILE = trim(EMPiredir)//'/RIPL/fission'
      &      //'/fis-barrier-exp.dat',STATUS = 'OLD',ERR = 200)
-         READ (52,*,END = 200)
-         READ (52,*)
-         READ (52,*)
-         READ (52,*)
-  150    READ (52,'(2(1x,i3),3x,2(f8.3,4x),9x)',END = 200) kz, ka,
-     &         EFB(1), EFB(2)
+         READ (52,*,ERR=200,END = 200)
+         READ (52,*,ERR=200,END = 200)
+         READ (52,*,ERR=200,END = 200)
+         READ (52,*,ERR=200,END = 200)
+  150    READ (52,'(2(1x,i3),3x,2(f8.3,4x),9x)',
+     &     ERR = 200, END = 200) kz, ka, EFB(1), EFB(2)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 150
          NRBar = 2
          IF (EFB(1).EQ.0.) THEN
@@ -128,13 +130,14 @@ C-----widths from Lynn systematics and wells' parameters provided by code
          ENDIF
          CLOSE (52)
          GOTO 300
-  200    WRITE (8,*) ' NO RIPL EXPERIMENTAL FISSION BARRIER FOR Z=',
-     &               INT(Z(Nnuc)), ' A=', INT(A(Nnuc)), ' IN RIPL'
-         WRITE (8,*)
-     &              ' CHANGE FISBAR OPTION(NOW=1). EXECUTION TERMINATED'
-         WRITE (8,*)
-     &     ' ERROR: File empire/RIPL/fission/fis-barrier-exp.dat may b
+  200    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
+     &    ' A=',INT(A(Nnuc)),' in RIPL experimental library'
+         WRITE (8,*) 
+     &    ' ERROR: or the file ../RIPL/fission/fis-barrier-exp.dat may b
      &e missing'
+         WRITE (8,*)
+     &     ' ERROR: You may use local barriers (FISBAR 0) instead of RIP
+     &L barriers (FISBAR 1) in your input file'
          STOP ' FATAL: Fission barrier can not be retrieved'
       ENDIF
 C
@@ -170,62 +173,64 @@ C--------default values for the second well
          EFB(3) = 2.
       ENDIF
 C
-
 C-----FISBAR(Nnuc)=2  HFB microscopic parameters for parabolic barriers
 C-----                extracted from HFB l.d.files and stored in
-c-----                data/HFB-fisbar.dat (default)
+c-----                ../data/HFB-fisbar.dat (default)
       IF (FISbar(Nnuc).EQ.2.) THEN
          OPEN (81,FILE = trim(EMPiredir)//'/data/HFB-fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 401)
-  351    READ (81,*,END = 401) kz, ka, NRBar, NRWel,
+  351    READ (81,*,ERR = 401,END = 401) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 351
          CLOSE (81)
          GOTO 500
-  401    WRITE (8,*) ' NO  FISSION BARRIER FOR Z=', INT(Z(Nnuc)), ' A=',
-     &               INT(A(Nnuc)), ' IN HFB-fisbar.dat'
-         WRITE (8,*)' CHANGE FISBAR OPTION(NOW=2). EXECUTION TERMINATED'
-         WRITE (8,*)' ERROR: File ../data/HFB-fisbar.dat missing'
-         STOP ' FATAL: Fission barrier can not be retrieved'
+  401    WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
+     &     iz, ' A=', ia,' in file ../data/HFB-fisbar.dat'
+         WRITE (8,*)
+     &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of para 
+     &bolic approximation of HFB barriers (FISBAR 2) in your input file'
+         STOP ' FATAL: No fission barrier in ../data/HFB-fisbar.dat'
       ENDIF
-c
-c-----FISBAR(Nnuc)=3.  HFB numerical barriers-------------------
+C
+C-----FISBAR(Nnuc)=3.  RIPL-3 HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (filename,99900)iz
 99900    FORMAT ('/RIPL/fission/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//trim(filename)
      &      ,STATUS = 'old',ERR = 460)
- 410     read(52,*,END=460) izrr,iarr,npoints
-         write(8,*) iz,ia,izrr,iarr
-C   When the mass number is smaller than that of all existing barriers,
+ 410     read(52,*,ERR = 460,END=460) izrr,iarr,npoints
+C         
+C        When the mass number is smaller than that of all existing barriers,
 C         the barrier of smallest mass number is used (BVC, MS - 05/10)
 C         if(izrr.ne.iz .or. iarr.ne.ia) then
+C
          IF(izrr.NE.iz .OR. iarr.LT.ia) THEN
             DO ii=1,npoints
-               READ (52,*,END = 460)
+               READ (52,*,ERR = 460,END = 460)
             ENDDO
             GOTO 410
          ENDIF
          IF(ia.LT.iarr) THEN
-            WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
-     &                     ' IN HFB2007 (RIPL-3)'
-            WRITE (8,*) '      Using barriers FOR Z=', iz, ' A=', iarr
+            WRITE (8,*) 'WARNING: NO RIPL HFB fission barriers FOR Z=',
+     &                   iz, ' A=', ia,' in ../RIPL/fission/HFB2007 '
+            WRITE (8,*) 'WARNING: Using HFB numerical barrier FOR Z=', 
+     &                   iz, ' A=', iarr
          ENDIF    
          DO ii=1,npoints
            READ (52,*,END = 480) bb2, bb3, bb4, vdef_1d(ii)
            eps_1d(ii) = bb2
         ENDDO
         GOTO 480
- 460    WRITE (8,*)' CHANGE FISBAR OPTION(NOW=3). EXECUTION TERMINATED'
-        WRITE (8,*) ' NO fission barriers FOR Z=', iz, ' A=', ia,
-     &                     ' IN HFB2007 (RIPL-3)'
-        STOP ' FATAL: Fission barrier can not be retrieved'
+ 460    WRITE (8,*)
+     &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of HFB 
+     &BARRIERS (FISBAR 3) in your input file'
+        WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
+     &              iz, ' A=', ia,' in ../RIPL/fission/HFB2007 '
+        STOP ' FATAL: HFB fission barrier can not be retrieved'
  480    CLOSE (52)
+
         nextr = Find_Extrem(Nnuc)
         
-C       write(*,*)nextr,nrsm
-C       pause
-
         nrhump = nextr/2 + 1
         nrwel = nextr/2
         nrbar = nrhump + nrwel
@@ -247,7 +252,9 @@ C-------Fitting parabola
             DEFfis(NRHump+int(k/2)) = eps_1d(iiextr(k))
         ENDDO
       ENDIF
+C
 C-----Default value for curvatures and protection !!
+C
   500 DO i = 1, NRBar
          IF (H(1,i).EQ.0) H(1,i) = 1.
       ENDDO
@@ -434,7 +441,7 @@ C     IF (A(Nnuc).GT.236) BFF(1) = 2.
       IF (A(Nnuc)-Z(Nnuc).GE.144) BFF(1) = 2
       BFF(2) = 3
       BFF(3) = 3
-C-----shell corrections at saddles according to RIPL
+C-----shell corrections at saddles according to RIPL-2
       SHCfis(1) = 2.6
       IF (Z(Nnuc).GT.97.) SHCfis(1) = 2.6 - 0.1*(Z(Nnuc) - 97.)
       SHCfis(2) = 0.6 + 0.1*(Z(Nnuc) - 97.)
@@ -443,12 +450,12 @@ C-----shell corrections at saddles according to RIPL
      &    = 0.6 + 0.04*(A(Nnuc) - Z(Nnuc) - 143.)
       SHCfis(3) = SHCfis(2)
       DO ib = 1, NRHump
-C--------pairing at saddles according to RIPL
+C--------pairing at saddles according to RIPL-2
          DELtafis(ib) = 14./SQRT(A(Nnuc))
-
-C--------EMPIRE-3.0-dependence
-c         CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-         GAMmafis(ib) = 0.2d0!Gamma
+C
+C--------EMPIRE-3.1-dependence
+c        CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+         GAMmafis(ib) = 0.2d0 !Gamma
 C--------multiplier of atil
          AFIs(ib) = 1.d0
          ECFis(ib) = 0.d0
@@ -467,7 +474,7 @@ C---- writing data in FISSION.INP
 c
       IF(FISbar(Nnuc).EQ.3.)THEN
          WRITE (79,*)chstar
-         WRITE (79,*)' HFB numerical fission barrier'
+         WRITE (79,*)' RIPL-3 HFB numerical fission barrier'
          WRITE (79,*)chstar
          WRITE(79,'(i3)')npoints
          DO ii=1, npoints
@@ -498,7 +505,6 @@ c
          WRITE(79,*)
       ENDIF
 
-
       IF (Nrbar.EQ.1) THEN
          WRITE (79,'(a)') '    Va      ha    (in Mev) '
          WRITE (79,'(2f8.3)') EFB(1), H(1,1)
@@ -510,6 +516,7 @@ c
          WRITE (79,'(f9.4)') DEFfis(1)
          WRITE (79,*) ' '
       ENDIF
+      
       IF (NRBar.EQ.2) THEN
          IF (FISmod(Nnuc).EQ.0.) THEN
             WRITE (79,'(a)')
@@ -538,6 +545,7 @@ c
          WRITE (79,'(2f9.4)') (DEFfis(i),i = 1,NRBar)
          WRITE (79,*) ' '
       ENDIF
+      
       IF (NRBar.EQ.3) THEN
          IF (FISmod(Nnuc).EQ.0.) THEN
             WRITE (79,'(a,1x,a)')
@@ -568,10 +576,11 @@ c
          WRITE (79,'(3f9.4)') (DEFfis(i),i = 1,NRBar)
          WRITE (79,*) '  '
       ENDIF
+      
       IF (NRBar.EQ.5) THEN
          WRITE (79,'(a,1x,a)')
-     &'    Va      ha      Vb      hb      Vc       hc      Vi
-     &      hi      Vo      ho  (in Mev) '
+     &'    Va      ha      Vb      hb      Vc       hc      Vi      hi   
+     &    Vo      ho  (in Mev) '
          WRITE (79,'(10f8.3,15x)') (EFB(i),H(1,i),i = 1,NRBar)
          WRITE (79,*) ' '
          WRITE (79,'(6a10)') 'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)',
@@ -583,6 +592,7 @@ c
          WRITE (79,'(5f9.4)') (DEFfis(i),i = 1,NRBar)
          WRITE (79,*) ' '
       ENDIF
+      
       WRITE (79,*)chstar
       WRITE (79,*)' Parameters of the imaginary potential used only if
      & FISOPT>0'
@@ -665,7 +675,7 @@ c         bff(ih)= float(bfi)
       WRITE (79,*)
       WRITE (79,*)'****************************************************'
       WRITE (79,*)'****************************************************'
-
+      RETURN
       END
 C
 C
@@ -723,94 +733,103 @@ C
       nrsm = NRSmooth(Nnuc)
 
       OPEN (79,FILE = 'FISSION.INP',STATUS = 'OLD',ERR = 400)
-  100 READ (79,'(A8)',END=400) cara8
+  100 READ (79,'(A8)',ERR=400,END=400) cara8
       IF (cara8.NE.'Isotope:') GOTO 100
-      READ (79,*)
-      READ (79,'(4x,a2,i3,2x,a2,i3)') carz, iz, cara3, ia
+      READ (79,*,ERR=385,END=385)
+      READ (79,'(4x,a2,i3,2x,a2,i3)',ERR=385,END=385) 
+     &    carz, iz, cara3, ia
       IF (carz.EQ.'Z=' .AND. iz.NE.INT(Z(Nnuc)) .OR. ia.NE.INT(A(Nnuc)))
      &    GOTO 100
       READ (79,*)
       READ (79,*)
 
       IF(FISbar(Nnuc).EQ.3.)THEN
-         READ (79,'(//)')
-         READ (79,'(i3)') npoints
+         READ (79,'(//)',ERR=385,END=385)
+         READ (79,'(i3)',ERR=385,END=385) npoints
          DO i = 1, npoints
-            READ(79,'(i4,2f10.3)')ii, vdef_1d(i),eps_1d(i)
+            READ(79,'(i4,2f10.3)',ERR=385,END=385)
+     &         ii, vdef_1d(i),eps_1d(i)
          ENDDO
-         READ (79,*)
-         READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
+         READ (79,*,ERR=385,END=385)
+         READ (79,'(15x,i1,15x,i1)',ERR=385,END=385) NRBar, NRWel
          NRHump = NRBar - NRWel
          nextr = nrbar
-         READ (79,'(/)')
-         READ (79,*)(iiextr(j), j = 1, nrbar)
-         READ (79,*)
-         IF(Nrhump.EQ.1) READ (79,'(2f10.3)')(barnorm(nh), nh=1,nrhump),
-     &                                        hnorm
-         IF(Nrhump.EQ.2) READ (79,'(3f10.3)')(barnorm(nh), nh=1,nrhump),
-     &                                        hnorm
-         IF(Nrhump.EQ.3) READ (79,'(4f10.3)')(barnorm(nh), nh=1,nrhump),
-     &                                        hnorm
-         READ (79,'(/)')
+         READ (79,'(/)',ERR=385,END=385)
+         READ (79,*,ERR=385,END=385)(iiextr(j), j = 1, nrbar)
+         READ (79,*,ERR=385,END=385)
+         IF(Nrhump.EQ.1) READ (79,'(2f10.3)',ERR=385,END=385)
+     &                       (barnorm(nh), nh=1,nrhump),hnorm
+         IF(Nrhump.EQ.2) READ (79,'(3f10.3)',ERR=385,END=385)
+     &                       (barnorm(nh), nh=1,nrhump),hnorm
+         IF(Nrhump.EQ.3) READ (79,'(4f10.3)',ERR=385,END=385)
+     &                       (barnorm(nh), nh=1,nrhump),hnorm
+         READ (79,'(/)',ERR=385,END=385)
       ENDIF
 
       IF(FISbar(Nnuc).LT.3.)THEN
-c         READ (79,'(/)')
-         READ (79,'(15x,i1,15x,i1)') NRBar, NRWel
+         READ (79,'(15x,i1,15x,i1)',ERR=385,END=385) NRBar, NRWel
          NRHump = NRBar - NRWel
-         READ (79,'(/)')
+         READ (79,'(/)',ERR=385,END=385)
       ENDIF
 c
       nrmod = INT(FISmod(Nnuc)) + 1
 
-      IF (FISmod(Nnuc).EQ.0.) READ (79,*) (EFB(i),HCOnt(i),i = 1,NRBar)
-c
-      IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1) READ (79,*) EFB(1),
+      IF (FISmod(Nnuc).EQ.0.) READ (79,*,ERR=385,END=385) 
+     &                          (EFB(i),HCOnt(i),i = 1,NRBar)
+      IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1) 
+     &    READ (79,*,ERR=385,END=385) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFB(3), H(1,3)
-      IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
+      IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0)
+     &    READ (79,*,ERR=385,END=385) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2)
-      IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.1) READ (79,*) EFB(1),
+      IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.1) 
+     &    READ (79,*,ERR=385,END=385) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3),
      &    EFB(3), H(1,3)
-      IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) READ (79,*) EFB(1),
+      IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) 
+     &    READ (79,*,ERR=385,END=385) EFB(1),
      &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
 c
-      READ (79,' (/)')
-      READ (79,*) (HJ(Nnuc,i),i = 1,NRBar)
-      READ (79,' (/)')
-      READ (79,*) (DEFfis(i),i = 1,NRBar)
-      READ (79,'(////)')
-      READ (79,'(3f11.4)') (WIMag(i),i = 1,3)
-      READ (79,'(///)')
+      READ (79,' (/)',ERR=385,END=385)
+      READ (79,*,ERR=385,END=385) (HJ(Nnuc,i),i = 1,NRBar)
+      READ (79,' (/)',ERR=385,END=385)
+      READ (79,*,ERR=385,END=385) (DEFfis(i),i = 1,NRBar)
+      READ (79,'(////)',ERR=385,END=385)
+      READ (79,'(3f11.4)',ERR=385,END=385) (WIMag(i),i = 1,3)
+      READ (79,'(///)',ERR=385,END=385)
 
       DO ibar = 1, NRBar
-         READ (79,'(a39,I2,a2,I2)') line, ibaro, cara8, NRFdis(ibar)
-         READ (79,*)
+         READ (79,'(a39,I2,a2,I2)',ERR=385,END=385) 
+     &      line, ibaro, cara8, NRFdis(ibar)
+         READ (79,*,ERR=385,END=385)
          DO nr = 1, NRFdis(ibar)
             IF (FISmod(Nnuc).EQ.0. .OR.
-     &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) READ (79,*)
+     &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) 
+     &          READ (79,*,ERR=385,END=385)
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDis(nr,ibar),
      &          H(nr,ibar)
-            IF (FISmod(Nnuc).EQ.1. .AND. ibar.EQ.2) READ (79,*)
+            IF (FISmod(Nnuc).EQ.1. .AND. ibar.EQ.2) 
+     &          READ (79,*,ERR=385,END=385)
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2)
-            IF (FISmod(Nnuc).EQ.2. .AND. ibar.EQ.2) READ (79,*)
+            IF (FISmod(Nnuc).EQ.2. .AND. ibar.EQ.2) 
+     &          READ (79,*,ERR=385,END=385)
      &          SFDis(nr,ibar), IPFdis(nr,ibar), EFDism(nr,1), HM(nr,1),
      &          EFDism(nr,2), HM(nr,2), EFDism(nr,3), HM(nr,3)
          ENDDO
       ENDDO
-      READ (79,*)
+      READ (79,*,ERR=385,END=385)
 
 C-----FISDEN(Nnuc)= 0 EMPIRE
 C-----FISDEN(Nnuc)= 1 Ignatyuk
 C-----FISDEN(Nnuc)= 2 HFB
 
       IF(FISDEN(Nnuc).LE.1)THEN
-         READ (79,'(///)')
+         READ (79,'(///)',ERR=385,END=385)
          DO ib = 1, nrhump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) THEN
-                READ (79,'(10x,  I1,4x, I1, 8f9.3)')  i,
+                READ (79,'(10x,  I1,4x, I1, 8f9.3)',ERR=385,END=385)  i,
      &          BFF(ib), SHCfis(ib), DELtafis(ib), GAMmafis(ib),
      &          AFIs(ib),ECFis(ib),vibf12(ib),vibfdt(ib),vibfnorm(ib)
 C               For covariance
@@ -818,7 +837,8 @@ C               For covariance
              ENDIF
              IF (FISmod(Nnuc).GT.0. .AND. ib.EQ.2) THEN
                DO m = 1, nrmod
-                  READ (79,'(10x, I1, 2x, I1, 1x, I1, 5f9.3)') i, mm,
+                  READ (79,'(10x, I1, 2x, I1, 1x, I1, 5f9.3)',ERR=385,
+     &                  END=385) i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
      &                  AFIsm(m), ECFism(m)
 C                 For covariance
@@ -826,34 +846,36 @@ C                 For covariance
                ENDDO
             ENDIF
          ENDDO
-         IF(NRHump.EQ.1) READ (79,'(//////)')
-         IF(NRHump.EQ.2) READ (79,'(///////)')
-         IF(NRHump.EQ.3) READ (79,'(////////)')
+         IF(NRHump.EQ.1) READ (79,'(//////)',ERR=385,END=385)
+         IF(NRHump.EQ.2) READ (79,'(///////)',ERR=385,END=385)
+         IF(NRHump.EQ.3) READ (79,'(////////)',ERR=385,END=385)
 c         READ (79,*)
       ENDIF
 
       IF(FISDEN(Nnuc).EQ.2)THEN
-         IF(NRHump.EQ.1)READ (79,'(/////////)')
-         IF(NRHump.EQ.2)READ (79,'(//////////)')
-         IF(NRHump.EQ.3)READ (79,'(///////////)')
+         IF(NRHump.EQ.1)READ (79,'(/////////)',ERR=385,END=385)
+         IF(NRHump.EQ.2)READ (79,'(//////////)',ERR=385,END=385)
+         IF(NRHump.EQ.3)READ (79,'(///////////)',ERR=385,END=385)
 
          DO ih = 1, nrhump
-            READ (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
-c     &            bff(ih),rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
-     &            bfi,rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
-c        if(ih.eq.2) write (*,'(1x, A8, 1x, I1,4x,I1, 3f9.3)') cara8, i,
-c     &            bfi,rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
-             bff(i)= float(bfi)
+            READ (79,'(1x, A8, 1x, I1,4x,I1, 3f9.3)',ERR=385,END=385) 
+     &        cara8, i, bfi,rohfbp_sd(ih), rohfba_sd(ih),rohfb_norm(ih)
+            bff(i)= float(bfi)
          ENDDO
          READ (79,*)
       ENDIF
 
       READ (79,'(//)')
       DO nr = 1, nrwel
-         READ (79,'(1x, A8, 1x, I1, 1f9.3)') cara8, i, awf(nr)
+         READ (79,'(1x, A8, 1x, I1, 1f9.3)',ERR=385,END=385) 
+     &          cara8, i, awf(nr)
       ENDDO
       GOTO 500
-
+ 385  CLOSE(79)
+      WRITE(8,*) ' ERROR: Reading the fission input file' 
+      WRITE(8,*) ' ERROR: Delete the fission input and restarts' 
+      WRITE(8,*) ' ERROR: EMPIRE execution stopped' 
+      STOP ' ERROR: Delete the fission input and restarts'
  400  CLOSE(79)
       OPEN(79,FILE='FISSION.INP',STATUS='OLD',ACCESS='APPEND')
       CALL INPFIS(nnuc)
@@ -930,8 +952,9 @@ c       pause
       ENDDO
       ENDIF
 
-
       IF(FISbar(Nnuc).LE.2.)CALL DEFO_FIS(Nnuc)
+
+      RETURN
       END
 c
 c**************************************************************
@@ -976,9 +999,18 @@ C     determination of the minima   and maxima
             iiextr(iext)=j
          endif
       enddo
-      IF(iext.GT.5)THEN
-         NRSmooth(Nnuc)= NRSmooth(Nnuc)+1
-         GOTO 10
+      IF(iext.GT.5) THEN
+         WRITE (8,*) 
+     &    ' WARNING: HFB numerical barrier of suspicious shape for Z=', 
+     &     NINT(Z(nnuc)), ' A=', NINT(A(nnuc))
+         WRITE(8,*) 
+     &    ' WARNING: More than 5 extrema in HFB barrier, RESET to 5' 
+         WRITE(8,*) 
+     &    ' WARNING: EMPIRE can not deal with more than 3H barriers' 
+         WRITE(8,*) 
+     &    ' WARNING: You may want to use RIPL barriers (FISBAR 1)'
+         iext = 5 
+         WRITE(8,*) ' WARNING: --------------------------------------'
       ENDIF
       Find_Extrem = iext
       iiextr(iext+1)= npoints
@@ -1053,6 +1085,7 @@ C-----deformations at saddles and wells and matching points-----------
       DO k = 1, NRwel
          DEFfis(NRhump + k) = epsil(2 * k)
       ENDDO
+      RETURN
       END
 C
 c===================================================================
@@ -1122,27 +1155,27 @@ C
 
       WRITE (80,'(a8,f2.0,a36)') ' FISMOD = ', FISmod(Nnuc)
 
-      IF (FISbar(Nnuc).EQ.0.) cara1 = '  EMPIRE  internal library'
-      IF (FISbar(Nnuc).EQ.1.) cara1 = '  RIPL  (Exp.) values'
+      IF (FISbar(Nnuc).EQ.0.) cara1 = '  EMPIRE  internal library      '
+      IF (FISbar(Nnuc).EQ.1.) cara1 = '  RIPL-3  (Exp.) values         '
       IF (FISbar(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB parabolic barriers'
       IF (FISbar(Nnuc).EQ.3.) cara1 = '  RIPL-3  HFB Numerical barriers'
 
       WRITE (80,'(a8,f2.0,a36)') ' FISBAR = ', FISbar(Nnuc),cara1
 
-      IF (FISden(Nnuc).EQ.0.) cara1 = '  RIPL-3  EGSM LD'
-      IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD'
-      IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD'
+      IF (FISden(Nnuc).EQ.0.) cara1 = '  RIPL-3  EGSM LD               '
+      IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD               '
+      IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD    '
       WRITE (80,'(a8,f2.0,a36)') ' FISDEN = ', FISden(Nnuc), cara1
 
-      IF (FISopt(Nnuc).EQ.0.) cara1 = '  Real fission potential'
-      IF (FISopt(Nnuc).EQ.1.) cara1 = '  Complex fission potential'
+      IF (FISopt(Nnuc).EQ.0.) cara1 = '  Real fission potential        '
+      IF (FISopt(Nnuc).EQ.1.) cara1 = '  Complex fission potential     '
       IF (FISopt(Nnuc).EQ.2.)
      &    cara1 = '  Complex fission potential, isomeric fission'
       WRITE (80,'(a8,f2.0,a36)') ' FISOPT = ', FISopt(Nnuc),cara1
       WRITE(80,*)' '
       WRITE(80,*)chstar
       IF(FISbar(Nnuc).EQ.3.)THEN
-         WRITE (80,*)' HFB numerical fission barrier'
+         WRITE (80,*)' RIPL-3 HFB numerical fission barrier'
          WRITE(80,*)chstar
          WRITE(80,'(i3)')npoints
          DO ii=1, npoints
@@ -1217,7 +1250,7 @@ c
      &         , '  Vb(ST2)  hb(ST2)   Vi      hi  (in Mev) '
             WRITE (80,'(10f9.3,15x)') EFB(1), H(1,1), EFBm(1), HM(1,1),
      &                                EFBm(2), HM(1,2), EFBm(3), HM(1,3)
-     &                                , EFB(3), H(1,3)
+     &                              , EFB(3), H(1,3)
          ENDIF
          WRITE (80,*) ' '
          WRITE (80,'(4a10)') 'h2/2J(A)', 'h2/2J(B)', 'h2/2J(I)',
@@ -1230,8 +1263,8 @@ c
       ENDIF
       IF (NRBar.EQ.5) THEN
          WRITE (80,'(a,1x,a)')
-     &'    Va      ha      Vb      hb      Vc       hc      Vi
-     &hi      Vo      ho  (in Mev) '
+     &'    Va      ha      Vb      hb      Vc       hc      Vi      hi   
+     &    Vo      ho  (in Mev) '
          WRITE (80,'(10f8.3,15x)') (EFB(i),H(1,i),i = 1,NRBar)
          WRITE (80,*) ' '
          WRITE (80,'(6a10)') 'h2/2J(A)', 'h2/2J(B)', 'h2/2J(C)',
@@ -1334,7 +1367,5 @@ c         pause
       ENDDO
       WRITE (80,*)
 
-
+      RETURN
       END
-
-
