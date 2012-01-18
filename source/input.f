@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2236 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 21:47:42 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2238 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-18 22:04:44 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2108,13 +2108,9 @@ C     Looking for Dobs and Gg for compound (resonances are stored for target nuc
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
 C         READ (47,'(2i4,  17x,2(e9.2,2x),2(f4.2,2x),2(F5.1,1x))',
-
-C           Changed to RIPL-3 file
-
-C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x,a4).
-
-          READ (47,'(i3,4x,i3,15x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x))',
-
+C         Changed to RIPL-3 file
+          READ (47,
+     &     '(i3,4x,i3,15x,2(e8.2,2x),1x,2(f4.2,2x),f5.1,1x,f5.1)',
      &     END = 60, ERR = 60) nztmp, natmp,
      &         dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
           IF (nztmp.NE.Iz .OR. natmp.NE.Ia) CYCLE
