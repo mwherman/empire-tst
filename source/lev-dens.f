@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 20:32:31 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 20:43:57 +0100 (Mi, 18 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -107,7 +107,7 @@ C     Ecrt = UCRt - DEL - dshift
       Ecrt = UCRt - DEL  
       IF(Ecrt .LT. Q(1,Nnuc)) THEN
         ellq = Ecrt - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
-	ELSE
+      ELSE
         ellq = Q(1,Nnuc) - (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc))
         IF(FIRst_ein .AND. nnuc.eq.1) THEN
           WRITE(8,*) 
@@ -117,7 +117,7 @@ C     Ecrt = UCRt - DEL - dshift
      &   ' WARNING: Tuning of the CN ATILNO required'
           WRITE(8,*) 
         ENDIF
-	ENDIF
+      ENDIF
 
       DO kk = 1, NEX(Nnuc)
          IF (FITlev.LE.0.0D0 .OR. 
@@ -130,7 +130,7 @@ C     Ecrt = UCRt - DEL - dshift
               ELSE
                  dshif = 0.d0
               ENDIF
-	      ELSE
+            ELSE
               IF (EX(kk,Nnuc).LT.Q(1,Nnuc) .AND. ellq.NE.0.0D0) THEN
                  dshif = dshift*(Q(1,Nnuc) - EX(kk,Nnuc))/ellq
               ELSE
@@ -210,7 +210,8 @@ c-----GSM (egsm=0) and EGSM (egsm=1)
       ENDIF
 
       IF(lazy.EQ.1)THEN
-         aj=0.
+         Aj=0.d0
+         u=0.d0
          CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,ac,Aj,
      &               mompar,momort,A2,stab,cigor)
       ENDIF
@@ -610,7 +611,7 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt,SHCn,GAMma)
       SCR = 2.*ACRt*TCRt
 
-      IF(iout.EQ.6.AND.ifis.EQ.0)	THEN
+      IF(iout.EQ.6.AND.ifis.EQ.0)   THEN
          WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
      &      ,I3,''-'',A2)') ia, SMAT(iz)
 
@@ -618,7 +619,7 @@ C-----45.84 stands for (12/SQRT(pi))**2
      &      ''  Acrt='',F6.3,''  Ucrt='', F6.3, ''  Ecrt='', F6.3,
      &      ''  Econd='', F5.3,''  Det='', G11.3, ''  Scrt='',F6.3)')
      &      atil,acrt,ucrt,ucrt-DEL,econd,detcrt,scr
-	ENDIF
+      ENDIF
 
       RETURN
       END
@@ -1420,8 +1421,8 @@ c            GOTO 500 !????
 
       IF (igna.NE.0D0) THEN
          DO i = 1, 10  
-C	      write(*,*) '***',a(nnuc),z(nnuc),ux
-C	      write(*,*) am, 6/t, atil
+C           write(*,*) '***',a(nnuc),z(nnuc),ux
+C           write(*,*) am, 6/t, atil
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
             am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
          ENDDO
