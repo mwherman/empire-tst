@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 06:14:25 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-18 09:03:33 +0100 (Mi, 18 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1591,7 +1591,8 @@ c        SHC(0) = shelMSr - defcorr
         SHC(0) = shelMSr
       ENDIF
       GO TO 40
-  60  STOP 'Error reading shell correction file'
+  60  WRITE(8,*) ' ERROR: Error reading shell correction file'
+      STOP ' ERROR: Error reading shell correction file'
   50  CLOSE(11)
       RETURN
       END
@@ -1643,11 +1644,9 @@ C
       REAL*8 defit
       CHARACTER*2 car2
       REAL*8 DLOG10
-      CHARACTER*56 filename
-      LOGICAL fexist
+      CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
       INTEGER*4 PIPE
-
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1670,19 +1669,18 @@ C
          ENDDO
       ENDDO
       WRITE (filename,99005) iz
-
 99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
-      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
-      IF(.not.fexist) THEN
-       WRITE(8,*) trim(empiredir)//trim(filename), ' does not exist'
-       WRITE(*,*) trim(empiredir)//trim(filename), ' does not exist'
-       STOP 'ERROR: '
-      ENDIF
+C     INQUIRE(file = trim(empiredir)//filename, exist = fexist)
+C     IF(.not.fexist) THEN
+C      WRITE(8,*) trim(empiredir)//filename, ' does not exist'
+C      WRITE(*,*) trim(empiredir)//filename, ' does not exist'
+C      STOP 'ERROR: HFB level density is missing'
+C      ENDIF
 
       OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
-  100 READ (34,99010,ERR=300,END = 300) car2
-99010 FORMAT (23x,a2,i3,3x,i3)!,2x,a8)
+  100 READ (34,99010,ERR = 300,END = 300) car2
+99010 FORMAT (23x,a2,i3,3x,i3)  !,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
       BACKSPACE (34)
       READ (34,99010,ERR=300,END = 300) car2, izr, iar!, paritate
@@ -1715,9 +1713,9 @@ C     SKIPPING 4 TITLE LINES
       IF (i.EQ.NLDGRID) GOTO 400
       i = i + 1
       GOTO 280
-  300 WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia, ' IN HFB'
-      WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION TERMINATED '
-      STOP 'RIPL HFB ground state lev dens. missing'
+  300 WRITE (8,*) ' ERROR: NO HFB LEV. DENS. FOR Z=', iz, ' A=', ia
+      WRITE (8,*) ' ERROR: USE OTHER LEVEL DENSITIES. '
+      STOP ' ERROR: RIPL HFB ground state lev density missing'
   400 CLOSE (34)
 C
 C     Using correction files given by A. Koning on March 2008.
@@ -1731,48 +1729,40 @@ C
         WRITE (filename,99007) iz
 99007   FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
-        INQUIRE(file = trim(empiredir)//filename, exist = fexist)
-        IF(fexist) then
-          OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 440)
-          pcorr = 0.d0
-          acorr = 0.d0
-  110     READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
-99008     FORMAT (1x,i3,1x,i3,10x,f11.5,1x,f11.5)
-          IF (iar.NE.ia .OR. izr.NE.iz) GOTO 110
+        OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR = 440)
+        pcorr = 0.d0
+        acorr = 0.d0
+  110   READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
+99008   FORMAT (1x,i3,1x,i3,10x,f11.5,1x,f11.5)
+        IF (iar.NE.ia .OR. izr.NE.iz) GOTO 110
 
-          IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc) = pcorr
-          IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc) = acorr
+        IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc) = pcorr
+        IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc) = acorr
 
-c          ROHfbp(Nnuc) = 0.d0
-c          ROHfba(Nnuc) = 0.d0
-C---------printing microscopic lev. dens. corrections from the RIPL-3 file
-C
-          IF(ROHfba(Nnuc).ne.0.d0) then
+C-------printing microscopic lev. dens. corrections from the RIPL-3 file
+
+        IF(ROHfba(Nnuc).ne.0.d0) then
             WRITE (8,
      &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
             WRITE (12,
      &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
      &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
-          ENDIF
-          IF(ROHfbp(Nnuc).ne.0.d0) then
-            WRITE (8,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
-            WRITE (12,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
-          ENDIF
-  440     CLOSE(34)
-          IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc)=0.d0
-          IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
-        ELSE ! no correction available'
-          IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc)=0.d0
-          IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
         ENDIF
+        IF(ROHfbp(Nnuc).ne.0.d0) then
+            WRITE (8,
+     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
+            WRITE (12,
+     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
+        ENDIF
+  440   CLOSE(34)
+        IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc)=0.d0
+        IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
         goto 445
-  310   WRITE (8,*) ' Error reading microsc. LD corrections FOR Z=', iz,
-     &              ' A=', ia, ' IN HFB'
+  310   WRITE (8,*) ' ERROR: reading microsc. LD corrections FOR Z=', 
+     &              iz,' A=', ia, ' IN HFB'
   445   CLOSE (34)
 cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       ENDIF
@@ -1786,11 +1776,12 @@ cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
          IF (u.LT.0.) CYCLE
          IF (u.GT.200.0D0) THEN
             WRITE (8,*) ' '
-            WRITE (8,*) ' HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
-            WRITE (8,*) ' REQUESTED ENERGY IS ', u, ' MeV'
-            WRITE (8,*) ' YOU HAVE TO USE OTHER LEVEL DENSITIES'
-            WRITE (8,*) ' EXECUTION STOPPED'
-            STOP 'TOO HIGH ENERGY FOR HFB LEV. DENS.'
+            WRITE (8,*) 
+     &        ' ERROR: HFB LEV. DENS. DEFINED UP TO 200 MeV ONLY'
+            WRITE (8,*) ' ERROR: REQUESTED ENERGY IS ', u, ' MeV'
+            WRITE (8,*) ' ERROR: YOU HAVE TO USE OTHER LEVEL DENSITIES'
+            WRITE (8,*) ' ERROR: EXECUTION STOPPED'
+            STOP ' ERROR: TOO HIGH ENERGY FOR HFB LEV. DENS.'
          ENDIF
          corr1 = 1.d0
          IF(ROHfba(Nnuc).NE.0.d0)
@@ -1873,13 +1864,11 @@ C--------cumulative plot of levels along with the l.d. formula
          WRITE (34,*) '0.0  ', rocumul
 
          DO kk = 2, iugrid!NFIsen1
-            if(uugrid(kk).gt. ELV(NLV(Nnuc),Nnuc)+2.d0)exit
+            if(uugrid(kk).gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
 C-----------integration over energy. Parity dependence explicitly considered.
 C-----------There is a factor 1/2 steming from the trapezoid integration
 C              rocumul = rocumul + 0.5d0*defit
-C           DO ij = 1, NFISJ1
             DO ij = 1, NLW
-c                rocumul = rocumul + 2.d0*RO(i,ij,1,Nnuc)
                rocumul = rocumul +
      &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))      
