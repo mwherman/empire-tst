@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 09:03:33 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 20:32:31 +0100 (Mi, 18 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -610,11 +610,15 @@ C-----45.84 stands for (12/SQRT(pi))**2
       ACR = ATIl*FSHELL(UCRt,SHCn,GAMma)
       SCR = 2.*ACRt*TCRt
 
-      if(iout.EQ.6.AND.ifis.EQ.0)
-     &WRITE(8, '(2X,/,2x,i2,1H-,A2,1H-,i3, '': Atil='', F6.3,
+      IF(iout.EQ.6.AND.ifis.EQ.0)	THEN
+         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
+     &      ,I3,''-'',A2)') ia, SMAT(iz)
+
+         WRITE(8, '(2X,/,''  Atil='', F6.3,
      &      ''  Acrt='',F6.3,''  Ucrt='', F6.3, ''  Ecrt='', F6.3,
      &      ''  Econd='', F5.3,''  Det='', G11.3, ''  Scrt='',F6.3)')
-     &      iz,SMAT(iz),ia,atil,acrt,ucrt,ucrt-DEL,econd,detcrt,scr
+     &      atil,acrt,ucrt,ucrt-DEL,econd,detcrt,scr
+	ENDIF
 
       RETURN
       END

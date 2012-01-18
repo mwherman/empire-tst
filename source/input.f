@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2233 $
+Ccc   * $Rev: 2234 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 09:03:33 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 20:32:31 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1984,24 +1984,31 @@ C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
+
+         IF (ADIv.EQ.2.0D0) 
+     &     WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
+     &      ,I3,''-'',A2)') ia, SYMb(nnur)
+	   
          IF (ADIv.NE.3.0D0) THEN
-           WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
-     &        ,I3,''-'',A2)') ia, SYMb(nnur)
+
            WRITE(8,'(/2x,A25,1x,F5.2,A46,I3//
      &1x,''   E        RHO(E)  '')')     
-     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the corresponding discrete level # ',NLV(nnur)     
-            DO i = 1, NEX(nnur)
+     &      'Continuum starts above E=',ELV( NLV(nnur),nnur),
+     &      ' MeV above the corresponding discrete level No. ',NLV(nnur)     
+
+           DO i = 1, NEX(nnur)
                rocumul = 0.D0
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
                WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,1,nnur),j = 1,11)
-c     &                     (RO(i,j,1,nnur),j = 11,21)
-c     &                     (RO(i,j,1,nnur),j = 21,31)     
-            ENDDO
+c    &                     (RO(i,j,1,nnur),j = 11,21)
+c    &                     (RO(i,j,1,nnur),j = 21,31)     
+           ENDDO
+
          ELSE
+
            WRITE (8,'(1X,/,''  HFB LEVEL DENSITY DEPENDENCE FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
            WRITE(8,'(/2x,A25,1x,F5.2,A46,I3//
