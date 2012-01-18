@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2234 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 20:32:31 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2236 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-18 21:47:42 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1706,8 +1706,10 @@ C-------continuum using current DE, if not adjust DE
 C
       WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
-      WRITE(8,'(1x,''# energy points ='',i3,'';   NDEX ='',i3)') 
+      WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
+      WRITE(8,*)'WARNING: NDEX in dimension.h is ',NDEX, 'recommended',
+     &' value is', 2*NEXreq     
 
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
@@ -1984,19 +1986,15 @@ C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
-
          IF (ADIv.EQ.2.0D0) 
-     &     WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
-     &      ,I3,''-'',A2)') ia, SYMb(nnur)
-	   
+     &   WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
+     &        ,I3,''-'',A2)') ia, SYMb(nnur)
          IF (ADIv.NE.3.0D0) THEN
-
-           WRITE(8,'(/2x,A25,1x,F5.2,A46,I3//
-     &1x,''   E        RHO(E)  '')')     
-     &      'Continuum starts above E=',ELV( NLV(nnur),nnur),
-     &      ' MeV above the corresponding discrete level No. ',NLV(nnur)     
-
-           DO i = 1, NEX(nnur)
+         WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+     &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
+     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+            DO i = 1, NEX(nnur)
                rocumul = 0.D0
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
