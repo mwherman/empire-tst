@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
+Ccc   * $Rev: 2229 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -588,7 +588,6 @@ C--------
 C--------decay to discrete levels
 C--------
       ENDIF
-      IF (RORed.NE.0.0D0) THEN
          DO i = 1, NLV(Nejc)
             SCRtl(i,Nejc) = 0.0
          ENDDO
@@ -666,13 +665,11 @@ C-----------do loop over l --- done ----------------------------------------
             s = s + 1.
             IF (s.LE.smax) GOTO 20
 C-----------loop over channel spin ------ done ----------------------------
-            sumdl = sumdl*RORed
             SCRtl(i,Nejc) = sumdl
             Sum = Sum + sumdl
 C           WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
          ENDDO
 C--------do loop over discrete levels --------- done --------------------
-      ENDIF
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
 Cpr   WRITE(8,*) 'TOTAL SUM=',SUM
@@ -897,7 +894,6 @@ C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
-      IF (RORed.NE.0.0D0) THEN
 C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
@@ -953,12 +949,11 @@ c            ENDIF
               ENDIF
              ENDDO
              IF(Nhrtw.EQ.0)H_Sumtls = H_Sumtls + hsumtls
-             SCRtl(i, 0) = hscrtl*RORed
+             SCRtl(i, 0) = hscrtl
              Sum = Sum + SCRtl(i, 0)
           ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
-      ENDIF
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END
@@ -1317,7 +1312,6 @@ C
 C-----
 C-----decay to discrete levels
 C-----
-      IF (RORed.NE.0.0D0) THEN
          eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
 C--------only target state considered
          i = LEVtarg
@@ -1361,7 +1355,6 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 50
 C--------loop over channel spin ------ done ----------------------------
-      ENDIF
 99999 END
 
 

@@ -1,5 +1,5 @@
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -94,7 +94,7 @@ C-----fit of cumulative low-lying discrete levels
       IF(BF.NE.0.d0)Call LEVFIT(Nnuc,Nplot,Dshif,Dshift, Defit)
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) 
      &   Call PLOT_ZVV_NumCumul(Nnuc, Defit,nplot, NLwst)
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3 .AND. RORed.GT.0) 
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
      &  CALL PLOT_GNU_NumCumul(Nnuc,Nplot,Defit,dshift,DEL,
      &                         NLwst)
 
@@ -243,10 +243,10 @@ C--------'a' including surface dependent factor
          ENDIF
 C
         IF (bcs) THEN
-            Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)* RORed
+            Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)
          ELSE
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,egsm)
+     &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,egsm)
          ENDIF
         
  346     RO(Kk,i,1,Nnuc) = Rotemp
@@ -319,7 +319,7 @@ C-----CONST=1/(2*SQRT(2 PI))
 CCC
 CCC
       REAL*8 FUNCTION RODEF(A,E,Ac,Aj,Mompar,Momort,T,
-     &                        Yrast,Ss,Bf,Argred,Expmax,a2,egsm)
+     &                        Yrast,Ss,Bf,Expmax,a2,egsm)
 
 
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -337,7 +337,7 @@ Ccc   *********************************************************************
 Ccc
 C Dummy arguments
 C
-      REAL*8 A, Ac, Aj, Argred, Bf, E, Expmax, Momort, Mompar,
+      REAL*8 A, Ac, Aj, Bf, E, Expmax, Momort, Mompar,
      &       Ss, Yrast,a2
 C
 C Local variables
@@ -403,7 +403,7 @@ cms---yrast recalculated
       con = const/Ac**0.25/SQRT(Mompar*t)
    
       IF (Ss.EQ.( - 1.0D0)) THEN
-         arg = 2*SQRT(Ac*e1) - Argred
+         arg = 2*SQRT(Ac*e1)
          IF (arg.LE.( - Expmax)) THEN
             sum = 0.0
          ELSEIF (e1.GT.1.0D0) THEN
@@ -435,7 +435,7 @@ C-----------rotation parallel to the symmetry axis (oblate nucleus)
             u = e1 - 0.5*(Aj*(Aj + 1.) - ak**2)*ABS(seff)
          ENDIF
          IF (u.LE.0.0D0) GOTO 100
-         arg = 2.0*SQRT(Ac*u) - Argred
+         arg = 2.0*SQRT(Ac*u)
          IF (arg.GT.( - Expmax)) THEN
             IF (u.GT.1.0D0) THEN
                sum = sum + 2.0*EXP(arg)/u**1.25
@@ -996,7 +996,6 @@ C
 C
 C Local variables
 C
-      REAL*8 ac, arg 
       INTEGER i, ia, iz, k
       INTEGER INT
 
@@ -1027,24 +1026,6 @@ C-----check of the input data ---------------------------------------
          STOP
       ENDIF
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) RETURN
-
-C-----setting overall level density scaling factor ------------------
-      IF (ARGred.LT.0.0D0) THEN
-         i = NEX(Nnuc)
-         ac = A(Nnuc)/7.0
-         arg = 2*SQRT(EX(i,Nnuc)*ac)
-         IF (arg.LT.EXPmax - 1) THEN
-            ARGred = 0.
-            RORed = 1.
-         ELSE
-            ARGred = AINT(arg - EXPmax + 1.)
-            IF (ARGred.LT.EXPmax) THEN
-               RORed = EXP( - ARGred)
-            ELSE
-               RORed = 0.0
-            ENDIF
-         ENDIF
-      ENDIF
 
 C-----set to 0 level density array
       DO i = 1, NDEX
@@ -1106,7 +1087,7 @@ C
 C
 C Local variables
 C
-      REAL*8 ac, aj, arg, cigor, fx, momort, mompar, s,
+      REAL*8 aj, cigor, fx, momort, mompar, s,
      &       sb, sb0, sbnor, segnor, segs, selmax, stab, x,
      &       x0, x1, xi, xk, ftmp
       REAL FLOAT
@@ -1242,24 +1223,6 @@ c      IF (JSTab(Nnuc).EQ.0) NLWst = MIN0(JSTab(Nnuc),NLWst)
 
       RETURN
 C-----yrast and saddle point energies ----- done ---------------
-C-----setting overall level density scaling factor ------------------
-      IF (ARGred.LT.0.0D0) THEN
-         i = NEX(Nnuc)
-         ac = A(Nnuc)/7.0
-         arg = 2*SQRT(EX(i,Nnuc)*ac)
-         IF (arg.LT.EXPmax - 1) THEN
-            ARGred = 0.
-            RORed = 1.
-         ELSE
-            ARGred = AINT(arg - EXPmax + 1.)
-            IF (ARGred.LT.EXPmax) THEN
-               RORed = EXP( - ARGred)
-            ELSE
-               RORed = 0.0
-            ENDIF
-         ENDIF
-      ENDIF
-C-----setting overall level density scaling factor ----- done -------
 C-----set to 0 level density array
       DO i = 1, NDEX
          DO k = 1, NDLW
@@ -1520,7 +1483,7 @@ C-----calculation of level densities below EXL
 C-----(low energy formula)
          DO i = 1, ig
             e = EX(i,Nnuc)
-            arg = (e - eo)/t - ARGred
+            arg = (e - eo)/t
             IF (arg.LT.EXPmax) THEN
                ro_u = EXP(arg)/t
 C--------------Spin-cutoff is interpolated
@@ -1534,8 +1497,6 @@ C--------------Spin-cutoff is interpolated
                      ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
                      RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi
                      RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi
-                     IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
-                     IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0
                   ENDIF
                ENDDO
                efort = e
@@ -1557,7 +1518,7 @@ C
             TNUc(i,Nnuc) = SQRT(u/am)
 C-----------Dilg's recommendations
             SIG = Scutf*0.6079*amas**0.6666667*SQRT(u*am)
-            arg = 2.*SQRT(am*u) - ARGred
+            arg = 2.*SQRT(am*u)
             IF (arg.LE.EXPmax) THEN
                ro_u = DEXP(arg)/(12.*SQRT(2*SIG))/am**0.25/u**1.25
                DO j = 1, NLW
@@ -1567,8 +1528,6 @@ C-----------Dilg's recommendations
                      ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
                      RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi  
                      RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi  
-                     IF (RO(i,j,1,Nnuc).LT.RORed) RO(i,j,1,Nnuc) = 0.d0
-                     IF (RO(i,j,2,Nnuc).LT.RORed) RO(i,j,2,Nnuc) = 0.d0         
                   ENDIF
                ENDDO
             ENDIF
@@ -1920,7 +1879,7 @@ C--------cumulative plot of levels along with the l.d. formula
             if(uugrid(kk).gt. ELV(NLV(Nnuc),Nnuc)+2.d0)exit
 C-----------integration over energy. Parity dependence explicitly considered.
 C-----------There is a factor 1/2 steming from the trapezoid integration
-C              rocumul = rocumul + 0.5d0*defit/RORed*
+C              rocumul = rocumul + 0.5d0*defit
 C           DO ij = 1, NFISJ1
             DO ij = 1, NLW
 c                rocumul = rocumul + 2.d0*RO(i,ij,1,Nnuc)
@@ -1972,19 +1931,6 @@ C
 C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
 C-----
-      IF (FITlev.GT.0 .AND. RORed.EQ.0) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) ' CAN NOT FIT DISCRETE LEVELS SINCE RORed IS 0'
-         WRITE (8,*) ' CHECK WHETHER YOU CAN INCREASE EXPmax in input.f'
-         WRITE (8,*) ' (MAXIMUM ARGUMENT OF THE EXPONENT ALLOWED)'
-         WRITE (8,*)
-     &             ' IF YOUR SYSTEM ALLOWS FOR THIS DO IT AND RECOMPILE'
-         WRITE (8,*) ' OTHERWISE YOU CAN NOT ASK FOR SUCH A HIGH ENERGY'
-         WRITE (8,*) ' HAVE NO CLUE WHAT TO DO IN SUCH A CASE'
-         WRITE (8,*) ' FOR THE TIME BEING EXECUTION TERMINATED'
-         STOP
-      ENDIF
-
 C-----get neutron binding energy  if not yet defined
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
          REWIND (25)
@@ -1995,9 +1941,8 @@ C-----get distance between Qn and the last level
       dshift = 0.0
       iter = 0
 C-----we are not going to fit discrete levels if there are not more
-C-----than three or if max excitation energy is so high that levels
-C-----can not be taken into account (RORed=0)
-      IF (NLV(Nnuc).GT.3 .AND. RORed.GT.0) THEN
+C-----than three 
+      IF (NLV(Nnuc).GT.3) THEN
          IF (FITlev.GT.0.0D0) THEN
             WRITE (8,*) ' '
             WRITE (8,*) ' Fitting l.d. to discrete levels'
@@ -2038,10 +1983,10 @@ C-----------parity but it cancels with the 1/2 steming from the trapezoid
 C-----------integration
 C              IF (kk.GT.1) rocumul = rocumul +
 C    &                                (RO(kk - 1,ij,Nnuc) + RO(kk,ij,
-C    &                                Nnuc))*defit/RORed
+C    &                                Nnuc))*defit
 C-----------Integration over energy. Parity dependence explicitly considered.
 C-----------There is a factor 1/2 steming from the trapezoid integration
-               IF (kk.GT.1) rocumul = rocumul + 0.5d0*defit/RORed*
+               IF (kk.GT.1) rocumul = rocumul + 0.5d0*defit*
      &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
             ENDDO
@@ -2137,7 +2082,7 @@ C-----------ACCN  serves only to calculate temperature fade-out
             accn = ACRt
          ENDIF
          temp = 0.
-         IF (EX(Kk,Nnuc).GE.YRAst(i,Nnuc))
+         IF (EX(Kk,Nnuc).GE. YRAst(i,Nnuc))
      &        temp = SQRT((EX(Kk,Nnuc) - YRAst(i,Nnuc))/accn)
          ampl = EXP(TEMp0*SHRt)
          shredt = 1.
@@ -2173,18 +2118,14 @@ C-----------dependent factor
          IF (ac.LE.0.D0) RETURN
 
          IF (bcs) THEN
-            Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)* RORed
-! --------The next two lines look like a mistake or some  left over trial
-! --------Mihaela please check.     
-!            Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-!     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
+            Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)
             IF (i.EQ.1) THEN
                phi = SQRT(1.D0 - u/UCRt)
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &               YRAst(i,Nnuc),HIS(Nnuc),BF,ARGred,EXPmax,a2,1)
+     &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,1)
             IF (i.EQ.1) t = SQRT(u/ac)
          ENDIF
 
@@ -2562,9 +2503,6 @@ C
       INTEGER INT
       REAL*8 ROBCSF, RODEFF, FSHELL
 
-
-       ARGred = 0.
-       RORed = 1.
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
 C-----where continuum starts,ends,steps in between
@@ -2719,13 +2657,13 @@ c
                IF (accn.LE.0.0D0) RETURN
             
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,MOMort,
-     &                         HIS(Nnuc),ARGred,
+     &                         HIS(Nnuc),
      &                         EXPmax,temp,def2,vibbf12,vibbfdt,vn)
 c               write(*,*)'fmg',u,rotemp  
             ELSE
                accn = ACRt
                rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
-     &                  mompar,temp,def2,vibbf12,vibbfdt,vn)*RORed
+     &                  mompar,temp,def2,vibbf12,vibbfdt,vn)
 
 c            write(*,*)'bcs',u,rotemp  
             ENDIF
@@ -2799,11 +2737,11 @@ c      pause
 C
 C
       REAL*8 FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
-     &                     Argred,Expmax,T,def2,vibbf12,vibbfdt,vn)
+     &                     Expmax,T,def2,vibbf12,vibbfdt,vn)
 
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C Dummy arguments
-      REAL*8 A, Ac, Aj, Argred, E, Expmax, Momort, Mompar, Ss,
+      REAL*8 A, Ac, Aj, E, Expmax, Momort, Mompar, Ss,
      &       T,e1,yrast,bf
       REAL*8 vibbf12,vibbfdt,vn
       REAL*8 ro,rot_K, rot_Q, vib_KQ
@@ -2817,7 +2755,7 @@ C Dummy arguments
       Yrast=0.d0 
       
       ro =RODEF(A,E,Ac,Aj,Mompar,Momort,T,
-     &                        Yrast,Ss,Bf,Argred,Expmax,def2,egsm)
+     &                        Yrast,Ss,Bf,Expmax,def2,egsm)
       e1 = E - Yrast
       CALL COLL_KQ_FIS(egsm,A,T,momort,def2,e1,vib_KQ,rot_K,rot_Q,
      &                   vibbf12,vibbfdt,vn)

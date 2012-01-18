@@ -1,6 +1,6 @@
-C $Rev: 2180 $
-C $Author: rcapote $
-C $Date: 2011-12-22 14:16:22 +0100 (Do, 22 Dez 2011) $
+C $Rev: 2229 $
+C $Author: mherman $
+C $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -8,7 +8,7 @@ C     line to have access to the system directory, RCN, July 2009
 C
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
-     &                 ANGles(ndangecis), ARGred, ATIlnor(0:ndnuc),
+     &                 ANGles(ndangecis), ATIlnor(0:ndnuc),
      &                 AUSpec(ndecse,0:ndejc), AVOm(0:ndejc,0:ndnuc),
      &                 AVSo(0:ndejc,0:ndnuc), awf(nfhump),
      &                 AWOm(0:ndejc,0:ndnuc),SHLlnor(0:ndnuc),
@@ -112,7 +112,7 @@ C
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
      &                 ROFis(0:nfisenmax,ndlw,nfhump), ROPaa(ndnuc),
      &                 ROFisp(0:nfisenmax,ndlw,2,nfhump),
-     &                 ROPar(ndropm,ndnuc), RORed, RECoil,
+     &                 ROPar(ndropm,ndnuc), RECoil,
      &                 RVOm(0:ndejc,0:ndnuc),
      &                 RVSo(0:ndejc,0:ndnuc),
      &                 RWOm(0:ndejc,0:ndnuc),
@@ -219,7 +219,7 @@ C
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
       COMMON /NUMHLP_I/ LTUrbo
-      COMMON /NUMHLP_R/ RORed, ARGred, EXPmax, EXPdec, TURbo
+      COMMON /NUMHLP_R/ EXPmax, EXPdec, TURbo
       COMMON /TLCOEF/ TL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas

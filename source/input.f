@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
+Ccc   * $Rev: 2229 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -69,7 +69,6 @@ C
      &     0.67, 0., 0.67, 0., 0.79, 0., 0.60, 0., 0.57, 0., 0.49, 0.,
      &     0.43, 0., 0.50, 0., 0.39/
       DATA deut, trit, gamma, he3/'d ', 't ', 'g ','h '/
-      ARGred = -1.
 C-----maximum argument of EXP function supported by the computer (for real*8)
       EXPmax = 700.
 C-----maximum exponent of 10 supported by the computer (for real*8)
@@ -1997,8 +1996,8 @@ C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
                DO j = 1, NLW
                   rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
                ENDDO
-               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &              (2.d0*RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
+               WRITE (8,99010) EX(i,nnur), rocumul,
+     &              (2.d0*RO(i,j,1,nnur),j = 1,11)
             ENDDO
          ELSE
             WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
@@ -2007,10 +2006,10 @@ C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
                DO j = 1, NLW
                   rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
-               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &              (RO(i,j,1,nnur)*EXP(ARGred),j = 1,11)
-c     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 11,21)
-c     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
+               WRITE (8,99010) EX(i,nnur), rocumul,
+     &              (RO(i,j,1,nnur),j = 1,11)
+c     &                     (RO(i,j,1,nnur),j = 11,21)
+c     &                     (RO(i,j,1,nnur),j = 21,31)
             ENDDO
 
             WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
@@ -2019,10 +2018,10 @@ c     &                     (RO(i,j,1,nnur)*EXP(ARGred),j = 21,31)
                DO j = 1, NLW
                   rocumul = rocumul + RO(i,j,2,nnur)
                ENDDO
-               WRITE (8,99010) EX(i,nnur), rocumul*EXP(ARGred),
-     &              (RO(i,j,2,nnur)*EXP(ARGred),j = 1,11)
-c     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 11,21)
-c     &                     (RO(i,j,2,nnur)*EXP(ARGred),j = 21,31)
+               WRITE (8,99010) EX(i,nnur), rocumul,
+     &              (RO(i,j,2,nnur),j = 1,11)
+c     &                     (RO(i,j,2,nnur),j = 11,21)
+c     &                     (RO(i,j,2,nnur),j = 21,31)
             ENDDO
          ENDIF
       ENDIF

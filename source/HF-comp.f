@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
+Ccc   * $Rev: 2229 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -570,7 +570,6 @@ C--------
 C--------decay to discrete levels
 C-----
       ENDIF
-      IF (RORed.NE.0.0D0) THEN
          DO i = 1, NLV(Nejc)
             SCRtl(i,Nejc) = 0.0
          ENDDO
@@ -606,13 +605,12 @@ C
 C           TUNe commented as it is dangerous to scale Ts for discrete levels 
 C           Dec. 2007, MH, RCN, MS 
 C
-C           sumdl = sumdl*RORed*cor*TUNe(Nejc,Nnuc)
-            sumdl = sumdl*RORed*cor
+C           sumdl = sumdl*cor*TUNe(Nejc,Nnuc)
+            sumdl = sumdl*cor
             SCRtl(i,Nejc) = sumdl
             Sum = Sum + sumdl
          ENDDO
 C--------do loop over discrete levels --------- done --------------------
-      ENDIF
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
       END
@@ -1013,7 +1011,6 @@ C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
-      IF (RORed.NE.0.0D0) THEN
 C-----do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
@@ -1046,12 +1043,11 @@ C-----do loop over discrete levels -----------------------------------
      &                  xlm(lamb)*ipar + xle(lamb)*iodd
               ENDIF
              ENDDO
-          SCRtl(i, 0) = hscrtl*RORed
+          SCRtl(i, 0) = hscrtl
           Sum = Sum + SCRtl(i, 0)
           ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
-      ENDIF
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END
@@ -1200,7 +1196,6 @@ C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 C-----
 C-----DECAY TO DISCRETE LEVELS
 C-----
-      IF (RORed.NE.0.0D0) THEN
 C--------do loop over discrete levels -----------------------------------
          DO i = 1, NLV(Nnuc)
           lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
@@ -1232,12 +1227,11 @@ C--------do loop over discrete levels -----------------------------------
      &                  xlm(lamb)*ipar + xle(lamb)*iodd
               ENDIF
              ENDDO
-          SCRtl(i, 0) = hscrtl*RORed
+          SCRtl(i, 0) = hscrtl
           Sum = Sum + SCRtl(i, 0)
           ENDIF
          ENDDO
 C-----do loop over discrete levels --------- done --------------------
-      ENDIF
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END

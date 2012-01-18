@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
+Ccc   * $Rev: 2229 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -291,7 +291,7 @@ C-----EGSM,GSM,GCM
      &            EXP(( - eo/t))*(EXP(defit*(kk - 1)/t) - 1.)
             ELSE
                DO ij = 1, NLWst
-                  rocumul = rocumul + 0.5d0*defit/RORed*
+                  rocumul = rocumul + 0.5d0*defit*
      &                    (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &                     RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
                ENDDO
@@ -403,7 +403,7 @@ C
  
       DO kk = 2, nplot
          DO ij = 1, NLWst
-            rocumul = rocumul + 0.5d0*defit/RORed*
+            rocumul = rocumul + 0.5d0*defit*
      &           (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &           RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
          ENDDO
