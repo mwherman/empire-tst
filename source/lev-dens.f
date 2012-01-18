@@ -1,5 +1,5 @@
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 06:14:25 +0100 (Mi, 18 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1325,7 +1325,6 @@ C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054d0
          ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
-c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C-----Arthurs' parametrization
@@ -1335,7 +1334,6 @@ C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.054d0
          ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
-c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C-----Mebel's  parametrization (taken from the INC code for the case
@@ -1346,7 +1344,6 @@ C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.051d0
          ROPar(1,Nnuc) = atil*FSHELL(enorm,SHC(Nnuc),-GAMma)
-c     &     atil*(1.d0 + SHC(Nnuc)*(1.d0 - EXP(GAMma*enorm))/enorm)
          igna = 1
       ENDIF
 C

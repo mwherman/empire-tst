@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2229 $
+Ccc   * $Rev: 2232 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-18 06:14:25 +0100 (Mi, 18 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1732,7 +1732,6 @@ C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.0
 C-----calculate compound nucleus level density 
-c     IF(FITlev.GT.0) CALL INP_LD(nnuc)  ! only for FITLEV>0    
       CALL INP_LD(nnuc)      
 C
 C-----other decaying nuclei
@@ -1985,25 +1984,28 @@ C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
-         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR '',I3,''-'',A2)') 
-     &        ia, SYMb(nnur)
-         WRITE(8,'(/2x,A25,1x,F5.2,A4//
-     &1x,''   E        RHO(E)  '')')
-     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),' MeV'
+         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
+     &        ,I3,''-'',A2)') ia, SYMb(nnur)
+         WRITE(8,'(/2x,A25,1x,F5.2,A46,I3//
+     &1x,''   E        RHO(E)  '')')     
+     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),
+     &        ' MeV above the corresponding discrete level # ',NLV(nnur)     
          IF (ADIv.NE.3.0D0) THEN
             DO i = 1, NEX(nnur)
                rocumul = 0.D0
-               DO j = 1, NLW
-                  rocumul = rocumul + 2.d0*RO(i,j,1,nnur)
+               DO j = 1, NDLW
+                  rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
                WRITE (8,99010) EX(i,nnur), rocumul,
-     &              (2.d0*RO(i,j,1,nnur),j = 1,11)
+     &              (RO(i,j,1,nnur),j = 1,11)
+c     &                     (RO(i,j,1,nnur),j = 11,21)
+c     &                     (RO(i,j,1,nnur),j = 21,31)     
             ENDDO
          ELSE
             WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
             DO i = 1, NEX(nnur)
                rocumul = 0.D0
-               DO j = 1, NLW
+               DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
                WRITE (8,99010) EX(i,nnur), rocumul,
@@ -2015,7 +2017,7 @@ c     &                     (RO(i,j,1,nnur),j = 21,31)
             WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
             DO i = 1, NEX(nnur)
                rocumul = 0.D0
-               DO j = 1, NLW
+               DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,2,nnur)
                ENDDO
                WRITE (8,99010) EX(i,nnur), rocumul,
@@ -2329,9 +2331,6 @@ C--------------------only gamma decay is considered up to now
               ENDIF
             ENDIF
           ENDDO  ! end of loop over levels
-C         IF(IOUT.GT.3) write(8,'(1x,A12,1x,A5,1x,A25,1x,F5.2,A4)')
-C    &        'FOR NUCLEUS ',chelem,
-C    &        'CONTINUUM STARTS ABOVE E=',ELV( NLV(Nnuc),Nnuc),' MeV'
         ENDIF
       ENDIF
   200 IF(.NOT.ADDnuc) THEN
@@ -6919,13 +6918,12 @@ C
 C Local variables
 C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
-     &                 atilave, atilsum, del, delp, dob, econd, gamma,
+     &                 del, delp, dob, econd, gamma,
      &                 pi2, qn, tcrt, uexc, xr, ddob, esh, dap, dam
       DOUBLE PRECISION om2_gsm,delp_gsm,asys_gsm,asyserr_gsm,dshift_gsm
 
-      REAL FLOAT
       DOUBLE PRECISION FSHELL
-      INTEGER iloc, ix, izamn, izamx, izar, nexp, nnuc, iz, nlevc
+      INTEGER iloc, ix, izamn, izamx, izar, nnuc, iz, nlevc
       INTEGER INT
       pi2 = PI**2
       izamx = 0
@@ -6934,8 +6932,6 @@ C
          izamx = MAX(IZA(nnuc),izamx)
          izamn = MIN(IZA(nnuc),izamn)
       ENDDO
-      nexp = 0
-      atilsum = 0.0
 C-----Set EGSM normalization factors for each Z
       DO iz = 1,NDZmax
          ATIlnoz(iz) = 1.0 !default
@@ -7004,8 +7000,8 @@ C
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
 
-C-----------set up normalization factors for level density parameter 'a'
-            IF (ROPaa(nnuc).EQ. (- 2.D0)) THEN
+C-----------Set up normalization factors for level density parameter 'a'
+C-----------for all level density models except HFB
 C--------------Gilbert-Cameron (no explicit collective effects)
                IF (ADIv.EQ.2.D0) THEN
                   ! for the time being, G&C not refitted !
@@ -7013,15 +7009,20 @@ C--------------Gilbert-Cameron (no explicit collective effects)
                   delp = 12.0/SQRT(A(nnuc))
                   IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
                   IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
-                  uexc = qn - del
-                  atil = 0.114*A(nnuc) + 9.80E-2*A(nnuc)**0.666667
-                  gamma = 0.051
-                  asys = atil*(1.0 + SHC(nnuc)
-     &                   *(1.0 - EXP((-gamma*uexc)))/uexc)
-                  atiln = arogc/asys
-C--------------EMPIRE specific (EGSM) with RIPL/3 shell corrections
-C              ELSEIF (ADIv.EQ.0.0D0) THEN
-               ELSE
+                  uexc = qn - del                  
+C-----Mebel's  parametrization (taken from the INC code for the case
+C-----of no collective enhancements) normalized to existing exp. data
+      IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
+         atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
+         gamma = 0.051d0
+         asys = atil*FSHELL(uexc,SHC(Nnuc),gamma)
+         atiln =  arogc/asys
+      ELSE
+         atiln = 1.0   
+      ENDIF                  
+      ENDIF                  
+C--------------EMPIRE specific (EGSM) with RIPL shell corrections
+             IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
                   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
                   atil = ap1*A(nnuc) + ap2*a23
                   tcrt = 0.567*delp
@@ -7043,14 +7044,14 @@ C              ELSEIF (ADIv.EQ.0.0D0) THEN
                   ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
                ENDIF
 C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCROSS)
-               ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+               IF(ADIv.EQ.1 .OR. ADIv.EQ.2) 
+     &            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
                ROPar(3,nnuc) = del
 C--------------Print resulting level density parameters
                IF (FITlev.GT.0.0D0) THEN
                   WRITE (8,*) ' '
                   WRITE(8,'(1X)')
                   WRITE(8,
-
      &              '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
      &              ''ext. nor. a_final'')')
                   IF (ADIv.EQ.0.0D0)
@@ -7085,22 +7086,10 @@ C--------------Print resulting level density parameters
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
                ENDIF
-C--------------Calculate sum for the average normalization factor
-               atilsum = atilsum + atiln
-               nexp = nexp + 1
-            ENDIF
          ENDIF
       ENDIF
       GOTO 100
-  200 IF (ROPaa(nnuc).EQ.(-2.D0) .AND. nexp.GT.0) THEN
-         atilave = ABS(atilsum/FLOAT(nexp))
-      ELSE
-         atilave = 1.0
-      ENDIF
-      IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0)
-     &    WRITE (8,'(''               Average exp/sys'',2x,F8.5)')
-     &               atilave
-      WRITE(8,'(1X)')
+  200 WRITE(8,'(1X)')
       WRITE(8,'(3X,''Nucleus                   final  norm.'')')
       WRITE(8,'(1X)')
       DO nnuc = 1, NNUct
