@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2244 $
+Ccc   * $Rev: 2246 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 06:00:11 +0100 (Do, 19 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -972,22 +972,22 @@ C
             STOP 'INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 
-         IF(TOTred.NE.1.d0) THEN
-            IF(FUSred.EQ.1 .AND. ELAred.EQ.1) THEN
-               FUSred = TOTred
-               ELAred = TOTred
-               WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
-            ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
-               WRITE (8,*) 'WARNING: TOTRED ignored as both'
-               WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
-            ELSEIF(FUSred.NE.1) THEN
-               WRITE (8,*) 'WARNING: TOTRED ignored as both'
-               WRITE (8,*) 'WARNING: TOTRED and FUSRED are in the INPUT'
-            ELSEIF(ELAred.NE.1) THEN
-               WRITE (8,*) 'WARNING: TOTRED ignored as both'
-               WRITE (8,*) 'WARNING: TOTRED and ELARED are in the INPUT'
-            ENDIF
-         ENDIF
+C        IF(TOTred.NE.1.d0) THEN
+C           IF(FUSred.EQ.1 .AND. ELAred.EQ.1) THEN
+C              FUSred = TOTred
+C              ELAred = TOTred
+C              WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
+C           ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
+C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
+C              WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
+C           ELSEIF(FUSred.NE.1) THEN
+C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
+C              WRITE (8,*) 'WARNING: TOTRED and FUSRED are in the INPUT'
+C           ELSEIF(ELAred.NE.1) THEN
+C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
+C              WRITE (8,*) 'WARNING: TOTRED and ELARED are in the INPUT'
+C           ENDIF
+C        ENDIF
 
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN

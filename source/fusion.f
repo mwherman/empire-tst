@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2246 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 06:00:11 +0100 (Do, 19 Jän 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -737,13 +737,13 @@ C
       ENDDO
       CLOSE (45)
 
-      IF(CSFus.gt.0.d0 .and. TOTred.ne.1.d0 .and. FUSred.eq.1.d0) then
+      IF(CSFus.gt.0.d0 .and. TOTred.ne.1.d0) then
+        if(FUSred.NE.1) WRITE (8,*) 'WARNING: INPUT FUSred dismissed'
         FUSred = (TOTred*TOTcs - ELAcs)/CSFus
-        if(FUSred.gt.1) WRITE (8,*) 'WARNING: INPUT FUSred dismissed'
-       
         WRITE (8,*) 
-     >  'Reaction XS scaled to reproduce scaled total XS by TOTRED=',
-     >  TOTred
+     >  ' FUSRED scaled to reproduce scaled total XS by TOTRED=',
+     >  sngl(TOTred)
+	  TOTred = 1.D0
 	ENDIF
 
   300 el = EINl
