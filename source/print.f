@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2240 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-19 02:55:50 +0100 (Do, 19 Jän 2012) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -179,7 +179,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csemax, e, s0, s1, s2, s3, totspec, recorp
+      DOUBLE PRECISION csemax, e, s0, s1, s2, s3, totspec, cstmp, recorp
       CHARACTER haha, hstar, symc(93)
       INTEGER i, ia, ij, kmax, l, n
       INTEGER IFIX, MIN0
@@ -197,8 +197,9 @@ C     Cross sections smaller than 0.05 mb are not relevant at all.
 C
       IF (csemax.LE.1.d-5) return
 
-      kmax = kmax + 1
-      kmax = MIN0(kmax,NDECSE)
+C      kmax = kmax + 1
+C      kmax = MIN0(kmax,NDECSE)
+
       totspec = 0.d0
       DO i = 1, kmax
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
@@ -259,12 +260,13 @@ C
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (8,99045)
 
-      totspec = 0.0
       DO i = 1, kmax
-         totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
-         IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
-            l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
+         cstmp = CSE(i,Nejc,Nnuc)
+         IF(Iflag.EQ.0 .AND. (i.EQ.1 .OR. i.EQ.kmax)) 
+     &                                             cstmp=0.5d0*cstmp
+         IF (cstemp.GE.s0) THEN
+            l = IFIX(SNGL(LOG10(cstmp) - n + 3)*31. + 0.5)
             l = MIN0(93,l)
             DO ij = 1, l
                symc(ij) = hstar
@@ -280,13 +282,9 @@ C
          DO ij = 1, 93
             symc(ij) = haha
          ENDDO
-  150    WRITE (8,99040) e/recorp, CSE(i,Nejc,Nnuc)*recorp, symc
+  150    WRITE (8,99040) e/recorp, cstmp*recorp, symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-
-      if(Iflag.eq.0) totspec = totspec - 
-     &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-      totspec = totspec*DE
 
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
