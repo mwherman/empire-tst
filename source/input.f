@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2239 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 22:23:15 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2241 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-19 02:57:20 +0100 (Do, 19 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4720,13 +4720,25 @@ C-----
                WRITE (8,
      &             '('' Exciton densities are used in DDHMS '')')
                WRITE (12,
-     &             '('' Exciton densities are be used in DDHMS '')')
-             ELSE
+     &             '('' Exciton densities are used in DDHMS '')')
+             ELSE IF(val.LT.1.99D0) THEN
                FHMs = 1
                WRITE (8,
      &             '('' Fermi gas densities are used in DDHMS '')')
                WRITE (12,
      &             '('' Fermi gas densities are used in DDHMS '')')
+             ELSE IF(val.LT.2.99D0) THEN
+               FHMs = 2
+               WRITE (8,
+     &         '('' Exact NR Fermi gas densities are used in DDHMS '')')
+               WRITE (12,
+     &         '('' Exact NR Fermi gas densities are used in DDHMS '')')
+             ELSE 
+               FHMs = 3
+               WRITE (8,
+     &       '('' Exact rel. Fermi gas densities are used in DDHMS '')')
+               WRITE (12,
+     &       '('' Exact rel. Fermi gas densities are used in DDHMS '')')
             ENDIF
             GOTO 100
          ENDIF
