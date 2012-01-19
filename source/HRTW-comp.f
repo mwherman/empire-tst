@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2229 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2245 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 05:21:34 +0100 (Do, 19 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -39,7 +39,8 @@ C
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
-C     DOUBLE PRECISION VT1
+      CHARACTER*1 cpar(2)
+      DATA cpar/'+','-'/ 
 C
 C
 C
@@ -246,10 +247,10 @@ C
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
 !        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
-                WRITE(8,'(A12,f4.1,A5,I2,A6,F5.3,A4,/,A35,d12.6)')
-     &           'CN state J=',cnspin,', Par=',ip,
-     &           ' at U=',EX(ke,nnuc),' keV',
-     &           'Int[Rho(U)*Tl(U)] + Sum[Tl(Ui)] = ',sumg
+                WRITE(8,'(A12,f4.1,A6,A1,A6,F7.3,A4,/,A37,d12.6)')
+     &           'CN state J=',cnspin,', Par:',cpar(ipar),
+     &           ' at U=',EX(ke,nnuc),' MeV',
+     &           'Int[Rho(U)*Tlg(U)] + Sum[Tlg(Ui)] = ',sumg
                 sumtg = sumtg + sumg
               ENDIF
             ENDIF
