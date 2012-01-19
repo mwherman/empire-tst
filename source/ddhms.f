@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2242 $
+Ccc   * $Rev: 2252 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 02:59:29 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 11:54:18 +0100 (Do, 19 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2242 $
+C CVS Version Management $Revision: 2252 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2447,7 +2447,7 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2242 $')
+99005 FORMAT ('  xddhms version: $Revision: 2252 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4947,7 +4947,7 @@ c      gg=wk2/(ak1*hbarc**4)
         wk2=ak22-akx22
         ak32=akf12
         if(ak2.gt.akf1) then
-          dw=(akf22+2.0d0*alf1**3/ak2)-akf12
+          dw=(akf22+2.0d0*akf1**3/ak2)-akf12
           wk2=wk2-dw
           ak32=ak32+dw
          endif
