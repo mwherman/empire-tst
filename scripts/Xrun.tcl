@@ -1,6 +1,6 @@
-# $Rev: 2171 $
-# $Author: gnobre $
-# $Date: 2011-12-19 21:55:18 +0100 (Mo, 19 Dez 2011) $
+# $Rev: 2249 $
+# $Author: mherman $
+# $Date: 2012-01-19 08:29:53 +0100 (Do, 19 Jän 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5432,7 +5432,7 @@ set filelist [lsort -dictionary $filelist]
 set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
 set archdirlist {}
 foreach elm $archdirlistmp {
-if {$elm != "$::env(EMPIREDIR)/RIPL-2/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
+if {$elm != "$::env(EMPIREDIR)/RIPL/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
 lappend archdirlist $elm }
 }
 set archdirlist [lsort -dictionary $archdirlist]
@@ -5607,7 +5607,7 @@ foreach el $stablist {
    if {$cplot == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $mulinputn}
    #if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
-#  exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111
+   exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
@@ -5697,7 +5697,7 @@ set filelist [lsort -dictionary $filelist]
 set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
 set archdirlist {}
 foreach elm $archdirlistmp {
-if {$elm != "$::env(EMPIREDIR)/RIPL-2/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
+if {$elm != "$::env(EMPIREDIR)/RIPL/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
 lappend archdirlist $elm }
 }
 set archdirlist [lsort -dictionary $archdirlist]
@@ -7751,7 +7751,7 @@ lappend stablist [lindex $elf 0]
     button $site_12_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {readabun $::env(EMPIREDIR)/RIPL-2/masses/abundance.dat} \
+        -command {readabun $::env(EMPIREDIR)/RIPL/masses/abundance.dat} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
         -highlightbackground #dcdcdc -text {Load stable} 
     vTcl:DefineAlias "$site_12_0.but76" "Button142" vTcl:WidgetProc "Toplevel1" 1
@@ -8660,7 +8660,7 @@ cd $workdir} \
         -label {EMPIRE input} 
     $site_3_0.menu96 add command \
         \
-        -command { editFile $::env(EMPIREDIR)/RIPL-2/optical/om-data/om-index.txt } \
+        -command { editFile $::env(EMPIREDIR)/RIPL/optical/om-data/om-index.txt } \
         -label {RIPL omp} 
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/doc/hints.txt } -label FAQ 
