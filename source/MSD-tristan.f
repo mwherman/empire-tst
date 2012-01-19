@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2243 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-19 03:05:09 +0100 (Do, 19 Jän 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3071,7 +3071,7 @@ C
          WRITE (8,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
          WRITE (8,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
          WRITE (8,*) ' NUCLEUS NNUC=', Nnuc, ' NEX(NNUC)=', NEX(Nnuc)
-         WRITE (8,*) ' I BETTER  S T O P'
+         WRITE (8,*) ' I HAD BETTER  S T O P'
          STOP
       ENDIF
 C-----
