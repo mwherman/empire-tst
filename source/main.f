@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2244 $
+Ccc   * $Rev: 2247 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 07:32:46 +0100 (Do, 19 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -471,29 +471,15 @@ C------------End of adding inelastic to continuum
       ENDIF
  1400 CLOSE (45)
       IF (DIRect.NE.0) CLOSE (46)
-C-----Print elastic and direct cross sections from ECIS
-      WRITE (8,*) ' '
-      WRITE (8,*) ' '
+
       IF (KTRlom(0,0).GT.0 .AND. FIRst_ein) THEN
         IF (DIRect.EQ.0) THEN
-         WRITE (8,*)
-     &       ' Results provided by Spherical Optical Model calculations'
-         WRITE (8,*) ' '
         ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
-         WRITE (8,*) ' Results provided by Coupled Channel calculations'
-         WRITE (8,*) ' Inelastic scattering results provided by'
-         WRITE (8,*) ' Coupled Channel + DWBA calculations'
          if((CSMsd(1)+CSMsd(2)).NE.0.)
      &   WRITE (8,*) ' Some discrete levels are embedded into continuum'
-         WRITE (8,*) ' '
         ELSEIF (DIRect.EQ.3) THEN
-         WRITE (8,*)
-     &       ' Results provided by Spherical Optical Model calculations'
-         WRITE (8,*)
-     &     ' Inelastic scattering results provided by DWBA calculations'
          if(xsinlcont.NE.0.)
      &   WRITE (8,*) ' Some discrete levels are embedded into continuum'
-         WRITE (8,*) ' '
         ENDIF
       ENDIF
 
@@ -506,24 +492,38 @@ C-----Print elastic and direct cross sections from ECIS
      &   (ELAcs*ELAred + CSFus + (SINl + SINlcc)*FCCred + SINlcont) /
      &                 (TOTcs*TOTred)
 C
-         WRITE (8,99005) TOTcs,TOTred*TOTcs*TOTcorr,
-     &                   CSFus/FUSred,CSFus,
-     &                   SINlcc + SINl + SINlcont,
-     &                   (SINlcc + SINl)*FCCred + SINlcont,
-     &                   ELAcs, ELAred*ELAcs
+         WRITE (8,99005) TOTcs,TOTred*TOTcorr,TOTred*TOTcs*TOTcorr,
+     &                   CSFus/FUSred,FUSRED,CSFus,
+     &                   ELAcs, ELAred, ELAred*ELAcs 
 99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
-     &                '  ( Scaled  ',e14.7,' mb )',/,2x,
+     &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )',/,2x,
      &           'Absorption cross section    :',e14.7,' mb',
-     &                '  ( Scaled  ',e14.7,' mb )',/,2x,
-     &           'Direct cross section        :',e14.7,' mb',
-     &                '  ( Scaled  ',e14.7,' mb )',/,2x,
+     &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )',/,2x,
      &           'Shape elastic cross section :',e14.7,' mb',
-     &                '  ( Scaled  ',e14.7,' mb )')
-         WRITE(8,'(//)')
+     &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )')
+         IF((SINlcc + SINl + SINlcont).GT.0) 
+     &    WRITE (8,99006) SINlcc + SINl + SINlcont,
+     &                  ((SINlcc + SINl)*FCCred + SINlcont)/
+     &                   (SINlcc + SINl + SINlcont),
+     &                   (SINlcc + SINl)*FCCred + SINlcont
+99006    FORMAT (/,2x,
+     &           'Direct cross section        :',e14.7,' mb',
+     &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )')
+         WRITE(8,'(/)')
       ENDIF
       IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
-         WRITE (8,99010) CSFus + (SINlcc + SINl)*FCCred + SINlcont
-99010    FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',//)
+C        WRITE (8,99010) CSFus + (SINlcc + SINl)*FCCred + SINlcont
+C99010   FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb')
+         WRITE (8,99010) CSFus/FUSred,FUSRED,CSFus
+99010    FORMAT (/,2x,
+     &           'Absorption cross section    :',e14.7,' mb',
+     &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )')
+         IF((SINlcc + SINl + SINlcont).GT.0) 
+     &    WRITE (8,99006) SINlcc + SINl + SINlcont,
+     &                  ((SINlcc + SINl)*FCCred + SINlcont)/
+     &                   (SINlcc + SINl + SINlcont),
+     &                   (SINlcc + SINl)*FCCred + SINlcont
+         WRITE(8,'(/)')
       ENDIF
       WRITE (8,99015)
       WRITE (8,99020)
@@ -3103,10 +3103,10 @@ C     ENDDO
         WRITE (8,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
         IF (INT(ZEJc(0)).EQ.0) THEN
-          if(TOTred.ne.1.)
+          if(TOTred.ne.1)
      &    WRITE (8,'('' * Total cross section scaled by '',G13.6)')
      &    TOTred
-          if(ELAred.ne.1.)
+          if(ELAred.ne.1)
      &    WRITE (8,
      &     '('' * Shape Elastic cross section scaled by '',G13.6)')
      &     ELAred
@@ -3144,10 +3144,10 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) WRITE (8,
      &  '('' * Compound elastic cross section (CE) '',G13.6,
      &              '' mb  '')') 4.*PI*ELCncs
-        if(FUSred.ne.1.)
+        if(FUSred.ne.1)
      &  WRITE (8,'('' * CN formation cross section scaled by '',G13.6
      &  )') FUSred
-        if(FCCred.ne.1.)
+        if(FCCred.ne.1)
      &  WRITE (8,'('' * Direct collective cross section scaled by '',
      &  G12.5)') FCCred
          WRITE (8,'('' ********************************************'',

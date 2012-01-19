@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2246 $
+Ccc   * $Rev: 2247 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 06:00:11 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 07:32:46 +0100 (Do, 19 Jän 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -737,16 +737,39 @@ C
       ENDDO
       CLOSE (45)
 
+  300 CONTINUE
+
+
+C-----Print elastic and direct cross sections from ECIS
+      WRITE (8,*) ' '
+      WRITE (8,*) ' '
+      IF (KTRlom(0,0).GT.0 .AND. FIRst_ein) THEN
+        IF (DIRect.EQ.0) THEN
+         WRITE (8,*)
+     &       ' Results provided by Spherical Optical Model calculations'
+        ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
+         WRITE (8,*) ' Results provided by Coupled Channel calculations'
+         WRITE (8,*) ' Inelastic scattering results provided by'
+         WRITE (8,*) ' Coupled Channel + DWBA calculations'
+        ELSEIF (DIRect.EQ.3) THEN
+         WRITE (8,*)
+     &       ' Results provided by Spherical Optical Model calculations'
+         WRITE (8,*)
+     &     ' Inelastic scattering results provided by DWBA calculations'
+        ENDIF
+      ENDIF
+
       IF(CSFus.gt.0.d0 .and. TOTred.ne.1.d0) then
         if(FUSred.NE.1) WRITE (8,*) 'WARNING: INPUT FUSred dismissed'
         FUSred = (TOTred*TOTcs - ELAcs)/CSFus
-        WRITE (8,*) 
-     >  ' FUSRED scaled to reproduce scaled total XS by TOTRED=',
-     >  sngl(TOTred)
+        WRITE (8,'(1x,A18,F5.2,A49,F5.2)') 
+     >   ' FUSRED scaled by ', sngl(FUSRED),
+     >   ' to impose requested scaling of total by TOTRED =',
+     >   sngl(TOTred)
 	  TOTred = 1.D0
 	ENDIF
 
-  300 el = EINl
+      el = EINl
       relcal = .FALSE.
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
