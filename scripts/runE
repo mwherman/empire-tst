@@ -32,6 +32,10 @@ def runE(proj):
         time.sleep(2)
         os.environ['EMPIREDIR'] = '..'
     
+    # Preserve previous *.lst file for comparison
+    if not isEmpty(proj+'.lst'):
+        cp(proj+'.lst', proj+'-prev.lst')
+        print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
     
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
