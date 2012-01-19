@@ -1,6 +1,6 @@
-C $Rev: 2229 $
-C $Author: mherman $
-C $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+C $Rev: 2242 $
+C $Author: bcarlson $
+C $Date: 2012-01-19 02:59:29 +0100 (Do, 19 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -21,7 +21,7 @@ C
      &                 CSE(ndecse,0:ndejc,0:ndnuc), FISbin(0:ndnuc),
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
-     &                 CSEahmslab(ndecse,ndangecis,2,0:ndnuc),
+     &                 CSEahmslab(ndecse,ndangecis,2),
      &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
      &                 CSEhms(ndecse,2,0:ndnuc),
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
@@ -106,7 +106,10 @@ C
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
-     &				   ELAred
+     &                 POPhmsx(ndecsed,2,0:ndexclus),
+     &                 POPhmslab(ndecsed,2,0:ndexclus),
+     &                 POPhmsalab(ndecsed,ndangecis,2,0:ndexclus),
+     &		       POPcon(ndnuc), POPdis(ndnuc), ELAred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -191,7 +194,8 @@ C
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
      &                 CSEhms, CSEhmslab, CSEfis, CSE, CSEa, CSEt, 
-     &                 CSEahmslab, RECcse, 
+     &                 CSEahmslab, POPhmsx, POPhmslab, POPhmsalab,
+     &                 RECcse, POPcon, POPdis, 
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,

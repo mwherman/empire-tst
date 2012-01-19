@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2242 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-19 02:59:29 +0100 (Do, 19 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -76,8 +76,8 @@ C
      &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
-     &                 step, sum, sumfis, sumfism(NFMOD), 
-     &                 totemis, weight, xcse, xizat, xnl, xnor,
+     &                 step, sum, sumfis, sumfism(NFMOD), totsp, pnrm,
+     &                 totemis, weight, xcse, xizat, xnl, xnor, xnrm,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
      &                 emiss_en(NDEPFN),post_fisn(NDEPFN), tequiv0,
@@ -105,17 +105,12 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, ke, kemax, kemin, ltrmax, m, jz, jn, jzmx, jnmx, 
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp, jfiss,
-     &        nnur, nnurec, nspec, neles,
+     &        nnur, nnurec, nspec, neles, nxsp, npsp,
      &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, nepfns(0:1),
      &        isnewchain(0:1), ncon
       INTEGER INT, MIN0, NINT
       LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
-
-
-
-
-
 
       INCLUDE 'io.h'
       DATA ctldir/'TL/'/
@@ -976,7 +971,25 @@ c        ELSE
 c           CALL SCNDPREEQ(nnur, nnurp, 2, 2)
 c        ENDIF
 C--------second chance preequilibrium *** done ***
-
+C--------
+C--------HMS Monte Carlo preequilibrium emission
+C--------        
+         IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
+            xizat = IZA(0)
+            CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
+     &             CSFus*corrmsd,CHMs,DE,DERec,FHMs,NHMs,QDFrac,
+     &                 0,1,0,icalled)
+            icalled = 1
+c            CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
+c            CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
+            WRITE (8,
+     &        '('' HMS inclusive neut. emission ='',G12.5,
+     &          ''mb'')') CSHms(1,0)
+            WRITE (8,
+     &        '('' HMS inclusive prot. emission ='',G12.5,
+     &          ''mb'')') CSHms(2,0)
+         ENDIF
+       totemis = CSHms(1,1) + CSHms(2,1)
 C-----
 C-----PE + DWBA cont. *** done ***
 C-----
@@ -1317,53 +1330,6 @@ C-------
      &             CSEmis(2,1)
             WRITE (8,*) ' '
          ENDIF          ! Degas done
-C--------
-C--------HMS Monte Carlo preequilibrium emission
-C--------
-         IF (nnuc.EQ.1 .AND. EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
-            CLOSE (8)
-            xizat = IZA(0)
-            xnhms = NHMs
-            debinhms = DE
-            IF (debinhms.LT.1.0D0) debinhms = 1.0
-C           CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
-C    &                 CSFus*corrmsd,CHMs,debinhms,xnhms,0,1,0,QDFrac,
-C    &                 icalled)
-            icalled = 1
-            CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
-            CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
-            WRITE (8,
-     &        '('' HMS inclusive neut. emission ='',G12.5,
-     &          ''mb'')') CSHms(1,0)
-            WRITE (8,
-     &        '('' HMS inclusive prot. emission ='',G12.5,
-     &          ''mb'')') CSHms(2,0)
-            IF (ENDf(1).EQ.1 .AND. FIRst_ein) THEN
-               WRITE (8,*) ' '
-               WRITE (8,*)
-     &                'WARNING: HMS Inclusive total emissions treated  '
-               WRITE (8,*)
-     &                'WARNING: as comming from the first CN. Allows   '
-               WRITE (8,*)
-     &                'WARNING: to check flux balance as long as       '
-               WRITE (8,*)
-     &                'WARNING: multiple P.E. can be neglected. At     '
-               WRITE (8,*)
-     &                'WARNING: higher energies this does not hold and '
-               WRITE (8,*)
-     &                'WARNING: balance will get wrong.  This is OK    '
-               WRITE (8,*)
-     &                'WARNING: since inclusive spectra are fine and,  '
-               WRITE (8,*)
-     &                'WARNING: in any case there are no approximations'
-               WRITE (8,*)
-     &                'WARNING: for production cross sections and      '
-               WRITE (8,*)
-     &                'WARNING: recoils!                               '
-               WRITE (8,*) ' '
-               CLOSE (8)
-            ENDIF
-         ENDIF
 C--------
 C--------Heidelberg Multistep Compound calculations
 C--------
@@ -1884,6 +1850,8 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
              IF (ctotsp.NE.0) emedc = emedc/ctotsp
 C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
+             xnrm = 1.0d0
+             pnrm = 1.0d0
              IF (nnuc.EQ.mt91) THEN
                   nejc = 1
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
@@ -1926,6 +1894,42 @@ c                 ENDDO
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
+              ELSE
+c                  write(8,*)'xtotsp,ptosp:',xtotsp,ptotsp,atotsp
+                  IF(atotsp.LT.1.0d-8) THEN
+                    totsp = CSprd(nnuc) - dtotsp - htotsp - ttotsp
+                    IF(NDEJC.EQ.7) totsp = totsp - ctotsp
+                    nxsp = 0
+                    IF(xtotsp.GT.0.0d0) THEN
+                      nxsp=INT(xtotsp/totsp+0.5d0)
+                      IF(ttotsp.GT.0.0d0) THEN
+                        xnrm = (nxsp*totsp+dtotsp)/xtotsp
+                        xtotsp = nxsp*totsp + dtotsp
+                       ELSE
+                        xnrm = nxsp*totsp/xtotsp
+                        xtotsp = nxsp*totsp
+                       ENDIF
+                      POPcs(1,INExc(nnuc)) = xtotsp
+                      IF(ABS(1.0d0 - xnrm).GT.0.01d0) WRITE(8,
+     &        '(''WARNING! Exclusive neutron spectrum renormalized by'',
+     &                               f6.3)') xnrm
+                     ENDIF
+                    npsp = 0
+                    IF(ptotsp.GT.0.0d0) THEN
+                      npsp=INT(ptotsp/totsp+0.5d0)
+                      IF(htotsp.GT.0.0d0) THEN
+                        pnrm = (npsp*totsp+dtotsp)/ptotsp
+                        ptotsp = npsp*totsp + dtotsp
+                       ELSE
+                        pnrm = npsp*totsp/ptotsp
+                        ptotsp = npsp*totsp
+                       ENDIF
+                      POPcs(2,INExc(nnuc)) = ptotsp
+                      IF(ABS(1.0d0 - pnrm).GT.0.01d0) WRITE(8,
+     &        '(''WARNING! Exclusive  proton spectrum renormalized by'',
+     &                     f6.3)') pnrm
+                     ENDIF
+                   ENDIF
              ENDIF
 
              WRITE (8,*) ' '
@@ -1941,6 +1945,10 @@ c                 ENDDO
              WRITE (8,*)
      &           '-------------------------------------------------'
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
+               POPcse(0,1,ispec,INExc(nnuc)) = 
+     &                               xnrm*POPcse(0,1,ispec,INExc(nnuc))
+               POPcse(0,2,ispec,INExc(nnuc)) = 
+     &                               pnrm*POPcse(0,2,ispec,INExc(nnuc))
                IF (NDEJC.EQ.7) THEN
                       WRITE (8,'(9g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,INExc(nnuc)),
@@ -2115,6 +2123,14 @@ C------------Print residual nucleus population
              DO i = 1, NLV(nnur)
                poplev = poplev + POPlv(i,nnur)
              ENDDO
+             IF(LHMs.NE.0) THEN
+               IF(nejc.GT.2) THEN
+                 poptot = poptot - POPcon(nnur)
+                 poplev = poplev - POPdis(nnur)
+                ELSE
+                 poptot = poptot + CSHms(1,nnur) + CSHms(2,nnur)
+                ENDIF
+              ENDIF
 
              if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
      &                          .and. ENDF(nnuc).gt.0) then
@@ -3256,7 +3272,7 @@ C             Subtract HMS contribution to CM emission spectrum
            DO ie = 1, nspec ! reconstruct continuum DDX spectrum
              ftmp = recorp*csetmp(ie)/4.0/PI
              DO nang = 1, NDANG
-               cseaprnt(ie,nang) = ftmp + CSEahmslab(ie,nang,1,0)
+               cseaprnt(ie,nang) = ftmp + CSEahmslab(ie,nang,1)
               ENDDO
              CSE(ie,1,0) = recorp*csetmp(ie) + CSEhmslab(ie,1,0)
             ENDDO 
@@ -3331,7 +3347,7 @@ C             Subtract HMS contribution to CM emission spectrum
            DO ie = 1, nspec ! reconstruct continuum DDX spectrum
              ftmp = recorp*csetmp(ie)/4.0/PI
              DO nang = 1, NDANG
-               cseaprnt(ie,nang) = ftmp + CSEahmslab(ie,nang,2,0)
+               cseaprnt(ie,nang) = ftmp + CSEahmslab(ie,nang,2)
               ENDDO
              CSE(ie,2,0) = recorp*csetmp(ie) + CSEhmslab(ie,2,0)
            ENDDO 

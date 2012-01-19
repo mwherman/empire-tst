@@ -1,8 +1,10 @@
-c CVS Version Management $Revision: 1862 $
+c CVS Version Management $Revision: 2242 $
 c $Id: ddhms.cmb,v 1.8 2007/09/03 14:20:29 Capote Exp $
 c 
 	integer ndim_ebins
-	parameter (ndim_ebins = 500)    !must be >  emax=einc+Q /debin
+	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
+        integer ndim_bnds
+	parameter (ndim_bnds = 40)    !limit of x-energy in excl.ang.dist.
 	integer maxnemiss  
 	parameter (maxnemiss = 6)  ! max number of emitted preeq. nucleons  
 
@@ -28,14 +30,18 @@ c
 !  ndanghms2 = number of   phi angle bins (every 5 degrees)
 
 !--------------------------------------------------------------
+c  damping rate test
+      REAL*8 vp,vh,vp2,vh2,vpe,vpe2,vhe,vhe2
+      INTEGER npv,nhv
+      common/matave/vp,vh,vp2,vh2,vpe,vpe2,vhe,vhe2,npv,nhv
 
 c input flags controling print of history file and recoil information in o/p
       common/iflagprint/ ihistlab, irecprint, iomlread
       integer ihistlab,irecprint, iomlread
 
 c quasideuteron frac. of photoabsorption cross section -- used in SETUPINITPH
-      common/qdsetup/ QDFrax
       real*8 QDFrax
+      common/qdsetup/ QDFrax
 
 c lookup tables for particle energy selection for Fermi distributions
       INTEGER ntmx, ifermi
@@ -82,17 +88,24 @@ c /spec/ arrays of neutron and proton differential spectra
      +             ddxsn(0:ndim_ebins,ndanghms),
      +             ddxsp(0:ndim_ebins,ndanghms),
      +             dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem)
-      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx
+     +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +     dxsnex(0:ndim_ebins,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +     dxspex(0:ndim_ebins,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     + ddxsnex(0:ndim_bnds,0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
+     + ddxspex(0:ndim_bnds,0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem)
+      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx,dxsnex,dxspex,
+     +                                          ddxsnex,ddxspex
       common/speclab/ dxsnlab(0:ndim_ebins),dxsplab(0:ndim_ebins), 
      +           dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           ddxsnlab(0:ndim_ebins,ndanghms),
      +           ddxsplab(0:ndim_ebins,ndanghms),
+     +     dxsnexlab(0:ndim_bnds,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     +     dxspexlab(0:ndim_bnds,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           ddxsnxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
      +           ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem)
 c23456789012345678901234567890123456789012345678901234567890123456789012
-      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab
+      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab,dxsnexlab,dxspexlab
      +              ,dxsnxlab,dxspxlab,ddxsnxlab,ddxspxlab
  
 c /siginv/ inverse cross sections for HMS calculation
@@ -112,9 +125,9 @@ c binding = sepn energy if particle emitted;sepproj=binding en for proj in CN
 c ucndump = energy to CN after preq,convmass=energy converted to mass in an event
 c ecmproj,elabproj =projectile k.e. in cm and lab frames
       common/energies/binding,sepproj,ucndump,convmass,ecmproj,elabproj,
-     +                 elabejecmax 
+     +                 elabejecmax,ecnmax 
       real*8 binding,sepproj,ucndump,convmass,ecmproj,elabproj,
-     +                 elabejecmax
+     +                 elabejecmax,ecnmax
 
 
 c /nucmasses/ nuclear masses
@@ -163,8 +176,10 @@ c /print/ flag for printing
       integer iprintdiag
  
 c /const/ used in calculation   !vdepang used just in ang dist routines
-      common/constmbc/ pi_g,amu,hbarc,zmnuc,vdep,vdepang
-      real*8 pi_g,amu,hbarc,zmnuc,vdep,vdepang
+      common/constmbc/ pi_g,amu,hbarc,zmnuc,zmf(2),vdep(2),vdepang,
+     +                     vv2,zkf0(2),bb,rtar,bth2,adif
+      real*8 pi_g,amu,hbarc,zmnuc,zmf,vdep,vdepang,vv2,zkf0
+      real*8 bb,rtar,bth2,adif
  
 c /isochar/isospin structure of p-h states
       common/isochar/isospin(200)
@@ -184,7 +199,7 @@ c     +               phip(0:ndim_ebins,ndanghms2),
 c     +               phin1(ndanghms2),phip1(ndanghms2)
 c      real*8 phin,phip,phin1,phip1
 
-c /badevents/ events where ucndump whent slightly negative
+c /badevents/ events where ucndump went slightly negative
       common /badevents1/ubad
       common /badevents2/nbad
       real*8 ubad
@@ -202,14 +217,12 @@ c prints of j,k distributions
       common /resspec/uspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
      + ujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins,0:ndim_jbins),
      + respop(0:ndim_zem,0:ndim_nem),
-     + recspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins,0:ndim_recbins)
+     + recspec(0:ndim_recbins,0:ndim_ebins,0:ndim_zem,0:ndim_nem)
       common /iresspec/
      +   jmaxujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
      +  maxerecspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins)
       real*8 uspec,ujspec,respop,recspec
       integer jmaxujspec,maxerecspec
-      
-
 	
 	common /inevdiag/ nev
 	integer nev
