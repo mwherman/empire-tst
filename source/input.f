@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2254 $
+Ccc   * $Rev: 2255 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 21:57:27 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-20 00:24:56 +0100 (Fr, 20 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -972,7 +972,9 @@ C              FUSred = TOTred
 C              ELAred = TOTred
 C              WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
 
+
 C           ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
+
 
 C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
 C              WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
@@ -1273,55 +1275,84 @@ C-----------stop PCROSS nucleon channels if HMS active
 C--------print IDNa matrix
          WRITE (8,*) ' '
          WRITE (8,*)
-     &             '                      Use of preequilibrium models '
+     &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
-     &             '                      ---------------------------- '
+     &             '           --------------------------------------- '
          WRITE (8,*) ' '
          WRITE (8,*) 'Exit channel    ECIS    MSD    MSC',
-     &              '           HMS   PCROSS'
+     &              '    HMS   PCROSS'
          WRITE (8,*) ' '
-         WRITE (8,'('' neut. disc. '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
-         WRITE (8,'('' neut. cont. '',8I7)')(IDNa(2,j),j = 1,NDMODELS)
-         WRITE (8,'('' prot. disc. '',8I7)')(IDNa(3,j),j = 1,NDMODELS)
-         WRITE (8,'('' prot. cont. '',8I7)')(IDNa(4,j),j = 1,NDMODELS)
-         WRITE (8,'('' gammas      '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
-         WRITE (8,'('' alpha cont. '',8I7)')(IDNa(6,j),j = 1,NDMODELS)
-         WRITE (8,'('' deut. cont. '',8I7)')(IDNa(7,j),j = 1,NDMODELS)
-         WRITE (8,'('' trit. cont. '',8I7)')(IDNa(8,j),j = 1,NDMODELS)
-         WRITE (8,'('' He-3  cont. '',8I7)')(IDNa(9,j),j = 1,NDMODELS)
-         WRITE (8,'('' LI    cont. '',8I7)')(IDNa(10,j),j= 1,NDMODELS)
-         WRITE (8,'('' alpha disc. '',8I7)')(IDNa(11,j),j= 1,NDMODELS)
-         WRITE (8,'('' deut. disc. '',8I7)')(IDNa(12,j),j= 1,NDMODELS)
-         WRITE (8,'('' trit. disc. '',8I7)')(IDNa(13,j),j= 1,NDMODELS)
-         WRITE (8,'('' He-3  disc. '',8I7)')(IDNa(14,j),j= 1,NDMODELS)
+         WRITE (8,'('' neut. disc. '',8I7)')
+     &     (IDNa(1,j),j = 1,3),(IDNa(1,j),j = 5,NDMODELS)
+         WRITE (8,'('' neut. cont. '',8I7)')
+     &     (IDNa(2,j),j = 1,3),(IDNa(2,j),j = 5,NDMODELS)
+         WRITE (8,'('' prot. disc. '',8I7)')
+     &     (IDNa(3,j),j = 1,3),(IDNa(3,j),j = 5,NDMODELS)
+         WRITE (8,'('' prot. cont. '',8I7)')
+     &     (IDNa(4,j),j = 1,3),(IDNa(4,j),j = 5,NDMODELS)
+         WRITE (8,'('' gammas      '',8I7)')
+     &     (IDNa(5,j),j = 1,3),(IDNa(5,j),j = 5,NDMODELS)
+         WRITE (8,'('' alpha cont. '',8I7)')
+     &     (IDNa(6,j),j = 1,3),(IDNa(6,j),j = 5,NDMODELS)
+         WRITE (8,'('' deut. cont. '',8I7)')
+     &     (IDNa(7,j),j = 1,3),(IDNa(7,j),j = 5,NDMODELS)
+         WRITE (8,'('' trit. cont. '',8I7)')
+     &     (IDNa(8,j),j = 1,3),(IDNa(8,j),j = 5,NDMODELS)
+         WRITE (8,'('' He-3  cont. '',8I7)')
+     &     (IDNa(9,j),j = 1,3),(IDNa(9,j),j = 5,NDMODELS)
+         WRITE (8,'('' LI    cont. '',8I7)')
+     &     (IDNa(10,j),j = 1,3),(IDNa(10,j),j = 5,NDMODELS)
+         WRITE (8,'('' alpha disc. '',8I7)')
+     &     (IDNa(11,j),j = 1,3),(IDNa(11,j),j = 5,NDMODELS)
+         WRITE (8,'('' deut. disc. '',8I7)')
+     &     (IDNa(12,j),j = 1,3),(IDNa(12,j),j = 5,NDMODELS)
+         WRITE (8,'('' trit. disc. '',8I7)')
+     &     (IDNa(13,j),j = 1,3),(IDNa(13,j),j = 5,NDMODELS)
+         WRITE (8,'('' He-3  disc. '',8I7)')
+     &     (IDNa(14,j),j = 1,3),(IDNa(14,j),j = 5,NDMODELS)
          WRITE (8,*) ' '
 
+C----------------------------------------------------------
          WRITE(12,*) ' '
          WRITE(12,*)
-     &            '                      Use of preequilibrium models '
+     &             '           Use of direct and preequilibrium models '
          WRITE(12,*)
-     &            '                      ---------------------------- '
+     &             '           --------------------------------------- '
          WRITE(12,*) ' '
-         WRITE(12,*) 'Exit channel      ECIS    MSD    MSC',
-     &              '           HMS   PCROSS'
+         WRITE(12,*) 'Exit channel    ECIS    MSD    MSC',
+     &              '    HMS   PCROSS'
          WRITE(12,*) ' '
-         WRITE(12,'('' n to levels   '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
-         WRITE(12,'('' n to continuum'',8I7)')(IDNa(2,j),j = 1,NDMODELS)
-         WRITE(12,'('' p to levels   '',8I7)')(IDNa(3,j),j = 1,NDMODELS)
-         WRITE(12,'('' p to continuum'',8I7)')(IDNa(4,j),j = 1,NDMODELS)
-         WRITE(12,'('' gammas        '',8I7)')(IDNa(5,j),j = 1,NDMODELS)
-         WRITE(12,'('' a to continuum'',8I7)')(IDNa(6,j),j = 1,NDMODELS)
-         WRITE(12,'('' d to continuum'',8I7)')(IDNa(7,j),j = 1,NDMODELS)
-         WRITE(12,'('' t to continuum'',8I7)')(IDNa(8,j),j = 1,NDMODELS)
-         WRITE(12,'('' h to continuum'',8I7)')(IDNa(9,j),j = 1,NDMODELS)
-         WRITE(12,'(''LI to continuum'',8I7)')(IDNa(10,j),j= 1,NDMODELS)
-         WRITE(12,'('' a to levels   '',8I7)')(IDNa(11,j),j= 1,NDMODELS)
-         WRITE(12,'('' d to levels   '',8I7)')(IDNa(12,j),j= 1,NDMODELS)
-         WRITE(12,'('' t to levels   '',8I7)')(IDNa(13,j),j= 1,NDMODELS)
-         WRITE(12,'('' h to levels   '',8I7)')(IDNa(14,j),j= 1,NDMODELS)
-
+         WRITE(12,'('' neut. disc. '',8I7)')
+     &     (IDNa(1,j),j = 1,3),(IDNa(1,j),j = 5,NDMODELS)
+         WRITE(12,'('' neut. cont. '',8I7)')
+     &     (IDNa(2,j),j = 1,3),(IDNa(2,j),j = 5,NDMODELS)
+         WRITE(12,'('' prot. disc. '',8I7)')
+     &     (IDNa(3,j),j = 1,3),(IDNa(3,j),j = 5,NDMODELS)
+         WRITE(12,'('' prot. cont. '',8I7)')
+     &     (IDNa(4,j),j = 1,3),(IDNa(4,j),j = 5,NDMODELS)
+         WRITE(12,'('' gammas      '',8I7)')
+     &     (IDNa(5,j),j = 1,3),(IDNa(5,j),j = 5,NDMODELS)
+         WRITE(12,'('' alpha cont. '',8I7)')
+     &     (IDNa(6,j),j = 1,3),(IDNa(6,j),j = 5,NDMODELS)
+         WRITE(12,'('' deut. cont. '',8I7)')
+     &     (IDNa(7,j),j = 1,3),(IDNa(7,j),j = 5,NDMODELS)
+         WRITE(12,'('' trit. cont. '',8I7)')
+     &     (IDNa(8,j),j = 1,3),(IDNa(8,j),j = 5,NDMODELS)
+         WRITE(12,'('' He-3  cont. '',8I7)')
+     &     (IDNa(9,j),j = 1,3),(IDNa(9,j),j = 5,NDMODELS)
+         WRITE(12,'('' LI    cont. '',8I7)')
+     &     (IDNa(10,j),j = 1,3),(IDNa(10,j),j = 5,NDMODELS)
+         WRITE(12,'('' alpha disc. '',8I7)')
+     &     (IDNa(11,j),j = 1,3),(IDNa(11,j),j = 5,NDMODELS)
+         WRITE(12,'('' deut. disc. '',8I7)')
+     &     (IDNa(12,j),j = 1,3),(IDNa(12,j),j = 5,NDMODELS)
+         WRITE(12,'('' trit. disc. '',8I7)')
+     &     (IDNa(13,j),j = 1,3),(IDNa(13,j),j = 5,NDMODELS)
+         WRITE(12,'('' He-3  disc. '',8I7)')
+     &     (IDNa(14,j),j = 1,3),(IDNa(14,j),j = 5,NDMODELS)
          WRITE(12,*) ' '
 C--------model matrix *** done ***
+
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
             IOUt = 1
@@ -1635,6 +1666,7 @@ C
      &       'Energy step in calculations ',DE*1000.d0,' keV'
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
+
 
 
       IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
@@ -2961,7 +2993,9 @@ C     GOTO 10
       WRITE (12,*) '- Soft-rotator deformed Optical Model including    '
       WRITE (12,*) '  coupled-channels code OPTMAN by E.Soukhovitskii  '
 
+
       WRITE (12,*) '  and coworkers                                    '
+
 
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
       WRITE (12,*) '  HRTW width fluctuation correction                '
@@ -3770,10 +3804,10 @@ C-----
          IF (name.EQ.'GST   ') THEN
             GST = val
             IF (GST.EQ.1.0D0) WRITE (8,
-     &                            '('' Gamma emission in MSC allowed'')'
-     &                            )
+     &                       '('' Gamma emission in MSC considered'')')
             IF (GST.EQ.1.0D0) WRITE (12,
      &                       '('' Gamma emission in MSC considered'')')
+
             GOTO 100
          ENDIF
 C-----
@@ -9541,4 +9575,3 @@ Ccc
       WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
       RETURN
       END
-

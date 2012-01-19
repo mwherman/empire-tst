@@ -1,14 +1,18 @@
       PARAMETER(
-     * NDNUC= 250
-     *,NDEXCLUS = 20
+     * NDNUC= 200
+     *,NDEXCLUS = 50
      *,NDEJC=6
-     *,NDAFIS=1
      *,NDEX= 121
-     *,NDLW= 50
-     *,NDMSCS=4
+     *,NDLW= 40
+     *,LEVCC=20
      *,NDLV=40
      *,NDBR=40
-     *,LEVcc=20
+     *,NDMSCS=4
+C
+C    DO NOT CHANGE parameters below 
+C    unless you REALLY know what you are doing.
+C    You may render the code unusable.
+C
      *,NDZMAX=110
      *,NDECSE=NDEX+50
      *,NDEPFN=2*NDEX     
@@ -36,5 +40,4 @@
      *,NDGQRPM=8,NDGMRPM=8,NDKNTR=3,NMAsse=9066
      *,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80
      *,NFtrans=50,NFMOD=3,NFisbarpnt=300
-     *,NFisEN1=60,NFisJ1=50 
-     *,NFisEN=55,NFisJ=30,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
+     *,NFPARAB=5,NFHUMP=3,NFISENMAX=400)

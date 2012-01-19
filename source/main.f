@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2255 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-20 00:24:56 +0100 (Fr, 20 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3026,7 +3026,7 @@ C     ENDDO
             DO i = 1, NDEX
                csemax = DMAX1(CSE(i,nejc,0),csemax)
             ENDDO
-			if(csemax.LT.1.d0) cycle
+            if(csemax.LE.0) cycle
             WRITE (8,'(//,11X,''**************************'')')
             WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
             WRITE (8,'(11x,   '' Ejectile :'',i1)') nejc
@@ -3039,16 +3039,13 @@ C     ENDDO
               DO i = 1, NDEX
                 csemax = DMAX1(CSEt(i,nejc),csemax)
               ENDDO
-            ENDDO
-            IF (csemax.GT.1.D0 ) THEN
+              if(csemax.LE.0) cycle
               WRITE (8,'(11X,''**********************'')')
               WRITE (8,'(11x,'' Total spectra (C.M.)'')')
               WRITE (8,'(11x,''**********************'')')
-              DO nejc = 0, NEJcm
-                CALL Print_Total(nejc)
-                IF (IOUT.GT.5) CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
-              ENDDO   
-            ENDIF
+              CALL Print_Total(nejc)
+              IF (IOUT.GT.5) CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
+            ENDDO
          ENDIF  
       ENDIF
       WRITE (8,*)
