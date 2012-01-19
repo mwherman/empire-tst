@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2247 $
+Ccc   * $Rev: 2250 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 07:32:46 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -68,7 +68,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
-     &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
+     &                 corrmsd, csemax, csemist, csmsdl, csum, 
      &                 dang, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
@@ -150,7 +150,6 @@ C-----
 C-----Open file 41 with tabulated cross sections
 C-----
       IF (FIRst_ein) THEN
-        IF( DEGa.GT.0 ) OPEN (42,FILE='DEGASRESULT', STATUS = 'UNKNOWN')
         OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
 C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
@@ -1063,21 +1062,6 @@ C
       WRITE (12,*) ' '
 C
       POPmax(1) = CSFus*1.0E-25
-C-----Renormalization of CN spin distribution if TURBO mode invoked
-      IF (LTUrbo.NE.1) THEN
-         IF (IOUt.GT.0) WRITE (8,
-     &         '('' TURBO mode with LTURBO='',I1,'' has been invoked'')'
-     &         ) LTUrbo
-         cturbo = 0.0
-         DO i = 1, NLW, LTUrbo
-            cturbo = cturbo + POP(NEX(1),i,1,1) + POP(NEX(1),i,2,1)
-         ENDDO
-         cturbo = CSFus/cturbo
-         DO i = 1, NLW, LTUrbo
-            POP(NEX(1),i,1,1) = POP(NEX(1),i,1,1)*cturbo
-            POP(NEX(1),i,2,1) = POP(NEX(1),i,2,1)*cturbo
-         ENDDO
-      ENDIF
       nubart=0
       OPEN (80,FILE = 'FISSION.OUT',STATUS = 'UNKNOWN')
 C-----Start DO loop over decaying nuclei
@@ -1088,11 +1072,6 @@ C-----Start DO loop over decaying nuclei
          IF (IOUt.GT.0) THEN
 C        if(nnuc.le.NNUcd)
          if(nnuc.le.NDEJC)  ! limiting screen printout 
-
-
-
-
-
      &     WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)),
      &                  SYMb(nnuc), INT(A(nnuc))
 1234       FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,
@@ -1312,24 +1291,6 @@ C--------Calculate compound nucleus level density at saddle point
                ENDIF
             ENDIF
          ENDIF
-C-------
-C------- DEGAS exciton model calculations of preequilibrium contribution
-C-------
-         IF (nnuc.EQ.1 .AND. EIN.GT.5.D0 .AND. DEGa.GT.0) THEN
-            CALL EMPIREDEGAS
-            WRITE (8,*) ' '
-            WRITE (8,*) ' Start of summary from DEGAS'
-            WRITE (8,*) ' ---------------------------'
-            IF (GDIv.GT.1.0) WRITE (8,*) ' g = A/gdiv, gdiv =', GDIv
-            WRITE (8,*) ' '
-            WRITE (8,'('' DEGAS gamma emission (CN) ='',G12.5,''mb'')')
-     &             CSEmis(0,1)
-            WRITE (8,'('' DEGAS neut. emission (CN) ='',G12.5,''mb'')')
-     &             CSEmis(1,1)
-            WRITE (8,'('' DEGAS prot. emission (CN) ='',G12.5,''mb'')')
-     &             CSEmis(2,1)
-            WRITE (8,*) ' '
-         ENDIF          ! Degas done
 C--------
 C--------Heidelberg Multistep Compound calculations
 C--------
@@ -1457,7 +1418,7 @@ C--------------Clean auxiliary particle spectra for calculation of recoils
                ENDDO
 C--------------Calculate population in the energy bin ke
                pope = 0.d0
-               DO jcn = 1, NLW, LTUrbo
+               DO jcn = 1, NLW
                   pope = pope + POP(ke,jcn,1,nnuc) + POP(ke,jcn,2,nnuc)
                ENDDO
                POPbin(ke,nnuc) = pope*step
@@ -1465,7 +1426,7 @@ C--------------Calculate population in the energy bin ke
 
             DO ipar = 1, 2 !over decaying nucleus parity
                ip = INT(( - 1.0)**(ipar + 1))
-               DO jcn = 1, NLW, LTUrbo !over decaying nucleus spin
+               DO jcn = 1, NLW !over decaying nucleus spin
                   IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
                   DENhf = 0.0
                   IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
@@ -1484,11 +1445,7 @@ C--------------------Residual nuclei must be heavier than alpha
                   ENDDO
 C-----------------DO loop over ejectiles       ***done***
 C-----------------gamma emision
-                  IF (LTUrbo.EQ.1) THEN
-                     CALL DECAYG(nnuc,ke,jcn,ip,sum)
-                  ELSE
-                     CALL DECAYT(nnuc,ke,jcn,ip,sum)
-                  ENDIF
+                  CALL DECAYG(nnuc,ke,jcn,ip,sum)
 C-----------------Distribute yrast population over discrete levels
                   IF (DENhf.EQ.0.0D0) THEN
                      IF (ke.EQ.1) THEN

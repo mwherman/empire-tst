@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2245 $
+Ccc   * $Rev: 2250 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 05:21:34 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -426,7 +426,7 @@ C     NSCh = 0
 C--------
 C--------decay to the continuum
 C--------
-         DO jr = 1, NLW, LTUrbo            ! do loop over r.n. spins
+         DO jr = 1, NLW            ! do loop over r.n. spins
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
             smax = xjr + SEJc(Nejc)
@@ -569,7 +569,7 @@ C
             ENDDO           ! over channel spins
          ENDDO        ! over and r.n. spins
 C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
-         DO j = 1, NLW, LTUrbo
+         DO j = 1, NLW
             DO i = 1, iermax
                Sum = Sum + SCRt(i,j,1,Nejc) + SCRt(i,j,2,Nejc)
             ENDDO

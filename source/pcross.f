@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2250 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -420,7 +420,7 @@ C
       CALL RESOL(em,ihmax,ap,cme)
 
 C--------setup model matrix (IDNa) defining which model is used where
-C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C                        ECIS   MSD   MSC   ????    HMS   PCROSS
 C                        1     2     3      4      5      6
 C        1 neut. disc.   x     x     0      0      x      x
 C        2 neut. cont.   0     x     x      x      x      x

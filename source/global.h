@@ -1,6 +1,6 @@
-C $Rev: 2242 $
-C $Author: bcarlson $
-C $Date: 2012-01-19 02:59:29 +0100 (Do, 19 Jän 2012) $
+C $Rev: 2250 $
+C $Author: rcapote $
+C $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -67,7 +67,7 @@ C
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
-     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), LTUrbo,
+     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), 
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
@@ -131,7 +131,7 @@ C
      &                 SIGabs(ndetl,ndejc,ndnuc), STMro, TEMp0,
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,
-     &                 TUNe(0:ndejc,0:ndnuc), TURbo, UEXcit(ndex,ndnuc),
+     &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),
      &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
@@ -222,8 +222,7 @@ C
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
-      COMMON /NUMHLP_I/ LTUrbo
-      COMMON /NUMHLP_R/ EXPmax, EXPdec, TURbo
+      COMMON /NUMHLP_R/ EXPmax, EXPdec
       COMMON /TLCOEF/ TL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas

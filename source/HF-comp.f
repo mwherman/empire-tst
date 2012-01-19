@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2229 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2250 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -61,7 +61,7 @@ C-----
          icse = MAX0(2,icse)
          icse = MIN0(ndecse,icse)
          popt = 0.0
-         DO j = 1, NLW, LTUrbo  !loop over residual spins
+         DO j = 1, NLW  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
             pop2 = Xnor*SCRt(ie,j,2,Nejc)
             pops = pop1 + pop2
@@ -466,7 +466,7 @@ C-----
 C-----decay to the continuum
 C-----
 C-----do loop over r.n. spins
-         DO jr = 1, NLW, LTUrbo
+         DO jr = 1, NLW
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
             smax = xjr + SEJc(Nejc)
@@ -499,9 +499,9 @@ C-----------------IP1 and IP2 decide to which parity each SUMTL  goes
                   ENDDO
 C-----------------do loop over l   ***done***
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &             + sumtl1*RO(iermax,jr,ip1,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &             + sumtl1*RO(iermax,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &             + sumtl2*RO(iermax,jr,ip2,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &             + sumtl2*RO(iermax,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
                ENDIF
 C--------------decay to the highest but one bin (conditional see the next IF)
                IF (ZEJc(Nejc).EQ.0.0D0 .AND. Iec.EQ.NEX(Nnuc) - 1) THEN
@@ -521,8 +521,7 @@ C-----------------do loop over l   ***done***
 C-----------------CORR in the next lines accounts for the Tl interpolation
 C-----------------and integration over overlaping bins (2/3), it turned out it must
 C-----------------be energy step and also emission step dependent
-                  corr = 0.4444/(DE - XN(Nnur) + XN(1))
-     &                   *TURbo*TUNe(Nejc,Nnuc)
+                  corr = 0.4444/(DE - XN(Nnur) + XN(1))*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
      &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
@@ -547,9 +546,9 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
 C-----------------do loop over l   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TURbo*TUNe(Nejc,Nnuc)
+     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
                ENDDO
 C--------------do loop over r.n. energies ***done***
             ENDDO
@@ -558,7 +557,7 @@ C-----------do loop over channel spins ***done***
 C--------do loop over and r.n. spins ***done***
 C--------decay to the continuum ------ done -----------------------------
 C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
-         DO j = 1, NLW, LTUrbo
+         DO j = 1, NLW
             DO i = 1, iermax
                Sum = Sum + SCRt(i,j,1,Nejc) + SCRt(i,j,2,Nejc)
             ENDDO
@@ -1051,191 +1050,6 @@ C-----do loop over discrete levels --------- done --------------------
       SCRtem(0) = Sum
       DENhf = DENhf + Sum
       END
-
-
-      SUBROUTINE DECAYT(Nnuc,Iec,Jc,Ipc,Sum)
-Ccc
-Ccc   ********************************************************************
-Ccc   *                                                         class:PPu*
-CCC   *                         D E C A Y T                              *
-Ccc   *                (function to function version)                    *
-Ccc   *                                                                  *
-Ccc   * Calculates gamma decay of a continuum state in nucleus NNUC into *
-Ccc   * continuum and discrete states in the same nucleus NNUC           *
-Ccc   * (to be used instead of DECAYG if TURBO mode is invoked)          *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * input:NNUC - decaying nucleus index                              *
-Ccc   *       IEC  - energy index of the decaying state                  *
-Ccc   *       JC   - spin index of the decaying state                    *
-Ccc   *       IPC  - parity of the decaying state                        *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * output:SUM - SUM of transmission coefficients over all outgoing  *
-Ccc   *              channels for the requested decay (partial sums are  *
-Ccc   *              stored in SCRT and SCRTL arrays for continuum and   *
-Ccc   *              discrete levels respectively. SUMs for all ejectiles*
-Ccc   *              combine to the total Huser-Feshbach denominator.    *
-Ccc   *              Inverse of the latter multiplied by the population  *
-Ccc   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
-Ccc   *              SCRT and SCRTL matrices to give residual nucleus    *
-Ccc   *              population.                                         *
-Ccc   *                                                                  *
-Ccc   * calls:none                                                       *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   ********************************************************************
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C
-C Dummy arguments
-C
-      INTEGER Iec, Ipc, Jc, Nnuc
-      DOUBLE PRECISION Sum
-C
-C Local variables
-C
-      DOUBLE PRECISION E1, E2, XM1
-      DOUBLE PRECISION eg, sumn, sump, xjc
-      REAL FLOAT
-      INTEGER i, ier, ineg, iodd, ipar, ipos, j, lmax, lmin
-      INTEGER Jr, lamb, lambmin, lambmax
-      DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr, hscrtl
-      DIMENSION xle(10),xlm(10)
-      DO i = 1, MAXmult
-         xle(i) = 0.0D0
-         xlm(i) = 0.0D0
-      ENDDO
-      IF (MAXmult.GT.2) THEN
-         ha = A(Nnuc)**0.666666666666D0
-         cee = 3.7D-5*ha
-         cme = 0.307D0/ha
-      ENDIF
-C
-      Sum = 0.0
-      SCRtem(0) = 0.0
-      xjc = FLOAT(Jc) + HIS(Nnuc)
-C-----clear scratch matrix (continuum)
-      DO j = 1, NLW
-         DO i = 1, NEX(Nnuc)
-            SCRt(i,j,1,0) = 0.d0
-            SCRt(i,j,2,0) = 0.d0
-         ENDDO
-      ENDDO
-C-----clear scratch matrix (discrete levels)
-      DO i = 1, NLV(Nnuc)
-         SCRtl(i,0) = 0.d0
-      ENDDO
-C-----IPOS is a parity-index of final states reached by gamma
-C-----transitions which do not change parity (E2 and M1)
-C-----INEG is a parity-index of final states reached by gamma
-C-----transitions which do change parity (E1)
-      IF (Iec.LT.1) RETURN
-      IF (Ipc.GT.0) THEN
-         ipos = 1
-         ineg = 2
-      ELSE
-         ipos = 2
-         ineg = 1
-      ENDIF
-C-----
-C-----decay to the continuum
-C-----
-C-----do loop over c.n. energies (loops over spins and parities expanded
-      DO ier = Iec - 1, 1, -1
-        IF (RO(ier,Jc,1,Nnuc).NE.0.D0 .OR.
-     &      RO(ier,Jc,2,Nnuc).NE.0.D0) THEN
-
-           eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-           xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
-     &            TUNe(0, Nnuc)
-           xlm(1) = XM1(eg)*TUNe(0, Nnuc)
-           xle(2) = E2(eg)*TUNe(0, Nnuc)
-           IF(MAXmult.GT.2) THEN
-             xlm(2) = xle(2)*cme
-             DO i = 3, MAXmult
-               xle(i) = xle(i-1)*eg**2*cee
-     &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
-               xlm(i) = xle(i)*cme
-             ENDDO
-           ENDIF
-           sump = 0.0D0
-           sumn = 0.0D0
-           DO Jr=1, NLW
-            xjr = FLOAT(Jr) + HIS(Nnuc)
-            lambmin = MAX0(1,IABS(Jc-Jr))
-            lambmax = xjc + xjr + 0.001
-            lambmax = MIN0(lambmax,MAXmult)
-            IF(lambmin.LE.lambmax)THEN
-               DO lamb = lambmin, lambmax
-                 IF(lamb/2*2.EQ.lamb)THEN
-                   sump = sump + xle(lamb)*RO(ier, Jr, ipos, Nnuc)
-                   sumn = sumn + xlm(lamb)*RO(ier, Jr, ineg, Nnuc)
-                 ELSE
-                   sump = sump + xlm(lamb)*RO(ier, Jr, ipos, Nnuc)
-                   sumn = sumn + xle(lamb)*RO(ier, Jr, ineg, Nnuc)
-                 ENDIF
-               ENDDO
-            ENDIF
-           ENDDO
-           SCRt(ier, Jc, ipos, 0) = sump
-           SCRt(ier, Jc, ineg, 0) = sumn
-        ENDIF
-      ENDDO
-C-----do loop over c.n. energies ***done***
-C-----decay to the continuum ----** done***---------------------------
-C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
-      DO i = 1, Iec - 1
-         Sum = Sum + SCRt(i,Jc,1,0) + SCRt(i,Jc,2,0)
-      ENDDO
-      Sum = Sum - 0.5*(SCRt(1,Jc,1,0) + SCRt(1,Jc,2,0))
-      Sum = Sum*DE
-C-----integration of ro*gtl in continuum for ejectile 0 -- done ----
-C-----
-C-----DECAY TO DISCRETE LEVELS
-C-----
-C--------do loop over discrete levels -----------------------------------
-         DO i = 1, NLV(Nnuc)
-          lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
-          lmax = xjc + XJLv(i,Nnuc) + 0.001
-          lambmin = MAX0(1,lmin)
-          lambmax = MIN0(lmax,MAXmult)
-          IF(lambmin.LE.lambmax)THEN
-            eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
-            ipar = (1 + LVP(i, Nnuc)*Ipc)/2
-            iodd = 1 - ipar
-            xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))*
-     &         *TUNe(0, Nnuc)
-             IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
-             IF(lambmax.GT.2) THEN
-              xlm(2) = xle(2)*cme
-              DO j = 3, lambmax
-               xle(j) = xle(j-1)*eg**2*cee
-     &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
-               xlm(j) = xle(j)*cme
-              ENDDO
-             ENDIF
-             hscrtl = 0.0D0
-             DO lamb = lambmin, lambmax
-              IF(lamb/2*2.EQ.lamb)THEN
-               hscrtl = hscrtl +
-     &                  xle(lamb)*ipar + xlm(lamb)*iodd
-               ELSE
-               hscrtl = hscrtl +
-     &                  xlm(lamb)*ipar + xle(lamb)*iodd
-              ENDIF
-             ENDDO
-          SCRtl(i, 0) = hscrtl
-          Sum = Sum + SCRtl(i, 0)
-          ENDIF
-         ENDDO
-C-----do loop over discrete levels --------- done --------------------
-      SCRtem(0) = Sum
-      DENhf = DENhf + Sum
-      END
-
 
       SUBROUTINE FISSION(Nnuc,Iec,Jc,Sumfis)
 Ccc

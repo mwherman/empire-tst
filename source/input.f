@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2246 $
+Ccc   * $Rev: 2250 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 06:00:11 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -244,12 +244,10 @@ C--------fusion parameters
          DFUs = 1.
          FUSred = 1.d0
          FCCred = 1.d0
-         FDWred = 1.d0
          TOTred = 1.d0
          ELAred = 1.d0
          rFUSred = 1.d0
          rFCCred = 1.d0
-         rFDWred = 1.d0
          rTOTred = 1.d0
          rELAred = 1.d0
          REDsef = 1.d0
@@ -316,9 +314,6 @@ C        Default deformation values, they are changed in ifindcoll(),ifindcoll_C
          FLAm(2) = 3.d0
          FLAm(3) = -2.d0
          FLAm(4) = -3.d0
-C--------set accelleration option
-         LTUrbo = 1
-         TURbo = FLOAT(LTUrbo)
 C--------temperature fade-out parameters of fission barrier
          TEMp0 = 1.65
          SHRt = 1.066
@@ -385,13 +380,10 @@ C--------GDR parameters
          EWSr1 = 1.0
          EWSr2 = 1.0
          GDRweis = 1.
-C--------set options for DEGAS (exciton preequilibrium)
-         DEGa = 0.0
-         GDIvp = 13.0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0
          PEQc = 0.0
-         NPAirpe = 1  ! default is to include pairing corrections in PCROSS/DEGAS 
+         NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
          MFPp = 1.3
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
@@ -1004,24 +996,6 @@ C        ENDIF
      &      WRITE (8,*)
      &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
             WRITE (8,*)
-
-         IF (LHRtw.NE.0 .AND. LTUrbo.NE.1) THEN
-            LTUrbo = 1
-            WRITE (8,*) ' '
-            WRITE (8,*) ' WARNING:'
-            WRITE (8,*) ' WARNING:  LTURBO>1 is incompatible ',
-     &                  ' WARNING:  with HRTW'
-            WRITE (8,*) ' WARNING:  LTURBO has been set to 1'
-            WRITE (8,*) ' '
-         ENDIF
-C
-         IF (DEGa.GT.0 .and. GCAsc.EQ.0.d0) THEN
-            GCAsc = 1.
-            WRITE (8,*) ' '
-            WRITE (8,*) ' WARNING: For DEGAS the gamma cascade must be'
-            WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
-            WRITE (8,*) ' '
-         ENDIF
 C
          IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
             GCAsc = 1.
@@ -1060,13 +1034,6 @@ C
             WRITE (8,*) ' WARNING!!!! (It is not allowed for '
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
             WRITE (8,*) ' '
-         ENDIF
-         IF (DEGa.NE.0 .AND. AEJc(0).NE.1.D0) THEN
-            WRITE (8,*) ' '
-            WRITE (8,*)
-     &                 'ERROR: DEGAS allowed only for incident nucleons'
-            WRITE (8,*) 'ERROR: Execution STOPPED'
-            STOP ' DEGAS allowed only for incident nucleons'
          ENDIF
 C--------------------------------------------------------------------------
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
@@ -1134,13 +1101,13 @@ c         ENDIF
 C--------input consistency check  *** done ***
 C
 C--------setup model matrix (IDNa) defining which model is used where
-C                        ECIS   MSD   MSC   DEGAS   HMS   PCROSS
+C                      ECIS   MSD   MSC           HMS   PCROSS
 C                        1     2     3      4      5      6
 C        1 neut. disc.   x     x     0      0      x      x
-C        2 neut. cont.   0     x     x      x      x      x
+C        2 neut. cont.   0     x     x      0      x      x
 C        3 prot. disc.   x     x     0      0      x      x
-C        4 prot. cont.   0     x     x      x      x      x
-C        5 gamma         0     0     x      x      0      x
+C        4 prot. cont.   0     x     x      0      x      x
+C        5 gamma         0     0     x      0      0      x
 C        6 alpha. cont.  0     0     0      0      0      x
 C        7 deut . cont.  0     0     0      0      0      x
 C        8 trit . cont.  0     0     0      0      0      x
@@ -1190,8 +1157,8 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
             IDNa(2,3) = 1
             IDNa(4,3) = 1
             IF (GST.GT.0) IDNa(5,3) = 1
-C-----------stop MSC charge-exchange if DEGAS,DDHMS or PCROSS active
-            IF (DEGa.GT.0 .OR. LHMs.GT.0 .OR. PEQc.GT.0.) THEN
+C-----------stop MSC charge-exchange if DDHMS or PCROSS active
+            IF (LHMs.GT.0 .OR. PEQc.GT.0.) THEN
                IF (NPRoject.EQ.1) THEN
                   IDNa(4,3) = 0
                ELSEIF (NPRoject.EQ.2) THEN
@@ -1199,51 +1166,11 @@ C-----------stop MSC charge-exchange if DEGAS,DDHMS or PCROSS active
                ELSE
                   WRITE (8,*) ''
                   WRITE (8,*)
-     &                       'DEGAS/PCROSS AND MSD/MSC ARE NOT COMPATIB'
+     &                       'PCROSS AND MSD/MSC ARE NOT COMPATIBLE IN '
                   WRITE (8,*)
-     &                       'LE IN THIS CASE. EXECUTION S T O P P E D '
-                  STOP 'ILLEGAL COMBINATION DEGAS/PCROSS + MSC/MSD !!!!'
+     &                       'THIS CASE. EXECUTION S T O P P E D       '
+                  STOP 'ILLEGAL COMBINATION PCROSS + MSC/MSD !!!!'
                ENDIF
-            ENDIF
-         ENDIF
-C--------set DEGAS  (.,4) (nucleons to discrete levels NOT blocked)
-         IF (DEGa.GT.0) THEN
-            IDNa(1,4) = 1
-            IDNa(2,4) = 1
-            IDNa(3,4) = 1
-            IDNa(4,4) = 1
-            IDNa(5,4) = 1
-C-----------stop DEGAS gammas if calculated within MSC
-            IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,4) = 0
-C-----------stop DEGAS inelastic scattering if MSC and/or MSD active
-            IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-               IF (NPRoject.EQ.2) THEN
-                  IDNa(3,4) = 0
-                  IDNa(4,4) = 0
-               ELSEIF (NPRoject.EQ.1) THEN
-                  IDNa(1,4) = 0
-                  IDNa(2,4) = 0
-               ELSE
-                  WRITE (8,*) ''
-                  WRITE (8,*) 'DEGAS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                  WRITE (8,*) 'THIS CASE. EXECUTION S T O P P E D !!!! '
-                  STOP 'ILLEGAL COMBINATION DEGAS + MSC/MSD'
-               ENDIF
-            ENDIF
-C-----------stop DEGAS particle channels if HMS active
-            IF (LHMs.GT.0) THEN
-               IDNa(1,4) = 0
-               IDNa(2,4) = 0
-               IDNa(3,4) = 0
-               IDNa(4,4) = 0
-            ENDIF
-C-----------stop DEGAS particle channels if PCROSS active
-CMH---------but leave  DEGAS for gamma emission
-            IF(PEQc.GT.0)THEN
-               IDNa(1, 4) = 0
-               IDNa(2, 4) = 0
-               IDNa(3, 4) = 0
-               IDNa(4, 4) = 0
             ENDIF
          ENDIF
 C--------set HMS  (.,5)
@@ -1321,7 +1248,6 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
                IF (NPRoject.EQ.2) THEN
                   IDNa(3,6) = 0
-
                   IDNa(4,6) = 0
                ELSEIF (NPRoject.EQ.1) THEN
                   IDNa(1,6) = 0
@@ -1339,8 +1265,6 @@ C-----------stop PCROSS nucleon channels if HMS active
                IDNa(2,6) = 0
                IDNa(4,6) = 0
             ENDIF
-C-----------stop PCROSS gamma channel if DEGAS active
-            IF (DEGa.GT.0) IDNa(5,6) = 0
          ENDIF
 C--------print IDNa matrix
          WRITE (8,*) ' '
@@ -1349,9 +1273,8 @@ C--------print IDNa matrix
          WRITE (8,*)
      &             '                      ---------------------------- '
          WRITE (8,*) ' '
-         WRITE (8,*) 'Exit channel      ECIS    MSD    MSC',
-
-     &              '   DEGAS   HMS   PCROSS'
+         WRITE (8,*) 'Exit channel    ECIS    MSD    MSC',
+     &              '           HMS   PCROSS'
          WRITE (8,*) ' '
          WRITE (8,'('' neut. disc. '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
          WRITE (8,'('' neut. cont. '',8I7)')(IDNa(2,j),j = 1,NDMODELS)
@@ -1376,7 +1299,7 @@ C--------print IDNa matrix
      &            '                      ---------------------------- '
          WRITE(12,*) ' '
          WRITE(12,*) 'Exit channel      ECIS    MSD    MSC',
-     &              '   DEGAS   HMS   PCROSS'
+     &              '           HMS   PCROSS'
          WRITE(12,*) ' '
          WRITE(12,'('' n to levels   '',8I7)')(IDNa(1,j),j = 1,NDMODELS)
          WRITE(12,'('' n to continuum'',8I7)')(IDNa(2,j),j = 1,NDMODELS)
@@ -2940,7 +2863,6 @@ C
 C
 C Local variables
 C
-      REAL FLOAT
       DOUBLE PRECISION GRAND,DRAND
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
@@ -3030,16 +2952,14 @@ C     GOTO 10
       WRITE (12,*) 'of important modules and features:                 '
       WRITE (12,*) '                                                   '
       WRITE (12,*) '- Spherical and deformed Optical Model including   '
-      WRITE (12,*) '  coupled-channels-ECIS06 by J. Raynal             '
+      WRITE (12,*) '  coupled-channels code ECIS06 by J. Raynal        '
       WRITE (12,*) '- Soft-rotator deformed Optical Model including    '
-      WRITE (12,*) '  coupled-channels-OPTMAN by E.Soukhovitskii et al.'
+      WRITE (12,*) '  coupled-channels code OPTMAN by E.Soukhovitskii  '
+      WRITE (12,*) '  and coworkers                                    '
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
       WRITE (12,*) '  HRTW width fluctuation correction                '
       WRITE (12,*) '- Quantum-mechanical MSD TUL model (codes ORION &  '
       WRITE (12,*) '  TRISTAN by H. Lenske), and MSC NVWY model        '
-      WRITE (12,*) '- Exciton model with angular momentum coupling     '
-      WRITE (12,*) '  (code DEGAS by E. Betak and P. Oblozinsky) that  '
-      WRITE (12,*) '  represents a good approximation to the DSD model '
       WRITE (12,*) '- Exciton model with Iwamoto-Harada cluster        '
       WRITE (12,*) '  emission and Kalbach systematic angular distr.   '
       WRITE (12,*) '  (code PCROSS by R.Capote et al)                  '
@@ -3052,7 +2972,7 @@ C     GOTO 10
       WRITE (12,*) '  and gamma strength functions based on the RIPL   '
       WRITE (12,*) '  library [RIPL]                                   '
       WRITE (12,*) '- Automatic retrieval of experimental data from the'
-      WRITE (12,*) '  EXFOR/CSISRS library                             '
+      WRITE (12,*) '  EXFOR/CSISRS library (C4 from the IAEA/NDS       '
       WRITE (12,*) '- ENDF-6 formatting (code EMPEND by A. Trkov)      '
       WRITE (12,*) '  coupled to graphical presentation capabilities   '
       WRITE (12,*) '  (code ZVView by V. Zerkin) through the chain of  '
@@ -3177,45 +3097,6 @@ C-----------Printout of some final input options   *** done ***
          i4 = i4e
          ENDIF
 
-C--------DEGAS input
-         IF (name.EQ.'DEGAS ') THEN
-            DEGa = val
-            IF (val.GT.0) WRITE(8,
-     &              '('' Exciton model calculations with code DEGAS '')'
-     &              )
-            IF (val.GT.0) WRITE(12,
-     &              '('' Exciton model calculations with code DEGAS '')'
-     &              )
-            GOTO 100
-         ENDIF
-         IF (name.EQ.'GDIVP ') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' DEGAS proton s.p.l. density uncertainty '',
-     &          '' is equal to '',i2,''%'')') i1
-                 sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                  GDIvp = val + grand()*sigma
-                ELSE
-                  GDIvp = val + 1.732d0*(2*drand()-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &       '('' DEGAS proton s.p.l. density sampled value is A/: ''
-     &          ,f5.2)') GDIvp
-                 IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, GDIvp, INDexf,INDexb
-            else
-              GDIvp = val
-              WRITE(8,
-     &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
-     &'' code DEGAS '')') GDIvp
-              WRITE(12,
-     &'('' DEGAS proton s.p.l. density set to A/'',f5.2,'' in'',
-     &'' code DEGAS '')') GDIvp
-            endif
-            GOTO 100
-         ENDIF
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
@@ -3279,11 +3160,11 @@ C
             IF (val.LE.0) THEN
               Npairpe = 0
               WRITE (8,
-     &'('' Pairing corrections are not considered in PCROSS/DEGAS calcul
-     &ations'')')
+     &'('' Pairing corrections are not considered in PCROSS calculations
+     &'')')
               WRITE (12,
-     &'('' Pairing corrections are not considered in PCROSS/DEGAS calcul
-     &ations'')')
+     &'('' Pairing corrections are not considered in PCROSS calculations
+     &'')')
              ELSE
               WRITE (8,
      &'('' Pairing corrections are considered in exciton model LDs'')')
@@ -3634,36 +3515,6 @@ C-----
             GOTO 100
          ENDIF
 
-         IF (name.EQ.'FDWRED') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' Direct cross section uncertainty '',
-     &          '' to the continuum is equal to '',i2,'' %'')') i1
-                 sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                  IF(rFDWred.eq.1.d0) rFDWred = grand()
-                  FDWred = val + rFDWred*sigma
-                ELSE
-                  IF(rFDWred.eq.1.d0) rFDWred = drand()
-                  FDWred = val + 1.732d0*(2*rFDWred-1.)*sigma
-                ENDIF
-                WRITE (8,'('' Direct cross section to the'',
-     &                     '' continuum was scaled by factor ''
-     &          ,f6.3)') FDWred
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &             IPArCOV, FDWred, INDexf,INDexb
-            else
-                FDWred = val
-                WRITE (8, '('' Direct cross section to the'',
-     &                      '' continuum was scaled by factor ''
-     &          ,f6.3)') FDWred
-                WRITE (12,'('' Direct cross section to the'',
-     &                      '' continuum was scaled by factor ''
-     &          ,f6.3)') FDWred
-            endif
-            GOTO 100
-         ENDIF
 C-----
          IF (name.EQ.'REDSEF') THEN
             REDsef = 1.d0
@@ -3947,14 +3798,6 @@ C-----
      &             D1Fra
             WRITE (12,'('' Spreading to total GDR width set to '',F5.3)'
      &             ) D1Fra
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'LTURBO') THEN
-            LTUrbo = val
-            TURbo = FLOAT(LTUrbo)
-            WRITE (8,'('' Step in the angular momentum set to '',I2)')
-     &             LTUrbo
             GOTO 100
          ENDIF
 C-----

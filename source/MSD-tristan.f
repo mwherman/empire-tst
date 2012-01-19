@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2243 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 03:05:09 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Rev: 2250 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3089,7 +3089,7 @@ C-----total number of bins
 C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667
       somj = 0.0
-      DO j = 1, NLW, LTUrbo
+      DO j = 1, NLW
          xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
          phdj(j) = 0.0
          w = (xj + 1.0)*xj/2./SIG
@@ -3102,7 +3102,7 @@ C-----distribution of the continuum MSD contribution -
 C-----proportional to the p-h spin distribution shifted by the target
 C-----ground state target spin XJLV(1,0)
       IF (nexrt.GT.0) THEN
-         DO j = 1, NLW, LTUrbo
+         DO j = 1, NLW
             xnor = 0.5*phdj(j)/somj
             DO ie = 1, nexrt
                pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)

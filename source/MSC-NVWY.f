@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2250 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -85,7 +85,7 @@ C--------
 C--------decay to the continuum
 C--------
 C--------do loop over r.n. spins
-         DO jr = 1, NLW, LTUrbo
+         DO jr = 1, NLW
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
             smax = xjr + SEJc(Nejc)
@@ -148,10 +148,10 @@ C-----------------------factor of 4 missing (it will be applied when PS is calcu
                      ENDDO
 C--------------------do loop over l   ***done***
                      SCRm(iermax,jr,ip1,Nejc,n)
-     &                  = SCRm(iermax,jr,ip1,Nejc,n) + ps1*TURbo
+     &                  = SCRm(iermax,jr,ip1,Nejc,n) + ps1
                      SCRm(iermax,jr,ip2,Nejc,n)
-     &                  = SCRm(iermax,jr,ip2,Nejc,n) + ps2*TURbo
-                     PIM(n,n) = PIM(n,n) + (ps1 + ps2)*TURbo
+     &                  = SCRm(iermax,jr,ip2,Nejc,n) + ps2
+                     PIM(n,n) = PIM(n,n) + ps1 + ps2
                   ENDIF
 C-----------------decay to the highest but one bin (conditional see the next IF)
                   IF (ZEJc(Nejc).EQ.0.0D0 .AND. NEX(1).EQ.NEX(1) - 1)
@@ -197,7 +197,7 @@ C--------------------do loop over l   ***done***
 C--------------------CORR in the next lines accounts for the Tl interpolation
 C--------------------and integration over overlaping bins (2/3), it turned out it must
 C--------------------be energy step and also emission step dependent
-                     corr = 0.4444/(DE - XN(Nnur) + XN(1))*TURbo
+                     corr = 0.4444/(DE - XN(Nnur) + XN(1))
                      SCRm(iermax,jr,ip1,Nejc,n)
      &                  = SCRm(iermax,jr,ip1,Nejc,n) + ps1*corr
                      SCRm(iermax,jr,ip2,Nejc,n)
@@ -244,10 +244,10 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
                      ENDDO
 C--------------------do loop over l   ***done***
                      SCRm(ier,jr,ip1,Nejc,n) = SCRm(ier,jr,ip1,Nejc,n)
-     &                  + ps1*TURbo
+     &                  + ps1
                      SCRm(ier,jr,ip2,Nejc,n) = SCRm(ier,jr,ip2,Nejc,n)
-     &                  + ps2*TURbo
-                     PIM(n,n) = PIM(n,n) + (ps1 + ps2)*TURbo
+     &                  + ps2
+                     PIM(n,n) = PIM(n,n) + (ps1 + ps2)
                   ENDDO
 C-----------------do loop over r.n. energies ***done***
                ENDDO
@@ -256,7 +256,7 @@ C-----------do loop over channel spins ***done***
          ENDDO
 C--------do loop over and r.n. spins ***done***
 C--------decay to the continuum ------ done -----------------------------
-         DO j = 1, NLW, LTUrbo
+         DO j = 1, NLW
             DO n = 1, NDMSCS
                PIM(n,n) = PIM(n,n)
      &                    - 0.5*(SCRm(1,j,1,Nejc,n) + SCRm(1,j,2,Nejc,n)
@@ -805,7 +805,7 @@ C-----
          ipii = -( - 1.0)**i
          ie1 = 2
          IF (i.EQ.2) ie1 = 1
-         DO j = 1, NLW, LTUrbo
+         DO j = 1, NLW
             emis = 0.0
             IF (POP(NEX(1),j,i,1).NE.0.0D0) THEN
                DO ix = 1, NDMSCS
@@ -964,7 +964,7 @@ C--------------neutron emission (if accepted, note IF on IDNA)
                      icse = NEX(nnur) - ke + 1
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
-                           DO jr = 1, NLW, LTUrbo
+                           DO jr = 1, NLW
                               pop1 = SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE
                               pop2 = SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE
                               popt = pop1 + pop2
@@ -1003,7 +1003,7 @@ C--------------proton emission (if accepted, note IF on IDNA)
                      icse = NEX(nnur) - ke + 1
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
-                           DO jr = 1, NLW, LTUrbo
+                           DO jr = 1, NLW
                               pop1 = SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE
                               pop2 = SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE
                               popt = pop1 + pop2
