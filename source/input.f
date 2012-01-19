@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2254 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-19 21:57:27 +0100 (Do, 19 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -283,11 +283,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 
 C--------set fission defaults
          DO nnuc = 1, NDNUC
-           FISbar(nnuc) = 3     ! RIPL-3 HFB barriers are default.
+             FISbar(nnuc) = 1     ! RIPL "experimental" double-kump barriers are default.
+           ! FISbar(nnuc) = 3     ! RIPL-3 HFB barriers
            ! FISopt(nnuc) = 2
            ! FISden(nnuc) = 2   ! HFB NLD
-           FISden(nnuc) = 0     ! EMPIRE NLD at saddle points are default!!
+           FISden(nnuc) = 0     ! EGSM NLD at saddle points are default!!
            FISmod(nnuc) = 0
+           FISopt(nnuc) = 0
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
 C
@@ -969,7 +971,9 @@ C           IF(FUSred.EQ.1 .AND. ELAred.EQ.1) THEN
 C              FUSred = TOTred
 C              ELAred = TOTred
 C              WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
+
 C           ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
+
 C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
 C              WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
 C           ELSEIF(FUSred.NE.1) THEN
@@ -1631,6 +1635,7 @@ C
      &       'Energy step in calculations ',DE*1000.d0,' keV'
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
+
 
       IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
      & 'WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
@@ -2955,7 +2960,9 @@ C     GOTO 10
       WRITE (12,*) '  coupled-channels code ECIS06 by J. Raynal        '
       WRITE (12,*) '- Soft-rotator deformed Optical Model including    '
       WRITE (12,*) '  coupled-channels code OPTMAN by E.Soukhovitskii  '
+
       WRITE (12,*) '  and coworkers                                    '
+
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
       WRITE (12,*) '  HRTW width fluctuation correction                '
       WRITE (12,*) '- Quantum-mechanical MSD TUL model (codes ORION &  '
@@ -9534,5 +9541,4 @@ Ccc
       WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
       RETURN
       END
-
 
