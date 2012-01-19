@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2241 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 02:57:20 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Rev: 2244 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1708,7 +1708,8 @@ C
      &       'Energy step in calculations ',DE*1000.d0,' keV'
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
-	IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
+
+      IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
      & 'WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEXreq     
 
@@ -7023,90 +7024,99 @@ C
 
 C-----------Set up normalization factors for level density parameter 'a'
 C-----------for all level density models except HFB
-C--------------Gilbert-Cameron (no explicit collective effects)
-               IF (ADIv.EQ.2.D0) THEN
-                  ! for the time being, G&C not refitted !
-                  del = 0.0
-                  delp = 12.0/SQRT(A(nnuc))
-                  IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
-                  IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
-                  uexc = qn - del                  
-C-----Mebel's  parametrization (taken from the INC code for the case
-C-----of no collective enhancements) normalized to existing exp. data
-      IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
-         atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
-         gamma = 0.051d0
-         asys = atil*FSHELL(uexc,SHC(Nnuc),gamma)
-         atiln =  arogc/asys
-      ELSE
-         atiln = 1.0   
-      ENDIF                  
-      ENDIF                  
-C--------------EMPIRE specific (EGSM) with RIPL shell corrections
-             IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
-                  CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-                  atil = ap1*A(nnuc) + ap2*a23
-                  tcrt = 0.567*delp
-                  ar = atil*(1.0 + SHC(nnuc)*gamma)
-                  DO ix = 1, 20
-                     xr = ar*tcrt**2
-                     acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
-                     IF (ABS(acrt - ar).LE.0.001D0*acrt) GOTO 105
-                     ar = acrt
-                  ENDDO
-  105             econd = 1.5*acrt*delp**2/pi2
-                  uexc = qn + del - econd
-                  asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
-                  atiln =  aroc/asys
+C
+
+C-----------Gilbert-Cameron (no explicit collective effects)
+            IF (ADIv.EQ.2.D0) THEN
+              ! for the time being, G&C not refitted !
+              del = 0.0
+              delp = 12.0/SQRT(A(nnuc))
+              IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
+              IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
+              uexc = qn - del                  
+C-------------Mebel's  parametrization (taken from the INC code for the case
+C-------------of no collective enhancements) normalized to existing exp. data
+              IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
+                atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
+                gamma = -0.051d0
+                asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
+                atiln =  arogc/asys
+              ELSE
+                atiln = 1.0   
+              ENDIF                  
+            ENDIF 
+
+
+                 
+C-----------EMPIRE specific (EGSM) with RIPL shell corrections
+            IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
+              CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+              atil = ap1*A(nnuc) + ap2*a23
+              tcrt = 0.567*delp
+              ar = atil*(1.0 + SHC(nnuc)*gamma)
+              DO ix = 1, 20
+                 xr = ar*tcrt**2
+                 acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
+                 IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
+                 ar = acrt
+              ENDDO
+              econd = 1.5*acrt*delp**2/pi2
+              uexc = qn + del - econd
+              asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
+              atiln =  aroc/asys
+            ENDIF
+
+            IF(ATIlnor(nnuc).EQ.0) THEN
+              ATIlnor(nnuc) = atiln
+            ELSE
+              ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+            ENDIF
+C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCROSS)
+C           IF(ADIv.EQ.1 .OR. ADIv.EQ.2) 
+C    &            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+
+            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
+            ROPar(3,nnuc) = del
+
+C-----------Print resulting level density parameters
+            IF (FITlev.GT.0.0D0) THEN
+               WRITE (8,*) ' '
+               WRITE(8,'(1X)')
+               WRITE(8,
+     &           '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
+     &           ''ext. nor. a_final'')')
+               IF (ADIv.EQ.0.0D0)
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+               IF (ADIv.EQ.2.0D0)
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+               WRITE(8,*)
+               IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) then 
+                  WRITE (8,*)
+     &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
+                  WRITE (8,*) 
+     &              ' DELTA=', sngl(del),' Dobs=',sngl(dob)
                ENDIF
-               IF(ATIlnor(nnuc).EQ.0) THEN
-                  ATIlnor(nnuc) = atiln
-               ELSE
-                  ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+               IF (ADIv.EQ.2.0D0) then
+                  WRITE (8,*)
+     &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
+                  WRITE (8,*) 
+     &              ' DELTA=', sngl(del),' Dobs=',sngl(dob)
                ENDIF
-C              Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCROSS)
-               IF(ADIv.EQ.1 .OR. ADIv.EQ.2) 
-     &            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
-               ROPar(3,nnuc) = del
-C--------------Print resulting level density parameters
-               IF (FITlev.GT.0.0D0) THEN
-                  WRITE (8,*) ' '
-                  WRITE(8,'(1X)')
-                  WRITE(8,
-     &              '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
-     &              ''ext. nor. a_final'')')
-                  IF (ADIv.EQ.0.0D0)
-     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-                  IF (ADIv.EQ.2.0D0)
-     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-                  WRITE(8,*)
-                  IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) then 
-                     WRITE (8,*)
-     &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
-                     WRITE (8,*) 
-     &                 ' DELTA=', sngl(del),' Dobs=',sngl(dob)
-                  ENDIF
-                  IF (ADIv.EQ.2.0D0) then
-                     WRITE (8,*)
-     &                 ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
-                     WRITE (8,*) 
-     &                 ' DELTA=', sngl(del),' Dobs=',sngl(dob)
-                  ENDIF
-                  WRITE(8,*) '========================'
-               ELSE
-                  IF (ADIv.EQ.0.0D0)
-     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &            aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-                  IF (ADIv.EQ.2.0D0)
-     &            WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &            arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-               ENDIF
+               WRITE(8,*) '========================'
+            ELSE
+               IF (ADIv.EQ.0.0D0)
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+               IF (ADIv.EQ.2.0D0)
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+            ENDIF
          ENDIF
       ENDIF
       GOTO 100
@@ -7126,7 +7136,7 @@ C--------------Print resulting level density parameters
          ENDIF
 
       ENDDO
-
+      RETURN
       END
 C
 C
@@ -9681,6 +9691,5 @@ Ccc
       WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
       RETURN
       END
-
 
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2242 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 02:59:29 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Rev: 2244 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -69,7 +69,7 @@ C Local variables
 C
       DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, cturbo,
-     &                 dang, debinhms, ded, delang, dencomp, echannel,
+     &                 dang, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
      &                 espmax, epre, ftmp, gang, grand,

@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 20:43:57 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -208,7 +208,6 @@ c-----GSM (egsm=0) and EGSM (egsm=1)
       ELSE
          bcs = .TRUE.
       ENDIF
-
       IF(lazy.EQ.1)THEN
          Aj=0.d0
          u=0.d0
@@ -216,6 +215,7 @@ c-----GSM (egsm=0) and EGSM (egsm=1)
      &               mompar,momort,A2,stab,cigor)
       ENDIF
 C-----do loop over angular momentum
+C     DO i = 1, 1	 ! only the first momentum is used, valid only for even-even nuclei
       DO i = 1, NLWst
          Aj = REAL(i) + HIS(Nnuc)
 C--------spin  dependent moments of inertia for yrast states by Karwowski
@@ -243,7 +243,7 @@ C--------'a' including surface dependent factor
              BF = 2
          ENDIF
 C
-        IF (bcs) THEN
+         IF (bcs) THEN
             Rotemp = ROBCS(A(Nnuc),u,Aj,mompar,momort,A2,T,BF)
          ELSE
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
@@ -1969,14 +1969,8 @@ C-----------decrease energy shift above the last level to become 0 at Qn
             CALL DAMIRO(kk,Nnuc,dshif,defit,rotemp,aj)
 
             DO ij = 1, NLWst
-C-----------Integration over energy. There should be factor 2 because of the
-C-----------parity but it cancels with the 1/2 steming from the trapezoid
-C-----------integration
-C              IF (kk.GT.1) rocumul = rocumul +
-C    &                                (RO(kk - 1,ij,Nnuc) + RO(kk,ij,
-C    &                                Nnuc))*defit
-C-----------Integration over energy. Parity dependence explicitly considered.
-C-----------There is a factor 1/2 steming from the trapezoid integration
+C--------------Integration over energy. Parity dependence explicitly considered.
+C--------------There is a factor 1/2 steming from the trapezoid integration
                IF (kk.GT.1) rocumul = rocumul + 0.5d0*defit*
      &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
@@ -1999,17 +1993,17 @@ C-----------There is a factor 1/2 steming from the trapezoid integration
          dshift = dshift + dshi
 
          IF (FITlev.GT.0.0D0) then 
-          Ecrt = UCRt - DEL - dshift
-        write(8,*)
-        WRITE (8,*) '*****   A=',nint(A(nnuc)),
-     &   ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
-     &     ' LDshif=',sngl(LDShif(nnuc))
-          WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
-     &    'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
-     &    ' DEL = ',DEL          
-          WRITE (8,'(A5,I3,4X,G12.5,A15,2(G12.5,1x))') 
-     &    'It # ', iter, dshi, ' Final shift = ',dshift
-        write(8,*)
+            Ecrt = UCRt - DEL - dshift
+            write(8,*)
+            WRITE (8,*) '*****   A=',nint(A(nnuc)),
+     &        ' Z=',nint(Z(nnuc)),' Bn=',sngl(Q(1,nnuc)),
+     &        ' LDshif=',sngl(LDShif(nnuc))
+            WRITE (8,'(A7,G12.5,A6,G12.5,A9,G12.5,A7,G12.5)')
+     &        'Ucrt = ',UCRt,' Ecrt=',Ecrt,' Econd = ',Econd,
+     &        ' DEL = ',DEL          
+            WRITE (8,'(A5,I3,4X,G12.5,A15,2(G12.5,1x))') 
+     &        'It # ', iter, dshi, ' Final shift = ',dshift
+            write(8,*)
          ENDIF
          IF (ABS(dshi).GT.0.01D0 .and. iter.LE.20) GOTO 150
       ENDIF

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2240 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 02:55:50 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Rev: 2244 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -265,7 +265,7 @@ C      kmax = MIN0(kmax,NDECSE)
          cstmp = CSE(i,Nejc,Nnuc)
          IF(Iflag.EQ.0 .AND. (i.EQ.1 .OR. i.EQ.kmax)) 
      &                                             cstmp=0.5d0*cstmp
-         IF (cstemp.GE.s0) THEN
+         IF (cstmp.GE.s0) THEN
             l = IFIX(SNGL(LOG10(cstmp) - n + 3)*31. + 0.5)
             l = MIN0(93,l)
             DO ij = 1, l
