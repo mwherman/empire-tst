@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2255 $
+Ccc   * $Rev: 2257 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-20 00:24:56 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-20 04:23:53 +0100 (Fr, 20 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3664,23 +3664,23 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
 C-----End of ENDF spectra (inclusive)
 C
  1155 IF( FITomp.GE.0 ) THEN
-        READ (5,'(A36)') nextenergy
+        READ (5,'(A36)',END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
-           READ(nextenergy,'(1x,A6,G10.5,4I5)') keyname, val, ikey1,
-     &         ikey2, ikey3, ikey4
+           READ(nextenergy,'(1x,A6,G10.5,4I5)',END=1200) 
+     &        keyname, val, ikey1, ikey2, ikey3, ikey4
            CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
            GO TO 1155
         ELSE
-           READ(nextenergy,'(G15.5)') EIN
+           READ(nextenergy,'(G15.5)',END=1200) EIN
         ENDIF
-       ELSE
-        READ (5,*) EIN, NDAng, ICAlangs
+      ELSE
+        READ (5,*,END=1200) EIN, NDAng, ICAlangs
           IF(NDAng.lt.2) THEN
             NDAng=2
             ANGles(1) = 0.
             ANGles(2) = 180.
            ELSE
-            READ (5,*) (ANGles(na),na=1,NDAng)
+            READ (5,*,END=1200) (ANGles(na),na=1,NDAng)
            ENDIF
           NANGela=NDAng
           IF(NANgela.GT.NDAngecis) THEN
@@ -3688,8 +3688,10 @@ C
      &        'ERROR: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
-       ENDIF
-      IF (EIN.LT.0.0D0) THEN
+      ENDIF
+	GOTO 1250
+ 1200	EIN = -1
+ 1250  IF (EIN.LT.0.0D0) THEN
 C
 C        CLOSING FILES
 C
