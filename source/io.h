@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2233 $
+Ccc   * $Rev: 2258 $
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2012-01-18 09:03:33 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-20 04:42:28 +0100 (Fr, 20 Jän 2012) $
 Ccc   * $Id$
             
 c     NOTE UNITS OPENED IN MODULES
@@ -102,7 +102,7 @@ c    100     empire_ctl
 c    102     Non-RIPL potential
 c
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
-      OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
+C     OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
       OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
 C-----spin distribution from file SDFILE
       OPEN (UNIT = 43,FILE='SDREAD', STATUS='OLD', ERR=768)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2258 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-20 04:42:28 +0100 (Fr, 20 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -33,10 +33,12 @@ C     even if EMPIREDIR is not defined
 C
       if(empiredir(1:1).eq.' ') empiredir(1:3)='../'
 
+      open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
+
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
       IF(autofit .AND. sensit) THEN
-      WRITE(8,*) 'OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE RUN TO
-     &GETHER'
+      WRITE(8,*) 'ERROR: OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE
+     & RUN TOGETHER'
       STOP 'NO OMP FIT TOGETHER WITH KALMAN CALCULATIONS'
       ENDIF
 
@@ -49,6 +51,8 @@ C
       ELSE
          CALL EMPIRE
       ENDIF
+
+	CLOSE(8)
 
       STOP
       END
@@ -654,8 +658,9 @@ C--- the fitting.
        endif
 
       return
-
- 100  STOP 'EOF in INPUT FILE.'
+ 100  WRITE(8,*)
+     > 'ERROR: EOF in the MANDATORY SECTION OF THE INPUT FILE.'
+      STOP 'EOF in the MANDATORY SECTION OF THE INPUT FILE.'
       end
 C
 C-------------------------------------------------------------------
