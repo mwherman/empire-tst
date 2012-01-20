@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2272 $
+Ccc   * $Rev: 2274 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 00:02:36 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-21 00:20:14 +0100 (Sa, 21 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -120,7 +120,7 @@ C-----FISBAR(Nnuc)= 1 RIPL "experimental" values for barrier heights;
 C-----widths from Lynn systematics and wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
          OPEN (52,FILE = trim(EMPiredir)//'/RIPL/fission'
-     &      //'/fis-barrier-exp.dat',STATUS = 'OLD',ERR = 200)
+     &      //'/empirical-barriers.dat',STATUS = 'OLD',ERR = 200)
          READ (52,*,ERR=200,END = 200)
          READ (52,*,ERR=200,END = 200)
          READ (52,*,ERR=200,END = 200)
@@ -136,14 +136,14 @@ C-----widths from Lynn systematics and wells' parameters provided by code
          CLOSE (52)
          GOTO 300
   200    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
-     &    ' A=',INT(A(Nnuc)),' in RIPL experimental library'
+     &    ' A=',INT(A(Nnuc)),' in RIPL empirical fission library'
          WRITE (8,*) 
-     &    ' ERROR: or the file ../RIPL/fission/fis-barrier-exp.dat may b
-     &e missing'
+     &    ' ERROR: or the file ../RIPL/fission/empirical-barriers.dat ma
+     &y be missing'
          WRITE (8,*)
      &     ' ERROR: You may use local barriers (FISBAR 0) instead of RIP
      &L barriers (FISBAR 1) in your input file'
-         STOP ' FATAL: Fission barrier can not be retrieved'
+         STOP ' FATAL: Fission barriers can not be retrieved'
       ENDIF
 C
 C-----default values for curvatures
@@ -200,7 +200,7 @@ c-----                ../data/HFB-fisbar.dat (default)
      &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of para 
      &bolic approximation of HFB barriers (FISBAR 2) in your input file'
          STOP 
-     &     ' FATAL: No fission barrier in ../data/HFB-parab-fisbar.dat'
+     &     ' FATAL: No fission barriers in ../data/HFB-parab-fisbar.dat'
       ENDIF
 C
 C-----FISBAR(Nnuc)=3.  RIPL-3 HFB numerical barriers-------------------
@@ -237,7 +237,8 @@ C
      &BARRIERS (FISBAR 3) in your input file'
         WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
      &              iz, ' A=', ia,' in ../RIPL/fission/HFB2007 '
-        STOP ' FATAL: HFB fission barrier can not be retrieved'
+        STOP 
+     &     ' FATAL: HFB numerical fission barriers can not be retrieved'
  480    CLOSE (52)
 
         nextr = Find_Extrem(Nnuc)
@@ -1178,8 +1179,8 @@ C
       IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD    '
       WRITE (80,'(a8,f2.0,a36)') ' FISDEN = ', FISden(Nnuc), cara1
 
-      IF (FISopt(Nnuc).EQ.0.) cara1 = '  Real fission potential        '
-      IF (FISopt(Nnuc).EQ.1.) cara1 = '  Complex fission potential     '
+      IF (FISopt(Nnuc).EQ.0.) cara1 = '  Full damping model (Ind.Barr.)'
+      IF (FISopt(Nnuc).EQ.1.) cara1 = '  Optical model for fission     '
       IF (FISopt(Nnuc).EQ.2.)
      &    cara1 = '  Complex fission potential, isomeric fission'
       WRITE (80,'(a8,f2.0,a36)') ' FISOPT = ', FISopt(Nnuc),cara1
