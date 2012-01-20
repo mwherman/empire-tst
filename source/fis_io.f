@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2231 $
+Ccc   * $Rev: 2272 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-18 03:25:49 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Date: 2012-01-21 00:02:36 +0100 (Sa, 21 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -94,21 +94,26 @@ C-----FISBAR(Nnuc)=3 HFB numeric
 C
 C-----FISBAR(Nnuc)= 0 Empire internal library
       IF (FISbar(Nnuc).EQ.0.) THEN
-         OPEN (81,FILE = trim(EMPiredir)//'/data/fisbar.dat'
+         OPEN (81,FILE = trim(EMPiredir)//'/data/EMPIRE-fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 400)
+         READ (81,*,ERR=400,END = 400)
+         READ (81,*,ERR=400,END = 400)
+         READ (81,*,ERR=400,END = 400)
+         READ (81,*,ERR=400,END = 400)
   350    READ (81,*,ERR=400, END = 400) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 350
          CLOSE (81)
          GOTO 500
   400    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
-     &    ' A=',INT(A(Nnuc)),' in internal EMPIRE library (fisbar.dat)'
+     &    ' A=',INT(A(Nnuc)),
+     &    ' in internal EMPIRE library (/data/EMPIRE-fisbar.dat)'
          WRITE (8,*) 
-     &    ' ERROR: or the file ../data/fisbar.dat may be missing'
+     &    ' ERROR: or the file ../data/EMPIRE-fisbar.dat may be missing'
          WRITE (8,*)
      &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of loca
-     &l barriers (FISBAR 0) in your input file'
-         STOP ' FATAL: Fission barrier can not be retrieved'
+     &l fission barriers (FISBAR 0) in your input file'
+         STOP ' FATAL: Internal fission barriers can not be retrieved'
       ENDIF
 C
 C-----FISBAR(Nnuc)= 1 RIPL "experimental" values for barrier heights;
@@ -177,19 +182,25 @@ C-----FISBAR(Nnuc)=2  HFB microscopic parameters for parabolic barriers
 C-----                extracted from HFB l.d.files and stored in
 c-----                ../data/HFB-fisbar.dat (default)
       IF (FISbar(Nnuc).EQ.2.) THEN
-         OPEN (81,FILE = trim(EMPiredir)//'/data/HFB-fisbar.dat'
+         OPEN (81,FILE = trim(EMPiredir)//
+     &     '/data/HFB-parab-fisbar.dat'
      &      ,STATUS = 'OLD',ERR = 401)
+         READ (81,*,ERR=401,END = 401)
+         READ (81,*,ERR=401,END = 401)
+         READ (81,*,ERR=401,END = 401)
+         READ (81,*,ERR=401,END = 401)
   351    READ (81,*,ERR = 401,END = 401) kz, ka, NRBar, NRWel,
      &                         (EFB(i),H(1,i),i = 1,NRBar)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 351
          CLOSE (81)
          GOTO 500
   401    WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
-     &     iz, ' A=', ia,' in file ../data/HFB-fisbar.dat'
+     &     iz, ' A=', ia,' in file ../data/HFB-parab-fisbar.dat'
          WRITE (8,*)
      &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of para 
      &bolic approximation of HFB barriers (FISBAR 2) in your input file'
-         STOP ' FATAL: No fission barrier in ../data/HFB-fisbar.dat'
+         STOP 
+     &     ' FATAL: No fission barrier in ../data/HFB-parab-fisbar.dat'
       ENDIF
 C
 C-----FISBAR(Nnuc)=3.  RIPL-3 HFB numerical barriers-------------------
