@@ -1,41 +1,27 @@
 Directory: FISSION
-File:      HFB_levden.readme (28 November 2008)
+File:      level-densities-hfb.readme (28 November 2008)
 *******************************************************
 
-          Max1/zxxx  Max2/zxxx  Max3/zxxx  Min1/zxxx  Min2/zxxx
-HFB plus combinatorial nuclear level densities at saddle and isomer deformations
+                         level-densities-hfb/zxxx.dat  
+HFB plus combinatorial nuclear level densities at ground state deformations
              (Provided by S. Goriely, November 28, 2008)
        *******************************************************
 
 Contents
 --------
 The files contains the HFB plus combinatorial nuclear level densities
-at saddle and isomer deformations [1]. The nuclear level density is coherently
+at ground state deformations [1]. The nuclear level density is coherently
 obtained on the basis of the single-particle level scheme and pairing energy
 derived at the saddle point deformation or shape isomer deformation.
 The same BSk14 Skyrme force [2] is used to estimate the fission saddle and
 isomeric points.
 
 The nuclear level density obtained within the HFB plus combinatorial model [1]
-at each of the 2 (or 3) saddle point barriers and of the 1 (or 2) shape isomers
-are given in table format (in a energy, spin and parity grid identical to the
-ground-state level density given in the Level Density Chapter 6). Each isotopic
-chain is included in a zxxx file (where xxx corresponds to the charge
-number Z) in the subdirectory Max1/, Max2/, Max3/, Min1/, Min2/ corresponding
-to the first, second and third saddle points and first and second minima,
-respectively (if there are only 2 barriers, the data for the third saddle
-and second minimum are missing in the respective files).
+at the ground state deformation are given in table format (in a energy, spin 
+and parity grid). Each isotopic chain is included in a zxxx file (where xxx 
+corresponds to the atomic number Z) .
 
-The second and third saddles as well as the second minimum are always found
-to be left-right asymmetric within the HFB framework. For these reasons, the
-tabulated nuclear level density have already been multiplied by a factor 2
-(see TecDoc for more details). In contrast, the inner barrier and minimum
-could be triaxial (though it has been estimated within the approximation of
-an axial symmetry) and in this case, it needs to be multiplied by the
-corresponding enhancement factor given in the TecDoc.
-
-The nuclear level densities are provided for about 1000 nuclei with 90 <= Z <= 102
-lying between the valley of beta-stability and the neutron drip line.
+The nuclear level densities are provided for about 9000 nuclei..
 
 Format
 ------
