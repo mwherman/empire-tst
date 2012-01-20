@@ -1,6 +1,6 @@
-# $Rev: 2268 $
+# $Rev: 2269 $
 # $Author: mherman $
-# $Date: 2012-01-20 22:36:05 +0100 (Fr, 20 Jän 2012) $
+# $Date: 2012-01-20 22:46:17 +0100 (Fr, 20 Jän 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8662,6 +8662,10 @@ cd $workdir} \
         \
         -command { editFile $::env(EMPIREDIR)/RIPL/optical/om-data/om-index-by-Z.txt} \
         -label {RIPL omp} 
+    $site_3_0.menu96 add command \
+        \
+        -command { editFile $::env(EMPIREDIR)/RIPL/optical/om-data/om-references.txt} \
+        -label {RIPL omp Refs.} 
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/doc/hints.txt } -label FAQ 
     $site_3_0.menu96 add command \
