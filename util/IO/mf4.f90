@@ -78,6 +78,8 @@ module ENDF_MF4_IO
         call get_endf(r4%za, r4%awr, n, r4%ltt, n, n)
         call read_endf(r4%li, r4%lct, n, r4%nm)
 
+        nullify(r4%tb1, r4%tb2)
+
         if((r4%ltt .eq. 1) .and. (r4%li .eq. 0)) then
             call read_list(r4)
         else if((r4%ltt .eq. 2) .and. (r4%li .eq. 0)) then
@@ -116,13 +118,16 @@ module ENDF_MF4_IO
 
     allocate(r4%tb1)
     call read_endf(n, n, r4%tb1%nr, r4%tb1%ne)
-    allocate(r4%tb1%itp(r4%tb1%nr))
+    allocate(r4%tb1%itp(r4%tb1%nr),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(r4%tb1%itp,r4%tb1%nr)
-    allocate(r4%tb1%lst(r4%tb1%ne))
+    allocate(r4%tb1%lst(r4%tb1%ne),stat=n)
+    if(n .ne. 0) call endf_badal
     do i = 1,r4%tb1%ne
         lst => r4%tb1%lst(i)
         call read_endf(lst%t, lst%e, lst%lt, n, lst%nl, n)
-        allocate(lst%alp(lst%nl))
+        allocate(lst%alp(lst%nl),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(lst%alp,lst%nl)
     end do
 
@@ -143,9 +148,11 @@ module ENDF_MF4_IO
 
     allocate(r4%tb2)
     call read_endf(n, n, r4%tb2%nr, r4%tb2%ne)
-    allocate(r4%tb2%itp(r4%tb2%nr))
+    allocate(r4%tb2%itp(r4%tb2%nr),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(r4%tb2%itp,r4%tb2%nr)
-    allocate(r4%tb2%lst(r4%tb2%ne))
+    allocate(r4%tb2%lst(r4%tb2%ne),stat=n)
+    if(n .ne. 0) call endf_badal
     do i = 1,r4%tb2%ne
         lss => r4%tb2%lst(i)
         call read_endf(lss%t, lss%e, lss%lt, n, lss%tab%nr, lss%tab%np)
@@ -242,6 +249,44 @@ module ENDF_MF4_IO
 
     return
     end subroutine write_tab
+
+!******************************************************************************
+
+    subroutine del_mf4(mf4)
+
+    implicit none
+
+    type (mf_4), target :: mf4
+    type (mf_4), pointer :: r4,nx
+
+    integer i
+
+    r4 => mf4
+    do while(associated(r4))
+
+        if(associated(r4%tb1)) then
+            do i = 1,r4%tb1%ne
+                deallocate(r4%tb1%lst(i)%alp)
+            end do
+            deallocate(r4%tb1%lst,r4%tb1%itp)
+            deallocate(r4%tb1)
+        endif
+
+        if(associated(r4%tb2)) then
+            do i = 1,r4%tb2%ne
+                call del_tab1(r4%tb2%lst(i)%tab)
+            end do
+            deallocate(r4%tb2%lst,r4%tb2%itp)
+            deallocate(r4%tb2)
+        endif
+
+        nx => r4%next
+        deallocate(r4)
+        r4 => nx
+
+    end do
+
+    end subroutine del_mf4
 
 !******************************************************************************
 

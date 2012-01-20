@@ -79,7 +79,8 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-        allocate(ncs%pt(ncs%nci))
+        allocate(ncs%pt(ncs%nci),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(ncs%pt, ncs%nci)
 
     case(1:3)
@@ -92,7 +93,8 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-        allocate(ncs%pt(ncs%nei))
+        allocate(ncs%pt(ncs%nei),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(ncs%xmfs)
         call get_endf(ncs%xlfss)
         call get_endf(ncs%pt, ncs%nei)
@@ -136,6 +138,19 @@ module ENDF_COV_IO
 
 !------------------------------------------------------------------------------
 
+    subroutine del_nc(ncs)
+
+    implicit none
+
+    type (nc_cov_sect) ncs
+
+    if(associated(ncs%pt)) deallocate(ncs%pt)
+
+    return
+    end subroutine del_nc
+
+!------------------------------------------------------------------------------
+
     integer function lc_nc(ncs)
 
     implicit none
@@ -168,9 +183,8 @@ module ENDF_COV_IO
     type (ni_cov_sect), intent(out) :: nis
     integer, intent(in) :: mf
 
-    integer nl,nk,ne,nec,ner
+    integer nl,nk,ne,nec,ner,n
     real xec
-    character clb*2
 
     call read_endf(nis%lt, nis%lb, nis%nt, nis%ne)
 
@@ -185,7 +199,8 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-        allocate(nis%kl(nis%ne))
+        allocate(nis%kl(nis%ne),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(nis%kl, nis%ne)
 
     case(3:4)
@@ -198,14 +213,16 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-        allocate(nis%kl(nk),nis%ll(nl))
+        allocate(nis%kl(nk),nis%ll(nl),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(nis%kl, nk)
         call get_endf(nis%ll, nl)
 
     case(5,7)
 
         ne = nis%ne
-        allocate(nis%e(ne),nis%cov(ne-1,ne-1))
+        allocate(nis%e(ne),nis%cov(ne-1,ne-1),stat=n)
+        if(n .ne. 0) call endf_badal
 
         if(mf .ne. 32) nis%ls = nis%lt    ! for MF32, LT = IDP = res ID #
         select case(nis%ls)
@@ -241,7 +258,8 @@ module ENDF_COV_IO
             call endf_error(erlin)
         endif
 
-        allocate(nis%er(ner),nis%ec(nec), nis%cov(ner-1,nec-1))
+        allocate(nis%er(ner),nis%ec(nec), nis%cov(ner-1,nec-1),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(nis%er,ner)
         call get_endf(nis%ec,nec)
         call get_endf(nis%cov,ner-1,nec-1)
@@ -350,6 +368,24 @@ module ENDF_COV_IO
 
 !------------------------------------------------------------------------------
 
+    subroutine del_ni(nis)
+
+    implicit none
+
+    type (ni_cov_sect) nis
+
+    if(associated(nis%kl))  deallocate(nis%kl)
+    if(associated(nis%ll))  deallocate(nis%ll)
+    if(associated(nis%cov)) deallocate(nis%cov)
+    if(associated(nis%e))   deallocate(nis%e)
+    if(associated(nis%er))  deallocate(nis%er)
+    if(associated(nis%ec))  deallocate(nis%ec)
+
+    return
+    end subroutine del_ni
+
+!------------------------------------------------------------------------------
+
     integer function lc_ni(nis,mf)
 
     implicit none
@@ -410,7 +446,9 @@ module ENDF_COV_IO
     call read_endf(xx, xx, cx%ndigit, cx%nnn, cx%nm, n)
     call set_fxn(cx%ndigit)
 
-    allocate(cx%cov(cx%nnn,cx%nnn))
+    allocate(cx%cov(cx%nnn,cx%nnn),stat=n)
+    if(n .ne. 0) call endf_badal
+
     cx%cov = zero
     do i = 1,cx%nnn
         cx%cov(i,i) = one
@@ -487,6 +525,19 @@ module ENDF_COV_IO
 10  call endf_error('Error writing compact covariance matrix')
 
     end subroutine write_cmpt
+
+!------------------------------------------------------------------------------
+
+    subroutine del_cmpt(cx)
+
+    implicit none
+
+    type (compact_cov_sect) cx
+
+    if(associated(cx%cov)) deallocate(cx%cov)
+
+    return
+    end subroutine del_cmpt
 
 !------------------------------------------------------------------------------
 

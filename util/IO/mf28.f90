@@ -59,7 +59,8 @@ module ENDF_MF28_IO
     do
         r28%next => null()
         call get_endf(r28%za, r28%awr, n, n, r28%nss, n)
-        allocate(r28%shl(r28%nss))
+        allocate(r28%shl(r28%nss),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1, r28%nss
             shl => r28%shl(i)
@@ -68,7 +69,8 @@ module ENDF_MF28_IO
                 write(erlin,*) ' Inconsistent NW, NTR found in MF28'
                 call endf_error(erlin)
             endif
-            allocate(shl%trn(shl%ntr))
+            allocate(shl%trn(shl%ntr),stat=n)
+            if(n .ne. 0) call endf_badal
             call read_endf(shl%ebi, shl%eln, xx, xx, xx, xx)
             do j = 1, shl%ntr
                 tr => shl%trn(j)
@@ -123,6 +125,30 @@ module ENDF_MF28_IO
 
     return
     end subroutine write_mf28
+
+!---------------------------------------------------------------------------------------------
+
+    subroutine del_mf28(mf28)
+
+    implicit none
+
+    type (mf_28), target :: mf28
+    type (mf_28), pointer :: r28,nx
+
+    integer i
+
+    r28 => mf28
+    do while(associated(r28))
+        do i = 1, r28%nss
+            deallocate(r28%shl(i)%trn)
+        end do
+        deallocate(r28%shl)
+        nx => r28%next
+        deallocate(r28)
+        r28 => nx
+    end do
+
+    end subroutine del_mf28
 
 !---------------------------------------------------------------------------------------------
 

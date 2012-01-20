@@ -83,6 +83,25 @@ module ENDF_MF23_IO
 
 !---------------------------------------------------------------------------------------------
 
+    subroutine del_mf23(mf23)
+
+    implicit none
+
+    type (mf_23), target :: mf23
+    type (mf_23), pointer :: r23,nx
+
+    r23 => mf23
+    do while(associated(r23))
+        call del_tab1(r23%ctab)
+        nx => r23%next
+        deallocate(r23)
+        r23 => nx
+    end do
+
+    end subroutine del_mf23
+
+!---------------------------------------------------------------------------------------------
+
     integer function lc_mf23(mf23)
 
     implicit none

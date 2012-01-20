@@ -83,6 +83,25 @@ module ENDF_MF27_IO
 
 !---------------------------------------------------------------------------------------------
 
+    subroutine del_mf27(mf27)
+
+    implicit none
+
+    type (mf_27), target :: mf27
+    type (mf_27), pointer :: r27,nx
+
+    r27 => mf27
+    do while(associated(r27))
+        call del_tab1(r27%ftab)
+        nx => r27%next
+        deallocate(r27)
+        r27 => nx
+    end do
+
+    end subroutine del_mf27
+
+!---------------------------------------------------------------------------------------------
+
     integer function lc_mf27(mf27)
 
     implicit none

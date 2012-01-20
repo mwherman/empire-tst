@@ -14,10 +14,10 @@ module ENDF_MF1_IO
     !~~~~~~~~~~~~~~~~~~~~~~~  MT451  Descriptive Data & Directory ~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_sect_list
-        integer mf
-        integer mt
-        integer nc
-        integer mod
+        integer mf                                ! section MF
+        integer mt                                ! section MT
+        integer nc                                ! # lines in section
+        integer mod                               ! modification number for section.
     end type
 
     type MF1_451
@@ -49,8 +49,8 @@ module ENDF_MF1_IO
         character*10 ddate                        ! orig distribution date
         character*10 rdate                        ! date & number of last revision.
         character*8 endate                        ! NNDC master file entry date.
-        character*66, pointer :: cmnt(:)          ! list of nwd comment lines
-        type (MF1_sect_list), pointer :: sct(:)   ! list of nxc sections
+        character*66, pointer :: cmnt(:)          ! lines of ascii comments (nwd)
+        type (MF1_sect_list), pointer :: dir(:)   ! "directory" of sections (nxc)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~ MT452  nubar = # neutrons/fission ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +61,7 @@ module ENDF_MF1_IO
         integer lnu                               ! flag for poly or table
         integer nc                                ! number of terms in poly
         real, pointer :: c(:)                     ! coefs of polynomial
-        type (tab1) tb                            ! table of values
+        type (tab1), pointer :: tb                ! table of values
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~  MT455 Delayed neutron data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,10 +81,10 @@ module ENDF_MF1_IO
         integer ldg                               ! flag for E-dep:0=indep, 1=dep
         integer nc                                ! number of terms in poly for nubar
         real, pointer :: c(:)                     ! coefs of polynomial for nubar
-        type (tab1) tb                            ! table of values for nubar
+        type (tab1), pointer :: tb                ! table of values for nubar
         integer nff                               ! number of precursor families for lambda
         real, pointer :: lambda(:)                ! E-independent lambda for nff families
-        type (tab2_455_lamb) lb                   ! E-dependent families 
+        type (tab2_455_lamb), pointer :: lb       ! E-dependent families 
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~ MT458  Components of energy release from fission ~~~~~~~~~~~~~~~~~~~~~~
@@ -176,18 +176,15 @@ module ENDF_MF1_IO
         case(451)
             allocate(r1%mt451)
             call read_451(r1%mt451)
-        case(452,456)
-            ! MT452 and MT456 share a common format
-            if(r1%mt .eq. 452) then
-                allocate(r1%mt452)
-                call read_4526(r1%mt452)
-            else
-                allocate(r1%mt456)
-                call read_4526(r1%mt456)
-            endif
+        case(452)
+            allocate(r1%mt452)
+            call read_4526(r1%mt452)
         case(455)
             allocate(r1%mt455)
             call read_455(r1%mt455)
+        case(456)
+            allocate(r1%mt456)
+            call read_4526(r1%mt456)
         case(458)
             allocate(r1%mt458)
             call read_458(r1%mt458)
@@ -226,7 +223,8 @@ module ENDF_MF1_IO
     call read_endf(r1%awi, r1%emax, r1%lrel, n, r1%nsub, r1%nver)
     call read_endf(r1%temp, xx, r1%ldrv, n, r1%nwd, r1%nxc)
 
-    allocate(r1%cmnt(r1%nwd),r1%sct(r1%nxc))
+    allocate(r1%cmnt(r1%nwd),r1%dir(r1%nxc),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do i = 1,r1%nwd
         call get_endline
@@ -234,7 +232,7 @@ module ENDF_MF1_IO
     end do
 
     do i = 1,r1%nxc
-        call read_endf(r1%sct(i)%mf, r1%sct(i)%mt, r1%sct(i)%nc, r1%sct(i)%mod)
+        call read_endf(r1%dir(i)%mf, r1%dir(i)%mt, r1%dir(i)%nc, r1%dir(i)%mod)
     end do
 
     r1%zsymam = r1%cmnt(1)(1:11)
@@ -262,14 +260,16 @@ module ENDF_MF1_IO
     call get_endf(r2%za, r2%awr, n, r2%lnu, n, n)
 
     if(r2%lnu .eq. 1) then
-        r2%tb%nr = 0
-        r2%tb%np = 0
+        nullify(r2%tb)
         call read_endf(n, n, r2%nc, n)
-        allocate(r2%c(r2%nc))
+        allocate(r2%c(r2%nc),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(r2%c,r2%nc)
     else if(r2%lnu .eq. 2) then
         r2%nc = 0
         nullify(r2%c)
+        allocate(r2%tb,stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(n, n, r2%tb%nr, r2%tb%np)
         call read_endf(r2%tb)
     else
@@ -298,11 +298,11 @@ module ENDF_MF1_IO
         ! here we have just one E-indep lambda/family
         ! the families are not interpolated.
 
+        nullify(r5%lb)
         call read_endf(n, n, r5%nff, n)
-        allocate(r5%lambda(r5%nff))
+        allocate(r5%lambda(r5%nff),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(r5%lambda,r5%nff)
-        r5%lb%nr = 0
-        r5%lb%ne = 0
 
     else if(r5%ldg .eq. 1) then
 
@@ -311,15 +311,19 @@ module ENDF_MF1_IO
         ! for each energy & family. The size of the real pair is (NE,NFF).
 
         nullify(r5%lambda)
+        allocate(r5%lb,stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(n, n, r5%lb%nr, r5%lb%ne)
-        allocate(r5%lb%itp(r5%lb%nr),r5%lb%e(r5%lb%ne))
+        allocate(r5%lb%itp(r5%lb%nr),r5%lb%e(r5%lb%ne),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(r5%lb%itp,r5%lb%nr)
 
         ! read first family to get 2*NFF in first (& every) record
 
         call read_endf(xx, r5%lb%e(1), n, n, i, n)
         r5%nff = i/2
-        allocate(r5%lb%dgc(r5%lb%ne, r5%nff))
+        allocate(r5%lb%dgc(r5%lb%ne, r5%nff),stat=n)
+        if(n .ne. 0) call endf_badal
         do j = 1,r5%nff
             call get_endf(r5%lb%dgc(1,j)%x)
             call get_endf(r5%lb%dgc(1,j)%y)
@@ -345,14 +349,16 @@ module ENDF_MF1_IO
     ! now read in the nubars
 
     if(r5%lnu .eq. 1) then
-        r5%tb%nr = 0
-        r5%tb%np = 0
+        nullify(r5%tb)
         call read_endf(n, n, r5%nc, n)
-        allocate(r5%c(r5%nc))
+        allocate(r5%c(r5%nc),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(r5%c,r5%nc)
     else if(r5%lnu .eq. 2) then
         r5%nc = 0
         nullify(r5%c)
+        allocate(r5%tb,stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(n, n, r5%tb%nr, r5%tb%np)
         call read_endf(r5%tb)
     else
@@ -380,7 +386,8 @@ module ENDF_MF1_IO
         call endf_error(erlin)
     endif
 
-    allocate(r8%cmp(0:r8%nply))
+    allocate(r8%cmp(0:r8%nply),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do k = 0,r8%nply
         call read_reals(r8%cmp(k)%efr,18)
@@ -404,7 +411,8 @@ module ENDF_MF1_IO
 
     if(r6%lo .eq. 1) then
         r6%ng = i
-        allocate(r6%e(r6%ng),r6%phot(r6%ng))
+        allocate(r6%e(r6%ng),r6%phot(r6%ng),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,r6%ng
             call read_endf(r6%e(i), xx, n, n, r6%phot(i)%nr, r6%phot(i)%np)
             call read_endf(r6%phot(i))
@@ -413,7 +421,8 @@ module ENDF_MF1_IO
         nullify(r6%lambda)
     else if(r6%lo .eq. 2) then
         call read_endf(n, n, r6%nnf, n)
-        allocate(r6%lambda(r6%nnf))
+        allocate(r6%lambda(r6%nnf),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(r6%lambda,r6%nnf)
         r6%ng = 0
         nullify(r6%e,r6%phot)
@@ -443,15 +452,12 @@ module ENDF_MF1_IO
         select case(r1%mt)
         case(451)
             call write_451(r1%mt451)
-        case(452,456)
-            ! MT452 and MT456 share a common format
-            if(r1%mt .eq. 452) then
-                call write_4526(r1%mt452)
-            else
-                call write_4526(r1%mt456)
-            endif
+        case(452)
+            call write_4526(r1%mt452)
         case(455)
             call write_455(r1%mt455)
+        case(456)
+            call write_4526(r1%mt456)
         case(458)
             call write_458(r1%mt458)
         case(460)
@@ -485,7 +491,7 @@ module ENDF_MF1_IO
 
     nmod = 0
     do i = 1,r1%nxc
-        nmod = max(nmod,r1%sct(i)%mod)
+        nmod = max(nmod,r1%dir(i)%mod)
     end do
 
     call write_endf(r1%za, r1%awr, r1%lrp, r1%lfi, r1%nlib, nmod)
@@ -499,7 +505,7 @@ module ENDF_MF1_IO
     end do
 
     do i = 1,r1%nxc
-        call write_endf(0,r1%sct(i)%mf, r1%sct(i)%mt, r1%sct(i)%nc, r1%sct(i)%mod)
+        call write_endf(0,r1%dir(i)%mf, r1%dir(i)%mt, r1%dir(i)%nc, r1%dir(i)%mod)
     end do
 
     return
@@ -637,6 +643,63 @@ module ENDF_MF1_IO
 
     return
     end subroutine write_460
+
+!***********************************************************************************
+
+    subroutine del_mf1(mf1)
+
+    implicit none
+
+    type (mf_1), target :: mf1
+    type (mf_1), pointer :: r1,nx
+
+    integer i
+
+    r1 => mf1
+    r1%mt = get_mt()
+    do while(associated(r1))
+
+        if(associated(r1%mt451)) then
+            deallocate(r1%mt451%cmnt, r1%mt451%dir)
+            deallocate(r1%mt451)
+        else if(associated(r1%mt452)) then
+            if(associated(r1%mt452%c)) deallocate(r1%mt452%c)
+            if(associated(r1%mt452%tb)) call remove_tab1(r1%mt452%tb)
+            deallocate(r1%mt452)
+        else if(associated(r1%mt455)) then
+            if(associated(r1%mt455%lambda)) deallocate(r1%mt455%lambda)
+            if(associated(r1%mt455%lb)) then
+                deallocate(r1%mt455%lb%itp, r1%mt455%lb%e, r1%mt455%lb%dgc)
+                deallocate(r1%mt455%lb)
+            endif
+            if(associated(r1%mt455%c)) deallocate(r1%mt455%c)
+            if(associated(r1%mt455%tb)) call remove_tab1(r1%mt455%tb)
+            deallocate(r1%mt455)
+        else if(associated(r1%mt456)) then
+            if(associated(r1%mt456%c)) deallocate(r1%mt456%c)
+            if(associated(r1%mt456%tb)) call remove_tab1(r1%mt456%tb)
+            deallocate(r1%mt456)
+        else if(associated(r1%mt458)) then
+            deallocate(r1%mt458%cmp)
+            deallocate(r1%mt458)
+        else if(associated(r1%mt460)) then
+            if(associated(r1%mt460%e)) then
+                do i = 1,r1%mt460%ng
+                    call del_tab1(r1%mt460%phot(i))
+                end do
+                deallocate(r1%mt460%e, r1%mt460%phot)
+            endif
+            if(associated(r1%mt460%lambda)) deallocate(r1%mt460%lambda)
+            deallocate(r1%mt460)
+        endif
+
+        nx => r1%next
+        deallocate(r1)
+        r1 => nx
+
+    end do
+
+    end subroutine del_mf1
 
 !***********************************************************************************
 

@@ -51,7 +51,8 @@ module ENDF_MF10_IO
     do
         r10%next => null()
         call get_endf(r10%za, r10%awr, r10%lis, n, r10%ns, n)
-        allocate(r10%fst(r10%ns))
+        allocate(r10%fst(r10%ns),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1,r10%ns
             fs => r10%fst(i)
@@ -100,6 +101,30 @@ module ENDF_MF10_IO
 
     return
     end subroutine write_mf10
+
+!---------------------------------------------------------------------------------------------
+
+    subroutine del_mf10(mf10)
+
+    implicit none
+
+    type (mf_10), target :: mf10
+    type (mf_10), pointer :: r10,nx
+
+    integer i
+
+    r10 => mf10
+    do while(associated(r10))
+        do i = 1,r10%ns
+            call del_tab1(r10%fst(i)%crs)
+        end do
+        deallocate(r10%fst)
+        nx => r10%next
+        deallocate(r10)
+        r10 => nx
+    end do
+
+    end subroutine del_mf10
 
 !---------------------------------------------------------------------------------------------
 

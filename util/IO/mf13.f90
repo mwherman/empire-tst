@@ -60,7 +60,8 @@ module ENDF_MF13_IO
             nullify(r13%tyld)
         endif
 
-        allocate(r13%gam(r13%nk))
+        allocate(r13%gam(r13%nk),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,r13%nk
             gm => r13%gam(i)
             call read_endf(gm%eg, gm%es, gm%lp, gm%lf, gm%crs%nr, gm%crs%np)
@@ -112,6 +113,37 @@ module ENDF_MF13_IO
 
     return
     end subroutine write_mf13
+
+!---------------------------------------------------------------------------------------------
+
+    subroutine del_mf13(mf13)
+
+    implicit none
+
+    type (mf_13), target :: mf13
+    type (mf_13), pointer :: r13,nx
+
+    integer i
+
+    r13 => mf13
+    do while(associated(r13))
+
+        if(associated(r13%tyld)) call remove_tab1(r13%tyld)
+
+        if(associated(r13%gam)) then
+            do i = 1,r13%nk
+                call del_tab1(r13%gam(i)%crs)
+            end do
+            deallocate(r13%gam)
+        endif
+
+        nx => r13%next
+        deallocate(r13)
+        r13 => nx
+
+    end do
+
+    end subroutine del_mf13
 
 !---------------------------------------------------------------------------------------------
 

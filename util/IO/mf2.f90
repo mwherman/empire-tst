@@ -311,7 +311,8 @@ module ENDF_MF2_IO
     type (MF2_range), pointer :: rng
 
     call get_endf(mf2%za, mf2%awr, n, n, mf2%nis, n)
-    allocate(mf2%iso(mf2%nis))
+    allocate(mf2%iso(mf2%nis),stat=n)
+    if(n .ne. 0) call endf_badal
 
     mf2%mt = 151
 
@@ -319,7 +320,8 @@ module ENDF_MF2_IO
 
         iso => mf2%iso(i)
         call read_endf(iso%zai, iso%abn, n, iso%lfw, iso%ner, n)
-        allocate(iso%rng(iso%ner))
+        allocate(iso%rng(iso%ner),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do j = 1,iso%ner
 
@@ -406,12 +408,14 @@ module ENDF_MF2_IO
     endif
 
     call read_endf(bw%spi, bw%ap, n, n, bw%nls, n)
-    allocate(bw%prm(bw%nls))
+    allocate(bw%prm(bw%nls),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do l = 1,bw%nls
         pm => bw%prm(l)
         call read_endf(pm%awri, pm%qx, pm%l, pm%lrx, n, pm%nrs)
-        allocate(pm%res(pm%nrs))
+        allocate(pm%res(pm%nrs),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,pm%nrs
             call read_reals(pm%res(i)%er,6)
         end do
@@ -440,12 +444,14 @@ module ENDF_MF2_IO
     endif
 
     call read_endf(rm%spi, rm%ap, rm%lad, n, rm%nls, rm%nlsc)
-    allocate(rm%prm(rm%nls))
+    allocate(rm%prm(rm%nls),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do l = 1,rm%nls
         pm => rm%prm(l)
         call read_endf(pm%awri, pm%apl, pm%l, n, n, pm%nrs)
-        allocate(pm%res(pm%nrs))
+        allocate(pm%res(pm%nrs),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,pm%nrs
             call read_reals(pm%res(i)%er,6)
         end do
@@ -476,7 +482,8 @@ module ENDF_MF2_IO
     endif
 
     call read_endf(aa%spi, aa%ap, n, n, aa%nls, n)
-    allocate(aa%lpm(aa%nls))
+    allocate(aa%lpm(aa%nls),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do l = 1,aa%nls
 
@@ -502,13 +509,15 @@ module ENDF_MF2_IO
         end select
 
         call read_endf(lm%l, n, lm%njs, n)
-        allocate(lm%jpm(lm%njs))
+        allocate(lm%jpm(lm%njs),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do j = 1,lm%njs
 
             jm => lm%jpm(j)
             call read_endf(jm%aj, xx, n, n, n, jm%nlj)
-            allocate(jm%res(jm%nlj))
+            allocate(jm%res(jm%nlj),stat=n)
+            if(n .ne. 0) call endf_badal
             do k = 1,jm%nlj
                 call read_reals(jm%res(k)%det,12)
             end do
@@ -541,7 +550,8 @@ module ENDF_MF2_IO
 
     ! allocate & read particle-pairs
 
-    allocate(ml%pp(ml%npp),ml%sg(ml%njs))
+    allocate(ml%pp(ml%npp),ml%sg(ml%njs),stat=n)
+    if(n .ne. 0) call endf_badal
     do n = 1,ml%npp
         call read_reals(ml%pp(n)%ma,12)
     end do
@@ -553,16 +563,19 @@ module ENDF_MF2_IO
         sg => ml%sg(l)
 
         call read_endf(sg%aj, sg%pj, sg%kbk, sg%kps, n, sg%nch)
-        allocate(sg%chn(sg%nch))
+        allocate(sg%chn(sg%nch),stat=n)
+        if(n .ne. 0) call endf_badal
         do n = 1,sg%nch
             call read_reals(sg%chn(n)%ppi,6)
         end do
         call read_endf(n, sg%nrs, n, sg%nx)
 
-        allocate(sg%er(sg%nrs))
-        do n = 1,sg%nch
-            chn => sg%chn(n)
-            allocate(chn%gam(sg%nrs))
+        allocate(sg%er(sg%nrs),stat=n)
+        if(n .ne. 0) call endf_badal
+        do j = 1,sg%nch
+            chn => sg%chn(j)
+            allocate(chn%gam(sg%nrs),stat=n)
+            if(n .ne. 0) call endf_badal
         end do
 
         do j = 1,sg%nrs
@@ -599,9 +612,9 @@ module ENDF_MF2_IO
             case(1)
                 allocate(bk%rbr,bk%rbi)
                 call get_endline
-                    call read_endf(n, n, bk%rbr%nr, bk%rbr%np)
+                call read_endf(n, n, bk%rbr%nr, bk%rbr%np)
                 call read_endf(bk%rbr)
-                    call read_endf(n, n, bk%rbi%nr, bk%rbi%np)
+                call read_endf(n, n, bk%rbi%nr, bk%rbi%np)
                 call read_endf(bk%rbi)
             case(2)
                 bk%ed = x1
@@ -637,10 +650,11 @@ module ENDF_MF2_IO
             case(0)
                 call get_endline
             case(1)
+                allocate(ps%psr, ps%psi)
                 call get_endline
-                    call read_endf(n, n, ps%psr%nr, ps%psr%np)
+                call read_endf(n, n, ps%psr%nr, ps%psr%np)
                 call read_endf(ps%psr)
-                    call read_endf(n, n, ps%psi%nr, ps%psi%np)
+                call read_endf(n, n, ps%psi%nr, ps%psi%np)
                 call read_endf(ps%psi)
             case default
                 write(erlin,*) 'Undefined value for MF2 R-Matrix phase shift LPS:', ps%lps
@@ -673,7 +687,8 @@ module ENDF_MF2_IO
     if((lfw.eq.0) .and. (lrf.eq.1)) then
 
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
-        allocate(ur%lpm(ur%nls))
+        allocate(ur%lpm(ur%nls),stat=n)
+        if(n .ne. 0) call endf_badal
         nullify(ur%es)
         ur%ne = 0
 
@@ -681,7 +696,8 @@ module ENDF_MF2_IO
             pm => ur%lpm(l)
             call read_endf(pm%awri, xx, pm%l, n, n, pm%njs)
             nullify(pm%jpc)
-            allocate(pm%jpm(pm%njs))
+            allocate(pm%jpm(pm%njs),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,pm%njs
                 jm => pm%jpm(j)
                 call read_reals(jm%d,5)
@@ -692,22 +708,26 @@ module ENDF_MF2_IO
     else if((lfw.eq.1) .and. (lrf.eq.1)) then
 
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%ne, ur%nls)
-        allocate(ur%lpm(ur%nls))
+        allocate(ur%lpm(ur%nls),stat=n)
+        if(n .ne. 0) call endf_badal
 
-        allocate(ur%es(ur%ne))
+        allocate(ur%es(ur%ne),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(ur%es,ur%ne)
 
         do l = 1,ur%nls
             pm => ur%lpm(l)
             call read_endf(pm%awri, xx, pm%l, n, pm%njs, n)
             nullify(pm%jpc)
-            allocate(pm%jpm(pm%njs))
+            allocate(pm%jpm(pm%njs),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,pm%njs
                 jm => pm%jpm(j)
                 call read_endf(n, muf, n, n)
                 jm%amuf = real(muf)
                 call read_reals(jm%d,5)
-                allocate(jm%gf(ur%ne))
+                allocate(jm%gf(ur%ne),stat=n)
+                if(n .ne. 0) call endf_badal
                 call read_endf(jm%gf,ur%ne)
             end do
         end do
@@ -715,7 +735,8 @@ module ENDF_MF2_IO
     else if(lrf.eq.2)then
 
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
-        allocate(ur%lpm(ur%nls))
+        allocate(ur%lpm(ur%nls),stat=n)
+        if(n .ne. 0) call endf_badal
         nullify(ur%es)
         ur%ne = 0
 
@@ -723,7 +744,8 @@ module ENDF_MF2_IO
             pm => ur%lpm(l)
             call read_endf(pm%awri, xx, pm%l, n, pm%njs, n)
             nullify(pm%jpm)
-            allocate(pm%jpc(pm%njs))
+            allocate(pm%jpc(pm%njs),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,pm%njs
                 jc => pm%jpc(j)
                 call read_endf(jc%aj, xx, jc%int, n, n, jc%ne)
@@ -733,7 +755,8 @@ module ENDF_MF2_IO
                 call get_endf(jc%amun)
                 call get_endf(jc%amug)
                 call get_endf(jc%amuf)
-                allocate(jc%fpm(jc%ne))
+                allocate(jc%fpm(jc%ne),stat=n)
+                if(n .ne. 0) call endf_badal
                 do n = 1,jc%ne
                     call read_reals(jc%fpm(n)%es,6)
                 end do
@@ -1132,6 +1155,102 @@ module ENDF_MF2_IO
 
     return
     end subroutine write_ur
+
+!******************************************************************************
+
+    subroutine del_mf2(mf2)
+
+    implicit none
+
+    type (mf_2), pointer :: mf2
+
+    integer i,j,l,n
+
+    type (MF2_isotope), pointer :: iso
+    type (MF2_range), pointer :: rng
+
+    do i = 1, mf2%nis
+
+        iso => mf2%iso(i)
+
+        do j = 1,iso%ner
+
+            rng => iso%rng(j)
+
+            if(associated(rng%sc)) then
+                deallocate(rng%sc)
+            else if(associated(rng%bw)) then
+                if(associated(rng%bw%ape)) call remove_tab1(rng%bw%ape)
+                do l = 1,rng%bw%nls
+                    deallocate(rng%bw%prm(l)%res)
+                end do
+                deallocate(rng%bw%prm)
+                deallocate(rng%bw)
+            else if(associated(rng%rm)) then
+                if(associated(rng%rm%ape)) call remove_tab1(rng%rm%ape)
+                do l = 1,rng%rm%nls
+                    deallocate(rng%rm%prm(l)%res)
+                end do
+                deallocate(rng%rm%prm)
+                deallocate(rng%rm)
+            else if(associated(rng%aa)) then
+                if(associated(rng%aa%ape)) call remove_tab1(rng%aa%ape)
+                do l = 1,rng%aa%nls
+                    do n = 1, rng%aa%lpm(l)%njs
+                        deallocate(rng%aa%lpm(l)%jpm(n)%res)
+                    end do
+                    deallocate(rng%aa%lpm(l)%jpm)
+                end do
+                deallocate(rng%aa%lpm)
+                deallocate(rng%aa)
+            else if(associated(rng%ml)) then
+                if(associated(rng%ml%pp)) deallocate(rng%ml%pp)
+                do l = 1, rng%ml%njs
+                    do n = 1,rng%ml%sg(l)%nch
+                        deallocate(rng%ml%sg(l)%chn(n)%gam)
+                    end do
+                    deallocate(rng%ml%sg(l)%chn, rng%ml%sg(l)%er)
+                    if(associated(rng%ml%sg(l)%bck)) then
+                        if(associated(rng%ml%sg(l)%bck%rbr)) call remove_tab1(rng%ml%sg(l)%bck%rbr)
+                        if(associated(rng%ml%sg(l)%bck%rbi)) call remove_tab1(rng%ml%sg(l)%bck%rbi)
+                        deallocate(rng%ml%sg(l)%bck)
+                    endif
+                    if(associated(rng%ml%sg(l)%psf)) then
+                        if(associated(rng%ml%sg(l)%psf%psr)) call remove_tab1(rng%ml%sg(l)%psf%psr)
+                        if(associated(rng%ml%sg(l)%psf%psi)) call remove_tab1(rng%ml%sg(l)%psf%psi)
+                        deallocate(rng%ml%sg(l)%psf)
+                    endif
+                end do
+                deallocate(rng%ml%sg)
+                deallocate(rng%ml)
+            else if(associated(rng%ur)) then
+                if(associated(rng%ur%es)) deallocate(rng%ur%es)
+                do l = 1,rng%ur%nls
+                    if(associated(rng%ur%lpm(l)%jpm)) then
+                        do n = 1,rng%ur%lpm(l)%njs
+                            if(associated(rng%ur%lpm(l)%jpm(n)%gf)) deallocate(rng%ur%lpm(l)%jpm(n)%gf)
+                        end do
+                        deallocate(rng%ur%lpm(l)%jpm)
+                    endif
+                    if(associated(rng%ur%lpm(l)%jpc)) then
+                        do n = 1,rng%ur%lpm(l)%njs
+                            deallocate(rng%ur%lpm(l)%jpc(n)%fpm)
+                        end do
+                        deallocate(rng%ur%lpm(l)%jpc)
+                    endif
+                end do
+                deallocate(rng%ur%lpm)
+                deallocate(rng%ur)
+            end if
+
+        end do
+        deallocate(iso%rng)
+    end do
+    deallocate(mf2%iso)
+    deallocate(mf2)
+
+    return
+    end subroutine del_mf2
 
 !******************************************************************************
 

@@ -63,13 +63,15 @@ module ENDF_MF34_IO
     do
         rc%next => null()
         call get_endf(rc%za, rc%awr, n, rc%ltt, n, rc%nmt1)
-        allocate(rc%sct(rc%nmt1))
+        allocate(rc%sct(rc%nmt1),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1,rc%nmt1
 
             sc => rc%sct(i)
             call read_endf(xx, xx, sc%mat1, sc%mt1, sc%nl, sc%nl1)
-            allocate(sc%ssc(sc%nl,sc%nl1))
+            allocate(sc%ssc(sc%nl,sc%nl1),stat=n)
+            if(n .ne. 0) call endf_badal
 
             do l = 1,sc%nl
                 if(sc%mt1 .eq. rc%mt) then
@@ -102,10 +104,11 @@ module ENDF_MF34_IO
 
     type (MF34_subsect), intent(out) :: nis
 
-    integer i
+    integer i,n
 
     call read_endf(nis%l, nis%l1, nis%lct, nis%ni)
-    allocate(nis%lst(nis%ni))
+    allocate(nis%lst(nis%ni),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do i = 1, nis%ni
         call read_ni(nis%lst(i),34)
@@ -186,6 +189,43 @@ module ENDF_MF34_IO
 
     return
     end subroutine write_mf34_ni
+
+!***********************************************************************************
+
+    subroutine del_mf34(mf34)
+
+    implicit none
+
+    type (mf_34), target :: mf34
+    type (MF_34), pointer :: rc,nx
+
+    integer i,k,k1,l,n
+
+    rc => mf34
+    do while(associated(rc))
+        do i = 1,rc%nmt1
+            do l = 1,rc%sct(i)%nl
+                if(rc%sct(i)%mt1 .eq. rc%mt) then
+                    k1 = l        ! symmetric
+                else
+                    k1 = 1        ! asymmetrix
+                endif
+                do k = k1, rc%sct(i)%nl1
+                    do n = 1, rc%sct(i)%ssc(l,k)%ni
+                        call del_ni(rc%sct(i)%ssc(l,k)%lst(n))
+                    end do
+                    deallocate(rc%sct(i)%ssc(l,k)%lst)
+                end do
+            end do
+            deallocate(rc%sct(i)%ssc)
+        end do
+        deallocate(rc%sct)
+        nx => rc%next
+        deallocate(rc)
+        rc => nx
+    end do
+
+    end subroutine del_mf34
 
 !***********************************************************************************
 

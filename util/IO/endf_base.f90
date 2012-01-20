@@ -92,8 +92,8 @@ module BASE_ENDF_IO
 
     public endline, erlin, ipos, zero, tab1, lc_tab1, real_pair, int_pair
     public write_endf, put_endf, read_endf, get_endf, write_send, write_fend
-    public open_endfile, get_endline, put_endline, close_endfile
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error
+    public open_endfile, get_endline, put_endline, close_endfile, del_tab1, remove_tab1
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
 
 !------------------------------------------------------------------------------
@@ -105,6 +105,8 @@ module BASE_ENDF_IO
     ! read a tab1 structure starting on next line
 
     implicit none
+
+    integer*4 istat
 
     type (tab1), intent(out) :: tb
 
@@ -118,12 +120,48 @@ module BASE_ENDF_IO
         call endf_error(erlin)
     endif
 
-    allocate(tb%itp(tb%nr),tb%dat(tb%np))
+    allocate(tb%itp(tb%nr),tb%dat(tb%np),stat=istat)
+    if(istat .ne. 0) then
+        write(erlin,*) ' Error allocating TAB1 record'
+        call endf_error(erlin)
+    endif
+
     call read_int_pair(tb%itp,tb%nr)
     call read_real_pair(tb%dat,tb%np)
 
     return
     end subroutine read_tab1
+
+!------------------------------------------------------------------------------
+
+    subroutine del_tab1(tb)
+
+    ! deallocate a tab1 structure contents, but not the structure itself
+
+    implicit none
+
+    type (tab1) tb
+
+    deallocate(tb%itp, tb%dat)
+
+    return
+    end subroutine del_tab1
+
+!------------------------------------------------------------------------------
+
+    subroutine remove_tab1(tb)
+
+    ! deallocate a tab1 structure contents & the tab1 itself
+
+    implicit none
+
+    type (tab1), pointer :: tb
+
+    deallocate(tb%itp, tb%dat)
+    deallocate(tb)
+
+    return
+    end subroutine remove_tab1
 
 !--------------------------------------------------------------------------------
 

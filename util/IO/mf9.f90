@@ -52,7 +52,8 @@ module ENDF_MF9_IO
         r9%next => null()
         call get_endf(r9%za, r9%awr, r9%lis, n, r9%ns, n)
 
-        allocate(r9%fst(r9%ns))
+        allocate(r9%fst(r9%ns),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,r9%ns
             fs => r9%fst(i)
             call read_endf(fs%qm, fs%qi, fs%izap, fs%lfs, fs%mlt%nr, fs%mlt%np)
@@ -106,6 +107,30 @@ module ENDF_MF9_IO
 
     return
     end subroutine write_mf9
+
+!------------------------------------------------------------------------------
+
+    subroutine del_mf9(mf9)
+
+    implicit none
+
+    type (mf_9), target :: mf9
+    type (mf_9), pointer :: r9,nx
+
+    integer i
+
+    r9 => mf9
+    do while(associated(r9))
+        do i = 1,r9%ns
+            call del_tab1(r9%fst(i)%mlt)
+        end do
+        deallocate(r9%fst)
+        nx => r9%next
+        deallocate(r9)
+        r9 => nx
+    end do
+
+    end subroutine del_mf9
 
 !------------------------------------------------------------------------------
 

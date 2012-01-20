@@ -92,7 +92,8 @@ module ENDF_MF14_IO
                 call endf_error(erlin)
             endif
 
-            allocate(r14%isg(r14%ni),r14%aig(nl))
+            allocate(r14%isg(r14%ni),r14%aig(nl),stat=n)
+            if(n .ne. 0) call endf_badal
             do i = 1,r14%ni
                 call read_endf(r14%isg(i)%eg,r14%isg(i)%es, n, n, n, n)
             end do
@@ -101,21 +102,25 @@ module ENDF_MF14_IO
 
                 ag => r14%aig(i)
                 call read_endf(ag%eg, ag%es, n, n, ag%nr, ag%ne)
-                allocate(ag%inb(ag%nr))
+                allocate(ag%inb(ag%nr),stat=n)
+                if(n .ne. 0) call endf_badal
                 call read_endf(ag%inb,ag%nr)
 
                 if(r14%ltt .eq. 1) then        ! Legendre
                     nullify(ag%tab)
-                    allocate(ag%leg(ag%ne))
+                    allocate(ag%leg(ag%ne),stat=n)
+                    if(n .ne. 0) call endf_badal
                     do j = 1, ag%ne
                         lg => ag%leg(j)
                         call read_endf(xx, lg%e, n, n, lg%nl, n)
-                        allocate(lg%a(lg%nl))
+                        allocate(lg%a(lg%nl),stat=n)
+                        if(n .ne. 0) call endf_badal
                         call read_endf(lg%a,lg%nl)
                     end do
                 else if(r14%ltt .eq. 2) then    ! tables
                     nullify(ag%leg)
-                    allocate(ag%tab(ag%ne))
+                    allocate(ag%tab(ag%ne),stat=n)
+                    if(n .ne. 0) call endf_badal
                     do j = 1, ag%ne
                         tb => ag%tab(j)
                         call read_endf(xx, tb%e, n, n, tb%mut%nr, tb%mut%np)
@@ -238,6 +243,48 @@ module ENDF_MF14_IO
 
     return
     end subroutine write_mf14
+
+!---------------------------------------------------------------------------------------------
+
+    subroutine del_mf14(mf14)
+
+    implicit none
+
+    type (mf_14), target :: mf14
+    type (mf_14), pointer :: r14,nx
+
+    integer i,j,nl
+
+    r14 => mf14
+    do while(associated(r14))
+
+        if(r14%li .eq. 0) then
+            ! ang dist info 
+            nl = r14%nk - r14%ni
+            do i = 1,nl
+                deallocate(r14%aig(i)%inb)
+                if(associated(r14%aig(i)%leg)) then
+                    do j = 1,r14%aig(i)%ne
+                        deallocate(r14%aig(i)%leg(j)%a)
+                    end do
+                    deallocate(r14%aig(i)%leg)
+                else if(associated(r14%aig(i)%tab)) then
+                    do j = 1,r14%aig(i)%ne
+                         call del_tab1(r14%aig(i)%tab(j)%mut)
+                    end do
+                    deallocate(r14%aig(i)%tab)
+                endif
+            end do
+            deallocate(r14%isg, r14%aig)
+        endif
+
+        nx => r14%next
+        deallocate(r14)
+        r14 => nx
+
+    end do
+
+    end subroutine del_mf14
 
 !---------------------------------------------------------------------------------------------
 

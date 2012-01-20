@@ -65,22 +65,26 @@ module ENDF_MF40_IO
         rc%next => null()
 
         call get_endf(rc%za, rc%awr, rc%lis, n, rc%ns, n)
-        allocate(rc%sct(rc%ns))
+        allocate(rc%sct(rc%ns),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1, rc%ns
 
             sc => rc%sct(i)
             call read_endf(sc%qm, sc%qi, n, sc%lfs, n, sc%nl)
-            allocate(sc%sub(sc%nl))
+            allocate(sc%sub(sc%nl),stat=n)
+            if(n .ne. 0) call endf_badal
 
             do j = 1, sc%nl
                 ss => sc%sub(j)
                 call read_endf(ss%xmf1, ss%xlfs1, ss%mat1, ss%mt1, ss%nc, ss%ni)
-                allocate(ss%ncs(ss%nc))
+                allocate(ss%ncs(ss%nc),stat=n)
+                if(n .ne. 0) call endf_badal
                 do k = 1,ss%nc
                     call read_nc(ss%ncs(k))
                 end do
-                allocate(ss%nis(ss%ni))
+                allocate(ss%nis(ss%ni),stat=n)
+                if(n .ne. 0) call endf_badal
                 do k = 1,ss%ni
                     call read_ni(ss%nis(k),40)
                 end do
@@ -141,6 +145,42 @@ module ENDF_MF40_IO
 
     return
     end subroutine write_mf40
+
+!------------------------------------------------------------------------------
+
+    subroutine del_mf40(mf40)
+
+    implicit none
+
+    type (mf_40), target :: mf40
+    type (mf_40), pointer :: rc,nx
+
+    integer i,j,k
+    type (mf40_subsect), pointer :: ss
+
+    rc => mf40
+    do while(associated(rc))
+        do i = 1, rc%ns
+            do j = 1, rc%sct(i)%nl
+                ss => rc%sct(i)%sub(j)
+                do k = 1,ss%nc
+                    call del_nc(ss%ncs(k))
+                end do
+                deallocate(ss%ncs)
+                do k = 1,ss%ni
+                    call del_ni(ss%nis(k))
+                end do
+                deallocate(ss%nis)
+            end do
+            deallocate(rc%sct(i)%sub)
+        end do
+        deallocate(rc%sct)
+        nx => rc%next
+        deallocate(rc)
+        rc => nx
+    end do
+
+    end subroutine del_mf40
 
 !------------------------------------------------------------------------------
 

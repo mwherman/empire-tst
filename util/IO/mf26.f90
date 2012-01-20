@@ -106,7 +106,8 @@ module ENDF_MF26_IO
         r26%next => null()
 
         call get_endf(r26%za, r26%awr, n, n, r26%nk, n)
-        allocate(r26%prd(r26%nk))
+        allocate(r26%prd(r26%nk),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1,r26%nk
 
@@ -153,14 +154,15 @@ module ENDF_MF26_IO
 
     type (mf26_law1), intent(out), target :: law1
 
-    integer i,j,nw
+    integer i,j,n,nw
     real xx
 
     type (mf26_law1_list), pointer :: l1
     type (mf26_law1_eprm), pointer :: pm
 
     call read_endf(law1%lang, law1%lep, law1%nr, law1%ne)
-    allocate(law1%itp(law1%nr),law1%ll(law1%ne))
+    allocate(law1%itp(law1%nr),law1%ll(law1%ne),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(law1%itp, law1%nr)
     do i = 1,law1%ne
         l1 => law1%ll(i)
@@ -169,11 +171,13 @@ module ENDF_MF26_IO
             write(erlin,*) 'Bad Word count, NEP,NA in MF26 LAW1:',l1%nep,l1%na
             call endf_error(erlin)
         endif
-        allocate(l1%prm(l1%nep))
+        allocate(l1%prm(l1%nep),stat=n)
+        if(n .ne. 0) call endf_badal
         do j = 1,l1%nep
             pm => l1%prm(j)
             call get_endf(pm%e2)
-            allocate(pm%b(0:l1%na))
+            allocate(pm%b(0:l1%na),stat=n)
+            if(n .ne. 0) call endf_badal
             call get_endf(pm%b,l1%na+1)
         end do
     end do
@@ -195,7 +199,8 @@ module ENDF_MF26_IO
     type (mf26_law2_list), pointer :: l2
 
     call read_endf(n, n, law2%nr, law2%ne)
-    allocate(law2%itp(law2%nr),law2%ll(law2%ne))
+    allocate(law2%itp(law2%nr),law2%ll(law2%ne),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(law2%itp, law2%nr)
     do i = 1,law2%ne
         l2 => law2%ll(i)
@@ -209,7 +214,8 @@ module ENDF_MF26_IO
             write(erlin,*) 'Inconsistent NW, LANG, NL in MF6 LAW2:',nw,l2%lang,l2%nl
             call endf_error(erlin)
         endif
-        allocate(l2%a(nw))
+        allocate(l2%a(nw),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(l2%a,nw)
     end do
 
@@ -311,6 +317,54 @@ module ENDF_MF26_IO
 
     return
     end subroutine write_law2
+
+!******************************************************************************
+
+    subroutine del_mf26(mf26)
+
+    implicit none
+
+    type (mf_26), target :: mf26
+    type (mf_26), pointer :: r26,nx
+
+    integer i,j,k
+    type (mf26_product), pointer :: sc
+
+    r26 => mf26
+    do while(associated(r26))
+
+        do k = 1,r26%nk
+            sc => r26%prd(k)
+            if(associated(sc%law1)) then
+                do i = 1,sc%law1%ne
+                    do j = 1,sc%law1%ll(i)%nep
+                        deallocate(sc%law1%ll(i)%prm(j)%b)
+                    end do
+                    deallocate(sc%law1%ll(i)%prm)
+                end do
+                deallocate(sc%law1%itp, sc%law1%ll)
+                deallocate(sc%law1)
+            else if(associated(sc%law2)) then
+                do i = 1,sc%law2%ne
+                    deallocate(sc%law2%ll(i)%a)
+                end do
+                deallocate(sc%law2%itp, sc%law2%ll)
+                deallocate(sc%law2)
+            else if(associated(sc%law8)) then
+                call del_tab1(sc%law8%etab)
+                deallocate(sc%law8)
+            endif
+
+        end do
+        deallocate(r26%prd)
+
+        nx => r26%next
+        deallocate(r26)
+        r26 => nx
+
+    end do
+
+    end subroutine del_mf26
 
 !******************************************************************************
 

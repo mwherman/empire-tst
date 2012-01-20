@@ -56,7 +56,8 @@ module ENDF_MF35_IO
     do
         rc%next => null()
         call get_endf(rc%za, rc%awr, n, n, rc%nk, n)
-        allocate(rc%sct(rc%nk))
+        allocate(rc%sct(rc%nk),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,rc%nk
             call read_mf35_list(rc%sct(i))
         end do
@@ -78,6 +79,8 @@ module ENDF_MF35_IO
 
     implicit none
 
+    integer n
+
     type (MF35_list), intent(out) :: lst
 
     call read_endf(lst%e1, lst%e2, lst%ls, lst%lb, lst%nt, lst%ne)
@@ -97,7 +100,8 @@ module ENDF_MF35_IO
         call endf_error(erlin)
     endif
 
-    allocate(lst%ek(lst%ne), lst%cov(lst%ne-1,lst%ne-1))
+    allocate(lst%ek(lst%ne), lst%cov(lst%ne-1,lst%ne-1),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(lst%ek,lst%ne)
     call get_endf(lst%cov,lst%ne-1)
 
@@ -157,6 +161,30 @@ module ENDF_MF35_IO
 
     return
     end subroutine write_mf35_list
+
+!******************************************************************************
+
+    subroutine del_mf35(mf35)
+
+    implicit none
+
+    type (mf_35), target :: mf35
+    type (MF_35), pointer :: rc,nx
+
+    integer i
+
+    rc => mf35
+    do while(associated(rc))
+        do i = 1,rc%nk
+            deallocate(rc%sct(i)%ek, rc%sct(i)%cov)
+        end do
+        deallocate(rc%sct)
+        nx => rc%next
+        deallocate(rc)
+        rc => nx
+    end do
+
+    end subroutine del_mf35
 
 !******************************************************************************
 

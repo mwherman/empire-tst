@@ -85,6 +85,25 @@ module ENDF_MF3_IO
 
 !------------------------------------------------------------------------------
 
+    subroutine del_mf3(mf3)
+
+    implicit none
+
+    type (mf_3), target :: mf3
+    type (mf_3), pointer :: r3,nx
+
+    r3 => mf3
+    do while(associated(r3))
+        call del_tab1(r3%tb)
+        nx => r3%next
+        deallocate(r3)
+        r3 => nx
+    end do
+
+    end subroutine del_mf3
+
+!------------------------------------------------------------------------------
+
     integer function lc_mf3(mf3)
 
     implicit none

@@ -378,7 +378,8 @@ module ENDF_MF32_IO
     type (MF32_range), pointer :: rng
 
     call get_endf(mf32%za, mf32%awr, n, n, mf32%nis, n)
-    allocate(mf32%iso(mf32%nis))
+    allocate(mf32%iso(mf32%nis),stat=n)
+    if(n .ne. 0) call endf_badal
 
     mf32%mt = 151
 
@@ -386,7 +387,8 @@ module ENDF_MF32_IO
 
         iso => mf32%iso(i)
         call read_endf(iso%zai, iso%abn, n, iso%lfw, iso%ner, n)
-        allocate(iso%rng(iso%ner))
+        allocate(iso%rng(iso%ner),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do j = 1,iso%ner
 
@@ -399,7 +401,8 @@ module ENDF_MF32_IO
                 nullify(rng%nis)
             case(1)
                 call read_endf(n, n, n, rng%ni)
-                allocate(rng%nis(rng%ni))
+                allocate(rng%nis(rng%ni),stat=n)
+                if(n .ne. 0) call endf_badal
                 do n = 1,rng%ni
                     call read_ni(rng%nis(n),33)    ! these are MF33-style covars
                 end do
@@ -477,7 +480,8 @@ module ENDF_MF32_IO
 
         ! old compatibility mode - only for BW parameters
 
-        allocate(bw%old(bw%nls))
+        allocate(bw%old(bw%nls),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1, bw%nls
             cp => bw%old(i)
             call read_endf(cp%awri, xx, cp%l, n, m, cp%nrs)
@@ -485,7 +489,8 @@ module ENDF_MF32_IO
                 write(erlin,*) 'Incompatible LCOMP=0 total items, # parameters in MF32:',m,cp%nrs
                 call endf_error(erlin)
             end if
-            allocate(cp%res(cp%nrs))
+            allocate(cp%res(cp%nrs),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,cp%nrs
                 call read_reals(cp%res(j)%er,17)
                 cp%res(j)%nul = zero
@@ -498,13 +503,15 @@ module ENDF_MF32_IO
 
         allocate(bw%gen)
         call read_endf(bw%gen%awri, xx, n, n, bw%gen%nsrs, bw%gen%nlrs)
-        allocate(bw%gen%blk(bw%gen%nsrs),bw%gen%lrc(bw%gen%nlrs))
+        allocate(bw%gen%blk(bw%gen%nsrs),bw%gen%lrc(bw%gen%nlrs),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1, bw%gen%nsrs
             blk => bw%gen%blk(i)
             call read_endf(blk%mpar, n, m, blk%nrb)
             mp = blk%nrb*blk%mpar
-            allocate(blk%res(blk%nrb),blk%v(mp,mp))
+            allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
+            if(n .ne. 0) call endf_badal
             call read_reals(blk%res(1)%er,6*blk%nrb)
             call read_endf(blk%v,mp)
         end do
@@ -532,7 +539,8 @@ module ENDF_MF32_IO
             write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,bw%cmp%nrsa
             call endf_error(erlin)
         end if
-        allocate(bw%cmp%res(bw%cmp%nrsa))
+        allocate(bw%cmp%res(bw%cmp%nrsa),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_reals(bw%cmp%res(1)%er,m)
         call read_cmpt(bw%cmp%cpv)
 
@@ -569,7 +577,8 @@ module ENDF_MF32_IO
             allocate(rm%dap(0:0))
             call read_endf(rm%dap(0))
         else if(rm%mls .le. rm%nls+1) then
-            allocate(rm%dap(0:rm%mls))
+            allocate(rm%dap(0:rm%mls),stat=n)
+            if(n .ne. 0) call endf_badal
             call read_endf(rm%dap,rm%mls+1)
         else
             write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
@@ -586,13 +595,15 @@ module ENDF_MF32_IO
 
         allocate(rm%gen)
         call read_endf(rm%gen%awri, xx, n, n, rm%gen%nsrs, rm%gen%nlrs)
-        allocate(rm%gen%blk(rm%gen%nsrs),rm%gen%lrc(rm%gen%nlrs))
+        allocate(rm%gen%blk(rm%gen%nsrs),rm%gen%lrc(rm%gen%nlrs),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1, rm%gen%nsrs
             blk => rm%gen%blk(i)
             call read_endf(blk%mpar, n, m, blk%nrb)
             mp = blk%nrb*blk%mpar
-            allocate(blk%res(blk%nrb),blk%v(mp,mp))
+            allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
+            if(n .ne. 0) call endf_badal
             call read_reals(blk%res(1)%er,6*blk%nrb)
             call read_endf(blk%v,mp)
         end do
@@ -620,7 +631,8 @@ module ENDF_MF32_IO
             write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,rm%cmp%nrsa
             call endf_error(erlin)
         end if
-        allocate(rm%cmp%res(rm%cmp%nrsa))
+        allocate(rm%cmp%res(rm%cmp%nrsa),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_reals(rm%cmp%res(1)%er,m)
         call read_cmpt(rm%cmp%cpv)
 
@@ -655,12 +667,14 @@ module ENDF_MF32_IO
 
     call read_endf(aa%spi, aa%ap, n, aa%lcomp, aa%nls, n)
     call read_endf(aa%gen%awri, xx, n, n, aa%gen%nsrs, n)
-    allocate(aa%gen%blk(aa%gen%nsrs))
+    allocate(aa%gen%blk(aa%gen%nsrs),stat=n)
+    if(n .ne. 0) call endf_badal
     do i = 1, aa%gen%nsrs
         blk => aa%gen%blk(i)
         call read_endf(blk%mpar, n, m, blk%nrb)
         mp = blk%nrb*blk%mpar
-        allocate(blk%res(blk%nrb),blk%v(mp,mp))
+        allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_reals(blk%res(1)%det,6*blk%nrb)
         call read_endf(blk%v,mp)
     end do
@@ -676,7 +690,7 @@ module ENDF_MF32_IO
 
     type (MF32_ml_subsection), intent(out) :: ml
 
-    integer i,j,l,n,snj
+    integer i,j,l,k,n,snj
 
     type (mf32_ml_gen_spin_grp), pointer :: sp
     type (mf32_ml_cmp_spin_grp), pointer :: sg
@@ -685,7 +699,8 @@ module ENDF_MF32_IO
     call read_endf(ml%ifg, ml%lcomp, ml%njs, ml%isr)
     if(ml%isr .gt. 0) then
         call read_endf(n, n, ml%njch, n)
-        allocate(ml%dap(ml%njs,ml%njch))
+        allocate(ml%dap(ml%njs,ml%njch),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(ml%dap,ml%njs,ml%njch)
     end if
 
@@ -700,11 +715,13 @@ module ENDF_MF32_IO
 
         snj = 0
         call read_endf(ml%gen%njsx, n, n, n)
-        allocate(ml%gen%sp(ml%gen%njsx))
+        allocate(ml%gen%sp(ml%gen%njsx),stat=n)
+        if(n .ne. 0) call endf_badal
         do i = 1,ml%gen%njsx
             sp => ml%gen%sp(i)
             call read_endf(sp%nch, sp%nrb, n, sp%nx)
-            allocate(sp%er(sp%nrb),sp%gam(sp%nch,sp%nrb))
+            allocate(sp%er(sp%nrb),sp%gam(sp%nch,sp%nrb),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,sp%nrb
                 call read_endf(sp%er(j))
                 do n = 1,sp%nch
@@ -721,7 +738,8 @@ module ENDF_MF32_IO
             write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
             call endf_error(erlin)
         endif
-        allocate(ml%gen%v(ml%gen%nparb,ml%gen%nparb))
+        allocate(ml%gen%v(ml%gen%nparb,ml%gen%nparb),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_endf(ml%gen%v,ml%gen%nparb)
 
     case(2)
@@ -730,7 +748,8 @@ module ENDF_MF32_IO
 
         allocate(ml%cmp)
         call read_endf(ml%cmp%npp, ml%cmp%njsx, n, n)
-        allocate(ml%cmp%pp(ml%cmp%npp),ml%cmp%sg(ml%njs))
+        allocate(ml%cmp%pp(ml%cmp%npp),ml%cmp%sg(ml%njs),stat=n)
+        if(n .ne. 0) call endf_badal
         do n = 1,ml%cmp%npp
             call read_reals(ml%cmp%pp(n)%ma,12)
         end do
@@ -743,16 +762,19 @@ module ENDF_MF32_IO
             sg => ml%cmp%sg(l)
 
             call read_endf(sg%aj, sg%pj, n, n, n, sg%nch)
-            allocate(sg%chn(sg%nch))
+            allocate(sg%chn(sg%nch),stat=n)
+            if(n .ne. 0) call endf_badal
             do n = 1,sg%nch
                 call read_reals(sg%chn(n)%ppi,6)
             end do
 
             call read_endf(n, sg%nrsa, n, sg%nx)
-            allocate(sg%er(sg%nrsa),sg%der(sg%nrsa))
+            allocate(sg%er(sg%nrsa),sg%der(sg%nrsa),stat=n)
+            if(n .ne. 0) call endf_badal
             do n = 1,sg%nch
                 chn => sg%chn(n)
-                allocate(chn%gam(sg%nrsa),chn%dgam(sg%nrsa))
+                allocate(chn%gam(sg%nrsa),chn%dgam(sg%nrsa),stat=k)
+                if(k .ne. 0) call endf_badal
             end do
 
             do j = 1,sg%nrsa
@@ -801,7 +823,8 @@ module ENDF_MF32_IO
     type (mf32_ur_lprm),  pointer :: pm
 
     call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
-    allocate(ur%lpm(ur%nls))
+    allocate(ur%lpm(ur%nls),stat=n)
+    if(n .ne. 0) call endf_badal
 
     snj = 0
     do l = 1,ur%nls
@@ -809,7 +832,8 @@ module ENDF_MF32_IO
         call read_endf(pm%awri, xx, pm%l, n, m, pm%njs)
         if(m .ne. 6*pm%njs) write(6,*) ' Warning: Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
         snj = snj + pm%njs
-        allocate(pm%jpm(pm%njs))
+        allocate(pm%jpm(pm%njs),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_reals(pm%jpm(1)%d,6*pm%njs)
     end do
 
@@ -820,7 +844,8 @@ module ENDF_MF32_IO
     endif
 
     if(m .ne. ur%npar*(ur%npar+1)/2) write(6,*) ' Warning: Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
-    allocate(ur%rv(ur%npar,ur%npar))
+    allocate(ur%rv(ur%npar,ur%npar),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(ur%rv,ur%npar)
 
     return
@@ -1220,6 +1245,123 @@ module ENDF_MF32_IO
 
     return
     end subroutine write_ur
+
+!***********************************************************************************
+
+    subroutine del_mf32(mf32)
+
+    implicit none
+
+    type (mf_32), pointer :: mf32
+
+    integer i,j,n,l
+
+    type (MF32_range), pointer :: rng
+
+    if(.not.associated(mf32)) return
+
+    do i = 1, mf32%nis
+        do j = 1,mf32%iso(i)%ner
+
+            rng => mf32%iso(i)%rng(j)
+
+            if(associated(rng%nis)) then
+                do n = 1,rng%ni
+                    call del_ni(rng%nis(n))
+                end do
+                deallocate(rng%nis)
+            endif
+
+            if(associated(rng%bw)) then
+
+                if(associated(rng%bw%old)) then
+                    do n = 1, rng%bw%nls
+                        deallocate(rng%bw%old(n)%res)
+                    end do
+                    deallocate(rng%bw%old)
+                else if(associated(rng%bw%gen)) then
+                    do n = 1, rng%bw%gen%nsrs
+                        deallocate(rng%bw%gen%blk(n)%res, rng%bw%gen%blk(n)%v)
+                    end do
+                    do n = 1, rng%bw%gen%nlrs
+                        call del_ni(rng%bw%gen%lrc(n))
+                    end do
+                    deallocate(rng%bw%gen%blk, rng%bw%gen%lrc)
+                    deallocate(rng%bw%gen)
+                else if(associated(rng%bw%cmp)) then
+                    deallocate(rng%bw%cmp%res)
+                    call del_cmpt(rng%bw%cmp%cpv)
+                    deallocate(rng%bw%cmp)
+                endif
+                deallocate(rng%bw)
+
+            else if(associated(rng%rm)) then
+
+                if(associated(rng%rm%dap)) deallocate(rng%rm%dap)
+                if(associated(rng%rm%gen)) then
+                    do n = 1, rng%rm%gen%nsrs
+                        deallocate(rng%rm%gen%blk(n)%res, rng%rm%gen%blk(n)%v)
+                    end do
+                    do n = 1, rng%rm%gen%nlrs
+                        call del_ni(rng%rm%gen%lrc(n))
+                    end do
+                    deallocate(rng%rm%gen%blk, rng%rm%gen%lrc)
+                    deallocate(rng%rm%gen)
+                else if(associated(rng%rm%cmp)) then
+                    deallocate(rng%rm%cmp%res)
+                    call del_cmpt(rng%rm%cmp%cpv)
+                    deallocate(rng%rm%cmp)
+                endif
+                deallocate(rng%rm)
+
+            else if(associated(rng%aa)) then
+
+                do n = 1, rng%aa%gen%nsrs
+                    deallocate(rng%aa%gen%blk(n)%res, rng%aa%gen%blk(n)%v)
+                end do
+                deallocate(rng%aa%gen%blk)
+                deallocate(rng%aa)
+
+            else if(associated(rng%ml)) then
+
+                if(associated(rng%ml%dap)) deallocate(rng%ml%dap)
+                if(associated(rng%ml%gen)) then
+                    do n = 1,rng%ml%gen%njsx
+                        deallocate(rng%ml%gen%sp(n)%er,rng%ml%gen%sp(n)%gam)
+                    end do
+                    deallocate(rng%ml%gen%sp,rng%ml%gen%v)
+                    deallocate(rng%ml%gen)
+                else if(associated(rng%ml%cmp)) then
+                    do l = 1,rng%ml%njs
+                        deallocate(rng%ml%cmp%sg(l)%er, rng%ml%cmp%sg(l)%der)
+                        do n = 1,rng%ml%cmp%sg(l)%nch
+                            deallocate(rng%ml%cmp%sg(l)%chn(n)%gam, rng%ml%cmp%sg(l)%chn(n)%dgam)
+                        end do
+                        deallocate(rng%ml%cmp%sg(l)%chn)
+                    end do
+                    deallocate(rng%ml%cmp%pp, rng%ml%cmp%sg)
+                    call del_cmpt(rng%ml%cmp%cpv)
+                    deallocate(rng%ml%cmp)
+                endif
+                deallocate(rng%ml)
+
+            else if(associated(rng%ur)) then
+
+                do l = 1,rng%ur%nls
+                    deallocate(rng%ur%lpm(l)%jpm)
+                end do
+                deallocate(rng%ur%rv,rng%ur%lpm)
+                deallocate(rng%ur)
+
+            endif
+        end do
+        deallocate(mf32%iso(i)%rng)
+    end do
+    deallocate(mf32%iso)
+    deallocate(mf32)
+
+    return
+    end subroutine del_mf32
 
 !***********************************************************************************
 

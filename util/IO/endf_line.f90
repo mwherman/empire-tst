@@ -39,7 +39,7 @@ module endf_lines
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
     public open_endfile, get_endline, put_endline, close_endfile, endf_error
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal
 
 !------------------------------------------------------------------------------
     contains
@@ -96,6 +96,11 @@ module endf_lines
 
     implicit none
 
+    ! this is a general routine to call when an error occurs somewhere
+    ! that is fatal. Supply a line describing the error to be printed
+    ! to standard output. Then, if a file is open, the last line processed
+    ! is printed out along with the line number, and then the program exits.
+
     character*(*), intent(in) :: errline
 
     write(6,*) ' ****** ERROR ******',char(7)
@@ -120,6 +125,19 @@ module endf_lines
     call endf_quit(1)
 
     end subroutine endf_error
+
+!------------------------------------------------------------------------------
+
+    subroutine endf_badal
+
+    implicit none
+
+    ! use this routine to report errors allocating memory
+    ! this may happen reading files with huge arrays
+
+    call endf_error('Error allocating memory')
+
+    end subroutine endf_badal
 
 !------------------------------------------------------------------------------
 

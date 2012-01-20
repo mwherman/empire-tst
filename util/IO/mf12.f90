@@ -86,7 +86,8 @@ module ENDF_MF12_IO
             else
                 nullify(r12%tyld)
             endif
-            allocate(r12%gam(r12%nk))
+            allocate(r12%gam(r12%nk),stat=n)
+            if(n .ne. 0) call endf_badal
             do i = 1,r12%nk
                 gm => r12%gam(i)
                 call read_endf(gm%eg, gm%es, gm%lp, gm%lf, gm%yld%nr, gm%yld%np)
@@ -101,7 +102,8 @@ module ENDF_MF12_IO
                 call endf_error(erlin)
             endif
             call read_endf(r12%par%esp, xx, r12%par%lp, n, np, r12%par%nt)
-            allocate(r12%par%tpb(r12%par%nt))
+            allocate(r12%par%tpb(r12%par%nt),stat=n)
+            if(n .ne. 0) call endf_badal
             do i = 1,r12%par%nt
                 tp => r12%par%tpb(i)
                 call get_endf(tp%es)
@@ -187,6 +189,42 @@ module ENDF_MF12_IO
 
     return
     end subroutine write_mf12
+
+!---------------------------------------------------------------------------------------------
+
+    subroutine del_mf12(mf12)
+
+    implicit none
+
+    type (mf_12), target :: mf12
+    type (mf_12), pointer :: r12,nx
+
+    integer i
+
+    r12 => mf12
+    do while(associated(r12))
+
+        if(associated(r12%tyld)) call remove_tab1(r12%tyld)
+
+        if(associated(r12%gam)) then
+            do i = 1,r12%nk
+                call del_tab1(r12%gam(i)%yld)
+            end do
+            deallocate(r12%gam)
+        endif
+
+        if(associated(r12%par)) then
+            deallocate(r12%par%tpb)
+            deallocate(r12%par)
+        endif
+
+        nx => r12%next
+        deallocate(r12)
+        r12 => nx
+
+    end do
+
+    end subroutine del_mf12
 
 !---------------------------------------------------------------------------------------------
 

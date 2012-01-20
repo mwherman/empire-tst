@@ -62,19 +62,22 @@ module ENDF_MF33_IO
             call endf_error(erlin)
         end if
 
-        allocate(rc%sct(rc%nl))
+        allocate(rc%sct(rc%nl),stat=n)
+        if(n .ne. 0) call endf_badal
 
         do i = 1,rc%nl
 
             sc => rc%sct(i)
             call read_endf(sc%xmf1, sc%xlfs1, sc%mat1, sc%mt1, sc%nc, sc%ni)
 
-            allocate(sc%ncs(sc%nc))
+            allocate(sc%ncs(sc%nc),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,sc%nc
                 call read_nc(sc%ncs(j))
             end do
 
-            allocate(sc%nis(sc%ni))
+            allocate(sc%nis(sc%ni),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,sc%ni
                 call read_ni(sc%nis(j),33)
             end do
@@ -139,6 +142,37 @@ module ENDF_MF33_IO
 
     return
     end subroutine write_mf33
+
+!------------------------------------------------------------------------------
+
+    subroutine del_mf33(mf33)
+
+    implicit none
+
+    type (mf_33), target :: mf33
+    type (MF_33), pointer :: rc,nx
+
+    integer i,j
+
+    rc => mf33
+    do while(associated(rc))
+        do i = 1,rc%nl
+            do j = 1,rc%sct(i)%nc
+                call del_nc(rc%sct(i)%ncs(j))
+            end do
+            deallocate(rc%sct(i)%ncs)
+            do j = 1,rc%sct(i)%ni
+                call del_ni(rc%sct(i)%nis(j))
+            end do
+            deallocate(rc%sct(i)%nis)
+        end do
+        deallocate(rc%sct)
+        nx => rc%next
+        deallocate(rc)
+        rc => nx
+    end do
+
+    end subroutine del_mf33
 
 !------------------------------------------------------------------------------
 

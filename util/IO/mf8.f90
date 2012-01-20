@@ -16,29 +16,29 @@ module ENDF_MF8_IO
 
     type mf8_branch
         sequence
-        real hl                         ! half-life (sec)
-        real rtyp                       ! decay type
-        real zan                        ! ZA of next nuclide in chain
-        real br                         ! branching ratio for ZAN & level
-        real end                        ! endpoint energy of particle produced
-        real ct                         ! chain terminator (see ENDF manual)
+        real hl                           ! half-life (sec)
+        real rtyp                         ! decay type
+        real zan                          ! ZA of next nuclide in chain
+        real br                           ! branching ratio for ZAN & level
+        real end                          ! endpoint energy of particle produced
+        real ct                           ! chain terminator (see ENDF manual)
     end type
 
     type mf8_nucprod
-        real zap                        ! ZA of nuclide produced
-        real elfs                       ! energy of state produced (eV)
-        integer lmf                     ! MF where multiplicity is found
-        integer lfs                     ! level number state formed
-        integer nd                      ! # branches into which nuclide decays
+        real zap                          ! ZA of nuclide produced
+        real elfs                         ! energy of state produced (eV)
+        integer lmf                       ! MF where multiplicity is found
+        integer lfs                       ! level number state formed
+        integer nd                        ! # branches into which nuclide decays
         type (mf8_branch), pointer :: br(:)    ! branches (nd)
     end type
 
 
     type mf8_nuclide
-        integer lis                     ! state # of target ZA
-        integer liso                    ! isomeric state # of target
-        integer ns                      ! # states of reaction product where decay data given
-        integer no                      ! flag denoting location decay data. 0=here, 1=MT=457.
+        integer lis                       ! state # of target ZA
+        integer liso                      ! isomeric state # of target
+        integer ns                        ! # states of reaction product where decay data given
+        integer no                        ! flag denoting location decay data. 0=here, 1=MT=457.
         type (mf8_nucprod), pointer :: prd(:)
     end type
 
@@ -47,21 +47,21 @@ module ENDF_MF8_IO
 
     type mf8_fp_yield_data
         sequence
-        real zafp                       ! ZA for fission product
-        real fps                        ! state # for fission product
-        real y                          ! MT454: yi=yield for FP prior to decay; MT459 yc=cumulative yield
-        real dy                         ! uncert in yi or yc
+        real zafp                         ! ZA for fission product
+        real fps                          ! state # for fission product
+        real y                            ! MT454: yi=yield for FP prior to decay; MT459 yc=cumulative yield
+        real dy                           ! uncert in yi or yc
     end type
 
     type mf8_fp_epoint
-        real e                          ! incident energy (eV)
-        integer itp                     ! interpolation table
-        integer nfp                     ! # product nuclide states
+        real e                            ! incident energy (eV)
+        integer itp                       ! interpolation table
+        integer nfp                       ! # product nuclide states
         type (mf8_fp_yield_data), pointer :: c(:)  ! yield data (nfp)
     end type
 
     type mf8_fp_yield
-        integer le                      ! # incident energies specified
+        integer le                        ! # incident energies specified
         type (mf8_fp_epoint), pointer :: ep(:)     ! yields at le energies
     end type
 
@@ -70,51 +70,51 @@ module ENDF_MF8_IO
 
     type mf8_decay_discrete_spectrum
         sequence
-        integer nt                      ! # items specifed (either all 12 or just first 6)
-        integer dum                     ! dummy for alignment
-        real er                         ! ave decay energy of radiation produced
-        real der                        ! unc in er
-        real rtyp                       ! decay mode
-        real type                       ! type of trans for e capture
-        real ri                         ! intensity of rad produced
-        real dri                        ! unc in ri
-        real ris                        ! internal pair form coef
-        real dris                       ! unc in ris
-        real ricc                       ! total internal conversion coeff
-        real dricc                      ! unc in ricc
-        real rick                       ! k-shell int conv coef
-        real drick                      ! unc in rick
-        real ricl                       ! l-shell int conv coef
-        real dricl                      ! unc in ricl
+        integer nt                        ! # items specifed (either all 12 or just first 6)
+        integer dum                       ! dummy for alignment
+        real er                           ! ave decay energy of radiation produced
+        real der                          ! unc in er
+        real rtyp                         ! decay mode
+        real type                         ! type of trans for e capture
+        real ri                           ! intensity of rad produced
+        real dri                          ! unc in ri
+        real ris                          ! internal pair form coef
+        real dris                         ! unc in ris
+        real ricc                         ! total internal conversion coeff
+        real dricc                        ! unc in ricc
+        real rick                         ! k-shell int conv coef
+        real drick                        ! unc in rick
+        real ricl                         ! l-shell int conv coef
+        real dricl                        ! unc in ricl
     end type
 
     type mf8_decay_continuous_spectrum
-        real rtyp                       ! decay mode
-        integer lcov                    ! flag for covariance data(0=no, 1=yes)
-        type (tab1) rp                  ! spectrum of cont component of radiation (prob/eV)
+        real rtyp                         ! decay mode
+        integer lcov                      ! flag for covariance data(0=no, 1=yes)
+        type (tab1) rp                    ! spectrum of cont component of radiation (prob/eV)
     end type
 
     type mf8_decay_covar_spectrum
-        integer lb                      ! flag
-        integer npp                     ! # pairs
+        integer lb                        ! flag
+        integer npp                       ! # pairs
         type (real_pair), pointer :: ef(:)    ! E,F pairs
     end type
 
     type mf8_decay_spec_data
         sequence
-        real fd                         ! discrete spectrum norm factor
-        real dfd                        ! unc in fd
-        real erave                      ! ave decay energy of radiation produced
-        real derave                     ! unc in erave
-        real fc                         ! continuum spectrum norm factor
-        real dfc                        ! unc in fc
+        real fd                           ! discrete spectrum norm factor
+        real dfd                          ! unc in fd
+        real erave                        ! ave decay energy of radiation produced
+        real derave                       ! unc in erave
+        real fc                           ! continuum spectrum norm factor
+        real dfc                          ! unc in fc
     end type
 
     type mf8_decay_spectum
-        real styp                       ! decay radiation type
-        integer lcon                    ! continuum spectrum flag
-        integer ner                     ! # discrete energies given
-        type (mf8_decay_spec_data) dat  ! norm factors & energies
+        real styp                         ! decay radiation type
+        integer lcon                      ! continuum spectrum flag
+        integer ner                       ! # discrete energies given
+        type (mf8_decay_spec_data) dat    ! norm factors & energies
         type (mf8_decay_discrete_spectrum), pointer :: dsc(:)   ! discrete spectra data (ner)
         type (mf8_decay_continuous_spectrum), pointer :: con    ! continuum spectra data
         type (mf8_decay_covar_spectrum), pointer :: cov         ! spectra covariance data
@@ -122,26 +122,26 @@ module ENDF_MF8_IO
 
     type mf8_decay_mode
         sequence
-        real rtyp                       ! decay mode
-        real rfs                        ! isomeric state flag for daughter nuclide
-        real q                          ! total decay energy available
-        real dq                         ! unc in q
-        real br                         ! frac of decay of nuclide in state LIS into this decay mode
-        real dbr                        ! unc in dbr
+        real rtyp                         ! decay mode
+        real rfs                          ! isomeric state flag for daughter nuclide
+        real q                            ! total decay energy available
+        real dq                           ! unc in q
+        real br                           ! frac of decay of nuclide in state LIS into this decay mode
+        real dbr                          ! unc in dbr
     end type
 
     type mf8_decay_data
-        integer lis                     ! state of original nuclide
-        integer liso                    ! isomeric state #
-        integer nst                     ! stability flag
-        integer nsp                     ! total # of radiation types with spectral info given
-        real t12                        ! half-life
-        real dt12                       ! error
-        integer nc                      ! # decay energies (3 or 17)
+        integer lis                       ! state of original nuclide
+        integer liso                      ! isomeric state #
+        integer nst                       ! stability flag
+        integer nsp                       ! total # of radiation types with spectral info given
+        real t12                          ! half-life
+        real dt12                         ! error
+        integer nc                        ! # decay energies (3 or 17)
         type (real_pair), pointer :: ex(:)  ! decay energies (ex & dex)
-        real spi                        ! spin of state lis
-        real par                        ! parity of state lis
-        integer ndk                     ! # decay modes
+        real spi                          ! spin of state lis
+        real par                          ! parity of state lis
+        integer ndk                       ! # decay modes
         type (mf8_decay_mode), pointer :: dcm(:)      ! decay modes (ndk)
         type (mf8_decay_spectum), pointer :: spt(:)   ! decay specta (nsp)
     end type
@@ -149,14 +149,14 @@ module ENDF_MF8_IO
     ! ----------------------------- MF8 ------------------------------------------
 
     type MF_8
-        type (mf_8), pointer :: next    ! next section
-        integer mt                      ! MT
-        integer lc                      ! line count
-        real za                         ! ZA for material
-        real awr                        ! AWR for material
-        type(mf8_nuclide), pointer :: ncl      ! radioactive nuclide prod
-        type(mf8_fp_yield), pointer :: fpy     ! fission product yeilds
-        type(mf8_decay_data), pointer :: rdd   ! radioactive decay data
+        type (mf_8), pointer :: next            ! next section
+        integer mt                              ! MT
+        integer lc                              ! line count
+        real za                                 ! ZA for material
+        real awr                                ! AWR for material
+        type(mf8_nuclide),    pointer :: ncl    ! radioactive nuclide prod
+        type(mf8_fp_yield),   pointer :: fpy    ! fission product yeilds
+        type(mf8_decay_data), pointer :: rdd    ! radioactive decay data
     end type
 
     !---------------------  private ---------------------------------------------
@@ -221,14 +221,16 @@ module ENDF_MF8_IO
     type (mf8_nucprod), pointer :: pr
 
     call get_endf(nc%lis, nc%liso, nc%ns, nc%no)
-    allocate(nc%prd(nc%ns))
+    allocate(nc%prd(nc%ns),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do i = 1,nc%ns
         pr => nc%prd(i)
         call read_endf(pr%zap, pr%elfs, pr%lmf, pr%lfs, nd, n)
         if(nc%no .eq. 0) then
             pr%nd = nd/6
-            allocate(pr%br(pr%nd))
+            allocate(pr%br(pr%nd),stat=n)
+            if(n .ne. 0) call endf_badal
             do j = 1,pr%nd
                 call read_reals(pr%br(j)%hl,6)
             end do
@@ -259,7 +261,8 @@ module ENDF_MF8_IO
 
     call get_endf(ne1, n, n, n)
     yld%le = ne1-1
-    allocate(yld%ep(ne1))
+    allocate(yld%ep(ne1),stat=n)
+    if(n .ne. 0) call endf_badal
 
     ep => yld%ep(1)
     call read_endf(ep%e, xx, n, n, nn, ep%nfp)
@@ -269,7 +272,8 @@ module ENDF_MF8_IO
     end if
     ep%itp = 0
 
-    allocate(ep%c(ep%nfp))
+    allocate(ep%c(ep%nfp),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_reals(ep%c(1)%zafp,nn)
 
     do i = 2,ne1
@@ -279,7 +283,8 @@ module ENDF_MF8_IO
             write(erlin,*) 'Inconsistent NFP, item count found in MF8:',ep%nfp,nn
             call endf_error(erlin)
         end if
-        allocate(ep%c(ep%nfp))
+        allocate(ep%c(ep%nfp),stat=n)
+        if(n .ne. 0) call endf_badal
         call read_reals(ep%c(1)%zafp,nn)
     end do
 
@@ -300,6 +305,7 @@ module ENDF_MF8_IO
     type (mf8_decay_spectum), pointer :: sp
     type (mf8_decay_discrete_spectrum), pointer :: dsc
 
+    nullify(rc%ex, rc%dcm, rc%spt)
     call get_endf(rc%lis, rc%liso, rc%nst, rc%nsp)
 
     select case(rc%nst)
@@ -307,7 +313,8 @@ module ENDF_MF8_IO
 
         call read_endf(rc%t12,rc%dt12, n, n, nc, n)
         rc%nc = nc/2
-        allocate(rc%ex(rc%nc))
+        allocate(rc%ex(rc%nc),stat=n)
+        if(n .ne. 0) call endf_badal
         call get_endf(rc%ex, rc%nc)
 
         call read_endf(rc%spi, rc%par, n, n, nc, rc%ndk)
@@ -318,26 +325,26 @@ module ENDF_MF8_IO
         endif
 
         if(rc%ndk .gt. 0) then
-            allocate(rc%dcm(rc%ndk))
+            allocate(rc%dcm(rc%ndk),stat=n)
+            if(n .ne. 0) call endf_badal
             call read_reals(rc%dcm(1)%rtyp,6*rc%ndk)
-        else
-            nullify(rc%dcm)
         endif
 
-        if(rc%nsp .eq. 0) then
-            nullify(rc%spt)
-            return
-        endif
+        if(rc%nsp .eq. 0) return
 
-        allocate(rc%spt(rc%nsp))
+        allocate(rc%spt(rc%nsp),stat=n)
+        if(n .ne. 0) call endf_badal
+
         do i = 1, rc%nsp
 
             sp => rc%spt(i)
+            nullify(sp%dsc, sp%cov, sp%con)
             call read_endf(xx, sp%styp, sp%lcon, n, n, sp%ner)
             call read_reals(sp%dat%fd, 6)
 
             if(sp%lcon .ne. 1) then
-                allocate(sp%dsc(sp%ner))
+                allocate(sp%dsc(sp%ner),stat=n)
+                if(n .ne. 0) call endf_badal
                 do j = 1, sp%ner
                     dsc => sp%dsc(j)
                     call read_endf(dsc%er, dsc%der, n, n, dsc%nt, n)
@@ -356,8 +363,6 @@ module ENDF_MF8_IO
                     dsc%dricl = zero
                     call read_reals(dsc%rtyp, dsc%nt)
                 end do
-            else
-                nullify(sp%dsc)
             endif
 
             if(sp%lcon .ne. 0) then
@@ -367,14 +372,10 @@ module ENDF_MF8_IO
                 if(sp%con%lcov .ne. 0) then
                     allocate(sp%cov)
                     call read_endf(n, sp%cov%lb, n, sp%cov%npp)
-                    allocate(sp%cov%ef(sp%cov%npp))
+                    allocate(sp%cov%ef(sp%cov%npp),stat=n)
+                    if(n .ne. 0) call endf_badal
                     call read_endf(sp%cov%ef, sp%cov%npp)
-                else
-                    nullify(sp%cov)
                 endif
-            else
-                nullify(sp%con)
-                nullify(sp%cov)
             endif
 
         end do
@@ -553,6 +554,60 @@ module ENDF_MF8_IO
 
     return
     end subroutine write_rdd
+
+!******************************************************************************
+
+    subroutine del_mf8(mf8)
+
+    implicit none
+
+    type (mf_8), target :: mf8
+    type (mf_8), pointer :: r8,nx
+
+    integer i
+
+    r8 => mf8
+    do while(associated(r8))
+
+        if(associated(r8%fpy)) then
+            do i = 1,r8%fpy%le+1
+                deallocate(r8%fpy%ep(i)%c)
+            end do
+            deallocate(r8%fpy%ep)
+            deallocate(r8%fpy)
+        else if(associated(r8%rdd)) then
+            if(associated(r8%rdd%ex)) deallocate(r8%rdd%ex)
+            if(associated(r8%rdd%dcm)) deallocate(r8%rdd%dcm)
+            if(associated(r8%rdd%spt)) then
+                do i = 1, r8%rdd%nsp
+                    if(associated(r8%rdd%spt(i)%dsc)) deallocate(r8%rdd%spt(i)%dsc)
+                    if(associated(r8%rdd%spt(i)%con)) then
+                        call del_tab1(r8%rdd%spt(i)%con%rp)
+                        deallocate(r8%rdd%spt(i)%con)
+                    endif
+                    if(associated(r8%rdd%spt(i)%cov)) then
+                        deallocate(r8%rdd%spt(i)%cov%ef)
+                        deallocate(r8%rdd%spt(i)%cov)
+                    endif
+                end do
+                deallocate(r8%rdd%spt)
+            endif
+            deallocate(r8%rdd)
+        else if(associated(r8%ncl)) then
+            do i = 1,r8%ncl%ns
+                if(associated(r8%ncl%prd(i)%br)) deallocate(r8%ncl%prd(i)%br)
+            end do
+            deallocate(r8%ncl%prd)
+            deallocate(r8%ncl)
+        endif
+
+        nx => r8%next
+        deallocate(r8)
+        r8 => nx
+
+    end do
+
+    end subroutine del_mf8
 
 !******************************************************************************
 

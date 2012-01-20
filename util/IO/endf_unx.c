@@ -12,6 +12,7 @@
   open and the fstat structures need to be put in by hand. Here
   make C jackets for a few useful unix funtions to make them more
   easily available from fortran.
+  These routines appear to work ok on both linux and mac OSX.
 */
 
 static struct stat file_stat;

@@ -12,53 +12,53 @@ module ENDF_MF7_IO
     public
 
     type mf7_coh_elas
-        integer nr                             ! # NR E-interpolation ranges
-        type (int_pair),  pointer :: ine(:)    ! E-interp tables (nr)
-        integer np                             ! # Bragg-edge energies
-        real, pointer :: e(:)                  ! Bragg energies (np)
-        integer lt                             ! # temps
-        integer, pointer :: li(:)              ! temp interpolation (lt) btw i & (i-1) bins
-        real, pointer :: t(:)                  ! temps (K) (lt)
-        real, pointer :: s(:,:)                ! Bragg edges (np,lt)
+        integer nr                              ! # NR E-interpolation ranges
+        type (int_pair),  pointer :: ine(:)     ! E-interp tables (nr)
+        integer np                              ! # Bragg-edge energies
+        real, pointer :: e(:)                   ! Bragg energies (np)
+        integer lt                              ! # temps
+        integer, pointer :: li(:)               ! temp interpolation (lt) btw i & (i-1) bins
+        real, pointer :: t(:)                   ! temps (K) (lt)
+        real, pointer :: s(:,:)                 ! Bragg edges (np,lt)
     end type
 
     type mf7_incoh_elas
-        real sb                                ! bound cross section (b)
-        type (tab1) W                          ! Debye-Waller integrals
+        real sb                                 ! bound cross section (b)
+        type (tab1) W                           ! Debye-Waller integrals
     end type
 
     type mf7_incoh_inelas
-        integer lat                            ! temp flag:0=actual temp, 1=zero253 eV
-        integer lasym                          ! symmetry flag:0=symm, 1=asymm
-        integer lln                            ! flag of form of S:0=direct,1=ln(s)
-        integer ni                             ! # items in b list
-        integer ns                             ! # non-principal scat atom types
-        real, pointer :: b(:)                  ! list of constants (ni)
-        integer nrb                            ! # beta interpolation ranges
-        type (int_pair), pointer :: inb(:)     ! beta interpolation table (nrb)
-        integer nb                             ! # beta values
-        real, pointer :: beta(:)               ! beta values (nb)
-        integer lt                             ! # temp values
-        integer, pointer :: li(:)              ! temp interpolation (lt) btw i & (i-1) bins
-        real, pointer :: temp(:)               ! temperature values (lt)
-        integer nra                            ! # alpha interpolation ranges
-        type (int_pair), pointer :: ina(:)     ! alpha interpolation table (nra)
-        integer np                             ! # alpha values
-        real, pointer :: alpha(:)              ! alpha values (np)
-        real, pointer :: s(:,:,:)              ! neutron scat law, (np,nb,lt)
-        type (tab1), pointer :: tef(:)         ! table for Teff0
+        integer lat                             ! temp flag:0=actual temp, 1=zero253 eV
+        integer lasym                           ! symmetry flag:0=symm, 1=asymm
+        integer lln                             ! flag of form of S:0=direct,1=ln(s)
+        integer ni                              ! # items in b list
+        integer ns                              ! # non-principal scat atom types
+        real, pointer :: b(:)                   ! list of constants (ni)
+        integer nrb                             ! # beta interpolation ranges
+        type (int_pair), pointer :: inb(:)      ! beta interpolation table (nrb)
+        integer nb                              ! # beta values
+        real, pointer :: beta(:)                ! beta values (nb)
+        integer lt                              ! # temp values
+        integer, pointer :: li(:)               ! temp interpolation (lt) btw i & (i-1) bins
+        real, pointer :: temp(:)                ! temperature values (lt)
+        integer nra                             ! # alpha interpolation ranges
+        type (int_pair), pointer :: ina(:)      ! alpha interpolation table (nra)
+        integer np                              ! # alpha values
+        real, pointer :: alpha(:)               ! alpha values (np)
+        real, pointer :: s(:,:,:)               ! neutron scat law, (np,nb,lt)
+        type (tab1), pointer :: tef(:)          ! table for Teff0
     end type
 
     type MF_7
-        type (mf_7), pointer :: next           ! next section
-        integer mt                             ! MT
-        integer lc                             ! line count
-        real za                                ! ZA for material
-        real awr                               ! AWR for material
-        integer lthr                           ! coherent flag for MT=2; 0 for MT=4
-        type(mf7_coh_elas), pointer :: cel     ! coherent elastic scattering, MT=2
-        type(mf7_incoh_elas), pointer :: iel   ! incoherent elastic scattering, MT=2
-        type(mf7_incoh_inelas), pointer :: iin ! incoherent inelastic scattering, MT=4
+        type (mf_7), pointer :: next            ! next section
+        integer mt                              ! MT
+        integer lc                              ! line count
+        real za                                 ! ZA for material
+        real awr                                ! AWR for material
+        integer lthr                            ! coherent flag for MT=2; 0 for MT=4
+        type(mf7_coh_elas),     pointer :: cel  ! coherent elastic scattering, MT=2
+        type(mf7_incoh_elas),   pointer :: iel  ! incoherent elastic scattering, MT=2
+        type(mf7_incoh_inelas), pointer :: iin  ! incoherent inelastic scattering, MT=4
     end type
 
     !---------------------  private ---------------------------------------------
@@ -134,13 +134,15 @@ module ENDF_MF7_IO
     real, allocatable :: xp(:)
 
     call read_endf(xt, xx, r7%lt, n, r7%nr, r7%np)
-    allocate(r7%ine(r7%nr), r7%e(r7%np), r7%li(r7%lt), r7%t(0:r7%lt), r7%s(r7%np,0:r7%lt))
+    allocate(r7%ine(r7%nr), r7%e(r7%np), r7%li(r7%lt), r7%t(0:r7%lt), r7%s(r7%np,0:r7%lt), stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(r7%ine, r7%nr)
     r7%t(0) = xt
 
     ! first t is a tab1, which contains the E & 0th S
 
-    allocate(xp(2*r7%np))
+    allocate(xp(2*r7%np),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(xp,2*r7%np)
     do i = 1,r7%np
         r7%e(i)   = xp(2*i-1)
@@ -194,11 +196,13 @@ module ENDF_MF7_IO
         call endf_error(erlin)
     endif
 
-    allocate(ic%b(ic%ni))
+    allocate(ic%b(ic%ni),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(ic%b,ic%ni)
 
     call read_endf(n, n, ic%nrb, ic%nb)
-    allocate(ic%inb(ic%nrb),ic%beta(ic%nb))
+    allocate(ic%inb(ic%nrb),ic%beta(ic%nb),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(ic%inb, ic%nrb)
 
     do i = 1,ic%nb
@@ -206,8 +210,8 @@ module ENDF_MF7_IO
         call read_endf(xt, ic%beta(i), lt, n, nra, np)
 
         if(i .eq. 1) then
-            allocate(ic%temp(0:lt),ic%li(lt),ic%ina(nra))
-            allocate(xp(2*np),ic%alpha(np),ic%s(np,ic%nb,0:lt))
+            allocate(ic%temp(0:lt),ic%li(lt),ic%ina(nra),xp(2*np),ic%alpha(np),ic%s(np,ic%nb,0:lt),stat=n)
+            if(n .ne. 0) call endf_badal
             ic%lt = lt
             ic%np = np
             ic%nra = nra
@@ -255,7 +259,8 @@ module ENDF_MF7_IO
 
     ! read in Teff tables
 
-    allocate(ic%tef(0:ic%ns))
+    allocate(ic%tef(0:ic%ns),stat=n)
+    if(n .ne. 0) call endf_badal
     call read_endf(n, n, ic%tef(0)%nr, ic%tef(0)%np)
     call read_endf(ic%tef(0))
 
@@ -319,7 +324,7 @@ module ENDF_MF7_IO
 
     type (mf7_coh_elas), intent(in), target :: r7
 
-    integer i
+    integer i,n
     real, allocatable :: xp(:)
 
     call write_endf(r7%t(0), zero, r7%lt, 0, r7%nr, r7%np)
@@ -327,7 +332,8 @@ module ENDF_MF7_IO
 
     ! first t is a tab1, which contains the E & 0th S
 
-    allocate(xp(2*r7%np))
+    allocate(xp(2*r7%np),stat=n)
+    if(n .ne. 0) call endf_badal
     do i = 1,r7%np
         xp(2*i-1) = r7%e(i)
         xp(2*i) = r7%s(i,0)
@@ -367,7 +373,7 @@ module ENDF_MF7_IO
 
     type (mf7_incoh_inelas), intent(in), target :: ic
 
-    integer i,j
+    integer i,j,n
     real, allocatable :: xp(:)
 
     if(ic%ni .ne. 6*(ic%ns+1)) then
@@ -380,7 +386,8 @@ module ENDF_MF7_IO
     call write_endf(0, 0, ic%nrb, ic%nb)
     call write_endf(ic%inb, ic%nrb)
 
-    allocate(xp(2*ic%np))
+    allocate(xp(2*ic%np),stat=n)
+    if(n .ne. 0) call endf_badal
 
     do i = 1,ic%nb
 
@@ -420,6 +427,41 @@ module ENDF_MF7_IO
 
     return
     end subroutine write_incoh_inelas
+
+!******************************************************************************************
+
+    subroutine del_mf7(mf7)
+
+    implicit none
+
+    type (mf_7), target :: mf7
+    type (mf_7), pointer :: r7,nx
+
+    integer i
+
+    r7 => mf7
+    do while(associated(r7))
+        if(associated(r7%cel)) then
+            deallocate(r7%cel%ine, r7%cel%e, r7%cel%li, r7%cel%t, r7%cel%s)
+            deallocate(r7%cel)
+        else if(associated(r7%iel)) then
+            call del_tab1(r7%iel%w)
+            deallocate(r7%iel)
+        else if(associated(r7%iin)) then
+            deallocate(r7%iin%temp, r7%iin%li, r7%iin%ina, r7%iin%b)
+            deallocate(r7%iin%alpha, r7%iin%s, r7%iin%inb, r7%iin%beta)
+            do i = 0,r7%iin%ns
+                if(r7%iin%tef(i)%nr .gt. 0) call del_tab1(r7%iin%tef(i))
+            end do
+            deallocate(r7%iin%tef)
+            deallocate(r7%iin)
+        end if
+        nx => r7%next
+        deallocate(r7)
+        r7 => nx
+    end do
+
+    end subroutine del_mf7
 
 !******************************************************************************************
 

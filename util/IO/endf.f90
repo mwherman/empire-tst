@@ -13,6 +13,10 @@ module ENDF_IO
     ! The main public interface for this module is just the
     ! routines read_endf_file and write_endf_file. All the
     ! type definitions for the various MF files are made available.
+    ! del_endf is used to deconstruct an endf file structure that
+    ! is no longer needed, and set_mf1_directory supplied to
+    ! re-create the section directory for a material. This is
+    ! done automatically when an endf file is written.
 
     use base_endf_io
     use endf_cov_io
@@ -45,6 +49,8 @@ module ENDF_IO
 
     public
 
+    character*80, parameter, private :: hdlin = ' $Rev::          $  $Date::            $                             1 0  0    0'
+
     type endf_mat
         integer mat
         type (endf_mat), pointer :: next
@@ -75,8 +81,8 @@ module ENDF_IO
     end type
 
     type endf_file
-        character*80 hdline            ! header line (line 0)
-        type (endf_mat) mat            ! materials
+        character*80 hdline                    ! header line (line 0)
+        type (endf_mat), pointer :: mat        ! materials
     end type
 
     ! define generic interfaces for read/write MF routines
@@ -135,6 +141,33 @@ module ENDF_IO
         module procedure write_mf40
     end interface
 
+    interface del_mf
+        module procedure del_mf1
+        module procedure del_mf2
+        module procedure del_mf3
+        module procedure del_mf4
+        module procedure del_mf5
+        module procedure del_mf6
+        module procedure del_mf7
+        module procedure del_mf8
+        module procedure del_mf9
+        module procedure del_mf10
+        module procedure del_mf12
+        module procedure del_mf13
+        module procedure del_mf14
+        module procedure del_mf15
+        module procedure del_mf23
+        module procedure del_mf26
+        module procedure del_mf27
+        module procedure del_mf28
+        module procedure del_mf31
+        module procedure del_mf32
+        module procedure del_mf33
+        module procedure del_mf34
+        module procedure del_mf35
+        module procedure del_mf40
+    end interface
+
     interface lc_mf
         module procedure lc_mf1
         module procedure lc_mf2
@@ -162,15 +195,18 @@ module ENDF_IO
         module procedure lc_mf40
     end interface
 
-    private read_mf1,read_mf2,read_mf3,read_mf4,read_mf5,read_mf6,read_mf7,read_mf8
-    private read_mf9,read_mf10,read_mf12,read_mf13,read_mf14,read_mf15,read_mf23,read_mf26
+    private read_mf1,read_mf2,read_mf3,read_mf4,read_mf5,read_mf6,read_mf7,read_mf8,read_nc,read_ni
+    private read_mf9,read_mf10,read_mf12,read_mf13,read_mf14,read_mf15,read_mf23,read_mf26,read_cmpt
     private read_mf27,read_mf28,read_mf31,read_mf32,read_mf33,read_mf34,read_mf35,read_mf40
-    private write_mf1,write_mf2,write_mf3,write_mf4,write_mf5,write_mf6,write_mf7,write_mf8
-    private write_mf9,write_mf10,write_mf12,write_mf13,write_mf14,write_mf15,write_mf23,write_mf26
-    private write_mf27,write_mf28,write_mf31,write_mf32,write_mf33,write_mf34,write_mf35,write_mf40
+    private write_mf1,write_mf2,write_mf3,write_mf4,write_mf5,write_mf6,write_mf7,write_mf8,write_nc
+    private write_mf9,write_mf10,write_mf12,write_mf13,write_mf14,write_mf15,write_mf23,write_mf26,write_ni
+    private write_mf27,write_mf28,write_mf31,write_mf32,write_mf33,write_mf34,write_mf35,write_mf40,write_cmpt
+    private del_mf1,del_mf2,del_mf3,del_mf4,del_mf5,del_mf6,del_mf7,del_mf8,del_ni,del_nc
+    private del_mf9,del_mf10,del_mf12,del_mf13,del_mf14,del_mf15,del_mf23,del_mf26,del_cmpt
+    private del_mf27,del_mf28,del_mf31,del_mf32,del_mf33,del_mf34,del_mf35,del_mf40
     private lc_mf1,lc_mf2,lc_mf3,lc_mf4,lc_mf5,lc_mf6,lc_mf7,lc_mf8,lc_mf9,lc_mf10
     private lc_mf12,lc_mf13,lc_mf14,lc_mf15,lc_mf23,lc_mf26,lc_mf27,lc_mf28,lc_mf31
-    private lc_mf32,lc_mf33,lc_mf34,lc_mf35,lc_mf40
+    private lc_mf32,lc_mf33,lc_mf34,lc_mf35,lc_mf40,lc_ni,lc_nc,lc_cmpt
     private get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, erlin
     private read_endf, get_endf, write_endf, put_endf, get_endline, put_endline, endline, ipos
     private clear_mat, mtmod, process_material
@@ -185,8 +221,6 @@ module ENDF_IO
 
     character*(*), intent(in) :: filename
     type (endf_file), intent(out), target :: endf
-
-    character*80, parameter :: hdlin = ' $Rev::          $  $Date::            $                             1 0  0    0'
 
     integer mat,status
     type (endf_mat), pointer :: mx
@@ -209,13 +243,15 @@ module ENDF_IO
         endf%hdline = hdlin
     endif
 
-    mx => endf%mat
     mat = get_mat()
     if(mat .lt. 0) then
         write(6,*) ' No materials found in ',filename
         call close_endfile
         return
     endif
+
+    allocate(endf%mat)
+    mx => endf%mat
 
     do
         call clear_mat(mx)
@@ -429,9 +465,58 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
+    subroutine del_endf(endf)
+
+    implicit none
+
+    ! deconstruct an endf file. Here we deflate the structure,
+    ! deallocating all data stored in the endf file.
+
+    type (endf_file), target :: endf
+    type (endf_mat), pointer :: mx,nx
+
+    endf%hdline = hdlin
+    mx => endf%mat
+    do while(associated(mx))
+        if(associated(mx%mf40)) call del_mf(mx%mf40)
+        if(associated(mx%mf35)) call del_mf(mx%mf35)
+        if(associated(mx%mf34)) call del_mf(mx%mf34)
+        if(associated(mx%mf33)) call del_mf(mx%mf33)
+        if(associated(mx%mf32)) call del_mf(mx%mf32)
+        if(associated(mx%mf31)) call del_mf(mx%mf31)
+        if(associated(mx%mf28)) call del_mf(mx%mf28)
+        if(associated(mx%mf27)) call del_mf(mx%mf27)
+        if(associated(mx%mf26)) call del_mf(mx%mf26)
+        if(associated(mx%mf23)) call del_mf(mx%mf23)
+        if(associated(mx%mf15)) call del_mf(mx%mf15)
+        if(associated(mx%mf14)) call del_mf(mx%mf14)
+        if(associated(mx%mf13)) call del_mf(mx%mf13)
+        if(associated(mx%mf12)) call del_mf(mx%mf12)
+        if(associated(mx%mf10)) call del_mf(mx%mf10)
+        if(associated(mx%mf9))  call del_mf(mx%mf9)
+        if(associated(mx%mf8))  call del_mf(mx%mf8)
+        if(associated(mx%mf7))  call del_mf(mx%mf7)
+        if(associated(mx%mf6))  call del_mf(mx%mf6)
+        if(associated(mx%mf5))  call del_mf(mx%mf5)
+        if(associated(mx%mf4))  call del_mf(mx%mf4)
+        if(associated(mx%mf3))  call del_mf(mx%mf3)
+        if(associated(mx%mf2))  call del_mf(mx%mf2)
+        if(associated(mx%mf1))  call del_mf(mx%mf1)
+        nx => mx%next
+        deallocate(mx)
+        mx => nx
+    end do
+
+    return
+    end subroutine del_endf
+
+!------------------------------------------------------------------------------
+
     subroutine set_mf1_directory(mx)
 
     implicit none
+
+    ! rebuild the MF1 directory
 
     type (endf_mat), intent(inout), target :: mx
 
@@ -464,8 +549,14 @@ module ENDF_IO
 
     type (MF1_sect_list), pointer :: drc(:), sc(:)
 
+    ! without the ability to upcast, we must repeat
+    ! many operations here on a MF-by-MF basis. Ugh.
+
+    if(.not.associated(mx%mf1))       return
+    if(.not.associated(mx%mf1%mt451)) return
+
     nxc =  mx%mf1%mt451%nxc
-    drc => mx%mf1%mt451%sct
+    drc => mx%mf1%mt451%dir
 
     mtc = 0
     mtc = mtc + lc_mf(mx%mf1)
@@ -495,11 +586,14 @@ module ENDF_IO
 
     ! make new directory
 
-    allocate(mx%mf1%mt451%sct(mtc))
-    sc => mx%mf1%mt451%sct
+    allocate(mx%mf1%mt451%dir(mtc))
+    sc => mx%mf1%mt451%dir
 
-    ! now we have to step through each MF
-    ! this is where polymorphism would come in handy!
+    ! now we have to step through each MF and
+    ! save the information into the new directory.
+    ! keep any old modification number that was in
+    ! the old directory, if present. Also, count
+    ! the total number of sections as a cross-check.
 
     i = 0
 
