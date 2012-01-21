@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2277 $
+Ccc   * $Rev: 2278 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-21 22:14:50 +0100 (Sa, 21 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -281,8 +281,7 @@ C--------Relativistic kinematics
 C--------Maximum energy to assume all levels are collective for DWBA calculations
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
-         JCUtcoll = 2.
-
+         JCUtcoll = 4
 C--------set fission defaults
          DO nnuc = 1, NDNUC
            FISbar(nnuc) = 1     ! RIPL-3 empirical fission barriers 
@@ -534,6 +533,8 @@ C-----------GAMMA EMISSION
          ELV(1,0) = 0.0
          QCC(1) = -e2p
          QCC(2) = -e3m
+
+         ECUtcoll = 3*30./A(0)**0.666666666666d0
 
 C--------product of target and projectile parities
 C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
@@ -2913,7 +2914,7 @@ C
       CHARACTER*35 char
       CHARACTER*13 char1
       LOGICAL fexist,file_exists
-      DOUBLE PRECISION val,vale,sigma,shelss,quant
+      DOUBLE PRECISION val,vale,sigma,shelss,quant,ecutof
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2
       GAPin(1) = 0.
@@ -3287,10 +3288,21 @@ C
          IF (name.EQ.'EcDWBA') THEN
 C           EcDWBA meaningless if Collective level file exists
             INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
-            IF(fexist) goto 100
-            ECUtcoll = val
+            IF(fexist) then
+              WRITE(8,*) 
+     &        ' WARNING: Collective levels for DWBA calculations  '
+              WRITE(8,*) 
+     &        ' WARNING:  can not be automatically selected if the'
+              WRITE(8,*) 
+     &        ' WARNING:  collective level file *-lev.col exists !'
+              goto 100
+	      ENDIF
+		  ECUtcoll = val
             JCUtcoll = i1
-            IF (JCUtcoll.EQ.0) JCUtcoll = 2
+	      ecutof = 3*30./A(0)**0.666666666666d0
+            IF (ECUtcoll.LT.0.1 .or. ECUtcoll.GT.ecutof) ECUtcoll=ecutof
+            IF (JCUtcoll.EQ.0 .or. JCUTcoll.GT.8) JCUtcoll = 4
+C
             WRITE (8,
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
      &     ) ECUtcoll
@@ -8270,8 +8282,16 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
   400 DO ilv = 1, nlvs
          READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') itmp, elvr,
      &         xjlvr, lvpr, t12, ndbrlin
+C
 C--------Skipping levels with unknown spin in the discrete level region
          IF (xjlvr.LT.0. .AND. ilv.LE.NLV(nnurec)) CYCLE
+
+         IF(ilv + LEVcc.gt.99) THEN
+           WRITE (8,*)
+     &      'WARNING: Max.number of uncoupled coll.levels reached'
+	       GOTO 600
+         ENDIF
+
          IF (xjlvr.LT.0.) THEN ! unknown spin in continuum
 C                                assigning randomly 2+,4+,3- spin
            ftmp = drand()
@@ -8286,6 +8306,7 @@ C                                assigning randomly 2+,4+,3- spin
              lvpr  = -1
            endif
          ENDIF
+
          IF (ilv.EQ.1) THEN
             delta_k = 2.D0
             IF (xjlvr.NE.0.D0) delta_k = 1.D0
