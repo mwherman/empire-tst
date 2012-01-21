@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2277 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -34,8 +34,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, tgexper,
-     &              sum, sumfis, sumfism(3), sumg, tlump, xnor, fisxse,
-     &              sumtg
+     &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
+     &              fisxse, sumtg
       REAL FLOAT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2258 $
+Ccc   * $Rev: 2277 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-20 04:42:28 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1886,7 +1886,7 @@ C
 C
       dimension namelst(ndkeys), namecat(ndkeys)
       data namelst /
-     &  'ATILNO', 'CHMS  ', 'DEFPAR', 'FUSRED', 'GDIVP ', 'GDRST1',
+     &  'ATILNO', 'CHMS  ', 'DXSRED', 'FUSRED', 'ELARED', 'GDRST1',
      &  'GDRST2', 'GDRWEI', 'GDRWP ', 'GTILNO', 'PCROSS', 'QFIS  ',
      &  'RESNOR', 'TOTRED', 'TUNEFI', 'TUNEPE', 'TUNE  ', 'UOMPAS',
      &  'UOMPAV', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'ALS   ', 'BETAV ',
@@ -1897,7 +1897,7 @@ C
      &  'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH',
      &  'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA',
      &  'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ',
-     &  'TRUNC ', 'WIDEX ', 'COMPFF', 'DEGAS ', 'DIRECT', 'DIRPOT',
+     &  'TRUNC ', 'WIDEX ', 'COMPFF', '      ', 'DIRECT', 'DIRPOT',
      &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN',
      &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP',
      &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT',
@@ -1906,11 +1906,10 @@ C
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
-     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP',  
-     &  'ATILFI', 'DEFNOR', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP',
-     &  'ELARED'/
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', '      ',
+     &  '      ', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', '      '/
       data namecat /
-     &  'A'     , 'A'     , 'T'     , 'T'     , 'A'     , 'A'     ,   
+     &  'A'     , 'A'     , 'T'     , 'T'     , 'T'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'T'     , 'A'     ,   
      &  'T'     , 'T'     , 'A'     , 'T'     , 'A'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'R'     , 'R'     ,   
@@ -1921,7 +1920,7 @@ C
      &  'R'     , 'R'     , 'R'     , 'R'     , 'T'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
+     &  'R'     , 'R'     , 'F'     , ' '     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
@@ -1930,8 +1929,8 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
-     &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'T' /
+     &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , ' '     ,
+     &  ' '     , 'A'     , 'A'     , 'A'     , 'A'     , ' ' /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1942,7 +1941,7 @@ C-----F - variation of the parameter not allowed (discrete value keyword)
 ccc
 C-----T - variation of the parameter allowed; the parameters
 C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
-C-----    DEFPAR, TOTRED, FUSRED, ELARED ...
+C-----    TOTRED, FUSRED, ELARED ...
 ccc
       LINUX = .TRUE.
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)

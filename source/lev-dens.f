@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 04:02:04 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -190,7 +190,7 @@ c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
 
       bcs = .TRUE.
 c-----GSM (egsm=0) and EGSM (egsm=1)
-      egsm=1
+      egsm=0
       lazy=0
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
@@ -359,7 +359,6 @@ C-----BF=3. stands for the triaxial yrast state (rot. perpend. to long )
 
       expmax=700.
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-      egsm=0
 c----
       RODEF = 0.D0
       T = DSQRT(E/Ac)
@@ -803,7 +802,7 @@ C Local variables
       NLWst = NLW
 c     Jstab(Nnuc)=NDLW
       CALL DAMIRO_CRT(ia,iz,shcn,IOUt,0)
-      def2=def(1,nnuc)
+      def2=DEF(1,nnuc)
       rotemp = 0.d0
      
       mm2=.24*A(Nnuc)**.66666
@@ -1588,12 +1587,12 @@ C-----Skipping header lines
       CALL WHERE(nz*1000+na,nnuc,iloc)
       IF (iloc.EQ.0) THEN
 c        SHC(Nnuc) = shelMSr - defcorr
-         SHC(Nnuc) = shelMSr
+         SHC(Nnuc) = shelMSr*SHLlnor(nnuc)
       ENDIF
 C-----projectile
       IF (nz.EQ.Z(0) .AND. na.EQ.A(0)) THEN
 c        SHC(0) = shelMSr - defcorr
-        SHC(0) = shelMSr
+        SHC(0) = shelMSr*SHLlnor(nnuc)
       ENDIF
       GO TO 40
   60  WRITE(8,*) ' ERROR: Error reading shell correction file'
@@ -1676,13 +1675,6 @@ C
       WRITE (filename,99005) iz
 99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
-C     INQUIRE(file = trim(empiredir)//filename, exist = fexist)
-C     IF(.not.fexist) THEN
-C      WRITE(8,*) trim(empiredir)//filename, ' does not exist'
-C      WRITE(*,*) trim(empiredir)//filename, ' does not exist'
-C      STOP 'ERROR: HFB level density is missing'
-C      ENDIF
-
       OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3)  !,2x,a8)
@@ -2094,8 +2086,8 @@ C-----------next line is to calculate deformation parameter A2 only
             CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),0.0D0,u,accn,Aj,
      &                     mompar,momort,A2,stab,cigor)
          ENDIF
-C-----------calculation of level density parameter 'a' including surface
-C-----------dependent factor
+C--------calculation of level density parameter 'a' including surface
+C--------dependent factor
          ATIl = AP1*A(Nnuc) + AP2*A23*BSQ(cigor)
          ATIl = ATIl*ATIlnor(Nnuc)
          IF (Asaf.GE.0.D0) ac = ATIl*FSHELL(u,SHC(Nnuc),Asaf)
@@ -2109,6 +2101,8 @@ C-----------dependent factor
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
+C           In DAMIRO_FISHI, RODEF is always called with egsm=1 (EGSM) 
+C           egsm=1
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
      &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,1)
             IF (i.EQ.1) t = SQRT(u/ac)
@@ -2173,7 +2167,7 @@ C
 C
 C Local variables
 C
-      REAL*8 aaj, excn1,   rotemp, xmax, mompar, temp
+      REAL*8 aaj, excn1, rotemp, xmax, mompar, temp
       REAL*8 bbb, ggg, rrry, rrr1, rrr2, def2
       REAL FLOAT
       INTEGER ia, iff, in, iz, jj, kk, nr
@@ -2217,7 +2211,15 @@ C     IF(ECFis(ib).gt.0.) XMInn(Ib) = ECFis(ib)
       rbmsph = 0.01448*A(Nnuc)**1.66667
 C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
 
-      bbb = min(DEFfis(Ib),1.5d0) ! the actual static saddle deformation is used
+      bbb = DEFfis(Ib) ! the actual static saddle deformation is used
+      IF(bbb .GT. 1.5d0) THEN
+ 		 WRITE(8,*) 
+     &   ' WARNING: Deformation reset to 1.5 for HFB fiss.barrier b=',Ib
+ 		 WRITE(8,*) 
+     &   ' WARNING:  for moment of inertia calculation (SIGMAK) '
+         bbb = 1.5d0 
+      ENDIF 
+
       ggg = pi/3.                 ! axial symmetry
       IF (iff.eq.2) ggg = pi/18.  ! arbitrarily fixed asymmetry to 10 degrees
 
@@ -2463,7 +2465,6 @@ C
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       INTEGER NLWst                                             ! PARAM
 
-      REAL*8 delf,delfis
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
@@ -2486,7 +2487,7 @@ C
       REAL FLOAT
       INTEGER ia, iff, in, iz, jj, kk, nr
       INTEGER INT
-      REAL*8 ROBCSF, RODEFF, FSHELL
+      REAL*8 ROBCSF, RODEFF, FSHELL, BSQ
 
 C-----continuum, level densities at saddle points
       excn1 = EMAx(Nnuc)
@@ -2556,8 +2557,7 @@ C-----EMPIRE-3.0-dependence
 
       IF (Mmod.EQ.0) THEN
          GAMma = GAMmafis(Ib)
-c         DELf = DELtafis(Ib)
-         delp=deltafis(ib)
+         DELp=deltafis(ib)
          shcf = SHCfis(Ib)
          iff = BFF(Ib)
          desteppp = DEStepp(Ib)
@@ -2568,56 +2568,63 @@ c         DELf = DELtafis(Ib)
          NRBinfis(Ib) = NRBinfism(Mmod)
          XMInn(Ib) = XMInnm(Mmod)
          GAMma = GAMmafism(Mmod)
-         DELf = DELtafism(Mmod)
-                  DELp = DELtafism(Mmod)
+         DELp = DELtafism(Mmod)
          shcf = SHCfism(Mmod)
          iff = BFFm(Mmod)
          desteppp = DEStepm(Mmod)
       ENDIF
       gamma = gamma/A(Nnuc)**0.333333
-      ATIl = AP1*A(Nnuc) + AP2*A(Nnuc)**0.666667
+      ATIl = AP1*A(Nnuc) + AP2*A23
       ATIl = ATIl*Rafis
       ar = ATIl*(1.0 + shcf*GAMma)
 
-      delfis = 0.
+C
+C     Both DEL and DELp may be redefined in FISSION.INP
+C           for fission LD calculations
+C
+      DEL = 0.
       IF (FISden(Nnuc).LE.1.) THEN
-         IF (MOD(in,2).NE.0) DELfis = DELp
-         IF (MOD(iz,2).NE.0) DELfis = DELfis + DELp
+         IF (MOD(in,2).NE.0) DEL = DELp
+         IF (MOD(iz,2).NE.0) DEL = DEL + DELp
       ENDIF
 C
-     
       aj=0.
       u=0.
       DO kk = 1, NDEX
          DO i = 1, NDLW
-c            DO Ib = 1, NRHUMP 
                ROFis(kk,jj,Ib) = 0.d0
                ROFisp(kk,jj,1,Ib) = 0.d0
                ROFisp(kk,jj,2,Ib) = 0.d0
-c            ENDDO
          ENDDO
       ENDDO
+
+      def2 = DEFfis(Ib) ! the actual static saddle deformation is used
+      IF(def2 .GT. 1.5d0) THEN
+ 		 WRITE(8,*) 
+     &   ' WARNING: Deformation reset to 1.5 for fission barrier b=',Ib
+ 		 WRITE(8,*) 
+     &   ' WARNING:  for fission LD calculations (SIGMAK,RODEFF)   '
+         def2 = 1.5d0 
+      ENDIF 
       if (iff.eq.2) then
 C       Axial SYMMETRY
-        CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-1.0D0,u,ar,
+        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.0D0,u,ar,
      &                           aj,mompar,momort,A2,stab,cigor)
       else
 C       Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK
-        CALL SIGMAK(A(Nnuc),Z(Nnuc),DEFfis(Ib),-2.0D0,u,ar,
+        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-2.0D0,u,ar,
      &                           aj,mompar,momort,A2,stab,cigor)
       endif
 C
-C-----calculation of level density parameter 'a' including
-C-----surface deformation dependent factor bsq
-cc      ATIl = AP1*A(Nnuc) + BSQ(cigor)*AP2*A(Nnuc)**0.666667
-cc      ATIl = ATIl*Rafis
+C-----calculation of level density parameter 'a' including surface
+C-----dependent factor
+      ATIl = AP1*A(Nnuc) + BSQ(cigor)*AP2*A23
+      ATIl = ATIl*Rafis
 
       CALL DAMIRO_CRT(ia,iz,shcf,IOUt,1)
 
       momparcrt=mompar
       momortcrt=momort
-
-      def2 = DEFfis(Ib)
 
       IF (mompar.LT.0.0D0 .OR. momort.LT.0.0D0) THEN
          WRITE (8,*) 'WARNING: Negative moment of inertia for spin ', Aj
@@ -2625,17 +2632,11 @@ cc      ATIl = ATIl*Rafis
          RETURN
       ENDIF
 
-      DEL = 0.
-      IF (FISden(Nnuc).LE.1.) THEN
-         IF (MOD(in,2).NE.0) DEL = DELp
-         IF (MOD(iz,2).NE.0) DEL = DEL + DELp
-      ENDIF
-c
  76   DO jj = 1,NLW
          aaj = FLOAT(jj) + HIS(Nnuc)
          DO kk = 1,NRBinfis(Ib)
             rotemp=0.d0
-            u = XMInn(Ib) + (kk - 1)*desteppp + DEL!fis
+            u = XMInn(Ib) + (kk - 1)*desteppp + DEL
             IF (u.GT.UCRt) THEN
                u = u - ECOnd
                accn = ATIl*FSHELL(u,Shcf,GAMma)
@@ -2735,6 +2736,7 @@ C Dummy arguments
       expmax=700.
       Bf=0.d0
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
+C     In RODEFF (fission LD) it is assumed that egsm=1 (EGSM) . 
       egsm=1
       RODEFF = 0.D0
       Yrast=0.d0 
@@ -2880,13 +2882,17 @@ Cccc  ********************************************************************
       delp = 12./SQRT(A(nnuc))
       IF (MOD(XN(nnuc),2.D0).NE.0.0D0) del = delp
       IF (MOD(Z(nnuc),2.D0).NE.0.0D0) del = del + delp
-
+C****************************************************************
 Cccc  * MINUIT fit results:                                              
+C
 C-----parameters of Dec 4, 2008
 C     frm=1.70   Chi**2=36 (per degree of freedom)                    
 C     ap1 = 0.74055E-01
 C     ap2 = 0.28598E-03
 C     gam = 0.57248
+C
+C****************************************************************
+C
 C-----parameters of Jan 26, 2011
 C  Do-fit using RIPL-3 database, 2.19 vibr enhancement (MINUIT)       
 C     alpha 0=  .0750000 delta alpha= .500000D-01
@@ -2894,7 +2900,13 @@ C     gam   0=  .5750000 delta gam  = .500000D-02
 C ---------------------------------
 C alpha=   7.488729E-02 gam=   5.697688E-01
 C frm=       1.687021929004768 Chi^2=      27.301609174895010
-C==================================================================
+C     ap1= 7.488729D-02 
+C     ap2= 0.d0
+C     gam= 5.697688D-01
+C
+C     egsm=1 in LD meaning that the EGSM model is used
+C
+C****************************************************************
 C
 C-----parameters of Jan 16, 2012 (EMPIRE v.2182 for LD routines)
 C  Do-fit using RIPL-3 database, 2.19 vibr enhancement       
@@ -2906,16 +2918,12 @@ C frm=       1.672033623535850 Chi^2=      27.242032055693340
 C Ncalc=        255 Nres=        300 N(Ucrt>Bn)=         48
 C 48 nuclei having Ucrt>Bn skipped in the MINUIT fit
 C
-C   frms  = 1.672
-C   Chi-2 = 27.2
-C
-C   egsm=0 in LD meaning that the GSM-like model is used
+C     egsm=0 in LD meaning that the GSM-like model is used
 C             Closed formula for spin dependence instead of sum_K
 C
       ap1 =  7.481815D-02
       ap2 =  0.d0
       gam =  5.609533D-01
-
       gamma = gam/A(Nnuc)**(1.d0/3.d0)
       IF(ATIlnoz(INT(Z(nnuc))) .eq. 0.d0) return
       ap1 = ap1*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor

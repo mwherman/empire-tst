@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2274 $
+Ccc   * $Rev: 2277 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 00:20:14 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -844,8 +844,6 @@ C-----FISDEN(Nnuc)= 2 HFB
                 READ (79,'(10x,  I1,4x, I1, 8f9.3)',ERR=385,END=385)  i,
      &          BFF(ib), SHCfis(ib), DELtafis(ib), GAMmafis(ib),
      &          AFIs(ib),ECFis(ib),vibf12(ib),vibfdt(ib),vibfnorm(ib)
-C               For covariance
-                AFIs(ib) = AFIs(ib) * ATILfi(Nnuc)
              ENDIF
              IF (FISmod(Nnuc).GT.0. .AND. ib.EQ.2) THEN
                DO m = 1, nrmod
@@ -853,8 +851,6 @@ C               For covariance
      &                  END=385) i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
      &                  AFIsm(m), ECFism(m)
-C                 For covariance
-                  AFIsm(ib) = AFIsm(ib) * ATILfi(Nnuc)
                ENDDO
             ENDIF
          ENDDO
@@ -951,7 +947,6 @@ C------- Fitting parabola
       ENDIF
 
 C     For covariance
-c      EFB(1) = EFB(1) * FISbin (Nnuc)
       IF(NRHump.GE.2) THEN
       DO i = 1, NRHump
          EFB(i) = EFB(i) * FISv_n (i,Nnuc)
@@ -1072,9 +1067,9 @@ C-----deformations at saddles and wells and matching points-----------
          VJJ(k) = EFB(NRhump + int(k/2))
       ENDDO
       DO i = 1, nrbarm
-         epsil(i) = 0.
-         ejoin(i) = 0.
-         DEFfis(i) = 0.
+         epsil(i) = 0.d0
+         ejoin(i) = 0.d0
+         DEFfis(i) = 0.d0
       ENDDO
       epsil(1) = SQRT(vjj(1))/(smiu*ho(1)) + DEF(1,Nnuc)
       ejoin(2) = epsil(1)
@@ -1091,12 +1086,14 @@ C-----deformations at saddles and wells and matching points-----------
      &                                 /(1.D0 + (ho(k)/ho(k+1))**2))
      &                                 /(smiu*ho(k))
       ENDDO
+
       DO k = 1, NRhump
          DEFfis(k) = epsil(2 * (k-1) + 1)
       ENDDO
       DO k = 1, NRwel
          DEFfis(NRhump + k) = epsil(2 * k)
       ENDDO
+
       RETURN
       END
 C

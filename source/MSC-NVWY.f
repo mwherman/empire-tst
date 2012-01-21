@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2277 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -330,7 +330,7 @@ C
      &                 spr(NG), spw, sumtlg, tg, tg1, tg2, tg3, tgc,
      &                 tl1, tl2, tl3, tlg, tls, tx, undeg(NG,NG),
      &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2),
-     &                 xga, xxxx, y, yd, ygdr
+     &                 xga, xxxx, y, yd, ygdr, ggg
       DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
       REAL FLOAT
       INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, iloc, inc,
@@ -424,7 +424,9 @@ C-----calculation of factorial      ***** done *******
          STOP
       ENDIF
 C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
-      G = A(1)/GDIv
+	ggg = GDIv
+      if(GDIV.LE.0) ggg=13.d0
+      G = A(1)/ggg
       IF (STMro.EQ.1.0D0) THEN
          WRITE (8,
      &'(     '' Microscopic p-h state densities will be calculated with

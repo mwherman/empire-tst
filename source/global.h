@@ -1,6 +1,6 @@
-C $Rev: 2250 $
+C $Rev: 2277 $
 C $Author: rcapote $
-C $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+C $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -16,9 +16,8 @@ C
      &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
      &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
-     &                 CSDirlev(ndlv,0:ndejc), ATIlfi(0:ndnuc),
-     &                 ATIlnoz(NDZmax),
-     &                 CSE(ndecse,0:ndejc,0:ndnuc), FISbin(0:ndnuc),
+     &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),
+     &                 CSE(ndecse,0:ndejc,0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
      &                 CSEahmslab(ndecse,ndangecis,2),
@@ -38,8 +37,7 @@ C
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),
      &                 EFB(nfparab),EFDis(nftrans,nfparab),
-     &                 EGDr1, EGDr2, EIN, EINl,
-     &                 EJMass(0:ndejc), FISbou(0:ndnuc)
+     &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)
       DOUBLE PRECISION FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
@@ -87,7 +85,7 @@ C
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
      &                 FISshi(ndnuc), FITlev, FLAm(ndcc),FCCred,FDWred,
-     &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv, GDIvp,
+     &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv, 
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn, DXSred,
      &                 GMRpar(ndgmrpm,0:ndnuc), GQRpar(ndgqrpm,0:ndnuc),
@@ -109,7 +107,7 @@ C
      &                 POPhmsx(ndecsed,2,0:ndexclus),
      &                 POPhmslab(ndecsed,2,0:ndexclus),
      &                 POPhmsalab(ndecsed,ndangecis,2,0:ndexclus),
-     &		       POPcon(ndnuc), POPdis(ndnuc), ELAred
+     &                   POPcon(ndnuc), POPdis(ndnuc), ELAred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -172,8 +170,8 @@ C
      &                 SIG, TRUnc, EXPush, CSRead, EGDr1, GGDr1, CSGdr1,
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
-     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,FISbin,
-     &                 FITlev,DV,FCC, STMro, DEGa, GDIvp, ATIlfi,FISbou,
+     &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,
+     &                 FITlev,DV,FCC, STMro, DEGa, 
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc,
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,

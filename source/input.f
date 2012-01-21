@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2255 $
+Ccc   * $Rev: 2277 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-20 00:24:56 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -149,12 +149,16 @@ C--------neutralize tuning factors and OMP normalization factors
            rTUNEpe(nejc) = 1.d0
          ENDDO
          DO nnuc = 0, NDNUC
-            DEFnor(nnuc) = 1.d0
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
             SHLlnor(nnuc) = 1.d0
+C
+C           This is the default number of smoothing points to process
+C           HFB numerical fission barriers. It is hardwired, not possible to change 
+C           without recompiling the EMPIRE sources. 
+C
             NRSmooth(nnuc) = 5
-            DO j = 1, NDLV  ! bug found, used to be NDLW
+            DO j = 1, NDLV  
                ISIsom(j,nnuc) = 0
             ENDDO
             DO nejc = 0, NDEJC
@@ -188,7 +192,6 @@ C-----------set level density parameters
             LDShif(Nnuc) = 0.d0
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
-            ATIlfi(nnuc) = 1.
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
 C-----------set ENDF flag to 0 (no ENDF formatting)
@@ -219,7 +222,6 @@ C
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
-         DEFpar = 1.
          DEFga = 0.
          DEFgw = 10.
          DEFgp = 40.
@@ -283,12 +285,13 @@ C--------        Default value 0. i.e. none but those selected automatically
 
 C--------set fission defaults
          DO nnuc = 1, NDNUC
-             FISbar(nnuc) = 1     ! RIPL "experimental" double-kump barriers are default.
-           ! FISbar(nnuc) = 3     ! RIPL-3 HFB barriers
-           ! FISopt(nnuc) = 2
-           ! FISden(nnuc) = 2   ! HFB NLD
-           FISden(nnuc) = 0     ! EGSM NLD at saddle points are default!!
-           FISmod(nnuc) = 0
+           FISbar(nnuc) = 1     ! RIPL-3 empirical fission barriers 
+C          FISbar(nnuc) = 3     ! RIPL-3 HFB barriers
+C
+           FISden(nnuc) = 0     ! EGSM NLD at saddle points 
+C          FISden(nnuc) = 2     ! HFB NLD
+C
+           FISmod(nnuc) = 0     ! Single-modal fission
            FISopt(nnuc) = 0
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
@@ -352,7 +355,7 @@ C
          MSC = 0
 C--------STMro selects p-h densities: 0 for closed form, 1 for microscopic
          STMro = 0.0
-C--------set single particle level density parameter default in MSC as A/13.
+C--------set single particle level density parameter default in PE models as A/13.
          GDIv = 13.0
 C--------NOUT controls output amount in MSC (valid range 0-4, higher the value
 C--------more printout)
@@ -3825,10 +3828,12 @@ C-----
          IF (name.EQ.'GDIV  ') THEN
             GDIv = val
             WRITE (8,
-     &      '('' Single particle level density in MSC set to A/'',F5.2)'
+     &       '('' Single particle level density in PE models set to A/''
+     &           ,F5.2)'
      &      ) GDIv
             WRITE (12,
-     &      '('' Single particle level density in MSC set to A/'',F5.2)'
+     &       '('' Single particle level density in PE models set to A/''
+     &           ,F5.2)'
      &      ) GDIv
             GOTO 100
          ENDIF
@@ -3923,6 +3928,7 @@ C
             GOTO 100
          ENDIF
 C----
+C
 C--------Volume real and imaginary imaginary potential diffuseness
 C        AVOm(Nejc,Nnuc) = alib(1)*FNavomp(Nejc,Nnuc)
 C        AWOm(Nejc,Nnuc) = alib(3)*FNavomp(Nejc,Nnuc)
@@ -4741,46 +4747,6 @@ C-----
             GOTO 100
          ENDIF
 C----
-         IF (name.EQ.'DEFPAR') THEN
-            DEFpar = val
-            WRITE (8,'('' Dynamic deformation multiplyer '',F7.3)')
-     &             DEFpar
-            WRITE (12,'('' Dynamic deformation multiplyer '',F7.3)')
-     &             DEFpar
-            GOTO 100
-         ENDIF
-C----
-         IF (name.EQ.'DEFNOR') THEN
-            izar = i1*1000 + i2
-            IF (izar.EQ.0) THEN
-               DO i = 0, NDNUC
-                  DEFnor(i) = val
-               ENDDO
-               IF (val.NE.1.0D0) WRITE (8,
-     &         '('' gs-deformation multiplier set to '',F6.1,
-     &         '' for all nuclei'')') val
-               IF (val.NE.1.0D0) WRITE (12,
-     &         '('' gs-deformation multiplier set to '',F6.1,
-     &         '' for all nuclei'')') val
-               GOTO 100
-            ENDIF
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' GS-DEFORMATION NORMALIZATION IGNORED'')')
-               GOTO 100
-            ENDIF
-            DEFnor(nnuc) = val
-            WRITE (8,
-     & '('' gs-deformation multiplier in '',I3,A2,'' set to ''  ,F7.3)'
-     & )  i2, SYMb(nnuc), val
-            WRITE (12,
-     & '('' gs-deformation multiplier in '',I3,A2,'' set to ''  ,F7.3)'
-     & )  i2, SYMb(nnuc), val
-            GOTO 100
-         ENDIF
-C-----
          IF (name.EQ.'DEFGA ') THEN
             DEFga = val
             WRITE (8,
@@ -5178,52 +5144,6 @@ C-----
             GOTO 100
          ENDIF
 C-----
-         IF (name.EQ.'ATILFI') THEN
-            izar = i1*1000 + i2
-            IF (izar.EQ.0) THEN
-               DO i = 1, NDNUC
-                  ATIlfi(i) = val
-               ENDDO
-               WRITE (8,
-     &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
-     &F6.2)') val
-               WRITE (12,
-     &'('' Saddle-point l.d. a-parameter in all nuclei multiplied by '',
-     &F6.2)') val
-               GOTO 100
-            ENDIF
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' NORMALIZATION OF SP a-tilde IGNORED'')')
-               GOTO 100
-            ENDIF
-            if(i3.ne.0 .and. IOPran.ne.0) then
-              WRITE (8,
-     &        '('' Saddle-point l.d. a-parameter uncertainty in '',I3,
-     &         A2,'' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
-              sigma = val*i3*0.01
-              IF(IOPran.gt.0) then
-                ATIlfi(nnuc) = val + grand()*sigma
-              ELSE
-                ATIlfi(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF
-              WRITE (8,
-     &        '('' Saddle-point l.d. a-parameter sampled value : '',
-     &        f8.3)') ATIlfi(nnuc)
-              IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
-     &              IPArCOV, ATIlfi(nnuc),INDexf,INDexb
-            else
-              ATIlfi(nnuc) = val
-              WRITE (8,
-     &        '('' Saddle-point l.d. a-parameter in '',I3,A2,
-     &        '' multiplied by '',F6.2)'  ) i2, SYMb(nnuc), val
-            endif
-            GOTO 100
-         ENDIF
-C-----
          IF (name.EQ.'GTILNO') THEN
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
@@ -5355,11 +5275,11 @@ C-----
          IF (name.EQ.'FITOMP') THEN
             FITomp = val
             IF (FITomp.GT.0) WRITE (8,
-     &'('' OM parameter adjustment has been peformed,'',
+     &'('' OM parameter adjustment has been performed,'',
      & '' (several options will be reset.'')')
             IF (FITomp.LT.0) WRITE (8,
      &'('' Automatic OM parameter adjustment was selected,'',
-     & '' (several options will be rest.'')')
+     & '' (several options will be reset.'')')
             GOTO 100
          ENDIF
 
@@ -5416,12 +5336,12 @@ C--------Tuning factors
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISSION WIDTH TUNING IGNORED'')')
+               WRITE (8,'('' FISSION DECAY WIDTH TUNING IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
-     &'('' Uncertainty of the Fission width of nucleus '',I3,A2,
+     &'('' Uncertainty of the Fission decay width of nucleus '',I3,A2,
      &         '' is equal to '',i2,'' %'')')
      &         i2, SYMb(nnuc), i3
               sigma = val*0.01*i3
@@ -5433,19 +5353,22 @@ C--------Tuning factors
                 TUNefi(nnuc) = val + 1.732d0*(2*rTUNEfi(nnuc)-1.)*sigma
               ENDIF
               WRITE (8,
-     &'('' Fission width of nucleus '',I3,A2,
+     &'('' Fission decay width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), TUNefi(nnuc)
               IPArCOV = IPArCOV +1
                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &       IPArCOV, TUNefi(nnuc), INDexf,INDexb
-             else
+ 
+            else
+ 
               TUNefi(nnuc) = val
               WRITE (8,
-     &'('' Fission width of nucleus '',I3,A2,
+     &'('' Fission decay width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
               WRITE (12,
-     &'('' Fission width of nucleus '',I3,A2,
+     &'('' Fission decay width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), val
+ 
             endif
             GOTO 100
          ENDIF
@@ -5870,7 +5793,6 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'DXSRED') THEN
-            IF(NEJCM.LT.4) GOTo 100
             IF (val.LE.0.d0) THEN
              DXSred = 0.d0
                WRITE ( 8,
@@ -6028,7 +5950,7 @@ C--------checking for fission data in the optional input
             IF (val.EQ.0) THEN
                fstring = 'advanced treatment of fission'
             ELSEIF (val.EQ.1) THEN
-               fstring = 'fission over single-humped barrier'
+               fstring = 'HI-fission over 1-humped barrier'
             ELSEIF (val.EQ.2) THEN
                fstring = 'fission ignored'
             ELSE
@@ -6061,7 +5983,9 @@ C-----
                DO nnuc = 1, NDNUC
                   FISmod(nnuc) = val
                ENDDO
-               WRITE (8,'('' FISMOD  in all nuclei set to '',F6.3)') val
+               WRITE (8,
+     &   '('' No. fission modes in all nuclei set to '',F6.3)') 
+     &   val + 1
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -6073,11 +5997,11 @@ C-----
             ENDIF
             FISmod(nnuc) = val
             WRITE (8,
-     &            '('' FISMOD  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+     &       '('' No. fission modes in '',I3,A2,'' set to '',F6.3)'
+     &            ) i2, SYMb(nnuc), val + 1
             WRITE (12,
-     &            '('' FISMOD  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+     &       '('' No. fission modes in '',I3,A2,'' set to '',F6.3)'
+     &            ) i2, SYMb(nnuc), val + 1
             GOTO 100
          ENDIF
 C-----
@@ -6208,37 +6132,8 @@ C--------------------------------------------------------------------------
             endif
             GOTO 100
          ENDIF
-C-----
-         IF (name.EQ.'FISSMT') THEN
-            izar = i1*1000 + i2
-            IF (izar.EQ.0) THEN
-               DO nnuc = 1, NDNUC
-                 NRSmooth(nnuc) = val
-               ENDDO
-               WRITE (8,'('' NrSmooth  in all nuclei set to '',F6.3)')
-     &                       val
-               WRITE (12,'('' NrSmooth in all nuclei set to '',F6.3)')
-     &                       val
-               GOTO 100
-            ENDIF
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' NRSmooth SETTING IGNORED'')')
-               GOTO 100
-            ENDIF
-            NRSmooth(nnuc) = val
-            WRITE (8,
-     &          '('' NrSmooth in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            WRITE (12,
-     &            '(''NrSmooth in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            GOTO 100
-         ENDIF
 C-----         
-         IF (name.EQ.'FISV1') THEN
+         IF (name.EQ.'FISVF1') THEN
             char =' Fission barrier first hump height  '
             char1=' first hump  ' 
             CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char, char1)
@@ -6260,7 +6155,7 @@ C-----
             GOTO 100
          ENDIF
 C-----       
-      IF (name.EQ.'FISV2') THEN
+      IF (name.EQ.'FISVF2') THEN
          char =' Fission barrier second hump height '
          char1='second hump  '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6279,7 +6174,7 @@ C-----
          goto 100
        ENDIF
 C-----       
-      IF (name.EQ.'FISV3') THEN
+      IF (name.EQ.'FISVF3') THEN
          char =' Fission barrier third hump height  '
          char1=' third hump  '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6355,7 +6250,7 @@ C-----
          goto 100
        ENDIF
 C-----       
-      IF (name.EQ.'FISA1') THEN
+      IF (name.EQ.'FISAT1') THEN
          char =' L.d.a-parameter for first saddle   '
          char1='first-saddle '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6374,7 +6269,7 @@ C-----
          goto 100
        ENDIF
 C----             
-      IF (name.EQ.'FISA2') THEN
+      IF (name.EQ.'FISAT2') THEN
          char =' L.d. a-parameter for second saddle '
          char1='second saddle '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6393,7 +6288,7 @@ C----
          goto 100
        ENDIF
 C-----       
-      IF (name.EQ.'FISA3') THEN
+      IF (name.EQ.'FISAT3') THEN
          char =' L.d. a-parameter for third saddle  '
          char1='third saddle '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6469,7 +6364,7 @@ C-----
          goto 100
        ENDIF
 C-----       
-      IF (name.EQ.'FISNV1') THEN
+      IF (name.EQ.'FISVE1') THEN
          char =' Vib. enhancement for first saddle  '
          char1='first-saddle '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6488,7 +6383,7 @@ C-----
          goto 100
        ENDIF
 C----             
-      IF (name.EQ.'FISNV2') THEN
+      IF (name.EQ.'FISVE2') THEN
          char =' Vib. enhancement for second saddle '
          char1='second saddle'
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6507,7 +6402,7 @@ C----
          goto 100
        ENDIF
 C-----       
-      IF (name.EQ.'FISNV3') THEN
+      IF (name.EQ.'FISVE3') THEN
          char =' Vib. enhancement  for third saddle '
          char1='third saddle '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -6728,14 +6623,14 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
-               DEF(1,nnuc) = beta2x(k)*DEFnor(nnuc)
+               DEF(1,nnuc) = beta2x(k)
                XMAss(nnuc) = EXCessmass(iz,ia)
                AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
             ENDIF
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-               IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)*DEFnor(0)
+               IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)
                XMAss(0) = EXCessmass(iz,ia)
             ENDIF
          ELSE
