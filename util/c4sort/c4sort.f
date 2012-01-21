@@ -211,8 +211,8 @@ C*
 C* Default path to RIPL nuclide level energy files
 c...  DPATH='../Sources/Inputs/Levels/'
 c...  LPATH=25
-      DPATH='../../RIPL-2/levels/'
-      LPATH=20
+      DPATH='../../RIPL/levels/'
+      LPATH=18
 C*
 C* Process the input
 C*
