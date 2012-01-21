@@ -88,11 +88,11 @@ else
    echo ' '
    exit
 fi
-echo 'Exploding HFB level densities in the directory '$instdir'/RIPL-2/densities/total/level-densities-hfb'
-cd $instdir/RIPL-2/densities/total/level-densities-hfb
+echo 'Exploding HFB level densities in the directory '$instdir'/RIPL/densities/total/level-densities-hfb'
+cd $instdir/RIPL/densities/total/level-densities-hfb
 tar xzvf $sourcedir/level-densities-hfb.tgz
 echo ' '
-echo 'RIPL-3 HFB level densities decompressed ('$instdir/RIPL-2/densities/total/level-densities-hfb')'
+echo 'RIPL HFB level densities decompressed ('$instdir/RIPL/densities/total/level-densities-hfb')'
 cd $instdir
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
