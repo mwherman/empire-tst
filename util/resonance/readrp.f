@@ -6,7 +6,7 @@ C
 C     Read ZA (1000*Z+A) as an argument at startup
 C
 C     Input files:
-C       discrete level data (../RIPL-2/levels/z???.dat)
+C       discrete level data (../RIPL/levels/z???.dat)
 C       thermal data (../thermal/z???.dat)
 C       resonance property data (../res-properties/z???.dat)
 C       resonance parameter data (../res-parameters/z???.dat)
@@ -101,7 +101,7 @@ c
       stop
       end
 c
-c     read atomic weight from RIPL-2
+c     read atomic weight from RIPL
 c
       function readawt(iz,imass)
       common/dir/basedir,basef,ilen
@@ -114,11 +114,11 @@ c
 c
       readawt=0.
       if (basedir.eq.' ') then
-        fname='../RIPL-2/masses/mass-frdm95.dat'
+        fname='../RIPL/masses/mass-frdm95.dat'
       else
-        fname=basedir(1:ilen)//'/RIPL-2/masses/mass-frdm95.dat'
+        fname=basedir(1:ilen)//'/RIPL/masses/mass-frdm95.dat'
       endif
-      open(11,file=fname,status='old',err=200)
+      open(11,file=trim(fname),status='old',err=200)
   100 read(11,'(a)',end=190) line
       if(line(1:1).eq.'#') goto 100
       read(line,'(2i4,4x,i1,2f10.3)') nxz, nxa,
@@ -138,7 +138,7 @@ c       readawt=iz*AMUpro+(imass-iz)*AMUneu+excess/AMUmev
   200 return
       end
 c
-c     read the first excited level from RIPL-2
+c     read the first excited level from RIPL
 c
       function readlvl(imass)
       common/dir/basedir,basef,ilen
@@ -147,11 +147,11 @@ c
 c
       readlvl=0.
       if (basedir.eq.' ') then
-        fname='../RIPL-2/levels/'//basef
+        fname='../RIPL/levels/'//basef
       else
-        fname=basedir(1:ilen)//'/RIPL-2/levels/'//basef
+        fname=basedir(1:ilen)//'/RIPL/levels/'//basef
       endif
-      open(9,file=fname,status='old',err=300)
+      open(9,file=trim(fname),status='old',err=300)
   200 read(9,'(i3,2x,f5.0,f5.0,f5.0)',end=290) ia,fa,fz,fn
       if(ia.eq.imass.and.fa.eq.imass) then
         if (fn.eq.1) goto 290
