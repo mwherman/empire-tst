@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-21 22:23:24 +0100 (Sa, 21 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -112,9 +112,9 @@ C     Ecrt = UCRt - DEL - dshift
         IF(FIRst_ein .AND. nnuc.eq.1) THEN
           WRITE(8,*) 
           WRITE(8,*) 
-     &   ' WARNING: Ecrt = Ucrt-DEL > Bn, Calculated D0 is not accurate'
+     &' WARNING: Ecrt= Ucrt-DEL > Bn, Calculated D0 may be not accurate'
           WRITE(8,*) 
-     &   ' WARNING: Tuning of the CN ATILNO required'
+     &   ' WARNING: Tuning of the CN ATILNO may be required'
           WRITE(8,*) 
         ENDIF
       ENDIF
