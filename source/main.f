@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2257 $
+Ccc   * $Rev: 2284 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-20 04:23:53 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-22 00:54:21 +0100 (So, 22 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1943,12 +1943,15 @@ c                  write(8,*)'xtotsp,ptosp:',xtotsp,ptotsp,atotsp
            ENDDO
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
+           WRITE (80,*)
+           WRITE (8,*)
            IF (IOUt.GT.0) THEN
+          
              DO m = 1, INT(FISmod(nnuc)) + 1
                WFIsm(m) = 0.d0
                IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-               IF(FISShi(nnuc).ne.1.d0)
-     >          WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
+               if(FISmod(nnuc).Gt.0 .and. FISShi(nnuc) .NE. 1)
+     >           WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
              ENDDO
              IF(FISShi(nnuc).ne.1.d0)
      >       WRITE (80,*) '   Fission cross section=', CSFis, ' mb'

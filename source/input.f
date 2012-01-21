@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2278 $
+Ccc   * $Rev: 2284 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 22:14:50 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-22 00:54:21 +0100 (So, 22 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -392,7 +392,7 @@ C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
-         EHRtw = 5.d0
+         EHRtw = 0.d0
 C--------ENDF global setting initialized to zero (no formatting)
          Nendf = 0
 C
@@ -3684,6 +3684,13 @@ C-----
             IF (CSRead.GT.0.0D0) WRITE (8,
      &       '('' Fusion cross section '',F8.3,'' mb read from input'')'
      &       ) CSRead
+
+	      IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
+              WRITE (8,'('' CSRead value in input ignored: '')') CSRead
+              CSRead = -2.0D0
+              GOTO 100
+            ENDIF
+
             IF (CSRead.EQ.0.0D0) THEN
                WRITE (8,
      &'('' Bass option disabled CCFUS will be used instead          '')'
@@ -4662,8 +4669,6 @@ C-----
          IF (name.EQ.'HRTW  ') THEN
             IF (val.GT.0) THEN
               LHRtw = 1
-              EHRtw = 5.d0
-              IF (val.gt.0.250) EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
      &           '('' HRTW width fluctuation correction was selected'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
