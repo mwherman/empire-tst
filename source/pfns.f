@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2287 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-23 17:56:15 +0100 (Mo, 23 Jän 2012) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
@@ -1251,10 +1251,11 @@ C     INTEGER nrll(20),nrhh(20)
 
       COMMON /inp_sp5/ eenc,signcf,nrnc
       COMMON /siglh/ nrll,nrhh,eell,sigll,eehh,sighh
-      
 
+      CHARACTER*64 EMPiredir
+      COMMON /GLOBAL_E/ EMPiredir
    
-      open(unit=103,file='CNxs.dat',status='old')
+      open(unit=103,file=trim(EMPiredir)//'/data/CNxs.dat',status='old')
            read(103,*) nrnc
            do i=1,nrnc
               read(103,*)eenc(i),signcf(i)
@@ -1262,14 +1263,14 @@ c              write(*,*)eenc(i),signcf(i)
            enddo
       close (103)
 
-      open(unit=104,file='LFxs.dat',status='old')
+      open(unit=104,file=trim(EMPiredir)//'/data/LFxs.dat',status='old')
            read(104,*) nrll
            do i=1,nrll
               read(104,*)eell(i),sigll(i)
 c              write(*,*)eell(i),sigll(i)
            enddo
       close (104)
-      open(unit=105,file='HFxs.dat',status='old')
+      open(unit=105,file=trim(EMPiredir)//'/data/HFxs.dat',status='old')
            read(105,*) nrhh
            do i=1,nrhh
               read(105,*)eehh(i),sighh(i)
