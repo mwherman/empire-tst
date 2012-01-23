@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2229 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-18 01:59:24 +0100 (Mi, 18 Jän 2012) $
+Ccc   * $Rev: 2285 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -57,6 +57,12 @@ C
         write(fname,'(A10)') 'LD_HFBM_GS'
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A7)') 'HFB-GS '
+      ENDIF
+
+      IF(ADIv.eq.4) then
+        write(fname,'(A10)') 'LD_OGCM_GS'
+        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(caz,'(A7)') 'OGCM-GS'
       ENDIF
 
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
@@ -257,6 +263,7 @@ C
       IF(ADIv.eq.1)write(fname,'(A10)') 'CumNL__GSM'
       IF(ADIv.eq.2)write(fname,'(A10)') 'CumNL__GCM'
       IF(ADIv.eq.3)write(fname,'(A10)') 'CumNL_HFBM'
+      IF(ADIv.eq.4)write(fname,'(A10)') 'CumNL_OGCM'
       write(ctmp1,'(A22)') fname//'_'//caz//'.zvd'
       write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
      &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
@@ -280,8 +287,8 @@ C
       rocumul = 1.D0
       WRITE (36,*) '0.0 1.0'
 
-C-----EGSM,GSM,GCM
-      IF(ADIv.lt.3)THEN
+C-----EGSM,GSM,GCM,OGCM
+      IF(ADIv.NE.3)THEN
          DO kk = 2, nplot
 
             IF(defit*(kk - 1) .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit

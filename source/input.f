@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2284 $
+Ccc   * $Rev: 2285 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-22 00:54:21 +0100 (So, 22 Jän 2012) $
+Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -252,7 +252,6 @@ C--------fusion parameters
          rFCCred = 1.d0
          rTOTred = 1.d0
          rELAred = 1.d0
-         REDsef = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -459,8 +458,8 @@ C--------ejectile he-3
 C
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
-         KEY_shape = 0
-         KEY_gdrgfl = 1
+         KEY_shape = 1   ! MLO1 RIPL-2
+         KEY_gdrgfl = 1  ! GDR parameters of RIPL introduced
          KEYinput = 0
          KZZ1 = 0
          KAA1 = 0
@@ -1945,18 +1944,18 @@ C
 
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
-C-----<m2> could be added to the input ( to use 0.124 if needed)
-      IF (ADIv.EQ.2.0D0) CALL ROGC(nnur,0.24D0)
-C     IF (ADIv.EQ.2.0D0) CALL ROGC(nnur, 0.146D0)
+C     IF (ADIv.EQ.2.0D0) CALL ROGCM(nnur, 0.146D0)
       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
+C-----<m2> could be added to the input ( to use 0.124 if needed)
+      IF (ADIv.EQ.4.0D0) CALL ROGC(nnur,0.24D0)
+C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
-         IF (ADIv.EQ.2.0D0) 
-     &   WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
-     &        ,I3,''-'',A2)') ia, SYMb(nnur)
          IF (ADIv.NE.3.0D0) THEN
-         WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+            WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
+     &        ,I3,''-'',A2)') ia, SYMb(nnur)
+            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
      &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
@@ -3245,11 +3244,8 @@ C
          IF (name.EQ.'DIRPOT') THEN
 ! historically val and -val meant different potentials. The '+val'
 ! potentials are no longer in EMPIRE, so no need to treat differently:
-             IF (val.LT.0) THEN
-                 val = -val
-             ENDIF
              ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
-             ipoten = INT(val)
+             ipoten = ABS(val)
              CALL FINDPOT(ki,ieof,ipoten)
              IF (ieof.NE.0) THEN
                  WRITE (8,*) 'WARNING: Requested RIPL entry ', ipoten,
@@ -3466,25 +3462,27 @@ C-----
          IF (name.EQ.'LEVDEN') THEN
             ADIv = val
             IF (ADIv.EQ.0.0D0) WRITE (8,
-     &           '('' EMPIRE-specific level densities were selected '')'
-     &           )
+     & '('' EMPIRE-specific level densities (J>>K aprox.) selected '')')
             IF (ADIv.EQ.1.0D0) WRITE (8,
-     &           '('' GSM (Ignatyuk) level densities were selected '')')
+     &           '('' GSM (Ignatyuk) level densities selected '')')
             IF (ADIv.EQ.2.0D0) WRITE (8,
-     &           '('' Gilbert-Cameron level densities were selected '')'
+     &           '('' Gilbert-Cameron level densities selected '')'
      &           )
             IF (ADIv.EQ.3.0D0) WRITE (8,
-     &          '('' Microscopic parity dependent HFB level densities we
-     &re selected'')')
+     &          '('' Microscopic parity dependent HFB level densities se
+     &lected'')')
+            IF (ADIv.EQ.4.0D0) WRITE (8,
+     & '('' Gilbert-Cameron (EMPIRE 2.18) level densities selected '')')
             IF (ADIv.EQ.0.0D0) WRITE (12,
-     &           '('' EMPIRE-specific level densities '')'
-     &           )
+     &           '('' EMPIRE-specific level densities (J>>K aprox.)'')')
             IF (ADIv.EQ.1.0D0) WRITE (12,
      &           '('' GSM level densities (Ignatyuk)  '')')
             IF (ADIv.EQ.2.0D0) WRITE (12,
      &           '('' Gilbert-Cameron level densities '')')
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
+            IF (ADIv.EQ.4.0D0) WRITE (12,
+     & '('' Gilbert-Cameron (EMPIRE 2.18) level densities selected '')')
             GOTO 100
          ENDIF
 C-----
@@ -3567,21 +3565,6 @@ C-----
                 WRITE (12,
      &      '('' Direct cross section was scaled by factor '',
      &           F6.3)') FCCred
-            endif
-            GOTO 100
-         ENDIF
-
-C-----
-         IF (name.EQ.'REDSEF') THEN
-            REDsef = 1.d0
-            if(val.le.1.d0 .and. val.gt.0.05d0) THEN
-                REDsef = val
-                WRITE (8,
-     &  '('' Spin-cut off parameter for dynamic LD reduced by factor '',
-     &          F6.3)') REDsef
-                WRITE (12,
-     &  '('' Spin-cut off parameter for dynamic LD reduced by factor '',
-     &           F6.3)') REDsef
             endif
             GOTO 100
          ENDIF
@@ -4669,6 +4652,7 @@ C-----
          IF (name.EQ.'HRTW  ') THEN
             IF (val.GT.0) THEN
               LHRtw = 1
+	        EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
      &           '('' HRTW width fluctuation correction was selected'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
@@ -4677,6 +4661,7 @@ C-----
      &             '' up to '',f4.2,'' MeV'')') EHRtw
             ELSE
                LHRtw = 0
+	         EHRtw = 0.d0
             ENDIF
             GOTO 100
          ENDIF
@@ -4856,11 +4841,8 @@ C-----
 C-----
 ! historically val and -val meant different potentials. The '+val'
 ! potentials are no longer in EMPIRE, so no need to treat differently:
-            IF (val.LT.0) THEN
-                val = -val
-            ENDIF
             ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
-            ipoten = INT(val)
+            ipoten = ABS(val)
 C--------------Searching in the RIPL database for i1 catalog number
             CALL FINDPOT(ki,ieof,ipoten)
             IF (ieof.NE.0) THEN
@@ -5529,21 +5511,13 @@ C-----
      &'('' Compressional l=0 form factor''
      &,'' used in MSD calculations'')')
                WRITE (8,
-
      &'('' This option is not compatible with''
-
      &,'' the use of dispersive optical model''
-
      &,'' for the incident channel'')')
-
                WRITE (12,
-
      &'('' This option is not compatible with''
-
      &,'' the use of dispersive optical model''
-
      &,'' for the incident channel'')')
-
             ELSE
                WRITE (8,
      &'('' Surface l=0 form factor''
@@ -6766,14 +6740,14 @@ C-----Set EGSM normalization factors for each Z
          CLOSE(31)
       ENDIF
 
-      IF (ADIv.GE.3.0D0 .and. FITLEV.LE.0.1) THEN
+      IF (ADIv.EQ.3.0D0 .and. FITLEV.LE.0.1) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
          WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  n
      & o r m a l i z a t i o n'')')
          WRITE(8,'(4X,54(''-''))')
       ENDIF
-      IF ((ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) .and. FITLEV.EQ.0) THEN
+      IF (ADIv.NE.3.0D0 .and. FITLEV.LE.0.1) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
          WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  a
@@ -6841,8 +6815,6 @@ C-------------of no collective enhancements) normalized to existing exp. data
                 atiln = 1.0   
               ENDIF                  
             ENDIF 
-
-
                  
 C-----------EMPIRE specific (EGSM) with RIPL shell corrections
             IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
@@ -6868,9 +6840,6 @@ C-----------EMPIRE specific (EGSM) with RIPL shell corrections
               ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
             ENDIF
 C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCROSS)
-C           IF(ADIv.EQ.1 .OR. ADIv.EQ.2) 
-C    &            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
-
             ROPar(1,nnuc) = asys*ATIlnor(nnuc)
             ROPar(3,nnuc) = del
 

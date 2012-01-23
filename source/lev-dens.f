@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 22:23:24 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -189,9 +189,11 @@ c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
       INTEGER INT
 
       bcs = .TRUE.
-c-----GSM (egsm=0) and EGSM (egsm=1)
+c-----EGSM - J>>K (egsm=0) and EGSM (egsm=1)
       egsm=0
+
       lazy=0
+
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
 
@@ -2037,7 +2039,7 @@ C
      &       shredt, stab, t, temp, u
       LOGICAL bcs
       REAL*8 FSHELL, ROBCS, RODEF
-      INTEGER i, ia, iz
+      INTEGER i, ia, iz, egsm
       INTEGER INT
 
       bcs = .TRUE.
@@ -2101,10 +2103,10 @@ C--------dependent factor
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
-C           In DAMIRO_FISHI, RODEF is always called with egsm=1 (EGSM) 
-C           egsm=1
+c-----------EGSM - J>>K (egsm=0) and EGSM (egsm=1)
+            egsm=0
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
-     &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,1)
+     &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,egsm)
             IF (i.EQ.1) t = SQRT(u/ac)
          ENDIF
 
@@ -2736,8 +2738,8 @@ C Dummy arguments
       expmax=700.
       Bf=0.d0
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
-C     In RODEFF (fission LD) it is assumed that egsm=1 (EGSM) . 
-      egsm=1
+c-----Fission LD: EGSM - J>>K (egsm=0) and EGSM (egsm=1)
+      egsm=0
       RODEFF = 0.D0
       Yrast=0.d0 
       
@@ -2904,8 +2906,7 @@ C     ap1= 7.488729D-02
 C     ap2= 0.d0
 C     gam= 5.697688D-01
 C
-C     egsm=1 in LD meaning that the EGSM model is used
-C
+C     EGSM model is used
 C****************************************************************
 C
 C-----parameters of Jan 16, 2012 (EMPIRE v.2182 for LD routines)
@@ -2918,8 +2919,8 @@ C frm=       1.672033623535850 Chi^2=      27.242032055693340
 C Ncalc=        255 Nres=        300 N(Ucrt>Bn)=         48
 C 48 nuclei having Ucrt>Bn skipped in the MINUIT fit
 C
-C     egsm=0 in LD meaning that the GSM-like model is used
-C             Closed formula for spin dependence instead of sum_K
+C     EGSM (J>>K approx.)
+C     Closed formula for spin dependence instead of sum_K
 C
       ap1 =  7.481815D-02
       ap2 =  0.d0
