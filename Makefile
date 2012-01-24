@@ -37,3 +37,7 @@ spec:
 clean:
 	@for dir in $(SOURCE) $(UTIL) $(OTHER); do (cd $$dir; $(MAKE) clean); done
 
+up:
+	svn up
+
+upall: up all
