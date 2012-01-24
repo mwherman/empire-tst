@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
+Ccc   * $Date: 2012-01-24 07:30:15 +0100 (Di, 24 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -380,8 +380,9 @@ c-----GSM
          ENDIF
          CALL COLL_KQ_EGSM(A,T,momort,A2,e,vib_KQ,rot_K,rot_Q)       
          RODEF = ro * rot_K * rot_Q * vib_KQ 
-        RETURN
+         RETURN
       ENDIF
+
 c-----EGSM
       sum = 0.0
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
@@ -424,8 +425,6 @@ cms---yrast recalculated
          kmin = 1
       ENDIF
 
-c      IF(abs(a2).lt.0.05d0) kmin = i
-c      kmin = i
       DO k = kmin, i
          ak = k + Ss
          IF (e1.LE.0.0D0) RETURN
@@ -642,9 +641,9 @@ Ccccc *  Input: A - nucleus mass number                                *
 Ccccc *         Z - nucleus atomic number                              *
 Ccccc *         B - ground state deformation (beta2)                   *
 Ccccc *        Bf >  0 yrast states                                    *
-Ccccc *           =  0 saddle point (HI FISSION, AXIAL SYMMETRY)       *
-Ccccc *           = -1 saddle point (    AXIAL SYMMETRY)               *
-Ccccc *           = -2 saddle point (NON-AXIAL SYMMETRY)               *
+Ccccc *           =  0 outer saddle (    AXIAL SYMMETRY,MASS  SYMMETRY *
+Ccccc *           = -1 outer saddle (    AXIAL SYMMETRY,MASS ASYMMETRY *
+Ccccc *           = -2 inner  point (NON-AXIAL SYMMETRY,MASS  SYMMETRY *
 Ccccc *         E - excitation energy                                  *
 Ccccc *        Ac - level density parameter                            *
 Ccccc *        Aj - spin                                               *
@@ -703,8 +702,10 @@ C-----saddle point
          gamma = pi/3. - ACOS(arg)
       ELSEIF(Bf.LT.0.0D0) THEN
          beta = bt      ! the actual static saddle deformation is used (must be < 1.5 !!!)
-         gamma = pi/3.                    ! axial symmetry
-         IF (Bf.LT.-1.50D0) gamma = pi/18. ! arbitrarily fixed asymmetry to 10 degrees
+C        default: axial symmetry                     (outer saddle)
+         gamma = pi/3.                     
+C        arbitrarily fixed nonaxiality of 10 degrees (inner saddle)
+         IF (Bf.LT.-1.50D0) gamma = pi/18. 
 C-----yrast states
       ELSEIF (Bf.GT.0.0D0) THEN
          gamma = pi/3.
@@ -2239,18 +2240,18 @@ C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
          aaj = FLOAT(jj) + HIS(Nnuc)
          DO kk = 1,NRBinfis(Ib)
             temp = TNUcf(kk,Nnuc)
+c
 c-----------SYMMETRY ENHANCEMENT
+c
+c           The normal GS is axial and mass symmetric
+c         
             DO ipp = 1, 2
                rotemp = ROFisp(kk,jj,ipp,Ib)
-C              Triaxiality with mass symmetry
+C              Nonaxial symmetry with mass symmetry
                IF (Iff.EQ.2) rotemp =
      &                       rotemp*SQRT(pi/2.d0)*SQRT(mompar*temp)
-c    &                       rotemp*SQRT(2.d0*pi)*SQRT(mompar*temp)
-C              Mass asymmetry is already considered in HFB calculations
-C              IF (Iff.EQ.3) rotemp = rotemp*2.
-C              No symmetry
-               IF (Iff.EQ.4) rotemp =
-     &                       rotemp*2.*SQRT(2.*pi)*SQRT(mompar*temp)
+C              Mass asymmetry (with axial symmetry) is already considered in HFB calculations
+C              IF (Iff.EQ.3) rotemp = rotemp*2.   ! axial, mass asymmetry
                ROFisp(kk,jj,ipp,Ib) = rotemp * rohfb_norm(Ib)
             ENDDO
          ENDDO
@@ -2608,15 +2609,13 @@ C
      &   ' WARNING:  for fission LD calculations (SIGMAK,RODEFF)   '
          def2 = 1.5d0 
       ENDIF 
-      if (iff.eq.2) then
-C       Axial SYMMETRY
-        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.0D0,u,ar,
-     &                           aj,mompar,momort,A2,stab,cigor)
-      else
-C       Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK
-        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-2.0D0,u,ar,
-     &                           aj,mompar,momort,A2,stab,cigor)
-      endif
+
+C     Axial SYMMETRY, MASS ASYMMETRY
+      if (iff.eq.3) CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.0D0,u,ar,
+     &                          aj,mompar,momort,A2,stab,cigor)
+C     Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK
+      if (iff.eq.2) CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-2.0D0,u,ar,
+     &                          aj,mompar,momort,A2,stab,cigor)
 C
 C-----calculation of level density parameter 'a' including surface
 C-----dependent factor
@@ -2656,12 +2655,15 @@ c               write(*,*)'fmg',u,rotemp
 c            write(*,*)'bcs',u,rotemp  
             ENDIF
 c-----------SYMMETRY ENHANCEMENT
+c
+c           The normal GS is axial and mass symmetric
+c
+c           Nonaxial symmetry with mass symmetry
  345        IF (Iff.EQ.2) rotemp =
      &             rotemp * SQRT(pi/2.) * SQRT(mompar * temp)
+c           Axial symmetry with mass asymmetry
             IF (Iff.EQ.3) rotemp = rotemp * 2.d0
-            IF (Iff.EQ.4) rotemp =
-     &             rotemp* 2.* SQRT(2.* pi) * SQRT(mompar * temp)
-
+c
             ROFis(kk,jj,Ib) = rotemp
             ROFisp(kk,jj,1,Ib) = rotemp
             ROFisp(kk,jj,2,Ib) = rotemp
