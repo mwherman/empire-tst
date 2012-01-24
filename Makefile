@@ -43,5 +43,5 @@ up:
 upall: up all 
 
 tarball: 
-	tar czf `cat version`.tar.gz  -X exclude.txt -s ':^:'`cat version`'/:' *
+	tar cvzf `cat version`.tar -X exclude.txt -s ':^:'`cat version`'/:'  *
 
