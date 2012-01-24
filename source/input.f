@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2285 $
+Ccc   * $Rev: 2289 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
+Ccc   * $Date: 2012-01-24 07:31:33 +0100 (Di, 24 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3254,8 +3254,8 @@ C
              ENDIF
              WRITE (8,
      &'('' Optical model parameters for direct inelastic scattering set
-     & to RIPL #'',I4)') INT(val)
-             KTRompcc = INT(val)
+     & to RIPL #'',I4)') ipoten
+             KTRompcc = ipoten
              GOTO 100
          ENDIF
 
