@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2256 $
+Ccc   * $Rev: 2298 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-20 00:55:36 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-24 22:44:12 +0100 (Di, 24 Jän 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -79,7 +79,7 @@ C
       POPcse   = 0.d0
       POPhmsx  = 0.d0
       POPhmslab= 0.d0
-      POPhsmalab=0.d0
+      POPhmsalab=0.d0
       SCRtem   = 0.d0
       SCRt     = 0.d0
       SCRtl    = 0.d0
