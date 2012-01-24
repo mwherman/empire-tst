@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2289 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-24 07:31:33 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Rev: 2290 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-24 15:49:20 +0100 (Di, 24 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4850,10 +4850,10 @@ C--------------Searching in the RIPL database for i1 catalog number
      &                        ' not found, using default choice'
                 GOTO 100
             ENDIF
-            if(INT(val).ne.9602) then
+            if(ipoten.ne.9602) then
                 WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
-     &'', I4)') i1, INT(val)
+     &'', I4)') i1, ipoten
             else
                 WRITE (8,
      &'('' Optical model parameters for ejectile '', I1,
@@ -4861,7 +4861,7 @@ C--------------Searching in the RIPL database for i1 catalog number
             endif
 C-----
             DO i = 1, NDNUC
-               KTRlom(i1,i) = INT(val)
+               KTRlom(i1,i) = ipoten
             ENDDO
             GOTO 100
          ENDIF
