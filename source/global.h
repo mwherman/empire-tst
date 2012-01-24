@@ -1,6 +1,6 @@
-C $Rev: 2277 $
-C $Author: rcapote $
-C $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+C $Rev: 2295 $
+C $Author: gnobre $
+C $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -53,7 +53,8 @@ C
      &                 FISDL1(ndnuc),FISDL2(ndnuc),FISDL3(ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
-     &                 FISn_n(NFHUMP,ndnuc)
+     &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
+     &                 VNIu_eval(NDECSE) 
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -76,7 +77,7 @@ C
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead, EXClusiv, SOFt 
+     &        RELkin, SDRead, EXClusiv, SOFt, NUBarread 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -187,7 +188,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred
+     &                 rELAred, ENIu_eval, VNIu_eval
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -216,7 +217,8 @@ C
      &                  KALman, MT2, MT91, MT649, MT849, IOPran, NPRIm_g
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
-     &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv
+     &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
+     &                  NUBarread
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt

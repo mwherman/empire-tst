@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2284 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-22 00:54:21 +0100 (So, 22 Jän 2012) $
+Ccc   * $Rev: 2295 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -63,7 +63,7 @@ C
 C
 C Local functions
 C
-      DOUBLE PRECISION fniu,fniuTH232,fniuLANL
+      DOUBLE PRECISION fniu,fniu_nubar_eval,fniuLANL
 C
 C Local variables
 C
@@ -2887,14 +2887,37 @@ C ????????
      &        eaverage
             if(nejc.eq.1) THEN
               WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)') tequiv
-              fniuEVAL = fniuTH232(EINl)
+C
+C             fniuEVAL = fniuTH232(EINl) given in pfns.f
+C
+C             The variable fniuEVAL is expected to be initialized to the value calculated 
+C             from the new interpolation routine fniu_nubar_eval () similar to fniuTH232
+C             that produces a NUBAR value for a given energy by interpolation of the ENDF
+C             evaluation file read in fission input (MT456=prompt) 
+C              READ values to be used in the interpolation are available
+C              in ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays if NUBarread = .TRUE.
+C
 cc              WRITE(74,
 cc     &        '(1X,f8.5,1x,f8.3,3(1x,f7.3))')
 cc     &             EINl, eaverage, fniuS, fniuEVAL, tequiv
 C
-C-------------PFNS normalized to experimental multiplicity for Thorium
+C------------NUBAR and PFNS normalized to evaluated ENDF-B/VII.1 NUBAR if available
 C
-             if(Z(0).eq.90) then
+             if(NUBarread) then
+
+                fniuEVAL = fniu_nubar_eval(EINl)
+                
+		if (fniuEVAL.LE.0) then
+                  WRITE (8,
+     &   '(''  WARNING: Zero interpolated multiplicity obtained'')')
+                  WRITE (8,
+     &  '(''  WARNING: Check the evaluated NUBAR file: NUBAR-EVAL.ENDF''
+     &)')
+                  fniueval = 1.d0
+                  WRITE (8,'(''  WARNING: Calculated NUBAR reset to 1.''
+     &)')
+                endif
+		
                 WRITE (12,
      &         '(''  Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
      &         fniuEVAL, fniuS
@@ -2904,22 +2927,31 @@ C
                 WRITE (8, '(''  PFN average energy '',G12.5)')
      &         eaverage
                 WRITE (12,
-     &   '(''  PFNS normalized to experimental multiplicity '',F6.3)')
+     &   '(''  PFNS normalized to ENDF-B/VII.1 multiplicity '',F6.3)')
      &         fniuEVAL
-              else
+
+             ELSE
+	      
+                WRITE (8,
+     &   '(''  WARNING: EVALUATED MULTIPLICITY FILE not available'')')
+                WRITE(8,'(''  WARNING: Normalization of NUBAR set to 1''
+     &)')
+                fniueval = 1.d0
                 WRITE (12,'(''  Multiplicity (nue) '',F8.3,5x,
-     &           ''(Th-232 mult. '',f6.3,'')'')')
-     &         fniuS, fniuEVAL
-                WRITE (8, '(''  Multiplicity (nue) '',F8.3,5x,
-     &           ''(Th-232 mult. '',f6.3,'')'')')
+     &           ''(Normal.mult. '',f6.3,'')'')')
      &         fniuS, fniuEVAL
                 WRITE (8, '(''  PFN average energy '',G12.5)')
      &         eaverage
-              endif
+                WRITE (12,
+     &   '(''  PFNS not normalized, normalization reset     '',F6.3)')
+     &         fniuEVAL
+
+             ENDIF
+
             endif
             ftmp3 = 0.d0
             fnorm = 1.d0
-            if (fniuEVAL.gt.0 .and. fniuS.gt.0) fnorm = fniuEVAL/fniuS
+            if (fniuS.gt.0) fnorm = fniuEVAL/fniuS
             DO ie = 1, nepfns(nejc)
               ratio2maxw(ie) = 0.d0
               IF(nejc.eq.1) THEN
@@ -2986,14 +3018,19 @@ C    &          enepfns(ie,nejc), csepfns(ie,nejc), ratio2maxw(ie)
             WRITE (8,
      &   '('' Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
      &      nfission, EINl
-            if(nejc.eq.1) then
-              fniuEVAL =  fniuTH232(EINl)
-              WRITE (8,
-     &      '('' Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
-     &        fniuEVAL, fniuS
-              WRITE (8,'(''  PF particle average energy '',G12.5)')
-     &        eaverage
-            endif
+C          if(nejc.eq.1) then
+C             fniuEVAL =  fniuTH232(EINl)
+C
+C             fniuEVAL = 1.d0
+C             Check wheather this call is needed !!!!!!
+C             if (NUBarread) fniuEVAL = fniu_nubar_eval(EINl)
+C
+C              WRITE (8,
+C    &      '('' Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
+C    &        fniuEVAL, fniuS
+C             WRITE (8,'(''  PF particle average energy '',G12.5)')
+C    &        eaverage
+C           endif
          ENDDO ! over ejectiles
       ELSE
          WRITE (12,*) ' '
@@ -4254,4 +4291,10 @@ C
       END
 
 
+
+
+      FUNCTION fniu_nubar_eval(EINl)
+
+      RETURN
+      END
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2290 $
+Ccc   * $Rev: 2295 $
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-24 15:49:20 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -260,7 +260,18 @@ C
          KTRompcc = 0
          SOFt = .FALSE.
          CCCalc = .FALSE.
-         NPRIm_g = 0       ! No primary gammas (default)        
+C    
+C        CHECKING and READING the NUBAR-EVAL.ENDF	 
+         OPEN(23, FILE=	'NUBAR-EVAL.ENDF',ERR = 5432)
+	 NUBarread = .TRUE.
+C
+C        READING OF THE ENDF MF=1, MT=456 prompt nubar
+C        and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays 
+C 
+         GOTO 5433
+ 5432    NUBarread = .FALSE.
+C 	 
+ 5433    NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
          IOMwritecc = 0
          MODelecis = 0
