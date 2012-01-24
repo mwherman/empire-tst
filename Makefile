@@ -40,4 +40,8 @@ clean:
 up:
 	svn up
 
-upall: up all
+upall: up all 
+
+tarball: 
+	tar czf `cat version`.tar.gz  -X exclude.txt -s ':^:'`cat version`'/:' *
+
