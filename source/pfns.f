@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2295 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Rev: 2299 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-25 04:18:01 +0100 (Mi, 25 Jän 2012) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
@@ -889,11 +889,7 @@ c--------                            ! end of main loop
       return
       end
 
-      real*8 FUNCTION fniuTH232(en)
-C
-C Use as a template to read from the working directory a file NUBAR-EVAL.DAT
-C and use it for normalization of calculated nubar 
-C
+      real*8 FUNCTION fniu_nubar_eval(en)
       implicit real*8 (A-H,O-Z)
       real*8 Eniu(20),Vniu(20),en
       integer i
@@ -911,13 +907,10 @@ c     if(en.gt.60) STOP 'En & 60 MeV, NO PFNM data'
       do i=1,20
         if(Eniu(i).gt.en) exit
       enddo
-      fniuTH232 = Vniu(i-1) +
+      fniu_nubar_eval = Vniu(i-1) +
      &   (Vniu(i)-Vniu(i-1))*(en-Eniu(i-1))/(Eniu(i)-Eniu(i-1))
       return
       end
-
-
-
 
 
       REAL*8 FUNCTION GAUSS_LAGUERRE_INT(F,Abserr)

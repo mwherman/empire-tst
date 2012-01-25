@@ -1,6 +1,6 @@
-C $Rev: 2295 $
-C $Author: gnobre $
-C $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
+C $Rev: 2299 $
+C $Author: rcapote $
+C $Date: 2012-01-25 04:18:01 +0100 (Mi, 25 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -53,8 +53,7 @@ C
      &                 FISDL1(ndnuc),FISDL2(ndnuc),FISDL3(ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
-     &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
-     &                 VNIu_eval(NDECSE) 
+     &                 FISn_n(NFHUMP,ndnuc)
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -145,6 +144,8 @@ C
       DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED, rELAred 
       DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
+      DOUBLE PRECISION om2_ig(0:NDNUC),delp_ig(0:NDNUC),
+     &                 atil_ig(0:NDNUC),dshift_ig(0:NDNUC)
 
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
       COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
@@ -188,7 +189,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, ENIu_eval, VNIu_eval
+     &                 rELAred
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -201,6 +202,8 @@ C
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
      &                 D_nno, CSPfis, RECoil, POPcselv
+      COMMON /GSM_SYS/ om2_ig,delp_ig,atil_ig,dshift_ig
+C
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
       COMMON /GLOBAL_E/ EMPiredir
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
@@ -219,7 +222,7 @@ C
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
      &                  NUBarread
-      COMMON /GSA   / KEY_shape, KEY_gdrgfl
+	 COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
       COMMON /NUMHLP_R/ EXPmax, EXPdec

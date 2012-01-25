@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2295 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Rev: 2299 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-25 04:18:01 +0100 (Mi, 25 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2888,12 +2888,13 @@ C ????????
             if(nejc.eq.1) THEN
               WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)') tequiv
 C
-C             fniuEVAL = fniuTH232(EINl) given in pfns.f
+C             fniuEVAL = fniu_nubar_eval(EINl) given in pfns.f
 C
 C             The variable fniuEVAL is expected to be initialized to the value calculated 
 C             from the new interpolation routine fniu_nubar_eval () similar to fniuTH232
 C             that produces a NUBAR value for a given energy by interpolation of the ENDF
 C             evaluation file read in fission input (MT456=prompt) 
+C
 C              READ values to be used in the interpolation are available
 C              in ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays if NUBarread = .TRUE.
 C
@@ -2907,9 +2908,9 @@ C
 
                 fniuEVAL = fniu_nubar_eval(EINl)
                 
-		if (fniuEVAL.LE.0) then
+ 		      if (fniuEVAL.LE.0) then
                   WRITE (8,
-     &   '(''  WARNING: Zero interpolated multiplicity obtained'')')
+     &  '(''  WARNING: Zero interpolated multiplicity obtained'')')
                   WRITE (8,
      &  '(''  WARNING: Check the evaluated NUBAR file: NUBAR-EVAL.ENDF''
      &)')
@@ -3018,19 +3019,6 @@ C    &          enepfns(ie,nejc), csepfns(ie,nejc), ratio2maxw(ie)
             WRITE (8,
      &   '('' Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
      &      nfission, EINl
-C          if(nejc.eq.1) then
-C             fniuEVAL =  fniuTH232(EINl)
-C
-C             fniuEVAL = 1.d0
-C             Check wheather this call is needed !!!!!!
-C             if (NUBarread) fniuEVAL = fniu_nubar_eval(EINl)
-C
-C              WRITE (8,
-C    &      '('' Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
-C    &        fniuEVAL, fniuS
-C             WRITE (8,'(''  PF particle average energy '',G12.5)')
-C    &        eaverage
-C           endif
          ENDDO ! over ejectiles
       ELSE
          WRITE (12,*) ' '
@@ -3071,7 +3059,7 @@ C     ENDDO
             WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
             WRITE (8,'(11x,   '' Ejectile :'',i1)') nejc
             WRITE (8,'(11x,   ''**************************''/)')
-            CALL AUERST(0,nejc,1)
+            IF (IOUT.GT.5)  CALL AUERST(0,nejc,1)
          ENDDO
          IF (FIRst_ein) then
             csemax = 0.d0
@@ -3083,8 +3071,10 @@ C     ENDDO
               WRITE (8,'(11X,''**********************'')')
               WRITE (8,'(11x,'' Total spectra (C.M.)'')')
               WRITE (8,'(11x,''**********************'')')
-              CALL Print_Total(nejc)
-              IF (IOUT.GT.5) CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
+              IF (IOUT.GT.5) THEN 
+                CALL Print_Total(nejc)
+			  CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
+	        ENDIF
             ENDDO
          ENDIF  
       ENDIF
@@ -4289,12 +4279,3 @@ C
          ENDDO
       ENDIF
       END
-
-
-
-
-      FUNCTION fniu_nubar_eval(EINl)
-
-      RETURN
-      END
-
