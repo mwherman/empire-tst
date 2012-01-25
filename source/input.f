@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2307 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 08:20:13 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2308 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-25 16:18:55 +0100 (Mi, 25 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1128,9 +1128,9 @@ C
 C--------setup model matrix (IDNa) defining which model is used where
 C                      ECIS   MSD   MSC           HMS   PCROSS
 C                        1     2     3      4      5      6
-C        1 neut. disc.   x     x     0      0      0      x
+C        1 neut. disc.   x     x     0      0      x      x
 C        2 neut. cont.   0     x     x      0      x      x
-C        3 prot. disc.   x     x     0      0      0      x
+C        3 prot. disc.   x     x     0      0      x      x
 C        4 prot. cont.   0     x     x      0      x      x
 C        5 gamma         0     0     x      0      0      x
 C        6 alpha. cont.  0     0     0      0      0      x
@@ -1200,9 +1200,9 @@ C-----------stop MSC charge-exchange if DDHMS or PCROSS active
          ENDIF
 C--------set HMS  (.,5)
          IF (LHMs.GT.0) THEN
-            IDNa(1,5) = 0  ! no discrete for the time being
+            IDNa(1,5) = 1  ! neutron discrete levels
             IDNa(2,5) = 1
-            IDNa(3,5) = 0  ! no discrete for the time being
+            IDNa(3,5) = 1  ! proton discrete levels
             IDNa(4,5) = 1
 C-----------stop HMS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
