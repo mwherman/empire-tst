@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2299 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 04:18:01 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2306 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-01-25 07:49:31 +0100 (Mi, 25 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -987,8 +987,9 @@ c            CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
             WRITE (8,
      &        '('' HMS inclusive prot. emission ='',G12.5,
      &          ''mb'')') CSHms(2,0)
+         totemis = CSHms(1,1) + CSHms(2,1)
          ENDIF
-       totemis = CSHms(1,1) + CSHms(2,1)
+
 C-----
 C-----PE + DWBA cont. *** done ***
 C-----
