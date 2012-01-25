@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2253 $
+Ccc   * $Rev: 2304 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 21:09:53 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-25 07:25:46 +0100 (Mi, 25 Jän 2012) $
 
 C
 C     Current version introduces soem changes that affects the agreement 
@@ -54,49 +54,29 @@ C
       DATA hstar, haha/'*', ' '/
 
       csemax = 0.
-
       kmax = 1
-
       DO i = 1, NDECSE
-
          IF (CSEt(i,Nejc).GT.0.d0) kmax = i
-
          csemax = DMAX1(CSEt(i,Nejc),csemax)
-
       ENDDO
 
 C
-
 C     Stringest test to avoid plotting problems.
-
 C     Cross sections smaller than 1.d-4 mb are not relevant at all.  
-
 C
-
       IF (csemax.LE.1.d-5) return
 
-
       kmax = kmax + 1
-
       kmax = MIN0(kmax,NDECSE)
-
-
       totspec = 0.d0
-
       DO i = 1, kmax
-
         totspec  = totspec  + CSEt(i,Nejc)
-
       ENDDO
-
       totspec = totspec - 
-
      &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
-
       totspec = totspec*DE     
 
       IF (totspec.LE.1.d-4) RETURN
-
 
       ia = AEJc(Nejc)
 
@@ -373,24 +353,15 @@ C
 
       IF (csemax.LE.1.d-5) return
       kmax = kmax + 1
-
       kmax = MIN0(kmax,NDECSE)
 
-
       totspec = 0.0
-
       DO i = 1, kmax
-
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
-
       ENDDO
-
       totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-
       totspec = totspec*DE
-
       IF (totspec.LE.1.d-4) RETURN
-
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
         write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
@@ -409,10 +380,7 @@ C
      & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
 
       recorp = 1.d0
-
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
-
-
 
       CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
       DO i = 1, kmax
