@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2308 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-25 16:18:55 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2317 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-26 00:23:55 +0100 (Do, 26 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -864,6 +864,12 @@ C-------------(Morillon dispersive global potential 2407 could be used)
             ELSE
                KTRlom(0,0) = 2408    ! Soukhovitskii et al non-dispersive CC OMP 2601
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 2408
+               DIRpot = 2408
+               IF(DIRECT.LE.0) THEN
+			    DIRECT = 1
+                  WRITE (8,*) 'WARNING: CC OMP used for n + A if A>220'
+                  WRITE (8,*) 'WARNING: DIRECT set to 1'
+	         ENDIF
             ENDIF
          ELSEIF (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.1) THEN
             IF (A(0).LE.220) THEN
@@ -871,6 +877,12 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
             ELSE
                KTRlom(0,0) = 5408    ! Soukhovitskii et al non-dispersive CC OMP 5601
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 5408
+               DIRpot = 5408
+               IF(DIRECT.LE.0) THEN
+			    DIRECT = 1
+                  WRITE (8,*) 'WARNING: CC OMP used for p + A if A>220'
+                  WRITE (8,*) 'WARNING: DIRECT set to 1'
+	         ENDIF
             ENDIF
          ELSEIF (AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0,0) = 6200       ! Haixia OMP for deuterons
@@ -985,26 +997,26 @@ C
             STOP 'INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 
-C        IF(TOTred.NE.1.d0) THEN
-C           IF(FUSred.EQ.1 .AND. ELAred.EQ.1) THEN
-C              FUSred = TOTred
-C              ELAred = TOTred
-C              WRITE (8,*) 'Reaction & Shape elastic scaled as total XS'
+C
+C        Checking fission input consistency 
+C
+         DO i = 1, NDNUC
+           IF(FISbar(i).eq.3) THEN
+             FISdis(i)=0.
+             WRITE (8,*) 
+     & 'WARNING: Fiss. transitional states can not be used with '
+             WRITE (8,*) 
+     & 'WARNING: HFB fission barriers, FISDIS set to 0 FOR Z=', 
+     &                   NINT(Z(i)), ' A=', NINT(A(i))
+             FISopt(i)=0.
+             WRITE (8,*) 
+     & 'WARNING: Optical model for fission can not be used with '
+             WRITE (8,*) 
+     & 'WARNING: HFB fission barriers, FISOPT reset to 0 FOR Z=', 
+     &                   NINT(Z(i)), ' A=', NINT(A(i))
+           ENDIF
+         ENDDO
 
-
-C           ELSEIF(FUSred.NE.1 .AND. ELAred.NE.1) THEN
-
-
-C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
-C              WRITE (8,*) 'WARNING: FUSRED and ELARED are in the INPUT'
-C           ELSEIF(FUSred.NE.1) THEN
-C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
-C              WRITE (8,*) 'WARNING: TOTRED and FUSRED are in the INPUT'
-C           ELSEIF(ELAred.NE.1) THEN
-C              WRITE (8,*) 'WARNING: TOTRED ignored as both'
-C              WRITE (8,*) 'WARNING: TOTRED and ELARED are in the INPUT'
-C           ENDIF
-C        ENDIF
 
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
@@ -1095,21 +1107,18 @@ c         ENDIF
          ENDIF
          IF (DIRect.GT.0 .AND. INT(AEJc(0)).EQ.0) THEN
             DIRect = 0
-            WRITE (8,*) ' '
-            WRITE (8,*)
-     &                 ' WARNING!!!! Direct mechanism is not supported '
-            WRITE (8,*) ' WARNING!!!! for photo-nuclear reactions and '
-            WRITE (8,*) ' WARNING!!!! has been turned off  '
-            WRITE (8,*) ' '
+            WRITE (8,*)' '
+            WRITE (8,*)' WARNING!!!! Direct mechanism is not supported'
+            WRITE (8,*)' WARNING!!!! for photo-nuclear reactions and '
+            WRITE (8,*)' WARNING!!!! has been turned off  '
+            WRITE (8,*)' '
          ENDIF
          IF (DIRect.GT.0 .AND. KTRompcc.EQ.0) THEN
             KTRompcc = KTRlom(0,0)
+	      DIRpot   = ABS(KTRompcc)
             WRITE (8,*)
-     &' WARNING: DIRPOT keyword is not specified, but DIRECT keyword > 0
-     &'
-            WRITE (8,*)
-     &' WARNING: Please add line: DIRPOT ',-KTRompcc,
-     &' to your INPUT file'
+     &' WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
+            WRITE (8,*)' WARNING: DIRPOT set to ',abs(KTRompcc)
 
             if(ABS(KTRompcc).ne.9602) then
               WRITE (8,
@@ -1202,7 +1211,7 @@ C--------set HMS  (.,5)
          IF (LHMs.GT.0) THEN
             IDNa(1,5) = 1  ! neutron discrete levels
             IDNa(2,5) = 1
-            IDNa(3,5) = 1  ! proton discrete levels
+            IDNa(3,5) = 1  ! proton  discrete levels
             IDNa(4,5) = 1
 C-----------stop HMS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
