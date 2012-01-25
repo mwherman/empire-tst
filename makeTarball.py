@@ -8,8 +8,8 @@ AVAILABLEFORMATS = [ "zip", "tar", "bztar", "gztar" ]
 # Set up the command line parser
 parser = argparse.ArgumentParser(description='Make a tarball of the ' + PACKAGENAMEROOT + ' package' )
 parser.add_argument( '--verbose',  dest='verbose',  default=False, action='store_true', help='Turn on verbose output' )
-parser.add_argument( '--release',  dest='release',  default=False, action='store_true', help='Make release tarball' )
-parser.add_argument( '--latest',   dest='latest',   default=False, action='store_true', help='Make tarball of latest update (stable or not)' )
+parser.add_argument( '--release',  dest='release',  default=False, action='store_true', help='Make tarball with release naming convention' )
+parser.add_argument( '--latest',   dest='latest',   default=False, action='store_true', help='Make tarball with latest svn update naming convention' )
 parser.add_argument( '--full',     dest='full',     default=True,  action='store_true', help='Include everything in the tarball (default=True)' )
 parser.add_argument( '--noRIPL',   dest='noRIPL',   default=False, action='store_true', help='Exclude the RIPL directory from the final tarball' )
 parser.add_argument( '--docOnly',  dest='docOnly',  default=False, action='store_true', help='Include only the documentation in the final tarball' )
