@@ -133,7 +133,7 @@ def runE(proj):
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
     mv('FISS_XS.OUT',proj+'-fiss.xsc',0) # no message if not present
-    mv('FISSION.INP','-inp.fis',0)       # no message if not present
+    mv('FISSION.INP',proj+'-inp.fis',0)  # no message if not present
     
     
     if not (os.path.isdir(proj+'-tl')):
@@ -141,9 +141,9 @@ def runE(proj):
     if os.path.islink('TL'):
         os.unlink('TL')
     
-    if not isEmpty(OMPAR.RIPL'):
+    if not isEmpty('OMPAR.RIPL'):
         cp('OMPAR.RIPL',proj+'-omp.ripl')
-    if not isEmpty(OMPAR.DIR):
+    if not isEmpty('OMPAR.DIR'):
         cp('OMPAR.DIR',proj+'-omp.dir')
         
     # FISSION.INP    
