@@ -9,7 +9,10 @@ fi
 work=`pwd`
 file=$1
 rm X4.DAT NEWX4.DAT X4TOC4.LST C4.DAT 2>/dev/null
-ln -sf $EMPIREDIR/util/x4toc4/EXFOR14A.DAT EXFOR14A.DAT
+# Pointing to the nex EXFOR dictionary located in the $EMPIREDIR/EXFOR 
+# directory which is automatically updated by the parseC4 python script  
+#ln -sf $EMPIREDIR/util/x4toc4/EXFOR14A.DAT EXFOR14A.DAT
+ln -sf $EMPIREDIR/EXFOR/EXFOR14A.DAT EXFOR14A.DAT
 ln -sf $EMPIREDIR/util/x4toc4/EXFOR24A.DAT EXFOR24A.DAT
 ln -sf $EMPIREDIR/util/x4toc4/EXFOR25A.DAT EXFOR25A.DAT
 ln  -sf $work/$file.exf X4.DAT
