@@ -1,8 +1,8 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
-      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp, snc)
+      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
 C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -16,7 +16,7 @@ C
 
 
       COMMON /VBAR  / vbarex, ho,faza2
-      REAL*8 VBArex(NFPARAB),HO(NFPARAB), enh_asym(NFPARAB) 
+      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
 
       DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
       DOUBLE PRECISION ee,uexc
@@ -32,7 +32,7 @@ C
       INTEGER j,k,kh,kw,iphas_opt
 
  
-      REAL*8  abserr, epsa, epsb, phase_sub, faza2, snc
+      REAL*8  abserr, epsa, epsb, phase_sub, faza2
       LOGICAL discrete
 
 C     FUNCTIONS
@@ -64,14 +64,6 @@ c-----reasigning humps and wells
          ENDDO
          Vpos(nextr+1) = 100.d0 
       ENDIF
-c-----removing partially degeneracy
-      DO kh = 1, NRBar,2
-         IF(BFF(kh/2+1).EQ.2)THEN
-            enh_asym(kh/2+1)= 2.d0*snc+1.d0
-         ELSE
-            enh_asym(kh/2+1)=1.d0
-         ENDIF
-      ENDDO
       
 C---- Momentum integrals are calculated
       iphas_opt=0  ! phases calculated on decoupled parabolas
@@ -85,11 +77,11 @@ C---- Momentum integrals are calculated
 
 C-----Calculating transmission from phases
       DO ih = 1, nrbar, 2
-         TFDd(ih/2 + 1) = enh_asym(ih/2+1)/
+         TFDd(ih/2 + 1) = 1.d0/
      &                    (1.d0 + DEXP(2.d0 *  phase(ih)))
       ENDDO
 
-      IF(FISopt(Nnuc).EQ.0)RETURN  !!!!!!!!!!!!!!!!!!
+      IF(FISopt(Nnuc).EQ.0)RETURN  
 
 C-------Imaginary potential strengths
       w = 0.d0
@@ -100,16 +92,18 @@ C-------Imaginary potential strengths
       DO iw = 2, nrbar,2
          deltt(iw) = 0.d0
          dmom = max(Vheigth(iw-1),Vheigth(iw+1))
-         W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
-     &       ((dmom - Vheigth(iw)) *
-     &       (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
-     &        dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
-Cccc &        dexp( - (Ee - dmom) / wimag(iw))))
+c         W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
+c     &       ((dmom - Vheigth(iw)) *
+c     &       (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
+c     &        dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
 
 c         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
 c     &              wimag(3)*(Ee - Vheigth(iw))**2
 cc         IF(iw.eq.2)w = wimag(1)+wimag(3)*(Ee - Vheigth(iw))
 cc         IF(iw.eq.4)w = wimag(2)+wimag(3)*(Ee - Vheigth(iw))
+         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
+     &              wimag(3)*dexp(Ee - dmom)
+
 
          if(Ee.le. Vheigth(iw)) W = 0.d0
 c         if(Ee.gt. dmom) W = 1.d0          
@@ -138,8 +132,8 @@ c-----Direct transmission coefficients
 c-----direct forward
       DO ih1 = nrhump, 2, -1
          DO ih = ih1 - 1, 1, -1
-            dmom = (enh_asym(ih) - tdirp(ih, ih)) *
-     &           (1.d0 - tdirp(ih+1, ih1))
+            dmom = (1.d0 - tdirp(ih, ih)) *
+     &             (1.d0 - tdirp(ih+1, ih1))
             dnum= exp2del(ih + 1) + 2.d0*  dSQRT(dmom) *
      &           dCOS(2.d0 * phasep(ih + 1)) +
      &           dmom* exm2del(ih + 1)
@@ -156,7 +150,7 @@ c-----direct forward
 c-----direct backward   
       DO ih1 = 1, nrhump - 1
          DO ih = ih1 + 1, nrhump - 1
-                 dmom = (enh_asym(ih) - tdirp(ih, ih)) *
+                 dmom = (1.d0 - tdirp(ih, ih)) *
      &                  (1.d0 - tdirp(ih+1, ih1))
                  tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
      &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
@@ -186,7 +180,7 @@ c--------forward
        DO iw = 1, nrwel
           DO iw1 = iw + 1, nrwel + 1
              IF(delt( iw1).GT.0.D0) THEN
-                dmom = (enh_asym(iw) - tdirp(iw, iw1 - 1)) *
+                dmom = (1.d0 - tdirp(iw, iw1 - 1)) *
      &                 (1.d0 - tdirp(iw1, nrhump))
                 tdr  = tdirp(iw, iw1 - 1) *  tdirp(iw1, nrhump)/
      &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
@@ -213,7 +207,7 @@ c------backward
      &                  dCOS(2.d0 * phasep(iw1)) +
      &                  dmom * exm2del(iw1))
                 tabsp(iw, iw1) = tdr * (exp2del(iw1)
-     &                          - (enh_asym(1)-  tdirp(iw1-1, 1)) *
+     &                          - (1.d0-  tdirp(iw1-1, 1)) *
      &                           exm2del(iw1) -
      &                           tdirp(iw1-1, 1)) /tdirp(iw1-1, 1)
              ELSE

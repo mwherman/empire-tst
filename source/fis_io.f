@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2284 $
+Ccc   * $Rev: 2301 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-22 00:54:21 +0100 (So, 22 Jän 2012) $
+Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -136,6 +136,7 @@ C-----wells' parameters provided by code
 
          NRBar = 2
          IF (EFB(2).EQ.0.)THEN
+            H(1,1)=0.3d0
             NRBar = 1
             NRWel = 0
          ENDIF
@@ -442,15 +443,15 @@ C-----shell corrections at saddles according to RIPL-2
      &    = 0.6 + 0.04*(A(Nnuc) - Z(Nnuc) - 143.)
       SHCfis(3) = SHCfis(2)
       DO ib = 1, NRHump
-C--------pairing at saddles according to RIPL-2
-         DELtafis(ib) = 14./SQRT(A(Nnuc))
-         GAMmafis(ib) = 0.2d0 !Gamma
+C--------energy shift
+         DELtafis(ib) = 0.300      !14./SQRT(A(Nnuc))
+         GAMmafis(ib) = 0.6d0 !Gamma
 C--------multiplier of atil
          AFIs(ib) = 1.d0
          ECFis(ib) = 0.d0
          vibf12(ib) = 1.d0
          vibfdt(ib) = 0.1d0
-         vibfnorm(ib)= 2.d0
+         vibfnorm(ib)= 1.d0
       ENDDO
 c=================================================================
 C---- writing data in FISSION.INP
@@ -598,7 +599,7 @@ c
       WRITE (79,*)chstar
       WRITE (79,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
      &             4x,a6)')
-     &           'Asym','shellcorr', 'delta','gamma','atilf/atil',
+     &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
      &          'Ecf','VIB1/2','VIBdt','VIBnor'
       DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
@@ -1290,10 +1291,12 @@ c
       IF(FISDEN(Nnuc).LE.1)THEN
 
          WRITE(80,*)'Parameters of EGSM LD'
+
          WRITE (80,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
      &             4x,a6)')
-     &           'Asym','shellcorr', 'delta','gamma','atilf/atil',
+     &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
      &          'Ecf','VIB1/2','VIBdt','VIBnor'
+
          DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))

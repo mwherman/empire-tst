@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2295 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-24 17:50:48 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Rev: 2301 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -194,6 +194,11 @@ C-----------set level density parameters
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
             GTIlnor(nnuc) = 1.
             LVP(1,nnuc) = 1
+C
+            om2_ig(nnuc)   = 0.d0
+            delp_ig(nnuc)  = 0.d0
+            atil_ig(nnuc)  = 0.d0
+            dshift_ig(nnuc)= 0.d0           
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
@@ -261,16 +266,16 @@ C
          SOFt = .FALSE.
          CCCalc = .FALSE.
 C    
-C        CHECKING and READING the NUBAR-EVAL.ENDF	 
-         OPEN(23, FILE=	'NUBAR-EVAL.ENDF',ERR = 5432)
-	 NUBarread = .TRUE.
+C        CHECKING and READING the NUBAR-EVAL.ENDF      
+         OPEN(23, FILE= 'NUBAR-EVAL.ENDF',ERR = 5432)
+       NUBarread = .TRUE.
 C
 C        READING OF THE ENDF MF=1, MT=456 prompt nubar
 C        and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays 
 C 
          GOTO 5433
  5432    NUBarread = .FALSE.
-C 	 
+C      
  5433    NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
          IOMwritecc = 0
@@ -1975,6 +1980,8 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
+               
+               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
                WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,1,nnur),j = 1,11)
 c    &                     (RO(i,j,1,nnur),j = 11,21)
@@ -1996,6 +2003,8 @@ c    &                     (RO(i,j,1,nnur),j = 21,31)
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
                ENDDO
+               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
+               
                WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,1,nnur),j = 1,11)
 c     &                     (RO(i,j,1,nnur),j = 11,21)
@@ -2008,6 +2017,8 @@ c     &                     (RO(i,j,1,nnur),j = 21,31)
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,2,nnur)
                ENDDO
+               
+               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
                WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,2,nnur),j = 1,11)
 c     &                     (RO(i,j,2,nnur),j = 11,21)
@@ -2926,17 +2937,17 @@ C
       LOGICAL fexist,file_exists
       DOUBLE PRECISION val,vale,sigma,shelss,quant,ecutof
 C-----initialization of TRISTAN input parameters
-      WIDexin = 0.2
-      GAPin(1) = 0.
-      GAPin(2) = 0.
-      HOMin = 0.0
-      ALSin = 1.5
-      BET2in = 0.0
-      GRIn(1) = 5.0
-      GRIn(2) = 5.0
+      WIDexin = 0.2d0
+      GAPin(1) = 0.d0
+      GAPin(2) = 0.d0
+      HOMin = 0.d0
+      ALSin = 1.5d0
+      BET2in = 0.d0
+      GRIn(1) = 5.d0
+      GRIn(2) = 5.d0
       DO i = 1, 8                                                        ! nilsson_newest
          do j = 1,8                                                      ! nilsson_newest
-            CNOrin(i,j) = 1.0                                            ! nilsson_newest
+            CNOrin(i,j) = 1.d0                                           ! nilsson_newest
             EFItin(i,j) = 0.0D0                                          ! nilsson_newest
          enddo                                                           ! nilsson_newest
       ENDDO
@@ -3303,10 +3314,10 @@ C           EcDWBA meaningless if Collective level file exists
               WRITE(8,*) 
      &        ' WARNING:  collective level file *-lev.col exists !'
               goto 100
-	      ENDIF
-		  ECUtcoll = val
+            ENDIF
+              ECUtcoll = val
             JCUtcoll = i1
-	      ecutof = 3*30./A(0)**0.666666666666d0
+            ecutof = 3*30./A(0)**0.666666666666d0
             IF (ECUtcoll.LT.0.1 .or. ECUtcoll.GT.ecutof) ECUtcoll=ecutof
             IF (JCUtcoll.EQ.0 .or. JCUTcoll.GT.8) JCUtcoll = 4
 C
@@ -3679,7 +3690,7 @@ C-----
      &       '('' Fusion cross section '',F8.3,'' mb read from input'')'
      &       ) CSRead
 
-	      IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
+            IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
               WRITE (8,'('' CSRead value in input ignored: '')') CSRead
               CSRead = -2.0D0
               GOTO 100
@@ -4663,7 +4674,7 @@ C-----
          IF (name.EQ.'HRTW  ') THEN
             IF (val.GT.0) THEN
               LHRtw = 1
-	        EHRtw = val
+              EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
      &           '('' HRTW width fluctuation correction was selected'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
@@ -4672,7 +4683,7 @@ C-----
      &             '' up to '',f4.2,'' MeV'')') EHRtw
             ELSE
                LHRtw = 0
-	         EHRtw = 0.d0
+               EHRtw = 0.d0
             ENDIF
             GOTO 100
          ENDIF
@@ -6035,13 +6046,110 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FISBAR') THEN
+                  IF(val.lt.0 .or. val.GT.3) THEN
+
+
+               WRITE (8,'('' ERROR: FISBAR ='',I1)') NINT(val)
+
+
+               WRITE (8,'('' ERROR: WRONG FISBAR, SETTING IGNORED'')')
+
+
+               GOTO 100
+
+
+            ENDIF
+
+
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISbar(nnuc) = val
                ENDDO
-               WRITE (8,'('' FISBAR  in all nuclei set to '',F6.3)') val
-               WRITE (12,'('' FISBAR  in all nuclei set to '',F6.3)')val
+               IF(val.eq.0) then
+
+
+                 WRITE (8,
+
+
+     &    '('' EMPIRE internal fission barriers used for all nuclei'')') 
+
+
+                 WRITE (12,
+
+
+     &    '('' EMPIRE internal fission barriers used for all nuclei'')') 
+
+
+                     ENDIF
+
+
+                     IF(val.eq.1) then
+
+
+                 WRITE (8,
+
+
+     &    '('' RIPL empirical fission barriers used for all nuclei'')')
+
+
+                 WRITE (12,
+
+
+     &    '('' RIPL empirical fission barriers used for all nuclei'')')
+
+
+                     ENDIF
+
+
+                     IF(val.eq.2) then
+
+
+                 WRITE (8,
+
+
+     &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for all 
+
+
+     &nuclei'')') 
+
+
+                 WRITE (12,
+
+
+     &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for all 
+
+
+     &nuclei'')') 
+
+
+                     ENDIF
+
+
+                     IF(val.eq.3) then
+
+
+                 WRITE (8,
+
+
+     &  '('' RIPL HFB numerical fission barriers used for all nuclei''
+
+
+     &          )') 
+
+
+                 WRITE (12,
+
+
+     &  '('' RIPL HFB numerical fission barriers used for all nuclei''
+
+
+     &          )') 
+
+
+                     ENDIF
+
+
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -6051,13 +6159,131 @@ C-----
                WRITE (8,'('' FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
+
+
+
+
+
             FISbar(nnuc) = val
-            WRITE (8,
-     &            '('' FISBAR  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            WRITE (12,
-     &            '('' FISBAR  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+
+
+C
+
+
+C-----Fundamental barrier heights
+
+
+C-----FISBAR(Nnuc)=0 EMPIRE
+
+
+C-----FISBAR(Nnuc)=1 Maslov
+
+
+C-----FISBAR(Nnuc)=2 HFB parabolic
+
+
+C-----FISBAR(Nnuc)=3 HFB numeric
+
+
+C
+
+
+                  IF(val.eq.0) then
+
+
+               WRITE (8,
+
+
+     &          '('' EMPIRE internal fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=0)'')') i2, SYMb(nnuc)
+
+
+               WRITE (12,
+
+
+     &          '('' EMPIRE internal fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=0)'')') i2, SYMb(nnuc)
+
+
+                  ENDIF
+
+
+                  IF(val.eq.1) then
+
+
+               WRITE (8,
+
+
+     &          '('' RIPL empirical fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=1)'')') i2, SYMb(nnuc)
+
+
+               WRITE (12,
+
+
+     &          '('' RIPL empirical fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=1)'')') i2, SYMb(nnuc)
+
+
+                  ENDIF
+
+
+                  IF(val.eq.2) then
+
+
+               WRITE (8,
+
+
+     &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for '',
+
+
+     &             I3,A2,'' (FISBAR=2)'')') i2, SYMb(nnuc)
+
+
+               WRITE (12,
+
+
+     &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for '',
+
+
+     &             I3,A2,'' (FISBAR=2)'')') i2, SYMb(nnuc)
+
+
+                  ENDIF
+
+
+                  IF(val.eq.3) then
+
+
+               WRITE (8,
+
+
+     &          '('' RIPL HFB numerical fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=3)'')') i2, SYMb(nnuc)
+
+
+               WRITE (12,
+
+
+     &          '('' RIPL HFB numerical fission barriers used for '',
+
+
+     &             I3,A2,'' (FISBAR=3)'')') i2, SYMb(nnuc)
+
+
+                  ENDIF
+
+
             GOTO 100
          ENDIF
 C-----
@@ -8274,7 +8500,7 @@ C--------Skipping levels with unknown spin in the discrete level region
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
      &      'WARNING: Max.number of uncoupled coll.levels reached'
-	       GOTO 600
+             GOTO 600
          ENDIF
 
          IF (xjlvr.LT.0.) THEN ! unknown spin in continuum

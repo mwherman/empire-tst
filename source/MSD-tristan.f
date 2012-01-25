@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2301 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -24,23 +24,18 @@ CCC   *                                                                *
 CCC   *                                                                *
 CCC   * output:none                                                    *
 CCC   *                                                                *
-CCC   *                                                                *
-CCC   *                                                                *
-CCC   * author: H.Lenske                                               *
+CCC   * author: H.Lenske, H. Wienke                                    *
 CCC   *                                                                *
 CCC   ******************************************************************
 CCC
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
-
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C COMMON variables
 C
-      DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(8,8),      ! nilsson_newest
-     &                 CNOrin(8,8), CROs1(30,49,2*NDANGecis),           ! nilsson_newest
-     &                   CROs2(30,49,2*NDANGecis),BET2in, GRin(2),      ! nilsson
+      DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(8,8),      
+     &                 CNOrin(8,8), CROs1(30,49,2*NDANGecis),           
+     &                   CROs2(30,49,2*NDANGecis),BET2in, GRin(2),      
      &                 DTHeta, ECEntr(5), EFItin(8,8), EOUtmi, EOUtmx,
      &                 ESTep, ETMax, ETMin, EXTcom(10), FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
@@ -144,7 +139,13 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       IC1mxr = l1maxr + 1
       IC2mxr = l2maxr + 1
       ICMax = MAX(IC1max,IC2max)
+
       IF(BET2in.EQ.0.0D+0) BET2in = DEF(1,nnuc)
+	WRITE (8,*)
+      WRITE (8,
+     &'('' beta_2 deformation in Nilsson Hamiltonian (MSD)'', F6.3
+     &)') BET2in
+
       DO na = 1, nangle
          ANGle(na) = ANGles(na)
       ENDDO
@@ -407,10 +408,10 @@ C
      &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    ! nilsson_newest
      &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      ! nilsson_newest
      &                 ddr(2),
-c     &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
+c    &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
      &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  ! nilsson
      &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
-c     &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000),! nilsson
+c    &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nilsson
      &                 epl, eplsq, eqq,               eqqx,ess(0:10000), ! nilsson
 
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,

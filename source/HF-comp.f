@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2301 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1265,7 +1265,7 @@ C
       DOUBLE PRECISION ee, tdircont(NfHump),
      &                 exfis, sfmin, snc,
      &                 tfcon(NfHump), tfdis(NfPARAB),
-     &                 vbarmax(NFPARAB),faza2,enh_asym(NFPARAB)
+     &                 vbarmax(NFPARAB),faza2,enh_asym(NFPARAB),enh
       REAL FLOAT
       INTEGER ibar, ist, jnc, nr, ipa
 C
@@ -1327,12 +1327,11 @@ CCC Discrete transition states contribution
 c-------numerical barrier from RIPL-3; gs is the only discrete transition state
         IF (Jc.EQ.1 .AND. Ip.EQ.1) THEN
           DO ibar = 1, NRBar
-                VBArex(ibar) = EFB(ibar)
-c               ENDDO
-c               CALL WKBFIS(Ee, nnuc, tfdis, tdirp,tabsp)
-                arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(1,Ibar)
-                IF (arg1.GE.EXPmax) arg1 = EXPmax
-                TFDis(ibar)= 1.d0/(1.d0 + EXP(arg1))
+             VBArex(ibar) = EFB(ibar)
+c            CALL WKBFIS(Ee, nnuc, tfdis, tdirp,tabsp)
+             arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(1,Ibar)
+             IF (arg1.GE.EXPmax) arg1 = EXPmax
+             TFDis(ibar)= 1.d0/(1.d0 + EXP(arg1))
           ENDDO
         ENDIF
 
@@ -1383,8 +1382,6 @@ c
 
 c-----------------complete damping
                   DO ibar = 1, Nrhump
-                     enh_asym(ibar)=1.d0
-                     IF(BFF(ibar).EQ.2)enh_asym(ibar)= 2.d0*snc+1.d0
                      arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(nr,Ibar)
                      IF (arg1.GE.EXPmax) arg1 = EXPmax
                      TFD(ibar)= 1.d0*enh_asym(ibar)/(1.d0 + EXP(arg1))
@@ -1394,7 +1391,7 @@ c-----------------complete damping
 
 c-----------------partial damping
                   IF(FISbar(Nnuc).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
-                  CALL WKBFIS(Ee, nnuc, tfd, tdirp,tabsp,snc)
+                  CALL WKBFIS(Ee, nnuc, tfd, tdirp,tabsp)
 c-----------------forward absorption coefficients
                   DO iw = 1, nrwel
                    DO iw1 = iw + 1, nrwel + 1
@@ -1454,7 +1451,7 @@ c-----continuum direct and indirect weights for surogate optical model
 C-----Continuum contribution to each hump transmission coefficient
  800  CALL SIMPSFIS(Nnuc,Ee,JCC,Ipa,tfcon)
       DO ih = 1, nrhump
-        TF(ih) = tfdis(ih) + tfcon(ih)
+        TF(ih) = tfdis(ih)*enh_asym(ih) + tfcon(ih)
         IF(TF(ih).LE.1.D-29) THEN
           TF(ih) = 0.d0
           tfdis(ih) = 0.d0
@@ -1476,9 +1473,14 @@ c-----adding weighted continuum direct
  809  DO ih = 1, nrhump
          tdirpp(ih, ih) = tf(ih)
       ENDDO
+
+      enh=1.d0
+      DO ih = 1, nrhump 
+         enh=enh * enh_asym(ih)
+      ENDDO   
  810  DO ih = 1, nrhump - 1
-         tdirpp(ih, nrhump) = tdirpp(ih, nrhump) + tdircont(ih) 
-     &                       * (1.d0 - wdir(ih + 1)) 
+         tdirpp(ih, nrhump) = tdirpp(ih, nrhump) * enh +
+     &                        tdircont(ih) * (1.d0 - wdir(ih + 1)) 
       ENDDO
 c     if(nrbar.eq.5) tdirpp(2,3) = tdirpp(2,3) + tdircont(2) 
 c    &                       * (1.d0 - wdir(3))
@@ -1502,10 +1504,10 @@ c--------COMPLETE DAMPING + surrogate OPT.MOD
 c--------PARTIAL DAMPING
 c--------adding weighted continuum absorption
          DO iw = 1, nrwel 
-           tabspp(iw, iw + 1) = tabspp(iw, iw + 1) + tfcon(iw) *
-     &                        wdir(iw + 1)
-           tabspp(iw + 1, iw) = tabspp(iw + 1, iw) + tfcon(iw) *
-     &                        wdir(iw)
+           tabspp(iw, iw + 1) = tabspp(iw, iw + 1) * enh_asym(iw) + 
+     &                          tfcon(iw) * wdir(iw + 1)
+           tabspp(iw + 1, iw) = tabspp(iw + 1, iw) * enh_asym(iw+1) + 
+     &                          tfcon(iw) * wdir(iw)
          ENDDO
 c--------sum of competting channels in wells
          sumtp(1) = 1.d0
@@ -1544,7 +1546,7 @@ c        DO iw = 2, nrwel + 1
 
          IF (FISopt(Nnuc).EQ.2.) THEN
 C----------gamma transition in isomeric well, as asuggested by MS
-           tg2 = .065-(ee-efb(3))**3*0.001
+           tg2 = .002
            if(tg2.lt.0)tg2=0.d0
            sumfis = tdir + tabs*(tf(2)+rfiso*tg2)/(tf(1)+tf(2)+tg2)
          ELSE
