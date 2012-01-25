@@ -6,6 +6,10 @@ Icon*
 *.mod
 *.exe
 *.tar.gz
+*.tar.bz2
+*.zip
+*.tgz
+*.tar
 *.tex
 *.bib
 *.lyx
