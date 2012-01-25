@@ -1,12 +1,14 @@
 #! /bin/sh -
 #script to install and compile EMPIRE-3.1 package
 #
+
 #directory in which EMPIRE is to be installed
 instdir=$HOME
 #directory with EMPIRE distribution
 sourcedir=`pwd`
 #EMPIRE version number
-empver='3.1'
+empver=`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`
+emprelname=`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`
 XWIN=`uname`
 echo '                                                           '
 echo '    EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333       '
@@ -15,7 +17,7 @@ echo '    EEE    M MM M  PPPP   I  RRRR   EEE    =   33333       '
 echo '    E      M    M  P      I  R  R   E              3       '
 echo '    EEEEE  M    M  P      I  R   R  EEEEE      33333       '
 echo '                                                           '
-echo '        R I V O L I (release '$empver'), June 2011         '
+echo '           '$emprelname' (release '$empver'), June 2011         '
 echo '                                                           '
 echo '              Sao Jose dos Campos, Brazil                  '
 echo '_______________________________________________________________________________'
