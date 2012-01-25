@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2303 $
+Ccc   * $Rev: 2307 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 07:11:26 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Date: 2012-01-25 08:20:13 +0100 (Mi, 25 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -5991,353 +5991,335 @@ C--------checking for fission data in the optional input
          ENDIF
 C-----
          IF (name.EQ.'FISMOD') THEN
+            IF(val.lt.0 .or. val.gt.2) THEN
+              WRITE (8,'('' ERROR: FISMOD ='',I1)') NINT(val)
+              WRITE (8,'('' ERROR: WRONG FISMOD, SETTING IGNORED'')')
+              GOTO 100
+            ENDIF
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISmod(nnuc) = val
                ENDDO
-               WRITE (8,
-     &   '('' No. fission modes in all nuclei set to '',F6.3)') 
-     &   val + 1
+               IF(val.eq.0) then
+                 WRITE (8,
+     & '('' Single-modal fission is assumed for all fiss. nuclei'')') 
+                 WRITE (12,
+     & '('' Single-modal fission is assumed for all fiss. nuclei'')') 
+               ENDIF
+               IF(val.eq.1) then
+                 WRITE (8 , 
+     & '('' Two-modal fission is assumed for all fiss. nuclei'')') 
+                 WRITE (12, 
+     & '('' Two-modal fission is assumed for all fiss. nuclei'')') 
+               ENDIF
+               IF(val.eq.2) then
+                 WRITE (8 , 
+     & '('' Three-modal fission is assumed for all fiss. nuclei'')') 
+                 WRITE (12, 
+     & '('' Three-modal fission is assumed for all fiss. nuclei'')') 
+               ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISMOD SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISMOD SETTING IGNORED'')')
                GOTO 100
             ENDIF
+
             FISmod(nnuc) = val
-            WRITE (8,
-     &       '('' No. fission modes in '',I3,A2,'' set to '',F6.3)'
-     &            ) i2, SYMb(nnuc), val + 1
-            WRITE (12,
-     &       '('' No. fission modes in '',I3,A2,'' set to '',F6.3)'
-     &            ) i2, SYMb(nnuc), val + 1
+
+            IF(val.eq.0) then
+               WRITE (8 ,'('' Single-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=0)'')') i2, SYMb(nnuc)
+               WRITE (12,'('' Single-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=0)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.1) then
+               WRITE (8 ,'('' Two-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=1)'')') i2, SYMb(nnuc)
+               WRITE (12,'('' Two-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=1)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.2) then
+               WRITE (8 ,'('' Three-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=2)'')') i2, SYMb(nnuc)
+               WRITE (12,'('' Three-modal fission is assumed for '' 
+     &             I3,A2,'' (FISMOD=2)'')') i2, SYMb(nnuc)
+            ENDIF
             GOTO 100
          ENDIF
 C-----
+C        FISopt(Nnuc).EQ.0. = '  Full damping model (Ind.Barr.)'
+C        FISopt(Nnuc).EQ.1. = '  Optical model for fission     '
+C        FISopt(Nnuc).EQ.2. = '  Complex fission potential, isomeric fission'
+
          IF (name.EQ.'FISOPT') THEN
+            IF(val.lt.0 .or. val.gt.2) THEN
+              WRITE (8,'('' ERROR: FISOPT ='',I1)') NINT(val)
+              WRITE (8,'('' ERROR: WRONG FISOPT, SETTING IGNORED'')')
+              GOTO 100
+            ENDIF
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISopt(nnuc) = val
                ENDDO
-               WRITE (8,'('' FISOPT  in all nuclei set to '',F6.3)') val
-               WRITE (12,'('' FISOPT  in all nuclei set to '',F6.3)')val
+               IF(val.eq.0) then
+                 WRITE (8,
+     & '('' Independent fiss. barriers (full damping assumed) '')') 
+                 WRITE (12,
+     & '('' Independent fiss. barriers (full damping assumed) '')') 
+               ENDIF
+               IF(val.eq.1) then
+                 WRITE (8 , 
+     & '('' Optical model for fission with partial damping used '')') 
+                 WRITE (12, 
+     & '('' Optical model for fission with partial damping used '')') 
+               ENDIF
+               IF(val.eq.2) then
+                 WRITE (8 , 
+     &'('' Isomeric fission model including partial damping assumed'')') 
+                 WRITE (12, 
+     &'('' Isomeric fission model including partial damping assumed'')') 
+               ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISOPT SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISOPT SETTING IGNORED'')')
                GOTO 100
             ENDIF
+
             FISopt(nnuc) = val
-            WRITE (8,
-     &            '('' FISOPT  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            WRITE (12,
-     &            '('' FISOPT  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+
+            IF(val.eq.0) then
+               WRITE (8 ,
+     & '('' Independent fiss. barriers (full damping) for nucleus '', 
+     &             I3,A2,'' (FISOPT=0)'')') i2, SYMb(nnuc)
+               WRITE (12, 
+     & '('' Independent fiss. barriers (full damping) for nucleus '', 
+     &             I3,A2,'' (FISOPT=0)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.1) then
+               WRITE (8 ,
+     &'('' Optical model for fission with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=1)'')') i2, SYMb(nnuc)
+               WRITE (12,
+     &'('' Optical model for fission with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=1)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.2) then
+               WRITE (8 ,
+     &'('' Isomeric fission model with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=2)'')') i2, SYMb(nnuc)
+               WRITE (12,
+     &'('' Isomeric fission model with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=2)'')') i2, SYMb(nnuc)
+            ENDIF
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'FISBAR') THEN
-                  IF(val.lt.0 .or. val.GT.3) THEN
-
-
-               WRITE (8,'('' ERROR: FISBAR ='',I1)') NINT(val)
-
-
-               WRITE (8,'('' ERROR: WRONG FISBAR, SETTING IGNORED'')')
-
-
-               GOTO 100
-
-
+            IF(val.lt.0 .or. val.GT.3) THEN
+              WRITE (8,'('' ERROR: FISBAR ='',I1)') NINT(val)
+              WRITE (8,'('' ERROR: WRONG FISBAR, SETTING IGNORED'')')
+              GOTO 100
             ENDIF
-
-
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISbar(nnuc) = val
                ENDDO
                IF(val.eq.0) then
-
-
                  WRITE (8,
-
-
      &    '('' EMPIRE internal fission barriers used for all nuclei'')') 
-
-
                  WRITE (12,
-
-
      &    '('' EMPIRE internal fission barriers used for all nuclei'')') 
-
-
-                     ENDIF
-
-
-                     IF(val.eq.1) then
-
-
+               ENDIF
+               IF(val.eq.1) then
                  WRITE (8,
-
-
      &    '('' RIPL empirical fission barriers used for all nuclei'')')
-
-
                  WRITE (12,
-
-
      &    '('' RIPL empirical fission barriers used for all nuclei'')')
-
-
-                     ENDIF
-
-
-                     IF(val.eq.2) then
-
-
+               ENDIF
+               IF(val.eq.2) then
                  WRITE (8,
-
-
      &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for all 
-
-
      &nuclei'')') 
-
-
                  WRITE (12,
-
-
      &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for all 
-
-
      &nuclei'')') 
-
-
-                     ENDIF
-
-
-                     IF(val.eq.3) then
-
-
+               ENDIF
+               IF(val.eq.3) then
                  WRITE (8,
-
-
      &  '('' RIPL HFB numerical fission barriers used for all nuclei''
-
-
      &          )') 
-
-
                  WRITE (12,
-
-
      &  '('' RIPL HFB numerical fission barriers used for all nuclei''
-
-
      &          )') 
-
-
-                     ENDIF
-
-
+               ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISBAR SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
-
-
-
-
             FISbar(nnuc) = val
-
-
 C
-
-
 C-----Fundamental barrier heights
-
-
 C-----FISBAR(Nnuc)=0 EMPIRE
-
-
 C-----FISBAR(Nnuc)=1 Maslov
-
-
 C-----FISBAR(Nnuc)=2 HFB parabolic
-
-
 C-----FISBAR(Nnuc)=3 HFB numeric
-
-
 C
-
-
-                  IF(val.eq.0) then
-
-
+            IF(val.eq.0) then
                WRITE (8,
-
-
      &          '('' EMPIRE internal fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=0)'')') i2, SYMb(nnuc)
-
-
                WRITE (12,
-
-
      &          '('' EMPIRE internal fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=0)'')') i2, SYMb(nnuc)
-
-
-                  ENDIF
-
-
-                  IF(val.eq.1) then
-
-
+            ENDIF
+            IF(val.eq.1) then
                WRITE (8,
-
-
      &          '('' RIPL empirical fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=1)'')') i2, SYMb(nnuc)
-
-
                WRITE (12,
-
-
      &          '('' RIPL empirical fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=1)'')') i2, SYMb(nnuc)
-
-
-                  ENDIF
-
-
-                  IF(val.eq.2) then
-
-
+            ENDIF
+            IF(val.eq.2) then
                WRITE (8,
-
-
      &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for '',
-
-
      &             I3,A2,'' (FISBAR=2)'')') i2, SYMb(nnuc)
-
-
                WRITE (12,
-
-
      &      '('' Parabolic approx. to RIPL HFB fiss. barr. used for '',
-
-
      &             I3,A2,'' (FISBAR=2)'')') i2, SYMb(nnuc)
-
-
-                  ENDIF
-
-
-                  IF(val.eq.3) then
-
-
+            ENDIF
+            IF(val.eq.3) then
                WRITE (8,
-
-
      &          '('' RIPL HFB numerical fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=3)'')') i2, SYMb(nnuc)
-
-
                WRITE (12,
-
-
      &          '('' RIPL HFB numerical fission barriers used for '',
-
-
      &             I3,A2,'' (FISBAR=3)'')') i2, SYMb(nnuc)
-
-
-                  ENDIF
-
-
+            ENDIF
             GOTO 100
          ENDIF
-C-----
+C--------
+C--------FISDEN(Nnuc)= 0 EMPIRE
+C--------FISDEN(Nnuc)= 2 HFB
+C        
          IF (name.EQ.'FISDEN') THEN
+            IF(val.ne.0 .and. val.ne.2) THEN
+              WRITE (8,'('' ERROR: FISDEN ='',I1)') NINT(val)
+              WRITE (8,'('' ERROR: WRONG FISDEN, SETTING IGNORED'')')
+              GOTO 100
+            ENDIF
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISden(nnuc) = val
                ENDDO
-               WRITE (8,'('' FISDEN  in all nuclei set to '',F6.3)') val
-               WRITE (12,'('' FISDEN  in all nuclei set to '',F6.3)')val
+               IF(val.eq.0) then
+                 WRITE (8,
+     &  '('' EGSM (J>>K approx.) used for fission LD for all nuclei'')') 
+                 WRITE (12,
+     &  '('' EGSM (J>>K approx.) used for fission LD for all nuclei'')') 
+               ENDIF
+               IF(val.eq.2) then
+                 WRITE (8 ,'('' HFB fission LD used for all nuclei'')') 
+                 WRITE (12,'('' HFB fission LD used for all nuclei'')') 
+               ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISDEN SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISDEN SETTING IGNORED'')')
                GOTO 100
             ENDIF
+
             FISden(nnuc) = val
-            WRITE (8,
-     &            '('' FISDEN  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            WRITE (12,
-     &            '('' FISDEN  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+
+            IF(val.eq.0) then
+               WRITE (8,
+     &          '('' EGSM (J>>K approx.) used for fission LD for '',
+     &             I3,A2,'' (FISDEN=0)'')') i2, SYMb(nnuc)
+               WRITE (12,
+     &          '('' EGSM (J>>K approx.) used for fission LD for '',
+     &             I3,A2,'' (FISDEN=0)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.2) then
+               WRITE (8 ,'('' RIPL HFB fission LD used for '',
+     &             I3,A2,'' (FISDEN=2)'')') i2, SYMb(nnuc)
+               WRITE (12,'('' RIPL HFB fission LD used for '',
+     &             I3,A2,'' (FISDEN=2)'')') i2, SYMb(nnuc)
+            ENDIF
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'FISDIS') THEN
+            IF(val.lt.0 .or. val.gt.1) THEN
+              WRITE (8,'('' ERROR: FISDIS ='',I1)') NINT(val)
+              WRITE (8,'('' ERROR: WRONG FISDIS, SETTING IGNORED'')')
+              GOTO 100
+            ENDIF
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
                   FISdis(nnuc) = val
                ENDDO
-               WRITE (8,'('' FISDIS  in all nuclei set to '',F6.3)') val
-               WRITE (12,'('' FISDIS  in all nuclei set to '',F6.3)')val
+               IF(val.eq.0) then
+                 WRITE (8,
+     & '('' Fission transition states above saddles not considered'')') 
+                 WRITE (12,
+     & '('' Fission transition states above saddles not considered'')') 
+               ENDIF
+               IF(val.eq.1) then
+                 WRITE (8 , 
+     &    '('' Fission transition states by Maslov considered'')') 
+                 WRITE (12, 
+     &    '('' Fission transition states by Maslov considered'')') 
+               ENDIF
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISDIS SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISDIS SETTING IGNORED'')')
                GOTO 100
             ENDIF
+
             FISdis(nnuc) = val
-            WRITE (8,
-     &            '('' FISDIS  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
-            WRITE (12,
-     &            '('' FISDIS  in '',I3,A2,'' set to ''          ,F6.3)'
-     &            ) i2, SYMb(nnuc), val
+
+            IF(val.eq.0) then
+               WRITE (8,
+     &          '('' No fission transition states above saddles for '',
+     &             I3,A2,'' (FISDIS=0)'')') i2, SYMb(nnuc)
+               WRITE (12,
+     &          '('' No fission transition states above saddles for '',
+     &             I3,A2,'' (FISDIS=0)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.1) then
+               WRITE (8 ,
+     &     '('' Fission transition states by Maslov considered for '',
+     &             I3,A2,'' (FISDEN=1)'')') i2, SYMb(nnuc)
+               WRITE (12,
+     &     '('' Fission transition states by Maslov considered for '',
+     &             I3,A2,'' (FISDEN=1)'')') i2, SYMb(nnuc)
+            ENDIF
             GOTO 100
          ENDIF
 C-----
