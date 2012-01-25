@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-24 07:30:15 +0100 (Di, 24 Jän 2012) $
+Ccc   * $Date: 2012-01-25 04:19:29 +0100 (Mi, 25 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -190,9 +190,12 @@ c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
 
       bcs = .TRUE.
 c-----EGSM - J>>K (egsm=0) and EGSM (egsm=1)
+
       egsm=0
 
+
       lazy=0
+
 
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
@@ -217,7 +220,7 @@ c-----EGSM - J>>K (egsm=0) and EGSM (egsm=1)
      &               mompar,momort,A2,stab,cigor)
       ENDIF
 C-----do loop over angular momentum
-C     DO i = 1, 1	 ! only the first momentum is used, valid only for even-even nuclei
+C     DO i = 1, 1  ! only the first momentum is used, valid only for even-even nuclei
       DO i = 1, NLWst
          Aj = REAL(i) + HIS(Nnuc)
 C--------spin  dependent moments of inertia for yrast states by Karwowski
@@ -309,9 +312,8 @@ C-----CONST=1/(2*SQRT(2 PI))
       IF(exp1.gt.20d0) RETURN
       ro_j=const*(2.d0*Aj + 1.d0)/seff2**1.5*DEXP(-exp1)
       IF(ro_j.LT.1d-15) RETURN
-!      ro_pi=0.5D0
-!      ROBCS = ro_u * ro_j * ro_pi 
-      ROBCS = ro_u * ro_j * 0.5d0
+      ro_pi=0.5D0
+      ROBCS = ro_u * ro_j * ro_pi 
       IF(Bf.EQ.0.d0) RETURN
       CALL COLL_KQ_EGSM(A,T,momo,A2,u,vib_KQ,rot_K,rot_Q)
       ROBCS = ROBCS *  rot_K * rot_Q * vib_KQ
@@ -365,7 +367,7 @@ c----
       RODEF = 0.D0
       T = DSQRT(E/Ac)
       seff2 = mompar**0.333D0*momort**0.6666D0*t
-c-----GSM
+c-----FG
       IF(egsm.eq.0)THEN
          S = 2.* Ac * T
          DET = 45.84 * Ac**3 * T**5
@@ -382,6 +384,7 @@ c-----GSM
          RODEF = ro * rot_K * rot_Q * vib_KQ 
          RETURN
       ENDIF
+
 
 c-----EGSM
       sum = 0.0
@@ -703,7 +706,9 @@ C-----saddle point
       ELSEIF(Bf.LT.0.0D0) THEN
          beta = bt      ! the actual static saddle deformation is used (must be < 1.5 !!!)
 C        default: axial symmetry                     (outer saddle)
+
          gamma = pi/3.                     
+
 C        arbitrarily fixed nonaxiality of 10 degrees (inner saddle)
          IF (Bf.LT.-1.50D0) gamma = pi/18. 
 C-----yrast states
@@ -765,8 +770,6 @@ C
       RETURN
       END
 
-
-
 c*********************************************************
       SUBROUTINE ROGSM(nnuc)
 c*********************************************************
@@ -783,88 +786,104 @@ C COMMON variables
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
-
+     
       REAL*8  Momort, Mompar, U, rotemp, shcn, def2
       INTEGER ia,iz,kk,nnuc
 C Local variables
-      REAL*8 mm2,aas,gamm,pi2,dshif,defit
-      REAL*8 om2 
+      REAL*8 mm2,pi2,defit,ac
+      REAL*8 om2,om3,cga 
+
+
+
+      REAL*8 FSHELL
 
       INTEGER nplot
      
       pi2 = PI*PI
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
+      
+      CALL ROGSM_sys(Nnuc,AP1,AP2,GAMma,DEL,DELp,om2,om3,cga)
 
-      CALL ROGSM_sys(Aas,gamm,del,delp,shcn,om2,dshif,Nnuc)
-      dshif=0.d0
 
-      gamma=gamm
-      atil=aas
+
+      shcn = SHC(Nnuc) 
+
+      ATIl = AP1*A(Nnuc) + AP2*A23          
+
+      ATIl = ATIl*ATIlnor(Nnuc)
+
+      u = Q(1,Nnuc) + DEL  
+
+      ac = ATIl*FSHELL(u,shcn, GAMma)
+
+      IF (ac.LE.0.0D0) RETURN
+
+
+
       CALL PRERORITO(Nnuc)
       NLWst = NLW
-c     Jstab(Nnuc)=NDLW
       CALL DAMIRO_CRT(ia,iz,shcn,IOUt,0)
-      def2=DEF(1,nnuc)
+
+      def2=def(1,nnuc)
       rotemp = 0.d0
-     
+      
       mm2=.24*A(Nnuc)**.66666
       Mompar = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
       Momort = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)      
 
-      defit = (ELV(NLV(Nnuc),Nnuc)+dshif +2.d0)
+      defit = (ELV(NLV(Nnuc),Nnuc)+2.d0)
      &           /(NEXreq-1) 
       nplot = (ELV(NLV(Nnuc),Nnuc)+2.d0)/defit
 
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)THEN    
          DO kk = 1, NEXreq     
-            u = (Kk - 1)*Defit+ DEL + Dshif
-            CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2)
+            u = (Kk - 1)*Defit + DEL 
+            CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2,om2,om3,
+     &                  cga,gamma,shcn)
          ENDDO
          Call PLOT_ZVV_NumCumul(Nnuc,Defit,nplot, NLWst)   
       ENDIF
-   
       DO kk = 1, NEXreq
-          u = EX(Kk,Nnuc)+ DEL + Dshif
-          CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2)
- 110   ENDDO  
-
-       IF(IOUt.eq.6 ) CALL PLOT_ZVV_GSLD(Nnuc)
+          u = EX(Kk,Nnuc)+ DEL 
+          CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2,om2,om3,
+     &                  cga,gamma,shcn)                    
+ 110  ENDDO 
+      IF(IOUt.eq.6 ) CALL PLOT_ZVV_GSLD(Nnuc)
     
 C      Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
-       ROPar(1,Nnuc) = ACR
-       ROPar(3,Nnuc) = del
-
+       ROPar(1,Nnuc) = ac
+       ROPar(3,Nnuc) = DEL
       RETURN
       END
 
-
-      SUBROUTINE BCS_FG(Nnuc,kk,U, Mompar,Momort,Nlwst,def2)
-
+CCC   ********************************************************************
+      SUBROUTINE BCS_FG(Nnuc,kk,U, Mompar,Momort,Nlwst,def2,om2,om3,
+     &                  cga,gamm,shcn)
+CCC   ********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
       REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl ! CRIT
-
+C
 
       REAL*8  Aj, Momort, Mompar, U, Momp, T,rotemp,
      &                 shcn,def2
       INTEGER kk,nnuc
 C Local variables
-      REAL*8 arg, const, det, momo, phi, phi2,dphi2,
-     &                 vib_KQ, s, seff2,
-     &                 seff2ort,mm2,ac,rot_KQ,
-     &                 gamm
+      REAL*8 arg, const, det, momo, phi, phi2,dphi2, vib_KQ, s, seff2,
+     &                 seff2ort,mm2,ac,rot_KQ,gamm
       REAL*8 rho, ro_u, ro_j, ro_pi
       REAL*8 om2,om3,cga,q2,q3
       REAL*8 FSHELL
-      INTEGER fg 
+
 C-----CONST=1/(2*SQRT(2 PI))
       DATA const/0.199471D0/
-     
+c 
       mm2=.24*A(Nnuc)**.66666
+c     
       IF(U.LE.UCRt) THEN
 c-----BCS
          dphi2 = U/UCRt
@@ -878,9 +897,8 @@ c-----BCS
          momo = Momort*0.3333D0 + 0.6666D0*Momort*TCRt*(1.d0-phi2)/t
          IF (momo.LT.0.0D0) RETURN  
       ELSE
-c------FG
+c-----FG
          U = U - ECOnd
-         fg = 1
          ac = atil * FSHELL(u, shcn,gamm)
          IF(ac.LE.0. .or. U.le.0.d0) RETURN
          T = DSQRT(U/ac)
@@ -889,24 +907,24 @@ c------FG
          momp = 0.608 * ac * mm2 * (1.- 0.6667 * def2)
          momo = 0.608 * ac * mm2 * (1.+ 0.3330 * def2)
       ENDIF
+c    
       seff2 = momp * t
       IF (ABS(def2).GT.0.005D0) seff2 = 
      &                          momp**0.333D0*momo**0.6666D0*t
       IF (seff2.LE.0.0D0) RETURN
       seff2ort = momo * t
 c-----collective enhancements
-c     IF(om2.le.0.)
-      om2 = 30./A(Nnuc)**.66666
-      om3 = 50./A(Nnuc)**.66666
-      CGA =.0075*A(Nnuc)**.33333
-      CALL VIB_KQ_GSM(T,OM2,CGA,5,Q2)
+      IF(om2.GT.0.)THEN
+         CALL VIB_KQ_GSM(T,OM2,CGA,5,Q2)
+      ELSE
+         Q2=1.d0
+      ENDIF 
       CALL VIB_KQ_GSM(T,OM3,CGA,7,Q3)
       CALL ROT_KQ_GSM(A(Nnuc),def2,seff2ort,U,rot_KQ)
-c      rot_KQ = Qr
-      vib_KQ =Q 2*Q3      
+      vib_KQ =Q2*Q3      
       ro_u = exp(s)/sqrt(det)
       ro_pi = 0.5D0
-       
+c 
       DO i = 1, NLWst
          Aj = REAL(i) + HIS(Nnuc)
  100     arg = s - (Aj + 0.5D0)**2/(2.D0*seff2)
@@ -919,11 +937,8 @@ c      rot_KQ = Qr
          RO(Kk,i,2,Nnuc) = Rotemp            
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t
       ENDDO
-
       RETURN
       END
-
-
 CCC
 CCC
 
@@ -963,9 +978,9 @@ Ccc
       RETURN
       END
 
-
-
+CCC   ********************************************************************
       SUBROUTINE ROT_KQ_GSM(A,BET,SIG4,U,QR)
+CCC   ********************************************************************
       IMPLICIT REAL*8 (A-H,O-Z)
 C***** QROT INCLUDING DAMPING ***
 
@@ -983,7 +998,7 @@ C***** QROT INCLUDING DAMPING ***
 
 
 
-
+CCC   ********************************************************************
       SUBROUTINE PRERORITO(Nnuc)
 CCC   ********************************************************************
 
@@ -1589,13 +1604,13 @@ C-----Skipping header lines
   98  FORMAT(2(i4),1x,a2,2x,f7.3,1x,f8.3)
       CALL WHERE(nz*1000+na,nnuc,iloc)
       IF (iloc.EQ.0) THEN
-c        SHC(Nnuc) = shelMSr - defcorr
          SHC(Nnuc) = shelMSr*SHLlnor(nnuc)
+         IF(ADIv.EQ.1) SHC(Nnuc) = (shelMSr - defcorr)*SHLlnor(nnuc)
       ENDIF
 C-----projectile
       IF (nz.EQ.Z(0) .AND. na.EQ.A(0)) THEN
-c        SHC(0) = shelMSr - defcorr
         SHC(0) = shelMSr*SHLlnor(nnuc)
+        IF(ADIv.EQ.1)  SHC(0) = (shelMSr - defcorr)*SHLlnor(nnuc)
       ENDIF
       GO TO 40
   60  WRITE(8,*) ' ERROR: Error reading shell correction file'
@@ -2104,7 +2119,9 @@ C--------dependent factor
                t = 2.0*TCRt*phi/LOG((phi + 1.D0)/(1.D0 - phi))
             ENDIF
          ELSE
+
 c-----------EGSM - J>>K (egsm=0) and EGSM (egsm=1)
+
             egsm=0
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
      &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,egsm)
@@ -2216,9 +2233,9 @@ C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
 
       bbb = DEFfis(Ib) ! the actual static saddle deformation is used
       IF(bbb .GT. 1.5d0) THEN
- 		 WRITE(8,*) 
+             WRITE(8,*) 
      &   ' WARNING: Deformation reset to 1.5 for HFB fiss.barrier b=',Ib
- 		 WRITE(8,*) 
+             WRITE(8,*) 
      &   ' WARNING:  for moment of inertia calculation (SIGMAK) '
          bbb = 1.5d0 
       ENDIF 
@@ -2241,13 +2258,18 @@ C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
          DO kk = 1,NRBinfis(Ib)
             temp = TNUcf(kk,Nnuc)
 c
+
 c-----------SYMMETRY ENHANCEMENT
 c
+
 c           The normal GS is axial and mass symmetric
+
 c         
+
             DO ipp = 1, 2
                rotemp = ROFisp(kk,jj,ipp,Ib)
 C              Nonaxial symmetry with mass symmetry
+
                IF (Iff.EQ.2) rotemp =
      &                       rotemp*SQRT(pi/2.d0)*SQRT(mompar*temp)
 C              Mass asymmetry (with axial symmetry) is already considered in HFB calculations
@@ -2443,8 +2465,9 @@ C
       ENDDO
       RETURN
       END
-
+C==============================================================
       SUBROUTINE DAMI_ROFIS(Nnuc,Ib,Mmod,Rafis)
+C==============================================================
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2560,7 +2583,8 @@ C-----EMPIRE-3.0-dependence
 
       IF (Mmod.EQ.0) THEN
          GAMma = GAMmafis(Ib)
-         DELp=deltafis(ib)
+c         DELp=deltafis(ib)
+         dshiff=deltafis(ib)
          shcf = SHCfis(Ib)
          iff = BFF(Ib)
          desteppp = DEStepp(Ib)
@@ -2580,11 +2604,8 @@ C-----EMPIRE-3.0-dependence
       ATIl = AP1*A(Nnuc) + AP2*A23
       ATIl = ATIl*Rafis
       ar = ATIl*(1.0 + shcf*GAMma)
-
 C
-C     Both DEL and DELp may be redefined in FISSION.INP
-C           for fission LD calculations
-C
+      delp = 14./SQRT(A(Nnuc))
       DEL = 0.
       IF (FISden(Nnuc).LE.1.) THEN
          IF (MOD(in,2).NE.0) DEL = DELp
@@ -2603,19 +2624,22 @@ C
 
       def2 = DEFfis(Ib) ! the actual static saddle deformation is used
       IF(def2 .GT. 1.5d0) THEN
- 		 WRITE(8,*) 
+             WRITE(8,*) 
      &   ' WARNING: Deformation reset to 1.5 for fission barrier b=',Ib
- 		 WRITE(8,*) 
+             WRITE(8,*) 
      &   ' WARNING:  for fission LD calculations (SIGMAK,RODEFF)   '
          def2 = 1.5d0 
       ENDIF 
 
-C     Axial SYMMETRY, MASS ASYMMETRY
-      if (iff.eq.3) CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.0D0,u,ar,
-     &                          aj,mompar,momort,A2,stab,cigor)
-C     Non-axial SYMMETRY, gamma assumed 10 degrees inside SIGMAK
-      if (iff.eq.2) CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-2.0D0,u,ar,
-     &                          aj,mompar,momort,A2,stab,cigor)
+      IF(iff.eq.2) then
+C       Non-axial, non-axiality parameter assumed as 10 degrees      
+        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-2.d0,u,ar,
+     &            aj,mompar,momort,A2,stab,cigor)
+      ELSE 
+C       Axial symmetry      
+        CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.d0,u,ar,
+     &            aj,mompar,momort,A2,stab,cigor)
+      ENDIF 
 C
 C-----calculation of level density parameter 'a' including surface
 C-----dependent factor
@@ -2637,7 +2661,7 @@ C-----dependent factor
          aaj = FLOAT(jj) + HIS(Nnuc)
          DO kk = 1,NRBinfis(Ib)
             rotemp=0.d0
-            u = XMInn(Ib) + (kk - 1)*desteppp + DEL
+            u = XMInn(Ib) + (kk - 1)*desteppp + DEL + dshiff
             IF (u.GT.UCRt) THEN
                u = u - ECOnd
                accn = ATIl*FSHELL(u,Shcf,GAMma)
@@ -2646,32 +2670,30 @@ C-----dependent factor
                rotemp = RODEFF(A(Nnuc),u,accn,aaj,MOMpar,MOMort,
      &                         HIS(Nnuc),
      &                         EXPmax,temp,def2,vibbf12,vibbfdt,vn)
-c               write(*,*)'fmg',u,rotemp  
             ELSE
                accn = ACRt
                rotemp = ROBCSF(A(Nnuc),u,aaj,MOMparcrt,MOMortcrt,
-     &                  mompar,temp,def2,vibbf12,vibbfdt,vn)
-
-c            write(*,*)'bcs',u,rotemp  
+     &                  mompar,temp,def2,vibbf12,vibbfdt,vn)  
             ENDIF
 c-----------SYMMETRY ENHANCEMENT
-c
-c           The normal GS is axial and mass symmetric
-c
-c           Nonaxial symmetry with mass symmetry
- 345        IF (Iff.EQ.2) rotemp =
+
+c-----------The normal GS is axial and mass symmetric
+
+c-----------Nonaxial symmetry with mass symmetry
+
+            IF (Iff.EQ.2) rotemp =
      &             rotemp * SQRT(pi/2.) * SQRT(mompar * temp)
-c           Axial symmetry with mass asymmetry
+c---------- Axial symmetry with mass asymmetry
+
             IF (Iff.EQ.3) rotemp = rotemp * 2.d0
 c
+
             ROFis(kk,jj,Ib) = rotemp
             ROFisp(kk,jj,1,Ib) = rotemp
             ROFisp(kk,jj,2,Ib) = rotemp
 
             IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp ! to be updated
          ENDDO
-
-c        write(*,*)'ro',u, ROFisp(kk,1,1,1)
       ENDDO
 
  346  ACRtf(Ib) = ACRt
@@ -2687,10 +2709,10 @@ c        write(*,*)'ro',u, ROFisp(kk,1,1,1)
       RETURN
       END
 C
-
+C==============================================================
       REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Mompr,T,
      &                       def2,vibbf12,vibbfdt,vn)
-
+C==============================================================
 
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C
@@ -2706,29 +2728,23 @@ C
       REAL*8 A, Aj, Momort, Mompar, Mompr,U, def2, T, bf
       REAL*8 vibbf12,vibbfdt,vn
       REAL*8 ro,rot_K, rot_Q, vib_KQ
-
      
       ROBCSF = 0.D0
       Bf=0.d0
-c      write(*,*)'1',A,U,Aj,Mompar,Momort,def2,T,Bf
+c 
       ro = ROBCS(A,U,Aj,Mompar,Momort,def2,T,Bf)
-c       write(*,*)'2',A,U,Aj,Mompar,Momort,def2,T,Bf,momp
-    
       Mompr=Momp 
-
       CALL COLL_KQ_FIS(0,A,T,momo,def2,u,vib_KQ,rot_K,rot_Q,
      &                   vibbf12,vibbfdt,vn)
       ROBCSF = ro *  rot_K * rot_Q * vib_KQ
-
-c      write(*,*)'ro', robcsf,ro,  rot_K, rot_Q, vib_KQ
-c      pause
       RETURN
       END
 C
 C
+C==============================================================
       REAL*8 FUNCTION RODEFF(A,E,ac,Aj,Mompar,Momort,Ss,
      &                     Expmax,T,def2,vibbf12,vibbfdt,vn)
-
+C==============================================================
       IMPLICIT REAL*8(A - H), REAL*8(O - Z)
 C Dummy arguments
       REAL*8 A, Ac, Aj, E, Expmax, Momort, Mompar, Ss,
@@ -2741,10 +2757,10 @@ C Dummy arguments
       Bf=0.d0
       IF(ac.LE.0. .or. e.le.0.d0) RETURN
 c-----Fission LD: EGSM - J>>K (egsm=0) and EGSM (egsm=1)
+
       egsm=0
       RODEFF = 0.D0
       Yrast=0.d0 
-      
       ro =RODEF(A,E,Ac,Aj,Mompar,Momort,T,
      &                        Yrast,Ss,Bf,Expmax,def2,egsm)
       e1 = E - Yrast
@@ -2755,28 +2771,23 @@ c-----Fission LD: EGSM - J>>K (egsm=0) and EGSM (egsm=1)
       RETURN
       END
 
-
+C====================================================================
       SUBROUTINE COLL_KQ_FIS(egsm,A,T,momo,def2,E1,vib_KQ,rot_K,rot_Q,
      &                   thalf,dt,vn)
-
-      REAL*8 A,T,momo,def2,E1,vib_KQ,rot_K,rot_Q 
-      REAL*8 qv,qr,vibrk
-      REAL*8 vn
-
-
-      INTEGER egsm
+C====================================================================
+      REAL*8 A,T,momo,def2,E1,vib_KQ,rot_K,rot_Q,thalf,dt,vn
 C
 C Local variables
 C
-      REAL*8 arg, cost, dmpdiff, dmphalf, dt, ht, m0, pi, r0,
-     &                 sdrop, thalf
+      REAL*8 arg, cost, dmpdiff, dmphalf,  ht, m0, pi, r0,
+     &                 sdrop,qv,qr,vibrk
+      INTEGER egsm
 
 C-----vib_K
-      DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/
-    
+      DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/    
       sdrop = 17./(4.*pi*r0**2)
       cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-      Vibrk = vn* 3.d0*EXP(1.7*cost**(2./3.)*T**(4./3.))
+      Vibrk = vn*4.d0* EXP(1.7*cost**(2./3.)*T**(4./3.))
 C-----vib_Q
       arg = (T - thalf)/dt
       qv = 1.0/(EXP((-arg)) + 1.0)
@@ -2795,60 +2806,69 @@ C-----rot_Q
       END
 C
 
-      SUBROUTINE ROGSM_sys(Aas,gamm,del,delp,shcn,om2,dshif,Nnuc)
+      SUBROUTINE ROGSM_sys(Nnuc,ap1,ap2,gamma,del,delp,om2,om3,cga)
 Cccc
 Cccc  ********************************************************************
 Cccc  *                    R O G S M_sys                                 *
 Cccc  *                                                                  *
-Cccc  * GSM level density systematics  from RIPL             .         *
+Cccc  * GSM level density systematics  from RIPL-2             .         *
 Cccc  *                                                                  *
 Cccc  ********************************************************************
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      REAL*8 aas,shcn,delp,del,gamm,dshif,om2
+      REAL*8 ap1,ap2,gamma,del,delp,om2,om3,cga
       INTEGER Nnuc
 C Local variables
-      REAL*8 shelMSr,shift,del0
-      REAL*8 omm2
-      INTEGER ia,iz,na,nz
+      REAL*8 arobn,A23,A13,dshif
+      INTEGER ia,iz
       
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
+      A23 = float(ia)**0.666667
 
-      OPEN(23,FILE=trim(empiredir)//'/RIPL/densities/total/'//
-     &'level-densities-gsm-RIPL2.dat',  STATUS='old')
-      READ(23,*)
-      READ(23,*)
-      READ(23,*)
-      READ(23,*)
-  40  READ(23,98,END=50,ERR=60)
-     &    nz, na, shelMSr,omm2,del0,aas,shift
-  98  FORMAT (1x,2(i3,1x),35x,e8.3,1x,e8.3,f7.3,f8.3,7x,f8.3)
-         
-      IF(nz.eq.iz.and.na.eq.ia)THEN
-         shcn = shelMSr
-         om2=omm2
-         atil=aas
-         delp=del0
-         dshif=shift
-         goto 50
-      ELSE
-         GOTO 40
-      ENDIF
-  60  STOP 'Error reading GSM file'
-  50  CLOSE(23)
-      
-      gamm=0.375
-      gamm = gamm/A(Nnuc)**0.333333
+      A13 = float(ia)**0.666667
 
-      IF(delp.EQ.0)  delp = 12./SQRT(A(nnuc))
 
+      arobn = atil_ig(Nnuc)
+      delp  = delp_ig(Nnuc) 
+
+
+      om2   = om2_ig(Nnuc)
+
+      if(om2.LE.0.d0) om2 = 30./float(ia)**.66666
+
+
+
+      dshif = dshift_ig(Nnuc)
+
+      if(arobn.LE.0.d0) dshif=0.617-0.00164*float(ia)
+
+
+
+      gamm = 0.375
+      gamma = gamm/A13
+
+
+      om3 = 50./A23
+      cga =.0075*A13
+
+      AP1=0.103
+      AP2=-0.105
+
+
+      delp = 12./SQRT(A(nnuc))
       del = 0.d0
       IF (MOD((ia-iz),2).NE.0.0D0) del = delp
       IF (MOD(iz,2).NE.0.0D0) del = del + delp
+
+
+      del = del + dshif
+
+
       RETURN
       END
+ 
 
      
       SUBROUTINE EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
