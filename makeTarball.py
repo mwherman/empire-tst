@@ -3,6 +3,7 @@ import os, argparse, tempfile, shutil
 PACKAGEDIR = os.path.dirname( os.path.abspath( __file__ ) )
 PACKAGENAMEROOT = 'Empire'
 EXCLUDEFILE = PACKAGEDIR + os.sep + 'exclude.txt'
+AVAILABLEFORMATS = [ "zip", "tar", "bztar", "gztar" ]
 
 # Set up the command line parser
 parser = argparse.ArgumentParser(description='Make a tarball of the ' + PACKAGENAMEROOT + ' package' )
@@ -13,6 +14,7 @@ parser.add_argument( '--full',     dest='full',     default=True,  action='store
 parser.add_argument( '--noRIPL',   dest='noRIPL',   default=False, action='store_true', help='Exclude the RIPL directory from the final tarball' )
 parser.add_argument( '--docOnly',  dest='docOnly',  default=False, action='store_true', help='Include only the documentation in the final tarball' )
 parser.add_argument( '--riplOnly', dest='riplOnly', default=False, action='store_true', help='Include only the RIPL directory in the final tarball' )
+parser.add_argument( '--format',   dest='format',   default='gztar', type=str, choices = AVAILABLEFORMATS, help='Set the archive format (default: gztar)' )
 
 
 
@@ -26,7 +28,7 @@ if __name__ == '__main__':
     tmpDir = tempfile.mkdtemp()
     if args.verbose: print "Make temporary directory:",tmpDir
     
-    # Compute base file name
+    # Compute base file name for the tarball and the package directory
     packageName = PACKAGENAMEROOT
     if args.release:
         for line in open( PACKAGEDIR + os.sep + 'version' ).readlines(): 
@@ -39,11 +41,16 @@ if __name__ == '__main__':
             if line.startswith( 'Revision:' ): 
                 revision = line.split( )[-1]
                 break
-        packageName += '-svnRevision' + revision
+        packageName += '-latest-r' + revision
         
+    # Compute the package directory name (the tarball unpacks to this directory)
+    packageDirName = packageName
+    
     # Compute additional modifiers
-    if args.docOnly: packageName += '-documentation'
-    elif args.riplOnly: packageName += '-onlyRIPL'
+    if args.docOnly: 
+        packageName += '-documentation'
+        packageDirName += '-documentation'
+    elif args.riplOnly: raise NotImplementedError()
     elif args.noRIPL: packageName += '-noRIPL'
     
     # Set up exclude list
@@ -61,20 +68,18 @@ if __name__ == '__main__':
     
     # Compute the source directory
     sourceDir = PACKAGEDIR
-    if args.docOnly: pass
-    elif args.riplOnly: pass
+    if args.docOnly: sourceDir = PACKAGEDIR + os.sep + "doc"
+    elif args.riplOnly: raise NotImplementedError()
     
     # Copy everything to packaging area
     if args.verbose: print "Copy distribution to", tmpDir
     if args.verbose: print "    ignoring files that match these patterns:", patternsToExclude
     if args.verbose: print "    ignoring files that match these items:", itemsToExclude
-    if args.verbose: print "    ignoring files that match these thingies:", stuffToExclude
-    
-    shutil.copytree( sourceDir, tmpDir + os.sep + packageName, ignore = ignoreTheseGuys )
+    shutil.copytree( sourceDir, tmpDir + os.sep + packageDirName, ignore = ignoreTheseGuys )
 
     # Make the package
     if args.verbose: print "Create archive"
-    shutil.make_archive( PACKAGEDIR + os.sep + packageName, format = 'gztar', root_dir = tmpDir, base_dir = packageName, verbose = args.verbose )
+    shutil.make_archive( PACKAGEDIR + os.sep + packageName, format = args.format, root_dir = tmpDir, base_dir = packageDirName, verbose = args.verbose )
     
     # Clean up
     if args.verbose: print "Delete temporary directory:",tmpDir
