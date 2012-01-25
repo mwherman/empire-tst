@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2252 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-19 11:54:18 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Rev: 2302 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-25 05:34:35 +0100 (Mi, 25 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2252 $
+C CVS Version Management $Revision: 2302 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -158,7 +158,7 @@ C
 C Local variables
 C
       REAL*8 ajfinal, ajhms, ajinit, amrec, avradius, c,
-     &       etotemiss, etotemissl, event, prec, pxrec, pyrec, pzrec,
+     &       etotemiss, event, prec, pxrec, pyrec, pzrec,
      &       radius, rsample, sumav, test,gamx, aveb2
       REAL*8 gamtot(0:200)
 C     DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
@@ -167,10 +167,12 @@ C     DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
       DOUBLE PRECISION RANG
       DOUBLE PRECISION perloang
       INTEGER i, jbin, jsweep, jexist, jtrans, mrecbin, n, nem, nubin
-      INTEGER nebinchan, nebinlab, nebtotchan, nebtotlab, nth, nthlab
+      INTEGER nebinchan, nebinlab, nth, nthlab
       INTEGER jndx,jstudy,jzdiff,jndiff, jzx, jnx
       INTEGER indx(0:200)
-      INTEGER nloang, ncmbin,nubinx
+      INTEGER nloang, ncmbin
+C     INTEGER nebtotchan, nebtotlab, nth, nthlab, nubinx
+C     REAL*8 etotemissl 
 C     INTEGER INT, NINT, MIN
 C
 
@@ -2447,7 +2449,7 @@ C
       ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2252 $')
+99005 FORMAT ('  xddhms version: $Revision: 2302 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -2967,7 +2969,8 @@ C
             ENDDO
          ENDDO
       ENDIF
-      CALL EMPTRANS(nemax,jzmax,jnmax,numax)
+C     CALL EMPTRANS(nemax,jzmax,jnmax,numax)
+      CALL EMPTRANS(nemax,jzmax,jnmax)
 99170 FORMAT (' energy-bin histogram width=',f10.3,' MeV')
 99173 FORMAT (3(f10.2,2x,f10.2,8x))
 99175 FORMAT (f10.2,2x,f10.2,2x,f10.2,10x,f10.2,2x,f10.2)
@@ -4198,7 +4201,8 @@ C
 C
 C local variables r0,
 C
-      REAL*8 r0,akf0,ekf0,rfac,vsigma
+      REAL*8 r0,akf0,ekf0,vsigma
+C     REAL*8 rfac
 
 C     ZMNuc = 939.D0
       ZMNuc = AMUpro*AMUmev
@@ -4251,7 +4255,7 @@ C     !theory is in the channel frame, and an extra lab boost is
 C     !given, which makes the dist more forward-peaked.
 C
 C   average squared reduced matrix element      
-c      vv2=40.0d0*AMUltdamprate
+c     vv2=40.0d0*AMUltdamprate
       vv2=0.13*AMUltdamprate
 
 c  parameters used in geometry dependence
@@ -4348,8 +4352,11 @@ C
 C
 C Local variables
 C
-      REAL*8 prob, probmax, xran, yran
+      REAL*8 prob, xran, yran
       REAL*8 RANG
+C
+C     REAL*8 probmax
+C
 C      probmax = Rnucleus
 C  100 xran = RANG()*(Rnucleus + 3*Adiffuse)
 C      yran = RANG()*probmax
@@ -4373,8 +4380,10 @@ C
 
       INTEGER n, nx, ne, n3
       REAL*8 dxn, emax, xx, ee, ex, eps, de, de3, erem, xn, x3 
-      REAL*8 argold, argnew, arg3old, arg3new, ep, eh, pf, zmn
+      REAL*8 argold, argnew, arg3old, arg3new, ep, eh, pf
       REAL*8 esum, eold, enew
+
+C     REAL*8 zmn
 
       dimension x3(0:nintmx3)
 
@@ -5860,25 +5869,31 @@ C sampling area not length!
       END
 C
 C
-      SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax,Numax)
+C     SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax,Numax)
+      SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       INCLUDE 'ddhms.cmb'
 C
 C Dummy arguments
 C
-      INTEGER Jnmax, Jzmax, Nemax, Numax
+      INTEGER Jnmax, Jzmax, Nemax
+C     INTEGER Numax
 C
 C Local variables
 C
       REAL*8 adum(5,7), csfit(NDANGecis), qq(5)
-      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, xmre,
+      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
-      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, maxrecener, mre,
-     &        mrec, na, ndiscmax, ne, nspec, ncsp, Inxr,
+      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, 
+     &        mrec, na,  ne, nspec, Inxr,
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
+C
+C     INTEGER maxrecener, mre, ndiscmax, ncsp,
+C     DOUBLE PRECISION xmre,
+C 
 C     INTEGER INT
 C
 C---- Nemax max number of energy bins in HMS
