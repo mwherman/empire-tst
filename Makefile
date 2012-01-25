@@ -42,6 +42,10 @@ up:
 
 upall: up all 
 
-tarball: 
-	tar cvzf `cat version`.tar -X exclude.txt -s ':^:'`cat version`'/:'  *
+tarball-release: 
+	#tar czf `cat version`.tar.gz -X exclude.txt -s ':^:'`cat version`'/:'  ./*
+	python makeTarball.py --release
+
+tarball-latest: upall
+	python makeTarball.py --latest
 
