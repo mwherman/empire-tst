@@ -112,7 +112,7 @@ module ENDF_IO
         module procedure read_mf34
         module procedure read_mf35
         module procedure read_mf40
-    end interface
+    end interface read_mf
 
     interface write_mf
         module procedure write_mf1
@@ -139,7 +139,7 @@ module ENDF_IO
         module procedure write_mf34
         module procedure write_mf35
         module procedure write_mf40
-    end interface
+    end interface write_mf
 
     interface del_mf
         module procedure del_mf1
@@ -166,7 +166,7 @@ module ENDF_IO
         module procedure del_mf34
         module procedure del_mf35
         module procedure del_mf40
-    end interface
+    end interface del_mf
 
     interface lc_mf
         module procedure lc_mf1
@@ -193,7 +193,7 @@ module ENDF_IO
         module procedure lc_mf34
         module procedure lc_mf35
         module procedure lc_mf40
-    end interface
+    end interface lc_mf
 
     private read_mf1,read_mf2,read_mf3,read_mf4,read_mf5,read_mf6,read_mf7,read_mf8,read_nc,read_ni
     private read_mf9,read_mf10,read_mf12,read_mf13,read_mf14,read_mf15,read_mf23,read_mf26,read_cmpt
@@ -209,7 +209,7 @@ module ENDF_IO
     private lc_mf32,lc_mf33,lc_mf34,lc_mf35,lc_mf40,lc_ni,lc_nc,lc_cmpt
     private get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, erlin
     private read_endf, get_endf, write_endf, put_endf, get_endline, put_endline, endline, ipos
-    private clear_mat, mtmod, process_material
+    private open_endfile, close_endfile, mtmod, process_material
 
 !------------------------------------------------------------------------------
     contains
@@ -218,6 +218,9 @@ module ENDF_IO
     subroutine read_endf_file(filename,endf)
 
     implicit none
+
+    ! read an entire ENDF file, which may contain multiple materials.
+    ! each material is scanned, and all MF files encountered are read in.
 
     character*(*), intent(in) :: filename
     type (endf_file), intent(out), target :: endf
@@ -306,76 +309,76 @@ module ENDF_IO
             return
         case(1)
             allocate(mx%mf1)
-            call read_mf1(mx%mf1)
+            call read_mf(mx%mf1)
         case(2)
             allocate(mx%mf2)
-            call read_mf2(mx%mf2)
+            call read_mf(mx%mf2)
         case(3)
             allocate(mx%mf3)
             call read_mf3(mx%mf3)
         case(4)
             allocate(mx%mf4)
-            call read_mf4(mx%mf4)
+            call read_mf(mx%mf4)
         case(5)
             allocate(mx%mf5)
-            call read_mf5(mx%mf5)
+            call read_mf(mx%mf5)
         case(6)
             allocate(mx%mf6)
-            call read_mf6(mx%mf6)
+            call read_mf(mx%mf6)
         case(7)
             allocate(mx%mf7)
-            call read_mf7(mx%mf7)
+            call read_mf(mx%mf7)
         case(8)
             allocate(mx%mf8)
-            call read_mf8(mx%mf8)
+            call read_mf(mx%mf8)
         case(9)
             allocate(mx%mf9)
-            call read_mf9(mx%mf9)
+            call read_mf(mx%mf9)
         case(10)
             allocate(mx%mf10)
-            call read_mf10(mx%mf10)
+            call read_mf(mx%mf10)
         case(12)
             allocate(mx%mf12)
-            call read_mf12(mx%mf12)
+            call read_mf(mx%mf12)
         case(13)
             allocate(mx%mf13)
-            call read_mf13(mx%mf13)
+            call read_mf(mx%mf13)
         case(14)
             allocate(mx%mf14)
-            call read_mf14(mx%mf14)
+            call read_mf(mx%mf14)
         case(15)
             allocate(mx%mf15)
-            call read_mf15(mx%mf15)
+            call read_mf(mx%mf15)
         case(23)
             allocate(mx%mf23)
-            call read_mf23(mx%mf23)
+            call read_mf(mx%mf23)
         case(26)
             allocate(mx%mf26)
-            call read_mf26(mx%mf26)
+            call read_mf(mx%mf26)
         case(27)
             allocate(mx%mf27)
-            call read_mf27(mx%mf27)
+            call read_mf(mx%mf27)
         case(28)
             allocate(mx%mf28)
-            call read_mf28(mx%mf28)
+            call read_mf(mx%mf28)
         case(31)
             allocate(mx%mf31)
-            call read_mf31(mx%mf31)
+            call read_mf(mx%mf31)
         case(32)
             allocate(mx%mf32)
-            call read_mf32(mx%mf32)
+            call read_mf(mx%mf32)
         case(33)
             allocate(mx%mf33)
-            call read_mf33(mx%mf33)
+            call read_mf(mx%mf33)
         case(34)
             allocate(mx%mf34)
-            call read_mf34(mx%mf34)
+            call read_mf(mx%mf34)
         case(35)
             allocate(mx%mf35)
-            call read_mf35(mx%mf35)
+            call read_mf(mx%mf35)
         case(40)
             allocate(mx%mf40)
-            call read_mf40(mx%mf40)
+            call read_mf(mx%mf40)
         case default
             ! unknown MF
             write(6,*) ' Undefined MF encountered:',mf
@@ -872,5 +875,346 @@ module ENDF_IO
 
     return
     end function mtmod
+
+!------------------------------------------------------------------------------
+
+    subroutine find_mf(endfile,mat)
+
+    implicit none
+
+    ! look through the endf file supplied and only read
+    ! MF files that are allocated in the MAT supplied.
+    ! The first instance of a particular MF is the one
+    ! read in, so if the ENDF file contains multiple materials,
+    ! then this routine may return MF's from ANY of them,
+    ! depending on what MF's are in which materials, and the
+    ! ordering. 
+
+    integer*4 stat,mn
+    character*(*) endfile
+
+    type (endf_mat) mat
+
+    call open_endfile(endfile,.false.)
+    call get_endline
+    mn = get_mat()
+    if(mn .le. 1) call get_endline
+    mat%mat = get_mat()
+
+    if(associated(mat%mf1)) then
+        mat%mf1%mt = 0
+        do while(endline(71:72) .ne. ' 1')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(1)
+        call read_mf(mat%mf1)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf2)) then
+        mat%mf2%mt = 0
+        do while(endline(71:72) .ne. ' 2')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(2)
+        call read_mf(mat%mf2)
+        call set_mat(0)
+    endif
+    if(associated(mat%mf3)) then
+        mat%mf3%mt = 0
+        do while(endline(71:72) .ne. ' 3')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(3)
+        call read_mf(mat%mf3)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf4)) then
+        mat%mf4%mt = 0
+        do while(endline(71:72) .ne. ' 4')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(4)
+        call read_mf(mat%mf4)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf5)) then
+        mat%mf5%mt = 0
+        do while(endline(71:72) .ne. ' 5')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(5)
+        call read_mf(mat%mf5)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf6)) then
+        mat%mf6%mt = 0
+        do while(endline(71:72) .ne. ' 6')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(6)
+        call read_mf(mat%mf6)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf7)) then
+        mat%mf7%mt = 0
+        do while(endline(71:72) .ne. ' 7')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(7)
+        call read_mf(mat%mf7)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf8)) then
+        mat%mf8%mt = 0
+        do while(endline(71:72) .ne. ' 8')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(8)
+        call read_mf(mat%mf8)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf9)) then
+        mat%mf9%mt = 0
+        do while(endline(71:72) .ne. ' 9')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(9)
+        call read_mf(mat%mf9)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf10)) then
+        mat%mf10%mt = 0
+        do while(endline(71:72) .ne. '10')
+            call get_endline(stat)
+            if(stat .ne. 0) return
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(10)
+        call read_mf(mat%mf10)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf12)) then
+        mat%mf12%mt = 0
+        do while(endline(71:72) .ne. '12')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(12)
+        call read_mf(mat%mf12)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf13)) then
+        mat%mf13%mt = 0
+        do while(endline(71:72) .ne. '13')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(13)
+        call read_mf(mat%mf13)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf14)) then
+        mat%mf14%mt = 0
+        do while(endline(71:72) .ne. '14')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(14)
+        call read_mf(mat%mf14)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf15)) then
+        mat%mf15%mt = 0
+        do while(endline(71:72) .ne. '15')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(15)
+        call read_mf(mat%mf15)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf23)) then
+        mat%mf23%mt = 0
+        do while(endline(71:72) .ne. '23')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(23)
+        call read_mf(mat%mf23)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf26)) then
+        mat%mf26%mt = 0
+        do while(endline(71:72) .ne. '26')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(26)
+        call read_mf(mat%mf26)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf27)) then
+        mat%mf27%mt = 0
+        do while(endline(71:72) .ne. '27')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(27)
+        call read_mf(mat%mf27)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf28)) then
+        mat%mf28%mt = 0
+        do while(endline(71:72) .ne. '28')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(28)
+        call read_mf(mat%mf28)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf31)) then
+        mat%mf31%mt = 0
+        do while(endline(71:72) .ne. '31')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(31)
+        call read_mf(mat%mf31)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf32)) then
+        mat%mf32%mt = 0
+        do while(endline(71:72) .ne. '32')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(32)
+        call read_mf(mat%mf32)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf33)) then
+        mat%mf33%mt = 0
+        do while(endline(71:72) .ne. '33')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(33)
+        call read_mf(mat%mf33)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf34)) then
+        mat%mf34%mt = 0
+        do while(endline(71:72) .ne. '34')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(34)
+        call read_mf(mat%mf34)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf35)) then
+        mat%mf35%mt = 0
+        do while(endline(71:72) .ne. '35')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(35)
+        call read_mf(mat%mf35)
+        call set_mat(0)
+    endif
+
+    if(associated(mat%mf40)) then
+        mat%mf40%mt = 0
+        do while(endline(71:72) .ne. '40')
+            call get_endline(stat)
+            if(stat .ne. 0) goto 100
+        end do
+        mn = get_mat()
+        call set_mat(mn)
+        call set_mf(40)
+        call read_mf(mat%mf40)
+        call set_mat(0)
+    endif
+
+100 call close_endfile
+
+    return
+    end subroutine find_mf
 
 end module ENDF_IO
