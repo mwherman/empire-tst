@@ -15,7 +15,7 @@ parser.add_argument( '--noRIPL',   dest='noRIPL',   default=True,  action='store
 parser.add_argument( '--docOnly',  dest='docOnly',  default=False, action='store_true', help='Include only the documentation in the final tarball' )
 parser.add_argument( '--riplOnly', dest='riplOnly', default=False, action='store_true', help='Archive only the RIPL/densities/total/level-densities-hfb directory' )
 parser.add_argument( '--format',   dest='format',   default='gztar', type=str, choices = AVAILABLEFORMATS, help='Set the archive format (default: gztar)' )
-parser.add_argument( '--Z',        dest='Z',        default=13,      type=int,          help='Set the Z to save from RIPL/densities/total/level-densities-hfb directory from the archive' )
+parser.add_argument( '--Z',        dest='Z',        default=13,      type=int,          help='Set the Z to save from RIPL/densities/total/level-densities-hfb directory from the archive (default=13)' )
 
 
 
@@ -62,8 +62,12 @@ if __name__ == '__main__':
     itemsToExclude = filter( lambda x: os.sep in x, stuffToExclude )
     patternsToExclude = filter( lambda x: os.sep not in x, stuffToExclude )
     allRIPLHFBDensities = glob.glob( 'RIPL/densities/total/level-densities-hfb/*' )
-    selectRIPLHFBDensities = glob.glob( 'RIPL/densities/total/level-densities-hfb/z'+str(args.Z).zfill(3) )
+    selectRIPLHFBDensities = glob.glob( 'RIPL/densities/total/level-densities-hfb/z'+str(args.Z).zfill(3)+'*' )
+#    print selectRIPLHFBDensities
+#    print args.Z, 
+#    print allRIPLHFBDensities
     if args.noRIPL: itemsToExclude += filter( lambda x: x not in selectRIPLHFBDensities, allRIPLHFBDensities )
+    if args.riplOnly: itemsToExclude = []
     def ignoreTheseGuys( adir, filenames ):
         items = set()
         for f in filenames:
