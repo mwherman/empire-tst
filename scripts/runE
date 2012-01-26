@@ -114,7 +114,9 @@ def runE(proj):
         print('Using existing random number generator seed')
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
-    
+    if not isEmpty(proj+'-nubar.endf'):
+        cp(proj+'-nubar.endf','NUBAR-EVAL.ENDF')
+        print('Using existing ENDF-B/VII.1 NUBAR evaluation')
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -201,6 +203,10 @@ def runE(proj):
         mv('XSECTIONS.OUT',proj+'.xsc')
     if not isEmpty('SENSITIVITY.MATRIX'):
         mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
+    if not isEmpty('OMP_A.DAT'):
+        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+    if not isEmpty('NUBAR-EVAL.ENDF'):
+        mv('NUBAR-EVAL.ENDF',proj+'-nubar.endf',0)
     
     # move files, no warning if files DNE:
     mv('EXFOR.DAT',proj+'.exf',0)
@@ -216,10 +222,11 @@ def runE(proj):
     mv('PFNM.OUT',proj+'-pfnm.out',0)
     mv('PFNS.OUT',proj+'-pfns.out',0)
     mv('FIT.OUT',proj+'-ompfit.lst',0)
-    mv('COVAR.DAT',proj+'-MC.par',0)
-    mv('OMP_A.DAT',proj+'-aOMP.lst',0)
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
+        mv(LDfile,proj+LDfile,0)
+    # spectra for one energy run:
+    for LDfile in glob("sp_*.zvd"):
         mv(LDfile,proj+LDfile,0)
     
     # Extract Warnings from the list file:
@@ -240,7 +247,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl') )
-    rm('TARGET.LEV')
+    rm('TARGET.LEV','OMP_A.DAT')
     rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
     rm('c4sort.scr')        
@@ -317,16 +324,16 @@ def runE(proj):
 def splashscreen():
     splash = [
     '                                                           '+'\n'+
-    '          EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 '+'\n'+
-    '          E      MM  MM  P   P  I  R   R  E             33 '+'\n'+
-    '          EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 '+'\n'+
-    '          E      M    M  P      I  R  R   E              3 '+'\n'+
-    '          EEEEE  M    M  P      I  R   R  EEEEE      33333 '+'\n'+
+    '    EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333   11  '+'\n'+
+    '    E      MM  MM  P   P  I  R   R  E             33   11  '+'\n'+
+    '    EEE    M MM M  PPPP   I  RRRR   EEE    =   33333   11  '+'\n'+
+    '    E      M    M  P      I  R  R   E              3   11  '+'\n'+
+    '    EEEEE  M    M  P      I  R   R  EEEEE      33333 O 11  '+'\n'+
     '                                                           '+'\n'+
-    '                      R I V O L I release 3.1              '+'\n'+
+    '                    R I V O L I                            '+'\n'+
     '                                                           '+'\n'+
-    '             Sao Jose dos Campos, Brazil, May 2011         '+'\n'+
-    '             Upton, New York, USA, January 2012            '+'\n'+
+    '       Sao Jose dos Campos, Brazil, May 2011               '+'\n'+
+    '         Upton, New York, USA, January 2012                '+'\n'+
     '                                                           '+'\n']
     return splash[0]
 
