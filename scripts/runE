@@ -153,8 +153,8 @@ def runE(proj):
     #    cp('FISSION.INP',proj+'-inp.fis',0) # no message if not present
 
     if isEmpty(proj+'-lev.col'):
-        if not isEmpty('TARGET_COLL.RIPL'):
-            mv('TARGET_COLL.RIPL',proj+'-lev.col')
+        if not isEmpty('TARGET_COLL_RIPL.DAT'):
+            mv('TARGET_COLL_RIPL.DAT',proj+'-lev.col')
             tfile = open(proj+'-lev.col','a')   # append mode
             tfile.write('\n\n\n')
             tfile.write('NOTE: this line and those below will not\
