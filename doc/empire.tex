@@ -66,8 +66,7 @@ Campos, Brazil }\\[1mm]
 \textsf{\large C.M. Mattoon}{\large{} }\\
 \textsf{\normalsize Lawrence Livermore National Laboratory, Livermore, USA }\\[1mm]
 %
-\textsf{\large H. Wienke}{\large{} }\\
-\textsf{\normalsize deceased}\\
+\textsf{\large H. Wienke$^{\dagger}$}{\large{} }\\
 %
 \textsf{\large Young-Sik Cho}{\large{} }\\
 \textsf{\normalsize Korea Atomic Energy Research Institute,  Daejeon, South Korea }\\[1mm]
@@ -84,7 +83,7 @@ nuclear models, and designed for calculations over a broad range of
 energies and incident particles. 
 The system can be used for theoretical investigations of nuclear reactions 
 as well as for nuclear data evaluation work.
-Photons, nucleons, deuterons, tritons, hellions ($^3$He), $\alpha$'s, and light or
+Photons, nucleons, deuterons, tritons, helions ($^3$He), $\alpha$'s, and light or
 heavy ions can be selected as projectiles. The energy range starts just above the resonance region
 in the case of a neutron projectile, and extends up to few hundred
 MeV for heavy ion induced reactions. The code accounts for the major
@@ -3717,7 +3716,7 @@ collective levels  \protect \\
 \item{Neutron reaction cross sections  for CN to be used in PFNS calculations based on Los Alamos model  \protect \\
 (\emph{empire/data/CNxs.dat })}
 
-\item{Neutron reaction cross sections  on heavy	fission fragment to be used in PFNS calculations based on Los Alamos model     \protect \\
+\item{Neutron reaction cross sections  on heavy fission fragment to be used in PFNS calculations based on Los Alamos model     \protect \\
 (\emph{empire/data/HFxs.dat})}
 
 \item{Neutron reaction cross sections  on light fission fragment to be used in PFNS calculations based on Los Alamos model   \protect \\
@@ -5976,7 +5975,7 @@ EMPIRE is set up to read as much data as possible from the RIPL input directory
 parameters that the code can not know. These are the incident energy,
 the projectile, the target and the number of emitted particles to be followed.
 The current version can treat multiple emissions of the following ejectiles:
-neutrons, protons, $\alpha$, deuterons, tritons, helions(3^{He}) and light ions. 
+neutrons, protons, $\alpha$, deuterons, tritons, helions($^3$He) and light ions. 
 
 With the default library of input parameters it is possible to execute
 a 'first-shot' calculation with minimal effort. In the second step,
@@ -6022,7 +6021,7 @@ contains basic data necessary to specify the case, and the structure
 is illustrated by the following example: 
 \begin{verbatim}
 14.8                       ;INCIDENT ENERGY (IN LAB)
-56 	  26                   ;TARGET A , Z
+56      26                   ;TARGET A , Z
  1     0                   ;PROJECTILE A, Z
 3                          ;NUMBER OF NEUTRONS TO BE EMITTED
 1                          ;NUMBER OF PROTONS TO BE EMITTED
@@ -9092,18 +9091,18 @@ Sao Jose dos Campos, June 2011}
 \item  Parity dependent level densities (HFBCS available)
 \item  Resonance module added
     \begin{itemize} 
-	\item  Parameters from Atlas of Neutron Resonances => MF2
-	\item  Parameter uncertainties => MF32
-	\item  Reproducing thermal cross section uncertainties 
-	\item  Inclusion of arbitrary correlations among gamma-widths and among neutron-widths 
+      \item  Parameters from Atlas of Neutron Resonances => MF2
+      \item  Parameter uncertainties => MF32
+      \item  Reproducing thermal cross section uncertainties 
+      \item  Inclusion of arbitrary correlations among gamma-widths and among neutron-widths 
    \end{itemize}
 \item   New parametrization of EGSM level densities (EGSM = Enhanced/EMPIRE Generalized Superfluid Model)
 \item   New fission model  implemented (Phys. Rev. C 77 (2008) 054601)
 \item   RIPL-3 updates
     \begin{itemize} 
-	\item   Discrete levels library
-	\item   Optical model parameters
-	\item   Microscopic level densities (HFBCS) with parity dependence
+      \item   Discrete levels library
+      \item   Optical model parameters
+      \item   Microscopic level densities (HFBCS) with parity dependence
     \end{itemize}
 \item   ECIS-2006 implemented
 \item   Covariance generation capabilities using Monte Carlo approach or Kalman filter
