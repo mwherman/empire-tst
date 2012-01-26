@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2325 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-26 05:52:29 +0100 (Do, 26 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -226,6 +226,32 @@ C
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
+
+         OPEN (UNIT = 32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN')
+         DO n=2,NCOll(ncalc)
+          elevcc = EEX(n,ncalc)
+          REWIND(32)
+            READ (32,'(A80)') ch_iuf
+            elvr0 = 0.d0
+            DO ilv = 1, NLV(nnuc)
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') 
+     &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
+              DO nbr = 1, ndbrlin
+                READ (32,'(A1)') dum
+              ENDDO
+              if(elvr.gt.elevcc) then
+                nlev = ilv    
+                if(abs(elvr0-elevcc).lt.abs(elvr-elevcc)) nlev = ilv - 1
+C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc 
+                ICOllev(n) = nlev 
+                goto 103
+              endif 
+              elvr0 = elvr 
+            ENDDO
+  103    ENDDO
+         CLOSE(32)  
+
+
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
@@ -327,11 +353,11 @@ C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EXV(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
             WRITE (8,
      ^             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EXV(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
          ENDDO
          CLOSE (32)
@@ -475,15 +501,15 @@ C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
 C--------JOIN finished 
-C
+C                                                                   
          DO k = 1, NVIb(ncalc)
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             k, EXV(k,ncalc), SPInv(k,ncalc), FLOAT(IPAr(k,ncalc))
+     &             k, EXV(k,ncalc), SPInv(k,ncalc),FLOAT(IPArv(k,ncalc))
      &             , NPH(k,ncalc), 0, 0, DEFv(k,ncalc)
             WRITE (8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
      &             ) k, EXV(k,ncalc), SPInv(k,ncalc),
-     &               FLOAT(IPAr(k,ncalc)), NPH(k,ncalc), 0, 0,
+     &               FLOAT(IPArv(k,ncalc)), NPH(k,ncalc), 0, 0,
      &               DEFv(k,ncalc)
          ENDDO
          CLOSE (32)

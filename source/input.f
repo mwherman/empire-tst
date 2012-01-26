@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2320 $
+Ccc   * $Rev: 2325 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-26 04:09:14 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-26 05:52:29 +0100 (Do, 26 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -8742,7 +8742,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                GOTO 500
             ENDIF
             IF (i8p.EQ.0 .AND. xjlvr.EQ.(gspin + 4*delta_k) .AND.
-     &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
+     &          lvpr.EQ.gspar) THEN
                i8p = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv
