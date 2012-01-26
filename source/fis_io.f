@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2301 $
+Ccc   * $Rev: 2323 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Date: 2012-01-26 04:44:19 +0100 (Do, 26 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -128,9 +128,9 @@ C-----wells' parameters provided by code
   150    READ (52,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))',!,f9.3)'
      &     ERR = 200, END = 200) kz, ka, dd,dd,EFB(1),H(1,1), 
      &     dd,EFB(2),H(1,2)
-         write (*,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))' )!,f9.3)'
-     &     kz, ka, dd,dd,EFB(1),H(1,1), 
-     &     dd,EFB(2),H(1,2)        
+C         write (*,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))' )!,f9.3)'
+C     &     kz, ka, dd,dd,EFB(1),H(1,1), 
+C     &     dd,EFB(2),H(1,2)        
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 150        
          CLOSE (52)
 
