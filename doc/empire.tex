@@ -11,7 +11,7 @@
 \makeindex
 \usepackage[dvips]{graphicx}
 \usepackage{amssymb}
-
+\usepackage{color}
 \makeatletter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
@@ -41,12 +41,14 @@ modular system for nuclear reaction calculations and nuclear data evaluation\\
 
 
 \author{
-\texts{\large M. Herman}{\large{} }\\
+\texts{\large M. Herman, S Hoblit}{\large{} }\\
 \textsf{\normalsize NNDC, Brookhaven National Laboratory, Upton, USA}\\
 \textsf{\normalsize e-mail: mwherman@bnl.gov}\\[1mm]
 %
 \textsf{\large R. Capote}{\large{} }\\
-\textsf{\normalsize NDS, International Atomic Energy Agency, Vienna, Austria}\\[1mm]
+\textsf{\normalsize NAPC--Nuclear Data Section, International Atomic Energy Agency, Vienna, Austria}\\
+\textsf{\normalsize e-mail: r.capotenoy@iaea.org}\\[1mm]
+\\[1mm]
 %
 \textsf{\large M. Sin}{\large{} }\\
 \textsf{\normalsize University of Bucharest, Bucharest, Romania}\\[1mm]
@@ -69,9 +71,11 @@ Campos, Brazil }\\[1mm]
 %
 \textsf{\large Young-Sik Cho}{\large{} }\\
 \textsf{\normalsize Korea Atomic Energy Research Institute,  Daejeon, South Korea }\\[1mm]
+\textsf{\large V. Plujko}{\large{} }\\
+\textsf{\normalsize  Taras Schevchenko National University, Kiev, Ukraine}\\[1mm]
 %
 \textsf{\large  V. Zerkin,}{\large{} }\\
-\textsf{\normalsize NDS, International Atomic Energy Agency, Vienna, Austria}\\[1mm]
+\textsf{\normalsize NAPC--Nuclear Data Section, International Atomic Energy Agency, Vienna, Austria}\\[1mm]
 }
 \maketitle
 \begin{abstract}
@@ -80,8 +84,8 @@ nuclear models, and designed for calculations over a broad range of
 energies and incident particles. 
 The system can be used for theoretical investigations of nuclear reactions 
 as well as for nuclear data evaluation work.
-A projectile can be a photon a nucleon, a light or
-heavy ion. The energy range starts just above the resonance region
+Photons, nucleons, deuterons, tritons, hellions ($^3$He), $\alpha$'s, and light or
+heavy ions can be selected as projectiles. The energy range starts just above the resonance region
 in the case of a neutron projectile, and extends up to few hundred
 MeV for heavy ion induced reactions. The code accounts for the major
 nuclear reaction models, such as optical model, Coupled Channels
@@ -109,16 +113,12 @@ data in computational format C4 that are automatically retrieved during the
 calculations. 
 
 EMPIRE contains  the resonance module that retrieves data from the electronic version of the Atlas of Neutron Resonances by Mughabghab (not provided with the EMPIRE distribution), to produce resonance section and related covariances for the ENDF-6 formatted files. 
-EMPIRE can be used to determine covariances of the calculated data using either sensitivity matrices along with the KALMAN code or employing Monte Carlo approach to produce model  model generated covariances. In both cases  experimental data can be taken into account, either directly (KALMAN) or by using Monte Carlo prior and covariance in the least square fitting GANDR system.
+EMPIRE can be used to determine covariances of the calculated data using either sensitivity matrices along with the KALMAN code or employing Monte Carlo approach to produce  model generated covariances. In both cases  experimental data can be taken into account, either directly (KALMAN) or by using Monte Carlo prior and covariance in the least square fitting GANDR system.
 
-Publication quality
-graphs can be obtained using the powerful and flexible plotting package
-ZVView. 
-Interactive plots with ZVView comparing experimental results with calculations
-can be produced with ENDVER modules. 
-The graphic user interface, written in Tcl/Tk is linked to the rest of
-the system through bash-shell (UNIX) scripts and provides for
-easy operation of the system. 
+Publication quality graphs can be obtained using the powerful and flexible plotting package ZVView. Interactive plots with ZVView comparing experimental results with calculations can be produced with ENDVER modules. 
+
+The backbone of the EMPIRE system are bash-shell UNIX scripts that provide for seamless console operation of EMPIRE on Linux, Mac OS X, and Windows with gfortran installed. Additionally,  the graphical interface,  provides for an
+easy operation of the system on Linux and Mac OS X.
 
 
 \end{abstract}
@@ -258,6 +258,9 @@ in the input file).
 \item [{\textbf{RESONANCE}}] Resonance module for extracting data from the Atlas of Neutron Resonances and producing ENDF-6 formatted resonance file with covariances (written by Young-Sik Cho).
 \item [{\textbf{STAN}}] Modern f90 replacement for STANEF (written by S. Hoblit).
 \end{labeling}
+This manual consists of three parts: (i) outline of the nuclear reaction models used in the calculations, (ii) description of the EMPIRE code structure, parameter libraries, input instructions and outputs, and (iii) working notes containing practical  suggestions that should be helpful for judicious execution of  the code, choosing proper reaction models, avoiding possible errors and correct interpretation of the results.   
+
+To facilitate further reading we anticipate our discussion by providing a brief description of the EMPIRE code operation and naming convention that will be used through the manual. The code depends on the naming scheme which has to be strictly preserved. The work is organized by projects;  each project has a user assigned name (e.g., {\color{cyan}Fe56-project}), which forms a root of all the project files (e.g.,{ \color{cyan}Fe56-project.inp},   { \color{cyan}Fe56-project-lev.col}, { \color{cyan}Fe56-project.lst}, ...). All project files are located in the same working directory selected by the user.  
 
 The next chapter outlines nuclear reaction models used in the code.
 Both, the structure of the code and the input/output files are described
@@ -1412,9 +1415,11 @@ There was no attempt to treat MSD\index{MSD} population of discrete
 levels more accurately as this kludge can be removed by using strict
 Coupled-Channels\index{Coupled-Channels} calculations.
 
-\chapter{Classical preequilibrium models}
+\chapter{Phenomenological preequilibrium models}
+Two  preequilibrium models are described in this section, the classical exciton model including nucleon, cluster and gamma emissions, and the Monte Carlo DDHMS inspired by Blann's Hybrid model that is limited to nucleon emission. The former includes only the first pre equilibrium emitted particle and is therefore valid up to about 50 MeV. The latter also includes multiple preequilibrium emission, which extends its applicability to much higher energies.
+The exciton model code DEGAS implementing full angular momentum coupling  in pre equilibrium emission of nucleons and gammas  has been temporarily disabled  due to incompatibilities with the current system. 
 
-\section{Exciton model code PCROSS}\label{PCROSS}}
+\section{Exciton model (PCROSS code)}\label{PCROSS}}
 The module PCROSS includes the pre-equilibrium mechanism as defined in the
 exciton model~\cite{Griffin:66}, as based on the solution of the
 master equation~\cite{Cline:71} in the form proposed by Cline~\cite{Cline:72}
@@ -1632,13 +1637,7 @@ libraries.}
 \end{figure}
 
 
-\section{Exciton model code DEGAS}
-The code DEGAS has been temporarily removed from the EMPIRE  due to
-incompatibilities with the current system. This module will be reinstated when
-these  issues are fixed. 
-
-
-\section{Monte Carlo Preequilibrium\label{DDHMS}}
+\section{Monte Carlo Preequilibrium (DDHMS code) \label{DDHMS}}
 
 The Hybrid Monte-Carlo Simulation (HMS) approach to the pre-equilibrium
 emission of nucleons has been formulated by M. Blann~\cite{Blann-HMS} as a
@@ -1770,6 +1769,106 @@ contribution in the calculations reported in Fig.~\ref{pb208HMS}.
 simulation, to neutron spectrum from the $^{208}$Pb(n,xn) reaction at 14.6~MeV.}
 \label{pb208HMS}
 \end{figure}
+
+\section{Compatibility of preequilibrium models }
+
+Possible inclusions of different preequilibrium models in a single
+calculation run rises a problem of double-counting. The current version
+of EMPIRE has 4 modules for preequilibrium decay: MSD\index{MSD},
+MSC\index{MSC},  HMS\index{HMS} and PCROSS\index{PCROSS}.
+While MSD and MSC describe different reaction mechanisms and are complementary,
+neither of them is compatible with  HMS or PCROSS. Therefore,
+neither of the latter three can be used together with MSD or MSC in
+the same exit channel. Also  HMS and PCROSS mutually exclude
+each other. However, these models can be combined if used in different
+exit channels, e.g., neutron inelastic scattering may be calculated
+using MSD\&MSC while the emission of protons can be treated within
+the exciton model using PCROSS. We also note that summing $\gamma$-emission
+spectra from more than one of the three possible mechanisms (MSC\index{MSC}
+(GST=1 option),  PCROSS) would be obvious
+multiple-counting and must be avoided.
+
+An additional complication is introduced by the possibility of using
+ECIS06\index{ECIS}, which calculates Coupled-Channel\index{Coupled-Channels}
+contributions to the collective discrete levels. In general, these
+contributions are so strong that adding those provided by the exciton
+model leave the results practically unchanged. Thus, ECIS06 can be
+considered compatible HMS\index{HMS} since the latter does not include
+collective excitations. By the same token ECIS06\index{ECIS} is not
+compatible with MSD\index{MSD} as both include collectivity of discrete
+levels. However, ECIS06 and MSD can be combined providing that only
+the continuum contribution from the MSD is retained.
+
+To avoid double-counting when combining different models EMPIRE applies
+the following priorities:
+
+\begin{description}
+\item [{ECIS06\index{ECIS}}] provides inelastic scattering to collective
+levels independently of the settings for the remaining models. 
+\item [{MSD\index{MSD}}] provides inelastic continuum independently of
+other settings. Inelastic to the discrete levels is suppressed if
+ECIS06 is active. Note the provision for the second-chance preequilibrium
+emission after MSD.
+\item [{MSC\index{MSC}}] results are taken for the inelastic to the continuum.
+Charge-exchange to the continuum is accepted if not suppressed by
+use of HMS\index{HMS} or PCROSS\index{PCROSS}. 
+\item [{HMS\index{HMS}}] provides inelastic and charge-exchange to the
+continuum and to discrete levels if MSD\index{MSD} and MSC\index{MSC}
+are not active. Otherwise only the charge-exchange contribution is
+used. Suppresses PCROSS results for particle emission
+if such was calculated. HMS does not provide $\gamma$-rays, thus
+PCROSS or MSC results are adopted. 
+\item [{PCROSS\index{PCROSS}}] provides inelastic and charge-exchange
+to the continuum if these are not provided by any of the above listed
+models. Provides $\gamma$-emission if not suppressed by $\gamma$-emission
+from MSC. Provides preequilibrium emission of clusters independently
+of settings for other models.
+\end{description}
+This scheme allows the user to activate any combination of reaction
+mechanisms while the code ensures the internal consistency of calculations.
+Overlapping contributions from various models are summed up and the
+Compound Nucleus contribution is added in all cases. A concise summary
+explaining use of the models is printed as a table at the beginning
+of the lengthy output \emph{{*}.lst}. An example is reproduced below:
+
+\hfill{}
+
+\texttt{Use of direct and preequilibrium models }
+
+\texttt{-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}- }
+
+\texttt{Exit channel ECIS MSD MSC HMS PCROSS }
+
+\texttt{neut. disc. ~0~~~ 1~~ 0~~~0~~~~0 }
+
+\texttt{neut. cont. ~0~~~ 1~~ 1~~ 0~~~~0}
+
+\texttt{prot. disc. ~0~~~ 0~~ 0~~ 0~~~~0}
+
+\texttt{prot. cont. ~0~~~ 0~~ 0~~ 0~~~~1}
+
+\texttt{gammas ~~~~~~~~0~~~ 0~~ 0~~ 0~~~~1}
+
+\texttt{alpha cont.~~ 0~~~ 0~~ 0~~ 0~~~~1}
+
+\hfill{}
+
+\noindent 1 indicates that the contribution of the model is included,
+and 0 means that it is not calculated or ignored. In the above example,
+MSD\index{MSD}, MSC\index{MSC} and PCROSS\index{PCROSS}
+were invoked, and priority rules caused PCROSS neutron contribution
+to be suppressed  leaving emission of protons and
+clusters.
+
+Selecting DIRECT =1 (or 2 or 3), MSD=1, MSC=1, PCROSS=1.5 is supposed
+to give the best results at low incident energies (say up to 30 MeV).
+At higher incident energies the preference should be given to the
+HMS\index{HMS} model, which is the only one that accounts for the multiple preequilibrium
+emission. When selecting appropriate models the user should take into
+account that not all of them provide the same set of observables.
+For example, preequilibrium
+$\gamma$-emission can be obtained from  PCROSS or MSC\index{MSC}
+but not from HMS. 
 
 
 
@@ -3265,317 +3364,20 @@ cross section. Such a set of data is provided for each fissioning
 nucleus. 
 
 
-\section{Model compatibility }
-
-Possible inclusions of different preequilibrium models in a single
-calculation run rises a problem of double-counting. The current version
-of EMPIRE has 4 modules for preequilibrium decay: MSD\index{MSD},
-MSC\index{MSC},  HMS\index{HMS} and PCROSS\index{PCROSS}.
-While MSD and MSC describe different reaction mechanisms and are complementary,
-neither of them is compatible with  HMS or PCROSS. Therefore,
-neither of the latter three can be used together with MSD or MSC in
-the same exit channel. Also  HMS and PCROSS mutually exclude
-each other. However, these models can be combined if used in different
-exit channels, e.g., neutron inelastic scattering may be calculated
-using MSD\&MSC while the emission of protons can be treated within
-the exciton model using PCROSS. We also note that summing $\gamma$-emission
-spectra from more than one of the three possible mechanisms (MSC\index{MSC}
-(GST=1 option),  PCROSS) would be obvious
-multiple-counting and must be avoided.
-
-An additional complication is introduced by the possibility of using
-ECIS06\index{ECIS}, which calculates Coupled-Channel\index{Coupled-Channels}
-contributions to the collective discrete levels. In general, these
-contributions are so strong that adding those provided by the exciton
-model leave the results practically unchanged. Thus, ECIS06 can be
-considered compatible HMS\index{HMS} since the latter does not include
-collective excitations. By the same token ECIS06\index{ECIS} is not
-compatible with MSD\index{MSD} as both include collectivity of discrete
-levels. However, ECIS06 and MSD can be combined providing that only
-the continuum contribution from the MSD is retained.
-
-To avoid double-counting when combining different models EMPIRE applies
-the following priorities:
-
-\begin{description}
-\item [{ECIS06\index{ECIS}}] provides inelastic scattering to collective
-levels independently of the settings for the remaining models. 
-\item [{MSD\index{MSD}}] provides inelastic continuum independently of
-other settings. Inelastic to the discrete levels is suppressed if
-ECIS06 is active. Note the provision for the second-chance preequilibrium
-emission after MSD.
-\item [{MSC\index{MSC}}] results are taken for the inelastic to the continuum.
-Charge-exchange to the continuum is accepted if not suppressed by
-use of HMS\index{HMS} or PCROSS\index{PCROSS}. 
-\item [{HMS\index{HMS}}] provides inelastic and charge-exchange to the
-continuum and to discrete levels if MSD\index{MSD} and MSC\index{MSC}
-are not active. Otherwise only the charge-exchange contribution is
-used. Suppresses PCROSS results for particle emission
-if such was calculated. HMS does not provide $\gamma$-rays, thus
-PCROSS or MSC results are adopted. 
-\item [{PCROSS\index{PCROSS}}] provides inelastic and charge-exchange
-to the continuum if these are not provided by any of the above listed
-models. Provides $\gamma$-emission if not suppressed by $\gamma$-emission
-from MSC. Provides preequilibrium emission of clusters independently
-of settings for other models.
-\end{description}
-This scheme allows the user to activate any combination of reaction
-mechanisms while the code ensures the internal consistency of calculations.
-Overlapping contributions from various models are summed up and the
-Compound Nucleus contribution is added in all cases. A concise summary
-explaining use of the models is printed as a table at the beginning
-of the lengthy output \emph{{*}.lst}. An example is reproduced below:
-
-\hfill{}
-
-\texttt{Use of direct and preequilibrium models }
-
-\texttt{-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}- }
-
-\texttt{Exit channel ECIS MSD MSC HMS PCROSS }
-
-\texttt{neut. disc. ~0~~~ 1~~ 0~~~0~~~~0 }
-
-\texttt{neut. cont. ~0~~~ 1~~ 1~~ 0~~~~0}
-
-\texttt{prot. disc. ~0~~~ 0~~ 0~~ 0~~~~0}
-
-\texttt{prot. cont. ~0~~~ 0~~ 0~~ 0~~~~1}
-
-\texttt{gammas ~~~~~~~~0~~~ 0~~ 0~~ 0~~~~1}
-
-\texttt{alpha cont.~~ 0~~~ 0~~ 0~~ 0~~~~1}
-
-\hfill{}
-
-\noindent 1 indicates that the contribution of the model is included,
-and 0 means that it is not calculated or ignored. In the above example,
-MSD\index{MSD}, MSC\index{MSC} and PCROSS\index{PCROSS}
-were invoked, and priority rules caused PCROSS neutron contribution
-to be suppressed  leaving emission of protons and
-clusters.
-
-Selecting DIRECT =1 (or 2 or 3), MSD=1, MSC=1, PCROSS=1.5 is supposed
-to give the best results at low incident energies (say up to 30 MeV).
-At higher incident energies the preference should be given to the
-HMS\index{HMS} model, which is the only one that accounts for the multiple preequilibrium
-emission. When selecting appropriate models the user should take into
-account that not all of them provide the same set of observables.
-For example, preequilibrium
-$\gamma$-emission can be obtained from  PCROSS or MSC\index{MSC}
-but not from HMS. 
-
-\part(STRUCTURE  OF  EMPIRE CODE)
-
-\section{Spectra of recoils}
-
-Energy spectra of recoils are calculated taking into account correlations
-between the excitation energy of the nucleus and the emission energy
-of the particle. In order to do so, the recoil energies are followed
-throughout the deexcitation cascade. A recoil spectrum is ascribed
-to each excitation energy bin for each nucleus involved in the decay
-chain. Emission of a particle depletes the spectrum bin of the parent
-and accumulate in the recoil spectrum bin of the daughter nucleus.
-$\gamma$ emissions are assumed to produce no recoil but shift respective
-portions of the recoil spectrum to the the lower excitation energy
-bin in the same nucleus. Transitions to discrete levels are summed
-directly to the ground state recoil spectrum, since particle emission
-from discrete levels is not considered and $\gamma$-emission does
-not change the recoil spectrum. At the end of the decay cascade all
-the recoil spectra for energy bins embedded in the continuum are null,
-and the final result is given by the ground state recoil spectra.
-
-The following assumptions are made in the course of these calculations:
-
-\begin{itemize}
-\item Particle emission from a nucleus at a certain excitation energy is
-independent of the actual recoil energy of the nucleus. The center
-of mass motion of a nucleus (recoil) is assumed to have no effect
-on the emission of particles, as the latter involves internal degrees
-of freedom. Statistically, any emission depletes the recoil spectrum
-of the parent uniformly, so that for each emission the whole recoil
-spectrum corresponding to the parent energy bin is reduced by a constant
-factor.
-\item Compound Nucleus emissions are isotropic and uncorrelated between
-each other. However, forward peaked angular distributions of nucleons
-emitted through the preequilibrium or direct mechanisms and the center
-of mass motion of the first Compound Nucleus are retained and taken
-into account in constructing recoil spectra. We note that recoils
-are given in the laboratory system.
-\end{itemize}
-Ejectile emission energy is denoted by $\varepsilon$, excitation
-energy by $E$, nucleus recoil energy by $e$, and $r$ and $p$ subscripts
-are used to mark residuals and parent nuclei respectively. The $d\sigma(e,E)/de$
-stands for the recoil spectrum at the excitation energy $E$ summed
-over spin and parity. Consider a single emission of an ejectile with
-energy $\varepsilon$; the contribution of this emission to the recoil
-spectrum of the residual can be quantified. We apply momentum conservation
-in binary reactions to calculate the {}``recoil kick'' energy ($\Delta e$)
-for this single emission event \begin{equation}
-\Delta e=\frac{m_{ejc}}{m_{r}}\varepsilon,\label{Erec}\end{equation}
-in which $m_{ejc}$ and $m_{r}$ are the ejectile and recoil mass
-respectively. Similarly, the contribution to the residue recoil spectrum
-is obtained from the emission spectrum by applying the reverse factor\begin{equation}
-\frac{d\sigma(\Delta e,E_{r})}{d(\Delta e)}=\frac{m_{r}}{m_{ejc}}\frac{d\sigma(\varepsilon,E_{r})}{d\varepsilon}.\label{CSkick}\end{equation}
-The recoil energy of the residue is obtained by adding the ejectile
-momentum and the momentum of the parent nucleus vectorially. We can
-express the residue recoil energy $e_{r}$ through the {}``recoil
-kick'' (Eq. \ref{Erec}) and the recoil energy of the parent $e_{p}$
-before emission
-
-\begin{equation}
-e_{r}(e_{p},\theta)=\Delta e+e_{p}+2\sqrt{\Delta e\cdot e_{p}}\cos(\theta),\label{Eresrec}\end{equation}
- where $\theta$ is the angle between the momentum of the parent and
-the {}``recoil kick''. Thus the contribution to the recoil spectrum
-in the residue can be defined as \begin{equation}
-\frac{d\sigma(e_{r},E_{r})}{de_{r}}=\int_{0}^{\infty}\int_{0}^{\pi}\delta\left(e_{r}-e_{r}(e_{p},\theta)\right)\left[\frac{d\sigma(e_{p},E_{p})}{de_{p}}\right]_{n}\frac{d\sigma(\Delta e,E_{r},\theta)}{d(\Delta e)}\sin(\theta)d\theta de_{p}.\label{CSrec}\end{equation}
-where the $\delta$ function ensures selection of the correct recoil
-energy and the square brackets $\left[\right]_{n}$ around the parent
-recoil spectrum indicate that the integral was normalized to unity:\begin{equation}
-\int_{0}^{\infty}\frac{d\sigma(e_{p},E_{p})}{de_{p}}de_{p}=1.\end{equation}
-Integration in Eq. \ref{CSrec} is limited by the range of possible
-recoil energies. We note that Eq. \ref{CSrec} distributes the recoil
-cross section related to a single emission event over various recoil
-energies. The reason for this spread is two-fold: (i) vectorial coupling
-of momenta and (ii) recoil spectrum of the parent nucleus. Even in
-the case of a delta-function parent spectrum (the first CN), the residual
-spectrum covers the range from $\Delta e+e_{p}-2\sqrt{\Delta e\cdot e_{p}}$
-to $\Delta e+e_{p}+2\sqrt{\Delta e\cdot e_{p}}$ , as results from
-Eq. \ref{Eresrec}. The $d\sigma(\Delta e,E_{r},\theta)/d(\Delta e)$
-is assumed to be isotropic ($\theta$ independent) except for the
-MSD\index{MSD} and direct inelastic contributions, for which angular
-distributions are preserved in Eq. \ref{CSrec}. The recoil spectrum
-of the Compound Nucleus is single valued and differs from zero only
-at the energy of the Center of Mass motion. This is also the first-parent
-spectrum to which Eq. \ref{CSrec} is sequentially applied. We note
-that Eq. \ref{CSrec} refers to the emissions of a single type ejectile
-with a given emission energy. Eq. \ref{CSrec} is  applied to all
-possible emissions including summation over different ejectile types
-and parent/residue excitation energies. 
-
-
-\section{Exclusive spectra}
-
-EMPIRE may rearrange emission spectra to conform to the ENDF representation,
-which require that for a given reaction all pertinent subsequent emissions
-are summed up to produce effective spectra (for each ejectile) associated
-with the reaction. For example, neutron spectrum from the (n,2n) reaction
-should contain a sequence of two neutron emissions, which is followed
-by the $\gamma$-cascade only. Thus the contribution of the first
-neutron should be subtracted from the (n,n) and added to the (n,2n)
-spectrum. 
-
-An new algorithm for calculation of the exclusive spectra has been
-developed and implemented in EMPIRE-3.1. It is based on the concept
-of the 'population spectra', also used for the recoils, and avoids
-approximations inherent in the previous method. The new algorithm
-is more precise, never produces negative cross sections, and can treat
-an arbitrary number of emissions.
-
-We want to calculate the populations and exclusive cross sections
-obtained from the statistical decay of nuclei remaining after a series
-of direct/pre-equilibrium reactions. We represent the properties of
-a nuclear state as $\alpha=(E_{\alpha}^{*},\, I_{\alpha},\,\pi_{\alpha},\, Z_{\alpha},\, A_{\alpha})$
-and that of an ejectile as $\beta=(e_{\beta},\, j_{\beta},\, l_{\beta},\, z_{\beta},\, a_{\beta})$.
-That is, we assume a complete description of a nuclear state, in terms
-of excitation energy, angular momentum, parity and charge and mass
-numbers, and of the emitted particle, in terms of emission energy,
-total and orbital angular momenta and charge and mass numbers. We
-do not take gamma emission into account. We write the differential
-occupation spectrum, that is, the differential (in energy) cross section/occupation
-of the state $\alpha$, as $POP(\alpha)$, with the initial spectrum
-obtained from the absorption/direct reaction as $POP_{0}(\alpha)$.
-We can determine the differential occupation of a given state by following
-the decay chain. In terms of the predecessors $\alpha^{\prime}$ of
-the nucleus in question, we can write\[
-POP(\alpha)=\sum_{\alpha\prime,\beta}\Pi(\alpha,\alpha^{\prime};\beta)\, POP(\alpha^{\prime})+POP_{0}(\alpha)\,,\]
-where $\Pi(\alpha,\alpha^{\prime};\beta)$ is the usual Hauser-Feshbach
-transition element,\[
-\Pi(\alpha,\alpha^{\prime};\beta)=\frac{\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}},j_{\tilde{\beta}},l_{\tilde{\beta}})}\]
- where $\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})$ is the density
-of states of the residual nucleus of spin $I_{\alpha}$, parity $\pi_{\alpha}$
-and excitation energy $E_{\alpha}^{*}=E_{\alpha^{\prime}}^{*}-B_{\beta}-e_{\beta}$,
-with $E_{\alpha^{\prime}}^{*}$ the excitation energy of the initial
-compound nucleus and $B_{\beta}$ the separation energy of the emitted
-particle $\beta$. We assume that the transmission factor
-$\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})$
-can be written in terms of the spherical optical model transmission
-coefficients in channel $\beta$, $T_{\beta}^{j_{\beta}l_{\beta}}(e_{\beta})$.
-It takes the form \[
-\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})=\frac{(1+(-1)^{l_{\beta}}\pi_{\alpha}\pi_{\alpha^{\prime}})}{2}T_{\beta}^{j_{\beta}l_{\beta}}(\varepsilon_{\beta})\,,\]
- where the factor in parentheses ensures that parity is conserved. 
-
-We can simplify these expressions slightly by including the sums over
-the angular momentum of the emitted particle in the transmission factor.
-We write\[
-POP(\alpha)=\sum_{\alpha\prime,\beta}\Pi(\alpha,\alpha^{\prime};\bar{\beta})\, POP(\alpha^{\prime})+POP_{0}(\alpha)\,,\]
-with \[
-\Pi(\alpha,\alpha^{\prime};\bar{\beta})=\frac{\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}})}\,,\]
-and $\bar{\beta}=(e_{\beta},\, z_{\beta},\, a_{\beta})$, where we
-now have \[
-\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})=\sum_{j=|I_{\alpha}-I_{\alpha^{\prime}}|}^{I_{\alpha}+I_{\alpha^{\prime}}}\sum_{l=|j-s_{\beta}|}^{j+s_{\beta}}\frac{(1+(-1)^{l}\pi_{\alpha}\pi_{\alpha^{\prime}})}{2}T_{\beta}^{jl}(\varepsilon_{\beta})\,,\]
-after taking into account angular momentum conservation when defining
-the sums.
-
-We also wish to calculate exclusive cross sections, which we define
-as the double differential cross section/occupation for obtaining
-a nucleus in the state $\alpha$ after emitting a particle $\beta$.
-This cross section, which we write as $POPcse(\alpha,\,\beta)$, takes
-into account all emissions of a particle $\beta$ that lead to the
-final state $\alpha$. By following the decay chain, the exclusive
-cross section $POPcse(\alpha,\,\beta)$ can be obtained as, \begin{eqnarray*}
-POPcse(\alpha,\beta) & = & \sum_{\alpha^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\beta\right)POP\left(\alpha^{\prime}\right)+POPcse_{0}(\alpha,\beta)\\
- &  & \qquad\qquad+\sum_{\alpha^{\prime}\beta^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\beta^{\prime}\right)POPcse\left(\alpha^{\prime},\beta\right)\,,\end{eqnarray*}
-where $POPcse_{0}(\alpha,\beta)$ is the contribution of the absorption/direct
-reaction. The expression for the exclusive cross section has two additional
-terms. The first is just that of a transition to $\alpha$ through
-emission of the particle $\beta$, which is proportional to the transition
-element $\Pi\left(\alpha,\alpha^{\prime};\beta\right)$. The second
-is the contribution from all anterior emissions of a particle $\beta$
-that, in the last transition, lead to the state $\alpha$. This can
-be written in terms of the exclusive cross sections of the predecessors,
-$POPcse\left(\alpha^{\prime},\beta\right)$. 
-
-We can immediately sum over the emitted particle angular momenta,
-$j_{\beta}$ and $l_{\beta}$, to write the equation defining the
-exclusive cross section as \begin{eqnarray*}
-POPcse(\alpha,\bar{\beta}) & = & \sum_{\alpha^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\bar{\beta}\right)POP\left(\alpha^{\prime}\right)+POPcse_{0}(\alpha,\bar{\beta})\\
- &  & \qquad\qquad+\sum_{\alpha^{\prime}\bar{\beta}^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\alpha^{\prime},\bar{\beta}\right)\,.\end{eqnarray*}
-Ideally, we would also like to obtain expressions summed over $I_{\alpha}$ and
-$\pi_{\alpha}$ for both $POP(\alpha)$ and $POPcse(\alpha,\bar{\beta})$.
-However, for this to be possible, the summed transition element\[
-\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})=\frac{\sum_{I_{\alpha},\pi_{\alpha}}\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}})}\]
-would have to be independent of $I_{\alpha^{\prime}}$ and $\pi_{\alpha^{\prime}}$.
-In general, this is not the case, so that the general equations should
-be used. In EMPIRE, the general equation is used to determine $POP(\alpha)$
-but not $POPcse(\alpha,\bar{\beta}$). In particular, the angular
-momentum dependence of the $POPcse(\alpha^{\prime},\bar{\beta}$)
-contributions to $POPcse(\alpha,\bar{\beta}$) are neglected. We could easily avoid this approximation but calculation time would grow by orders of magnitude  - the increase that would not be justified by more precise splitting of inclusive spectra into its exclusive components.
-
-When the angular momentum dependence can be neglected, the expressions
-reduce to Weisskopf-Ewing ones. This is possible when we can approximate
-the density of states as\[
-\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\approx\frac{1}{2}\rho(E_{\alpha}^{*},I_{\alpha})\approx\frac{1}{2}(2I_{\alpha}+1)\rho(E_{\alpha}^{*},0)\]
-for the states occupied in the reaction. It is then possible to reduce
-the summed transition element to \[
-\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})=\frac{(2s_{\beta}+1)\mu_{\beta}\varepsilon_{\beta}\sigma_{\beta}(\varepsilon_{\beta})\rho(E_{\alpha}^{*},0)}{\sum_{\tilde{\alpha}\tilde{\beta}}\int d\varepsilon_{\tilde{\beta}}\:(2s_{\tilde{\beta}}+1)\mu_{\tilde{\beta}}\varepsilon_{\tilde{\beta}}\sigma_{\tilde{\beta}}(\varepsilon_{\tilde{\beta}})\rho(E_{\tilde{\alpha}}^{*},0)}\]
-and write the summed equations as\[
-POP(\bar{\alpha})=\sum_{\alpha\prime,\beta}\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})\, POP(\bar{\alpha}^{\prime})+POP_{0}(\bar{\alpha})\]
-and \begin{eqnarray*}
-POPcse(\bar{\alpha},\bar{\beta}) & = & \sum_{\alpha^{\prime}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}\right)POP\left(\bar{\alpha}^{\prime}\right)+POPcse_{0}(\bar{\alpha},\bar{\beta})\\
- &  & \qquad\qquad+\sum_{\alpha^{\prime}\bar{\beta}^{\prime}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\bar{\alpha}^{\prime},\bar{\beta}\right)\,.\end{eqnarray*}
+\part{STRUCTURE  OF  EMPIRE CODE}
 
 
 \chapter{Code} \label{Chap:code}
-
+The full EMPIRE system resides in a user defined directory (e.g., \emph{empire/})  which name is specified in an environment variable EMPIREDIR.     
+We remind that  the operation of the code depends on the file naming scheme which has to be strictly preserved.   The work is organized by projects;  each project has a user assigned name (e.g., {\color{cyan}Fe56-project}), which forms a root of all the project files (e.g.,{ \color{cyan}Fe56-project.inp},   { \color{cyan}Fe56-project-lev.col}, { \color{cyan}Fe56-project.lst}, ...). All project files are located in the same working directory selected by the user.  
 
 \section{Directory structure}
 
-The full  EMPIRE-3.1 system has the following directory structure (folders preceded by '/'):
+The full  EMPIRE system has the following directory structure (subdirectories preceded by '/'):
 
 \begin{itemize}
-\item \textbf{/empire}
-
+\item \textbf{user defined directory (e.g., \emph{empire/})} 
+includes the following files and subdirectories:
 \begin{itemize}
 \item \textbf{Makefile} - Makefile used to compile the whole EMPIRE package (physics core in /source and all utility codes in the /util directory)
 \item \textbf{/source} - source of the EMPIRE physics code divided into modules and
@@ -3763,7 +3565,7 @@ command in the following sub-directories:
 Users have to ensure that FORTRAN compiler is called properly. To
 this end, one should edit \emph{Makefile} files in the above mentioned
 directories and fix calls to FORTRAN compiler. By default \emph{gfortran}
- is used on Linux, MacOSX and Windows. Several other typical options are included in the
+ is used on Linux, MacOS X and Windows. Several other typical options are included in the
 \emph{Makefile} files. These are commented with the \# character in
 the first column. Users should remove this character on the line corresponding
 to the desired compiler and comment a line with \emph{gfortran} instead.
@@ -3783,7 +3585,7 @@ various compilers.
 For full functionality EMPIRE requires the following software:
 
 \begin{itemize}
-\item FORTRAN (GNU gfortran 4.4 or later is recommended as a  freely available compiler for all platforms, including Linux, Mac OSX and Windows; in case of Windows gfortran 4.4 contains basic bash shell, awk, and gcc that are sufficient to run EMPIRE scripts) 
+\item FORTRAN (GNU gfortran 4.4 or later is recommended as a  freely available compiler for all platforms, including Linux, Mac OS X and Windows; in case of Windows gfortran 4.4 contains basic bash shell, awk, and gcc that are sufficient to run EMPIRE scripts) 
 \item C-compiler 
 \item C$^{++}$-compiler (for the kercen module only)
 \item gnuplot (for plotting only)
@@ -4203,39 +4005,38 @@ Routines involved in fission calculations, including fitting numerical barriers 
 \subsection*{optmand.f}
 This module replaces ECIS when soft-rotator CC calculations are requested for selected RIPL potentials.   
 
-\section{Flow of the calculations}
+\section{Flow of  calculations}
 
 Listed below are the essential steps in the calculation of the nucleon induced reaction 
 involving preequilibrium and Hauser-Feshbach decay: 
 
 \begin{enumerate}
 \item read EMPIRE input file (\emph{.inp})
-
 \item construct table of nuclei involved
-
-\item read from the input parameter library (or input/output files if they
-exist)
+\item read from the input parameter library (or stored local input  files if they exist)
 \begin{enumerate}
 \item optical model parameters
 \item discrete levels
-\item binding energies 
+\item collective levels
+\item masses and binding energies 
 \item level density parameters or pre-calculated tables of level densities
 \item fission barrier parameters (for fissionable nuclei)
 \item shell corrections
 \item ground state deformations
-\item $\gamma$-strength function parameters 
+\item low energy observables (resonance spacings, $\gamma$-strength functions, $\Gamma_\gamma$) 
 \end{enumerate}
 
 \item calculate 
 \begin{enumerate}
-\item transmission coefficients , 
-\item level densities\index{level densities}, 
-\item fission barriers
+\item optical model including direct excitation of discrete levels if requested
+\item pre equilibrium emission of $\gamma$'s, nucleons and clusters
+\item compound nucleus decay including full $\gamma$-cascade and fission
+\item prompt fission spectra
 \end{enumerate}
 
 \item retrieve experimental data from the EXFOR library.
 
-\item write input/output files
+\item write local input files
 \begin{enumerate}
 \item \emph{.c4}
 \item \emph{-omp.dir}
@@ -4252,12 +4053,9 @@ exist)
 \item \emph{-}
 \item \emph{-} NEED TO COMPLETE THIS!!!
 
-\end{enumerate}
 
-\item determine fusion cross section and direct inelastic scattering (code
-ECIS might be invoked twice if CC and DWBA calculations are requested)
-
-\item select the compound nucleus for consideration.
+\item Determine optical model cross sections including direct excitation of collective levels if requested:  fusion cross section and direct inelastic scattering are calculated (codes
+ECIS or OPTMAN).
 
 \item{calculate preequilibrium emission (usually not all of the below listed PE models are used; in case of competing PE models internal selection rules are applied to select specific contribution from a single model and suppress those from the other models)}
 \begin{enumerate}
@@ -4294,6 +4092,28 @@ with decreasing neutron number are considered again. In the Z-N plane
 the calculations are performed row-wise from the top-right corner
 (compound nucleus) to the left. When a row is completed the one below
 is considered.
+
+\item select the compound nucleus for consideration.
+\item write input/output files
+\begin{enumerate}
+\item \emph{.c4}
+\item \emph{-omp.dir}
+\item \emph{-omp.ripl}
+\item \emph{.lev}
+\item \emph{-lev.col}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-}
+\item \emph{-} NEED TO COMPLETE THIS!!!
+
+\end{enumerate}
+
+
 
 \item print inclusive spectra, read new incident energy from the input file
 (.\emph{inp}) and repeat steps 4 and 7 through 20.
@@ -5560,6 +5380,261 @@ any of the listed files will open it with an appropriate application.
 
 \section{ENDF formatting}
 
+One of the primary design goals of the EMPIRE code is to perform
+ theoretical calculations in support of nuclear data evaluation.  To this end the code must meet certain requirements that go beyond usual features of similar codes used in pure science, e.g., calculation of nuclear recoils needed for energy balance and exclusive spectra, and ENDF-6 formatting of all calculated physical quantities, such as cross sections, spectra, angular distributions, energy-angle correlated distributions, etc.  
+
+\subsection{Spectra of recoils}
+
+Energy spectra of recoils are calculated taking into account correlations
+between the excitation energy of the nucleus and the emission energy
+of the particle. In order to do so, the recoil energies are followed
+throughout the deexcitation cascade. A recoil spectrum is ascribed
+to each excitation energy bin for each nucleus involved in the decay
+chain. Emission of a particle depletes the spectrum bin of the parent
+and accumulate in the recoil spectrum bin of the daughter nucleus.
+$\gamma$ emissions are assumed to produce no recoil but shift respective
+portions of the recoil spectrum to the the lower excitation energy
+bin in the same nucleus. Transitions to discrete levels are summed
+directly to the ground state recoil spectrum, since particle emission
+from discrete levels is not considered and $\gamma$-emission does
+not change the recoil spectrum. At the end of the decay cascade all
+the recoil spectra for energy bins embedded in the continuum are null,
+and the final result is given by the ground state recoil spectra.
+
+The following assumptions are made in the course of these calculations:
+
+\begin{itemize}
+\item Particle emission from a nucleus at a certain excitation energy is
+independent of the actual recoil energy of the nucleus. The center
+of mass motion of a nucleus (recoil) is assumed to have no effect
+on the emission of particles, as the latter involves internal degrees
+of freedom. Statistically, any emission depletes the recoil spectrum
+of the parent uniformly, so that for each emission the whole recoil
+spectrum corresponding to the parent energy bin is reduced by a constant
+factor.
+\item Compound Nucleus emissions are isotropic and uncorrelated between
+each other. However, forward peaked angular distributions of nucleons
+emitted through the preequilibrium or direct mechanisms and the center
+of mass motion of the first Compound Nucleus are retained and taken
+into account in constructing recoil spectra. We note that recoils
+are given in the laboratory system.
+\end{itemize}
+Ejectile emission energy is denoted by $\varepsilon$, excitation
+energy by $E$, nucleus recoil energy by $e$, and $r$ and $p$ subscripts
+are used to mark residuals and parent nuclei respectively. The $d\sigma(e,E)/de$
+stands for the recoil spectrum at the excitation energy $E$ summed
+over spin and parity. Consider a single emission of an ejectile with
+energy $\varepsilon$; the contribution of this emission to the recoil
+spectrum of the residual can be quantified. We apply momentum conservation
+in binary reactions to calculate the {}``recoil kick'' energy ($\Delta e$)
+for this single emission event \begin{equation}
+\Delta e=\frac{m_{ejc}}{m_{r}}\varepsilon,\label{Erec}\end{equation}
+in which $m_{ejc}$ and $m_{r}$ are the ejectile and recoil mass
+respectively. Similarly, the contribution to the residue recoil spectrum
+is obtained from the emission spectrum by applying the reverse factor\begin{equation}
+\frac{d\sigma(\Delta e,E_{r})}{d(\Delta e)}=\frac{m_{r}}{m_{ejc}}\frac{d\sigma(\varepsilon,E_{r})}{d\varepsilon}.\label{CSkick}\end{equation}
+The recoil energy of the residue is obtained by adding the ejectile
+momentum and the momentum of the parent nucleus vectorially. We can
+express the residue recoil energy $e_{r}$ through the {}``recoil
+kick'' (Eq. \ref{Erec}) and the recoil energy of the parent $e_{p}$
+before emission
+
+\begin{equation}
+e_{r}(e_{p},\theta)=\Delta e+e_{p}+2\sqrt{\Delta e\cdot e_{p}}\cos(\theta),\label{Eresrec}\end{equation}
+ where $\theta$ is the angle between the momentum of the parent and
+the {}``recoil kick''. Thus the contribution to the recoil spectrum
+in the residue can be defined as \begin{equation}
+\frac{d\sigma(e_{r},E_{r})}{de_{r}}=\int_{0}^{\infty}\int_{0}^{\pi}\delta\left(e_{r}-e_{r}(e_{p},\theta)\right)\left[\frac{d\sigma(e_{p},E_{p})}{de_{p}}\right]_{n}\frac{d\sigma(\Delta e,E_{r},\theta)}{d(\Delta e)}\sin(\theta)d\theta de_{p}.\label{CSrec}\end{equation}
+where the $\delta$ function ensures selection of the correct recoil
+energy and the square brackets $\left[\right]_{n}$ around the parent
+recoil spectrum indicate that the integral was normalized to unity:\begin{equation}
+\int_{0}^{\infty}\frac{d\sigma(e_{p},E_{p})}{de_{p}}de_{p}=1.\end{equation}
+Integration in Eq. \ref{CSrec} is limited by the range of possible
+recoil energies. We note that Eq. \ref{CSrec} distributes the recoil
+cross section related to a single emission event over various recoil
+energies. The reason for this spread is two-fold: (i) vectorial coupling
+of momenta and (ii) recoil spectrum of the parent nucleus. Even in
+the case of a delta-function parent spectrum (the first CN), the residual
+spectrum covers the range from $\Delta e+e_{p}-2\sqrt{\Delta e\cdot e_{p}}$
+to $\Delta e+e_{p}+2\sqrt{\Delta e\cdot e_{p}}$ , as results from
+Eq. \ref{Eresrec}. The $d\sigma(\Delta e,E_{r},\theta)/d(\Delta e)$
+is assumed to be isotropic ($\theta$ independent) except for the
+MSD\index{MSD} and direct inelastic contributions, for which angular
+distributions are preserved in Eq. \ref{CSrec}. The recoil spectrum
+of the Compound Nucleus is single valued and differs from zero only
+at the energy of the Center of Mass motion. This is also the first-parent
+spectrum to which Eq. \ref{CSrec} is sequentially applied. We note
+that Eq. \ref{CSrec} refers to the emissions of a single type ejectile
+with a given emission energy. Eq. \ref{CSrec} is  applied to all
+possible emissions including summation over different ejectile types
+and parent/residue excitation energies. 
+
+
+\subsection{Exclusive spectra}
+
+EMPIRE may rearrange emission spectra to conform to the ENDF representation,
+which require that for a given reaction all pertinent subsequent emissions
+are summed up to produce effective spectra (for each ejectile) associated
+with the reaction. For example, neutron spectrum from the (n,2n) reaction
+should contain a sequence of two neutron emissions, which is followed
+by the $\gamma$-cascade only. Thus the contribution of the first
+neutron should be subtracted from the (n,n) and added to the (n,2n)
+spectrum. 
+
+An new algorithm for calculation of the exclusive spectra has been
+developed and implemented in EMPIRE-3.1. It is based on the concept
+of the 'population spectra', also used for the recoils, and avoids
+approximations inherent in the previous method. The new algorithm
+is more precise, never produces negative cross sections, and can treat
+an arbitrary number of emissions.
+
+We want to calculate the populations and exclusive cross sections
+obtained from the statistical decay of nuclei remaining after a series
+of direct/pre-equilibrium reactions. We represent the properties of
+a nuclear state as $\alpha=(E_{\alpha}^{*},\, I_{\alpha},\,\pi_{\alpha},\, Z_{\alpha},\, A_{\alpha})$
+and that of an ejectile as $\beta=(e_{\beta},\, j_{\beta},\, l_{\beta},\, z_{\beta},\, a_{\beta})$.
+That is, we assume a complete description of a nuclear state, in terms
+of excitation energy, angular momentum, parity and charge and mass
+numbers, and of the emitted particle, in terms of emission energy,
+total and orbital angular momenta and charge and mass numbers. We
+do not take gamma emission into account. We write the differential
+occupation spectrum, that is, the differential (in energy) cross section/occupation
+of the state $\alpha$, as $POP(\alpha)$, with the initial spectrum
+obtained from the absorption/direct reaction as $POP_{0}(\alpha)$.
+We can determine the differential occupation of a given state by following
+the decay chain. In terms of the predecessors $\alpha^{\prime}$ of
+the nucleus in question, we can write\[
+POP(\alpha)=\sum_{\alpha\prime,\beta}\Pi(\alpha,\alpha^{\prime};\beta)\, POP(\alpha^{\prime})+POP_{0}(\alpha)\,,\]
+where $\Pi(\alpha,\alpha^{\prime};\beta)$ is the usual Hauser-Feshbach
+transition element,\[
+\Pi(\alpha,\alpha^{\prime};\beta)=\frac{\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}},j_{\tilde{\beta}},l_{\tilde{\beta}})}\]
+ where $\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})$ is the density
+of states of the residual nucleus of spin $I_{\alpha}$, parity $\pi_{\alpha}$
+and excitation energy $E_{\alpha}^{*}=E_{\alpha^{\prime}}^{*}-B_{\beta}-e_{\beta}$,
+with $E_{\alpha^{\prime}}^{*}$ the excitation energy of the initial
+compound nucleus and $B_{\beta}$ the separation energy of the emitted
+particle $\beta$. We assume that the transmission factor
+$\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})$
+can be written in terms of the spherical optical model transmission
+coefficients in channel $\beta$, $T_{\beta}^{j_{\beta}l_{\beta}}(e_{\beta})$.
+It takes the form \[
+\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta},j_{\beta},l_{\beta})=\frac{(1+(-1)^{l_{\beta}}\pi_{\alpha}\pi_{\alpha^{\prime}})}{2}T_{\beta}^{j_{\beta}l_{\beta}}(\varepsilon_{\beta})\,,\]
+ where the factor in parentheses ensures that parity is conserved. 
+
+We can simplify these expressions slightly by including the sums over
+the angular momentum of the emitted particle in the transmission factor.
+We write\[
+POP(\alpha)=\sum_{\alpha\prime,\beta}\Pi(\alpha,\alpha^{\prime};\bar{\beta})\, POP(\alpha^{\prime})+POP_{0}(\alpha)\,,\]
+with \[
+\Pi(\alpha,\alpha^{\prime};\bar{\beta})=\frac{\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}})}\,,\]
+and $\bar{\beta}=(e_{\beta},\, z_{\beta},\, a_{\beta})$, where we
+now have \[
+\tau_{\beta}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})=\sum_{j=|I_{\alpha}-I_{\alpha^{\prime}}|}^{I_{\alpha}+I_{\alpha^{\prime}}}\sum_{l=|j-s_{\beta}|}^{j+s_{\beta}}\frac{(1+(-1)^{l}\pi_{\alpha}\pi_{\alpha^{\prime}})}{2}T_{\beta}^{jl}(\varepsilon_{\beta})\,,\]
+after taking into account angular momentum conservation when defining
+the sums.
+
+We also wish to calculate exclusive cross sections, which we define
+as the double differential cross section/occupation for obtaining
+a nucleus in the state $\alpha$ after emitting a particle $\beta$.
+This cross section, which we write as $POPcse(\alpha,\,\beta)$, takes
+into account all emissions of a particle $\beta$ that lead to the
+final state $\alpha$. By following the decay chain, the exclusive
+cross section $POPcse(\alpha,\,\beta)$ can be obtained as, \begin{eqnarray*}
+POPcse(\alpha,\beta) & = & \sum_{\alpha^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\beta\right)POP\left(\alpha^{\prime}\right)+POPcse_{0}(\alpha,\beta)\\
+ &  & \qquad\qquad+\sum_{\alpha^{\prime}\beta^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\beta^{\prime}\right)POPcse\left(\alpha^{\prime},\beta\right)\,,\end{eqnarray*}
+where $POPcse_{0}(\alpha,\beta)$ is the contribution of the absorption/direct
+reaction. The expression for the exclusive cross section has two additional
+terms. The first is just that of a transition to $\alpha$ through
+emission of the particle $\beta$, which is proportional to the transition
+element $\Pi\left(\alpha,\alpha^{\prime};\beta\right)$. The second
+is the contribution from all anterior emissions of a particle $\beta$
+that, in the last transition, lead to the state $\alpha$. This can
+be written in terms of the exclusive cross sections of the predecessors,
+$POPcse\left(\alpha^{\prime},\beta\right)$. 
+
+We can immediately sum over the emitted particle angular momenta,
+$j_{\beta}$ and $l_{\beta}$, to write the equation defining the
+exclusive cross section as \begin{eqnarray*}
+POPcse(\alpha,\bar{\beta}) & = & \sum_{\alpha^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\bar{\beta}\right)POP\left(\alpha^{\prime}\right)+POPcse_{0}(\alpha,\bar{\beta})\\
+ &  & \qquad\qquad+\sum_{\alpha^{\prime}\bar{\beta}^{\prime}}\Pi\left(\alpha,\alpha^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\alpha^{\prime},\bar{\beta}\right)\,.\end{eqnarray*}
+Ideally, we would also like to obtain expressions summed over $I_{\alpha}$ and
+$\pi_{\alpha}$ for both $POP(\alpha)$ and $POPcse(\alpha,\bar{\beta})$.
+However, for this to be possible, the summed transition element\[
+\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})=\frac{\sum_{I_{\alpha},\pi_{\alpha}}\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\tau_{c}(I_{\alpha},\pi_{\alpha},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\beta})}{\sum_{\tilde{\beta},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}}}\int de_{\tilde{\beta}}\:\rho(E_{\tilde{\alpha}}^{*},I_{\tilde{\alpha}},\pi_{\tilde{\alpha}})\tau_{\tilde{\beta}}(I_{\tilde{\alpha}},\pi_{\tilde{\alpha}},I_{\alpha^{\prime}},\pi_{\alpha^{\prime}},e_{\tilde{\beta}})}\]
+would have to be independent of $I_{\alpha^{\prime}}$ and $\pi_{\alpha^{\prime}}$.
+In general, this is not the case, so that the general equations should
+be used. In EMPIRE, the general equation is used to determine $POP(\alpha)$
+but not $POPcse(\alpha,\bar{\beta}$). In particular, the angular
+momentum dependence of the $POPcse(\alpha^{\prime},\bar{\beta}$)
+contributions to $POPcse(\alpha,\bar{\beta}$) are neglected. We could easily avoid this approximation but calculation time would grow by orders of magnitude  - the increase that would not be justified by more precise splitting of inclusive spectra into its exclusive components.
+
+When the angular momentum dependence can be neglected, the expressions
+reduce to Weisskopf-Ewing ones. This is possible when we can approximate
+the density of states as\[
+\rho(E_{\alpha}^{*},I_{\alpha},\pi_{\alpha})\approx\frac{1}{2}\rho(E_{\alpha}^{*},I_{\alpha})\approx\frac{1}{2}(2I_{\alpha}+1)\rho(E_{\alpha}^{*},0)\]
+for the states occupied in the reaction. It is then possible to reduce
+the summed transition element to \[
+\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})=\frac{(2s_{\beta}+1)\mu_{\beta}\varepsilon_{\beta}\sigma_{\beta}(\varepsilon_{\beta})\rho(E_{\alpha}^{*},0)}{\sum_{\tilde{\alpha}\tilde{\beta}}\int d\varepsilon_{\tilde{\beta}}\:(2s_{\tilde{\beta}}+1)\mu_{\tilde{\beta}}\varepsilon_{\tilde{\beta}}\sigma_{\tilde{\beta}}(\varepsilon_{\tilde{\beta}})\rho(E_{\tilde{\alpha}}^{*},0)}\]
+and write the summed equations as\[
+POP(\bar{\alpha})=\sum_{\alpha\prime,\beta}\Pi(\bar{\alpha},\alpha^{\prime};\bar{\beta})\, POP(\bar{\alpha}^{\prime})+POP_{0}(\bar{\alpha})\]
+and \begin{eqnarray*}
+POPcse(\bar{\alpha},\bar{\beta}) & = & \sum_{\alpha^{\prime}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}\right)POP\left(\bar{\alpha}^{\prime}\right)+POPcse_{0}(\bar{\alpha},\bar{\beta})\\
+ &  & \qquad\qquad+\sum_{\alpha^{\prime}\bar{\beta}^{\prime}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\bar{\alpha}^{\prime},\bar{\beta}\right)\,.\end{eqnarray*}
+
+In EMPIRE, the general equation maintaining the full angular momentum
+dependence is used to determine $POP(\alpha)$ but not $POPcse(\alpha,\bar{\beta}$).
+The angular momentum summed forms of the exclusive cross sections,
+$POPcse(\bar{\alpha},\bar{\beta})$, are approximated as \begin{eqnarray}
+POPcse(\bar{\alpha},\bar{\beta}) & = & \sum_{\alpha^{\prime}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}\right)POP\left(\alpha^{\prime}\right)+POPcse_{0}(\bar{\alpha},\bar{\beta})\\
+ &  & \qquad\qquad+\sum_{\bar{\alpha}^{\prime}\bar{\beta}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\bar{\alpha}^{\prime},\bar{\beta}\right)\nonumber \\
+ & = & \sum_{\bar{\alpha}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}\right)POP\left(\bar{\alpha}^{\prime}\right)+POPcse_{0}(\bar{\alpha},\bar{\beta})\nonumber \\
+ &  & \qquad\qquad+\sum_{\bar{\alpha}^{\prime}\bar{\beta}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\bar{\alpha}^{\prime},\bar{\beta}\right)\,,\nonumber \end{eqnarray}
+where the effective transition matrix element is approximated using
+the angular momentum dependence of the decaying population, \begin{equation}
+\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}^{\prime}\right)=\frac{1}{POP\left(\bar{\alpha}^{\prime}\right)}\sum_{I_{\alpha^{\prime}}\pi_{\alpha^{\prime}}}\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}\right)POP\left(\alpha^{\prime}\right)\,.\end{equation}
+ Note that this reduces to the Weisskopf-Ewing transition matrix element
+when $\Pi\left(\bar{\alpha},\alpha^{\prime};\bar{\beta}\right)$ is
+independent of the spin and parity, $I_{\alpha^{\prime}}$ and $\pi_{\alpha^{\prime}}$,
+of the decaying nucleus.
+
+The same approximation is used to calculate the exclusive angular
+distributions, with the additional assumption that the angular dependence
+arises from the direct / absorption contributions to the reaction,
+$POPcse_{0}(\bar{\alpha},\bar{\beta})$. An exclusive angular distribution
+involving the emission of $n$ particles will thus have contributions
+from one direct emission followed by $n-1$ statistical emissions,
+the second of two direct emissions followed by $n-2$ statistical
+emissions, etc., up to the $\left(n-1\right)$st of $n-1$ direct
+emissions followed by one statistical emission and, finally, a contribution
+from the last of $n$ direct emissions. 
+
+Let us denote the exclusive angular distribution of particle $\bar{\beta}$
+at angle $\theta$ to form the residue $\bar{\alpha}$ as $POPcse\left(\bar{\alpha},\bar{\beta},\theta\right)$
+with the initial direct contribution written analogously as $POPcse_{0}\left(\bar{\alpha},\bar{\beta},\theta\right)$.
+Taking into account the considerations above, we can write an approximate
+equation for the angular distribution as \begin{eqnarray}
+POPcse(\bar{\alpha},\bar{\beta},\theta) & =\frac{1}{4\pi} & \sum_{\bar{\alpha}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}\right)POP\left(\bar{\alpha}^{\prime}\right)+POPcse_{0}(\bar{\alpha},\bar{\beta},\theta)\\
+ &  & \qquad\qquad+\sum_{\bar{\alpha}^{\prime}\bar{\beta}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}^{\prime}\right)POPcse\left(\bar{\alpha}^{\prime},\bar{\beta},\theta\right)\,.\nonumber\end{eqnarray}
+The total direct reaction contribution can be isolated as $POPcse_{d}(\bar{\alpha},\bar{\beta},\theta)$
+with\begin{equation}
+POPcse_{d}(\bar{\alpha},\bar{\beta},\theta)=\sum_{\bar{\alpha}^{\prime}\bar{\beta}^{\prime}}\hat{\Pi}\left(\bar{\alpha},\bar{\alpha}^{\prime};\bar{\beta}^{\prime}\right)POPcse_{d}\left(\bar{\alpha}^{\prime},\bar{\beta},\theta\right)+POPcse_{0}(\bar{\alpha},\bar{\beta},\theta)\,.\end{equation}
+For a single emission, EMPIRE calculates this as \begin{equation}
+POPcse_{d}(\bar{\alpha},\bar{\beta},\theta)=\sum_{\bar{\alpha}^{\prime}}\, POPcseaf\left(\bar{\alpha},\bar{\alpha}^{\prime},\bar{\beta}\right)POPcse_{0}(\bar{\alpha}^{\prime},\bar{\beta},\theta)\,,\end{equation}
+where \begin{equation}
+POPcseaf\left(\bar{\alpha},\bar{\alpha},\bar{\beta}\right)=1.\end{equation}
+However, in this case the representation of $POPcseaf\left(\bar{\alpha},\bar{\alpha}^{\prime},\bar{\beta}\right)$
+is greatly simplified as the energy of the first residual CN is completely
+correlated with that of the emitted particle, so that only two energy
+indices are needed to represent 
+$POPcseaf\left(\bar{\alpha},\bar{\alpha}^{\prime},\bar{\beta}\right)$,
+those of $\bar{\alpha}$ and $\bar{\beta}$.
+For second and higher emissions this is no longer the case.
+When all three energy indices are needed, it might be more convenient
+to calculate $POPcse_{d}(\bar{\alpha},\bar{\beta},\theta)$ directly.
+
+
+\subsection{EMPEND code }
+
 The ENDF formatted file is created by the user selecting the ENDF
 option in the input file ({*}.\emph{inp}). This instructs EMPIRE to
 write all necessary information to the output file \emph{{*}.out},
@@ -5568,8 +5643,7 @@ choice of input options in the EMPIRE calculations. This file is
 processed by the utility code EMPEND\index{EMPEND} written by Trkov, 
 which creates the ENDF-6 formatted file.
 
-Rather than providing exclusive cross sections and
-associated spectra for each of the reactions separately, EMPIRE can output
+EMPIRE provides inclusive cross sections for production of the residues, i.e., all paths to the final nucleus are summed  together (e.g., (n,np)+(n,pn)+(n,d)). Only for the reactions involving emission of a single type of particle the reaction cross sections are exclusive (e.g., (n,n), (n,2n), (n,3n), ... or (n,p), (2p),...). As described in the previous section, user may request inclusive or exclusive particle  and gamma emission spectra.  Employing a rather involved bookkeeping, EMPIRE can keep track of the sequential decays to produce spectra associated with the particular residue.  User may choose how many emissions are treated in the exclusive approach. The remaining emissions are inclusive, i.e., rather than providing exclusive cross sections and associated spectra for each of the reactions separately, EMPIRE can output
 inclusive cross sections, spectra and double-differential cross sections.
 This means that the total emission spectra of neutrons, protons, 
 $\alpha$-particles and $\gamma$s are printed, instead of individual 
@@ -8881,26 +8955,111 @@ installation.
 
 \section*{Acknowledgments}
 
-EMPIRE is the result of international cooperation towards open source
-software as so successfully promoted by the General Public License.
-A number of authors contributed to the development of the code. The
-recent developments described in this report would not have been possible
-without their valuable voluntary contributions. We would also like
-to acknowledge the authors of the codes that are included in EMPIRE:
- M.B. Chadwick and M. Blann (DDHMS), C.H. Dasso
-and S. Landowne (CCFUS), H. Lenske and H. Wolter (ORION and TRISTAN),
-J. Raynal (ECIS06), and A. Sierk (BARFIT and MOMFIT). We would like
-to thank M. Mebel for providing the routine for calculation of shell-corrections
-according to Myers and Swiatecki. We are grateful to G. Giardina and
-his collaborators A. D'Arrigo, A. Taccone, and A. Lamberto who assisted
-the project from the very beginning and have tested various versions
-of the code since 1993. We would also like to thank A.L. Nichols for
-his continual support of the project. Finally, we are indebted to R. Sturiale
+EMPIRE is the result of an international cooperation towards open source
+software, as so successfully promoted by the General Public License. A number
+of authors contributed to the development of the code and it would be next
+to impossible to list all names. We stress that the code described in this
+paper would not have been possible without their valuable and voluntary
+cooperation.
+
+
+
+
+%other code authors
+We gratefully acknowledge the authors of the codes that are included in the
+physics core of EMPIRE: 
+M.B. Chadwick (DDHMS), 
+H. Lenske and H. Wolter (ORION and TRISTAN), 
+J. Raynal (ECIS), 
+E. Soukhovitskii, S. Chiba, J.M. Quesada, O. Iwamoto, K. Shibata, T. Fukahori, and G.B. Morogovskij  (OPTMAN), 
+C.H. Dasso and S. Landowne (CCFUS), 
+and A. Sierk (BARFIT and MOMFIT). 
+Our gratitude goes also
+to Ch. Dunford for his ENDF checking codes, D.E. Cullen whose suite of
+preprocessing codes makes an essential part of the EMPIRE system and to R.
+MacFarlane for his help in interfacing EMPIRE to his processing code NJOY.
+
+%Toshihiko, Raynal
+We are in debt to T. Kawano, who drew our attention to covariances and
+who was actively involved in the implementation of his KALMAN code in EMPIRE. 
+We owe very special thanks to J. Raynal who has been developing his ECIS
+code since 1972~\cite{ra72} and is still actively maintaining and extending
+it as evidenced by the recent release of the 2007 version. His code is the
+EMPIRE, TALYS and McGNASH backbone for all optical model calculations,
+playing a unique role in current nuclear data evaluation efforts. Another
+special thanks go to the authors of GNASH (Mark Chadwick and Phil Young) as well
+to the principal author of TALYS (Arjan Koning) for providing a never ending source
+of inspiration to our continuous attempts to surpass performance and functionalities
+of their codes.
+
+
+%main users and plot producers
+First of all, we would like to acknowledge our colleagues whose work helped
+to prepare this paper H.I. Kim, G. Nobre, A. Palumbo, and M. Pigni  deserve  special mention as the  major users of the code. Their 
+comments were of great value and enabled us to trace coding errors, improve
+ stability and ease of use of the code. 
+
+
+%almost authors
+ 
+We also highly appreciate S. Mughabghab's 
+help in developing the resonance module linking his
+Atlas of Neutron Resonances and
+EMPIRE. 
+
+%IAEA
+We feel particularly fortunate to be able to build on two solid
+foundations - the comprehensive compilation of model parameters (RIPL) and
+the extensive compilation of experimental results (CSISRS/EXFOR).
+We are grateful to the recent heads of the IAEA Nuclear Data Section, Ch. Dunford, D.
+Muir, A.L. Nichols and R. Forrest for their continued
+support of the two projects. Naturally, our gratitude goes also to all
+participants of the three phases of the RIPL project and to all EXFOR
+compilers, in particular to V. McLane, S. Dunaeva and O. Schwerer, who dedicated their careers to EXFOR.
+Three of us (M.H., R.C. and A.T.), who had  the privilege to
+work under the leadership of A.L. Nichols, would like thank him for his
+encouragement and support for the development of EMPIRE.
+
+%contributors
+We would like to thank A. Ventura who was involved in the early formulations
+of the fission theory used in EMPIRE, E. B{\v e}t{\' a}k who developed exciton model with angular momentum conservation used in earlier versions of EMPIRE, and to A. Hoering who took part in the
+implementation of $\gamma $-emission within the multi-step compound
+mechanism. 
+
+We would like to thank A. Ignatyuk who has been a permanent source of
+inspiration, constructive criticism and encouragement and lately has been
+using EMPIRE in many different applications.
+
+%'enlighteners'
+Finally, there is a group of our colleagues to whom we owe particular
+gratitude for their enlightenment and inspiration. It is a honour to
+acknowledge H.A. Weidenm\"uller's guidance on multi-step compound theory and
+the foundations of the statistical model, discussions with H. Lenske and H.
+Wolter on the multi-step direct model and its implementation,
+working with H. Hofmann on width-fluctuation corrections,
+and with D. Smith on the exploration of the world of
+covariances. EMPIRE would not have reached its current stage without
+illuminating discussions on pre-equilibrium emission with M. Blann, P.E.
+Hodgson, and E. Gadioli. We also benefited from the exchange of experience
+with authors of other codes. We would like to express our appreciation to
+S. Hilaire, P. Talou, and S. Goriely 
+for inspiring discussions, indication of priorities, and technical
+suggestions.
+
+%nostalgy
+One of us (M.H.) would like to thank A. Marcinkowski for motivating him to
+write the EMPIRE-1 code. He is also grateful to G. Giardina and his
+collaborators A. D'Arrigo, A. Lamberto, and A. Taccone who assisted the
+EMPIRE-2 project from the very beginning and  tested  preliminary
+versions of the code since 1993. Finally, we are indebted to R. Sturiale
 for LINUX support at the early stages of the development of EMPIRE development. 
 
-M. Pigni (attn. Roberto) ...
+%BNL
+The work at BNL was sponsored by the Office of Nuclear Physics, Office of Science
+of the U.S. Department of Energy under Contract No. DE-AC02-98CH10886 with
+Brookhaven Science Associates, LLC. We are pleased to acknowledge strong support by the International Atomic Energy Agency over last ten years.
 
-RIPL Project ...
+
 
 \bibliographystyle{prsty}
 \bibliography{complete051101,empire}
