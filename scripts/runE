@@ -17,6 +17,14 @@ from glob import glob
 # get rm(), mv(), cp(), ln() and isEmpty() functions:
 #from empy.bash import *
 
+PACKAGEDIR = os.sep.join( os.path.dirname( os.path.abspath( __file__ ) ).split( os.sep )[:-1] )
+
+def get_version( ):
+    for line in open( PACKAGEDIR + os.sep + 'version' ).readlines(): 
+        if line.startswith( 'VERSIONNUMBER' ): VERSIONNUMBER = line.split( )[-1]
+        if line.startswith( 'VERSIONNAME' ): VERSIONNAME = line.split( )[-1]
+    return ( VERSIONNAME, VERSIONNUMBER )
+
 
 def runE(proj):
     """
@@ -30,7 +38,7 @@ def runE(proj):
         print ("export EMPIREDIR=<path to empire>\n")
         print ("Guessing at path for now")
         time.sleep(2)
-        os.environ['EMPIREDIR'] = '..'
+        os.environ['EMPIREDIR'] = PACKAGEDIR
     
     # Preserve previous *.lst file for comparison
     if not isEmpty(proj+'.lst'):
@@ -323,19 +331,19 @@ def runE(proj):
 
 def splashscreen():
     splash = [
-    '                                                           '+'\n'+
-    '    EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333   11  '+'\n'+
-    '    E      MM  MM  P   P  I  R   R  E             33   11  '+'\n'+
-    '    EEE    M MM M  PPPP   I  RRRR   EEE    =   33333   11  '+'\n'+
-    '    E      M    M  P      I  R  R   E              3   11  '+'\n'+
-    '    EEEEE  M    M  P      I  R   R  EEEEE      33333 O 11  '+'\n'+
-    '                                                           '+'\n'+
-    '                    R I V O L I                            '+'\n'+
-    '                                                           '+'\n'+
-    '       Sao Jose dos Campos, Brazil, May 2011               '+'\n'+
-    '         Upton, New York, USA, January 2012                '+'\n'+
-    '                                                           '+'\n']
-    return splash[0]
+    ' ',\
+    ' EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333   11 ',\
+    ' E      MM  MM  P   P  I  R   R  E             33   11 ',\
+    ' EEE    M MM M  PPPP   I  RRRR   EEE    =   33333   11 ',\
+    ' E      M    M  P      I  R  R   E              3   11 ',\
+    ' EEEEE  M    M  P      I  R   R  EEEEE      33333 O 11 ',\
+    ' ',\
+    ' '.join( get_version()[0] ) + '  ( version ' + get_version()[1] +' )',\
+    ' ',\
+    ' Sao Jose dos Campos, Brazil, May 2011 ',\
+    ' Upton, New York, USA, January 2012 ',\
+    ' ']
+    return '\n'.join( [ x.center(60) for x in splash ] )
 
 
 #from bash.py:
