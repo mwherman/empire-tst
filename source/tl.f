@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2325 $
+Ccc   * $Rev: 2333 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-26 05:52:29 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-26 23:10:59 +0100 (Do, 26 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -229,7 +229,7 @@ C
 
          OPEN (UNIT = 32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN')
          DO n=2,NCOll(ncalc)
-          elevcc = EEX(n,ncalc)
+          elevcc = EVV(n,ncalc)
           REWIND(32)
             READ (32,'(A80)') ch_iuf
             elvr0 = 0.d0
@@ -353,11 +353,11 @@ C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EVV(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
             WRITE (8,
      ^             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EVV(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
          ENDDO
          CLOSE (32)

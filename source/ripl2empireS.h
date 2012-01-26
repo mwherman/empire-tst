@@ -1,8 +1,12 @@
-Ccc   * $Rev: 2228 $ 
-Ccc   * $Author: mherman $ 
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2333 $ 
+Ccc   * $Author: rcapote $ 
+Ccc   * $Date: 2012-01-26 23:10:59 +0100 (Do, 26 Jän 2012) $
 Ccc   * $Id$            
 
+C-----It is ripl2empireS.h because it must be compatible
+C-----with global.h declarations so some variables of the original
+C-----ripl2empire.h must be renamed
+C
       INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7
 C
 C-----Common blocks and declarations from omretrieve.f (RIPL)
@@ -10,7 +14,7 @@ C
 C-----Parameter statement
 C
 C-----Parameter statement
-C     RCN, 08/2004, to handle new extension to the OMP RIPL format
+C     RCN, 08/2004, to handle new extension to the OMP RIPL-2 format
 C     PARAMETER(NDIM1 = 10, NDIM2 = 13, NDIM3 = 24, NDIM4 = 30,
 C    &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
 C     RCN, 08/2008, to handle new extension to the OMP RIPL-3 format
@@ -24,7 +28,7 @@ C
      &        IDR, IPArv, NPH, IPAr, JCOul
 C
       REAL*8 EEMin, EEMax, EPOt, RCO, ACO, POT, BANdk, DDEf, EXV, DEFv,
-     &       THEtm, EEX, SPIn, SPInv, EECoul,
+     &       THEtm, EEX, SPIn, SPInv, EECoul, EVV,
      &       RRCoul, RCOul0, BETa, RCOul1, RCOul2, AACOul, RCOul3
 C
       REAL*8 SR_hw(ndim4),SR_amb0(ndim4),SR_amg0(ndim4),
@@ -37,7 +41,7 @@ C
       INTEGER SR_ntu(ndim6,ndim4),SR_nnb(ndim6,ndim4),
      & SR_nng(ndim6,ndim4),SR_nno(ndim6,ndim4)
 C
-	 REAL*8 ETA,ATAR,ZTAR,TARMAS,PROJMAS,
+       REAL*8 ETA,ATAR,ZTAR,TARMAS,PROJMAS,
      &       HBARC,AMU0C2,EFErmi,RC,ENCOUL,ACOu
 C
       COMMON /RIPLXX/ETA,ATAR,ZTAR,TARMAS,PROJMAS,
@@ -53,7 +57,7 @@ C    &                DDEf(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj,
 C    &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
 C    &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4),
 C    &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4),
-C    &                XMUbeta(NDIM4), EEX(NDIM6, NDIM4), RCOul3(NDIM1),
+C    &                XMUbeta(NDIM4), EVV(NDIM6, NDIM4), RCOul3(NDIM1),
 C    &                SPIn(NDIM6, NDIM4), IPAr(NDIM6, NDIM4),
 C    &                SPInv(NDIM7, NDIM4), JCOul, EECoul(NDIM1),
 C    &                RRCoul(NDIM1), RCOul0(NDIM1), BETa(NDIM1),
@@ -62,7 +66,7 @@ C    &                AUThor(80), REFer(80), SUMmary(320)
 
       COMMON /LIBDBL/ EEMIn, EEMAx, EPOt(6, NDIM1),RCO(6, NDIM1, NDIM2),
      &                ACO(6, NDIM1, NDIM2), POT(6, NDIM1, NDIM3),
-     &                BANdk(NDIM4),	DDEF(NDIM4, NDIM5), 
+     &                BANdk(NDIM4), DDEF(NDIM4, NDIM5), 
      &                EXV(NDIM7, NDIM4),  DEFv(NDIM7, NDIM4),
      &                THEtm(NDIM7, NDIM4), EEX(NDIM6, NDIM4), 
      &                SPIn(NDIM6, NDIM4), SPInv(NDIM7, NDIM4),  
@@ -70,7 +74,7 @@ C    &                AUThor(80), REFer(80), SUMmary(320)
      &                RCOul2(NDIM1), RCOul3(NDIM1), 
      &                AACOul(NDIM1), EECOul(NDIM1), BETa(NDIM1)
 
-	  COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,
+        COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,
      &                SR_bet4, SR_bb42, SR_gamg, SR_delg, SR_bet3,
      &                SR_et0, SR_amu0, SR_hw0, SR_bb32, SR_gamde,
      &                SR_dpar, SR_gshape
@@ -78,7 +82,7 @@ C    &                AUThor(80), REFer(80), SUMmary(320)
 
       COMMON /LIBCHA/AUThor(80), REFer(80), SUMmary(320)
 
-	  COMMON /LIBINT/IREf,IZMin, IZMax, IAMin, IAMax, IMOdel, 
+        COMMON /LIBINT/IREf,IZMin, IZMax, IAMin, IAMax, IMOdel, 
      &               JRAnge(6),NCOll(NDIM4), NVIb(NDIM4), NISotop,
      &               IZ(NDIM4), IA(NDIM4), LMAx(NDIM4), IDEf(NDIM4),
      &               IZProj, IAProj, IREl, IDR, IPArv(NDIM7, NDIM4),
