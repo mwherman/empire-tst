@@ -42,7 +42,7 @@ up:
 
 upall: up all 
 
-tarball-release: 
+release: 
 	python makeTarball.py --release --full
 	python makeTarball.py --release --docOnly
 	python makeTarball.py --release

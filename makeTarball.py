@@ -47,7 +47,7 @@ if __name__ == '__main__':
     # Compute additional modifiers and the package directory name (the tarball unpacks to this directory)
     if args.docOnly: 
         packageName += '-documentation'
-        packageDirName += '-documentation'
+        packageDirName = packageName
     elif args.riplOnly: 
         packageName = 'level-densities-hfb'
         packageDirName = packageName
@@ -63,12 +63,13 @@ if __name__ == '__main__':
     patternsToExclude = filter( lambda x: os.sep not in x, stuffToExclude )
     allRIPLHFBDensities = glob.glob( 'RIPL/densities/total/level-densities-hfb/*' )
     selectRIPLHFBDensities = glob.glob( 'RIPL/densities/total/level-densities-hfb/z'+str(args.Z).zfill(3)+'*' )
-#    print selectRIPLHFBDensities
-#    print args.Z, 
-#    print allRIPLHFBDensities
     if args.noRIPL: itemsToExclude += filter( lambda x: x not in selectRIPLHFBDensities, allRIPLHFBDensities )
-    if args.riplOnly: itemsToExclude = []
+    if args.riplOnly or args.full: itemsToExclude = []
+
+    # Filter function to use in the shutil.copytree
     def ignoreTheseGuys( adir, filenames ):
+        '''Note: this function has the same call signature as the function shutil.ignore_patterns. 
+        If shutil.ignore_patterns had been more glob-like I wouldn't have to do this.'''
         items = set()
         for f in filenames:
             testItem = adir+os.sep+f
