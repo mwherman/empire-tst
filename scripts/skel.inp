@@ -18,7 +18,6 @@ MSD        0.                               ! Recommended default for nucleon in
 MSC        0.                               ! Recommended default for nucleon induced reactions MSC=1
 ENDF       0.                               ! No ENDF formatting by default (muxh faster than formatting)
 PCROSS    1.5                               ! Default prequilibrium using the exciton model code PCROSS with default MFP parameter
-DEGAS      0.                               ! Spin conserving exciton model for nucleons and gammas
 HMS        0.                               ! Monte Carlo Hybrid preequilibrium model
 *TUNE       0.90    Z0   A0    0            ! To fit the capture channel (commented)
 * OPTICAL MODEL INPUT
