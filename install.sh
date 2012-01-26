@@ -43,14 +43,14 @@ read dir
 #if [ ! "$dir" = "" ]; then
 #   sourcedir=$dir
 #fi
-if [ -f $sourcedir/EMPIRE-$empver.tgz ]; then
+if [ -f $sourcedir/EMPIRE-$empver-$emprelname.tgz ]; then
    echo ' '
-   echo 'Setup file EMPIRE-'$empver'.tgz found'
+   echo 'Setup file EMPIRE-'$empver'-'$emprelname'.tgz found'
    echo ' '
 else
    echo ' '
-   echo 'EMPIRE-'$empver'.tgz not found in '$sourcedir', please restart the setup'
-   echo '  script in the directory containing the EMPIRE-'$empver'.tgz file'
+   echo 'EMPIRE-'$empver'-'$emprelname'.tgz not found in '$sourcedir', please restart the setup'
+   echo '  script in the directory containing the EMPIRE-'$empver'-'$emprelname'.tgz file'
    exit
 fi
 echo 'Specify a directory in which EMPIRE-3 should be installed.'
@@ -72,7 +72,7 @@ export EMPIREDIR
 cd $instdir
 echo ' '
 echo 'Exploding EMPIRE-3 release $empver source'
-tar xzvf $sourcedir/EMPIRE-$empver.tgz
+tar xzvf $sourcedir/EMPIRE-$empver-$emprelname.tgz
 echo ' '
 echo 'EMPIRE-3 system decompressed in the directory '$instdir
 echo ' '
@@ -86,13 +86,13 @@ if [ -f $sourcedir/level-densities-hfb.tgz ]; then
 else
    echo ' '
    echo 'level-densities-hfb.tgz not found in '$sourcedir', please restart the '
-   echo ' setup script in the directory containing the EMPIRE-'$empver'.tgz file'
+   echo ' setup script in the directory containing the EMPIRE-'$empver-$emprelname'.tgz file'
    echo ' '
    exit
 fi
 echo 'Exploding HFB level densities in the directory '$instdir'/RIPL/densities/total/level-densities-hfb'
-cd $instdir/RIPL/densities/total/level-densities-hfb
-tar xzvf $sourcedir/level-densities-hfb.tgz
+cd $instdir/RIPL/densities/total/
+tar xzf $sourcedir/level-densities-hfb.tgz
 echo ' '
 echo 'RIPL HFB level densities decompressed ('$instdir/RIPL/densities/total/level-densities-hfb')'
 cd $instdir
@@ -100,18 +100,18 @@ echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
 echo ' '
-if [ -f $sourcedir/C4-IAEA-Jan2011.tgz ]; then
+if [ -f $sourcedir/C4-latest.zip ]; then
    echo ' '
    echo 'EXFOR(C4) setup file found'
    echo ' '
 else
    echo ' '
-   echo 'C4-IAEA-Jan2011.tgz not found in '$sourcedir', please restart the      '
-   echo ' setup script in the directory containing the EMPIRE-'$empver'.tgz file'
+   echo 'C4-latest.tgz not found in '$sourcedir', please restart the      '
+   echo ' setup script in the directory containing the EMPIRE-'$empver'-'$emprelname'.tgz file'
    exit
 fi
 echo 'Exploding EXFOR(C4) experimental data retrieved from IAEA/NDS'
-tar xzvf $sourcedir/C4-IAEA-Jan2011.tgz
+tar xzvf $sourcedir/C4-latest.zip
 echo ' '
 echo 'EXFOR(C4) data decompressed in the directory '$instdir
 echo ' '
