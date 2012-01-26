@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2317 $
+Ccc   * $Rev: 2320 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-26 00:23:55 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-26 04:09:14 +0100 (Do, 26 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -261,7 +261,7 @@ C--------fusion parameters
 C
 C--------Capote, additional input options
 C
-         DIRect = 0
+         DIRect = -1
          KTRompcc = 0
          SOFt = .FALSE.
          CCCalc = .FALSE.
@@ -864,12 +864,6 @@ C-------------(Morillon dispersive global potential 2407 could be used)
             ELSE
                KTRlom(0,0) = 2408    ! Soukhovitskii et al non-dispersive CC OMP 2601
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 2408
-               DIRpot = 2408
-               IF(DIRECT.LE.0) THEN
-			    DIRECT = 1
-                  WRITE (8,*) 'WARNING: CC OMP used for n + A if A>220'
-                  WRITE (8,*) 'WARNING: DIRECT set to 1'
-	         ENDIF
             ENDIF
          ELSEIF (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.1) THEN
             IF (A(0).LE.220) THEN
@@ -877,12 +871,6 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
             ELSE
                KTRlom(0,0) = 5408    ! Soukhovitskii et al non-dispersive CC OMP 5601
 C                                    ! Replaced by Capote, Soukhovistkii et al OMP 5408
-               DIRpot = 5408
-               IF(DIRECT.LE.0) THEN
-			    DIRECT = 1
-                  WRITE (8,*) 'WARNING: CC OMP used for p + A if A>220'
-                  WRITE (8,*) 'WARNING: DIRECT set to 1'
-	         ENDIF
             ENDIF
          ELSEIF (AEJc(0).EQ.2 .AND. ZEJc(0).EQ.1) THEN
             KTRlom(0,0) = 6200       ! Haixia OMP for deuterons
@@ -909,6 +897,25 @@ C--------inteligent defaults *** done ***
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
+
+         IF( KTRlom(0,0).eq.2408 .and. DIRECT. LT. -0.1) then
+            DIRECT = 1
+            KTRompcc = 2408 
+            WRITE (8,*) 
+     &       'Default actinide CC OMP 2408 used for n + A if A > 220'
+            WRITE (8,*)'Coupled channels calculations will be performed'
+ 	   ENDIF
+
+         IF( KTRlom(0,0).eq.5408 .and.  DIRECT. LT. -0.1) then
+            DIRECT = 1
+            KTRompcc = 5408 
+            WRITE (8,*) 
+     &       'Default actinide CC OMP 5408 used for p + A if A > 220'
+            WRITE (8,*)'Coupled channels calculations will be performed'
+ 	   ENDIF
+
+         IF(DIRECT.LT.-0.1) DIRECT = 0 ! Restoring the default to zero
+                                       ! if DIRECT not present in the input
 
          IF(ENDf(NTArget).EQ.10) ENDf(NTArget)=1
          IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
@@ -1021,7 +1028,7 @@ C
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
-     &'WARNING: For HI induced reactions it is recommended Lmax~200'
+     &'WARNING: For HI induced reactions it is recommended Lmax~150-200'
             WRITE (8,*)
      &'WARNING: Increase NDLW parameter in dimension.h and recompile'
             WRITE (8,*)         
@@ -1117,7 +1124,7 @@ c         ENDIF
             KTRompcc = KTRlom(0,0)
 	      DIRpot   = ABS(KTRompcc)
             WRITE (8,*)
-     &' WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
+     &'WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
             WRITE (8,*)' WARNING: DIRPOT set to ',abs(KTRompcc)
 
             if(ABS(KTRompcc).ne.9602) then
@@ -3115,6 +3122,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF (OMParfcc .AND. (DIRect.EQ.1 .OR. DIRect.EQ.3)) WRITE (8,
      &'('' Input file OMPAR.DIR with optical model'',
      &'' parameters to be used in inelastic scattering'')')
+C
             IF (KEY_shape.EQ.0) WRITE (12,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
             IF (KEY_shape.EQ.1) WRITE (12,
@@ -3150,12 +3158,11 @@ C-----      print  maximal gamma-ray multipolarity  'MAXmult'
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
             IF (DIRect.EQ.0 .AND. KTRompcc.NE.0) THEN
-               WRITE (8,
-     &'(1X,/,         '' WARNING: No direct calculations have been selec
-     &ted'',/,        '' WARNING: but DIRPOT keyword is specified.'',/,
-     &                '' WARNING: Set direct keyword in the input file t
-     &o a nonzero'',/,'' WARNING: value if you want to include direct co
-     &ntribution.'')')
+               WRITE (8, '(1X,/,
+     &'' WARNING: No direct calculations have been selected (DIRECT=0)''
+     &,/, '' WARNING:   but DIRPOT keyword is specified.'',/,
+     &    '' WARNING: Set DIRECT > 0 in the input file'',/,
+     &    '' WARNING:   to include direct contribution.'')')
                KTRompcc = 0
             ENDIF
             WRITE (8,*) ' '
@@ -3269,6 +3276,69 @@ C
 C
 C--------ECIS input
 C
+         IF (name.EQ.'EcDWBA') THEN
+C           EcDWBA meaningless if Collective level file exists
+            INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
+            IF(fexist) then
+              WRITE(8,*) 
+     &        ' WARNING: Collective levels for DWBA calculations  '
+              WRITE(8,*) 
+     &        ' WARNING:  can not be automatically selected if the'
+              WRITE(8,*) 
+     &        ' WARNING:  collective level file *-lev.col exists !'
+              goto 100
+            ENDIF
+            ECUtcoll = val
+            JCUtcoll = i1
+            ecutof = 3*30./A(0)**0.666666666666d0
+            IF (ECUtcoll.LT.0.1 .or. ECUtcoll.GT.ecutof) ECUtcoll=ecutof
+            IF (JCUtcoll.EQ.0 .or. JCUTcoll.GT.8) JCUtcoll = 4
+C
+            WRITE (8,
+     &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
+     &     ) ECUtcoll
+            WRITE (8,
+     &'('' All levels with spin less or equal to '',I1,           '' con
+     &sidered in DWBA'')') JCUtcoll
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'OMPOT ') THEN
+            IF (i1.LT.1 .OR. i1.GT.NEJcm) THEN
+               WRITE (8,
+     &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &                  '' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: OPTICAL MODEL SETTING IGNORED'')')
+               GOTO 100
+            ENDIF
+C-----
+! historically val and -val meant different potentials. The '+val'
+! potentials are no longer in EMPIRE, so no need to treat differently:
+            ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
+            ipoten = ABS(val)
+C--------------Searching in the RIPL database for i1 catalog number
+            CALL FINDPOT(ki,ieof,ipoten)
+            IF (ieof.NE.0) THEN
+                WRITE (8,*) 'Requested RIPL entry ', ipoten,
+     &                        ' not found, using default choice'
+                GOTO 100
+            ENDIF
+            if(ipoten.ne.9602) then
+                WRITE (8,
+     &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
+     &'', I4)') i1, ipoten
+            else
+                WRITE (8,
+     &'('' Optical model parameters for ejectile '', I1,
+     & '' set to Kumar & Kailas 2007 values'')') i1
+            endif
+C-----
+            DO i = 1, NDNUC
+               KTRlom(i1,i) = ipoten
+            ENDDO
+            GOTO 100
+         ENDIF
+C
 C--------In the following block one parameter -KTRompCC- is defined
 C--------DIRECT is set to 1 if equal zero to allow for ECIS calc.
 C
@@ -3289,7 +3359,7 @@ C
              KTRompcc = ipoten
              GOTO 100
          ENDIF
-
+C
          IF (name.EQ.'DIRECT') THEN
             DIRect = val
             IF (DIRect.EQ.3) WRITE (8,
@@ -3310,32 +3380,6 @@ C
             IF (DIRect.EQ.2) WRITE (12,
      &'('' Coupled Channels Method used for Tl calculations in inelastic
      & channels'')')
-            GOTO 100
-         ENDIF
-         IF (name.EQ.'EcDWBA') THEN
-C           EcDWBA meaningless if Collective level file exists
-            INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
-            IF(fexist) then
-              WRITE(8,*) 
-     &        ' WARNING: Collective levels for DWBA calculations  '
-              WRITE(8,*) 
-     &        ' WARNING:  can not be automatically selected if the'
-              WRITE(8,*) 
-     &        ' WARNING:  collective level file *-lev.col exists !'
-              goto 100
-            ENDIF
-              ECUtcoll = val
-            JCUtcoll = i1
-            ecutof = 3*30./A(0)**0.666666666666d0
-            IF (ECUtcoll.LT.0.1 .or. ECUtcoll.GT.ecutof) ECUtcoll=ecutof
-            IF (JCUtcoll.EQ.0 .or. JCUTcoll.GT.8) JCUtcoll = 4
-C
-            WRITE (8,
-     &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
-     &     ) ECUtcoll
-            WRITE (8,
-     &'('' All levels with spin less or equal to '',I1,           '' con
-     &sidered in DWBA'')') JCUtcoll
             GOTO 100
          ENDIF
 C
@@ -4858,42 +4902,6 @@ C           Setting ENDF for a single nucleus
      &       '('' Emission spectra from nucleus '',I3,A2,
      &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
             ENDIF
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'OMPOT ') THEN
-            IF (i1.LT.1 .OR. i1.GT.NEJcm) THEN
-               WRITE (8,
-     &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
-     &                  '' UNKNOWN'')') i1
-               WRITE (8,'('' WARNING: OPTICAL MODEL SETTING IGNORED'')')
-               GOTO 100
-            ENDIF
-C-----
-! historically val and -val meant different potentials. The '+val'
-! potentials are no longer in EMPIRE, so no need to treat differently:
-            ki = 26 ! file id for 'om-parameter-u.dat' in RIPL
-            ipoten = ABS(val)
-C--------------Searching in the RIPL database for i1 catalog number
-            CALL FINDPOT(ki,ieof,ipoten)
-            IF (ieof.NE.0) THEN
-                WRITE (8,*) 'Requested RIPL entry ', ipoten,
-     &                        ' not found, using default choice'
-                GOTO 100
-            ENDIF
-            if(ipoten.ne.9602) then
-                WRITE (8,
-     &'('' Optical model parameters for ejectile '', I1,'' set to RIPL #
-     &'', I4)') i1, ipoten
-            else
-                WRITE (8,
-     &'('' Optical model parameters for ejectile '', I1,
-     & '' set to Kumar & Kailas 2007 values'')') i1
-            endif
-C-----
-            DO i = 1, NDNUC
-               KTRlom(i1,i) = ipoten
-            ENDDO
             GOTO 100
          ENDIF
 C-----
