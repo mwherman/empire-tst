@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2349 $
+Ccc   * $Rev: 2350 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 22:58:52 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2012-01-27 23:07:26 +0100 (Fr, 27 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1868,7 +1868,8 @@ c                 ENDDO
                         xtotsp = nxsp*totsp
                        ENDIF
                       POPcs(1,INExc(nnuc)) = xtotsp
-                      IF(ABS(1.0d0 - xnrm).GT.0.01d0) WRITE(8,
+                      IF(ABS(1.0d0 - xnorm(1,INExc(nnuc))).GT.0.01d0) 
+     &                  WRITE(8,
      &        '(''WARNING! Exclusive neutron spectrum renormalized by'',
      &                               f6.3)') xnorm(1,INExc(nnuc))
                      ENDIF
@@ -1883,7 +1884,8 @@ c                 ENDDO
                         ptotsp = npsp*totsp
                        ENDIF
                       POPcs(2,INExc(nnuc)) = ptotsp
-                      IF(ABS(1.0d0 - pnrm).GT.0.01d0) WRITE(8,
+                      IF(ABS(1.0d0 - xnorm(2,INExc(nnuc))).GT.0.01d0) 
+     &                  WRITE(8,
      &        '(''WARNING! Exclusive  proton spectrum renormalized by'',
      &                     f6.3)') xnorm(2,INExc(nnuc))
                      ENDIF
