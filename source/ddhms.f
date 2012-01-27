@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2302 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 05:34:35 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2345 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2302 $
+C CVS Version Management $Revision: 2345 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -166,13 +166,13 @@ C     DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
 
       DOUBLE PRECISION RANG
       DOUBLE PRECISION perloang
+      INTEGER matex(0:ndim_zem,0:ndim_nem), inxr 
       INTEGER i, jbin, jsweep, jexist, jtrans, mrecbin, n, nem, nubin
-      INTEGER nebinchan, nebinlab, nth, nthlab
+      INTEGER nebinchan, nebinlab, nebtotchan, nth, nthlab
       INTEGER jndx,jstudy,jzdiff,jndiff, jzx, jnx
       INTEGER indx(0:200)
       INTEGER nloang, ncmbin
-C     INTEGER nebtotchan, nebtotlab, nth, nthlab, nubinx
-C     REAL*8 etotemissl 
+C      INTEGER nph, nphlab
 C     INTEGER INT, NINT, MIN
 C
 
@@ -198,6 +198,7 @@ C
       aveb2=0.0d0
 
       CALL INIT0(Icalled)
+      CALL EXCLUMAT(matex)
 
       ncmbin = INT((ECMproj+SEPproj)/DEBin)
 c      write(8,*) 'ncmbin:', ncmbin,ECMproj+SEPproj,DEBin
@@ -357,6 +358,7 @@ C  First pass to obtain total global nucleon and energy loss
            IF (IZAemiss(nem).EQ.1) jnx = jnx + 1
            etotemiss = etotemiss + EEMiss(nem)
           END DO
+         inxr = matex(jzx,jnx)
 
          IF (IKIn.EQ.1) THEN
             test = DABS(((etotemiss+UCNdump+CONvmass)/(ECMproj)) - 1.)
@@ -392,10 +394,6 @@ C              !keep a sum of events where ucndump is negative
             STOP ' no energy balance'
          ENDIF
          nubin = MIN(MAX(INT(UCNdump/DEBin),0),NDIM_EBINS)
-c         nubinx = MIN(MAX(INT(UCNdump/DEBin),0),NDIM_EBINS)
-c         nubin = ncmbin - 
-c     &       MIN(MAX(INT((ECMproj+SEPproj-UCNdump)/DEBin),0),NDIM_EBINS)
-c         IF(NEMiss.EQ.0)write(8,*)'nubins:',nubin,nubinx,ECMproj,UCNdump
 C
          mrecbin = INT(EREclab/DEBinrec)
 C        !energy bin for recoil spectra
@@ -426,14 +424,13 @@ C       Inclusive spectra and DDXS
              DDXsplab(nebinlab,nthlab) = DDxsplab(nebinlab,nthlab) + 1.
 C       Exclusive spectra and DDXS
 
-C           IF(nebinchan.eq.0) write(8,*) 'p0:', nem,EEMiss(nem)
-             DXSpex(nubin,nebinchan,jzx,jnx) = 
-     &                 DXSpex(nubin,nebinchan,jzx,jnx) + 1.
-             IF(nubin.LE.NDIM_BNDS) THEN 
-               DXSpexlab(nubin,nebinlab,jzx,jnx) = 
-     &                 DXSpexlab(nubin,nebinlab,jzx,jnx) + 1.
-               DDXspex(nubin,nebinlab,nthlab,jzx,jnx) = 
-     &                    DDXspex(nubin,nebinlab,nthlab,jzx,jnx) + 1.
+             IF(inxr.GT.0) THEN
+               DXSpex(nubin,nebinchan,inxr) = 
+     &                 DXSpex(nubin,nebinchan,inxr) + 1.
+               DXSpexlab(nubin,nebinlab,inxr) = 
+     &                 DXSpexlab(nubin,nebinlab,inxr) + 1.
+               DDXspexlab(nthlab,nubin,nebinlab,inxr) = 
+     &                 DDXspexlab(nthlab,nubin,nebinlab,inxr) + 1.
               ENDIF
 
              DXSpx(nebinchan,jzdiff,jndiff) = 
@@ -454,14 +451,13 @@ C       Inclusive spectra and DDXS
              DDXsnlab(nebinlab,nthlab) = DDxsnlab(nebinlab,nthlab) + 1.
 C       Exclusive spectra and DDXS
 
-C           IF(nebinchan.eq.0) write(8,*) 'n0:', nem,EEMiss(nem)
-             DXSnex(nubin,nebinchan,jzx,jnx) = 
-     &                 DXSnex(nubin,nebinchan,jzx,jnx) + 1.
-             IF(nubin.LE.NDIM_BNDS) THEN 
-               DXSnexlab(nubin,nebinlab,jzx,jnx) = 
-     &                 DXSnexlab(nubin,nebinlab,jzx,jnx) + 1.
-               DDXsnex(nubin,nebinlab,nthlab,jzx,jnx) = 
-     &                    DDXsnex(nubin,nebinlab,nthlab,jzx,jnx) + 1.
+             IF(inxr.GT.0) THEN
+               DXSnex(nubin,nebinchan,inxr) = 
+     &                 DXSnex(nubin,nebinchan,inxr) + 1.
+               DXSnexlab(nubin,nebinlab,inxr) = 
+     &                 DXSnexlab(nubin,nebinlab,inxr) + 1.
+               DDXsnexlab(nthlab,nubin,nebinlab,inxr) = 
+     &                 DDXsnexlab(nthlab,nubin,nebinlab,inxr) + 1.
               ENDIF
 
              DXSnx(nebinchan,jzdiff,jndiff) = 
@@ -2325,6 +2321,7 @@ C
       SUBROUTINE OUTPUTPRINT
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
+
 C
 C Local variables
 C
@@ -2334,7 +2331,7 @@ C     DOUBLE PRECISION DSIN, DCOS
 C     REAL FLOAT
 C     INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
-     &        nx, nemax, norder, nth, nu, numax,iwritxddx
+     &        inx, nx, nemax, norder, nth, nu, numax, iwritxddx
 
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
@@ -2371,15 +2368,15 @@ C         write(28,*) ne,DXSplab(ne)
                DXSpxlab(ne,jz,jn) = DXSpxlab(ne,jz,jn)*anorm
                XSNx(jz,jn) = XSNx(jz,jn) + DXSnx(ne,jz,jn)*DEBin
                XSPx(jz,jn) = XSPx(jz,jn) + DXSpx(ne,jz,jn)*DEBin
-               DO nx = 0, nemax - ne
-                 DXSnex(nx,ne,jz,jn) = DXSnex(nx,ne,jz,jn)*anorme
-                 DXSpex(nx,ne,jz,jn) = DXSpex(nx,ne,jz,jn)*anorme
-                ENDDO
-               DO nx = 0, MIN(NDIM_BNDS,nemax - ne)
-                 DXSnexlab(nx,ne,jz,jn) = DXSnexlab(nx,ne,jz,jn)*anorme
-                 DXSpexlab(nx,ne,jz,jn) = DXSpexlab(nx,ne,jz,jn)*anorme
-                ENDDO
              ENDDO
+          ENDDO
+         DO inx = 1, NDEXCLUHMS
+           DO nx = 0, nemax - ne
+             DXSnex(nx,ne,inx) = DXSnex(nx,ne,inx)*anorme
+             DXSpex(nx,ne,inx) = DXSpex(nx,ne,inx)*anorme
+             DXSnexlab(nx,ne,inx) = DXSnexlab(nx,ne,inx)*anorme
+             DXSpexlab(nx,ne,inx) = DXSpexlab(nx,ne,inx)*anorme
+            ENDDO
           ENDDO
        ENDDO
 C
@@ -2398,33 +2395,6 @@ C
                ENDDO
             ENDDO
          ENDDO
-C
-C     now double-differential spectra
-      dth = PI_g/FLOAT(NDAnghms1)
-      DO nth = 1, NDAnghms1
-             dxang = DCOS(FLOAT(nth-1)*dth)-DCOS(FLOAT(nth)*dth)
-             angnorm = anorm/(2.*PI_g*dxang)
-             angnorme = anorme/(2.*PI_g*dxang)
-         DO ne = 0, nemax
-            DDXsn(ne,nth) = DDXsn(ne,nth)*angnorm
-            DDXsp(ne,nth) = DDXsp(ne,nth)*angnorm
-            DDXsnlab(ne,nth) = DDXsnlab(ne,nth)*angnorm
-            DDXsplab(ne,nth) = DDXsplab(ne,nth)*angnorm
-            DO jn = 0, jnmax
-              DO jz = 0, jzmax
-               DDXsnxlab(ne,nth,jz,jn) = DDXsnxlab(ne,nth,jz,jn)*angnorm
-               DDXspxlab(ne,nth,jz,jn) = DDXspxlab(ne,nth,jz,jn)*angnorm
-               DO nx = 0, MIN(NDIM_BNDS,nemax - ne)
-                 DDXsnex(nx,ne,nth,jz,jn) = 
-     &                                   DDXsnex(nx,ne,nth,jz,jn)*anorme
-                 DDXspex(nx,ne,nth,jz,jn) = 
-     &                                   DDXspex(nx,ne,nth,jz,jn)*anorme
-                ENDDO
-               ENDDO
-             ENDDO
-          ENDDO
-C
-       ENDDO
 C
 C        infer max non-zero j=value and mrec values:
          DO jz = 0, NDIM_ZEM
@@ -2448,8 +2418,49 @@ C
          ENDDO
       ENDDO
 C
+C     printout of residual nucleus populations after preequilibrium:
+C     determine the max number of protons and neutrons emitted
+      jzmax = 0
+      jnmax = 0
+      DO jz = MAXNEMISS, 0, -1
+         DO jn = MAXNEMISS, 0, -1
+            IF (RESpop(jz,jn).GT.0.D0) THEN
+               IF (jn.GT.jnmax) jnmax = jn
+               IF (jz.GT.jzmax) jzmax = jz
+            ENDIF
+         ENDDO
+      ENDDO
+C
+C     now double-differential spectra
+      dth = PI_g/FLOAT(NDAnghms1)
+      DO nth = 1, NDAnghms1
+             dxang = DCOS(FLOAT(nth-1)*dth)-DCOS(FLOAT(nth)*dth)
+             angnorm = anorm/(2.*PI_g*dxang)
+             angnorme = anorme/(2.*PI_g*dxang)
+         DO ne = 0, nemax
+            DDXsn(ne,nth) = DDXsn(ne,nth)*angnorm
+            DDXsp(ne,nth) = DDXsp(ne,nth)*angnorm
+            DDXsnlab(ne,nth) = DDXsnlab(ne,nth)*angnorm
+            DDXsplab(ne,nth) = DDXsplab(ne,nth)*angnorm
+            DO jn = 0, jnmax
+              DO jz = 0, jzmax
+               DDXsnxlab(ne,nth,jz,jn) = DDXsnxlab(ne,nth,jz,jn)*angnorm
+               DDXspxlab(ne,nth,jz,jn) = DDXspxlab(ne,nth,jz,jn)*angnorm
+               ENDDO
+             ENDDO
+            DO inx = 1, NDEXCLUHMS
+              DO nx = 0, nemax - ne
+                DDXsnexlab(nth,nx,ne,inx) = 
+     &                                DDXsnexlab(nth,nx,ne,inx)*angnorme
+                DDXspexlab(nth,nx,ne,inx) = 
+     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
+              ENDDO
+            ENDDO
+          ENDDO
+       ENDDO
+C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2302 $')
+99005 FORMAT ('  xddhms version: $Revision: 2345 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -2566,10 +2577,10 @@ C
       vpe2=sqrt(vpe2/npv-vpe**2)
       vhe=vhe/nhv
       vhe2=sqrt(vhe2/nhv-vhe**2)
-      write(28,*) '            n         v    st.dev_v2',
-     1                            '     ve    st.dev_ve2'
-      write(28,'(a4,2x,i10,4f10.3)') 'part',npv,vp,vp2,vpe,vpe2  
-      write(28,'(a4,2x,i10,4f10.3)') 'hole',nhv,vh,vh2,vhe,vhe2  
+c      write(28,*) '            n         v    st.dev_v2',
+c     1                            '     ve    st.dev_ve2'
+c      write(28,'(a4,2x,i10,4f10.3)') 'part',npv,vp,vp2,vpe,vpe2  
+c      write(28,'(a4,2x,i10,4f10.3)') 'hole',nhv,vh,vh2,vhe,vhe2  
 
       IF (IOMlread.EQ.1) THEN
          WRITE (28,*) ' '
@@ -2635,19 +2646,6 @@ C         IF (DXSplab(ne).LT.1.D-10) DXSplab(ne) = 1.D-10
          WRITE (9,99115) (DEBin*(ne + 0.5)),
      &       MAX(DXSnlab(ne),1.D-10), MAX(DXSplab(ne),1.D-10)
 99115    FORMAT (1p,1E10.3,2x,1p,1E10.3,2x,1p,1E10.3)
-      ENDDO
-C
-C     printout of residual nucleus populations after preequilibrium:
-C     determine the max number of protons and neutrons emitted
-      jzmax = 0
-      jnmax = 0
-      DO jz = MAXNEMISS, 0, -1
-         DO jn = MAXNEMISS, 0, -1
-            IF (RESpop(jz,jn).GT.0.D0) THEN
-               IF (jn.GT.jnmax) jnmax = jn
-               IF (jz.GT.jzmax) jzmax = jz
-            ENDIF
-         ENDDO
       ENDDO
 C
       WRITE (28,*)
@@ -2969,7 +2967,6 @@ C
             ENDDO
          ENDDO
       ENDIF
-C     CALL EMPTRANS(nemax,jzmax,jnmax,numax)
       CALL EMPTRANS(nemax,jzmax,jnmax)
 99170 FORMAT (' energy-bin histogram width=',f10.3,' MeV')
 99173 FORMAT (3(f10.2,2x,f10.2,8x))
@@ -3156,7 +3153,7 @@ C
 C Local variables
 C
       REAL*8 amproj, sepejecn, sepejecp
-      INTEGER japroj, jn, jsp, jz, jzproj, mem, nen, nxn, nth
+      INTEGER japroj, jn, jsp, jz, jzproj, mem, nen, nxn, nth, inx
       INTEGER NINT
       IF (Icalled.EQ.0) THEN
 
@@ -3257,26 +3254,26 @@ C     zero emission spectrum:
                DXSnxlab(nen,jz,jn) = 0.
                DXSpxlab(nen,jz,jn) = 0.
                RESpop(jz,jn) = 0.
-               DO nxn = 0, NDIM_EBINS
-                 DXSnex(nxn,nen,jz,jn) = 0.
-                 DXSpex(nxn,nen,jz,jn) = 0.
-                ENDDO
-               DO nxn = 0, NDIM_BNDS
-                 DXSnexlab(nxn,nen,jz,jn) = 0.
-                 DXSpexlab(nxn,nen,jz,jn) = 0.
-                 DO nth = 1, NDAnghms1
-                   DDXsnex(nxn,nen,nth,jz,jn) = 0.
-                   DDXspex(nxn,nen,nth,jz,jn) = 0.
-                  ENDDO
-                ENDDO
                DO jsp = 0, NDIM_JBINS
                  UJSpec(jz,jn,nen,jsp) = 0.
                 ENDDO
                DO mem = 0, NDIM_RECBINS
                  RECspec(mem,nen,jz,jn) = 0.
                 ENDDO
+             ENDDO
+          ENDDO
+         DO inx = 1, NDEXCLUHMS
+           DO nxn = 0, NDIM_EBINS
+             DXSnex(nxn,nen,inx) = 0.
+             DXSpex(nxn,nen,inx) = 0.
+             DXSnexlab(nxn,nen,inx) = 0.
+             DXSpexlab(nxn,nen,inx) = 0.
+             DO nth = 1, NDAnghms1
+               DDXsnexlab(nth,nxn,nen,inx) = 0.
+               DDXspexlab(nth,nxn,nen,inx) = 0.
+              ENDDO
             ENDDO
-         ENDDO
+          ENDDO
          DO nth = 1, NDAnghms1
             DDXsn(nen,nth) = 0.
             DDXsp(nen,nth) = 0.
@@ -3319,6 +3316,42 @@ C        history file header print:
      &'    ----- --------     ----------  ----------  ----------  ------
      &----       ----')
       ENDIF
+      END
+C
+C
+      SUBROUTINE EXCLUMAT(matex)
+
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      INCLUDE 'ddhms.cmb'
+
+      INTEGER matex(0:ndim_zem,0:ndim_nem), nexcluhms 
+C
+C Local variables
+C
+      INTEGER jz, jn, izar, nnuc, iloc
+
+      nexcluhms = 0
+      DO jz = 0,Ndim_zem
+        DO jn = 0,Ndim_nem
+          matex(jz,jn) = 0
+          izar = IZA(1) - 1001*jz - jn
+          CALL WHERE(izar,nnuc,iloc)
+          IF(iloc .NE. 0) CYCLE
+          IF (ENDf(nnuc).EQ.1) then
+            matex(jz,jn) = INExc(nnuc)
+            nexcluhms = nexcluhms + 1
+           ENDIF
+         ENDDO
+       ENDDO
+
+      IF(nexcluhms.GT.NDExcluhms) THEN
+        WRITE(*,*) 'INSUFFICIENT SPACE ALLOCATED FOR EXCLUSIVE DDXs'
+        WRITE(*,*) 'INCREASE NDExcluhms in ddhms.cmb to ',nexcluhms
+        STOP
+       ENDIF
+
+      RETURN
       END
 C
 C
@@ -4202,7 +4235,6 @@ C
 C local variables r0,
 C
       REAL*8 r0,akf0,ekf0,vsigma
-C     REAL*8 rfac
 
 C     ZMNuc = 939.D0
       ZMNuc = AMUpro*AMUmev
@@ -4255,7 +4287,7 @@ C     !theory is in the channel frame, and an extra lab boost is
 C     !given, which makes the dist more forward-peaked.
 C
 C   average squared reduced matrix element      
-c     vv2=40.0d0*AMUltdamprate
+c      vv2=40.0d0*AMUltdamprate
       vv2=0.13*AMUltdamprate
 
 c  parameters used in geometry dependence
@@ -4353,10 +4385,8 @@ C
 C Local variables
 C
       REAL*8 prob, xran, yran
+C      REAL*8 probmax
       REAL*8 RANG
-C
-C     REAL*8 probmax
-C
 C      probmax = Rnucleus
 C  100 xran = RANG()*(Rnucleus + 3*Adiffuse)
 C      yran = RANG()*probmax
@@ -4382,8 +4412,6 @@ C
       REAL*8 dxn, emax, xx, ee, ex, eps, de, de3, erem, xn, x3 
       REAL*8 argold, argnew, arg3old, arg3new, ep, eh, pf
       REAL*8 esum, eold, enew
-
-C     REAL*8 zmn
 
       dimension x3(0:nintmx3)
 
@@ -5869,7 +5897,6 @@ C sampling area not length!
       END
 C
 C
-C     SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax,Numax)
       SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -5878,22 +5905,17 @@ C
 C Dummy arguments
 C
       INTEGER Jnmax, Jzmax, Nemax
-C     INTEGER Numax
 C
 C Local variables
 C
-      REAL*8 adum(5,7), csfit(NDANGecis), qq(5)
+      DOUBLE PRECISION adum(5,7), csfit(NDANGecis), qq(5)
       DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
-      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz, 
-     &        mrec, na,  ne, nspec, Inxr,
+      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz,
+     &        mrec, na, ne, nspec, Inxr,
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
-C
-C     INTEGER maxrecener, mre, ndiscmax, ncsp,
-C     DOUBLE PRECISION xmre,
-C 
 C     INTEGER INT
 C
 C---- Nemax max number of energy bins in HMS
@@ -5924,20 +5946,14 @@ c         DDXsn(ne,NDAnghms1+1) = DDXsn(ne,NDAnghms1)
 c         DDXsp(ne,NDAnghms1+1) = DDXsp(ne,NDAnghms1)
          DDXsnlab(ne,NDAnghms1+1) = DDXsnlab(ne,NDAnghms1)
          DDXsplab(ne,NDAnghms1+1) = DDXsplab(ne,NDAnghms1)
-         DO jn = 0,Jnmax
-           DO jz = 0,Jzmax
+c         DO jn = 0,Jnmax
+c           DO jz = 0,Jzmax
 c             DDXsnxlab(ne,NDAnghms1+1,jz,jn) = 
 c     &                                     DDXsnxlab(ne,NDAnghms1,jz,jn)
 c             DDXspxlab(ne,NDAnghms1+1,jz,jn) = 
 c     &                                     DDXspxlab(ne,NDAnghms1,jz,jn)
-             DO nu = 0, MIN(NDIM_BNDS,NEmax-ne)
-               DDXsnex(nu,ne,NDAnghms1+1,jz,jn) = 
-     &                                    DDXsnex(nu,ne,NDAnghms1,jz,jn)
-               DDXspex(nu,ne,NDAnghms1+1,jz,jn) = 
-     &                                    DDXspex(nu,ne,NDAnghms1,jz,jn)
-              ENDDO
-            ENDDO
-          ENDDO
+c            ENDDO
+c          ENDDO
          DO nth = NDAnghms1, 2, -1
            thx = thx - dth
            xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
@@ -5948,24 +5964,16 @@ c           DDXsp(ne,nth) = (dxhi*DDXsp(ne,nth)+dxlo*DDXsp(ne,nth-1))/
 c     &                                              (dxhi+dxlo)
            DDXsnlab(ne,nth) = (dxhi*DDXsnlab(ne,nth)
      &                          +dxlo*DDXsnlab(ne,nth-1))/(dxhi+dxlo)
-           DDXsp(ne,nth) = (dxhi*DDXsplab(ne,nth)
+           DDXsplab(ne,nth) = (dxhi*DDXsplab(ne,nth)
      &                          +dxlo*DDXsplab(ne,nth-1))/(dxhi+dxlo)
-           DO jn = 0,Jnmax
-             DO jz = 0,Jzmax
+c           DO jn = 0,Jnmax
+c             DO jz = 0,Jzmax
 c               DDXsnxlab(ne,nth,jz,jn) = (dxhi*DDXsnxlab(ne,nth,jz,jn)
 c     &                      +dxlo*DDXsnxlab(ne,nth-1,jz,jn))/(dxhi+dxlo)
 c               DDXspxlab(ne,nth,jz,jn) = (dxhi*DDXspxlab(ne,nth,jz,jn)
 c     &                      +dxlo*DDXspxlab(ne,nth-1,jz,jn))/(dxhi+dxlo)
-               DO nu = 0, MIN(NDIM_BNDS,NEmax-ne)
-                 DDXsnex(nu,ne,nth,jz,jn) = 
-     &                     (dxhi*DDXsnex(nu,ne,nth,jz,jn)
-     &                     +dxlo*DDXsnex(nu,ne,nth-1,jz,jn))/(dxhi+dxlo)
-                 DDXspex(nu,ne,nth,jz,jn) = 
-     &                     (dxhi*DDXspex(nu,ne,nth,jz,jn)
-     &                     +dxlo*DDXspex(nu,ne,nth-1,jz,jn))/(dxhi+dxlo)
-                ENDDO
-              ENDDO
-            ENDDO
+c              ENDDO
+c            ENDDO
            xhi = xlo
            dxhi = dxlo
           ENDDO
@@ -6074,42 +6082,42 @@ C
           IF(iloc .EQ. 0 .AND. XSNx(jz,jn) .GT. 1.0d-6) THEN
            CSHms(1,nnuc) =  XSNx(jz,jn)
            CSEmis(1,nnuc) = CSEmis(1,nnuc) + XSNx(jz,jn)
-           IF (ENDf(nnuc).EQ.1) THEN
+           IF (ENDf(nnur).EQ.1) THEN
              ecres = ecn-Q(1,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
              ndspc = nspec - nspecc
-             IF(ndspc-1.GT.NDIM_BNDS) write(8,*)
-     &                'WARNING! Increase NDIM_BNDS in DDHMS.'
 C             chk = 0.0d0
 C             chkpop = 0.0d0
 C             chkpopd = 0.0d0
              Inxr=INExc(nnur)
+             DO ne = 1,nspec
+               POPhmsx(ne,1,Inxr) = 0.0d0
+               DO nu = 1, min(ndspc,nspec-ne+1)
+                 pops =  DXSnex(nu-1,ne-1,Inxr)*DE
+C                 chkpopd = chkpopd + pops
+                 POPhmsx(ne,1,Inxr) =  POPhmsx(ne,1,Inxr) + pops
+                ENDDO
+               IF(ne.GT.nspecc)
+     &           CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
+               POPcsed(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
+               IF(jz.NE.0 .OR. jn.NE.0)
+     &                    POPcse(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
+              ENDDO
              DO ne = 1, nspecc
 C               CSEhms(ne,1,nnuc) = DXSnx(ne-1,jz,jn)
 C               chk=chk + DXSnx(ne-1,jz,jn)
-C               IF(DXSnex(nspec-ne+1,ne-1,jz,jn+1).gt.0.0d0) 
-C     &          write(8,'(a3,3i5,f12.6)') 'n: ',nspec-ne,ne-1,
-C     &              DXSnex(nspec-ne+1,ne-1,jz,jn+1)
                pops = DXSnx(ne-1,jz,jn)
                if(ne.eq.1 .or. ne.eq.nspecc) pops = 2*pops
                CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + pops
                DO nu = 1, nspecc-ne+1
-                 pops =  DXSnex(nu+ndspc-1,ne-1,jz,jn+1)*DE
+                 pops =  DXSnex(nu+ndspc-1,ne-1,Inxr)*DE
 C                 chkpop = chkpop + pops
-                 POPcse(nu,1,ne,Inxr) = POPcse(nu,1,ne,Inxr) + pops 
-                 POPcseaf(nu,1,ne,Inxr) = 1.0d0
-                ENDDO
-              ENDDO
-             DO ne = 1,nspec
-               POPhmsx(ne,1,Inxr) = 0.0d0
-               DO nu = 1, min(ndspc,nspec-ne+1)
-                 pops =  DXSnex(nu-1,ne-1,jz,jn+1)*DE
-C                 chkpopd = chkpopd + pops
                  POPhmsx(ne,1,Inxr) =  POPhmsx(ne,1,Inxr) + pops
+                 POPcse(nu,1,ne,Inxr) = POPcse(nu,1,ne,Inxr) + pops 
+                 POPcsed(nu,1,ne,Inxr) = POPcsed(nu,1,ne,Inxr) + pops 
                 ENDDO
-               IF(jz.NE.0 .OR. jn.NE.0)
-     &                    POPcse(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
+               CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
               ENDDO
 C             write(8,'(a5,i8,5f12.6)') '   n:',nnuc,chk*DE,XSNx(jz,jn),
 C     1                            chkpop*DE,chkpopd*DE
@@ -6122,50 +6130,41 @@ C-----integrated spectrum
            nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
            DO ne = 1, nspec
              CSEhmslab(ne,1,Inxr) = DXSnxlab(ne-1,jz,jn)
-
-             POPhmslab(ne,1,Inxr) = 0.0d0
-             POPhmsalab(ne,NDAnghms1+1,1,Inxr) = 0.0d0
-             DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-               POPhmslab(ne,1,Inxr) = POPhmslab(ne,1,Inxr)
-     &                              +DXsnexlab(nu,ne-1,jz,jn+1)
-               POPhmsalab(ne,NDAnghms1+1,1,Inxr) = 
-     &                          POPhmsalab(ne,NDAnghms1+1,1,Inxr)   
-     &                              +DDXsnex(nu,ne-1,NDAnghms1,jz,jn+1)
-              ENDDO
-             csfit(1) =   POPhmsalab(ne,NDAnghms,1,Inxr) 
-
-             thx = PI_g - dth
-             xhi = DCOS(thx)
-             dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
-             DO nth = NDAnghms1, 2, -1
+            DO nu = 1, nspec - ne +1
+             POPhmslab = DXSnexlab(nu-1,ne-1,Inxr)*DE
+             CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) - POPhmslab
+             IF(ENDFA(Nnur).EQ.1) THEN
+              POPcsealab(NDAnghms,nu,1,ne,Inxr) = 
+     &                           DDXsnexlab(NDAnghms1,nu-1,ne-1,Inxr)
+              csfit(1) =   POPcsealab(NDAnghms,nu,1,ne,Inxr) 
+              thx = PI_g - dth
+              xhi = DCOS(thx)
+              dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
+              DO nth = NDAnghms1, 2, -1
                thx = thx - dth
                xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
                dxlo = xlo - xhi
-               POPhmsalab(ne,nth,1,Inxr) = 0.0d0
-               DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-                 POPhmsalab(ne,nth,1,Inxr) = POPhmsalab(ne,nth,1,Inxr) + 
-     &                 (dxhi*DDXsnex(nu,ne-1,nth,jz,jn+1)
-     &                 +dxlo*DDXsnex(nu,ne-1,nth-1,jz,jn+1))/(dxhi+dxlo)
-                ENDDO
-               csfit(NDAnghms-nth+1) = POPhmsalab(ne,nth,1,Inxr) 
+               POPcsealab(nth,nu,1,ne,Inxr) = 
+     &            (dxhi*DDXsnexlab(nth,nu-1,ne-1,Inxr)
+     &            +dxlo*DDXsnexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
+               csfit(NDAnghms-nth+1) = POPcsealab(nth,nu,1,ne,Inxr) 
                xhi = xlo
                dxhi = dxlo
               ENDDO
-             POPhmsalab(ne,1,1,Inxr) = 0.0d0
-             DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-               POPhmsalab(ne,1,1,Inxr) = POPhmsalab(ne,1,1,Inxr)   
-     &                                    +DDXsnex(nu,ne-1,1,jz,jn+1)
-              ENDDO
-             csfit(NDAnghms) =  POPhmsalab(ne,1,1,Inxr)
-             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
-             IF (qq(1).NE.0.0D+0) THEN
-              xnor = POPhmslab(ne,1,Inxr)/(4.0*3.14159*qq(1))
-              DO na = 1, NDAnghms
-               POPhmsalab(ne,na,1,Inxr) = POPhmsalab(ne,na,1,Inxr)*xnor
-c               CSEa(ne,na,1,0) = CSEa(ne,na,1,0)
-c     &                                 + CSEahmslab(ne,na,1,0)
-              ENDDO
+              POPcsealab(1,nu,1,ne,Inxr) =DDXsnexlab(1,nu-1,ne-1,Inxr)
+              csfit(NDAnghms) =  POPcsealab(1,nu,1,ne,Inxr)
+              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+              IF (qq(1).NE.0.0D+0) THEN
+               xnor = POPhmslab/(4.0*3.14159*qq(1))
+               DO nth = 1, NDAnghms
+                POPcsealab(nth,nu,1,ne,Inxr) = 
+     &                                 POPcsealab(nth,nu,1,ne,Inxr)*xnor
+                CSEahmslab(ne,nth,1) = CSEahmslab(ne,nth,1)
+     &                              - POPcsealab(nth,nu,1,ne,Inxr)
+               ENDDO
+              ENDIF
              ENDIF
+            ENDDO
            ENDDO
          ENDIF ! iloc
 C
@@ -6175,42 +6174,42 @@ C
           IF(iloc .EQ. 0 .AND. XSPx(jz,jn) .GT. 1.0d-6) THEN
            CSHms(2,nnuc) =  XSPx(jz,jn)
            CSEmis(2,nnuc) = CSEmis(2,nnuc) + XSPx(jz,jn)
-           IF (ENDf(nnuc).EQ.1) THEN
+           IF (ENDf(nnur).EQ.1) THEN
              ecres = ecn-Q(2,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
              ndspc = nspec - nspecc
-             IF(ndspc-1.GT.NDIM_BNDS) write(8,*)
-     &                'WARNING! Increase NDIM_BNDS in DDHMS.'
 C             chk = 0.0d0
 C             chkpop = 0.0d0
 C             chkpopd = 0.0d0
              Inxr=INExc(nnur)
+             DO ne = 1,nspec
+               POPhmsx(ne,2,Inxr) = 0.0d0
+               DO nu = 1, min(ndspc,nspec-ne+1)
+                 pops =  DXSpex(nu-1,ne-1,Inxr)*DE
+C                 chkpopd = chkpopd + pops
+                 POPhmsx(ne,2,Inxr) =  POPhmsx(ne,2,Inxr) + pops
+                ENDDO
+               IF(ne.GT.nspecc)
+     &           CSEhms(ne,2,0) = CSEhms(ne,2,0) - POPhmsx(ne,2,Inxr)
+               POPcsed(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+               IF(jz.NE.0 .OR. jn.NE.0)
+     &                    POPcse(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+              ENDDO
              DO ne = 1, nspecc
-c              CSEhms(ne,2,nnuc) = DXSpx(ne-1,jz,jn)
+C              CSEhms(ne,2,nnuc) = DXSpx(ne-1,jz,jn)
 C               chk=chk+DXSpx(ne-1,jz,jn)
-c               IF(DXSpex(nspec-ne+1,ne-1,jz+1,jn).gt.0.0d0) 
-c     &          write(8,'(a3,3i5,f12.6)') 'p: ',nspec-ne,ne-1,
-c     &              DXSpex(nspec-ne+1,ne-1,jz+1,jn)
                pops = DXSpx(ne-1,jz,jn)
                IF(ne.EQ.1 .OR. ne.EQ.nspecc) pops = 2*pops
                CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + pops
                DO nu = 1, nspecc-ne+1
-                 pops =  DXSpex(nu+ndspc-1,ne-1,jz+1,jn)*DE
+                 pops =  DXSpex(nu+ndspc-1,ne-1,Inxr)*DE
 C                 chkpop = chkpop + pops
-                 POPcse(nu,2,ne,Inxr) = POPcse(nu,2,ne,Inxr) + pops
-                 POPcseaf(nu,2,ne,Inxr) = 1.0d0
-                ENDDO 
-              ENDDO
-             DO ne = 1,nspec
-               POPhmsx(ne,2,Inxr) = 0.0d0
-               DO nu = 1, min(ndspc,nspec-ne+1)
-                 pops =  DXSpex(nu-1,ne-1,jz+1,jn)*DE
-C                 chkpopd = chkpopd + pops
                  POPhmsx(ne,2,Inxr) =  POPhmsx(ne,2,Inxr) + pops
+                 POPcse(nu,2,ne,Inxr) = POPcse(nu,2,ne,Inxr) + pops
+                 POPcsed(nu,2,ne,Inxr) = POPcsed(nu,2,ne,Inxr) + pops
                 ENDDO
-               IF(jz.NE.0 .OR. jn.NE.0)
-     &                    POPcse(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+               CSEhms(ne,2,0) = CSEhms(ne,2,0) - POPhmsx(ne,2,Inxr)
               ENDDO
 C             write(8,'(a5,i8,4f12.6)') '   p:',nnuc,chk*DE,XSPx(jz,jn),
 C     1                            chkpop*DE,chkpopd*DE
@@ -6223,54 +6222,45 @@ C-----integrated spectrum
            nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
            DO ne = 1, nspec
              CSEhmslab(ne,2,nnuc) = DXSpxlab(ne-1,jz,jn)
-
-              POPhmslab(ne,2,Inxr) = 0.0d0
-              POPhmsalab(ne,NDAnghms1,2,Inxr) = 0.0d0
-              DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-               POPhmslab(ne,2,Inxr) = POPhmslab(ne,2,Inxr)
-     &                              +DXSpexlab(nu,ne-1,jz+1,jn)
-               POPhmsalab(ne,NDAnghms1+1,2,Inxr) = 
-     &                          POPhmsalab(ne,NDAnghms1+1,2,Inxr)   
-     &                              +DDXspex(nu,ne-1,NDAnghms1,jz+1,jn)
-               ENDDO
-              csfit(1) =   POPhmsalab(ne,NDAnghms,2,Inxr) 
-
+            DO nu = 1, nspec - ne +1
+             POPhmslab = DXSpexlab(nu-1,ne-1,Inxr)*DE
+             CSEhmslab(ne,2,0) = CSEhmslab(ne,2,0)-POPhmslab
+             IF(ENDFA(Nnur).EQ.1) THEN
+              POPcsealab(NDAnghms,nu,2,ne,Inxr) = 
+     &                              DDXspexlab(NDAnghms1,nu-1,ne-1,Inxr)
+              csfit(1) =   POPcsealab(NDAnghms,nu,2,ne,Inxr) 
               thx = PI_g - dth
               xhi = DCOS(thx)
               dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
               DO nth = NDAnghms1, 2, -1
-                thx = thx - dth
-                xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
-                dxlo = xlo - xhi
-                POPhmsalab(ne,nth,2,Inxr) = 0.0d0
-                DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-                 POPhmsalab(ne,nth,2,Inxr) = POPhmsalab(ne,nth,2,Inxr) + 
-     &                 (dxhi*DDXspex(nu,ne-1,nth,jz+1,jn)
-     &                 +dxlo*DDXspex(nu,ne-1,nth-1,jz+1,jn))/(dxhi+dxlo)
-                ENDDO
-               csfit(NDAnghms-nth+1) =   POPhmsalab(ne,nth,2,Inxr) 
+               thx = thx - dth
+               xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
+               dxlo = xlo - xhi
+               POPcsealab(nth,nu,2,ne,Inxr) = 
+     &            (dxhi*DDXspexlab(nth,nu-1,ne-1,Inxr)
+     &            +dxlo*DDXspexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
+               csfit(NDAnghms-nth+1) =  POPcsealab(nth,nu,2,ne,Inxr) 
                xhi = xlo
                dxhi = dxlo
               ENDDO
-             POPhmsalab(ne,1,2,Inxr) = 0.0d0
-             DO nu = 0, MIN(NDIM_BNDS,ndspc - 1)
-               POPhmsalab(ne,1,2,Inxr) = POPhmsalab(ne,1,2,Inxr)   
-     &                                    +DDXspex(nu,ne-1,1,jz+1,jn)
-              ENDDO
-             csfit(NDAnghms) =  POPhmsalab(ne,1,2,Inxr)
-             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
-             IF (qq(1).NE.0.0D+0) THEN
-              xnor = POPhmslab(ne,2,Inxr)/(4.0*3.14159*qq(1))
-              DO na = 1, NDAnghms
-               POPhmsalab(ne,na,2,Inxr) = POPhmsalab(ne,na,2,Inxr)*xnor
-c               CSEa(ne,na,2,0) = CSEa(ne,na,2,0)
-c     &                                 + CSEahmslab(ne,na,2,0)
-              ENDDO
+              POPcsealab(1,nu,2,ne,Inxr) = DDXspexlab(1,nu-1,ne-1,Inxr)
+              csfit(NDAnghms) =  POPcsealab(1,nu,2,ne,Inxr)
+              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+              IF (qq(1).NE.0.0D+0) THEN
+               xnor = POPhmslab/(4.0*3.14159*qq(1))
+               DO nth = 1, NDAnghms
+                POPcsealab(nth,nu,2,ne,Inxr) = 
+     &                                 POPcsealab(nth,nu,2,ne,Inxr)*xnor
+                CSEahmslab(ne,nth,2) = CSEahmslab(ne,nth,2)
+     &                             - POPcsealab(nth,nu,2,ne,Inxr)
+               ENDDO
+              ENDIF
              ENDIF
+            ENDDO
            ENDDO
-          ENDIF ! iloc
+         ENDIF ! iloc
 
-         ENDDO ! jz
+        ENDDO ! jz
        ENDDO   ! jn
 C
 C-----transfer population of residual nuclei

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2337 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2345 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -23,7 +23,7 @@ C
 C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
-      
+
       CHARACTER*40 nubar_filename
       CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
@@ -202,6 +202,8 @@ C
             dshift_ig(nnuc)= 0.d0           
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0
+C-----------set ENDFA flag to 0 (no exclusive angular distributions)
+            ENDfa(nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
             NSTOred(nnuc) = -1
          ENDDO
@@ -267,7 +269,7 @@ C
          SOFt = .FALSE.
          CCCalc = .FALSE.
 C    
-C        CHECKING and READING the NUBAR-EVAL.ENDF	 
+C        CHECKING and READING the NUBAR-EVAL.ENDF      
          nubar_filename='NUBAR-EVAL.ENDF'
          INQUIRE(FILE=nubar_filename,EXIST=NUBarread)
 C
@@ -275,8 +277,7 @@ C        READING OF THE ENDF MF=1, MT=456 prompt nubar
 C        and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays 
          IF(NUBarread) CALL READNUBAR(nubar_filename,
      &len_trim(nubar_filename))
-
-C 	 
+C      
          NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
          IOMwritecc = 0
@@ -410,7 +411,8 @@ C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
          EHRtw = 0.d0
 C--------ENDF global setting initialized to zero (no formatting)
-         Nendf = 0
+         NENdf = 0
+         NENdfa = 0
 C
 C--------default input parameters    *** done ***
 C
@@ -670,8 +672,10 @@ C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
                   HIS(nnuc) = -1.
                   IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                HIS(nnuc) = -0.5
-                  IF(NENdf.gt.0 .and. mulem.eq.in .and. in.le.4) 
-     &             ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
+                  IF(NENdf.gt.0 .and. mulem.eq.in .and. in.le.4) THEN 
+                   ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
+                   ENDFa(nnuc) = 1
+                  ENDIF
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -816,7 +820,8 @@ C--------Retrieve C4 experimental data  *** done ***
          DO nnuc = 1, NNUcd
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
 
-            ENDf(nnuc)=1
+            ENDf(nnuc) = 1
+            ENDfa(nnuc) = 1
 
             irepeated = 0
             do i=1,nnuc-1
@@ -846,7 +851,8 @@ C              residual nuclei must be heavier than alpha
                   IF (A(nnur)*0.5.NE.AINT(A(nnur)*0.5)) HIS(nnur) = -0.5
                   NNUct = NNUct + 1
 C                 These nuclei are always considered inclusive
-                  ENDf(nnur)=2
+                  ENDf(nnur) = 2
+                  ENDfa(nnur) = 2
 C
                ENDIF
             ENDDO
@@ -893,6 +899,7 @@ C-----------(McFadden global potential 9100 could be used)
             KTRlom(6,i) = 8100
 c           KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
+
 C
 C--------inteligent defaults *** done ***
 C
@@ -926,9 +933,14 @@ C
          IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
          IF(ENDf(0).EQ.10) ENDf(0)=1 ! for compound
 
+         IF(ENDfa(NTArget).EQ.10) ENDfa(NTArget)=1
+         IF(ENDfa(1).EQ.10) ENDfa(1)=1 ! for compound
+         IF(ENDfa(0).EQ.10) ENDfa(0)=1 ! for compound
+
          IF(NENdf.EQ.0) THEN
 
-           ENDF = 0
+           ENDf = 0
+           ENDfa = 0
            NEXclusive = 0
            EXClusiv = .FALSE.
 
@@ -972,6 +984,12 @@ C             residues must be heavier than alpha
               ENDIF
 C             This nucleus requested as exclusive in the optional input
               IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  
+
+              IF(mulem.GT.NENdfa .AND. ENDfa(nnuc).NE.10) THEN
+                ENDfa(nnuc) = 2
+              ENDIF
+C             This nucleus requested as exclusive in the optional input
+              IF(ENDfa(nnuc).EQ.10) ENDfa(nnuc) = 1  
             ENDDO
             ENDDO
             ENDDO
@@ -984,19 +1002,24 @@ C           Reducing the number of exclusive nuclei
 C           by eliminating those from higher emission loops 
 C
             itmp = 0          
-            do i=1,NEXclusive
-              iatmp = int(a(i))
-              iztmp = int(z(i))
+            DO i = 1, NEXclusive
+              iatmp = INT(a(i))
+              iztmp = INT(z(i))
               izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
-              if(endf(nnuc).eq.1) then 
+              
+              IF(ENDf(nnuc).EQ.1) THEN 
+                IF(LHMs.EQ.0. OR. NENdfa.EQ.0) ENDfa(nnuc) = 2 
                 itmp = itmp + 1
                 INExc(nnuc) = itmp 
-C               write(*,*) i,int(a(i)),int(z(i)),INExc(nnuc),endf(nnuc) 
-              endif
-            enddo
+              ELSE
+               ENDfa(nnuc) = 2
+              ENDIF
+C               write(*,'(7i5)') i,INT(a(i)),INT(z(i)),nnuc,INExc(nnuc),
+C     &                                            ENDf(nnuc),ENDfa(nnuc) 
+            ENDDO
             NEXclusive = itmp
-C           write(*,*) '***',NEXclusive
+C           write(*,'(a3,i5)') '***',NEXclusive
           
          ENDIF
 C
@@ -4960,6 +4983,63 @@ C           Setting ENDF for a single nucleus
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
             ENDIF
             IF (ENDf(nnuc).EQ.2) THEN
+              WRITE (8,
+     &       '('' Emission spectra from nucleus '',I3,A2,
+     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+              WRITE (12,
+     &       '('' Emission spectra from nucleus '',I3,A2,
+     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+            ENDIF
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'ENDFA  ') THEN
+             IF(i1.eq.0 .AND. i2.eq.0) THEN
+C              Setting ENDF for all emission loops
+               NENdfa = INT(val)
+               IF(NENdfa.GT.0) THEN
+                 WRITE (8,'('' ENDF formatting enabled'')')
+                 WRITE (8,'(
+     &            '' Exclusive DDXSs available up to'',
+     &            '' emission loop # '',I2)') NENdfa
+                 WRITE (12,'('' ENDF formatting enabled'')')
+                 WRITE (12,'(
+     &            '' Exclusive DDXSs available up to'',
+     &            '' emission loop # '',I2)') NENdfa
+                     GOTO 100
+               ENDIF
+               IF(NENdfa.EQ.0) THEN
+                 WRITE ( 8,'('' Exclusive DDXSs disabled'')')
+                 WRITE (12,'('' Exclusive DDXSs disabled'')')
+                 GOTO 100
+               ENDIF
+             ENDIF
+             IF(val.LT.0) THEN
+               WRITE (8,'('' WRONG ENDFA value in input'',I3)')
+     &                i2
+               WRITE (8,'('' SETTING IGNORED'')')
+               GOTO 100
+             ENDIF
+C           Setting ENDFA for a single nucleus
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,'('' ENDFA SETTING IGNORED'')')
+               GOTO 100
+            ENDIF
+            ENDfa(nnuc) = INT(val)
+            IF (ENDfa(nnuc).EQ.1) THEN
+              ENDfa(nnuc) = 10  ! using as a flag 
+              WRITE (8,
+     &       '('' Exclusive DDXS will be available for emission'',
+     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+              WRITE (12,
+     &       '('' Exclusive DDXS will be available for emission'',
+     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+            ENDIF
+            IF (ENDfa(nnuc).EQ.2) THEN
               WRITE (8,
      &       '('' Emission spectra from nucleus '',I3,A2,
      &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
@@ -9808,8 +9888,8 @@ Ccc
       END
 
 
-
       SUBROUTINE READNUBAR(infile,nin)
+
       use endf_io
 
       INCLUDE 'dimension.h'
@@ -9862,5 +9942,3 @@ c	Assigning nubars to vniu_eval
 
       return      
       END
-
-

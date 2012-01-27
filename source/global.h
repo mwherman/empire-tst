@@ -1,6 +1,6 @@
-C $Rev: 2337 $
-C $Author: gnobre $
-C $Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
+C $Rev: 2345 $
+C $Author: bcarlson $
+C $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -62,7 +62,7 @@ C
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,
-     &        IOUt, IPFdis(nftrans,nfparab),ENDf(0:ndnuc), 
+     &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc),ENDfa(0:ndnuc),
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
@@ -71,8 +71,8 @@ C
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
-     &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab),
-     &        NRWel, NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
+     &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab), NRWel,
+     &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
@@ -97,7 +97,10 @@ C
      &                 PEQc, PEQcont, PI, POP(ndex,ndlw,2,ndnuc),
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
+     &                 POPcsed(0:ndex_d,2,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
+     &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
+     &                 0:ndexclus), POPhmsx(ndecsed,2,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
      &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
@@ -105,10 +108,7 @@ C
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
-     &                 POPhmsx(ndecsed,2,0:ndexclus),
-     &                 POPhmslab(ndecsed,2,0:ndexclus),
-     &                 POPhmsalab(ndecsed,ndangecis,2,0:ndexclus),
-     &                   POPcon(ndnuc), POPdis(ndnuc), ELAred
+     &                 POPcon(ndnuc), POPdis(ndnuc), ELAred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
@@ -164,7 +164,7 @@ C
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
       COMMON /DEPTH / POTe
-      COMMON /ENDFEA/ POPcseaf
+      COMMON /ENDFEA/  POPcsed, POPcsealab, POPcseaf
       COMMON /ENDFEMIS/ POPcs
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
@@ -195,8 +195,7 @@ C
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
      &                 CSEhms, CSEhmslab, CSEfis, CSE, CSEa, CSEt, 
-     &                 CSEahmslab, POPhmsx, POPhmslab, POPhmsalab,
-     &                 RECcse, POPcon, POPdis, 
+     &                 CSEahmslab, POPhmsx, RECcse, POPcon, POPdis, 
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,
@@ -217,9 +216,10 @@ C
      &                  num_niu,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,INExc, ENDf, 
-     &                  NANgela,NDAng,ISProd,FITomp,ICAlangs, NPAirpe,
-     &                  KALman, MT2, MT91, MT649, MT849, IOPran, NPRIm_g
+     &                  NENdf, NENdfa, NEMn, NEMp, NEMa, NEXclusive,
+     &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
+     &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
+     &                  MT649, MT849, IOPran, NPRIm_g
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,

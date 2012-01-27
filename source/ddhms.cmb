@@ -1,12 +1,12 @@
-c CVS Version Management $Revision: 2242 $
+c CVS Version Management $Revision: 2345 $
 c $Id: ddhms.cmb,v 1.8 2007/09/03 14:20:29 Capote Exp $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
-        integer ndim_bnds
-	parameter (ndim_bnds = 40)    !limit of x-energy in excl.ang.dist.
 	integer maxnemiss  
-	parameter (maxnemiss = 6)  ! max number of emitted preeq. nucleons  
+	parameter (maxnemiss = 5)  ! max number of emitted preeq. nucleons  
+        integer ndexcluhms
+        parameter (ndexcluhms = 15) ! max number of exclusive spectra and DDX's 
 
 	integer ndim_zem,ndim_nem   
 	parameter (ndim_zem = maxnemiss)  !max # of protons emitted	
@@ -89,24 +89,23 @@ c /spec/ arrays of neutron and proton differential spectra
      +             ddxsp(0:ndim_ebins,ndanghms),
      +             dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +     dxsnex(0:ndim_ebins,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +     dxspex(0:ndim_ebins,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     + ddxsnex(0:ndim_bnds,0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
-     + ddxspex(0:ndim_bnds,0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem)
-      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx,dxsnex,dxspex,
-     +                                          ddxsnex,ddxspex
+     +             dxsnex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     +             dxspex(0:ndim_ebins,0:ndim_ebins,ndexcluhms)
+      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx,dxsnex,dxspex
       common/speclab/ dxsnlab(0:ndim_ebins),dxsplab(0:ndim_ebins), 
      +           dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           ddxsnlab(0:ndim_ebins,ndanghms),
      +           ddxsplab(0:ndim_ebins,ndanghms),
-     +     dxsnexlab(0:ndim_bnds,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +     dxspexlab(0:ndim_bnds,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
      +           ddxsnxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
-     +           ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem)
+     +           ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
+     +           dxsnexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     +           dxspexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     +       ddxsnexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     +       ddxspexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms)
 c23456789012345678901234567890123456789012345678901234567890123456789012
-      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab,dxsnexlab,dxspexlab
-     +              ,dxsnxlab,dxspxlab,ddxsnxlab,ddxspxlab
+      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab,dxsnexlab,dxspexlab,
+     +       dxsnxlab,dxspxlab,ddxsnxlab,ddxspxlab,ddxsnexlab,ddxspexlab
  
 c /siginv/ inverse cross sections for HMS calculation
       common/siginv/ siginvn(0:2000),siginvp(0:2000) ! defined evergy 0.25 MeV to ndim_ebins
