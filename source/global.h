@@ -1,6 +1,6 @@
-C $Rev: 2299 $
-C $Author: rcapote $
-C $Date: 2012-01-25 04:18:01 +0100 (Mi, 25 Jän 2012) $
+C $Rev: 2337 $
+C $Author: gnobre $
+C $Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -53,7 +53,8 @@ C
      &                 FISDL1(ndnuc),FISDL2(ndnuc),FISDL3(ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
-     &                 FISn_n(NFHUMP,ndnuc)
+     &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
+     &                 VNIu_eval(NDECSE) 
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -65,7 +66,7 @@ C
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
-     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), 
+     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), num_niu,
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
@@ -189,7 +190,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred
+     &                 rELAred, ENIu_eval, VNIu_eval
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -213,6 +214,7 @@ C
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite,
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
+     &                  num_niu,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,INExc, ENDf, 

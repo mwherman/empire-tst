@@ -2,7 +2,7 @@
 #
 # set C compiler
 CC     =  gcc
-CFLAGS = -O3
+#CFLAGS = -O3
 
 # choose your fortran compiler:
 #FC     =  f90

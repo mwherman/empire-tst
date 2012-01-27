@@ -1,6 +1,6 @@
-#$Rev: 2251 $
-#$Author: mherman $
-#$Date: 2012-01-19 08:38:39 +0100 (Do, 19 Jän 2012) $
+#$Rev: 2337 $
+#$Author: gnobre $
+#$Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -8,7 +8,8 @@
 FC     =  gfortran
 #CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -I ../util/IO/
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
@@ -35,7 +36,8 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 #---------------------------
 #FC     =  ifort
 #----flags for production compilation using ifort
-#FFLAGS = -arch pn4 -O3 -ipo
+#FFLAGS = -arch pn4 -O3 -ipo -I ../util/IO/
+#FFLAGS = -O3 -x=host  -I ../util/IO/
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #----flags for debuging using ifort compiler
 #FFLAGS =  -C -ftrapuv -g -debug all
@@ -77,7 +79,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
-            systematics.o     subecis06m.o
+            systematics.o     subecis06m.o      ../util/IO/endf_io.a
 
 all: 
 	$(MAKE) empire

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2334 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2337 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -23,7 +23,8 @@ C
 C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
-
+      
+      CHARACTER*40 nubar_filename
       CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
@@ -266,17 +267,17 @@ C
          SOFt = .FALSE.
          CCCalc = .FALSE.
 C    
-C        CHECKING and READING the NUBAR-EVAL.ENDF      
-         OPEN(23, FILE= 'NUBAR-EVAL.ENDF',ERR = 5432)
-       NUBarread = .TRUE.
+C        CHECKING and READING the NUBAR-EVAL.ENDF	 
+         nubar_filename='NUBAR-EVAL.ENDF'
+         INQUIRE(FILE=nubar_filename,EXIST=NUBarread)
 C
 C        READING OF THE ENDF MF=1, MT=456 prompt nubar
 C        and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays 
-C 
-         GOTO 5433
- 5432    NUBarread = .FALSE.
-C      
- 5433    NPRIm_g = 0       ! No primary gammas (default)        
+         IF(NUBarread) CALL READNUBAR(nubar_filename,
+     &len_trim(nubar_filename))
+
+C 	 
+         NPRIm_g = 0       ! No primary gammas (default)        
          FISspe = 0
          IOMwritecc = 0
          MODelecis = 0
@@ -892,7 +893,6 @@ C-----------(McFadden global potential 9100 could be used)
             KTRlom(6,i) = 8100
 c           KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
-
 C
 C--------inteligent defaults *** done ***
 C
@@ -9806,3 +9806,61 @@ Ccc
       WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
       RETURN
       END
+
+
+
+      SUBROUTINE READNUBAR(infile,nin)
+      use endf_io
+
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      integer*4, intent(in) :: nin
+      character*200, intent(in) :: infile
+
+      integer*4 np
+
+      type (endf_mat) nubar_mat
+      type (mf_1), pointer :: mf1
+      
+      call clear_mat(nubar_mat)
+      allocate(nubar_mat%mf1)
+
+      call find_mf(infile(1:nin),nubar_mat)
+
+      mf1 => nubar_mat%mf1
+      do while(associated(mf1))
+         if(mf1%mt .eq. 456) exit
+	 mf1 => mf1%next
+      end do
+      
+      if(.not.(associated(mf1))) then
+          write(8,*) ' MT456 not found in ',infile(1:nin)
+          stop ' Aborted in readNubar'
+      endif 
+      
+      if(mf1%mt456%lnu .eq. 2) then
+        np = mf1%mt456%tb%np
+        eniu_eval = 0.0d0
+        vniu_eval = 0.0d0
+	if(np .gt. ndecse) then
+	    write(8,*) ' WARNING: # nubar energies > storage array'
+	    np = ndecse
+	endif
+c	Assigning energies to eniu_eval and converting to MeV
+        eniu_eval(1:np) = mf1%mt456%tb%dat%x/1.d6
+c	Assigning nubars to vniu_eval
+        vniu_eval(1:np) = mf1%mt456%tb%dat%y
+	num_niu = np
+       else
+        write(8,*) 'ERROR Reading nubar!'
+	write(8,*) 'Only option lnu=2 in MT=456 has been implemented!'
+	stop ' Abort in readNubar'
+      endif
+      
+      call del_mf(mf1)
+
+      return      
+      END
+
+
