@@ -10,6 +10,8 @@ sourcedir=`pwd`
 empver=`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`
 emprelname=`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`
 XWIN=`uname`
+
+
 echo '                                                           '
 echo '    EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333       '
 echo '    E      MM  MM  P   P  I  R   R  E             33       '
@@ -39,6 +41,8 @@ echo ' '
 echo 'This is the EMPIRE-3 (release '$empver') installation script. It will lead you '
 echo 'through the set-up procedure and eventually compile the whole package.         '
 echo ' '
+
+
 echo '  Press ENTER to start the EMPIRE setup, CTRL-C to cancel'
 read dir
 #if [ ! "$dir" = "" ]; then
@@ -70,10 +74,12 @@ read dir
 mkdir $instdir  
 EMPIREDIR=$instdir
 export EMPIREDIR
+
+
 cd $instdir
 echo ' '
 echo 'Exploding EMPIRE-3 release $empver source'
-tar xzvf $sourcedir/EMPIRE-$empver-$emprelname.tgz
+tar xzf $sourcedir/EMPIRE-$empver-$emprelname.tgz
 echo ' '
 echo 'EMPIRE-3 system decompressed in the directory '$instdir
 echo ' '
@@ -100,6 +106,9 @@ cd $instdir
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
+
+exit
+
 echo ' '
 if [ -f $sourcedir/C4-latest.zip ]; then
    echo ' '
@@ -118,6 +127,8 @@ echo 'EXFOR(C4) data decompressed in the directory '$instdir
 echo ' '
 echo '  Press ENTER to continue the setup, CTRL-C to cancel'
 read dir
+
+
 echo ' '
 # Installing Tcl/Tk packages
 echo ' '
@@ -184,6 +195,7 @@ if [ "$activetcl" = "y" ]; then
   fi  
 fi
 
+
 if [ "$XWIN" = "Darwin" ]; then
 export DISPLAY=:0
 echo '********* '
@@ -191,6 +203,8 @@ cp -f $instdir/util/c4zvd/zvv2-1.005-mac.exe $instdir/util/c4zvd/zvview.exe
 echo 'Mac ZVView installed'
 echo '********* '
 fi
+
+
 echo ' '
 cd $HOME
 #

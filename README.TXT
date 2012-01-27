@@ -40,10 +40,13 @@ ____________
 1) You may create your new EMPIRE-3.1 directory [e.g. /home/empire-3.1-rivoli]
 2) Untar the distribution file EMPIRE-3.1-RIVOLI.tgz
 3) Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
-       corresponding subdirectory RIPL/densities/total/level-densities-hfb (if you plan to use 
-       RIPL HFB level densities)
-4) Untar the distribution file C4-latest.tgz to the corresponding subdirectory EXFOR/ 
-       to get the automatic retrieval and plotting of EXFOR experiemntal data.
+       corresponding subdirectory RIPL/densities/total/level-densities-hfb 
+       (if you plan to use RIPL HFB level densities)
+4) Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
+       EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
+       data.  One is available on the EMPIRE download site and from the IAEA at
+       http://www-nds.iaea.org/x4toc4-master/.   Once you unzip it, run the 
+       parseC4.py script.
 
 --- setup finished 
 

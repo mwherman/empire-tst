@@ -43,10 +43,10 @@ up:
 upall: up all 
 
 release: 
-	python makeTarball.py --release --full
-	python makeTarball.py --release --docOnly
+#	python makeTarball.py --release --full
+#	python makeTarball.py --release --docOnly
 	python makeTarball.py --release
-	python makeTarball.py --release --riplOnly
+#	python makeTarball.py --release --riplOnly
 
 tarball-latest: upall
 	python makeTarball.py --latest
