@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2345 $
+Ccc   * $Rev: 2349 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2012-01-27 22:58:52 +0100 (Fr, 27 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -278,7 +278,7 @@ C-----DE spectra
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                 ENDIF
                 IF (POPcsealab(1,Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 DO nth = 1, NDAnghms
+                 DO nth = 1, NDAnghmx
                   POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
      &                = POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
      &                + POPcsealab(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -392,7 +392,7 @@ C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
      &                + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
                 ENDIF
                 IF (POPcsealab(1,Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 DO nth = 1, NDAnghms
+                 DO nth = 1, NDAnghmx
                   POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
      &                = POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
      &                + POPcsealab(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2334 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2349 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-27 22:58:52 +0100 (Fr, 27 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -72,12 +72,12 @@ C
      &                 dang, ded, delang, dencomp, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
-     &                 espmax, epre, ftmp, gang, grand,
+     &                 espmax, epre, ftmp, gang, grand, 
      &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
-     &                 step, sum, sumfis, sumfism(NFMOD), totsp, pnrm,
-     &                 totemis, weight, xcse, xizat, xnl, xnor, xnrm,
+     &                 step, sum, sumfis, sumfism(NFMOD), totsp,
+     &                 totemis, weight, xcse, xizat, xnl, xnor,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
      &                 emiss_en(NDEPFN),post_fisn(NDEPFN), tequiv0,
@@ -89,7 +89,8 @@ C                      Total PF angular distribution defined only for neutrons
      &                 tequiv1, tequiv2, ddxs(NDAngecis),csetmp(ndecse),
      &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
      &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor,checkprd,
-     &                 xcross(0:NDEJC+3,0:15,0:20), cspg
+     &                 xcross(0:NDEJC+3,0:15,0:20), cspg,
+     &                 xnorm(2,NDExclus)
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs, csmax
@@ -1808,8 +1809,8 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
              IF (ctotsp.NE.0) emedc = emedc/ctotsp
 C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
-             xnrm = 1.0d0
-             pnrm = 1.0d0
+             xnorm(1,INExc(nnuc)) = 1.0d0
+             xnorm(2,INExc(nnuc)) = 1.0d0
              IF (nnuc.EQ.mt91) THEN
                   nejc = 1
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
@@ -1853,7 +1854,6 @@ c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
 c                 ENDDO
               ELSE
-c                  write(8,*)'xtotsp,ptosp:',xtotsp,ptotsp,atotsp
                   IF(atotsp.LT.1.0d-8) THEN
                     totsp = CSprd(nnuc) - dtotsp - htotsp - ttotsp
                     IF(NDEJC.EQ.7) totsp = totsp - ctotsp
@@ -1861,31 +1861,31 @@ c                  write(8,*)'xtotsp,ptosp:',xtotsp,ptotsp,atotsp
                     IF(xtotsp.GT.0.0d0) THEN
                       nxsp=INT(xtotsp/totsp+0.5d0)
                       IF(ttotsp.GT.0.0d0) THEN
-                        xnrm = (nxsp*totsp+dtotsp)/xtotsp
+                        xnorm(1,INExc(nnuc)) =(nxsp*totsp+dtotsp)/xtotsp
                         xtotsp = nxsp*totsp + dtotsp
                        ELSE
-                        xnrm = nxsp*totsp/xtotsp
+                        xnorm(1,INExc(nnuc)) = nxsp*totsp/xtotsp
                         xtotsp = nxsp*totsp
                        ENDIF
                       POPcs(1,INExc(nnuc)) = xtotsp
                       IF(ABS(1.0d0 - xnrm).GT.0.01d0) WRITE(8,
      &        '(''WARNING! Exclusive neutron spectrum renormalized by'',
-     &                               f6.3)') xnrm
+     &                               f6.3)') xnorm(1,INExc(nnuc))
                      ENDIF
                     npsp = 0
                     IF(ptotsp.GT.0.0d0) THEN
                       npsp=INT(ptotsp/totsp+0.5d0)
                       IF(htotsp.GT.0.0d0) THEN
-                        pnrm = (npsp*totsp+dtotsp)/ptotsp
+                        xnorm(2,INExc(nnuc)) =(npsp*totsp+dtotsp)/ptotsp
                         ptotsp = npsp*totsp + dtotsp
                        ELSE
-                        pnrm = npsp*totsp/ptotsp
+                        xnorm(2,INExc(nnuc)) = npsp*totsp/ptotsp
                         ptotsp = npsp*totsp
                        ENDIF
                       POPcs(2,INExc(nnuc)) = ptotsp
                       IF(ABS(1.0d0 - pnrm).GT.0.01d0) WRITE(8,
      &        '(''WARNING! Exclusive  proton spectrum renormalized by'',
-     &                     f6.3)') pnrm
+     &                     f6.3)') xnorm(2,INExc(nnuc))
                      ENDIF
                    ENDIF
              ENDIF
@@ -1904,9 +1904,9 @@ c                  write(8,*)'xtotsp,ptosp:',xtotsp,ptotsp,atotsp
      &           '-------------------------------------------------'
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
                POPcse(0,1,ispec,INExc(nnuc)) = 
-     &                               xnrm*POPcse(0,1,ispec,INExc(nnuc))
+     &                xnorm(1,INExc(nnuc))*POPcse(0,1,ispec,INExc(nnuc))
                POPcse(0,2,ispec,INExc(nnuc)) = 
-     &                               pnrm*POPcse(0,2,ispec,INExc(nnuc))
+     &                xnorm(2,INExc(nnuc))*POPcse(0,2,ispec,INExc(nnuc))
                IF (NDEJC.EQ.7) THEN
                       WRITE (8,'(9g15.5)') (ispec - 1)*DE,
      &                      POPcse(0,0,ispec,INExc(nnuc)),
