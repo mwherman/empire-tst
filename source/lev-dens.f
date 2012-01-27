@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 04:19:29 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1690,8 +1690,8 @@ C
             ENDDO
          ENDDO
       ENDDO
-      WRITE (filename,99005) iz
-99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
+      WRITE (filename,99985) iz
+99985 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
       OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2

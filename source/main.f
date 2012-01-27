@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2306 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-25 07:49:31 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2334 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -491,10 +491,10 @@ C------------End of adding inelastic to continuum
      &   (ELAcs*ELAred + CSFus + (SINl + SINlcc)*FCCred + SINlcont) /
      &                 (TOTcs*TOTred)
 C
-         WRITE (8,99005) TOTcs,TOTred*TOTcorr,TOTred*TOTcs*TOTcorr,
+         WRITE (8,99785) TOTcs,TOTred*TOTcorr,TOTred*TOTcs*TOTcorr,
      &                   CSFus/FUSred,FUSRED,CSFus,
      &                   ELAcs, ELAred, ELAred*ELAcs 
-99005    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
+99785    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
      &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )',/,2x,
      &           'Absorption cross section    :',e14.7,' mb',
      &                '  ( Scaled by ',f5.2,'  to ',e14.7,' mb )',/,2x,
@@ -3049,34 +3049,35 @@ C         ENDDO
 C     ENDDO
       WRITE (8,*) ' '
       WRITE (8,*)
-      IF (IOUt.GT.1 .AND. .NOT.EXClusiv ) THEN
-         csemax = 0.d0
+
+      IF (IOUt.GT.5 .AND. .NOT.EXClusiv ) THEN
+
          DO nejc = 0, NEJcm
-            DO i = 1, NDEX
-               csemax = DMAX1(CSE(i,nejc,0),csemax)
-            ENDDO
-            if(csemax.LE.0) cycle
-            WRITE (8,'(//,11X,''**************************'')')
-            WRITE (8,'(11x,   '' Inclusive spectra (C.M.)'')')
-            WRITE (8,'(11x,   '' Ejectile :'',i1)') nejc
-            WRITE (8,'(11x,   ''**************************''/)')
-            IF (IOUT.GT.5)  CALL AUERST(0,nejc,1)
-         ENDDO
-         IF (FIRst_ein) then
             csemax = 0.d0
+            DO i = 1, NDEX
+              csemax = DMAX1(CSE(i,nejc,0),csemax)
+            ENDDO
+            if(csemax.le.0.01d0) cycle 
+ 
+            CALL AUERST(0,nejc,1)
+         ENDDO
+
+         IF (FIRst_ein) THEN 
+
+            WRITE (8,'(11X,''**********************'')')
+            WRITE (8,'(11x,'' Total spectra (C.M.)'')')
+            WRITE (8,'(11x,''**********************'')')
             DO nejc = 0, NEJcm
+              csemax = 0.d0
               DO i = 1, NDEX
                 csemax = DMAX1(CSEt(i,nejc),csemax)
               ENDDO
-              if(csemax.LE.0) cycle
-              WRITE (8,'(11X,''**********************'')')
-              WRITE (8,'(11x,'' Total spectra (C.M.)'')')
-              WRITE (8,'(11x,''**********************'')')
-              IF (IOUT.GT.5) THEN 
-                CALL Print_Total(nejc)
-			  CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
-	        ENDIF
+              if(csemax.le.0.01d0) cycle 
+
+              CALL Print_Total(nejc)
+              CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
             ENDDO
+
          ENDIF  
       ENDIF
       WRITE (8,*)

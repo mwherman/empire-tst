@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2333 $
+Ccc   * $Rev: 2334 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-26 23:10:59 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -158,7 +158,7 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc, array_tmp(100)
       CHARACTER*80 ch_iuf
-      CHARACTER*1 dum
+	CHARACTER*1 dum
       LOGICAL coll_defined
       CHARACTER*132 ctmp
       REAL FLOAT
@@ -226,15 +226,18 @@ C
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
-
-         OPEN (UNIT = 32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN')
+C
+C        rigid rotor model
+C
+         OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1056)
          DO n=2,NCOll(ncalc)
-          elevcc = EVV(n,ncalc)
-          REWIND(32)
-            READ (32,'(A80)') ch_iuf
+            elevcc = EEX(n,ncalc)
+            REWIND(32)
+            READ (32,'(A80)',END=1056,ERR=1056) ch_iuf
             elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
-              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') 
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &                  ) 
      &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
@@ -242,93 +245,114 @@ C
               if(elvr.gt.elevcc) then
                 nlev = ilv    
                 if(abs(elvr0-elevcc).lt.abs(elvr-elevcc)) nlev = ilv - 1
-C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc 
                 ICOllev(n) = nlev 
                 goto 103
               endif 
               elvr0 = elvr 
             ENDDO
   103    ENDDO
-         CLOSE(32)  
-
+ 1056    CLOSE(32)  
 
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) THEN
-                nld_cc = nld_cc + 1
-            ELSE
-              IF (k.le.NCOll(ncalc)) then
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+         ENDDO
+
+         IF (nld_cc.NE.NCOll(ncalc)) THEN
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
+         ENDIF
+         WRITE (8,*) 
+
+         nld_cc = 0
+         DO k = 1, ND_nlv
+            IF (k.le.NCOll(ncalc)) then
+              IF (ICOllev(k).GE.LEVcc) then 
                 ICOllev(k) = ICOllev(k) - LEVCC
                 nld_cc = nld_cc + 1
-                WRITE (8,*) 'WARNING: level ',k,' COUPLED'
+                WRITE (8,*) 'WARNING: rotat. level ',k,' COUPLED'
+	        ELSE
+                nld_cc = nld_cc + 1
+              ENDIF 
+            ELSE
+              IF (ICOllev(k).LT.LEVcc) then 
+                ICOllev(k) = ICOllev(k) + LEVCC
+                WRITE (8,*) 'WARNING: rotat. level ',k,' unCOUPLED'
               ENDIF
-            ENDIF
+	      ENDIF
          ENDDO
-C
-         WRITE (8,*)
-         WRITE (8,*)
+
+         WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
             D_Def(1,k) = DDEf(ncalc,k)
          ENDDO
-         IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
-     &                  nld_cc
-            WRITE (8,*) 'WARNING: is not equal ', NCOll(ncalc),
-     &                  ' (used in CC RIPL OMP)'
-            WRITE (8,*) 'WARNING: Using RIPL CC levels'
-         ENDIF
+         WRITE (8,*) 
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
+         READ (97,*)                    ! FIRST LINE
+
          WRITE (8,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE (32,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
-         READ (97,'(A80)') ch_iuf   ! FIRST LINE
-         WRITE (96,'(A80)') ch_iuf
-         WRITE (8,*) 'Dyn.deformations are not used in symm.rot.model'
-         WRITE (32,*) 'Dyn.deformations are not used in symm.rot.model'
+         WRITE (96,*) 
+     &           'Collective levels: RIPL CC OMP + default, rigid model'
+C
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
+         WRITE (8,'(A80)') ch_iuf
+         WRITE (32,'(A80)') ch_iuf
          WRITE (96,'(A80)') ch_iuf
-         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp,
+C
+         READ (97,*)                    ! model type , ! 3ER LINE
+         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp, 
      &                                 ' nucleus is treated as deformed'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
-         READ (97,'(A80)') ch_iuf       ! 3ER LINE
-         WRITE (96,'(A80)') ch_iuf
-         WRITE (8,*)
-         WRITE (32,*)
-         READ (97,'(A80)') ch_iuf       ! EMPTY LINE
-         WRITE (96,'(A80)') ch_iuf
+         WRITE (96,'(1x,i3,1x,i3,a35)') izinp, iainp,
+     &                                 ' nucleus is treated as deformed'
+
+         READ (97,*)                    ! EMPTY LINE
+         WRITE (8,*) 
+         WRITE (32,*) 
+         WRITE (96,*) 
          DEFormed = .TRUE.
+
+         READ (97,*) 
          WRITE (8,*) '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE (32,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-         READ (97,'(A80)') ch_iuf
          WRITE (96,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+
+         READ (97,*) 
          WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
          WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-         READ (97,'(A80)') ch_iuf
          WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+
+         READ (97,*) 
          WRITE (8,*)
          WRITE (32,*)
-         READ (97,'(A80)') ch_iuf
          WRITE (96,*)
+
+         READ (97,*) 
          WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-         READ (97,'(A80)') ch_iuf
          WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          k=1
    50    READ (97,'(A80)',END = 100) ch_iuf                                      
@@ -353,17 +377,18 @@ C-----------symm.rotational model but could be used for vibrational
 C-----------rotational model so we are setting it to 0.01
             WRITE (32,
      &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EVV(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
             WRITE (8,
      ^             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EVV(k,ncalc), SPIn(k,ncalc), 
+     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
      &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
          ENDDO
          CLOSE (32)
          WRITE (8,*)
          WRITE (8,*)
       ENDIF
+
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
 C
 C--------model = 'coupled-channels vibrational model'
@@ -403,15 +428,18 @@ C
               GOTO 300
             ENDIF
          ENDDO
-
-         OPEN (UNIT = 32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN')
-         DO n=2,NCOll(ncalc)
+C        
+C        vibrational model
+C
+         OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1057)
+         DO n=2,NVIb(ncalc)
           elevcc = EXV(n,ncalc)
           REWIND(32)
-            READ (32,'(A80)') ch_iuf
+            READ (32,'(A80)',END=1057,ERR=1057) ch_iuf
             elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
-              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') 
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &              ,END=1057,ERR=1057) 
      &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
@@ -426,19 +454,39 @@ C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc
               elvr0 = elvr 
             ENDDO
   110    ENDDO
-         CLOSE(32)  
+ 1057    CLOSE(32)  
  
          nld_cc = 0
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
+
          IF (nld_cc.NE.NVIb(ncalc)) THEN
-            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
-     &                  nld_cc
-            WRITE (8,*) 'WARNING: is not equal ', NVIb(ncalc),
-     &                  ' (used in CC RIPL OMP)'
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
-         WRITE (8,*)
+
+C--------Setting EMPIRE global variables
+         nld_cc = 0
+         DO k = 1, ND_nlv
+            IF (k.le.NVIb(ncalc)) then
+              IF (ICOllev(k).GE.LEVcc) then 
+                ICOllev(k) = ICOllev(k) - LEVCC
+                nld_cc = nld_cc + 1
+                WRITE (8,*) 'WARNING: phonon level ',k,' COUPLED'
+	        ELSE
+                nld_cc = nld_cc + 1
+              ENDIF 
+            ELSE
+              IF (ICOllev(k).LT.LEVcc) then 
+                ICOllev(k) = ICOllev(k) + LEVCC
+                WRITE (8,*) 'WARNING: phonon level ',k,' unCOUPLED'
+              ENDIF
+	      ENDIF
+         ENDDO
          WRITE (8,*)
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
@@ -446,58 +494,69 @@ C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT')
          OPEN (96,FILE = 'COLL.DAT')
+         READ (97,'(A80)') ch_iuf   ! FIRST LINE
          WRITE (8,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE (32,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
-         READ (97,'(A80)') ch_iuf   ! FIRST LINE
-         WRITE (96,'(A80)') ch_iuf
-         WRITE (8,*) 'Dynamical deformations should be adjusted'
-         WRITE (32,*) 'Dynamical deformations should be adjusted'
+         WRITE (96,*) 
+     &           'Collective levels: RIPL CC OMP + default, vibr. model'
+C
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
-         WRITE (96,'(A80)') 'Dynamical deformations should be adjusted'
-         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (8,'(A80)') ch_iuf
+         WRITE (32,'(A80)') ch_iuf
+         WRITE (96,'(A80)') ch_iuf
+C
+         READ (97,'(A80)') ch_iuf     ! model type
+         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp, ! 3ER LINE
      &                                ' nucleus is treated as spherical'
          WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
-         READ (97,'(A80)') ch_iuf       ! 3ER LINE
-         WRITE (96,'(A80)') ch_iuf
+         WRITE (96,'(1x,i3,1x,i3,a35)') izinp, iainp,
+     &                                ' nucleus is treated as spherical'
+C
+         READ (97,'(A80)') ch_iuf       ! EMPTY LINE
+         WRITE (96,*) 
          WRITE (8,*)
          WRITE (32,*)
-         READ (97,'(A80)') ch_iuf       ! EMPTY LINE
-         WRITE (96,'(A80)') ch_iuf
          DEFormed = .FALSE.
          DO n = 1, NISotop
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
-               WRITE (8,*) '   Ncoll'
+C
+               READ (97,'(A80)') ch_iuf
+               WRITE (8 ,*) '   Ncoll'
                WRITE (32,*) '   Ncoll'
-               READ (97,'(A80)') ch_iuf
                WRITE (96,*) '   Ncoll'
-               WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
-               WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(n)
+
                READ (97,'(A80)') ch_iuf
-               WRITE (96,'(A80)') ND_nlv
+               WRITE (8,'(3x,3I5)') NVIb(n)
+               WRITE (32,'(3x,3I5)') NVIb(n)
+               WRITE (96,'(3x,3I5)') ND_nlv
+C
+               READ (97,'(A80)') ch_iuf
                WRITE (8,*)
                WRITE (32,*)
-               READ (97,'(A80)') ch_iuf
                WRITE (96,*)
+C
+               READ (97,'(A80)') ch_iuf
                WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
                WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-               READ (97,'(A80)') ch_iuf
                WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
+	         itmp = 0
+  150          READ (97,'(A80)',END = 200) ch_iuf
+               itmp = itmp + 1
+               write(ch_iuf(1:3),'(1x,I2)') ICOllev(itmp)	
+               WRITE (96,'(A80)') ch_iuf
+			 GOTO 150
             ENDIF
          ENDDO
-  150    READ (97,'(A80)',END = 200) ch_iuf
-         WRITE (96,'(A80)') ch_iuf
-         GOTO 150
   200    CLOSE (96)
          CLOSE (97,STATUS = 'DELETE')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
-            iwin = PIPE('copy COLL.DAT TARGET_COLL.DAT')
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
 C--------JOIN finished 
@@ -524,13 +583,12 @@ C
          coll_defined = .TRUE.
          WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'WARNING: None of the requested isotopes is '
-            WRITE (8,*)'WARNING: included in the selected potential.'
+            WRITE (8,*)'ERROR: None of the requested isotopes is   '
+            WRITE (8,*)'ERROR: included in the selected potential !'
             WRITE (8,*)
-     &                 'WARNING: File with RIPL discrete levels can not'
-            WRITE (8,*)'WARNING: be created.                    '
-            WRITE (8,*)'WARNING: No default hamiltonian is available'
-            WRITE (8,*)'WARNING: for the soft rotor model, STOP !'
+     &      'ERROR: File with RIPL discrete levels can not be created'
+            WRITE (8,*)'ERROR: No default hamiltonian is available '
+            WRITE (8,*)'ERROR: for the soft rotor model !          '
             WRITE (8,*)'ERROR: EMPIRE stops'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
@@ -540,26 +598,31 @@ C
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (8,*)'WARNING: Target nucleus not listed in RIPL OMP'
-            WRITE (8,*)'WARNING: EMPIRE stops !'
+            WRITE (8,*)'ERROR: Target nucleus not listed in RIPL OMP'
+            WRITE (8,*)'ERROR: EMPIRE stops !'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
+
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)'WARNING: RIPL OMP NCOLL(target) not defined'
-            WRITE (8,*)'WARNING: for selected nucleus, EMPIRE stops !'
+            WRITE (8,*)
+     &       'ERROR: RIPL soft rotor OMP NCOLL(target) not defined '
+            WRITE (8,*)'ERROR: for selected nucleus, EMPIRE stops !'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
 C
 C        Overwriting ICOllev() to rearrange coupled channels
 C
-         OPEN (UNIT = 32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN')
+C        soft rotor model
+C
+         OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN', ERR=1058)
          DO n=2,NCOll(ncalc)
           elevcc = EXV(n,ncalc)
           REWIND(32)
-            READ (32,'(A80)') ch_iuf
+            READ (32,'(A80)',END=1058,ERR=1058) ch_iuf
             elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
-              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') 
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &              ,END=1058,ERR=1058) 
      &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
@@ -574,19 +637,43 @@ C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc
               elvr0 = elvr 
             ENDDO
   210    ENDDO
-         CLOSE(32)  
+ 1058    CLOSE(32)  
 
 C--------Setting EMPIRE global variables
          nld_cc = 0
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
+
          IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (8,*) 'WARNING: Default number of coupled levels: ',
-     &                  nld_cc
-            WRITE (8,*) 'WARNING: is not equal ', NCOll(ncalc),
-     &                  ' (used in CC RIPL OMP)'
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
+
+C--------Setting EMPIRE global variables
+         WRITE (8,*)
+         nld_cc = 0
+         DO k = 1, ND_nlv
+            IF (k.le.NCOll(ncalc)) then
+              IF (ICOllev(k).GE.LEVcc) then 
+                ICOllev(k) = ICOllev(k) - LEVCC
+                nld_cc = nld_cc + 1
+                WRITE (8,*) 'WARNING: soft rotor level ',k,' COUPLED'
+	        ELSE
+                nld_cc = nld_cc + 1
+              ENDIF 
+            ELSE
+              IF (ICOllev(k).LT.LEVcc) then 
+                ICOllev(k) = ICOllev(k) + LEVCC
+                WRITE (8,*) 'WARNING:  soft rotor level ',k,' unCOUPLED'
+              ENDIF
+	      ENDIF
+         ENDDO
+         WRITE (8,*)
+
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
@@ -602,8 +689,7 @@ C
 
          READ (97,'(A80)') ch_iuf       ! FIRST LINE
          WRITE (96,*)
-     &    'Collective levels from RIPL CC OMP, soft rotator model'
-
+     &           'Collective levels: RIPL CC OMP + default, soft rotor '
          READ (97,'(A80)') ch_iuf       ! 2ND LINE
          WRITE (96,'(A80)') ch_iuf
          WRITE (32,'(A80)') ch_iuf
@@ -716,16 +802,16 @@ C
              IPH  (k)=SR_ntu(j,ncalc)
              D_Klv(k)=SR_nnb(j,ncalc)
              D_Llv(k)=SR_nng(j,ncalc)
-               D_nno(k)=SR_nno(j,ncalc)
+             D_nno(k)=SR_nno(j,ncalc)
              EXIT
            ENDDO 
          ENDDO
        
          if(nttt.ne.nld_cc) then
-           WRITE (8 ,*) 'ERROR: Wrong energy of OMP coupled levels'
-           WRITE (* ,*) 'ERROR: Wrong energy of OMP coupled levels'
-           PAUSE
-           STOP 'ERROR: Wrong energy of OMP coupled levels'
+           WRITE (8 ,*) 
+     &       'ERROR: Wrong energy of OMP coupled levels: soft rotor'
+           STOP 
+     &       'ERROR: Wrong energy of OMP coupled levels: soft rotor'
          endif
 
          DO k = 2, nld_cc
@@ -768,7 +854,6 @@ C
          WRITE (8,*)
 
   290    CLOSE (96)
-C        CLOSE (97,STATUS = 'DELETE')
          CLOSE (97)
 
          IF (IOPsys.EQ.0) THEN
@@ -1434,8 +1519,8 @@ C              levels' energies before compiling RIPL potentials
 C
                IF(dabs(D_Elv(i)-EXV(j,n)).gt.0.005d0) cycle
                iarray_tmp(i) = j
-           ENDDO
-          ENDDO
+             ENDDO
+            ENDDO
 
 C           write(*,*) 'Reordered levels'
 C           do k=1,NCOll(n)
@@ -1443,25 +1528,25 @@ C             write(*,*) D_elv(k),EXV(iarray_tmp(k),n)
 C           enddo
 
             DO i = 1, NCOll(n)
-           iarray(i) = IPArv (iarray_tmp(i),n)
-           array0(i) = EXV   (iarray_tmp(i),n)
-           array1(i) = SPInv (iarray_tmp(i),n)
-           array2(i) = SR_ntu(iarray_tmp(i),n)
-           array3(i) = SR_nnb(iarray_tmp(i),n)
-           array4(i) = SR_nng(iarray_tmp(i),n)
-           array5(i) = SR_nno(iarray_tmp(i),n)
-          ENDDO
+              iarray(i) = IPArv (iarray_tmp(i),n)
+              array0(i) = EXV   (iarray_tmp(i),n)
+              array1(i) = SPInv (iarray_tmp(i),n)
+              array2(i) = SR_ntu(iarray_tmp(i),n)
+              array3(i) = SR_nnb(iarray_tmp(i),n)
+              array4(i) = SR_nng(iarray_tmp(i),n)
+              array5(i) = SR_nno(iarray_tmp(i),n)
+            ENDDO
 
 C           write(*,*) 'Reordered levels'
             do i=1,NCOll(n)
-           IPArv (i,n) = iarray(i)
-           EXV   (i,n) = array0(i) 
-           SPInv (i,n) = array1(i)
-           SR_ntu(i,n) = array2(i)
-           SR_nnb(i,n) = array3(i) 
-           SR_nng(i,n) = array4(i)
-           SR_nno(i,n) = array5(i) 
-C            write(*,99051) D_elv(i),EXV(i,n),SPInv(i,n),IPArv(i,n),
+              IPArv (i,n) = iarray(i)
+              EXV   (i,n) = array0(i) 
+              SPInv (i,n) = array1(i)
+              SR_ntu(i,n) = array2(i)
+              SR_nnb(i,n) = array3(i) 
+              SR_nng(i,n) = array4(i)
+              SR_nno(i,n) = array5(i) 
+C             write(*,99051) D_elv(i),EXV(i,n),SPInv(i,n),IPArv(i,n),
 C    +               SR_ntu(i,n),SR_nnb(i,n),SR_nng(i,n),SR_nno(i,n)
             enddo
 

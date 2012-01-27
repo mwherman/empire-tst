@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2333 $ 
+Ccc   * $Rev: 2334 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2012-01-26 23:10:59 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
 Ccc   * $Id$            
 
 C-----It is ripl2empireS.h because it must be compatible
@@ -28,7 +28,7 @@ C
      &        IDR, IPArv, NPH, IPAr, JCOul
 C
       REAL*8 EEMin, EEMax, EPOt, RCO, ACO, POT, BANdk, DDEf, EXV, DEFv,
-     &       THEtm, EEX, SPIn, SPInv, EECoul, EVV,
+     &       THEtm, EEX, SPIn, SPInv, EECoul,
      &       RRCoul, RCOul0, BETa, RCOul1, RCOul2, AACOul, RCOul3
 C
       REAL*8 SR_hw(ndim4),SR_amb0(ndim4),SR_amg0(ndim4),
@@ -57,7 +57,7 @@ C    &                DDEf(NDIM4, NDIM5), IDEf(NDIM4), IZProj, IAProj,
 C    &                EXV(NDIM7, NDIM4), IPArv(NDIM7, NDIM4), IREl, IDR,
 C    &                NPH(NDIM7, NDIM4), DEFv(NDIM7, NDIM4),
 C    &                THEtm(NDIM7, NDIM4), BETa0(NDIM4), GAMma0(NDIM4),
-C    &                XMUbeta(NDIM4), EVV(NDIM6, NDIM4), RCOul3(NDIM1),
+C    &                XMUbeta(NDIM4), EEX(NDIM6, NDIM4), RCOul3(NDIM1),
 C    &                SPIn(NDIM6, NDIM4), IPAr(NDIM6, NDIM4),
 C    &                SPInv(NDIM7, NDIM4), JCOul, EECoul(NDIM1),
 C    &                RRCoul(NDIM1), RCOul0(NDIM1), BETa(NDIM1),
