@@ -24,8 +24,8 @@ OTHER = util/lsttab util/resonance util/kalman
 
 # by default, compile SOURCE and UTIL with gfortran:
 all:
-	cd $(SOURCE); $(MAKE) $(compiler) $(flags1);
 	@for dir in $(UTIL); do (echo $$dir; cd $$dir; $(MAKE) $(compiler) $(flags2)); done
+	cd $(SOURCE); $(MAKE) $(compiler) $(flags1);
 	@for dir in $(OTHER); do (echo $$dir; cd $$dir; $(MAKE)); done
 
 
@@ -46,11 +46,12 @@ IZPACK = /Users/davidbrown/Projects/Current/IzPack
 
 release: 
 #	python installer/makeTarball.py --release --full
-	python installer/makeTarball.py --release --docOnly
-	python makeTarball.py --release
-	python installer/makeTarball.py --release --riplOnly
+#	python installer/makeTarball.py --release --docOnly
+#	python installer/makeTarball.py --release
+#	python installer/makeTarball.py --release --riplOnly
 	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
-#	$(IZPACK)/bin/compile installer/install.xml
+	$(IZPACK)/bin/compile installer/install-base.xml -o installer/EMPIRE-base-installer.jar
+#	$(IZPACK)/bin/compile installer/install-full.xml -o installer/EMPIRE-full-installer.jar
 
 tarball-latest: upall
 	python installer/makeTarball.py --latest
