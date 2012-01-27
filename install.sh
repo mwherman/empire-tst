@@ -7,8 +7,8 @@ instdir=$HOME
 #directory with EMPIRE distribution
 sourcedir=`pwd`
 #EMPIRE version number
-empver=`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`
-emprelname=`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`
+empver=3.1
+emprelname=RIVOLI
 XWIN=`uname`
 
 

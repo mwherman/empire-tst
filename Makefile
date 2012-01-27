@@ -43,11 +43,12 @@ up:
 upall: up all 
 
 release: 
-#	python makeTarball.py --release --full
-#	python makeTarball.py --release --docOnly
-	python makeTarball.py --release
-#	python makeTarball.py --release --riplOnly
+#	python installer/makeTarball.py --release --full
+#	python installer/makeTarball.py --release --docOnly
+#	python makeTarball.py --release
+#	python installer/makeTarball.py --release --riplOnly
+	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
 
 tarball-latest: upall
-	python makeTarball.py --latest
+	python installer/makeTarball.py --latest
 
