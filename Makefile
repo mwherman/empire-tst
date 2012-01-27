@@ -42,12 +42,15 @@ up:
 
 upall: up all 
 
+IZPACK = /Users/davidbrown/Projects/Current/IzPack
+
 release: 
 #	python installer/makeTarball.py --release --full
-#	python installer/makeTarball.py --release --docOnly
-#	python makeTarball.py --release
-#	python installer/makeTarball.py --release --riplOnly
+	python installer/makeTarball.py --release --docOnly
+	python makeTarball.py --release
+	python installer/makeTarball.py --release --riplOnly
 	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
+#	$(IZPACK)/bin/compile installer/install.xml
 
 tarball-latest: upall
 	python installer/makeTarball.py --latest
