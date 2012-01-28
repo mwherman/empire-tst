@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2323 $
+Ccc   * $Rev: 2353 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-26 04:44:19 +0100 (Do, 26 Jän 2012) $
+Ccc   * $Date: 2012-01-28 05:14:30 +0100 (Sa, 28 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -594,7 +594,7 @@ c
       ENDDO
       WRITE (79,*)
       WRITE (79,*)chstar
-      WRITE (79,*)' Quantities used only if FISDEN=1 to calculate LD at
+      WRITE (79,*)' Quantities used only if FISDEN<=1 to calculate LD at
      & saddles'
       WRITE (79,*)chstar
       WRITE (79,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
@@ -787,7 +787,8 @@ c
       ENDDO
       READ (79,*,ERR=385,END=385)
 
-C-----FISDEN(Nnuc)= 0 EMPIRE
+C-----FISDEN(Nnuc)= 0 EGSM
+C-----FISDEN(Nnuc)= 1 GSM(Ignatyuk - to be tested)
 C-----FISDEN(Nnuc)= 2 HFB
 
       IF(FISDEN(Nnuc).LE.1)THEN
