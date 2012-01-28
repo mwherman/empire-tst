@@ -46,8 +46,8 @@ C     READ(*,'(A20)') fname
       fname='ecis06'
 
 C     open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD')
-      open(unit=20,file='optman.inp',STATUS='OLD')
-      open(unit=21,file=TRIM(fname)//'.out')
+      open(unit=20,file='OPTMAN.INP',STATUS='OLD')
+      open(unit=21,file='OPTMAN.OUT')
 
       WRITE(21,'(A)')' ************************************************'
       WRITE(21,'(A)')' *     CODE OPTMAN VERSION 10 ( August, 2007)   *'
@@ -163,7 +163,7 @@ C     CHARACTER*23 ctmp23
      */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
      */NCLMA/LLMA,NCMA,NSMA,KODMA
      */DISPE/VD,VRDC,EA,WDISO
-	COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
+      COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
       DATA ITEXT,IMOD/4HHAMI,4HLTON,4HIAN ,4H RV ,4H VM ,4HDCHM,
      *4H FDM,4H5PA0,4H 5PM,4HCLGB/,
      *IPOT,MPOT/4HPOTE,4HNTIA,4HL EX,4HPAND,4HED  ,4HBY  ,
@@ -393,7 +393,7 @@ C     PRINT 96,(I,BET(I),I=2,NPD,2)
                      IF(II.EQ.1) GO TO 678
                      IF(MERIP.NE.1) GO TO 678
                      READ(20,*)      
-	               READ(20,2)VR0,VR1,VR2,VR3,VRLA,ALAVR,
+                     READ(20,2)VR0,VR1,VR2,VR3,VRLA,ALAVR,
      *               WD0,WD1,WDA1,WDBW,WDWID,ALAWD,
      *               WC0,WC1,WCA1,WCBW,WCWID,BNDC,
      *               VS,ALASO,WS0,WS1,WSBW,WSWID,
@@ -428,9 +428,9 @@ C     CREATING LEVELS FOR (P,N) ANALOG STATES CALCULATIONS
 
       IF(EE(II).LT.EL(NURRR)*(AT+1.007825032D0)/AT+0.5D0) GO TO 779
       IF(MEHAM.GE.1.AND.MCHAE(II).EQ.1) NUR=NURRR
-	IF(MEHAM.GE.1.AND.MCHAE(II).EQ.1) GO TO 777
-  779	DO 778 ILEV=1,NURRR
-  	IF(NCA(ILEV).EQ.NCA(1)) NUR=ILEV
+      IF(MEHAM.GE.1.AND.MCHAE(II).EQ.1) GO TO 777
+  779 DO 778 ILEV=1,NURRR
+      IF(NCA(ILEV).EQ.NCA(1)) NUR=ILEV
   778 CONTINUE
 
 
@@ -549,12 +549,12 @@ C     open(unit=98,file=TRIM(ctmp23)//'.ICS')
       IF(ETA.EQ.0.) THEN
 C       WRITE(93,'(10H<CROSS-S.>,F10.2,F10.5,F10.2,2I5)') 
         WRITE(93,1009) 
-     *	  ANEU,EN,AT,NINT(0.5*JO(1)),3
-	ELSE
+     *        ANEU,EN,AT,NINT(0.5*JO(1)),3
+      ELSE
 C       WRITE(93,'(10H<CROSS-S.>,F10.2,F10.5,F10.2,2I5)') 
         WRITE(93,1009) 
-     *	  ANEU,EN,AT,NINT(0.5*JO(1)),1
-	ENDIF
+     *        ANEU,EN,AT,NINT(0.5*JO(1)),1
+      ENDIF
 C     WRITE(98,'(10H<INE.C.S.>,F10.2,F10.5,F10.2,2I5)') 
       WRITE(98,1010) 
      *      ANEU,EN,AT,NINT(0.5*JO(1)),NMAX-1
@@ -592,8 +592,8 @@ C       WRITE(93,'(1X,E14.8)') (CST - CSN(1))*1000.
         WRITE(93,1012) (CST - CSN(1))*1000.d0
 
       ENDIF
-	close(93)
-	close(98)
+      close(93)
+      close(98)
 
 C     open(unit=96,file=TRIM(ctmp23)//'.LEG')
 C     open(unit=97,file=TRIM(ctmp23)//'.ANG')
@@ -609,9 +609,9 @@ c     WRITE(97,'(10H<ANG.DIS.>,F10.2,F10.5,F10.2,2I5)')
       DO K=1,NMAX
         IF(ETA.EQ.0.) 
      *    WRITE(96,'(2I5,'' COUPLED LEVEL, NUMBER OF VALUES'')') K, LKK
-	  IF(NPO(K).eq.+1)
+        IF(NPO(K).eq.+1)
      *    WRITE(97,'(I5,F5.1,A1,I4,I5)') K,0.5*JO(K),'+',1,MTET
-	  IF(NPO(K).eq.-1)
+        IF(NPO(K).eq.-1)
      *    WRITE(97,'(I5,F5.1,A1,I4,I5)') K,0.5*JO(K),'-',1,MTET
         IF(ETA.EQ.0.) THEN
           DO L=1,LKK
@@ -623,8 +623,8 @@ c     WRITE(97,'(10H<ANG.DIS.>,F10.2,F10.5,F10.2,2I5)')
 C         WRITE(97,1038)   TET(M),DISC(K,M)*1000.d0,'CROSS-SECTION   '
         ENDDO
       ENDDO
-	close(96)
-	close(97)
+      close(96)
+      close(97)
    12 FORMAT(/1X,'NEUTRON ENERGY =',F10.6/1X,'TOTAL  CR-SECT.=',F10.6/
      *1X,'REACTION CR-SECT. =',F10.6/
      *1X,'REACTION CR-SECT. incl. coupled levels =',F10.6/
@@ -644,8 +644,8 @@ C    */(1X,I5,25X,F10.6))
 
   129 FORMAT(/30X,'STRENGTH  FUNCTIONS'
      */1X,'SF0=',E15.7,8X,'SF1=',E15.7,8X,'SF2=',E15.7)
-	NUR=NURRR
-	CALL THORA(21)
+      NUR=NURRR
+      CALL THORA(21)
     4 CONTINUE
       RETURN
  1000 FORMAT ('<LEGENDRE>',F10.2,1P,D20.8,0P,F10.2,2I5)                 LCSP-307
@@ -694,7 +694,7 @@ C     *******************************************************
      */NCLMA/LLMA,NCMA,NSMA,KODMA
      */ENB/EE(50),MCHAE(50)
      */DISPE/VD,VRDC,EA,WDISO
-	COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
+      COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
       DATA ITEXT,IMOD/4HHAMI,4HLTON,4HIAN ,4H RV ,4H VM ,4HDCHM,
      *4H FDM,4H5PA0,4H 5PM,4HCLGB/,
      *IPOT,MPOT/4HPOTE,4HNTIA,4HL EX,4HPAND,4HED B,4HY    ,
@@ -724,7 +724,7 @@ C=======================================================================
            READ(20,1)(MCHAE(I),I=1,NST)
       IF(MEHAM.GT.1) GO TO 36
            READ(20,3)(EL(I),JO(I),NPO(I),KO(I),NCA(I),I=1,NUR)
-	      GO TO 37
+            GO TO 37
    36      READ(20,43)(EL(I),JO(I),NPO(I), NTU(I),NNB(I),
      *                 NNG(I),NNO(I),NCA(I),I=1,NUR)
 C====================================================================
@@ -904,8 +904,8 @@ C
       RS=RS*ASQ
       RZ=RZ*ASQ
             READ(20,112)(NPJ(I),I=1,64)
-	PRINT 99
-	WRITE (21,99)
+      PRINT 99
+      WRITE (21,99)
    99 FORMAT(/10X,'PARAMETERS ADJUSTED'/)
       PRINT 111,(NPJ(I),I=1,64)
       WRITE(21,111)(NPJ(I),I=1,64)
@@ -1243,7 +1243,7 @@ C     *******************************************************
       SUBROUTINE XISQT
 C     *******************************************************
       IMPLICIT REAL*8(A-H,O-Z)
-	DIMENSION XPRN(25)
+      DIMENSION XPRN(25)
 
       CHARACTER*20 fname
       CHARACTER*1 cpar(-1:1)
@@ -1280,273 +1280,273 @@ C     *******************************************************
      */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
      */NCLMA/LLMA,NCMA,NSMA,KODMA
      */DISPE/VD,VRDC,EA,WDISO
-	COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
-	APRN=1.D0/AT**(1.D0/3.D0) 
+      COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
+      APRN=1.D0/AT**(1.D0/3.D0) 
       KEV=0
       IF(NPJ(1).NE.1) GO TO 11
       KEV=KEV+1
       VR0=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    11 IF(NPJ(2).NE.1) GO TO 12
       KEV=KEV+1
       VR1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    12 IF(NPJ(3).NE.1) GO TO 13
       KEV=KEV+1
       VR2=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    13 IF(NPJ(4).NE.1) GO TO 14
       KEV=KEV+1
       VR3=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    14 IF(NPJ(5).NE.1) GO TO 15
       KEV=KEV+1
       VRLA=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    15 IF(NPJ(6).NE.1) GO TO 16
       KEV=KEV+1
       ALAVR=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    16 IF(NPJ(7).NE.1) GO TO 17
       KEV=KEV+1
       WD0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    17 IF(NPJ(8).NE.1) GO TO 18
       KEV=KEV+1
       WD1=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    18 IF(NPJ(9).NE.1) GO TO 19
       KEV=KEV+1
       WDA1=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    19 IF(NPJ(10).NE.1) GO TO 20
       KEV=KEV+1
       WDBW=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    20 IF(NPJ(11).NE.1) GO TO 21
       KEV=KEV+1
       WDWID=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    21 IF(NPJ(12).NE.1) GO TO 22
       KEV=KEV+1
       ALAWD=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    22 IF(NPJ(13).NE.1) GO TO 23
       KEV=KEV+1
       WC0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    23 IF(NPJ(14).NE.1) GO TO 24
       KEV=KEV+1
       WC1=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    24 IF(NPJ(15).NE.1) GO TO 25
       KEV=KEV+1
       WCA1=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    25 IF(NPJ(16).NE.1) GO TO 26
       KEV=KEV+1
       WCBW=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    26 IF(NPJ(17).NE.1) GO TO 27
       KEV=KEV+1
       WCWID=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    27 IF(NPJ(18).NE.1) GO TO 28
       KEV=KEV+1
       BNDC=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    28 IF(NPJ(19).NE.1) GO TO 34
       KEV=KEV+1
       VS=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    34 IF(NPJ(20).NE.1) GO TO 35
       KEV=KEV+1
       ALASO=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    35 IF(NPJ(21).NE.1) GO TO 36
       KEV=KEV+1
       WS0=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    36 IF(NPJ(22).NE.1) GO TO 37
       KEV=KEV+1
       WS1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    37 IF(NPJ(23).NE.1) GO TO 38
       KEV=KEV+1
       WSBW=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    38 IF(NPJ(24).NE.1) GO TO 52
       KEV=KEV+1
       WSWID=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    52 IF(NPJ(25).NE.1) GO TO 53
       KEV=KEV+1
       RR=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
    53 IF(NPJ(26).NE.1) GO TO 54
       KEV=KEV+1
       RRBWC=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    54 IF(NPJ(27).NE.1) GO TO 55
       KEV=KEV+1
       RRWID=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    55 IF(NPJ(28).NE.1) GO TO 56
       KEV=KEV+1
       PDIS=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    56 IF(NPJ(29).NE.1) GO TO 57
       KEV=KEV+1
       AR0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    57 IF(NPJ(30).NE.1) GO TO 58
       KEV=KEV+1
       AR1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    58 IF(NPJ(31).NE.1) GO TO 59
       KEV=KEV+1
       RD=X(KEV)
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
    59 IF(NPJ(32).NE.1) GO TO 60
       KEV=KEV+1
       AD0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    60 IF(NPJ(33).NE.1) GO TO 61
       KEV=KEV+1
       AD1=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    61 IF(NPJ(34).NE.1) GO TO 62
       KEV=KEV+1
       RC=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
 C      rc=rr
    62 IF(NPJ(35).NE.1) GO TO 63
       KEV=KEV+1
       AC0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
 C      ac0=ar0
    63 IF(NPJ(36).NE.1) GO TO 64
       KEV=KEV+1
       AC1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    64 IF(NPJ(37).NE.1) GO TO 65
       KEV=KEV+1
       RW=X(KEV)
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
    65 IF(NPJ(38).NE.1) GO TO 66
       KEV=KEV+1
       AW0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    66 IF(NPJ(39).NE.1) GO TO 67
       KEV=KEV+1
       AW1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    67 IF(NPJ(40).NE.1) GO TO 68
       KEV=KEV+1
       RS=X(KEV)
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
    68 IF(NPJ(41).NE.1) GO TO 69
       KEV=KEV+1
       AS0=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    69 IF(NPJ(42).NE.1) GO TO 70
       KEV=KEV+1
       AS1=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    70 IF(NPJ(43).NE.1) GO TO 71
       KEV=KEV+1
       RZ=X(KEV)
-	XPRN(KEV)=X(KEV)*APRN
+      XPRN(KEV)=X(KEV)*APRN
    71 IF(NPJ(44).NE.1) GO TO 72
       KEV=KEV+1
       RZBWC=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    72 IF(NPJ(45).NE.1) GO TO 73
       KEV=KEV+1
       RZWID=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    73 IF(NPJ(46).NE.1) GO TO 74
       KEV=KEV+1
       AZ=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    74 IF(NPJ(47).NE.1) GO TO 75
       KEV=KEV+1
       CCOUL=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    75 IF(NPJ(48).NE.1) GO TO 76
       KEV=KEV+1
       ALF=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    76 IF(NPJ(49).NE.1) GO TO 77
       KEV=KEV+1
       CISO=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    77 IF(NPJ(50).NE.1) GO TO 78
       KEV=KEV+1
       WCISO=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    78 IF(NPJ(51).NE.1) GO TO 79
       KEV=KEV+1
       WDISO=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    79 IF(NPJ(52).NE.1) GO TO 80
       KEV=KEV+1
       EA=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    80 IF(NPJ(53).NE.1) GO TO 81
       KEV=KEV+1
       WDSHI=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    81 IF(NPJ(54).NE.1) GO TO 82
       KEV=KEV+1
       WDWID2=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    82 IF(NPJ(55).NE.1) GO TO 83
       KEV=KEV+1
       ALFNEW=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    83 IF(NPJ(56).NE.1) GO TO 84
       KEV=KEV+1
       VRD=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    84 IF(NPJ(57).NE.1) GO TO 85
       KEV=KEV+1
       BET0=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    85 IF(NPJ(58).NE.1) GO TO 86
       KEV=KEV+1
       CBM=BET3/AMUO
       BET3=X(KEV)
       AMUO=BET3/CBM
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    86 IF(NPJ(59).NE.1) GO TO 87
       KEV=KEV+1
       BET4=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    87 IF(NPJ(60).NE.1) GO TO 88
       KEV=KEV+1
       BET(2)=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    88 IF(NPJ(61).NE.1) GO TO 899
       KEV=KEV+1
       BET(4)=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
   899 IF(NPJ(62).NE.1) GO TO 901
       KEV=KEV+1
       BET(6)=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
   901 IF(NPJ(63).NE.1) GO TO 910
       KEV=KEV+1
       CMB=AMUO**2*BB32
       CBM=BET3/AMUO
       AMUO=X(KEV)
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
       IF(BET3.EQ.0.) BB32=CMB/AMUO**2
       IF(BET3.NE.0.) BET3=AMUO*CBM
   910 IF(NPJ(64).NE.1) GO TO 93
       KEV=KEV+1
       AMG0=DABS(X(KEV))
-	XPRN(KEV)=X(KEV)
+      XPRN(KEV)=X(KEV)
    93 FU=0.
       IF(NPJ(58).EQ.1.OR.NPJ(63).EQ.1) CALL PREQU
       NNT=0
@@ -1561,9 +1561,9 @@ C     CREATING LEVELS FOR (P,N) ANALOG STATES CALCULATIONS
 
       IF(EE(IE).LT.EL(NURRR)*(AT+1.007825032D0)/AT+0.5D0) GO TO 779
       IF(MEHAM.GE.1.AND.MCHAE(IE).EQ.1) NUR=NURRR
-	IF(MEHAM.GE.1.AND.MCHAE(IE).EQ.1) GO TO 777
-  779	DO 778 ILEV=1,NURRR
-  	IF(NCA(ILEV).EQ.NCA(1)) NUR=ILEV
+      IF(MEHAM.GE.1.AND.MCHAE(IE).EQ.1) GO TO 777
+  779 DO 778 ILEV=1,NURRR
+      IF(NCA(ILEV).EQ.NCA(1)) NUR=ILEV
   778 CONTINUE
 
   
@@ -1655,7 +1655,7 @@ C    */(1X,I5,25X,F10.6))
       NNT=NNT+1
       FU=FU+((SRE(IE)-CSR)/DSR(IE))**2
       FUU=((SRE(IE)-CSR)/DSR(IE))**2
- 	  WRITE (21,153)FUU,CSR,SRE(IE),DSR(IE)
+        WRITE (21,153)FUU,CSR,SRE(IE),DSR(IE)
   153 FORMAT(/1X,'FU FOR REACTION CS=',E14.7, 
      *'    CALC :',F10.4,' EXP :',F10.4,' +/- ',F9.4/)
     3 NG=NGN(IE)
@@ -1724,7 +1724,7 @@ C     *******************************************************
      *,AZ
       COMMON/POTEB/R,DE,VP,WP
       COMMON/DISPE/VD,VRDC,EA,WDISO
-	X=(R-RR*DE)/AR
+      X=(R-RR*DE)/AR
       IF(X.GT.23) GO TO 7
       EX1=DEXP(X)
       ARC1=-1.D0/(1.D0+EX1)
@@ -1769,7 +1769,7 @@ C     *******************************************************
      *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
      */COUL/CONZ,ETA,COPH(20,90)
      */WSTE/WSTEP
-	COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
+      COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
       AMI=939.56536
        IF(MECHA.EQ.1) AMI=938.272029
       REL=(EN+AMI)/AMI
@@ -1791,9 +1791,9 @@ C     *******************************************************
       DO 1 I=1,NUR
       COPH(I,1)=0.
       X=WNK(I)*(RK-STEP)
-	
-	ETA=CONZ/WNK(I)
-	IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(I)) ETA=0.D0
+      
+      ETA=CONZ/WNK(I)
+      IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(I)) ETA=0.D0
        
 
 C     IF(ETA.GT.400.) PRINT 999, I,ETA
@@ -1826,7 +1826,7 @@ C     IF(ETA.GT.400.) PRINT 999, I,ETA
       GO TO 6
     5 WSTEP=WNK(I)*2.D0*STEP
       CALL BESIM
-    6 DO 7 K=1,LMA1	 
+    6 DO 7 K=1,LMA1      
       IF(K.GE.LMA1) GO TO 9
       COPH(I,K+1)=COPH(I,K)+DATAN(ETA/K)
     9 FBR2(I,K)=FBR(K)
@@ -2283,10 +2283,10 @@ C     *******************************************************
       SUBROUTINE QUANT(fname)
 C     *******************************************************
       IMPLICIT REAL*8(A-H,O-Z)
-	DIMENSION STL(250)
-	REAL*8 jc,jj
-	INTEGER ltlmax,itmp
-	CHARACTER*1 parc
+      DIMENSION STL(250)
+      REAL*8 jc,jj
+      INTEGER ltlmax,itmp
+      CHARACTER*1 parc
       CHARACTER*20 fname
 C     CHARACTER*23 ctmp23
 c=============================
@@ -2311,7 +2311,7 @@ c=============================
      */QNSBD/LNJ(180,250),JNJ(180,250),NNJ(180,250)
      */NCLMA/LLMA,NCMA,NSMA,KODMA
      */TROUT/TRL(100),TRLJ(100,2)
-	COMMON/COUL/CONZ,ETA,COPH(20,90)
+      COMMON/COUL/CONZ,ETA,COPH(20,90)
 
       AMI=939.56536
        IF(MECHA.EQ.1) AMI=938.272029
@@ -2535,20 +2535,20 @@ C     PRINT 999,LL,TLL,SRL,SIL
  888  CONTINUE
 C------------------------------------------------------------------------
 C     go to 17
-C	Formatting the output for reaction codes (e.g. EMPIRE)
+C     Formatting the output for reaction codes (e.g. EMPIRE)
 C     RCN
 C
-	ltlmax = Min(ltlmax,249)
+      ltlmax = Min(ltlmax,249)
       numbtl = 0
       DO L=1,ltlmax
         IF(NPO(1)*(-1)**(L-1).EQ.+1) THEN 
           IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) numbtl = numbtl + 1
-	    IF(TRLJ(L,2).GT.0.) numbtl = numbtl + 1
-	  ENDIF
+          IF(TRLJ(L,2).GT.0.) numbtl = numbtl + 1
+        ENDIF
         IF(NPO(1)*(-1)**(L-1).EQ.-1) THEN 
           IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) numbtl = numbtl + 1
-	    IF(TRLJ(L,2).GT.0.) numbtl = numbtl + 1
-	  ENDIF
+          IF(TRLJ(L,2).GT.0.) numbtl = numbtl + 1
+        ENDIF
       ENDDO
 C----------------
 C     from ecis06
@@ -2570,38 +2570,38 @@ C     open(unit=92,file=     ctmp23//'.TLJ')
 C     WRITE(92,'(10H<TLJ     >,F10.2,F10.5,F10.2,2I5)') 
       WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
       DO L=1,ltlmax
-	  LL = L-1 
+        LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.-1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
 C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1-0.5,'+',1
-C	    WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
+C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
           WRITE(92,1007)         L-1-0.5,'+',1
-	    WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
         ENDIF
-	  IF(TRLJ(L,2).GT.0.) THEN
+        IF(TRLJ(L,2).GT.0.) THEN
 C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1+0.5,'+',1
 C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
           WRITE(92,1007)         L-1+0.5,'+',1
-	    WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
         ENDIF
       ENDDO
       DO L=1,ltlmax
-	  LL = L-1 
+        LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.+1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
 C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1-0.5,'-',1
 C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
           WRITE(92,1007)         L-1-0.5,'-',1
-	    WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
         ENDIF
-	  IF(TRLJ(L,2).GT.0.) THEN
+        IF(TRLJ(L,2).GT.0.) THEN
 C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1+0.5,'-',1
 C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
           WRITE(92,1007)         L-1+0.5,'-',1
-	    WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
         ENDIF
       ENDDO
-	CLOSE(92)
+      CLOSE(92)
 
       Stl = 0.d0
 
@@ -2639,17 +2639,17 @@ C998  FORMAT (E12.6,I3/(6F11.8))
 C     PRINT 111,LNJ1(IC),CR(IC,IC),CI(IC,IC)
 C 111 FORMAT (3X,I10,2F20.10)
    17 CSR=CST-CSN(1)
-	SINlcc = 0.d0
+      SINlcc = 0.d0
       IF(NMAX.LT.2) GO TO 955
       DO 55 N=2,NMAX
-   55	SINlcc = SINlcc + CSN(N)
+   55 SINlcc = SINlcc + CSN(N)
 C  55 CSR=CSR-CSN(N)
   955 CONTINUE
       SF0=SF0/P0
       SF1=SF1/P1
       SF2=SF2/P2
       
-	ltlmax = ltlmax - 1
+      ltlmax = ltlmax - 1
 
 C     OPEN (46,FILE =      ctmp23//'_INC.LST')
       OPEN (46,FILE = trim(fname)//'_INC.LST')
@@ -2669,12 +2669,12 @@ C     ENDDO
 C     OPEN (45,FILE =      ctmp23//'.INC',FORM = 'UNFORMATTED')
       OPEN (45,FILE = trim(fname)//'.INC',FORM = 'UNFORMATTED')
       IF (MEREL.EQ.0) then 
-	  itmp = 0 
+        itmp = 0 
         WRITE (45) ltlmax, EN, itmp
-	ELSE
-	  itmp = 1 
+      ELSE
+        itmp = 1 
         WRITE (45) ltlmax, EN, itmp
-	ENDIF
+      ENDIF
       DO l = 0, ltlmax
          WRITE (45) stl(l + 1)
       ENDDO
@@ -2717,7 +2717,7 @@ C     CARBUN=931.49378D0  , this is the OPTMAN mass unit
 C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
       HHBarc = 197.3269601D0
 
- 	AI = ANEU
+      AI = ANEU
       ck2= (2.d0*AMUmev)/(HHBarc**2)
 C
 C--------From lab to CM (the input quantity is EN)
@@ -2739,27 +2739,27 @@ C
      &           /((1.d0 + AI/AT)**2 + 2.d0*EN/(AMUmev*AT))
          Ak2 = p2/(HHBarc*HHBarc)
       ENDIF
-	dtmp = 10.D0*3.14159259d0/Ak2
+      dtmp = 10.D0*3.14159259d0/Ak2
 
-	sabs  =0.d0
+      sabs  =0.d0
       DO l = 0, ltlmax
          sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
       ENDDO
-C	write(*,*) 'Test       :',dtmp*sabs,1000*(CSR-SINLcc)
+C     write(*,*) 'Test       :',dtmp*sabs,1000*(CSR-SINLcc)
 
 C     Renormalizing TLs
       if(dtmp.gt.0.d0  .and. sabs.gt.0.d0) then
         DO l = 0, ltlmax
           Stl(l + 1)=Stl(l + 1)/(dtmp*sabs)*1000.d0*(CSR-SINLcc)
         ENDDO
-  	  sabs  =0.d0
+        sabs  =0.d0
         DO l = 0, ltlmax
          sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         ENDDO
-C	  write(*,*) 'Test renorm:',dtmp*sabs,1000*(CSR-SINLcc)
-	endif
+C       write(*,*) 'Test renorm:',dtmp*sabs,1000*(CSR-SINLcc)
+      endif
 
-	CSR=CSR-SINlcc
+      CSR=CSR-SINlcc
 
       RETURN
       END
@@ -2908,7 +2908,7 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      *,AZ
       COMMON/POTB/WNK(20),WN(20),VR,WC,WD
      */CV/CVNR(160000)
-	COMMON/CVPN/CVNRPN(40000)
+      COMMON/CVPN/CVNRPN(40000)
      */AB/DEF(300),VL(300),VSL(120000),POL(5,300),
      *PV(600000),PW(600000),WSL(120000)
      */ABCOUL/PVC(5400),PRC(5400),CVNC(720000)
@@ -2919,11 +2919,11 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */CONT/P(40000),R(40000),W(40000),V(40000),E(40000),F(40000),
      *S(40000),B(40000),Q(40000),T(40000),G(40000),Z(40000)
       COMMON/FUEC/FREM(300,40000),FIEM(300,40000)
-	COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
-	COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
+      COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
+      COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
      */CVOL/CBET0
 
-C	WRITE(21,'(1X,11I6,1X,6(f8.4,1X))') NCLL
+C     WRITE(21,'(1X,11I6,1X,6(f8.4,1X))') NCLL
 
       SPI2=ASP*(ASP+1.)
       NCL2=NCLL*NCLL
@@ -2990,17 +2990,17 @@ C     L-LINE OF INDEPENDENT SOLUTION
       UI=0.
 
       
-	
-	C=CVNRPN(KL)
+      
+      C=CVNRPN(KL)
 C     IF(NU.NE.NUN.AND.JO(NU).EQ.JO(NUN).AND. JO(NU).EQ.0) C=1.D0
-	IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+1)*C
+      IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+1)*C
       IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UI=UI+PW(MNULKL+1)*C
-	
-	
-	
-	
-C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UR=UR+PVV(MNUKL+1)*CVNRPN(KL)
-C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+1)*CVNRPN(KL)
+      
+      
+      
+      
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UR=UR+PVV(MNUKL+1)*CVNRPN(KL)
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+1)*CVNRPN(KL)
 
 
 
@@ -3054,21 +3054,21 @@ C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+1)*CVNRPN(KL)
       VI2(KL)=UI*C
       UR=0.
       UI=0.
-	
+      
 
 
 
-	C=CVNRPN(KL)
+      C=CVNRPN(KL)
 C     IF(NU.NE.NUN.AND.JO(NU).EQ.JO(NUN).AND. JO(NU).EQ.0) C=1.D0
-	IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+2)*C
+      IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+2)*C
       IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UI=UI+PW(MNULKL+2)*C
-	
+      
 
-C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UR=UR+PVV(MNUKL+2)*CVNRPN(KL)
-C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+2)*CVNRPN(KL)
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UR=UR+PVV(MNUKL+2)*CVNRPN(KL)
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+2)*CVNRPN(KL)
 
-	
-	
+      
+      
           ACS=0.
       IF(LAS2.LT.2) GO TO 310
       DO 31 LLL=2,LAS2
@@ -3119,20 +3119,20 @@ C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+2)*CVNRPN(KL)
 
 
 
-	C=CVNRPN(KL)
+      C=CVNRPN(KL)
 C     IF(NU.NE.NUN.AND.JO(NU).EQ.JO(NUN).AND. JO(NU).EQ.0) C=1.D0
-	IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+3)*C
+      IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UR=UR+PV(MNULKL+3)*C
       IF(NCA(NU).NE.NCA(NUK).AND.JO(NU).EQ.JO(NUK))UI=UI+PW(MNULKL+3)*C
-	
+      
 
 C      IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UR=UR+PVV(MNUKL+3)*CVNRPN(KL)
-C	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+3)*CVNRPN(KL)
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK)) UI=UI+PWW(MNUKL+3)*CVNRPN(KL)
 
 C      WRITE(21,'(1X,3I6,1X,6(f8.4,1X))') k,l,ll,PV(LL2),VSL(MNUKL+2),
 C     *SOP,VL(2)
 
-C 	IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK))
-C     *	WRITE(21,'(1X,11I6,1X,9(f8.4,1X))') NCLL,NU,NUK,KL, MNUKL,
+C     IF(NU.NE.NUK.AND.JO(NU).EQ. JO(NUK))
+C     *     WRITE(21,'(1X,11I6,1X,9(f8.4,1X))') NCLL,NU,NUK,KL, MNUKL,
 C     *JNJ1(L), JNJ1(K),LNJ1(L),LNJ1(K), JO(NU),
 C     *jO(NUK),PVV(MNUKL+3),CVNRPN(KL)
 
@@ -3195,7 +3195,7 @@ C     *jO(NUK),PVV(MNUKL+3),CVNRPN(KL)
 C     L-LINE OF INDEPENDENT SOLUTION
 
       DO 15 L=1,NCLL
-	LPN1=(L-1)*NCLL
+      LPN1=(L-1)*NCLL
       KC1=ICLL*(L-1)
       K1=(L-1)*NCLA-1
       DO 6 K=1,NCLL
@@ -3213,7 +3213,7 @@ C     L-LINE OF INDEPENDENT SOLUTION
 C     N-NUMBER OF LINE OF SOLUTION COUPLED WITH L-LINE
 
       DO 7 N=1,NCLL
-	LN=LPN1+N
+      LN=LPN1+N
       KC2=KC1+LAS8*(N-1)
       K2=K1+(N-1)*LAS1
       NPI2=KPJ1(N)
@@ -3223,23 +3223,23 @@ C     N-NUMBER OF LINE OF SOLUTION COUPLED WITH L-LINE
       POTR5=PV(MNULLN+MM2)+VSL(MNULN+MM)*SOP+VL(MM)*LL*(LL+1)-WN(NU)
       UR=0.
       UI=0.
-	C=CVNRPN(LN)
+      C=CVNRPN(LN)
 C     IF(NU.NE.NUN.AND.JO(NU).EQ.JO(NUN).AND. JO(NU).EQ.0) C=1.D0
-	IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
+      IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
      *UR=UR+PV(MNULLN+MM2)*C
       IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
      *UI=UI+PW(MNULLN+MM2)*C
 
-C	write (21,9797) mm,ur, ui,2.2, l,n
+C     write (21,9797) mm,ur, ui,2.2, l,n
 C 9797 format(i5, 3e12.5,2i5)
 
 C      WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n
 
-C	WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n,ll,
+C     WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n,ll,
 C     *PV(MNULLN+MM2),pw(MNULLN+MM2),VSL(MNUKL+mm),SOP,VL(mm)
 
-C	IF(NU.NE.NUn.AND.JO(NU).EQ. JO(NUn))
-C     *	WRITE(21,'(1X,12I5,1X,6(f8.4,1X))') NCLL,NU,NUn,ln, MNUln,
+C     IF(NU.NE.NUn.AND.JO(NU).EQ. JO(NUn))
+C     *     WRITE(21,'(1X,12I5,1X,6(f8.4,1X))') NCLL,NU,NUn,ln, MNUln,
 C     *JNJ1(L), JNJ1(n),LNJ1(L),LNJ1(n), JO(NU),
 C     *jO(NUn),mm, PVV(MNUln+mm),Pww(MNUln+mm),CVNRPN(ln),WN(NU)
 
@@ -3391,7 +3391,7 @@ C     K-NUMBER OF INDEPENDENT SOLUTION
       MMC=LAS8*(MM-1)
       MM2=MM1+1
       DO 17 L=1,NCLL
-	LPN1=(L-1)*NCLL
+      LPN1=(L-1)*NCLL
       KC1=ICLL*(L-1)
       K1=(L-1)*NCLA-1
       DO 16 K=1,NCLL
@@ -3406,7 +3406,7 @@ C     K-NUMBER OF INDEPENDENT SOLUTION
       CJ1=JJ/2.
       SOP=(CJ1-LL)*(CJ1+LL+1)-SPI2
       DO 14 N=1,NCLL
-	LN=LPN1+N
+      LN=LPN1+N
       NPI2=KPJ1(N)
       NUN=NNJ1(N)
       MNULLN=MNULAL+MLA*(NUN-1)
@@ -3419,20 +3419,20 @@ C     K-NUMBER OF INDEPENDENT SOLUTION
 
       C=CVNRPN(LN)
 c      IF(NU.NE.NUN.AND.JO(NU).EQ.JO(NUN).AND. JO(NU).EQ.0) C=1.D0
-	IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
+      IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
      *UR=UR+PV(MNULLN+MM2)*C
       IF(NCA(NU).NE.NCA(NUN).AND.JO(NU).EQ.JO(NUN))
      *UI=UI+PW(MNULLN+MM2)*C
 
-C		write (21,9797) mm,ur, ui,2.2, l,n
+C           write (21,9797) mm,ur, ui,2.2, l,n
 C 
 C      WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n
 
-C	WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n,ll,
+C     WRITE(21,'(1X,4I6,1X,6(f8.4,1X))')mm,l,n,ll,
 C     *PV(MNULLN+MM2),pw(MNULLN+MM2),VSL(MNUKL+mm),SOP,VL(mm)
 
-C	IF(NU.NE.NUn.AND.JO(NU).EQ. JO(NUn))
-C     *	WRITE(21,'(1X,12I5,1X,6(f8.4,1X))') NCLL,NU,NUn,ln, MNUln,
+C     IF(NU.NE.NUn.AND.JO(NU).EQ. JO(NUn))
+C     *     WRITE(21,'(1X,12I5,1X,6(f8.4,1X))') NCLL,NU,NUn,ln, MNUln,
 C     *JNJ1(L), JNJ1(n),LNJ1(L),LNJ1(n), JO(NU),
 C     *jO(NUn),mm, PVV(MNUln+mm),Pww(MNUln+mm),CVNRPN(ln)
 
@@ -4074,10 +4074,10 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */ECI/NECI,NHI
       COMMON/POTB/WNK(20),WN(20),VR,WC,WD
      */ABEC/PL(300),PSL(120000),PR(600000),PI(600000),WPSL(120000)
-	COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
+      COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
      */ABCOUL/PVC(5400),PRC(5400),CVNC(720000)
      */CV/CVNR(160000)
-	COMMON/CVPN/CVNRPN(40000)
+      COMMON/CVPN/CVNRPN(40000)
      */FBN/FBR1(20,90),FBI1(20,90),FNR2(20,90),FNI2(20,90),FNR1(20,90),
      *FNI1(20,90),FBR2(20,90),FBI2(20,90)
       COMMON/CMAT/CR(200,200),CI(200,200)
@@ -4338,8 +4338,8 @@ C333  FORMAT('    SECOND PART')
       IF(MEHAM.EQ.1) BEN=BEN*BET(2)
       DO 7 L=1,NCLL
       LLL=(L-1)*(NCLA+LAS1)-1
-	
-	LISO=(L-1)*NCLL
+      
+      LISO=(L-1)*NCLL
 
       LC2=(L-1)*(ICLL+LAS8)
       LL=LNJ1(L)
@@ -4419,7 +4419,7 @@ C        IF(L.GT.MALL.AND.IR.GT.1) GO TO 11
 C        IF(L.GT.MALL) GO TO 11
       NPI2=KPJ1(IR)
       NUIR=NNJ1(IR)
-	LISOR=LISO+IR
+      LISOR=LISO+IR
       MNLLIR=MNLL+MLA*(NUIR-1)
       MNLIR=MNL+300*(NUIR-1)
       K2=K1+(IR-1)*LAS1
@@ -4465,17 +4465,17 @@ C      LI=LAS2+2+MNLLIR
    12 CONTINUE
 
       
-	
+      
       COUPL=CVNRPN(LISOR)
 C      IF(NU.NE.NUIR.AND.JO(NU).EQ. JO(NUIR).AND.JO(NU).EQ.0) COUPL=1.D0
       IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
      *POTR=POTR+PR(LI-1)*COUPL
-	IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
+      IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
      *POTI=POTI+PI(LI-1)*COUPL
  
-	
-	
-	
+      
+      
+      
  
 
 
@@ -4545,17 +4545,17 @@ C      IF(IR.EQ.L) GO TO 14
    15 CONTINUE
 
       
-		
+            
       COUPL=CVNRPN(LISOR)
 C      IF(NU.NE.NUIR.AND.JO(NU).EQ. JO(NUIR).AND.JO(NU).EQ.0) COUPL=1.D0
       IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
      *POTR=POTR+PR(LI-1)*COUPL
-	IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
+      IF(NCA(NU).NE.NCA(NUIR).AND.JO(NU).EQ. JO(NUIR))
      *POTI=POTI+PI(LI-1)*COUPL
  
 C        IF(NU.NE.NUIR.AND.JO(NU).EQ. JO(NUIR))
 C     *print 567, lisor,nu,nuir,jo(nu),jo(nuir),li,PR(LI-1),Pi(LI-1),
-C     *	CVNRPN(LISOR)
+C     *     CVNRPN(LISOR)
 C  567 Format (6i4,5e12.3)
 C      IF(NU.NE.NUIR.AND.JO(NU).EQ. JO(NUIR))pause
 
@@ -4858,7 +4858,7 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      *PV(600000),PW(600000),WSL(120000)
      */ABEC/PL(300),PSL(120000),PR(600000),PI(600000),WPSL(120000)
      */ABCOUL/PVC(5400),PRC(5400),CVNC(720000)
-	COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
+      COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
       COMMON/POTB/WNK(20),WN(20),VR,WC,WD
      */STR/STEP,RK,NH1
      */ECI/NECI,NHI
@@ -4867,7 +4867,7 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */POT3/BNDC,WDA1,WCA1,CCOUL,CISO,WCISO,WS0,WS1
      */POTD/ALAVR,VRLA,WCBW,WCWID,WDBW,WDWID,ALAWD,EFERMN,EFERMP,ALASO
      *,PDIS,WSBW,WSWID,RRBWC,RRWID,RZBWC,RZWID
-	COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
+      COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
       COMMON/RAD/RR,RC,RD,RW,RS,AR,AC,AW,AD,AS,ALF,AT,ANEU,RZ,ZNUC,ASP
      *,AZ
      */ENA/EN,EL(20),BET(10),NUR,NMAX,NPD,LAS
@@ -4877,31 +4877,31 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */COULON/PZI(300)
      */DISPE/VD,VRDC,EA,WDISO
       COMMON/VHFS/WW4,VHF,ENCON,VRLANP,EFERM,AMI
-	COMMON/RIP/ST,NH,NAN1,NAN2
-	COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
+      COMMON/RIP/ST,NH,NAN1,NAN2
+      COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
 
-	DO 97 I=1,600000
-	IF(I.GT.120000) GO TO 78
-	PVV(I)=0.D0
-	PWW(I)=0.D0
-	PRR(I)=0.D0
-	PII(I)=0.D0
-	PSL(I)=0.D0
-	WPSL(I)=0.D0
-	VSL(I)=0.D0
-	WSL(I)=0.D0
-   78	PV(I)=0.D0
-	PW(I)=0.D0
-	PR(I)=0.D0
-	PI(I)=0.D0
+      DO 97 I=1,600000
+      IF(I.GT.120000) GO TO 78
+      PVV(I)=0.D0
+      PWW(I)=0.D0
+      PRR(I)=0.D0
+      PII(I)=0.D0
+      PSL(I)=0.D0
+      WPSL(I)=0.D0
+      VSL(I)=0.D0
+      WSL(I)=0.D0
+   78 PV(I)=0.D0
+      PW(I)=0.D0
+      PR(I)=0.D0
+      PI(I)=0.D0
    97 CONTINUE
 
       CCDE=0.0
-	CCCOUL=CCOUL
-	IF(MECUL.GE.2) CCDE=CCOUL
-	IF(MECUL.GE.2) CCOUL=0.0
-	CDE=CCDE*MECHA*ZNUC/AT**(1.D0/3.D0)
- 	CDE12=CCDE*ZNUC/AT**(1.D0/3.D0)
+      CCCOUL=CCOUL
+      IF(MECUL.GE.2) CCDE=CCOUL
+      IF(MECUL.GE.2) CCOUL=0.0
+      CDE=CCDE*MECHA*ZNUC/AT**(1.D0/3.D0)
+      CDE12=CCDE*ZNUC/AT**(1.D0/3.D0)
  
       VRDC=0.0
       VD=0.0
@@ -4913,7 +4913,7 @@ c     AMUmev = 9.31494013D+02
 C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
 c     HHBarc = 197.3269601D0
 
-	CARBUN=931.49378
+      CARBUN=931.49378
       AMI=939.56536
       IF(MECHA.EQ.1) AMI=938.272029
       DAVERN=0.00
@@ -4968,17 +4968,17 @@ C
       IF(MEREL.EQ.1.OR.MEREL.EQ.3) WW=WW*RELPOT
       CONZ=MECHA*ZNUC*EIRELM*EIRELT/(ANEU*EIRELM+EIRELT)/DEREL*
      *3.458814365D-2*APAN
-	CONZ12=ZNUC*EIRELM*EIRELT/(ANEU*EIRELM+EIRELT)/DEREL*
+      CONZ12=ZNUC*EIRELM*EIRELT/(ANEU*EIRELM+EIRELT)/DEREL*
      *3.458814365D-2*APAN
 
       CONZZ=CONZ
          
-	
-	   
+      
+         
 
       ENEF=EN-EFERM-CDE
       EN=EN-CDE
-	
+      
       VISO=CISO*(AT-2.*ZNUC)/AT
       WISO=WCISO*(AT-2.*ZNUC)/AT
       WVISO=WDISO*(AT-2.*ZNUC)/AT
@@ -5025,14 +5025,14 @@ C    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       VDISP=DOM_INT_WV(Eferm,EPAVER,WCBW+WVISO,WCWID,INT(PDIS),EN,VDISD)
 
-	T12D = 0.D0
-	IF(EA.GT.0.d0.AND.WC.NE.0.D0) THEN
+      T12D = 0.D0
+      IF(EA.GT.0.d0.AND.WC.NE.0.D0) THEN
        T12P=WCP*DOM_INT_T1(Eferm,EA,EN+0.01)+
      *ALFNEW*DOM_INT_T2(EFERM,EA,EN+0.01)
        T12M=WCP*DOM_INT_T1(Eferm,EA,EN-0.01)+
      *ALFNEW*DOM_INT_T2(EFERM,EA,EN-0.01)
        T12D=(T12M-T12P)*50
-	ENDIF
+      ENDIF
       VRDIRC=VDISD+T12D
 
       VDP=DOM_INT_WS
@@ -5181,7 +5181,7 @@ c      IF(RK.GT.30.) RK=30.
 
        IF(RKC.GT.RK) RK=RKC
 
-	IF(MECHA.NE.0) RK=RK
+      IF(MECHA.NE.0) RK=RK
 
       
 
@@ -5215,7 +5215,7 @@ c      IF(RK.GT.30.) RK=30.
       B=X*A
       POL(1,N)=A
       DEF(N)=1.
-	DO 4 K=3,LAS1,2
+      DO 4 K=3,LAS1,2
       KK=K-1
       C=((2.*KK-1.D0)*X*B-(KK-1.D0)*A)/KK
 C     POL - SPHERICAL FUNCTIONS L-1,ANGLE
@@ -5250,9 +5250,9 @@ C     if(nu1.ne.nu2)EN=EINT-dabs(EL(NU1)-EL(NU2))/2.
 
 
 
-C	SPHERICAL PART OF THE POTENTIAL AND COUPLING IN PARTITIONS  !!!!!!!!
-	
-  	IF(NCA(NU1).NE.NCA(NU2)) GO TO 38
+C     SPHERICAL PART OF THE POTENTIAL AND COUPLING IN PARTITIONS  !!!!!!!!
+      
+      IF(NCA(NU1).NE.NCA(NU2)) GO TO 38
 
 
       VISO=CISO*(AT-2.*ZNUC)/AT
@@ -5285,31 +5285,31 @@ C      WCP=Wv(Ef-Ea)=Wv(Ef+Ea)
       
 
       IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(NU1)) CONZ=0.D0
-	IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) CONZ=CONZ12
-	IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) CONZ=CONZ12
-	IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) CONZ=0.D0
+      IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) CONZ=CONZ12
+      IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) CONZ=CONZ12
+      IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) CONZ=0.D0
       
       IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(NU1)) EFENU12=EFERMN
-	IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) EFENU12=EFERMP
+      IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) EFENU12=EFERMP
       IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) EFENU12=EFERMP
-	IF(MECHA.EQ.0.AND.NCA(1).EQ.NCA(NU1)) EFENU12=EFERMN
-	
-	
+      IF(MECHA.EQ.0.AND.NCA(1).EQ.NCA(NU1)) EFENU12=EFERMN
+      
+      
 
 
                           
-	
-	IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(NU1)) ENEF=EN-EFENU12
+      
+      IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(NU1)) ENEF=EN-EFENU12
       IF(MECHA.EQ.1.AND.NCA(1).NE.NCA(NU1)) EN=EN
 
-	IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) ENEF=EN-EFENU12-CDE12
+      IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) ENEF=EN-EFENU12-CDE12
       IF(MECHA.EQ.1.AND.NCA(1).EQ.NCA(NU1)) EN=EN-CDE12
 
       
-	IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) ENEF=EN-EFENU12-CDE12
+      IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) ENEF=EN-EFENU12-CDE12
       IF(MECHA.EQ.0.AND.NCA(1).NE.NCA(NU1)) EN=EN-CDE12
 
-	IF(MECHA.EQ.0.AND.NCA(1).EQ.NCA(NU1)) ENEF=EN-EFENU12
+      IF(MECHA.EQ.0.AND.NCA(1).EQ.NCA(NU1)) ENEF=EN-EFENU12
       IF(MECHA.EQ.0.AND.NCA(1).EQ.NCA(NU1)) EN=EN
 
 
@@ -5368,7 +5368,7 @@ C     DISPERSIVE WC CONTRIBUTION TO VR
       T12M=WCP*DOM_INT_T1(Eferm,EA,EN-0.01)+
      *ALFNEW*DOM_INT_T2(EFERM,EA,EN-0.01)
       T12D=(T12M-T12P)*50.
-	ENDIF
+      ENDIF
       VRDIRC=VDISD+T12D
 
 
@@ -5390,14 +5390,14 @@ C     DISPERSIVE WD CONTRIBUTION TO VR
 
       IF(EN.GT.WDSHI.AND.ALAWD.EQ.0.D+00) THEN 
         VDP1=VDP
-  	  VDD1=VDD
+        VDD1=VDD
         VDP=DOM_INT_WV(Eferm,WDSHI,WDBW+WISO,WDWID2,INT(PDIS),EN,VDD)
         VDP=VDP1-VDP
         VDD=VDD1-VDD 
       ENDIF      
 
           IF(EN.GT.EA) VDP=VDP+VRD*(EN-EA)
-	    IF(EN.GT.EA) VDD=VDD+VRD
+          IF(EN.GT.EA) VDD=VDD+VRD
 
 
       VDCUL=VDD*MECHA*ZNUC/AT**0.333333333*CCOUL
@@ -5457,7 +5457,7 @@ C    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ENE=ENEF
       IF(MECUL.EQ.3) ENE=ENE+CDE
-	ENESHID=ENE-WDSHI+EFERM
+      ENESHID=ENE-WDSHI+EFERM
       
       IF(ENE.LT.BNDC) GO TO 900
       WD=WD0+WD1*BNDC+(ENE-BNDC)*WDA1+(WDBW+WISO)*DEXP(-ALAWD*ENE)
@@ -5883,14 +5883,14 @@ C      pause 1
       EN=EINT
       RR=RRR
       RZ=RZIN
-	
+      
 C      write(21,1799) vr,vd,vrdc,wc,wd
 C 1799 format(6e12.5)
 C      pause 1
       CCOUL=CCCOUL
       CONZ=CONZZ
 
-C		WRITE(21,9997) RK, STEP,CONZ ,3.302222, NH1
+C           WRITE(21,9997) RK, STEP,CONZ ,3.302222, NH1
 C9997  FORMAT(4E12.5,I3)
       CALL RIPAT1
       RETURN
@@ -5906,7 +5906,7 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      *PV(600000),PW(600000),WSL(120000)
      */ABEC/PL(300),PSL(120000),PR(600000),PI(600000),WPSL(120000)
      */ABCOUL/PVC(5400),PRC(5400),CVNC(720000)
-	COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
+      COMMON/POTPN/PVV(120000),PWW(120000),PRR(120000),PII(120000)
       COMMON/POTB/WNK(20),WN(20),VR,WC,WD
      */SHEMM/ES(20),JJ(20),NTU(20),NNB(20),NNG(20),NNO(20),
      *NPI(20)
@@ -5917,7 +5917,7 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */POT3/BNDC,WDA1,WCA1,CCOUL,CISO,WCISO,WS0,WS1
      */POTD/ALAVR,VRLA,WCBW,WCWID,WDBW,WDWID,ALAWD,EFERMN,EFERMP,ALASO
      *,PDIS,WSBW,WSWID,RRBWC,RRWID,RZBWC,RZWID
-	COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
+      COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
       COMMON/RAD/RR,RC,RD,RW,RS,AR,AC,AW,AD,AS,ALF,AT,ANEU,RZ,ZNUC,ASP
      *,AZ
      */ENA/EN,EL(20),BET(10),NUR,NMAX,NPD,LAS
@@ -5927,8 +5927,8 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
      */COULON/PZI(300)
      */DISPE/VD,VRDC,EA,WDISO
       COMMON/VHFS/WW4,VHF,ENCON,VRLANP,EFERM,AMI
-	COMMON/RIP/ST,NH,NAN1,NAN2
-	COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
+      COMMON/RIP/ST,NH,NAN1,NAN2
+      COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
 
 
       CONZZ=CONZ
@@ -5936,17 +5936,17 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
 
          
 
-	
+      
 
       APAN=ANEU/1.0086652
 
       CCDE=0.0
-	CCCOUL=CCOUL
-	CCOUL=CCOUL/2.0
-	IF(MECUL.GE.2) CCDE=CCOUL
-	IF(MECUL.GE.2) CCOUL=0.0
-	CDE=CCDE*MECHA*ZNUC/AT**(1.D0/3.D0)
-	CDE12=CCDE*ZNUC/AT**(1.D0/3.D0)
+      CCCOUL=CCOUL
+      CCOUL=CCOUL/2.0
+      IF(MECUL.GE.2) CCDE=CCOUL
+      IF(MECUL.GE.2) CCOUL=0.0
+      CDE=CCDE*MECHA*ZNUC/AT**(1.D0/3.D0)
+      CDE12=CCDE*ZNUC/AT**(1.D0/3.D0)
 
 
       VRDC=0.0
@@ -5980,7 +5980,7 @@ C
 C     IF(MERRR.EQ.1)   RR=RR*(1.D00-RRBWC*EN**2/(EN**2+RRWID**2))
       IF(MERRR.EQ.1)   RR=RR*(1.D00-RRBWC*(EN-EFERM)**PDIS/
      *((EN-EFERM)**PDIS+RRWID**PDIS))
-	
+      
      
 
       
@@ -5996,7 +5996,7 @@ C     IF(MERRR.EQ.1)   RR=RR*(1.D00-RRBWC*EN**2/(EN**2+RRWID**2))
       WW=4.8257984E-2*EIRELM*EIRELT/(ANEU*EIRELM+EIRELT)/DEREL*APAN
       IF(MEREL.EQ.1.OR.MEREL.EQ.3) WW=WW*RELPOT
 
-      	
+            
       
 
 
@@ -6024,7 +6024,7 @@ C     IF(MERRR.EQ.1)   RR=RR*(1.D00-RRBWC*EN**2/(EN**2+RRWID**2))
 
    
       EINT=EN
-	
+      
       DO 38 NU1=1,NUR
       MNULA1=MNULA*(NU1-1)
       MNU1=MNU*(NU1-1)
@@ -6035,13 +6035,13 @@ C     IF(MERRR.EQ.1)   RR=RR*(1.D00-RRBWC*EN**2/(EN**2+RRWID**2))
 C       if(nu1.ne.nu2)EN=EINT-dabs(EL(NU1)-EL(NU2))/2.
         if(nu1.ne.nu2)EN=EINT-(EL(NU1)+EL(NU2))/2.
       IF(MEAPP.EQ.1) EN=EINT
-	
+      
 
 
-C	COUPLINGIN BETWEEN LEVELS OF THE DIFFERENT PARTITIONS    !!!!!!!!
-	
-	
-	IF(NCA(NU1).EQ.NCA(NU2)) GO TO 38
+C     COUPLINGIN BETWEEN LEVELS OF THE DIFFERENT PARTITIONS    !!!!!!!!
+      
+      
+      IF(NCA(NU1).EQ.NCA(NU2)) GO TO 38
       IF(MEHAM.EQ.1) GO TO 40
       IF(NTU(NU1).NE.NTU(NU2).OR.NNB(NU1).NE.NNB(NU2)
      *.OR.NNG(NU1).NE.NNG(NU2).OR.NNO(NU1).NE.NNO(NU2))GO TO 38
@@ -6051,13 +6051,13 @@ C	COUPLINGIN BETWEEN LEVELS OF THE DIFFERENT PARTITIONS    !!!!!!!!
       
       ENEF=EN-EFENU12-CDE
       
-	EN=EN-CDE
+      EN=EN-CDE
 
       
       
       COENH=1.D0
 C     
-C     IF(MECUL.GE.2) 	COENH=1.D0+ALAVR*VRLA*DEXP(-ALAVR*ENEF)
+C     IF(MECUL.GE.2)    COENH=1.D0+ALAVR*VRLA*DEXP(-ALAVR*ENEF)
       
 
   
@@ -6120,16 +6120,16 @@ C     DISPERSIVE CONTRIBUTION TO VR
 
 C     NO ISOSCALOR PART OF Wv
         
-  	IF(EA.GT.0.d0) THEN 
+      IF(EA.GT.0.d0) THEN 
        T12P=WCP*DOM_INT_T1(Eferm,EA,EN+0.01)
        T12M=WCP*DOM_INT_T1(Eferm,EA,EN-0.01)
        T12D=(T12M-T12P)*50.
-	ENDIF
+      ENDIF
 
 
 
 
-	
+      
       VRDIRC=VDISD+T12D
 
 
@@ -6155,7 +6155,7 @@ C     DISPERSIVE WD CONTRIBUTION TO VR
 
       IF(EN.GT.WDSHI.AND.ALAWD.EQ.0.D+00) THEN 
         VDP1=VDP
-  	  VDD1=VDD
+        VDD1=VDD
         VDP=DOM_INT_WV(Eferm,WDSHI,WDBWNP,WDWID2,INT(PDIS),EN,VDD)
         VDP=VDP1-VDP
         VDD=VDD1-VDD 
@@ -6176,7 +6176,7 @@ C
 
   394 VCUL=MECHA*ZNUC/AT**0.333333333*CCOUL*VRDIR
       IF(MECUL.EQ.1) VCUL=MECHA*ZNUC/AT**0.333333333*CCOUL
-	
+      
 C   
 
       VR=(VR0+VR1*ENEF+VR2*ENEF**2+VR3*ENEF**3
@@ -6190,10 +6190,10 @@ C     VHF AND VR AT EN
       ENCON=EN
 
       CALL VHFROM
-	
-	
+      
+      
       VR=VHF+VCUL               !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
+      
       VRDC=VDISP+VCULC
       
       
@@ -6212,10 +6212,10 @@ C    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       ENE=ENEF                       !!!!!!!!!!!!!!!!!!!!!!!!
 
-	IF(MECUL.EQ.3) ENE=ENE+CDE
+      IF(MECUL.EQ.3) ENE=ENE+CDE
 
      
-	ENESHID=ENE-WDSHI+EFERM
+      ENESHID=ENE-WDSHI+EFERM
       
       IF(ENE.LT.BNDC) GO TO 900
       WD=WD0+WD1*BNDC+(ENE-BNDC)*WDA1+(WDBWNP)*DEXP(-ALAWD*ENE)
@@ -6289,32 +6289,32 @@ C     WD=WD+WISO
       NIT=1
       IK=M4-1
 
-	
+      
 C
       STEP=RK/NH
       STEP1=STEP/M
-	
+      
 C
       DO 5 K=1,2
       DO 6 I=IN,IK
-	
+      
 
 
       
 
 
 
-	II=MNU2+I
-	IR=I/KIT+NIT
-	I1=(IR-1)*LAS2+MNULA2
-	LALASR=LALAS*(IR-1)
-	IIC=MNU2+IR
+      II=MNU2+I
+      IR=I/KIT+NIT
+      I1=(IR-1)*LAS2+MNULA2
+      LALASR=LALAS*(IR-1)
+      IIC=MNU2+IR
       LALASI=LALAS*(I-1)
       L1=(I-1)*LAS2+MNULA2
       L1AP=(I-1)*LAS2
-	IF(K.EQ.2.AND.I.EQ.IK) GO TO 14
+      IF(K.EQ.2.AND.I.EQ.IK) GO TO 14
       R=STEP1*(I-KL)
-	GO TO 15
+      GO TO 15
    14 R=0.D0
  
 C     NON-DIAGONAL TERMS BY ISOSPIN
@@ -6330,7 +6330,7 @@ C 9999 format(11e12.5)
       NT2=L1+3
       NT3=L1+4
       NT4=L1+5
-	X=(R-RR)/AR
+      X=(R-RR)/AR
       IF(X.GT.23.) GO TO 30
       EX=DEXP(X)
       EX1=1.+EX
@@ -6438,7 +6438,7 @@ C 9999 format(11e12.5)
       WDD=-4.*WD*EXDM*EXD*WW
       IF(MEREL.EQ.3) WDD=WDD/RELPOT
       IF(JO(NU1).EQ.JO(NU2)) PW(NT0)=PW(NT0)+WDD
-	IF(JO(NU1).EQ.JO(NU2).AND.WD.NE.0.D0) PV(NT0)=PV(NT0)+WDD/WD*VD
+      IF(JO(NU1).EQ.JO(NU2).AND.WD.NE.0.D0) PV(NT0)=PV(NT0)+WDD/WD*VD
       IF(LAS.EQ.0) GO TO 35
       Y1=1.-2.*EXD
       WDD=WDD*Y1*RAD
@@ -6512,7 +6512,7 @@ C      pause 22
       
       
       PDC=0.D0
-	PZ=0.D0
+      PZ=0.D0
       LL2=L1+L
       LL2AP=L1AP+L
       
@@ -6544,10 +6544,10 @@ C      pause 22
    11 W2=W2+WP*POL(L,N)
 
       
-    	IF(JO(NU1).EQ.JO(NU2).AND.L.EQ.1) GO TO 780
-	IF(L.EQ.1) GO TO 99
-	
-	  
+      IF(JO(NU1).EQ.JO(NU2).AND.L.EQ.1) GO TO 780
+      IF(L.EQ.1) GO TO 99
+      
+        
       
 C      GO TO 99                                           !!!!!!!CHECK!!!!!!!
 
@@ -6558,20 +6558,20 @@ C      GO TO 99                                           !!!!!!!CHECK!!!!!!!
 
 C      write(21,1234) i,l,r
 C 1234 format(2i5,e12.5)
-C	write(21,9999)vr,vd,vrdc,wc,wd,ww, 7.77777777
+C     write(21,9999)vr,vd,vrdc,wc,wd,ww, 7.77777777
 C      write(21,9999)v2,v4,vv, 7.77777777,w2,w4,wv, pv(LL2),pWW(LL2), 5.5
 
       IF(K.EQ.2.AND.I.EQ.IK) GO TO 114
       R=STEP1*(I-KL)
-	GO TO 115
+      GO TO 115
   114 R=0.D0
       IR=1
 
       GO TO 116
 
   115 IF(I/KIT*KIT.NE.I) GO TO 99
-	IR=I/KIT+NIT
-  116	I1=(IR-1)*LAS2+MNULA2
+      IR=I/KIT+NIT
+  116 I1=(IR-1)*LAS2+MNULA2
       II2=I1+L
       PR(II2)=PV(LL2)
       PI(II2)=PW(LL2)
@@ -6594,7 +6594,7 @@ C      write(21,9999)v2,v4,vv, 7.77777777,w2,w4,wv, pv(LL2),pWW(LL2), 5.5
       EN=EINT
       RR=RRR
       RZ=RZIN
-	CCOUL=CCCOUL
+      CCOUL=CCCOUL
       CONZ=CONZZ
 
 
@@ -6602,7 +6602,7 @@ C      write(21,1799) vr,vd,vrdc,wc,wd, enef,WDBWNP
 C 1799 format(7e12.5)
 C     pause 2
 
-C	WRITE(21,9997) RK, STEP,CONZ ,2.2222222, NH1
+C     WRITE(21,9997) RK, STEP,CONZ ,2.2222222, NH1
 C9997  FORMAT(4E12.5, I3)
       RETURN
       END
@@ -8758,7 +8758,7 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       COMMON /KG/J1,J2,M1,M2,J,M,AKG
      */ENA/EN,EL(20),BET(10),NUR,NMAX,NPD,LAS
       COMMON/CV/CVNR(160000)
-	COMMON/CVPN/CVNRPN(40000)
+      COMMON/CVPN/CVNRPN(40000)
       COMMON/JNN/CSS,INCC,NCLL,NSS,NJ,INCR
       COMMON/QNS1/LNJ1(250),JNJ1(250),NNJ1(250),KPJ1(250)
       COMMON/MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
@@ -8788,8 +8788,8 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       C95=1.8
       CQ95=1.34164
       IILL=NCLL*NCLL*2*9
-	NCLLX2=NCLL*NCLL
-	NCLL4=NCLLX2*4
+      NCLLX2=NCLL*NCLL
+      NCLL4=NCLLX2*4
       DO 4 I=1,IILL
       IF(I.LE.NCLLX2) CVNRPN(I)=0.D0
       IF(I.LE.NCLL4) CVNR(I)=0.D0
@@ -8807,7 +8807,7 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       DO 20 K=1,NCLL
       K1=(K-1)*NCLA
       KI1=(K-1)*LAS2
-	K1PN=(K-1)*NCLL
+      K1PN=(K-1)*NCLL
       KC1=ICLL*(K-1)
       KIC1=LAS8*(K-1)
       NU1=NNJ1(K)
@@ -8821,8 +8821,8 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       NK1=(KMA1-KMI1+2)/2
       DO 20 KK=K,NCLL
       K2=K1+(KK-1)*LAS2
-	K2PN=K1PN+KK
-	K2NP=(KK-1)*NCLL+K
+      K2PN=K1PN+KK
+      K2NP=(KK-1)*NCLL+K
       KI2=KI1+(KK-1)*NCLA
       KC2=KC1+(KK-1)*LAS8
       KIC2=KIC1+(KK-1)*ICLL
@@ -9099,7 +9099,7 @@ C9999 format(7i6,e12.4)
       IF(NPI1.NE.NPI2) CVNR(LL2)=CVNR(LL2)*NPCV
       IF(NPI1.NE.NPI2)CVNR(LI2)=-CVNR(LL2)
       
-	
+      
  
    22 CONTINUE
    20 CONTINUE
@@ -9141,7 +9141,7 @@ C     IF(NPI1.NE.NPI2)CVNRPN(K2PN)=-CVNRPN(K2PN)
       NCLA=NCLL*LAS2
       DO 1 K=1,NCLL
       K1=(K-1)*NCLA
-	K1PN=(K-1)*NCLL
+      K1PN=(K-1)*NCLL
       NU=NNJ1(K)
       KO1=KO(NU)
       JO1=JO(NU)
@@ -9152,7 +9152,7 @@ C     IF(NPI1.NE.NPI2)CVNRPN(K2PN)=-CVNRPN(K2PN)
       JB=JO1
       DO 2 KK=1,NCLL
       K2=K1+(KK-1)*LAS2
-	K2PN=K1PN+KK
+      K2PN=K1PN+KK
       IF(NPD.EQ.0) GO TO 2
       LN2=LNJ1(KK)
       J2=JNJ1(KK)
@@ -9222,10 +9222,10 @@ C     IF(NPI1.NE.NPI2)CVNRPN(K2PN)=-CVNRPN(K2PN)
       AKG=AKG*DSQRT(J1+1.D0)
       JF=0
       CALL RACAH
-	CVNRPN(K2PN)=CCC*BKG*AKG*W
+      CVNRPN(K2PN)=CCC*BKG*AKG*W
       J1=JN1
-	J2=JN2
-C	WRITE(21,'(1X,8I8,1X,6(f8.4,1X))') NCLL,K,KK,KL, JO1,JO2,NCA(NU)
+      J2=JN2
+C     WRITE(21,'(1X,8I8,1X,6(f8.4,1X))') NCLL,K,KK,KL, JO1,JO2,NCA(NU)
 C     *,NCA(NU1)
 C     *,CVNRPN(K2PN)
             
