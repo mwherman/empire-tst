@@ -1,24 +1,36 @@
-Ccc   * $Rev: 2337 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-27 16:22:58 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2356 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-28 09:37:52 +0100 (Sa, 28 Jän 2012) $
 
       DOUBLE PRECISION FUNCTION fniuLANL(en,iaf,izf)
 C
-C    Following Malinovskii 
+C     See D. Madland original paper (NSE) on LA model
 C
-      implicit real*8 (A-H,O-Z)
+C     Following Malinovskii prescription for nubar calculation
+C
+
       real*8 CNdef,HFdef,LFdef,ftmp,Erel
-      real*8 en, eg0, egn, bn, uexcit, ftmp1, ftmp2
-      real*8 TKE,GAUSS_INT1,FEPSL,FEPSH
-      real*8 TmL, TmH, ThCF, r, U0CF, coeff, Ux
-C     real*8 Tm
-      data ThCF/0.8868d0/,r/1.248d0/,U0CF/32.9d0/
-      integer iaf,izf,ial,izl
+      real*8 en, eg, eg0, egn, bn, uexcit, ftmp1, ftmp2
+      real*8 TmL, TmH, r, Ux
+      real*8 Tm,abserr
+      real*8 Ekin_ave,Bnl,Bnh,Sn,eps,fniuA,fniuB
+      real*8 Sn1, S2n1, Erel1
+      real*8 Sn2, S2n2, Erel2
+      real*8 Sn3, S2n3, Erel3
+      real*8 Sn4, S2n4, Erel4
+      real*8 Sn5, S2n5, Erel5
+      integer iaf,izf,ial,izl,iah,iah0,izh0,izh
+      real*8 p0,p1,p2,pnorm
+
+      real*8 TKE,GAUSS_INT1,FEPSL,FEPSH,bind
       external FEPSL,FEPSH
+
 C     Mass of heavy fragment fixed following Malinovskii
       data iah/140/
 C     Average gamma energy release Eg = eg0 + niu*egn
       data eg0/4.42d0/,egn/0.99d0/
+C     Ratio of the light to heavy fragments' Temperature taken from Kornilov
+      data r/1.248d0/
 C
 C     Normal distribution
 C     P(j)=1/sqrt(2*pi)*exp(-j^2/2) ; s^2=1.
@@ -48,7 +60,7 @@ C     eg0 = 0.75 + 0.088*ftmp ! q
       bn = bind(iaf-izf,izf,CNdef)  ! get mass excess CNdef for fiss.nucleus
      &   - bind(iaf-izf-1,izf,ftmp) ! get Bn of the neutron in fiss. nucleus
      
-      uexcit = en + bn
+      uexcit = en + abs(bn)
      
       Ekin_ave = TKE(izf, iaf, en)      
       
@@ -109,7 +121,7 @@ C     Fourth fragment Zh - 2
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel4 = CNdef - HFdef - LFdef
 C---------------------------
-C     Fifth fragment Zh + 2 (to avergae selecting either (Zh + 2) or (Zh - 2)
+C     Fifth fragment Zh + 2 (to average selecting either (Zh + 2) or (Zh - 2)
 C     Only four fragments considered to avoid odd-even effect
       izh = izh0 + 2
       izl = izf - izh
@@ -125,108 +137,125 @@ C     Total energy release in fission from mass excess for CN, heavy and light f
 
 C===========================================================================
 C     FINAL AVERAGE
+C
+C     S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
+C     S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n4*p2)/pnorm
+C     Sn = 0.5*( S1n + 0.5*S2n)      
+      Sn = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn4*p2)/pnorm
 
-      S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn4*p2)/pnorm
-      S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n4*p2)/pnorm
-      Sn = S1n
-C     Sn = 0.5*( S1n + 0.5*S2n)
-C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
-      eg0 = Sn*0.9
       Erel = (Erel1*p0 + (Erel2 + Erel3)*p1 + Erel4*p2)/pnorm
 
-C     The two lines below correspond to LA model with constant reaction cross section 
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) = 4/3*Tm
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
-C   
-C     Tm = dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0))   
-C
-C     LA model (eq.11 CPC)
-C
-C     TmL = Tm
-C     TmH = Tm
-
       Ux = Erel + uexcit - Ekin_ave
       IF(UX.lt.0) return
-      coeff = DSQRT( 252.d0/iaf * Ux/U0CF)
-      TlCF = ThCF * r
-      TmL = TlCF * coeff
+C
+C     Level density assumed porportional to A/11 
+      Tm = dsqrt(Ux/(iaf/11.d0))   
+C
+C     LA model (eq.11 CPC)
+      TmL = Tm*r
+      TmH = Tm
+
       ftmp1 = GAUSS_INT1(FEPSL,0.d0,TmL,abserr)/(TmL*TmL)
 C     write(*,*) sngl(TmL), sngl(abserr/ftmp1), sngl(ftmp1)
 
-      TmH = ThCF * coeff
       ftmp2 = GAUSS_INT1(FEPSH,0.d0,TmH,abserr)/(TmH*TmH)
 C     write(*,*) sngl(TmH), sngl(abserr/ftmp2), sngl(ftmp2)
 
+C     The two lines below correspond to LA model with constant reaction cross section 
+C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) = 4/3*Tm
+C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
       eps = ftmp1 + ftmp2
-            
-      fniuA = (Erel + uexcit - Ekin_ave - eg0)/(eps + Sn + egn)
-      write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
-     &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f5.3)')
-     &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuA
 
-      S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
-      S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n5*p2)/pnorm
-      Sn = S1n
-C     Sn = 0.5*( S1n + 0.5*S2n)      
+C     Prompt gamma emission
 C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
-      eg0 = Sn*0.9
+C     eg0 = Sn*0.9
+
+      fniuA = (Ux - eg0)/(eps + Sn + egn)
+      eg = eg0 + fniuA * egn
+
+      write(*,'('' Einc='',f6.3,'' Ux='',f6.3,'' Erel='',f5.1,
+     &          '' Ex='',f6.3,'' TKE='',f5.1,'' Bn='',f5.1)')
+     &          en,Ux,Erel,uexcit,ekin_ave,bn
+
+      write(*,'('' Eg='',f6.3,'' Enf='',f6.3,
+     &          '' Sn='',f6.3,'' nuA='',f6.3,'' LANL'')')
+     &          eg0,eps,Sn,fniuA
+
+C     S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
+C     S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n5*p2)/pnorm
+C     Sn = 0.5*( S1n + 0.5*S2n)      
+      Sn = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
+
       Erel = (Erel1*p0 + (Erel2 + Erel3)*p1 + Erel5*p2)/pnorm
 
-C     The two lines below correspond to LA model with constant reaction cross section 
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) = 4/3*Tm
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
-C   
-C     Tm = dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0))   
-C
-C     LA model (eq.11 CPC)
-C
-C     TmL = Tm
-C     TmH = Tm
       Ux = Erel + uexcit - Ekin_ave
       IF(UX.lt.0) return
-      coeff = DSQRT( 252.d0/iaf * Ux/U0CF)
-C     Following formulae (7) of the paper
+C
+C     Level density assumed porportional to A/11 
+      Tm = dsqrt(Ux/(iaf/11.d0))   
+C
+C     LA model (eq.11 CPC)
+      TmL = Tm*r
+      TmH = Tm
 
-      TlCF = ThCF * r
-      TmL = TlCF * coeff
       ftmp1 = GAUSS_INT1(FEPSL,0.d0,TmL,abserr)/(TmL*TmL)
 C     write(*,*) sngl(TmL), sngl(abserr/ftmp1), sngl(ftmp1)
 
-      TmH = ThCF * coeff
       ftmp2 = GAUSS_INT1(FEPSH,0.d0,TmH,abserr)/(TmH*TmH)
 C     write(*,*) sngl(TmH), sngl(abserr/ftmp2), sngl(ftmp2)
 
+C     The two lines below correspond to LA model with constant reaction cross section 
+C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) = 4/3*Tm
+C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
       eps = ftmp1 + ftmp2
 
-      fniuB = (Erel + uexcit - Ekin_ave - eg0)/(eps + Sn + egn)
-      fniuLANL = 0.5 * (fniuA + fniuB)
+      fniuB = (Ux - eg0)/(eps + Sn + egn)
 
-C     write(*,'('' Erel='',f6.1, ''  En='',f5.2,''  Bn='',f5.2,
-C    &          ''  Sn='',f5.2, '' S2n/2='',f5.2,''  TKE='',f6.1, 
-C    &          ''  eps='',f6.2, '' nu='',f5.3)')
-C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
-      write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
-     &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f5.3)')
-     &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuB
+      eg = eg0 + fniuB * egn
+
+      write(*,'('' Einc='',f6.3,'' Ux='',f6.3,'' Erel='',f5.1,
+     &          '' Ex='',f6.3,'' TKE='',f5.1,'' Bn='',f5.1)')
+     &          en,Ux,Erel,uexcit,ekin_ave,bn
+
+      write(*,'('' Eg='',f6.3,'' Enf='',f6.3,
+     &          '' Sn='',f6.3,'' nuB='',f6.3,'' LANL'')')
+     &          eg0,eps,Sn,fniuB
+
+      fniuLANL = 0.5 * (fniuA + fniuB)
 
       return
       end
 C
       DOUBLE PRECISION FUNCTION fniu(en,iaf,izf)
 C
-C    Following Malinovskii 
+C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
+C     Phys. At. Nuclei 62 (1999) pp 173-185
 C
-      implicit real*8 (A-H,O-Z)
-      real*8 CNdef,HFdef,LFdef,ftmp,Erel
-      real*8 en, eg0, egn, bn, uexcit
-      real*8 TKE
-      integer iaf,izf
+C     Following Malinovskii prescription for nubar calculation
+C
+      implicit none
+      real*8 en, eg, eg0, egn, bn, uexcit, ftmp, ftmp1, ftmp2
+      real*8 TmL, TmH, Ux
+      real*8 TlCF, ThCF, r, U0CF, coeff, abserr
+      real*8 Ekin_ave,Bnl,Bnh,Sn,eps,fniuA,fniuB
+      real*8 Sn1,Sn2,Sn3,Sn4,Sn5 
+      real*8 CNdef,HFdef,LFdef
+      real*8 Erel,Erel1,Erel2,Erel3,Erel4,Erel5
+C     real*8 S2n1,S2n2,S2n3,S2n4,S2n5 
+      integer iaf,izf,ial,izl,iah,iah0,izh0,izh
+      real*8 p0,p1,p2,pnorm
+C
+      real*8 TKE,GAUSS_INT1,FEPSL,FEPSH,bind
+      external FEPSL,FEPSH
+
 C     Mass of heavy fragment fixed following Malinovskii
       data iah/140/
 C     Average gamma energy release Eg = eg0 + niu*egn
+C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
+C     eg0 = Sn*0.9
       data eg0/4.42d0/,egn/0.99d0/
+C     Kornilov parameterization
+      data ThCF/0.8868d0/,r/1.248d0/,U0CF/32.9d0/
 C
 C     Normal distribution
 C     P(j)=1/sqrt(2*pi)*exp(-j^2/2) ; s^2=1.
@@ -251,9 +280,11 @@ C     ftmp = real(izf)**2/real(iaf)
 C     egn = 6.71 - 0.156*ftmp ! p
 C     eg0 = 0.75 + 0.088*ftmp ! q
 
+      fniu = 0.d0
+
       bn = bind(iaf-izf,izf,CNdef)  ! get mass excess CNdef for fiss.nucleus
      &   - bind(iaf-izf-1,izf,ftmp) ! get Bn of the neutron in fiss. nucleus
-     
+
       uexcit = en + bn
      
       Ekin_ave = TKE(izf, iaf, en)      
@@ -271,7 +302,7 @@ C     Malinovskii parametrization of the heavy fragment charge
       Sn1 = 0.5*(Bnh+Bnl)
       Bnh = bind(iah-izh,izh,HFdef) - bind(iah-izh-2,izh,ftmp)
       Bnl = bind(ial-izl,izl,LFdef) - bind(ial-izl-2,izl,ftmp)
-      S2n1 = 0.5*(Bnh+Bnl)
+C     S2n1 = 0.5*(Bnh+Bnl)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel1 = CNdef - HFdef - LFdef
 C---------------------------
@@ -284,7 +315,7 @@ C     Second fragment Zh - 1
       Sn2 = 0.5*(Bnh+Bnl)
       Bnh = bind(iah-izh,izh,HFdef) - bind(iah-izh-2,izh,ftmp)
       Bnl = bind(ial-izl,izl,LFdef) - bind(ial-izl-2,izl,ftmp)
-      S2n2 = 0.5*(Bnh+Bnl)
+C     S2n2 = 0.5*(Bnh+Bnl)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel2 = CNdef - HFdef - LFdef
 C---------------------------
@@ -297,7 +328,7 @@ C     Third fragment Zh + 1
       Sn3 = 0.5*(Bnh+Bnl)
       Bnh = bind(iah-izh,izh,HFdef) - bind(iah-izh-2,izh,ftmp)
       Bnl = bind(ial-izl,izl,LFdef) - bind(ial-izl-2,izl,ftmp)
-      S2n3 = 0.5*(Bnh+Bnl)
+C     S2n3 = 0.5*(Bnh+Bnl)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel3 = CNdef - HFdef - LFdef
 C---------------------------
@@ -310,7 +341,7 @@ C     Fourth fragment Zh - 2
       Sn4 = 0.5*(Bnh+Bnl)
       Bnh = bind(iah-izh,izh,HFdef) - bind(iah-izh-2,izh,ftmp)
       Bnl = bind(ial-izl,izl,LFdef) - bind(ial-izl-2,izl,ftmp)
-      S2n4 = 0.5*(Bnh+Bnl)
+C     S2n4 = 0.5*(Bnh+Bnl)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel4 = CNdef - HFdef - LFdef
 C---------------------------
@@ -324,55 +355,104 @@ C     Only four fragments considered to avoid odd-even effect
       Sn5 = 0.5*(Bnh+Bnl)
       Bnh = bind(iah-izh,izh,HFdef) - bind(iah-izh-2,izh,ftmp)
       Bnl = bind(ial-izl,izl,LFdef) - bind(ial-izl-2,izl,ftmp)
-      S2n5 = 0.5*(Bnh+Bnl)
+C     S2n5 = 0.5*(Bnh+Bnl)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel5 = CNdef - HFdef - LFdef
 
 C===========================================================================
-C     FINAL AVERAGE
 
-      S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn4*p2)/pnorm
-      S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n4*p2)/pnorm
-      Sn = S1n
+C     FINAL AVERAGE
+C     S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn4*p2)/pnorm
+C     S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n4*p2)/pnorm
 C     Sn = 0.5*( S1n + 0.5*S2n)
-C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
-      eg0 = Sn*0.9
+
+      Sn = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn4*p2)/pnorm
+
       Erel = (Erel1*p0 + (Erel2 + Erel3)*p1 + Erel4*p2)/pnorm
 
-      eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) 
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
-      fniuA = (Erel + uexcit - Ekin_ave - eg0)/(eps + Sn + egn)
-      write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
-     &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f9.3)')
-     &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuA
+      Ux = Erel + uexcit - Ekin_ave
+      IF(UX.lt.0) return
 
-      S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
-      S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n5*p2)/pnorm
-      Sn = S1n
-C     Sn = 0.5*( S1n + 0.5*S2n)      
+C     Kornilov is based on Cf-252 PFNS fitting
+      coeff = DSQRT( 252.d0/iaf * Ux/U0CF)
+C     Following formulae (7) of the paper
+      TlCF = ThCF * r
+      TmL = TlCF * coeff
+      TmH = ThCF * coeff
+
+      ftmp1 = GAUSS_INT1(FEPSL,0.d0,TmL,abserr)/(TmL*TmL)
+C     write(*,*) sngl(TmL), sngl(abserr/ftmp1), sngl(ftmp1)
+
+      ftmp2 = GAUSS_INT1(FEPSH,0.d0,TmH,abserr)/(TmH*TmH)
+C     write(*,*) sngl(TmH), sngl(abserr/ftmp2), sngl(ftmp2)
+
+      eps = ftmp1 + ftmp2
+
 C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
-      eg0 = Sn*0.9
+C     eg0 = Sn*0.9
+
+      fniuA = (Ux - eg0)/(eps + Sn + egn)
+
+      eg = eg0 + fniuA * egn
+
+      write(*,'('' Einc='',f6.3,'' Ux='',f6.3,'' Erel='',f5.1,
+     &          '' Ex='',f6.3,'' TKE='',f5.1,'' Bn='',f5.1)')
+     &          en,Ux,Erel,uexcit,ekin_ave,bn
+
+      write(*,'('' Eg='',f6.3,'' Enf='',f6.3,
+     &          '' Sn='',f6.3,'' nuB='',f6.3,'' LANL'')')
+     &          eg,eps,abs(Sn),fniuA
+
+C     S1n = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
+C     S2n = (S2n1*p0 + (S2n2 + S2n3)*p1 + S2n5*p2)/pnorm
+C     Sn = 0.5*( S1n + 0.5*S2n)      
+      Sn = (Sn1*p0 + (Sn2 + Sn3)*p1 + Sn5*p2)/pnorm
+
       Erel = (Erel1*p0 + (Erel2 + Erel3)*p1 + Erel5*p2)/pnorm
 
-      eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/(iaf/11.d0)) 
-C     eps   = 4./3.*dsqrt((Erel + uexcit - Ekin_ave)/acc) 
-      fniuB = (Erel + uexcit - Ekin_ave - eg0)/(eps + Sn + egn)
-      fniu = 0.5 * (fniuA + fniuB)
+      Ux = Erel + uexcit - Ekin_ave
+      IF(UX.lt.0) return
 
-C     write(*,'('' Erel='',f6.1, ''  En='',f5.2,''  Bn='',f5.2,
-C    &          ''  Sn='',f5.2, '' S2n/2='',f5.2,''  TKE='',f6.1, 
-C    &          ''  eps='',f6.2, '' nu='',f5.3)')
-C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
-      write(*,'('' Erel='',f5.1,'' En='',f6.3,'' Bn='',f5.2,
-     &          '' Sn='',f5.2,'' TKE='',f5.1, 
-     &          '' eps='',f5.2, '' Ex='',f6.3,'' nu='',f9.3)')
-     &      erel,en,bn,sn,ekin_ave,eps,uexcit,fniuB
+C     Kornilov is based on Cf-252 PFNS fitting
+      coeff = DSQRT( 252.d0/iaf * Ux/U0CF)
+C     Following formulae (7) of the paper
+      TlCF = ThCF * r
+      TmL = TlCF * coeff
+      TmH = ThCF * coeff
+
+      ftmp1 = GAUSS_INT1(FEPSL,0.d0,TmL,abserr)/(TmL*TmL)
+C     write(*,*) sngl(TmL), sngl(abserr/ftmp1), sngl(ftmp1)
+
+      ftmp2 = GAUSS_INT1(FEPSH,0.d0,TmH,abserr)/(TmH*TmH)
+C     write(*,*) sngl(TmH), sngl(abserr/ftmp2), sngl(ftmp2)
+
+      eps = ftmp1 + ftmp2
+
+C     Following Kornilov (instead of constant 4.42 according to Malinovskii)
+C     eg0 = Sn*0.9
+
+      fniuB = (Ux - eg0)/(eps + Sn + egn)
+
+      eg = eg0 + fniuB * egn
+
+      write(*,'('' Einc='',f6.3,'' Ux='',f6.3,'' Erel='',f5.1,
+     &          '' Ex='',f6.3,'' TKE='',f5.1,'' Bn='',f5.1)')
+     &          en,Ux,Erel,uexcit,ekin_ave,bn
+
+      write(*,'('' Eg='',f6.3,'' Enf='',f6.3,
+     &          '' Sn='',f6.3,'' nuB='',f6.3,'' LANL'')')
+     &          eg,eps,abs(Sn),fniuB
+
+      fniu = 0.5 * (fniuA + fniuB)
 
       return
       end
 
       real*8 FUNCTION TKE(izf,iaf,einc)
+C
+C     Malinovskii et al, INDC(CCP)-277, IAEA 1987 (VANT N2,1987) in russian
+C     Itkis et al, Yad.Fiz.52(1990) 23; Fiz.Elem.Ch.At. Yadra 29(1998) 389
+C
       integer izf,iaf
       real*8 ftmp, einc
       real*8 en
@@ -380,18 +460,94 @@ C    &      erel,en,bn,s1n,0.5*s2n,ekin_ave,eps,fniuB
       en = einc
       if(en.lt.0.d0) en = 0.d0
  
+      if(izf.eq.92) then  ! Uranium
+        TKE = 169.24
+        IF(en.lt.0.0001d0) THEN
+          TKE = TKE + 0.4*en
+C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For U-238 Bn=6.15
+        ELSEIF(en.gt.0.0001d0 .and. en.le.1.65) THEN
+          TKE = TKE + (-0.423 + 0.044*(iaf-230))*en
+        ELSE
+          TKE = TKE + ( 0.144 - 0.047*(iaf-230))*en
+        ENDIF
+        return
+      endif
+
+      if(izf.eq.93) then  ! Neptunium
+        TKE = 172.43
+        IF(en.le.0.0001d0) THEN
+          TKE = TKE + 0.25*en
+C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Np-237 Bn=6.57
+        ELSEIF(en.gt.0.0001d0 .and. en.le.1.23) THEN
+          TKE = TKE - 0.14*en
+        ELSE 
+          TKE = TKE - 0.22*en
+        ENDIF
+        return
+      endif
+
+      if(izf.eq.94) then  ! Plutonium
+        TKE = 176.4
+        IF(en.le.0.0001d0) THEN
+          TKE = TKE + 0.06*en
+C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Pu-239 Bn=5.65
+        ELSEIF(en.gt.0.0001d0 .and. en.le.2.15) THEN
+          TKE = TKE - 0.12*en
+	  ELSE
+          TKE = TKE - 0.21*en
+        ENDIF
+        return
+      endif
+
+      if(izf.eq.95) then  ! Americium
+        TKE = 179.74
+        IF(en.le.0.0001d0) THEN
+          TKE = TKE + 0.08*en
+        ELSE
+          TKE = TKE -0.25*en
+        ENDIF
+        return
+      endif
+
+      if(izf.eq.96) then  ! Curium
+        TKE = 183.23 - 0.338*(iaf-240)
+        if(iaf.le.242) TKE = 183.23 - 0.338*2
+        IF(en.le.0.0001d0) THEN
+          TKE = TKE + 0.07*en
+        ELSE
+          TKE = TKE + 0.11*en
+        ENDIF
+        return
+      endif
+
+      if(izf.eq.97) then  ! Bekerelium
+        TKE = 185.08 - 0.405*(iaf-249)
+        TKE = TKE + 0.1*en
+        return
+      endif
+
+      if(izf.eq.98) then  ! Californium
+        TKE = 193.79 - 0.472*(iaf-240)
+        TKE = TKE + 0.1*en
+        return
+      endif
+C-------------------------------------------------------------------------
+C
 C     Itkis et al, Yad.Fiz.52(1990) 23; Fiz.Elem.Ch.At. Yadra 29(1998) 389
+C
       ftmp = real(izf)**2/real(iaf)**(1.d0/3.d0)
       IF(ftmp .le. 900.) then
         TKE = 0.131*ftmp
       ELSE
         TKE = 0.104*ftmp + 24.3
       ENDIF
+
       if(izf.eq.89) then  ! Actinium
         TKE = 0.104*ftmp + 23.3 
         TKE = TKE + 0.4*en
         return
       endif
+
       if(izf.eq.90) then  ! Thorium
 C       TKE = 0.104*ftmp + 23.85             
 C       TKE = 0.104*ftmp + 24.05                 ! for delta <& 0 and beta2 = 0
@@ -410,96 +566,67 @@ C       TKE = TKE + 0.15*en
 
         TKE = 0.104*ftmp + 25.75                 ! for delta = 0 and S2n <& 0
         TKE = TKE + 0.50*en                      ! eval     
-
         return
       endif
+
       if(izf.eq.91) then  ! Protoactinium
         TKE = 166.7 + 0.016d0*(ftmp-1332.d0) 
 C       TKE = 166.1 + 0.021d0*(ftmp-1332.d0)
         TKE = TKE + 0.37*en
         return
       endif
+C
+C     Itkis
       if(izf.eq.92) then  ! Uranium
         TKE = 0.104*ftmp + 27.35
         TKE = TKE + 0.4*en
         return
       endif
-C     Malinovskii et al, INDC(CCP)-277, IAEA 1987 (VANT N2,1987) in russian
-      if(izf.eq.92) then  ! Uranium
-        TKE = 169.24
-        IF(en.lt.0.0001d0) TKE = TKE + 0.4*en
-C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For U-238 Bn=6.15
-        IF(en.gt.0.0001d0 .and. en.le.1.65)
-     &        TKE = TKE + (-0.423 + 0.044*(iaf-230))*en
-        IF(en.gt.1.65)
-     &        TKE = TKE + ( 0.144 - 0.047*(iaf-230))*en
-      endif
-      if(izf.eq.93) then  ! Neptunium
-        TKE = 172.43
-        IF(en.lt.0.0001d0) TKE = TKE + 0.25*en
-C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Np-237 Bn=6.57
-        IF(en.gt.0.0001d0 .and. en.le.1.23) TKE = TKE - 0.14*en
-        IF(en.gt.1.23) TKE = TKE - 0.22*en
-      endif
-      if(izf.eq.94) then  ! Plutonium
-        TKE = 176.4
-        IF(en.lt.0.0001d0) TKE = TKE + 0.06*en
-C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Pu-239 Bn=5.65
-        IF(en.gt.0.0001d0 .and. en.le.2.15) TKE = TKE - 0.12*en
-        IF(en.gt.2.15) TKE = TKE - 0.21*en
-      endif
-      if(izf.eq.95) then  ! Americium
-        TKE = 179.74
-        IF(en.lt.0.0001d0) TKE = TKE + 0.08*en
-        IF(en.gt.0.0001d0) TKE = TKE -0.25*en
-      endif
-      if(izf.eq.96) then  ! Curium
-        TKE = 183.23 - 0.338*(iaf-240)
-        if(iaf.le.242) TKE = 183.23 - 0.338*2
-        IF(en.lt.0.0001d0) TKE = TKE + 0.07*en
-        IF(en.gt.0.0001d0) TKE = TKE + 0.11*en
-      endif
-      if(izf.eq.97) then  ! Bekerelium
-        TKE = 185.08 - 0.405*(iaf-249)
-        TKE = TKE + 0.1*en
-      endif
-      if(izf.eq.98) then  ! Californium
-        TKE = 193.79 - 0.472*(iaf-240)
-        TKE = TKE + 0.1*en
-      endif
+
       return
       end
 
       SUBROUTINE get_fragmPFNS_LANL (fragmPFNS, emiss_en, nen_emis,
-     &      eincid, af, zf, emed, tequiv)
+     &      eincid, af, zf, emed, tequiv, qval)
 C
-C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
-C     Phys. At. Nuclei 62 (1999) pp 173-185
+C     See D. Madland original paper (NSE) on LA model
 C
-      implicit real*8 (A-H,O-Z)
+      implicit none
+C     Dummy parameters
       integer nen_emis
       real*8 fragmPFNS(nen_emis), emiss_en(nen_emis)
-      real*8 af,zf, eincid, bn, ftmp1, ftmp2, eplus, emin 
-      real*8 CNdef,HFdef,LFdef,ftmp, Erel,ThCF,TlCF,r,e,Efkin,Tlf,Thf
-      real*8 GAUSS_INT1, SL_LAB, SH_LAB
+      real*8 eincid, af, zf, emed, tequiv, qval
+
+C     Local variables
+      real*8 bn, ftmp1, ftmp2, eplus, emin 
+      real*8 CNdef,HFdef,LFdef,ftmp, Erel,r,e,Efkin,Tlf,Thf
+	real*8 Ux,EniuL,EniuH,Tm,Tml,Tmh
+      real*8 deltae, fmed, abserr
+      integer iah,ial,iaf,izf,izh,izl,i
 C     real*8 fpost, fnscn, tscn, wscn
-      integer iah
-      external SL_LAB, SH_LAB
+
       COMMON /eparam/eplus,emin
-      data ThCF/0.8868d0/,r/1.248d0/,U0CF/32.9d0/
-      data iah/140/ ! Assumed fixed mass of the heavy fragment
+
+C     Mass of heavy fragment fixed following Malinovskii
+      data iah/140/ 
+C     Ratio of the light to heavy fragments' Temperature taken from Kornilov
+C     data r/1.248d0/  !Kornilov value
+      data r/1.000d0/  !Original LANL value
 C     Scission neutrons for Th-232 following Lovchikova et al (Phys.At.Nuclei 67 (2004) p890)
-C     data wscn/0.10d0/ ! fitted to get
-C     data tscn/0.40d0/ ! scission neutron temperature (0.38 +/- 0.04)
+C     data wscn/0.10d0/ ! "wscn,tscn" fitted to get scission neutron temperature (0.38 +/- 0.04)
+C     data tscn/0.40d0/ !
+
+      real*8 GAUSS_INT1, SL_LAB, SH_LAB, TKE, BIND
+      external SL_LAB, SH_LAB
+
       emed = 0.d0
       tequiv = 0.d0
-      do i =1,nen_emis
-        fragmPFNS(i) = 0.d0
-      enddo
+      fragmPFNS = 0.d0
+
       iaf = nint(af)
       izf = nint(zf)
 
-      bn = bind(iaf-izf,izf,CNdef) - bind(iaf-izf-1,izf,ftmp)
+      ftmp = bind(iaf-izf,izf,CNdef) 
 
 C     Parametrization of the Total Kinetic Energy in fission
       Efkin = TKE(izf,iaf,eincid)
@@ -513,47 +640,30 @@ C     Malinovskii parametrization of the heavy fragment charge
       ftmp = bind(ial-izl,izl,LFdef)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel = CNdef - HFdef - LFdef
-      alpha0 = 1.d0
-C--------------------------------------------------------------------------
-C     Following Kornilov's paper
-C     if(iaf.eq.233 .and. izf.eq.90) alpha = 0.947d0  ! Th232 target
-C     if(izf.eq.90) alpha0 = 0.947d0  ! Th232 target and all thorium chain
-C     if(iaf.eq.234 .and. izf.eq.92) alpha0 = 0.92d0   ! U233  target
-C     if(iaf.eq.236 .and. izf.eq.92) alpha0 = 0.936d0  ! U235  target
-C     if(iaf.eq.239 .and. izf.eq.92) alpha0 = 0.88d0   ! U238  target
-C     if(iaf.eq.238 .and. izf.eq.93) alpha0 = 0.808d0  ! Np237 target
-C     if(iaf.eq.240 .and. izf.eq.94) alpha0 = 0.873d0  ! Np237 target
-C     if(iaf.eq.253 .and. izf.eq.98) alpha0 = 0.809d0  ! Np237 target
-C--------------------------------------------------------------------------
-C     Adjusted values (RCN, February 2006)
-C     if(izf.le.91) alpha0 = 0.910d0 ! Th, Pa and Ac chains
-      if(izf.le.91) alpha0 = 0.947d0 ! Th, Pa and Ac chains
-C     if scission neutrons are considered then no reduction of
-C            the CMS energy is needed
+
+C     if scission neutrons are considered 
 C     if(wscn.ne.0.d0) alpha0 = 1.d0
-C     Following Maslov we interpolate alpha from 10 to 12.1 MeV
-      alpha = alpha0
-      if(eincid.gt.10.and.eincid.le.12.)  
-     &                  alpha = alpha0 + 0.05*(10.d0 - eincid)
-      if(eincid.gt.12.) alpha = 0.847d0  ! for Th,Pa,Ac chains
 C
-      EniuL =  float(iah)/float(ial*iaf)*alpha*Efkin
-      EniuH =  float(ial)/float(iah*iaf)*alpha*Efkin
+      EniuL =  float(iah)/float(ial*iaf)*Efkin
+      EniuH =  float(ial)/float(iah*iaf)*Efkin
 
-      TlCF = ThCF * r
-
-      Ux = Erel - Efkin + eincid + bn 
+      Ux = Erel - Efkin + eincid + qval 
 
       IF(UX.lt.0) return
+C
+C     Level density assumed porportional to A/11 
+      Tm = dsqrt(Ux/(iaf/11.d0))   
+C
+C     LA model (eq.11 CPC)
+      TmL = Tm*r
+      TmH = Tm
 
-      coeff = DSQRT( 252./af * Ux/U0CF)
-C     Following formulae (7) of the paper
-      Tlf = TlCF * coeff
-      Thf = ThCF * coeff
       ftmp = 0.D0
       do i =1,nen_emis
         e = emiss_en(i)
-        if (e.eq.0.d0) cycle
+
+        if (e.lt.0.001d0) cycle
+
         eplus = (DSQRT(e) + DSQRT(EniuL))**2
         emin  = (DSQRT(e) - DSQRT(EniuL))**2
         ftmp1=
@@ -569,6 +679,7 @@ C     Following formulae (7) of the paper
 C       fpost = 0.5d0*( fwatt(e,EniuH,Thf) + fwatt(e,EniuL,Tlf) )
 C       fnscn = fscn(e,tscn)
 C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
+
         IF(i.gt.1) then
           deltae = emiss_en(i)-emiss_en(i-1)
           fmed = (fragmPFNS(i)+fragmPFNS(i-1))*0.5
@@ -576,6 +687,7 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
           ftmp = ftmp + fmed*deltae
         ENDIF
       enddo
+
       if(ftmp.GT.0) emed = emed/ftmp
       tequiv = 2.D0/3.D0*emed
       
@@ -583,36 +695,54 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
       end
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
-     &      eincid, af, zf, emed, tequiv)
+     &      eincid, af, zf, emed, tequiv, qval)
 C
 C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
 C     Phys. At. Nuclei 62 (1999) pp 173-185
 C
-      implicit real*8 (A-H,O-Z)
+C
+      implicit none
+C     Dummy parameters
       integer nen_emis
       real*8 fragmPFNS(nen_emis), emiss_en(nen_emis)
-      real*8 af,zf, eincid, bn 
-      real*8 CNdef,HFdef,LFdef,ftmp, Erel,ThCF,TlCF,r,e,Efkin
+      real*8 eincid, af, zf, emed, tequiv, qval
+
+C     Local variables
+      real*8 eplus, emin 
+      real*8 CNdef,HFdef,LFdef,ftmp, Erel
+      real*8 ThCF,TlCF,r,e,Efkin,Tlf,Thf
+	real*8 Ux,EniuL,EniuH
+      real*8 deltae, fmed
+      integer iah,ial,iaf,izf,izh,izl,i,iloc
 C     real*8 fpost, fnscn, tscn, wscn
-      integer iah
-      data ThCF/0.8868d0/,r/1.248d0/,U0CF/32.9d0/
-      data iah/140/ ! Assumed fixed mass of the heavy fragment
+      real*8 alpha,alpha0,coeff,U0Cf
+      real*8 TKE, bind, fwatt
+	  integer nnuc,izaf  
+      
+	  COMMON /eparam/eplus,emin
+
+C     Mass of heavy fragment fixed following Malinovskii
+      data iah/140/ 
+
+C     Kornilov model parameters
+      data ThCF/0.8868d0/,r/1.248d0/,U0Cf/32.9d0/
+
 C     Scission neutrons for Th-232 following Lovchikova et al (Phys.At.Nuclei 67 (2004) p890)
-C     data wscn/0.10d0/ ! fitted to get
-C     data tscn/0.40d0/ ! scission neutron temperature (0.38 +/- 0.04)
+C     data wscn/0.10d0/ ! "wscn,tscn" fitted to get scission neutron temperature (0.38 +/- 0.04)
+C     data tscn/0.40d0/ !
+
       emed = 0.d0
       tequiv = 0.d0
-      do i =1,nen_emis
-        fragmPFNS(i) = 0.d0
-      enddo
+      fragmPFNS = 0.d0
+
       iaf = nint(af)
       izf = nint(zf)
-
-      bn = bind(iaf-izf,izf,CNdef) - bind(iaf-izf-1,izf,ftmp)
 
 C     Parametrization of the Total Kinetic Energy in fission
       Efkin = TKE(izf,iaf,eincid)
       
+      ftmp = bind(iaf-izf,izf,CNdef) 
+
 C     Malinovskii parametrization of the heavy fragment charge
       izh = (zf/af)*iah - 0.5
       izl = izf - izh
@@ -622,21 +752,24 @@ C     Malinovskii parametrization of the heavy fragment charge
       ftmp = bind(ial-izl,izl,LFdef)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
       Erel = CNdef - HFdef - LFdef
+
       alpha0 = 1.d0
+C     Adjusted values (RCN, February 2006)
+      if(izf.le.91) alpha0 = 0.947d0 ! Th, Pa and Ac chains
+      if(izf.eq.92) alpha0 = 0.933d0 ! U chain
+      if(izf.eq.94) alpha0 = 0.873d0 ! Pu chain
+      if(izf.eq.95) alpha0 = 0.808d0 ! Am chain = Np237 
 C--------------------------------------------------------------------------
 C     Following Kornilov's paper
-C     if(iaf.eq.233 .and. izf.eq.90) alpha = 0.947d0  ! Th232 target
-C     if(izf.eq.90) alpha0 = 0.947d0  ! Th232 target and all thorium chain
-C     if(iaf.eq.234 .and. izf.eq.92) alpha0 = 0.92d0   ! U233  target
-C     if(iaf.eq.236 .and. izf.eq.92) alpha0 = 0.936d0  ! U235  target
-C     if(iaf.eq.239 .and. izf.eq.92) alpha0 = 0.88d0   ! U238  target
-C     if(iaf.eq.238 .and. izf.eq.93) alpha0 = 0.808d0  ! Np237 target
-C     if(iaf.eq.240 .and. izf.eq.94) alpha0 = 0.873d0  ! Np237 target
-C     if(iaf.eq.253 .and. izf.eq.98) alpha0 = 0.809d0  ! Np237 target
+      if(izf.eq.90) alpha0 = 0.947d0  ! Th232 target and all thorium chain
+      if(iaf.eq.234 .and. izf.eq.92) alpha0 = 0.92d0   ! U233  target
+      if(iaf.eq.236 .and. izf.eq.92) alpha0 = 0.936d0  ! U235  target
+      if(iaf.eq.239 .and. izf.eq.92) alpha0 = 0.88d0   ! U238  target
+      if(iaf.eq.238 .and. izf.eq.93) alpha0 = 0.808d0  ! Np237 target
+      if(iaf.eq.240 .and. izf.eq.94) alpha0 = 0.873d0  ! Pu240 target
+      if(iaf.eq.253 .and. izf.eq.98) alpha0 = 0.809d0  ! Cf252 target
 C--------------------------------------------------------------------------
-C     Adjusted values (RCN, February 2006)
-C     if(izf.le.91) alpha0 = 0.910d0 ! Th, Pa and Ac chains
-      if(izf.le.91) alpha0 = 0.947d0 ! Th, Pa and Ac chains
+
 C     if scission neutrons are considered then no reduction of
 C            the CMS energy is needed
 C     if(wscn.ne.0.d0) alpha0 = 1.d0
@@ -644,13 +777,13 @@ C     Following Maslov we interpolate alpha from 10 to 12.1 MeV
       alpha = alpha0
       if(eincid.gt.10.and.eincid.le.12.)  
      &                  alpha = alpha0 + 0.05*(10.d0 - eincid)
-      if(eincid.gt.12.) alpha = 0.847d0  ! for Th,Pa,Ac chains
+      if(eincid.gt.12.) alpha = alpha0 - 0.05*2.d0  ! the value at eincid = 12
 C
       EniuL =  float(iah)/float(ial*iaf)*alpha*Efkin
       EniuH =  float(ial)/float(iah*iaf)*alpha*Efkin
       TlCF = ThCF * r
 
-      Ux = Erel - Efkin + eincid + bn 
+      Ux = Erel - Efkin + eincid + qval 
 
       IF(UX.lt.0) return
 
@@ -659,6 +792,7 @@ C     Following formulae (7) of the paper
       Tlf = TlCF * coeff
       Thf = ThCF * coeff
       ftmp = 0.D0
+
       do i =1,nen_emis
         e = emiss_en(i)
         fragmPFNS(i) = 0.5d0*(fwatt(e,EniuH,Thf) + fwatt(e,EniuL,Tlf))
@@ -888,36 +1022,6 @@ c--------                            ! end of main loop
       if(de.le.0..or.nz.le.50)E=y(1) !                spherical nuclides
       return
       end
-
-      real*8 FUNCTION fniu_nubar_eval(en)
-
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
- 
-      real*8, intent(in) :: en
-      
-      integer*4 i
-      real*8 xnus
-     
-      if(en .lt. Eniu_eval(1)) then
-        fniu_nubar_eval = Vniu_eval(1)
-        RETURN
-      else if(en .ge. Eniu_eval(num_niu)) then
-        i=num_niu
-	write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
-      else
-        do i=1,num_niu
-          if(Eniu_eval(i) .gt. en) exit
-        enddo
-      endif
-      
-      xnus = (Vniu_eval(i)-Vniu_eval(i-1))/(Eniu_eval(i)-Eniu_eval(i-1))
-
-      fniu_nubar_eval = Vniu_eval(i-1) + xnus*(en-Eniu_eval(i-1))
-
-      return
-      end
-
 
       REAL*8 FUNCTION GAUSS_LAGUERRE_INT(F,Abserr)
       IMPLICIT NONE
@@ -1400,5 +1504,31 @@ C
 C     RETURN
       END
 
+      real*8 FUNCTION fniu_nubar_eval(en)
 
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+ 
+      real*8, intent(in) :: en
+      
+      integer*4 i
+      real*8 xnus
+     
+      if(en .lt. Eniu_eval(1)) then
+        fniu_nubar_eval = Vniu_eval(1)
+        RETURN
+      else if(en .ge. Eniu_eval(num_niu)) then
+        i=num_niu
+   	  write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
+      else
+        do i=1,num_niu
+          if(Eniu_eval(i) .gt. en) exit
+        enddo
+      endif
+      
+      xnus = (Vniu_eval(i)-Vniu_eval(i-1))/(Eniu_eval(i)-Eniu_eval(i-1))
 
+      fniu_nubar_eval = Vniu_eval(i-1) + xnus*(en-Eniu_eval(i-1))
+
+      return
+      end

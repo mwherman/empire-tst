@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2350 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 23:07:26 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2356 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-28 09:37:52 +0100 (Sa, 28 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -63,7 +63,7 @@ C
 C
 C Local functions
 C
-      DOUBLE PRECISION fniu,fniu_nubar_eval,fniuLANL
+      DOUBLE PRECISION fniu_nubar_eval,fniuTH232
 C
 C Local variables
 C
@@ -80,14 +80,10 @@ C
      &                 totemis, weight, xcse, xizat, xnl, xnor,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
-     &                 emiss_en(NDEPFN),post_fisn(NDEPFN), tequiv0,
-     &                 bindS(0:1), fniuS, tequiv, fmaxw, ftmp1, ftmp2,
-C                      Total prompt fission spectra only for two ejectiles (n,g)
-C                      Total PF angular distribution defined only for neutrons
-     &                 cseapfns(NDEPFN,NDAngecis),enepfns(NDEPFN,0:1),
-     &                 csepfns(NDEPFN,0:1), ratio2maxw(NDEPFN), ebind,
-     &                 tequiv1, tequiv2, ddxs(NDAngecis),csetmp(ndecse),
-     &                 eincid, eee, uuuu, fanisot, eneutr,csprnt(ndnuc),
+     &                 emiss_en(NDEPFN),post_fisn(NDEPFN), 
+     &                 bindS(0:1), tequiv, fmaxw, 
+     &                 ratio2maxw(NDEPFN), csetmp(ndecse),
+     &                 eincid, eneutr, csprnt(ndnuc),
      &                 fisxse, dtmp0, dtmp1, csinel,eps,dcor,checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg,
      &                 xnorm(2,NDExclus)
@@ -169,8 +165,6 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
-          WRITE(74,1235)
- 1235     FORMAT('   Elab    <Epfns>  nue(th) nue(exp)  Tmaxw ')
         ENDIF
       ENDIF
 C-----
@@ -2212,20 +2206,9 @@ C     emission and first CN.
       bindS(1) = 0.d0
       isnewchain(0) = 0
       isnewchain(1) = 0
-      fniuS    = 0.d0 ! total multiplicity
       nfission = 0
       nepfns(0)= 0
       nepfns(1)= 0
-      tequiv0 = 0.d0
-      DO ie = 1, NDEPFN
-        ENEpfns(ie,0) = 0.d0
-        ENEpfns(ie,1) = 0.d0
-        csepfns(ie,0) = 0.d0
-        csepfns(ie,1) = 0.d0
-        DO nang = 1, NDANGD
-          cseapfns(ie,nang) = 0.d0
-        ENDDO
-      ENDDO
 c fisspec===============
 C     For Kalbach parameterization
       do i=1,NDAng
@@ -2460,139 +2443,154 @@ C--------------------------printed (4*Pi*CSAlev(1,il,3)
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
-C
-C--------Prompt fission spectra of neutrons and gammas
+C****************************************************************************
+C        Prompt fission spectra of neutrons 
 C        for a given decaying nucleus
 C
          IF (FISSPE.gt.0 .and.
      &      TOTcsfis.gt.0.d0 .and. CSPfis(nnuc).GT.0.0D0 .and.
      &       ( Z(0).eq.Z(nnuc) .OR.   Z(0)-1.eq.Z(nnuc) ) .AND.
-     &      ENDf(nnuc).EQ.1 .and.
 C           Prompt fission spectra are not calculated if:
 C           Partial fission cross section is lower than 1.d-7*TOTcsfis
      &      CSPfis(Nnuc).GT.1.d-7*TOTcsfis) THEN
 C
 C           Only neutron and proton isotope chains are considered for PFNS
             izfiss =  NINT(Z(0)) - NINT(Z(nnuc))
+
             IF (izfiss.gt.1) CYCLE
+C           For Elab<30 MeV only the emission from the "neutron" chain
+C           is considered (izfiss = 0). Emission from the proton chain
+C           are neglected (izfiss = 1).
+C           IF (izfiss.eq.1 .and. EINl.LT.30.d0) CYCLE
+C
             iaf = A(nnuc)
             izf = Z(nnuc)
+C
             WRITE
      & (73,'(''*** Fiss. CN nucleus '',I3,''-'',A2,''-'',I3,''  Elab '',
      &  F8.4)') INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), EINl
-            DO nejc = 0, 1         !loop over gamma and neutrons only
-              DO ie = 1, NDEPFN
-                emiss_en(ie) = 0.d0
-                post_fisn(ie) = 0.d0
-                ratio2maxw(ie) = 0.d0
+            WRITE (73,'(''*** En     PFNS(tot)   Ratio_Maxw'')') 
+
+            nejc = 1 ! neutron emission only
+            post_fisn  = 0.d0
+            ratio2maxw =  0.d0
+            cejectile = 'neutrons '
+            iizaejc = IZAejc(nejc)
+            espmax = EMAx(1) - Q(1,1)
+C
+            IF(nfission.eq.0) THEN
+C             Calculating unique energy grid (only for the first fissioning nucleus)
+              nspec = MIN(INT(espmax/DE) + 2,NDECSE - 1)
+C             Assumed maximum energy of neutrons from fragments will be 25 MeV
+              nspecmax = min( NINT(25.d0/0.1D0) + 2, NDEPFN)
+              nepfns(nejc) = nspecmax
+              DO ie = 1, nspec - 1
+                emiss_en(ie) = FLOAT(ie - 1)*DE
               ENDDO
-              IF (nejc.EQ.0) THEN
-                cejectile = 'gammas   '
-                iizaejc = 0
-                espmax = EMAx(1)
-              ELSEIF (nejc.EQ.1) THEN
-                  cejectile = 'neutrons '
-                  iizaejc = IZAejc(nejc)
-                  espmax = EMAx(1) - Q(1,1)
-              ENDIF
-C
-              if(nfission.eq.0) THEN
-C               Calculating unique energy grid (only for the first fissioning nucleus)
-                nspec = MIN(INT(espmax/DE) + 2,NDECSE - 1)
-                if(espmax.LT.25.d0) THEN
-C                 Assumed maximum energy of neutrons from fragments will be 25 MeV
-                  nspecmax = min( NINT(25.d0/0.1D0) + 2, NDEPFN)
-                else
-C                 Maximum emission energy from n,xnf
-                  nspecmax = min( nspec, NDEPFN)
-                endif
-                nepfns(nejc) = nspecmax
-                DO ie = 1, nspec - 1
-                  ENEpfns(ie,nejc) = FLOAT(ie - 1)*DE
+              if(nspec.gt.1) then
+                DO ie = nspec, nspecmax
+                  emiss_en(ie) = emiss_en(nspec-1) +
+     &                           FLOAT(ie - nspec + 1)*0.1d0
                 ENDDO
-                if(nspec.gt.1) then
-                  DO ie = nspec, nspecmax
-                    ENEpfns(ie,nejc) = ENEpfns(nspec-1,nejc) +
-     &                             FLOAT(ie - nspec + 1)*0.1d0
-                  ENDDO
-                else
-                  DO ie = 1, nspecmax
-                    ENEpfns(ie,nejc) = FLOAT(ie - 1)*0.1d0
-                  ENDDO
-                endif
-              ENDIF
+              else
+                DO ie = 1, nspecmax
+                  emiss_en(ie) = FLOAT(ie - 1)*0.1d0
+                ENDDO
+              endif
+            ENDIF
 C
-              IF(isnewchain(izfiss).eq.0) THEN ! IF(nnuc.eq.1) THEN  ! CN
+            IF(isnewchain(izfiss).eq.0) THEN ! IF(nnuc.eq.1) THEN  ! CN
 C
 C             First fissioning nucleus in the isotope chain
 C
-C              no gammas from fragments are considered for the time being from the first CN
-               IF(nejc.eq.0) CYCLE
+C             no gammas from fragments are considered for the time being 
+
+              eincid = EXCn - Q(izfiss+1,1)
 C
-C              Below first chance, no emissive contributions to fission spectra
-C              Only fission neutrons emitted from fully accelerated fragments
-C              acc = ROPar(1,nnuc)
-C              bett = DEF(1,Nnuc)
+C---------------NUBAR read from evaluated ENDF-B/VII.1 NUBAR if available
 C
-               eincid = EXCn - Q(izfiss+1,1)
-               IF(FISspe.eq.1)fmultPostfiss=fniuLANL(eincid,iaf,izf)
-               IF(FISspe.eq.2)fmultPostfiss=fniu    (eincid,iaf,izf)
-               write(8,
-     &        '(1x,a4,4(f8.3,1x),3x,i3,1x,i3,2x,f10.3,1x,f6.3,1x,f6.3)')
-     &            'Ein=',eincid, 0.d0,  0.d0, eincid + Q(1,nnuc),
-     &            iaf, izf, CSPfis(Nnuc)/TOTcsfis,
-     &            CSPfis(Nnuc)/TOTcsfis*fmultPostfiss,0.d0
-C    &             'Ein=', eincid, 11*acc/iaf, 0.d0, EIN, iaf, izf,
-C    &              CSPfis(Nnuc)/TOTcsfis
-               WRITE (12,*) ' '
-               WRITE
+              fniuEVAL=0.d0
+              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
+C
+C             FAKE CALL FOR TESTING
+C
+C             fniuEVAL = fniuTH232(eincid)
+
+              WRITE (12,*)
+              WRITE (8,*) 
+
+              if(fniueval.LE.0.d0) then
+               fniueval = 1.d0
+               WRITE (12,'('' WARNING: Nubar taken as 1'')')
+               WRITE (8 ,'('' WARNING: Nubar taken as 1'')')
+               WRITE (8 ,'('' WARNING: MF=1,MT=456 should be copied'')')
+               WRITE (8 ,'('' WARNING:  from desired evaluation to '')')
+               WRITE (8 ,'('' WARNING:  to file -nubar.endf        '')')
+              endif
+		
+              if(fniuEVAL.eq.1) then
+C               iafiss = A(1) 
+C               IF(FISspe.eq.1) 
+C    &            fnubar = fniuLANL(eincid,NINT(A(1)),NINT(Z(1)))
+C               IF(FISspe.eq.2) 
+C    &            fnubar = fniu    (eincid,NINT(A(1)),NINT(Z(1)))
+	        else
+                fnubar = fniuEVAL
+              endif 
+
+                write(8,
+     &        '(1x,a4,2(f8.3,1x),3x,i3,1x,i3,2x,f10.3,1x,f6.3)')
+     &            'Ein=',eincid, eincid + Q(1,nnuc),
+     &            iaf, izf, CSPfis(Nnuc)/TOTcsfis, fnubar
+
+                WRITE (12,*) ' '
+                WRITE
      &        (12,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
-               WRITE
+                WRITE
      &     (12,'(''  Partial fission cross section '',G12.5,'' mb'')')
      &            CSPfis(Nnuc)
-               WRITE
+                WRITE
      &     (12,'(''  Ratio of partial to total fission '',G12.5)')
      &            CSPfis(Nnuc)/TOTcsfis
-               WRITE
+                WRITE
      &     (12,'(''  Binding energy of fissioning nucleus '',G12.5)')
      &            Q(1,nnuc)
-               WRITE (12,'(''  Postfission multiplicity  '',F8.3)')
-     &            fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
-               WRITE  (12,'(''  Partial multiplicity      '',F8.3)')
-     &            fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
-C--------------Summing total multiplicity
-               fniuS = fniuS + fmultPostfiss*CSPfis(Nnuc)/TOTcsfis
+                WRITE (12,'(''  Multiplicity (nue) '',F6.3)') fnubar
+	         if(fnubar.ne.1) 
+     &            WRITE (12,'(''  Nubar from evaluated library '')')
+
+
+                WRITE (8,*) ' '
+                WRITE
+     &        (8,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
+     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
+                WRITE
+     &     (8,'(''  Partial fission cross section '',G12.5,'' mb'')')
+     &            CSPfis(Nnuc)
+                WRITE
+     &     (8,'(''  Ratio of partial to total fission '',G12.5)')
+     &            CSPfis(Nnuc)/TOTcsfis
+                WRITE
+     &     (8,'(''  Binding energy of fissioning nucleus '',G12.5)')
+     &            Q(1,nnuc)
+               WRITE (8 ,'(''  Multiplicity (nue) '',F6.3)') fnubar
+	         if(fnubar.ne.1) 
+     &            WRITE ( 8,'(''  Nubar from evaluated library '')')
+
                nspecmax = nepfns(nejc)
-               DO ie = 1, nspecmax
-                  emiss_en(ie) = ENEpfns(ie,nejc)
-               ENDDO
 C--------------Calculating post-fission neutrons in the first chance
                IF (FISspe.eq.1)
      &          CALL get_fragmPFNS_LANL (post_fisn, emiss_en, nspecmax,
-     &          eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv)
+     &          eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc))
                IF (FISspe.eq.2)
      &          CALL get_fragmPFNS      (post_fisn, emiss_en, nspecmax,
-     &          eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv)
-C               subroutine get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
-C               eincid, af, zf, emed, tequiv_maxw)
-                if(eneutr.gt.0) then
-                 tequiv0 = tequiv
-                 fnorm = CSPfis(nnuc)*fmultPostfiss
+     &          eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc))
+
+               if(eneutr.gt.0) then
                  DO ie = 1, nspecmax
                    ftmp = fmaxw(emiss_en(ie),tequiv)
                    if (ftmp.gt.0) ratio2maxw(ie) = post_fisn(ie)/ftmp
-                   post_fisn(ie) = post_fisn(ie) * fnorm
-                   CSEfis(ie,nejc,nnuc) = CSEfis(ie,nejc,nnuc) +
-     &                                      post_fisn(ie)
-C------------------Accumulating total spectrum for neutrons
-                   csepfns(ie,nejc) = csepfns(ie,nejc) +
-     &                              CSEfis(ie,nejc,nnuc)
-C------------------Post-fission neutrons assumed isotropically distributed
-                   DO nang = 1, NDAng
-                     cseapfns(ie,nang) = cseapfns(ie,nang) +
-     &                                CSEfis(ie,nejc,nnuc)/(4.d0*PI)
-                   ENDDO
                  ENDDO
                  isnewchain(izfiss) = 1
                  WRITE (12,
@@ -2602,430 +2600,49 @@ C------------------Post-fission neutrons assumed isotropically distributed
      &       '(''  Equivalent Tmaxwell '',G12.5,5x,G12.5)')
      &           tequiv
                  WRITE (12,*) ' '
+
+                 WRITE(74,'(1X,f8.5,1x,f8.3,3(1x,f7.3))')
+     &             EINl, eneutr, fnubar, tequiv
+
 C----------------Double the first bin x-sec to preserve integral in EMPEND
-C                CSEfis(1,nejc,Nnuc) = CSEfis(1,nejc,Nnuc)*2
+
                  WRITE (12,*) ' '
                  WRITE (12,*) ' Spectrum of ', cejectile,
-     &             '(z,partfis) from CN ', ' ZAP= ', IZA(Nnuc)
+     &             '(z,fission) from CN ', ' ZAP= ', IZA(Nnuc)
                  WRITE (12,*) ' '
-                 WRITE (12,'('' Energy    mb/MeV'')')
+                 WRITE (12,'(''    Energy    mb/MeV'')')
                  WRITE (12,*) ' '
-                 DO ie = 1, nspecmax - 1
+                 DO ie = 1, nspecmax 
                    WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &               emiss_en(ie), CSEfis(ie,nejc,Nnuc), ratio2maxw(ie)
+     &               emiss_en(ie), post_fisn(ie), ratio2maxw(ie)
                    WRITE (73,'(F10.5,E14.5,4(2x,E14.5))')
-     &               emiss_en(ie), CSEfis(ie,nejc,Nnuc),
-     &               post_fisn(ie), ratio2maxw(ie)
+     &               emiss_en(ie), post_fisn(ie), ratio2maxw(ie)
                  ENDDO
-                 WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &             emiss_en(nspecmax), CSEfis(nspecmax,nejc,Nnuc),
-     &             ratio2maxw(nspecmax)
                  WRITE (12,'(F10.5,E14.5,2x,E14.5)')
      &             emiss_en(nspecmax), 0.d0, 0.d0
-                else
+               else
                  WRITE  (12,'(''  No fission neutrons emitted'')')
+                 WRITE  (8 ,'(''  No fission neutrons emitted'')')
                endif
+               
                WRITE (12,*) ' '
-C
-              ELSE ! (A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1))
-C
-C--------------Fission chances (emissive and post fission contributions to PFNS)
-C
-C--------------Assumed maximum energy of neutrons from fragments will be 25 MeV
-C--------------For high incident energies, nxnf neutrons could eventually
-C--------------have higher energies than post-fission neutrons
-C
-               totspec = 0.d0
-               eavespe = 0.d0
-               if (nejc.eq.0) egamma =0.d0
-               if (nejc.eq.1) eneutr =0.d0
-               fmultPrefiss = 0.d0
-               nspec = MIN(INT(espmax/DE) + 2,NDECSE - 1)
-               IF(nspec.GT.0) THEN
-                 DO ie = 1, nspec
-                   eee = FLOAT(ie - 1)*DE
-C------------------Integral of prefission spectra for normalization
-                   totspec  = totspec  + CSEfis(ie,Nejc,Nnuc)
-                   eavespe  = eavespe +
-     &               FLOAT(ie - 1)*DE*CSEfis(ie,Nejc,Nnuc)
-                 ENDDO
-                 if(totspec.gt.0) THEN
-                   if(nejc.eq.0) then
-                     fmultPrefiss = 1.d0  ! gamma multiplicity fixed
-                     egamma = eavespe/totspec
-                   else
-C--------------------Particle multiplicity is obtained from the spectrum
-                     fmultPrefiss=NINT(totspec/CSPfis(nnuc))
-                     eneutr = eavespe/totspec
-                   endif
-C------------------Normalizing prefission spectra (converting to mb/MeV)
-                   fnorm = CSPfis(nnuc)*fmultPrefiss/totspec/DE
-                   DO ie = 1, nspec
-                     CSEfis(ie,nejc,nnuc) = CSEfis(ie,nejc,nnuc)*fnorm
-                     IF (nejc.eq.0) csepfns(ie,nejc) = csepfns(ie,nejc)
-     &                   + CSEfis(ie,nejc,nnuc) ! prompt fission gammas
-                   ENDDO
-                 endif
-               ELSE
-                 nspec = 1
-               ENDIF
-               fmultPostfiss = 0.d0
-               nspecmax = nepfns(nejc)
-               DO ie = 1, nspecmax
-                 emiss_en(ie) = ENEpfns(ie,nejc)
-               ENDDO
-               IF(nejc.eq.1) THEN
-C
-C----------------We substract binding energy of the neutrons to the previous
-C----------------nuclei in the chain to consider the emitted pre-fission neutron.
-C----------------We also substract the corresponding average energy eneutr
-C
-                 bindS(izfiss) = bindS(izfiss) + Q(1,nnuc)
-                 eincid = EXCn - Q(izfiss+1,1) - bindS(izfiss) - eneutr
-C                acc = ROPar(1,Nnuc)
-C                bett = DEF(1,Nnuc)
-                 IF(FISspe.eq.1)
-     &             fmultPostfiss=fniuLANL(eincid,iaf,izf)
-                 IF(FISspe.eq.2)
-     &             fmultPostfiss=fniu    (eincid,iaf,izf)
-                 write(8,
-     &        '(1x,a4,4(f8.3,1x),3x,i3,1x,i3,2x,f10.3,1x,f6.3,1x,f6.3)')
-     &            'Ein=',eincid , bindS(izfiss),  eneutr,
-     &            eincid + Q(1,nnuc), iaf, izf, CSPfis(Nnuc)/TOTcsfis,
-     &            CSPfis(Nnuc)/TOTcsfis*fmultPostfiss,
-     &            CSPfis(Nnuc)/TOTcsfis*fmultPrefiss
-                 WRITE (12,*) ' '
-                 WRITE
-     &        (12,'(''  Fiss. CN nucleus '',I3,''-'',A2,''-'',I3)')
-     &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
-                 WRITE
-     &     (12,'(''  Partial fission cross section '',G12.5,'' mb'')')
-     &            CSPfis(Nnuc)
-                 WRITE
-     &     (12,'(''  Ratio of partial to total fission '',G12.5)')
-     &            CSPfis(Nnuc)/TOTcsfis
-C
-C----------------Calculating post-fission neutrons above the neutron emission threshold
-                 IF (FISspe.eq.1)
-     &           CALL get_fragmPFNS_LANL (post_fisn, emiss_en, nspecmax,
-     &           eincid, A(Nnuc), Z(Nnuc), ftmp, tequiv)
-                 IF (FISspe.eq.2)
-     &           CALL get_fragmPFNS (post_fisn, emiss_en, nspecmax,
-     &           eincid, A(Nnuc), Z(Nnuc), ftmp, tequiv)
-C                subroutine get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
-C                eincid, af, zf, emed, tequiv_maxw)
-                 WRITE
-     &     (12,'(''  Binding energy of fiss. nucleus '',G12.5)')
-     &            Q(1,nnuc)
-                 WRITE
-     &     (12,'(''  Sum of Bn (from second nucleus) in '',A2, '' chain
-     &'',G12.5)') SYMb(nnuc), bindS(izfiss)
-                 WRITE
-     &     (12,'(''  Effective incident energy '',G12.5,'' (initial ''
-     &   ,G12.5,'')'')')  eincid, EIN
-                 totspec = 0.d0
-                 eavespe = 0.d0
-                 fnorm = CSPfis(nnuc)*fmultPostfiss
-                 DO ie = 1, nspecmax
-                   post_fisn(ie) = post_fisn(ie) * fnorm
-C------------------Accumulating total spectrum for neutrons
-                   CSEfis(ie,Nejc,nnuc) = CSEfis(ie,Nejc,nnuc) +
-     &                                    post_fisn(ie)
-                   csepfns(ie,nejc) = csepfns(ie,nejc) +
-     &                                CSEfis(ie,Nejc,nnuc)
-                   if(CSEfis(ie,Nejc,nnuc).LE.0) cycle
-                   DO iang = 1, NDAng
-                     ddxs(iang) = 0.d0
-                   ENDDO
-C------------------Kalbach systematic for PCROSS DDX calculations
-C
-                   fanisot =
-     &                 1.d0-post_fisn(ie)/CSEfis(ie,Nejc,nnuc)
-                   iacc = NINT(A(nnuc))
-                   izcc = NINT(Z(nnuc))
-                   ebind = Q(1,nnuc)
-                   uuuu = eincid + ebind
-                   eee = emiss_en(ie)
-                   ftmp2 = CSEfis(ie,nejc,nnuc)
-                   Call Kalbach( iacc, izcc, 0, 1, 0, 1, eincid,
-     &                   uuuu, ebind, eee, ftmp2, fanisot, ddxs, NDAng)
-                   DO iang = 1, NDAng
-                      cseapfns(ie,iang) = cseapfns(ie,iang) +
-     &                                    ddxs(iang)
-                   ENDDO
-C
-C------------------Calculating average energy (integral over non-uniform grid !!)
-                   IF(ie.gt.1) then
-                     deltae = emiss_en(ie)-emiss_en(ie-1)
-                     fmed = ( CSEfis(ie,Nejc,nnuc) +
-     &                        CSEfis(ie-1,Nejc,nnuc)) * 0.5d0
-                     eavespe = eavespe +
-     &                  fmed*deltae*(emiss_en(ie)+emiss_en(ie-1))*0.5d0
-                     totspec = totspec + fmed*deltae
-                   ENDIF
-                 ENDDO
-                 ftmp2 = 0.d0
-                 if (totspec.gt.0.) ftmp2 = eavespe/totspec
-                 WRITE (12,
-     &       '(''  Prefission <En> for fissioning nucleus  '',G12.5)')
-     &              eneutr
-                 tequiv1 = 2.d0/3.d0*eneutr
-                 WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)')tequiv1
-                 WRITE (12,
-     &       '(''  Postfission <En> for fissioning nucleus '',
-     &            G12.5)') ftmp
-                 WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)')tequiv
-                 if(totspec.gt.0.) then
-                       WRITE (12,
-     &       '(''  Prompt fission neutron average <E>      '',G12.5)')
-     &             ftmp2
-                   tequiv2 = 2.d0/3.d0*ftmp2
-                   WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)')
-     &             tequiv2
-                   DO ie = 1, nspecmax
-C                    ftmp = CSPfis(nnuc)*
-C    &                   ( fmaxw(emiss_en(ie),tequiv1)*fmultPrefiss +
-C    &                     fmaxw(emiss_en(ie),tequiv )*fmultPostfiss )
-C                    ftmp = fmaxw(emiss_en(ie),tequiv2)*
-C    &                    (fmultPostfiss+fmultPrefiss)*CSPfis(Nnuc)
-                     ftmp = fmaxw(emiss_en(ie),tequiv0)*
-     &                    (fmultPostfiss+fmultPrefiss)*CSPfis(Nnuc)
-                     ratio2maxw(ie) = 0.d0
-                     if (ftmp.gt.0)
-     &                 ratio2maxw(ie) = CSEfis(ie,Nejc,nnuc)/ftmp
-                   ENDDO
-                 endif
-                 WRITE
-     & (12,'(''  Postfission multiplicity (non-weighted) '',F6.3,2x,
-     & F6.3)') fmultPostfiss*CSPfis(Nnuc)/TOTcsfis, fmultPostfiss
-                 WRITE
-     & (12,'(''  Prefission  multiplicity (non-weighted) '',F6.3,2x,
-     & F6.3)') fmultPrefiss*CSPfis(Nnuc)/TOTcsfis, fmultPrefiss
-                 WRITE
-     & (12,'(''  Partial multiplicity (non-weighted)     '',F6.3,2x,
-     & F6.3)')  (fmultPostfiss+fmultPrefiss)*CSPfis(Nnuc)/TOTcsfis,
-     &          (fmultPostfiss+fmultPrefiss)
-                 WRITE (12,*) ' '
-                 fniuS = fniuS +
-     &              (fmultPostfiss+fmultPrefiss)*CSPfis(Nnuc)/TOTcsfis
-               ENDIF ! IF (Nejc.eq.1)
-C--------------double the first bin x-sec to preserve integral in EMPEND
-C              CSEfis(1,nejc,Nnuc) = CSEfis(1,nejc,Nnuc)*2
-               WRITE (12,*) ' '
-               WRITE (12,*) ' Spectrum of ', cejectile,
-     &               '(z,partfis) from CN ', ' ZAP= ', IZA(Nnuc)
-               WRITE (12,*) ' '
-               WRITE (12,'('' Energy    mb/MeV'')')
-               WRITE (12,*) ' '
-               nspecmax = nepfns(nejc)
-               IF(nejc.eq.1) THEN
-                 DO ie = 1, nspecmax - 1
-                   WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &              emiss_en(ie), CSEfis(ie,nejc,Nnuc), ratio2maxw(ie)
-                   WRITE (73,'(F10.5,E14.5,4(2x,E14.5))')
-     &              emiss_en(ie), CSEfis(ie,nejc,Nnuc),
-     &              post_fisn(ie), ratio2maxw(ie)
-                 ENDDO
-                 WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &            emiss_en(nspecmax), CSEfis(nspecmax,nejc,Nnuc),
-     &            ratio2maxw(nspecmax)
-                 WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &            emiss_en(nspecmax), 0.d0, 0.d0
-               ELSE
-                 DO ie = 1, nspecmax - 1
-                   WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &              emiss_en(ie), CSEfis(ie,nejc,Nnuc)
-                 ENDDO
-                 WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &            emiss_en(nspecmax), CSEfis(nspecmax,nejc,Nnuc)
-                 WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &            emiss_en(nspecmax), 0.d0
-               ENDIF
-              ENDIF  ! (A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1))
-            ENDDO  ! over ejectiles
+
+            ENDIF ! isnewchain(izfiss).eq.0
+
             nfission = nfission + 1
+
          ENDIF  !  IF ( TOTcsfis > 0 & CSPfis(nnuc)> 0 & Z(0)==Z(nnuc) )
+
       ENDDO  ! over decaying nuclei
-C-----
-C-----PRINTING TOTAL PFNS and PFNM quantities
-C-----
-C     WRITE (12,*) ' '
-C     WRITE (12,*) ' '
-C     WRITE (12,'(''  Sum of fission cross section '',G12.4,'' mb'')')
-C    &       TOTcsfis
-C     WRITE (8,*) ' '
-C     WRITE (8,*) ' '
-C     WRITE (8,'(''  Sum of fission cross section '',G12.4,'' mb'')')
-C    &       TOTcsfis
-C ????????
-      IF (FISspe.gt.0 .and. TOTcsfis.gt.0.d0) THEN
-         DO nejc = 0, 1         !loop over gamma and neutrons only
-            IF (nejc.EQ.0) THEN
-              cejectile = 'gammas   '
-            ELSE
-              cejectile = 'neutrons '
-              WRITE
-     & (73,'(''*** PFNS from CN '',I3,''-'',A2,''-'',I3,''  Elab '',
-     &  F8.4)') INT(Z(1)), SYMb(1), INT(A(1)), EINl
-            ENDIF
-            WRITE (12,
-     &   '(''  Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
+
+      WRITE (12,
+     & '('' Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
      &      nfission, EINl
-            ftmp1 = 0.d0
-            ftmp2 = 0.d0
-            DO ie = 2, nepfns(nejc)
-              deltae = enepfns(ie,nejc)-enepfns(ie-1,nejc)
-              fmed = (csepfns(ie,nejc)+csepfns(ie-1,nejc))*0.5
-              ftmp1 = ftmp1 + fmed*deltae
-              ftmp2 = ftmp2 + fmed*deltae*
-     &                (enepfns(ie,nejc)+enepfns(ie-1,nejc))*0.5d0
-            ENDDO
-            eaverage = 0.d0
-            tequiv = 0.d0
-            if(ftmp1.gt.0) then
-              eaverage = ftmp2/ftmp1
-              tequiv = 2.d0/3.d0*eaverage
-            endif
-            WRITE (12,'(''  PF particle average energy '',G12.5)')
-     &        eaverage
-            if(nejc.eq.1) THEN
-              WRITE (12,'(''  Equivalent Tmaxwell '',G12.5)') tequiv
-C
-C             fniuEVAL = fniu_nubar_eval(EINl) given in pfns.f
-C
-C             The variable fniuEVAL is expected to be initialized to the value calculated 
-C             from the new interpolation routine fniu_nubar_eval () similar to fniuTH232
-C             that produces a NUBAR value for a given energy by interpolation of the ENDF
-C             evaluation file read in fission input (MT456=prompt) 
-C
-C              READ values to be used in the interpolation are available
-C              in ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays if NUBarread = .TRUE.
-C
-cc              WRITE(74,
-cc     &        '(1X,f8.5,1x,f8.3,3(1x,f7.3))')
-cc     &             EINl, eaverage, fniuS, fniuEVAL, tequiv
-C
-C------------NUBAR and PFNS normalized to evaluated ENDF-B/VII.1 NUBAR if available
-C
-             if(NUBarread) then
-
-                fniuEVAL = fniu_nubar_eval(EINl)
-                
- 		      if (fniuEVAL.LE.0) then
-                  WRITE (8,
-     &  '(''  WARNING: Zero interpolated multiplicity obtained'')')
-                  WRITE (8,
-     &  '(''  WARNING: Check the evaluated NUBAR file: NUBAR-EVAL.ENDF''
-     &)')
-                  fniueval = 1.d0
-                  WRITE (8,'(''  WARNING: Calculated NUBAR reset to 1.''
-     &)')
-                endif
-		
-                WRITE (12,
-     &         '(''  Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
-     &         fniuEVAL, fniuS
-                WRITE (8,
-     &         '(''  Multiplicity (nue) '',F6.3,5x,''('',f6.3,'')'')')
-     &         fniuEVAL, fniuS
-                WRITE (8, '(''  PFN average energy '',G12.5)')
-     &         eaverage
-                WRITE (12,
-     &   '(''  PFNS normalized to ENDF-B/VII.1 multiplicity '',F6.3)')
-     &         fniuEVAL
-
-             ELSE
-	      
-                WRITE (8,
-     &   '(''  WARNING: EVALUATED MULTIPLICITY FILE not available'')')
-                WRITE(8,'(''  WARNING: Normalization of NUBAR set to 1''
-     &)')
-                fniueval = 1.d0
-                WRITE (12,'(''  Multiplicity (nue) '',F8.3,5x,
-     &           ''(Normal.mult. '',f6.3,'')'')')
-     &         fniuS, fniuEVAL
-                WRITE (8, '(''  PFN average energy '',G12.5)')
-     &         eaverage
-                WRITE (12,
-     &   '(''  PFNS not normalized, normalization reset     '',F6.3)')
-     &         fniuEVAL
-
-             ENDIF
-
-            endif
-            ftmp3 = 0.d0
-            fnorm = 1.d0
-            if (fniuS.gt.0) fnorm = fniuEVAL/fniuS
-            DO ie = 1, nepfns(nejc)
-              ratio2maxw(ie) = 0.d0
-              IF(nejc.eq.1) THEN
-                ftmp = fmaxw(enepfns(ie,nejc),tequiv)
-C               ftmp1 is the integral of csepfns(ie,nejc) over energy (ie index)
-                if(ftmp.gt.0) ratio2maxw(ie) =
-     &                  csepfns(ie,nejc)/(ftmp*ftmp1)
-C
-C---------------Integral of the Maxwell distribution must be equal 1
-C               if(ie.gt.1) then
-C                 deltae = enepfns(ie,nejc)-enepfns(ie-1,nejc)
-C                 fmed1 = ( fmaxw(enepfns(ie  ,nejc),tequiv) +
-C    &                    fmaxw(enepfns(ie-1,nejc),tequiv) )*0.5d0
-C                 ftmp3 = ftmp3 + fmed1*deltae
-C                endif
-                 DO nang = 1, NDAng
-                    cseapfns(ie,nang) = cseapfns(ie,nang)*fnorm
-                 ENDDO
-              ENDIF
-              csepfns(ie,nejc) = csepfns(ie,nejc)*fnorm
-            ENDDO
-C-----------Double the first bin x-sec to preserve integral in EMPEND
-C           CSEpfns(1,nejc) = CSEpfns(1,nejc)*2
-            WRITE (12,*) ' '
-            WRITE (12,*) ' Spectrum of ', cejectile, '(z,fission) '
-            IF(nejc.eq.0) THEN
-              WRITE (12,*) ' '
-              WRITE (12,'('' Energy    mb/MeV'')')
-              WRITE (12,*) ' '
-            ELSE
-              WRITE (12,'(30X,''A     n     g     l     e     s '')')
-              WRITE (12,*) ' '
-              WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &           (ANGles(nang),nang=1,NDAng)
-            ENDIF
-            nspecmax = nepfns(nejc)
-            IF (nejc.eq.1) THEN
-              DO ie = 1, nspecmax - 1   ! print DDX PFNS
-C               WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-C    &          enepfns(ie,nejc), csepfns(ie,nejc), ratio2maxw(ie)
-                WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &            enepfns(ie,nejc),(cseapfns(ie,nang),nang = 1,NDANG)
-                WRITE (73,'(F10.5,E14.5,4(2x,E14.5))')
-     &            enepfns(ie,nejc), csepfns(ie,nejc), ratio2maxw(ie)
-              ENDDO
-              WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &            enepfns(nspecmax,nejc),
-     &            (cseapfns(nspecmax,nang),nang = 1,NDANG)
-              WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &            enepfns(nspecmax,nejc),(0.d0,nang = 1,NDANG)
-            ELSE
-              DO ie = 1, nspecmax - 1
-                WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &          enepfns(ie,nejc), csepfns(ie,nejc)
-              ENDDO
-              WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &        enepfns(nspecmax,nejc), csepfns(nspecmax,nejc)
-              WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &        emiss_en(nspecmax), 0.d0
-            endif
-            WRITE (12,*) ' '
-            WRITE (8,*)
-            WRITE (8,*)
-            WRITE (8,
-     &   '('' Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
+      WRITE (8,
+     & '('' Number of fissioning nuclei '',I3,'' at Elab '',F9.5)')
      &      nfission, EINl
-         ENDDO ! over ejectiles
-      ELSE
-         WRITE (12,*) ' '
-      ENDIF ! if TOTcsfis > 0
+
+      WRITE (12,*) ' '
 C-----
 C-----ENDF spectra inclusive representation
 C-----
@@ -3197,13 +2814,6 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF(FISspe.GT.0) THEN
-C    &        '(1X,f9.5,1x,f8.3,4(1x,f7.3))')
-              WRITE(74,
-     &        '(1X,f9.5,1x,d12.6,4(1x,d12.6))')
-     &             EINl, eaverage, fniuS, fniuEVAL, tequiv
-      ENDIF
-
       IF (.NOT.EXClusiv) THEN
 C--------Print spectra of residues
          reactionx = '(z,x)  '
@@ -3217,7 +2827,7 @@ C--------Print inclusive gamma spectrum
          WRITE (12,*) ' '
          WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
          WRITE (12,*) ' '
-         WRITE (12,'(''   Energy    mb/MeV'')')
+         WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3270,7 +2880,7 @@ C             Subtract HMS contribution to CM emission spectrum
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3345,7 +2955,7 @@ C             Subtract HMS contribution to CM emission spectrum
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
           WRITE (12,*) ' '
-          WRITE (12,'('' Energy    mb/MeV'')')
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3404,7 +3014,7 @@ C--------alphas
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
           WRITE (12,*) ' '
-          WRITE (12,'(''   Energy    mb/MeV'')')
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
 
           DO ie = 1, nspec - 1
@@ -3438,7 +3048,7 @@ C--------deuterons
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
           WRITE (12,*) ' '
-          WRITE (12,'(''   Energy    mb/MeV'')')
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3470,8 +3080,8 @@ C--------tritons
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
-            WRITE (12,*) ' '
-          WRITE (12,'(''   Energy    mb/MeV'')')
+          WRITE (12,*) ' '
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3504,7 +3114,7 @@ C--------helium-3
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
           WRITE (12,*) ' '
-          WRITE (12,'(''   Energy    mb/MeV'')')
+          WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
@@ -3539,7 +3149,7 @@ C--------light ions
      &'(''  Spectrum of  '',I1,''-'',A2,4X,A5,I7,''(LI,x)'')')
      &INT(AEJc(NDEJC)), SYMbe(NDEJC), ' ZAP=', IZAejc(NDEJC)
              WRITE (12,*) ' '
-             WRITE (12,'(''   Energy    mb/MeV'')')
+             WRITE (12,'(''    Energy    mb/MeV'')')
              WRITE (12,*) ' '
              DO ie = 1, nspec - 1
                WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
