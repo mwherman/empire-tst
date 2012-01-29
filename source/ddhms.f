@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2345 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2370 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 00:02:52 +0100 (Mo, 30 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2345 $
+C CVS Version Management $Revision: 2370 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -168,7 +168,7 @@ C     DOUBLE PRECISION DABS, DACOS, DATAN2, DMAX1, DMOD, DSQRT
       DOUBLE PRECISION perloang
       INTEGER matex(0:ndim_zem,0:ndim_nem), inxr 
       INTEGER i, jbin, jsweep, jexist, jtrans, mrecbin, n, nem, nubin
-      INTEGER nebinchan, nebinlab, nebtotchan, nth, nthlab
+      INTEGER nebinchan, nebinlab, nth, nthlab
       INTEGER jndx,jstudy,jzdiff,jndiff, jzx, jnx
       INTEGER indx(0:200)
       INTEGER nloang, ncmbin
@@ -2460,7 +2460,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2345 $')
+99005 FORMAT ('  xddhms version: $Revision: 2370 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
