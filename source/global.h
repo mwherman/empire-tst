@@ -1,6 +1,6 @@
-C $Rev: 2345 $
-C $Author: bcarlson $
-C $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
+C $Rev: 2365 $
+C $Author: rcapote $
+C $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -54,7 +54,7 @@ C
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
      &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
-     &                 VNIu_eval(NDECSE) 
+     &                 VNIu_eval(NDECSE),PFNtke,PFNalp,PFNrat,PFNniu 
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -135,7 +135,7 @@ C
      &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
      &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
-     &                 VSO(0:ndejc,0:ndnuc), WIMag(3),
+     &                 VSO(0:ndejc,0:ndnuc), WIMag(NFHUMP-1,3),
      &                 WOMs(0:ndejc,0:ndnuc),
      &                 WOMv(0:ndejc,0:ndnuc),
      &                 WSO(0:ndejc,0:ndnuc), XJLv(ndlv,0:ndnuc),
@@ -190,7 +190,8 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, ENIu_eval, VNIu_eval
+     &                 rELAred, ENIu_eval, VNIu_eval, PFNtke, PFNalp,
+     &                 PFNrat, PFNniu
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -224,7 +225,7 @@ C
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
      &                  NUBarread
-	 COMMON /GSA   / KEY_shape, KEY_gdrgfl
+       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
       COMMON /NUMHLP_R/ EXPmax, EXPdec

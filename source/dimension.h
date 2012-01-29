@@ -1,8 +1,8 @@
       PARAMETER(
-     * NDNUC= 200
-     *,NDEXCLUS = 15
+     * NDNUC= 20
+     *,NDEXCLUS = 10
      *,NDEJC=6
-     *,NDEX= 121
+     *,NDEX= 101
      *,NDLW= 40
      *,LEVCC=20
      *,NDLV=40
@@ -14,8 +14,8 @@ C    unless you REALLY know what you are doing.
 C    You may render the code unusable.
 C
      *,NDZMAX=110
-     *,NDECSE=NDEX+50
-     *,NDEPFN=2*NDEX     
+     *,NDECSE=NDEX+30
+     *,NDEPFN=251     
      *,NDANGecis=91
      *,NDAnghmx=37   ! Must be equal to NDAnghms in ddhms.cmb
      *,NDNUCD=NDNUC

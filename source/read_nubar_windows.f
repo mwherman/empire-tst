@@ -1,26 +1,14 @@
-Ccc   * $Rev: 2355 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-28 09:34:54 +0100 (Sat, 28 Jan 2012) $
-C
-C     A new Windows only source file read_nubar_windows.f 
-C
-C     Contains:
-C       1) An empty subroutine READNUBAR(infile,nin) that avoids
-C          compilation errors of IO package in Windows
-C
-C       2) A replacement function fniu_nubar_eval(eincid)
-C          that calculates the nubar from Th-232 nubar 
-C          evaluation (0-60 MeV). It is designed to test 
-C          PFNS calculations
 
       SUBROUTINE READNUBAR(infile,nin)
 
-      integer*4, intent(in) :: nin
-      character*200, intent(in) :: infile
-
+      integer nin
+      character*200 infile
+C     to avoid compiler warnings 
+      infile = ' Fake call'
+      nin    = 10 
       return      
       END
-                                  
+
       real*8 FUNCTION fniu_nubar_eval(en)
       implicit real*8 (A-H,O-Z)
       real*8 Eniu(20),Vniu(20),en
@@ -35,14 +23,19 @@ C          PFNS calculations
      & 6.4284D0, 6.8801D0, 7.3217D0, 7.7434D0, 8.1242D0, 8.5053D0/
 
       fniu_nubar_eval = Vniu(1)
-
       if(en.lt.1.d-11) RETURN
 
-      if(en.gt.60) STOP 'En > 60 MeV, NO NUBAR data for testing'
+c     if(en.gt.60) STOP 'En & 60 MeV, NO PFNM data'
+      if(en.gt.60.d0) THEN
+        WRITE(8,*) ' ERROR: Einc > 60 MeV in NUBAR calculation'
+        STOP ' ERROR: Einc > 60 MeV in NUBAR calculation'
+	endif
+
       do i=1,20
         if(Eniu(i).gt.en) exit
       enddo
       fniu_nubar_eval = Vniu(i-1) +
      &   (Vniu(i)-Vniu(i-1))*(en-Eniu(i-1))/(Eniu(i)-Eniu(i-1))
+
       return
       end

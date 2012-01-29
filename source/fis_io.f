@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2353 $
+Ccc   * $Rev: 2365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-28 05:14:30 +0100 (Sa, 28 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -116,7 +116,7 @@ C-----FISBAR(Nnuc)= 0 Empire internal library
          STOP ' FATAL: Internal fission barriers can not be retrieved'
       ENDIF
 C
-C-----FISBAR(Nnuc)= 1 RIPL "experimental" values for humps' heights and widths
+C-----FISBAR(Nnuc)= 1 RIPL "empirical" values for humps' heights and widths
 C-----wells' parameters provided by code
       IF (FISbar(Nnuc).EQ.1.) THEN
          OPEN (52,FILE = trim(EMPiredir)//'/RIPL/fission'
@@ -128,9 +128,9 @@ C-----wells' parameters provided by code
   150    READ (52,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))',!,f9.3)'
      &     ERR = 200, END = 200) kz, ka, dd,dd,EFB(1),H(1,1), 
      &     dd,EFB(2),H(1,2)
-C         write (*,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))' )!,f9.3)'
-C     &     kz, ka, dd,dd,EFB(1),H(1,1), 
-C     &     dd,EFB(2),H(1,2)        
+c         write (*,'(2i4,1x,a2,1x,2(3x,a2,2f8.2))' )!,f9.3)'
+c     &     kz, ka, dd,dd,EFB(1),H(1,1), 
+c     &     dd,EFB(2),H(1,2)        
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 150        
          CLOSE (52)
 
@@ -194,8 +194,6 @@ c-----                ../data/HFB-fisbar.dat (default)
 C
 C-----FISBAR(Nnuc)=3.  RIPL-3 HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
-         FISOPT=0.
-         FISDIS=0.
          WRITE (filename,99900)iz
 99900    FORMAT ('/RIPL/fission/HFB2007/z',i3.3,'.tab')
          OPEN (UNIT = 52,FILE = trim(EMPiredir)//trim(filename)
@@ -415,10 +413,11 @@ C-----h**2/2J from RIPL
          HJ(Nnuc,4) = 0.0035
          HJ(Nnuc,5) = 0.0020
       ENDIF
-      WIMag(1) = 1.
-      WIMag(2) = 0.1
-      WIMag(3) = 0.1
-
+      DO iw=1,NRWel
+         WIMag(iw,1) = 0.02
+         WIMag(iw,2) = 0.0001
+         WIMag(iw,3) = 0.02
+      ENDDO
 
 
 C================  level densities at saddles  ===============================
@@ -453,6 +452,26 @@ C--------multiplier of atil
          vibfdt(ib) = 0.1d0
          vibfnorm(ib)= 1.d0
       ENDDO
+
+      IF(FISmod(Nnuc).GT.0)THEN
+         efbm(1)=efb(2)+2.0
+         efbm(2)=efb(2)
+         efbm(3)=efb(2)+0.1
+         hm(1,1)= 1.2
+         hm(1,2)=h(1,1)
+         hm(1,3)=h(1,1)
+         DO m=1,int(FISmod(Nnuc))+1
+            DO nr = 1, NRFdis(2)
+               EFDism(nr,m)= EFDis(nr,2)
+               HM(nr,m)=HM(1,m)
+            ENDDO
+            SHCfism(m)=SHCfis(2)
+            DELtafism(m)=DELtafis(2)
+            GAMmafism(m)=GAMmafis(2)
+            AFIsm(m)=AFIs(2)
+            ECFism(m)=ECFis(2)
+         ENDDO
+      ENDIF  
 c=================================================================
 C---- writing data in FISSION.INP
       WRITE (79,'(a8)') 'Isotope:'
@@ -559,7 +578,9 @@ c
      & FISOPT>0'
       WRITE (79,*)chstar
       WRITE (79,*) '      W0         W1         W2'
-      WRITE (79,'(3f11.4)') (WIMag(i),i = 1,3)
+      DO iw=1,NRWel
+         WRITE (79,'(3f11.4)') (WIMag(iw,i),i = 1,3)
+      ENDDO  
       WRITE (79,*)
       WRITE (79,*)chstar
       WRITE (79,*)' Discrete transitional states'
@@ -594,13 +615,13 @@ c
       ENDDO
       WRITE (79,*)
       WRITE (79,*)chstar
-      WRITE (79,*)' Quantities used only if FISDEN<=1 to calculate LD at
+      WRITE (79,*)' Quantities used only if FISDEN=0 to calculate LD at
      & saddles'
       WRITE (79,*)chstar
       WRITE (79,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
      &             4x,a6)')
      &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
-     &          'Ecf','VIB1/2','VIBdt','VIBnor'
+     &          'Ecf','VIB1/2','VIBdt','BarNor'
       DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
@@ -610,16 +631,17 @@ c
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
-                  WRITE (79,'(1x, A8, 1x, I1, 2x, I1, 1x, I1, 5f9.3)')
+                  WRITE (79,'(1x, A8, 1x, I1, 2x, I1, 1x, I1, 8f9.3)')
      &                  'Barrier', nr, m, BFFm(m), SHCfism(m),
      &                   DELtafism(m), GAMmafism(m), AFIsm(2), ECFism(m)
+     &                   ,vibf12(2),vibfdt(2),vibfnorm(2)
                ENDDO
             ENDIF
       ENDDO
       WRITE (79,*)
 
       WRITE (79,*)chstar
-      WRITE (79,*)'  Coefficients used only if FISDEN=2 to adjust HFB LD
+      WRITE (79,*)'  Coefficients used only if FISDEN=3 to adjust HFB LD
      & at saddles '
       WRITE (79,*)chstar
       WRITE (79,*) '            Asym    Delta    alpha   Norm'
@@ -762,7 +784,9 @@ c
       READ (79,' (/)',ERR=385,END=385)
       READ (79,*,ERR=385,END=385) (DEFfis(i),i = 1,NRBar)
       READ (79,'(////)',ERR=385,END=385)
-      READ (79,'(3f11.4)',ERR=385,END=385) (WIMag(i),i = 1,3)
+      DO iw=1,NRWel
+         READ (79,'(3f11.4)',ERR=385,END=385) (WIMag(iw,i),i = 1,3)
+      ENDDO
       READ (79,'(///)',ERR=385,END=385)
 
       DO ibar = 1, NRBar
@@ -787,25 +811,25 @@ c
       ENDDO
       READ (79,*,ERR=385,END=385)
 
-C-----FISDEN(Nnuc)= 0 EGSM
-C-----FISDEN(Nnuc)= 1 GSM(Ignatyuk - to be tested)
-C-----FISDEN(Nnuc)= 2 HFB
+C-----FISDEN(Nnuc)= 0 EMPIRE
+C-----FISDEN(Nnuc)= 3 HFB
 
       IF(FISDEN(Nnuc).LE.1)THEN
          READ (79,'(///)',ERR=385,END=385)
          DO ib = 1, nrhump
             IF (FISmod(Nnuc).EQ.0. .OR.
-     &          (FISmod(Nnuc).GT.0. .AND. ibar.NE.2)) THEN
+     &          (FISmod(Nnuc).GT.0. .AND. ib.NE.2)) THEN
                 READ (79,'(10x,  I1,4x, I1, 8f9.3)',ERR=385,END=385)  i,
      &          BFF(ib), SHCfis(ib), DELtafis(ib), GAMmafis(ib),
      &          AFIs(ib),ECFis(ib),vibf12(ib),vibfdt(ib),vibfnorm(ib)
              ENDIF
              IF (FISmod(Nnuc).GT.0. .AND. ib.EQ.2) THEN
                DO m = 1, nrmod
-                  READ (79,'(10x, I1, 2x, I1, 1x, I1, 5f9.3)',ERR=385,
+                  READ (79,'(10x, I1, 2x, I1, 1x, I1, 8f9.3)',ERR=385,
      &                  END=385) i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
-     &                  AFIsm(m), ECFism(m)
+     &                  AFIsm(m), ECFism(m),!!!!!!!!!!!!!!!!!!!!!!!!!!
+     &                             vibf12(ib),vibfdt(ib),vibfnorm(ib)
                ENDDO
             ENDIF
          ENDDO
@@ -815,7 +839,7 @@ C-----FISDEN(Nnuc)= 2 HFB
 c         READ (79,*)
       ENDIF
 
-      IF(FISDEN(Nnuc).EQ.2)THEN
+      IF(FISDEN(Nnuc).EQ.3)THEN
          IF(NRHump.EQ.1)READ (79,'(/////////)',ERR=385,END=385)
          IF(NRHump.EQ.2)READ (79,'(//////////)',ERR=385,END=385)
          IF(NRHump.EQ.3)READ (79,'(///////////)',ERR=385,END=385)
@@ -913,7 +937,7 @@ c      EFB(1) = EFB(1) * FISbin (Nnuc)
       ENDDO
       ENDIF
 
-      IF(FISbar(Nnuc).LE.2.)CALL DEFO_FIS(Nnuc)
+      IF(FISbar(Nnuc).LE.2.AND.FISmod(Nnuc).EQ.0.)CALL DEFO_FIS(Nnuc)
 
       RETURN
       END
@@ -1127,8 +1151,8 @@ C
       WRITE (80,'(a8,f2.0,a36)') ' FISBAR = ', FISbar(Nnuc),cara1
 
       IF (FISden(Nnuc).EQ.0.) cara1 = '  RIPL-3  EGSM LD               '
-      IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD               '
-      IF (FISden(Nnuc).EQ.2.) cara1 = '  RIPL-3  HFB microscopic LD    '
+c      IF (FISden(Nnuc).EQ.1.) cara1 = '  Ignatyuk GSM LD               '
+      IF (FISden(Nnuc).EQ.3.) cara1 = '  RIPL-3  HFB microscopic LD    '
       WRITE (80,'(a8,f2.0,a36)') ' FISDEN = ', FISden(Nnuc), cara1
 
       IF (FISopt(Nnuc).EQ.0.) cara1 = '  Full damping model (Ind.Barr.)'
@@ -1252,7 +1276,9 @@ c      ENDIF
 
       IF(FISOPT(Nnuc).GT.0)THEN
          WRITE (80,*) '      W0         W1         W2'
-         WRITE (80,'(3f11.4)') (WIMag(i),i = 1,3)
+         DO iw=1,NRWel
+            WRITE (80,'(3f11.4)') (WIMag(iw,i),i = 1,3)
+         ENDDO
          WRITE (80,*)
       ENDIF
 
@@ -1296,7 +1322,7 @@ c
          WRITE (80,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
      &             4x,a6)')
      &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
-     &          'Ecf','VIB1/2','VIBdt','VIBnor'
+     &          'Ecf','VIB1/2','VIBdt','BarNor'
 
          DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
@@ -1326,7 +1352,7 @@ c
          WRITE (80,*)
       ENDIF
 
-      IF(FISDEN(Nnuc).EQ.2)THEN
+      IF(FISDEN(Nnuc).EQ.3)THEN
          WRITE (80,*)'Normalization factors for HFB LD'
          WRITE (80,*) '                   Delta    alpha   Norm'
          DO ih = 1, nrhump

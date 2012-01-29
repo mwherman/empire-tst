@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2334 $
+Ccc   * $Rev: 2365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2834,11 +2834,11 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
-               WRITE (1,'(i5,5x,6f10.5)') INT(D_Xjlv(j)), D_Def(j,2)
+               WRITE (1,'(i5,5x,6f10.5)') INT(D_Xjlv(j)),ABS(D_Def(j,2))
             ELSE
 C--------------only one phonon states need deformations as input
                IF (IPH(j).EQ.1) WRITE (1,'(i5,5x,6f10.5)')
-     &                                 INT(D_Xjlv(j)), D_Def(j,2)
+     &                                 INT(D_Xjlv(j)), ABS(D_Def(j,2))
             ENDIF
          ENDDO
       ENDIF
@@ -3466,7 +3466,7 @@ C--------L_PHO(lev(j))  = IPH(j)
 C--------L3_pho(lev(j)) = 0
          DO j = 1, npho
             WRITE (1,'(2i5,6f10.5)') INT(D_Llv(lev(j)) + 0.1),
-     &      INT(D_Klv(lev(j))+ 0.1),D_Def(lev(j),2)
+     &      INT(D_Klv(lev(j))+ 0.1),ABS(D_Def(lev(j),2))
          ENDDO
       ENDIF
 C-----Deformation of rotational band (only ground state band is present)

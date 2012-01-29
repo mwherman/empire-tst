@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2258 $
+Ccc   * $Rev: 2365 $
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2012-01-20 04:42:28 +0100 (Fr, 20 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 Ccc   * $Id$
             
 c     NOTE UNITS OPENED IN MODULES
@@ -28,7 +28,7 @@ c     19     input,MSD-Orion
 c     20     input,MSD-Orion
 c     21     input
 c     22     input
-c     23     free
+c     23     main.f
 c     24     io.h
 c     25     (seems to be used but don't know where)
 c     26     empire-ctrl, main

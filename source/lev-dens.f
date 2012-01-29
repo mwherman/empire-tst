@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -62,7 +62,7 @@ C
       pi2 = PI*PI
       BF = 1.0
       IF (Cf.NE.0.0D0) BF = 0.0D0
-      A23 = A(Nnuc)**0.666667
+      A23 = A(Nnuc)**0.666667d0
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
       in = ia - iz
@@ -1181,7 +1181,7 @@ C-----according to Myers&Swiatecki, Phys. Rev. C60(1999)014606
             x1 = 34.15
             xi = (A(Nnuc) - 2*Z(Nnuc))/A(Nnuc)
             xk = 1.9 + (Z(Nnuc) - 80.0)/75.0
-            s = A(Nnuc)**0.666667*(1.0 - xk*xi**2)
+            s = A(Nnuc)**0.666667d0*(1.0 - xk*xi**2)
             x = Z(Nnuc)**2/A(Nnuc)/(1.0 - xk*xi**2)
             fx = 0.0
             IF (x.LE.x0 .AND. x.GE.x1) fx = 0.000199749*(x0 - x)**3
@@ -1331,6 +1331,7 @@ C-----next call prepares for lev. dens. calculations
       CALL PRERO(Nnuc)
 
       amas = A(Nnuc)
+      A23 = A(Nnuc)**0.666667d0
       igna = 0
       ro_pi=0.5
 C-----zero potentially undefined variables
@@ -1361,7 +1362,7 @@ C--------next line assures normalization to experimental data (on average)
 C-----Mebel's  parametrization (taken from the INC code for the case
 C-----of no collective enhancements) normalized to existing exp. data
       IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
-         atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
+         atil = 0.114*A(Nnuc) + 9.80E-2*A23
 C--------next line assures normalization to experimental data (on average)
          atil = atil*ATIlnor(Nnuc)
          GAMma = -0.051d0
@@ -1451,7 +1452,7 @@ C           write(*,*) am, 6/t, atil
 C-----RCN 12/2004 
 C-----IF(Scutf.LT.0.0D0)sigh calculated according to Dilg's recommendations
 C-----0.6079 = 6/pi^2   a=6/pi^2*g  sig^2 = <m^2>gt  Scutf = <m^2>
-      sigh = Scutf*0.6079*amas**0.6666667*SQRT(ux*am)
+      sigh = Scutf*0.6079*A23*SQRT(ux*am)
 C
 C-----determination of the index in EX-array such that EX(IG,.).LT.EXL
 C-----(low-energy level density formula is used up to IG)
@@ -1536,7 +1537,7 @@ C
             UEXcit(i,Nnuc) = MAX(u,0.D0)
             TNUc(i,Nnuc) = SQRT(u/am)
 C-----------Dilg's recommendations
-            SIG = Scutf*0.6079*amas**0.6666667*SQRT(u*am)
+            SIG = Scutf*0.6079*A23*SQRT(u*am)
             arg = 2.*SQRT(am*u)
             IF (arg.LE.EXPmax) THEN
                ro_u = DEXP(arg)/(12.*SQRT(2*SIG))/am**0.25/u**1.25
@@ -1690,8 +1691,8 @@ C
             ENDDO
          ENDDO
       ENDDO
-      WRITE (filename,99985) iz
-99985 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
+      WRITE (filename,99005) iz
+99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
       OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2
@@ -2572,8 +2573,8 @@ C-----where continuum starts,ends,steps in between
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
       in = ia - iz
-
-      mm2 = 0.24 * A(Nnuc)**0.666667
+      A23 = A(Nnuc)**0.666667d0
+      mm2 = 0.24 * A23
       r0=1.24
       iff = 1
 
@@ -2583,7 +2584,6 @@ C-----EMPIRE-3.0-dependence
 
       IF (Mmod.EQ.0) THEN
          GAMma = GAMmafis(Ib)
-c         DELp=deltafis(ib)
          dshiff=deltafis(ib)
          shcf = SHCfis(Ib)
          iff = BFF(Ib)
@@ -2676,23 +2676,19 @@ C-----dependent factor
      &                  mompar,temp,def2,vibbf12,vibbfdt,vn)  
             ENDIF
 c-----------SYMMETRY ENHANCEMENT
-
 c-----------The normal GS is axial and mass symmetric
 
 c-----------Nonaxial symmetry with mass symmetry
-
             IF (Iff.EQ.2) rotemp =
      &             rotemp * SQRT(pi/2.) * SQRT(mompar * temp)
 c---------- Axial symmetry with mass asymmetry
-
             IF (Iff.EQ.3) rotemp = rotemp * 2.d0
 c
-
             ROFis(kk,jj,Ib) = rotemp
             ROFisp(kk,jj,1,Ib) = rotemp
             ROFisp(kk,jj,2,Ib) = rotemp
 
-            IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp ! to be updated
+            IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp 
          ENDDO
       ENDDO
 
@@ -2825,30 +2821,20 @@ C Local variables
       
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
-      A23 = float(ia)**0.666667
-
-      A13 = float(ia)**0.666667
+      A23 = float(ia)**0.666667d0
+      A13 = float(ia)**0.333333d0
 
 
       arobn = atil_ig(Nnuc)
       delp  = delp_ig(Nnuc) 
-
-
       om2   = om2_ig(Nnuc)
-
       if(om2.LE.0.d0) om2 = 30./float(ia)**.66666
 
-
-
       dshif = dshift_ig(Nnuc)
-
       if(arobn.LE.0.d0) dshif=0.617-0.00164*float(ia)
-
-
 
       gamm = 0.375
       gamma = gamm/A13
-
 
       om3 = 50./A23
       cga =.0075*A13
@@ -2856,16 +2842,12 @@ C Local variables
       AP1=0.103
       AP2=-0.105
 
-
       delp = 12./SQRT(A(nnuc))
       del = 0.d0
       IF (MOD((ia-iz),2).NE.0.0D0) del = delp
       IF (MOD(iz,2).NE.0.0D0) del = del + delp
 
-
       del = del + dshif
-
-
       RETURN
       END
  

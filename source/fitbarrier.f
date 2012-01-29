@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -17,6 +17,9 @@ C
 
       COMMON /VBAR  / vbarex, ho,faza2
       REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
+
+      COMMON/INTER/  einters
+      REAL*8 Einters(2*NFPARAB)
 
       DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
       DOUBLE PRECISION ee,uexc
@@ -92,21 +95,12 @@ C-------Imaginary potential strengths
       DO iw = 2, nrbar,2
          deltt(iw) = 0.d0
          dmom = max(Vheigth(iw-1),Vheigth(iw+1))
-c         W = wimag(1)*2.d0 * (Ee - Vheigth(iw)) /
-c     &       ((dmom - Vheigth(iw)) *
-c     &       (1.d0 + (1.d0/wimag(1))*  ! to get w(2) and w(3)
-c     &        dexp( - (Ee - dmom) / wimag(iw/2+1)))) 
 
-c         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
-c     &              wimag(3)*(Ee - Vheigth(iw))**2
-cc         IF(iw.eq.2)w = wimag(1)+wimag(3)*(Ee - Vheigth(iw))
-cc         IF(iw.eq.4)w = wimag(2)+wimag(3)*(Ee - Vheigth(iw))
-         w = wimag(1)+wimag(2)*(Ee - Vheigth(iw))+
-     &              wimag(3)*dexp(Ee - dmom)
+         w = wimag(iw/2,1)+wimag(iw/2,2)*(Ee - Vheigth(iw))+
+     &             wimag(iw/2,3)* dexp(Ee - dmom)
 
-
-         if(Ee.le. Vheigth(iw)) W = 0.d0
-c         if(Ee.gt. dmom) W = 1.d0          
+         if(Ee.le. Vheigth(iw)) W = 0.d0 
+         if(Ee.gt. dmom.and.w.lt.1.d0) W = w+(Ee-dmom)*(1.d0-w)/0.1   
          if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
          deltt(iw) = W * phase(iw)
       ENDDO
@@ -129,6 +123,117 @@ c-----Direct transmission coefficients
             IF(ih.EQ.ih1) tdirp(ih, ih1) = tfdd(ih)
          ENDDO
       ENDDO
+C-----subwell excitation energy      
+      IF(NRWel.EQ.1.AND.Ee.LT.Vheigth(2)) THEN
+         tabsp(1,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(6)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,2) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+      ENDIF
+      IF(NRWel.EQ.2.AND.Ee.LT.Vheigth(2).AND.Ee.LT.Vheigth(4)) THEN
+         tabsp(1,2)=0.d0
+         tabsp(1,3)=0.d0
+         tabsp(2,3)=0.d0
+         tabsp(3,2)=0.d0
+         tdirp(1,2)=0.d0
+         tdirp(2,1)=0.d0
+         tdirp(2,3)=0.d0
+         tdirp(3,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(10)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         RETURN
+      ENDIF
+      IF(NRWel.EQ.2.AND.Ee.GT.Vheigth(2).AND.Ee.LT.Vheigth(4)) THEN
+         tabsp(1,3)=0.d0
+         tabsp(3,2)=0.d0
+         tabsp(2,3)=0.d0
+         tdirp(1,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3))
+            epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
+         ELSE
+            epsa=einters(5)
+            epsb=einters(10)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(2,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         tdirp(3,2)=tdirp(2,3)
+         dmom = (1.d0 - tdirp(1,1)) * (1.d0 - tdirp(2,3))
+         tdirp(1,3) = tdirp(1,1) *  tdirp(2,3)/
+     &                (exp2del(2) + 2.d0 * dSQRT(dmom) *
+     &                dCOS(2.d0 * phasep(2)) +
+     &                dmom * exm2del(2))
+         tabsp(1,2) = tdirp(1,3) * (exp2del(2)
+     &                           - (1.d0 - tdirp(2,3)) *
+     &                           exm2del(2) -
+     &                           tdirp(2,3)) /tdirp(2,3) 
+         RETURN
+      ENDIF
+      IF(NRWel.EQ.2.AND.Ee.LT.Vheigth(2).AND.Ee.GT.Vheigth(4)) THEN
+         tabsp(1,2)=0.d0
+         tabsp(3,2)=0.d0
+         tabsp(2,3)=0.d0
+         tdirp(2,3)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(6)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,2) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         tdirp(2,1)=tdirp(1,2)
+
+         dmom = (1.d0 - tdirp(1,2)) * (1.d0 - tdirp(3,3))
+         tdirp(1,3) = tdirp(1,2) *  tdirp(3,3)/
+     &                (exp2del(3) + 2.d0 * dSQRT(dmom) *
+     &                dCOS(2.d0 * phasep(3)) +
+     &                dmom * exm2del(3))
+         tabsp(1,3) = tdirp(1,3) * (exp2del(3)
+     &                           - (1.d0 - tdirp(3,3)) *
+     &                           exm2del(3) -
+     &                           tdirp(3,3)) /tdirp(3,3)       
+         RETURN
+      ENDIF
+
 c-----direct forward
       DO ih1 = nrhump, 2, -1
          DO ih = ih1 - 1, 1, -1
@@ -158,22 +263,6 @@ c-----direct backward
      &                          dmom * exm2del(ih + 1))
          ENDDO
       ENDDO
-c-----to be generalized, valid now only for Th like cases
-      IF(ee.LE.Vheigth(4))THEN
-         epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/
-     &                   (SMIu*Vwidth(3))
-                  epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/
-     &                   (SMIu*Vwidth(5))
-                  dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
-                  IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-                     write(*,*) ' WARNING: For extremum ',k,
-     &                       ' phase integral is not accurate (',
-     &                  sngl(abserr/dmom*100.d0),' %)'
-                  ENDIF
-                  phase_sub = min(dmom,50.d0)
-                  tdirp(2,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
-                  tdirp(3,2)=tdirp(2,3)
-      ENDIF
 
 c--------Absorption coefficients
 c--------forward
@@ -227,8 +316,9 @@ C================================================================
 
 
       COMMON /VBAR  / vbarex, ho,faza2
-      COMMON/ PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
+      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
       COMMON /VARGS/ Uexc, Smiu_p, Kbarr
+       COMMON/INTER/  einters
 
       REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
       REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
@@ -364,10 +454,15 @@ C COMMON variables
  
       REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
      &       HO(NFPARAB), uexc,smiu_p,eps
+C
+C     , Einters(2*NFPARAB)
       INTEGER j
 C
 C     calculation of the deformation potential energy
       VDEF = 0.D0
+C
+C      Commented by MS, to be adressed in the bright future (post 3.1 Rivoli :-)
+C
 c      IF (Eps.LE.EJOin(2)) THEN
 c         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
 c         RETURN
@@ -376,7 +471,7 @@ c      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
 c         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
 c         RETURN
 c      ENDIF
-
+c
 c      DO j = 2, NRBar - 1
       DO j = 1, NRBar
          IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) THEN

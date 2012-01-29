@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2349 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 22:58:52 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Rev: 2365 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1346,26 +1346,13 @@ c-----initialization
          IF(BFF(ibar).EQ.2)enh_asym(ibar)= 2.d0*snc+1.d0
          IF(BFF(ibar).EQ.3)enh_asym(ibar)=2.d0
       ENDDO
+      enh = enh_asym(1)
+      DO ih = 2, nrhump
+         IF(enh_asym(ih).LT.enh)enh=enh_asym(ih)
+      ENDDO   
 
 CCC Discrete transition states contribution
-
-      IF(FISbar(Nnuc).EQ.3.)THEN
-
-c-------numerical barrier from RIPL-3; gs is the only discrete transition state
-        IF (Jc.EQ.1 .AND. Ip.EQ.1) THEN
-          DO ibar = 1, NRBar
-             VBArex(ibar) = EFB(ibar)
-c            CALL WKBFIS(Ee, nnuc, tfdis, tdirp,tabsp)
-             arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(1,Ibar)
-             IF (arg1.GE.EXPmax) arg1 = EXPmax
-             TFDis(ibar)= 1.d0/(1.d0 + EXP(arg1))
-          ENDDO
-        ENDIF
-
-      ELSE
-
-c-------parabolic barriers
-        DO nr = 1, NRFdis(1)
+      DO nr = 1, NRFdis(1)
          sfmin = SFDis(nr,1)
          ist = 1
          IF (SFDis(nr,1).EQ.0.0 .AND. IPFdis(nr,1).EQ.1) THEN
@@ -1411,32 +1398,35 @@ c-----------------complete damping
                   DO ibar = 1, Nrhump
                      arg1 = 2*PI*(VBArex(Ibar) - Ee)/H(nr,Ibar)
                      IF (arg1.GE.EXPmax) arg1 = EXPmax
-                     TFD(ibar)= 1.d0*enh_asym(ibar)/(1.d0 + EXP(arg1))
+                     TFD(ibar)= 1.d0/(1.d0 + EXP(arg1))
                   ENDDO
 
                ELSE
 
 c-----------------partial damping
-                  IF(FISbar(Nnuc).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
+c                 IF(FISbar(Nnuc).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
                   CALL WKBFIS(Ee, nnuc, tfd, tdirp,tabsp)
 c-----------------forward absorption coefficients
                   DO iw = 1, nrwel
-                   DO iw1 = iw + 1, nrwel + 1
-                     tabspp(iw, iw1) = tabspp(iw, iw1) + tabsp(iw, iw1)
-                   ENDDO
+                     DO iw1 = iw + 1, nrwel + 1
+                        tabspp(iw, iw1) = tabspp(iw, iw1) + 
+     &                                    tabsp(iw, iw1)
+                     ENDDO
                   ENDDO
 c-----------------backward absorption coefficients
                   DO iw = nrwel + 1, 3, -1
-                   DO iw1 = iw -1, 2, -1
-                     tabspp(iw, iw1) = tabspp(iw, iw1) + tabsp(iw, iw1)
-                   ENDDO
+                     DO iw1 = iw -1, 2, -1
+                        tabspp(iw, iw1) = tabspp(iw, iw1) + 
+     &                                    tabsp(iw, iw1)
+                     ENDDO
                   ENDDO
 c-----------------direct transmission coefficient
                   DO ih = 1, nrhump
-                   DO ih1 = 1, nrhump
-                     IF(tdirp(ih, ih1).LT.1D-29)tdirp(ih, ih1)=0.d0
-                     tdirpp(ih, ih1) = tdirpp(ih, ih1) + tdirp(ih, ih1)
-                   ENDDO
+                     DO ih1 = 1, nrhump
+                        IF(tdirp(ih, ih1).LT.1D-29)tdirp(ih, ih1)=0.d0
+                        tdirpp(ih, ih1) = tdirpp(ih, ih1) + 
+     &                                    tdirp(ih, ih1)
+                     ENDDO
                   ENDDO
 
                ENDIF ! PARTIAL OR FULL DAMPING
@@ -1448,8 +1438,6 @@ c-----------------direct transmission coefficient
          ENDDO
        ENDDO
       
-      ENDIF  ! NUMERICAL OR PARABOLIC BARRIERS for discrete states
-
 CCC   Continuum contribution
  700  IF(Ip.EQ.1)  ipa = 1
       IF(Ip.EQ.-1) ipa = 2
@@ -1494,17 +1482,13 @@ c
       ENDIF
 
 C     Continuum direct for surrogate optical model
-csinn      IF(wdir(1).eq.0..and.wdir(2).eq.0.) GOTO 809    
-csinn      CALL SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
+      IF(awf(1).eq.0..and.awf(2).eq.0.) GOTO 809    
+      CALL SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
 c-----adding weighted continuum direct
  809  DO ih = 1, nrhump
          tdirpp(ih, ih) = tf(ih)
       ENDDO
 
-      enh=1.d0
-      DO ih = 1, nrhump 
-         enh=enh * enh_asym(ih)
-      ENDDO   
  810  DO ih = 1, nrhump - 1
          tdirpp(ih, nrhump) = tdirpp(ih, nrhump) * enh +
      &                        tdircont(ih) * (1.d0 - wdir(ih + 1)) 
@@ -1556,7 +1540,6 @@ c--------normalization factor for the indirect terms
            ENDDO
          ENDDO
 c--------sumfis
-c        DO iw = 2, nrwel + 1
          DO iw = 1, nrwel+1 
            tindp = 0.d0
            DO iw1 = 2, nrwel + 1

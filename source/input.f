@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2355 $
+Ccc   * $Rev: 2365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-28 09:34:54 +0100 (Sa, 28 Jän 2012) $
+Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -268,19 +268,51 @@ C
          KTRompcc = 0
          SOFt = .FALSE.
          CCCalc = .FALSE.
-C    
-C        CHECKING and READING the NUBAR-EVAL.ENDF      
-         nubar_filename='NUBAR-EVAL.ENDF'
-         INQUIRE(FILE=nubar_filename,EXIST=NUBarread)
+C       
+         IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
-C        READING OF THE ENDF MF=1, MT=456 prompt nubar
-C        and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc) global arrays 
+C          CHECKING and READING the NUBAR-EVAL.ENDF      
+C
+           nubar_filename='NUBAR-EVAL.ENDF'
+           INQUIRE(FILE=nubar_filename,EXIST=NUBarread)
+C
+C          READING OF THE ENDF MF=1, MT=456 prompt nubar
+C          and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc)
+C          global arrays 
+C
+           IF(NUBarread) 
+     &       CALL READNUBAR(nubar_filename,len_trim(nubar_filename))
+C
+         ELSE                    !Windows
+C
+C          In Windows it is assumed that the NUBAR-EVAL.ENDF
+C          was found so NUBarread = .TRUE. 
+C
+C          A new Windows only source file read_nubar_windows.f is provided
+C
+C          It contains:
+C            1) An empty subroutine READNUBAR() that avoids
+C               compilation errors of IO package in Windows
+C
+C            2) A replacement function fniu_nubar_eval(eincid)
+C               that calculates the nubar from Th-232 nubar 
+C               evaluation (0-60 MeV). It is designed to test 
+C               PFNS calculations
+C
+           NUBarread = .TRUE.
+ 
+         ENDIF 
 
-         IF(NUBarread) 
-     &   CALL READNUBAR(nubar_filename,len_trim(nubar_filename))
-C      
-         NPRIm_g = 0       ! No primary gammas (default)        
+         NPRIm_g = 0       ! No primary gammas (default)
+C
+C        PFNS keywords
+C        
          FISspe = 0
+         PFNtke = 1.d0
+         PFNalp = 1.d0
+         PFNrat = 1.d0
+         PFNniu = 1.d0
+C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE. ! Default: All exclusive calculation
@@ -306,7 +338,7 @@ C--------set fission defaults
 C          FISbar(nnuc) = 3     ! RIPL-3 HFB barriers
 C
            FISden(nnuc) = 0     ! EGSM NLD at saddle points 
-C          FISden(nnuc) = 2     ! HFB NLD
+C          FISden(nnuc) = 3     ! HFB NLD
 C
            FISmod(nnuc) = 0     ! Single-modal fission
            FISopt(nnuc) = 0
@@ -1157,7 +1189,7 @@ c         ENDIF
          ENDIF
          IF (DIRect.GT.0 .AND. KTRompcc.EQ.0) THEN
             KTRompcc = KTRlom(0,0)
-	      DIRpot   = ABS(KTRompcc)
+            DIRpot   = ABS(KTRompcc)
             WRITE (8,*)
      &'WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
             WRITE (8,*)' WARNING: DIRPOT set to ',abs(KTRompcc)
@@ -2576,12 +2608,16 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
           WRITE(12,*)
           WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
-
         WRITE (12,*) '                                                '
-        WRITE (12,*) 'RESULTS                                         '
+        WRITE (12,*) 'RESULTS:                                        '
+        IF(FISspe.GT.0 .and. NUBarread) THEN
+        WRITE (12,*) 'MF=1                                            '                
+        WRITE (12,*) '   MT=456 nubar adopted from evaluated libraries'
+        ENDIF
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=3 Neutron cross sections                     '
         WRITE (12,*) '     EMPIRE calculations were adopted for:      '
+        WRITE (12,*) '                                                '
         WRITE (12,*) '   MT=1 Total                                   '
         WRITE (12,*) '   MT=2 Elastic scattering                      '
         WRITE (12,*) '   MT=4, 51-91 Inelastic scattering             '
@@ -2601,8 +2637,17 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
         WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '                                                '
-        WRITE (12,*) 'MF=4 Angular distributions of secondary neutrons'
+        WRITE (12,*) 'MF=4 Angular distributions                      '
         WRITE (12,*) '     EMPIRE calculations were adopted           '
+        WRITE (12,*) '                                                '
+        IF(FISspe.GT.0) THEN
+        WRITE (12,*) 'MF=5 Energy distributions                       '
+        WRITE (12,*) '   MT=18 PFNS: EMPIRE calculations using        '
+        IF(FISspe.eq.1) 
+     >  WRITE (12,*) '           Madland-Nix (Los Alamos) model  [MN] '
+        IF(FISspe.eq.2)
+     >  WRITE (12,*) '           Kornilov et al parameterization [KO] '
+        ENDIF
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
@@ -2626,6 +2671,16 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '           for data evaluation"                 '
         WRITE (12,*) '  Nuclear Data Sheets 108 (2007) 2655-2715      '
         WRITE (12,*) '                                                '
+        WRITE (12,*) '[EMP-man]                                       '
+        WRITE (12,*) '  M.Herman, R.Capote, A.Trkov, M.Sin, B.Carlson,'
+        WRITE (12,*) '  P.Oblozinsky, C.Mattoon, H.Wienke, S. Hoblit, '
+        WRITE (12,*) '  Young-Sik Cho, V. Plujko and V.Zerkin         '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) ' "EMPIRE: Modular system for nuclear reaction   '
+        WRITE (12,*) '     calculations and nuclear data evaluation", '
+        WRITE (12,*) ' Users'' manual, to be published as IAEA(Vienna)'
+        WRITE (12,*) '  and BNL(Upton,NY) technical reports, 2012     ' 
+        WRITE (12,*) '                                                '
         WRITE (12,*) '[RIPL]                                          '
         WRITE (12,*) '  R.Capote, M.Herman, P.Oblozinsky, P.G.Young,  '
         WRITE (12,*) '  S.Goriely, T.Belgya, A.V.Ignatyuk, A.J.Koning,'
@@ -2643,8 +2698,14 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '  Data available online at                      '
         WRITE (12,*) '   http://www-nds.iaea.org/RIPL-3/              '
         WRITE (12,*) '                                                '
-        WRITE (12,*) '************************************************'
+        WRITE (12,*) '[MN] D.G.Madland and J.R.Nix,                   '
+        WRITE (12,*) '     Nuc. Sci. Eng. 81, (1982) 213              '
         WRITE (12,*) '                                                '
+        WRITE (12,*) '[KK] N.V.Kornilov, A.B.Kagalenko, F.-J.Hambsch  '
+        WRITE (12,*) '     Phys. At. Nuclei 62 (1999) pp 173-185      '
+        WRITE (12,*) '                                                '
+        WRITE (12,*) '************************************************'
+        WRITE (12,*)
         WRITE (12,*)
 
         WRITE (8,*)
@@ -3445,7 +3506,7 @@ C
      &'('' Optical model parameters for direct inelastic scattering set
      & to RIPL #'',I4)') ipoten
              KTRompcc = ipoten
-	       KTRLOM(0,0) = ipoten
+             KTRLOM(0,0) = ipoten
              GOTO 100
          ENDIF
 C
@@ -3624,6 +3685,12 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'LEVDEN') THEN
+            IF(val.lt.0 .or. val.gt.3) THEN
+              WRITE (8,'('' ERROR: LEVDEN ='',I1)') NINT(val)
+              WRITE (8,
+     &    '('' ERROR: LEVDEN must be 0,1,2; default EGSM = 0 used '')')
+              GOTO 100
+            ENDIF
             ADIv = val
             IF (ADIv.EQ.0.0D0) WRITE (8,
      & '('' EMPIRE-specific level densities (J>>K aprox.) selected '')')
@@ -6130,7 +6197,10 @@ C--------checking for fission data in the optional input
             ELSEIF (val.EQ.2) THEN
                fstring = 'fission ignored'
             ELSE
-               fstring = 'illegal value for FISSHI'
+              WRITE (8,
+     &          '('' ERROR: FISSHI must be 0,1,2; default 0 used '')')
+              FISSHI = 0
+              GOTO 100
             ENDIF
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
@@ -6156,7 +6226,8 @@ C-----
          IF (name.EQ.'FISMOD') THEN
             IF(val.lt.0 .or. val.gt.2) THEN
               WRITE (8,'('' ERROR: FISMOD ='',I1)') NINT(val)
-              WRITE (8,'('' ERROR: WRONG FISMOD, SETTING IGNORED'')')
+              WRITE (8,
+     &          '('' ERROR: FISMOD must be 0,1,2; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6222,7 +6293,8 @@ C        FISopt(Nnuc).EQ.2. = '  Complex fission potential, isomeric fission'
          IF (name.EQ.'FISOPT') THEN
             IF(val.lt.0 .or. val.gt.2) THEN
               WRITE (8,'('' ERROR: FISOPT ='',I1)') NINT(val)
-              WRITE (8,'('' ERROR: WRONG FISOPT, SETTING IGNORED'')')
+              WRITE (8,
+     &          '('' ERROR: FISOPT must be 0,1,2; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6290,7 +6362,8 @@ C-----
          IF (name.EQ.'FISBAR') THEN
             IF(val.lt.0 .or. val.GT.3) THEN
               WRITE (8,'('' ERROR: FISBAR ='',I1)') NINT(val)
-              WRITE (8,'('' ERROR: WRONG FISBAR, SETTING IGNORED'')')
+              WRITE (8,
+     &          '('' ERROR: FISBAR must be 0,1,2,3; default 1 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6380,12 +6453,13 @@ C
          ENDIF
 C--------
 C--------FISDEN(Nnuc)= 0 EMPIRE
-C--------FISDEN(Nnuc)= 2 HFB
+C--------FISDEN(Nnuc)= 3 HFB
 C        
          IF (name.EQ.'FISDEN') THEN
-            IF(val.ne.0 .and. val.ne.2) THEN
+            IF(val.ne.0 .and. val.ne.3) THEN
               WRITE (8,'('' ERROR: FISDEN ='',I1)') NINT(val)
-              WRITE (8,'('' ERROR: WRONG FISDEN, SETTING IGNORED'')')
+              WRITE (8,
+     &          '('' ERROR: FISDEN must be 0 or 3; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6399,7 +6473,7 @@ C
                  WRITE (12,
      &  '('' EGSM (J>>K approx.) used for fission LD for all nuclei'')') 
                ENDIF
-               IF(val.eq.2) then
+               IF(val.eq.3) then
                  WRITE (8 ,'('' HFB fission LD used for all nuclei'')') 
                  WRITE (12,'('' HFB fission LD used for all nuclei'')') 
                ENDIF
@@ -6423,11 +6497,11 @@ C
      &          '('' EGSM (J>>K approx.) used for fission LD for '',
      &             I3,A2,'' (FISDEN=0)'')') i2, SYMb(nnuc)
             ENDIF
-            IF(val.eq.2) then
+            IF(val.eq.3) then
                WRITE (8 ,'('' RIPL HFB fission LD used for '',
-     &             I3,A2,'' (FISDEN=2)'')') i2, SYMb(nnuc)
+     &             I3,A2,'' (FISDEN=3)'')') i2, SYMb(nnuc)
                WRITE (12,'('' RIPL HFB fission LD used for '',
-     &             I3,A2,'' (FISDEN=2)'')') i2, SYMb(nnuc)
+     &             I3,A2,'' (FISDEN=3)'')') i2, SYMb(nnuc)
             ENDIF
             GOTO 100
          ENDIF
@@ -6435,7 +6509,8 @@ C-----
          IF (name.EQ.'FISDIS') THEN
             IF(val.lt.0 .or. val.gt.1) THEN
               WRITE (8,'('' ERROR: FISDIS ='',I1)') NINT(val)
-              WRITE (8,'('' ERROR: WRONG FISDIS, SETTING IGNORED'')')
+              WRITE (8,
+     &          '('' ERROR: FISDIS must be 0 or 1; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6478,26 +6553,32 @@ C-----
             IF(val.eq.1) then
                WRITE (8 ,
      &     '('' Fission transition states by Maslov considered for '',
-     &             I3,A2,'' (FISDEN=1)'')') i2, SYMb(nnuc)
+     &             I3,A2,'' (FISDIS=1)'')') i2, SYMb(nnuc)
                WRITE (12,
      &     '('' Fission transition states by Maslov considered for '',
-     &             I3,A2,'' (FISDEN=1)'')') i2, SYMb(nnuc)
+     &             I3,A2,'' (FISDIS=1)'')') i2, SYMb(nnuc)
             ENDIF
             GOTO 100
          ENDIF
-C-----
+C--------------------------------------------------------------------------
          IF (name.EQ.'FISSPE') THEN
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
-              FISspe = nint(val)
+                FISspe = nint(val)
+                if(FISspe.eq.1) THEN 
+                  WRITE (8,*) 
+     &         ' WARNING: Los Alamos model will be implemented in 2012'
+                  WRITE (8,*) 
+     &         ' WARNING:      changing to Kornilov Model             '
+                 FISspe = 2
+                ENDIF                
                 WRITE (8,*) 'Prompt fission neutron spectra calculated'
-                if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'
                 if(FISspe.eq.2) WRITE (8,*) ' using Kornilov''s model'
+                if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'
               else
                 WRITE (8,*)
      &           'Prompt fission neutron spectra not calculated'
               endif
-C--------------------------------------------------------------------------
             else
                WRITE (8,
      &         '('' WARNING: Fission spectrum key out of range (0-2) '',
@@ -6505,6 +6586,134 @@ C--------------------------------------------------------------------------
             endif
             GOTO 100
          ENDIF
+C
+C        PFNS scaling parameters below : 
+C        PFNTKE, PFNrat PFNALP for both Kornilov & LA models 
+C
+C        PFNNIU is the nubar parameter
+C
+         IF (name.EQ.'PFNTKE') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &        '('' Global Fission TKE normalization uncertainty '',
+     &        '' is equal to '',i2,''%'')') i1
+              sigma = val*i1*0.01
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              
+              PFNtke = atilss
+
+              WRITE (8,
+     &        '('' Fission TKE norm sampled value : '',f8.3)')
+     &       atilss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, atilss,INDexf,INDexb
+ 
+            else
+
+              PFNtke = val
+              WRITE (8,'('' Fission TKE norm in all nuclei set to '',
+     & F8.3)') val
+            endif
+            GOTO 100
+	   ENDIF
+C-----         
+         IF (name.EQ.'PFNRAT') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &    '('' Global PFN R=TLight/THeavy normalization uncertainty '',
+     &        '' is equal to '',i2,''%'')') i1
+              sigma = val*i1*0.01
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              
+              PFNrat = atilss
+
+              WRITE (8,
+     &    '('' PFN R=TLight/THeavy norm sampled value : '',f8.3)')
+     &       atilss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, atilss,INDexf,INDexb
+ 
+            else
+
+              PFNrat = val
+              WRITE (8,
+     &    '('' PFN R=TLight/THeavy norm in all nuclei set to '',
+     & F8.3)') val
+            endif
+            GOTO 100
+	   ENDIF
+C-----         
+         IF (name.EQ.'PFNALP') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     & '('' Global PFN alpha (Efrag ~ alpha*TKE) norm uncertainty '',
+     &        '' is equal to '',i2,''%'')') i1
+              sigma = val*i1*0.01
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              
+              PFNalp = atilss
+
+              WRITE (8,
+     & '('' PFN alpha (Efrag ~ alpha*TKE) norm sampled value : '',
+     & f8.3)') atilss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, atilss,INDexf,INDexb
+ 
+            else
+
+              PFNalp = val
+              WRITE (8,
+     & '('' PFN alpha (Efrag ~ alpha*TKE) norm in all nuclei set to '',
+     & F8.3)') val
+            endif
+            GOTO 100
+	   ENDIF
+C-----         
+         IF (name.EQ.'PFNNIU') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &        '('' Global PFN NUBAR normalization uncertainty '',
+     &        '' is equal to '',i2,''%'')') i1
+              sigma = val*i1*0.01
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              
+              PFNniu = atilss
+
+              WRITE (8,
+     &        '('' PFN NUBAR norm sampled value : '',f8.3)')
+     &       atilss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, atilss,INDexf,INDexb
+ 
+            else
+
+              PFNniu = val
+              WRITE (8,'('' PFN NUBAR norm in all nuclei set to '',
+     & F8.3)') val
+
+            endif
+            GOTO 100
+	   ENDIF
 C-----         
          IF (name.EQ.'FISVF1') THEN
             char =' Fission barrier first hump height  '
@@ -7917,12 +8126,11 @@ C-----copy EXFOR file to the working directory
       iwin = pipe(ctmp) 
 
       write(*,*) ' '
-      WRITE (8,
-     &  '(''  Retrieving and sorting EXFOR(C4) file: '',A64)')
-     &  trim(filename)
-      WRITE (*,
-     &  '(''  Retrieving and sorting EXFOR(C4) file: '',A64)')
-     &  trim(filename)
+      WRITE (8,*) 
+     &  '  Retrieving and sorting EXFOR(C4) file: ',trim(filename)
+      WRITE (*,*) 
+     &  '  Retrieving and sorting EXFOR(C4) file: ',trim(filename)
+      write(*,*) ' '
 
       IF(IOPsys .EQ. 0) then  !Linux, Mac
         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
