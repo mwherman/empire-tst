@@ -123,9 +123,6 @@ def runE(proj):
         print('Using existing random number generator seed')
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
-    if not isEmpty(proj+'-nubar.endf'):
-        cp(proj+'-nubar.endf','NUBAR-EVAL.ENDF')
-        print('Using existing ENDF-B/VII.1 NUBAR evaluation')
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -214,8 +211,6 @@ def runE(proj):
         mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
     if not isEmpty('OMP_A.DAT'):
         mv('OMP_A.DAT',proj+'-aOMP.lst',0)
-    if not isEmpty('NUBAR-EVAL.ENDF'):
-        mv('NUBAR-EVAL.ENDF',proj+'-nubar.endf',0)
     
     # move files, no warning if files DNE:
     mv('EXFOR.DAT',proj+'.exf',0)
