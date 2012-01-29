@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
+Ccc   * $Rev: 2366 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-29 21:02:09 +0100 (So, 29 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -23,7 +23,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD), ELTl(NDLW)
+     & TFB, TDIrect, ECFism(NFMOD), ELTl(NDLW),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -45,7 +46,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
@@ -3812,7 +3813,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -3823,7 +3825,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -3928,7 +3930,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -3939,7 +3942,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 

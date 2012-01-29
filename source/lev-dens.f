@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-29 21:02:09 +0100 (So, 29 Jän 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -2155,7 +2155,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD)
+     & TFB, TDIrect,  ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
 
@@ -2175,7 +2176,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
@@ -2486,7 +2487,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
@@ -2498,7 +2500,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
 C Dummy arguments
@@ -2597,9 +2599,13 @@ C-----EMPIRE-3.0-dependence
          GAMma = GAMmafism(Mmod)
          DELp = DELtafism(Mmod)
          shcf = SHCfism(Mmod)
-         iff = BFFm(Mmod)
+         iff  = BFFm(Mmod)
          desteppp = DEStepm(Mmod)
+         vibbf12  = VIBf12m(Mmod)
+         vibbfdt  = VIBfdtm(Mmod)
+         vn       = VIBfnormm(Mmod)
       ENDIF
+
       gamma = gamma/A(Nnuc)**0.333333
       ATIl = AP1*A(Nnuc) + AP2*A23
       ATIl = ATIl*Rafis
@@ -2691,15 +2697,6 @@ c
             IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp 
          ENDDO
       ENDDO
-
- 346  ACRtf(Ib) = ACRt
-      UCRtf(Ib) = UCRt
-      ECOndf(Ib) = ECOnd
-      DETcrtf(Ib) = DETcrt
-      TCRtf(Ib) = TCRt
-      SCRtf(Ib) = SCR
-      VIBf12(Ib)= vibbf12
-      VIBfdt(Ib)= vibbfdt
 
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       RETURN

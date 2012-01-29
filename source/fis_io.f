@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
+Ccc   * $Rev: 2366 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-29 21:02:09 +0100 (So, 29 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -25,7 +25,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD)
+     & TFB, TDIrect, ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -47,7 +48,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
@@ -429,7 +430,6 @@ C           bff=4 axial asymmetry,mass asymmetry
       DO ih=1, NRHump
          BFF(ih) = 1
       ENDDO
-C     IF (A(Nnuc).GT.236) BFF(1) = 2.
       IF (A(Nnuc)-Z(Nnuc).GE.144) BFF(1) = 2
       BFF(2) = 3
       BFF(3) = 3
@@ -454,22 +454,27 @@ C--------multiplier of atil
       ENDDO
 
       IF(FISmod(Nnuc).GT.0)THEN
-         efbm(1)=efb(2)+2.0
-         efbm(2)=efb(2)
-         efbm(3)=efb(2)+0.1
-         hm(1,1)= 1.2
-         hm(1,2)=h(1,1)
-         hm(1,3)=h(1,1)
+         EFBm(1)=EFB(2)+2.0
+         EFBm(2)=EFB(2)
+         EFBm(3)=EFB(2)+0.1
+         HM(1,1)= 1.2
+         HM(1,2)=H(1,1)
+         HM(1,3)=H(1,1)
+  	   BFFm(1)=1.
+  	   BFFm(2)=2.
+  	   BFFm(3)=2.
          DO m=1,int(FISmod(Nnuc))+1
             DO nr = 1, NRFdis(2)
                EFDism(nr,m)= EFDis(nr,2)
-               HM(nr,m)=HM(1,m)
             ENDDO
             SHCfism(m)=SHCfis(2)
             DELtafism(m)=DELtafis(2)
             GAMmafism(m)=GAMmafis(2)
             AFIsm(m)=AFIs(2)
             ECFism(m)=ECFis(2)
+            vibf12m(m)=vibf12(2)
+            vibfdtm(m)=vibfdt(2)
+            vibfnormm(m)=vibfnorm(2)
          ENDDO
       ENDIF  
 c=================================================================
@@ -633,8 +638,8 @@ c
                DO m = 1, nrmod
                   WRITE (79,'(1x, A8, 1x, I1, 2x, I1, 1x, I1, 8f9.3)')
      &                  'Barrier', nr, m, BFFm(m), SHCfism(m),
-     &                   DELtafism(m), GAMmafism(m), AFIsm(2), ECFism(m)
-     &                   ,vibf12(2),vibfdt(2),vibfnorm(2)
+     &                   DELtafism(m), GAMmafism(m), AFIsm(m), ECFism(m)
+     &                   ,vibf12m(m),vibfdtm(m),vibfnormm(m)
                ENDDO
             ENDIF
       ENDDO
@@ -680,7 +685,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD)
+     & TFB, TDIrect,  ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -694,7 +700,8 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
+
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
       COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
@@ -828,8 +835,8 @@ C-----FISDEN(Nnuc)= 3 HFB
                   READ (79,'(10x, I1, 2x, I1, 1x, I1, 8f9.3)',ERR=385,
      &                  END=385) i, mm,
      &                  BFFm(m), SHCfism(m), DELtafism(m), GAMmafism(m),
-     &                  AFIsm(m), ECFism(m),!!!!!!!!!!!!!!!!!!!!!!!!!!
-     &                             vibf12(ib),vibfdt(ib),vibfnorm(ib)
+     &                  AFIsm(m), ECFism(m),
+     &                  vibf12m(m),vibfdtm(m),vibfnormm(m)
                ENDDO
             ENDIF
          ENDDO
@@ -1091,7 +1098,8 @@ C
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
      & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD)
+     & TFB, TDIrect,  ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
 
@@ -1110,7 +1118,7 @@ C
       COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
      &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect,ECFism
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
@@ -1333,9 +1341,10 @@ c
             IF (FISmod(Nnuc).GT.0. .AND. nr.EQ.2) THEN
                nrmod = INT(FISmod(Nnuc)) + 1
                DO m = 1, nrmod
-                  WRITE (80,'(1x, A8, 1x, I1, 2x, I1, 1x, I1, 5f9.3)')
+                  WRITE (80,'(1x, A8, 1x, I1, 2x, I1, 1x, I1, 8f9.3)')
      &                  'Barrier', nr, m, BFFm(m), SHCfism(m),
      &                   DELtafism(m), GAMmafism(m), AFIsm(2), ECFism(m)
+     &                   , vibf12m(m), vibfdtm(m),vibfnormm(m)
                ENDDO
             ENDIF
          ENDDO
