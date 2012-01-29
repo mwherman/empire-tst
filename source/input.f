@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
+Ccc   * $Rev: 2373 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-30 00:07:47 +0100 (Mo, 30 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -24,7 +24,8 @@ C COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
 
-      CHARACTER*40 nubar_filename
+      CHARACTER*120 nubar_filename
+      INTEGER*4 len_nubar_filename
       CHARACTER*24 EMPireos
       INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
@@ -269,39 +270,16 @@ C
          SOFt = .FALSE.
          CCCalc = .FALSE.
 C       
-         IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
-C          CHECKING and READING the NUBAR-EVAL.ENDF      
-C
-           nubar_filename='NUBAR-EVAL.ENDF'
-           INQUIRE(FILE=nubar_filename,EXIST=NUBarread)
-C
-C          READING OF THE ENDF MF=1, MT=456 prompt nubar
-C          and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc)
-C          global arrays 
-C
-           IF(NUBarread) 
-     &       CALL READNUBAR(nubar_filename,len_trim(nubar_filename))
-C
-         ELSE                    !Windows
-C
-C          In Windows it is assumed that the NUBAR-EVAL.ENDF
-C          was found so NUBarread = .TRUE. 
-C
-C          A new Windows only source file read_nubar_windows.f is provided
-C
-C          It contains:
-C            1) An empty subroutine READNUBAR() that avoids
-C               compilation errors of IO package in Windows
-C
-C            2) A replacement function fniu_nubar_eval(eincid)
-C               that calculates the nubar from Th-232 nubar 
-C               evaluation (0-60 MeV). It is designed to test 
-C               PFNS calculations
-C
-           NUBarread = .TRUE.
- 
-         ENDIF 
+         NUBarread = .FALSE.
+
+         IOPSYS = 0 !   LINUX - Default
+         CALL GETENV ('OS', empireos)
+         if(empireos(1:3). eq. 'Win') IOPsys = 1 ! Windows
+C--------Mode of EXFOR retrieval
+C        IX4ret = 0 no EXFOR retrieval
+C        IX4ret = 1 copy C4 file
+         IX4ret = 1
 
          NPRIm_g = 0       ! No primary gammas (default)
 C
@@ -345,13 +323,6 @@ C
            FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
          ENDDO
 C
-         IOPSYS = 0 !   LINUX - Default
-         CALL GETENV ('OS', empireos)
-         if(empireos(1:3). eq. 'Win') IOPsys = 1 ! Windows
-C--------Mode of EXFOR retrieval
-C        IX4ret = 0 no EXFOR retrieval
-C        IX4ret = 1 copy C4 file
-         IX4ret = 1
 C--------CCFUS parameters
          DV = 10.
          FCC = 1.
@@ -647,6 +618,54 @@ C--------compound nucleus 1
          IF (A(1)*0.5.NE.AINT(A(1)*0.5)) HIS(1) = -0.5
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
+C
+         IF(iz. ge. 90 .and. iz. le. 98) then ! only from Th to Cf
+C          retrieving NUBAR if available
+           IF(IOPsys .EQ. 1) then  !Linux, Mac
+C
+C            CHECKING and READING the file data/nubar.endf      
+C
+             nubar_filename = trim(empiredir)//'/data/nubar.endf'
+             len_nubar_filename = len_trim(nubar_filename) 
+
+             INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
+     &               EXIST=NUBarread)
+C
+C            READING OF THE ENDF MF=1, MT=456 prompt nubar
+C            and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc)
+C            global arrays 
+C
+             IF(NUBarread) THEN 
+
+               CALL READNUBAR(trim(nubar_filename),len_nubar_filename,
+     &                        ierr, ia, iz)
+
+               if(ierr.gt.0) NUBarread = .FALSE.
+
+             ENDIF  
+C
+           ELSE                    !Windows
+C
+C             In Windows it is assumed that the NUBAR-EVAL.ENDF
+C             was found so NUBarread = .TRUE. 
+C
+C             A new Windows only source file read_nubar_windows.f is provided
+C
+C             It contains:
+C             1) An empty subroutine READNUBAR() that avoids
+C                compilation errors of IO package in Windows
+C
+C             2) A replacement function fniu_nubar_eval(eincid)
+C                that calculates the nubar from Th-232 nubar 
+C                evaluation (0-60 MeV). It is designed to test 
+C                PFNS calculations
+C
+              NUBarread = .TRUE.
+ 
+           ENDIF 
+         
+         ENDIF
+C
 C--------other decaying nuclei
 C
 C--------NNUcd number of decaying nuclei
@@ -1071,26 +1090,26 @@ C
 C	   To add printout of fission options default values: 
 C           (by setting all of them to -1)
 C     
-         itmp = 0
-         DO i = 1, NDNUC
-           IF(FISbar(i).eq.3) THEN
-	       itmp = 1
-             FISdis(i)=0.
-             FISopt(i)=0.
-           ENDIF
-         ENDDO
-	   if(itmp .gt. 0) then
-             WRITE (8,*) 
-     & 'WARNING: Fiss. transitional states can not be used with '
-             WRITE (8,*) 
-     & 'WARNING: HFB fission barriers, FISDIS set to 0 FOR Z=', 
-     &                   NINT(Z(i)), ' A=', NINT(A(i))
-             WRITE (8,*) 
-     & 'WARNING: Optical model for fission can not be used with '
-             WRITE (8,*) 
-     & 'WARNING: HFB fission barriers, FISOPT reset to 0 FOR Z=', 
-     &                   NINT(Z(i)), ' A=', NINT(A(i))
-         endif
+C        itmp = 0
+C        DO i = 1, NDNUC
+C          IF(FISbar(i).eq.3) THEN
+C            itmp = 1
+C            FISdis(i)=0.
+C            FISopt(i)=0.
+C          ENDIF
+C        ENDDO
+C        if(itmp .gt. 0) then
+C             WRITE (8,*) 
+C    & 'WARNING: Fiss. transitional states can not be used with '
+C            WRITE (8,*) 
+C    & 'WARNING: HFB fission barriers, FISDIS set to 0 FOR Z=', 
+C    &                   NINT(Z(i)), ' A=', NINT(A(i))
+C            WRITE (8,*) 
+C    & 'WARNING: Optical model for fission can not be used with '
+C            WRITE (8,*) 
+C    & 'WARNING: HFB fission barriers, FISOPT reset to 0 FOR Z=', 
+C    &                   NINT(Z(i)), ' A=', NINT(A(i))
+C        endif
 
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN

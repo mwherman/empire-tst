@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2366 $
+Ccc   * $Rev: 2373 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 21:02:09 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-30 00:07:47 +0100 (Mo, 30 Jän 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -624,9 +624,9 @@ c
      & saddles'
       WRITE (79,*)chstar
       WRITE (79,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
-     &             4x,a6)')
+     &             4x,a4)')
      &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
-     &          'Ecf','VIB1/2','VIBdt','BarNor'
+     &          'Ecf','VIB1/2','VIBdt','Norm'
       DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
      &         (FISmod(Nnuc).GT.0. .AND. nr.NE.2))
@@ -1328,9 +1328,9 @@ c
          WRITE(80,*)'Parameters of EGSM LD'
 
          WRITE (80,'(14x,a4,1x,a9,1x,a5,4x,a4,2x,a10,3x,a3,5x,a6,3x,a5,
-     &             4x,a6)')
+     &             4x,a4)')
      &           'Asym','shellcorr', 'Ushif','gamma','atilf/atil',
-     &          'Ecf','VIB1/2','VIBdt','BarNor'
+     &          'Ecf','VIB1/2','VIBdt','Norm'
 
          DO nr = 1, NRHump
             IF (FISmod(Nnuc).EQ.0. .OR.
