@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2285 $
+Ccc   * $Rev: 2374 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-23 07:37:46 +0100 (Mo, 23 Jän 2012) $
+Ccc   * $Date: 2012-01-30 00:11:59 +0100 (Mo, 30 Jän 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -160,7 +160,7 @@ C
         write(caz,'(A6,I1)') 'EGSM-S',Ib
       ENDIF
 
-      IF(FISden(Nnuc).eq.2) then
+      IF(FISden(Nnuc).eq.3) then
         write(fname,'(A9,I1)') 'LD_HFBM_S',ib
         write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
         write(caz,'(A6,I1)') 'HFBM-S',Ib
@@ -186,7 +186,7 @@ c        pause
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
  
-      IF(FISden(Nnuc).LT.2)RETURN
+      IF(FISden(Nnuc).LT.3)RETURN
 
       write(caz,'(A6,I1)') 'Pos_S_',Ib
       CALL OPEN_ZVV(36,caz,' ')
