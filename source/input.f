@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2382 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2386 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-01-30 18:14:00 +0100 (Mo, 30 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -41,7 +41,7 @@ C
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT
-      LOGICAL gexist, fexist, calc_fiss
+      LOGICAL gexist, fexist, calc_fiss, fexist_nu
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
@@ -653,11 +653,30 @@ C          retrieving NUBAR if available
 C
 C            CHECKING and READING the file data/nubar.endf      
 C
-             nubar_filename = trim(empiredir)//'/data/nubar.endf'
-             len_nubar_filename = len_trim(nubar_filename) 
 
-             INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
-     &               EXIST=NUBarread)
+C            nubar_filename = 'NUBAR-EVAL.ENDF'
+C            len_nubar_filename = len_trim(nubar_filename) 
+C            INQUIRE(FILE='NUBAR-EVAL.ENDF',EXIST=fexist_nu)
+C
+C            IF(fexist_nu) then
+C
+C              NUBarread = .TRUE.
+C------------------------------------------------------------------------------------
+C            To uncomment (till endif) once read_nubar.f is fixed 
+C            to use either the local file NUBAR-EVAL.ENDF or the EMPIRE database data/nubar.endf
+C 
+C            else              
+C
+C              CHECKING and READING the file data/nubar.endf      
+C
+C              nubar_filename = trim(empiredir)//'/data/nubar.endf'
+C              len_nubar_filename = len_trim(nubar_filename) 
+C              INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
+C    &               EXIST=NUBarread)
+C
+C            endif
+C------------------------------------------------------------------------------------
+
 C
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
 C            and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc)
