@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2370 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 00:02:52 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2376 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2370 $
+C CVS Version Management $Revision: 2376 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -427,6 +427,10 @@ C       Exclusive spectra and DDXS
              IF(inxr.GT.0) THEN
                DXSpex(nubin,nebinchan,inxr) = 
      &                 DXSpex(nubin,nebinchan,inxr) + 1.
+c               DXSpexlab(nubin,nebinchan,inxr) = 
+c     &                 DXSpexlab(nubin,nebinchan,inxr) + 1.
+c               DDXspexlab(nthlab,nubin,nebinchan,inxr) = 
+c     &                 DDXspexlab(nthlab,nubin,nebinchan,inxr) + 1.
                DXSpexlab(nubin,nebinlab,inxr) = 
      &                 DXSpexlab(nubin,nebinlab,inxr) + 1.
                DDXspexlab(nthlab,nubin,nebinlab,inxr) = 
@@ -454,6 +458,10 @@ C       Exclusive spectra and DDXS
              IF(inxr.GT.0) THEN
                DXSnex(nubin,nebinchan,inxr) = 
      &                 DXSnex(nubin,nebinchan,inxr) + 1.
+c               DXSnexlab(nubin,nebinchan,inxr) = 
+c     &                 DXSnexlab(nubin,nebinchan,inxr) + 1.
+c               DDXsnexlab(nthlab,nubin,nebinchan,inxr) = 
+c     &                 DDXsnexlab(nthlab,nubin,nebinchan,inxr) + 1.
                DXSnexlab(nubin,nebinlab,inxr) = 
      &                 DXSnexlab(nubin,nebinlab,inxr) + 1.
                DDXsnexlab(nthlab,nubin,nebinlab,inxr) = 
@@ -2460,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2370 $')
+99005 FORMAT ('  xddhms version: $Revision: 2376 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -5908,7 +5916,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION adum(5,7), csfit(NDANGecis), qq(5)
+      DOUBLE PRECISION adum(5,7), csfit(NDAnghms), csx0(NDAnghms), qq(5)
       DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
@@ -6006,7 +6014,7 @@ C-----integrated spectrum obtained above
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhmslab(ne,1,0)/(4.0*3.14159*qq(1))
+            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
             DO na = 1, NDAnghms
                CSEahmslab(ne,na,1) = CSEahmslab(ne,na,1)*xnor
 c               CSEa(ne,na,1,0) = CSEa(ne,na,1,0)
@@ -6039,7 +6047,7 @@ C-----integrated spectrum obtained above
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhmslab(ne,2,0)/(4.0*3.14159*qq(1))
+            xnor = CSEhmslab(ne,2,0)/(4.0*PI_g*qq(1))
             DO na = 1, NDAnghms
                CSEahmslab(ne,na,2) = CSEahmslab(ne,na,2)*xnor
 c               CSEa(ne,na,2,0) = CSEa(ne,na,2,0)
@@ -6087,56 +6095,66 @@ C
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
              ndspc = nspec - nspecc
-C             chk = 0.0d0
-C             chkpop = 0.0d0
-C             chkpopd = 0.0d0
+c             chk = 0.0d0
+c             chkpop = 0.0d0
+c             chkpopd = 0.0d0
              Inxr=INExc(nnur)
              DO ne = 1,nspec
                POPhmsx(ne,1,Inxr) = 0.0d0
                DO nu = 1, min(ndspc,nspec-ne+1)
                  pops =  DXSnex(nu-1,ne-1,Inxr)*DE
-C                 chkpopd = chkpopd + pops
+c                 chkpopd = chkpopd + pops
                  POPhmsx(ne,1,Inxr) =  POPhmsx(ne,1,Inxr) + pops
                 ENDDO
-               IF(ne.GT.nspecc)
-     &           CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
-               POPcsed(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
-               IF(jz.NE.0 .OR. jn.NE.0)
-     &                    POPcse(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
-              ENDDO
-             DO ne = 1, nspecc
+               IF(jz.NE.0 .OR. jn.NE.0) THEN
+                 POPcse(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
+                 POPcsed(0,1,ne,Inxr) = POPhmsx(ne,1,Inxr) 
+                ENDIF
+               IF(ne.GT.nspecc) THEN
+                 CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
+               ELSE               
 C               CSEhms(ne,1,nnuc) = DXSnx(ne-1,jz,jn)
-C               chk=chk + DXSnx(ne-1,jz,jn)
-               pops = DXSnx(ne-1,jz,jn)
-               if(ne.eq.1 .or. ne.eq.nspecc) pops = 2*pops
-               CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + pops
-               DO nu = 1, nspecc-ne+1
+c                chk=chk + DXSnx(ne-1,jz,jn)
+                pops = DXSnx(ne-1,jz,jn)
+                if(ne.eq.1 .or. ne.eq.nspecc) pops = 2*pops
+                CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + pops
+                DO nu = 1, nspecc-ne+1
                  pops =  DXSnex(nu+ndspc-1,ne-1,Inxr)*DE
-C                 chkpop = chkpop + pops
+c                 chkpop = chkpop + pops
                  POPhmsx(ne,1,Inxr) =  POPhmsx(ne,1,Inxr) + pops
                  POPcse(nu,1,ne,Inxr) = POPcse(nu,1,ne,Inxr) + pops 
                  POPcsed(nu,1,ne,Inxr) = POPcsed(nu,1,ne,Inxr) + pops 
                 ENDDO
-               CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
-              ENDDO
-C             write(8,'(a5,i8,5f12.6)') '   n:',nnuc,chk*DE,XSNx(jz,jn),
-C     1                            chkpop*DE,chkpopd*DE
-            ENDIF
+                CSEhms(ne,1,0) = CSEhms(ne,1,0) - POPhmsx(ne,1,Inxr)
+               ENDIF
+             ENDDO
+c             write(8,'(a5,i8,4f12.6)') '   n:',nnur,chk*DE,XSNx(jz,jn),
+c     1                            chkpop*DE,chkpopd*DE
 
 C-----transfer exclusive neutron lab spectrum
 C-----transfer exclusive neutron lab double-differential cross sections
 C-----integrate interpolated ddx over angle and normalize ddx to the angle
 C-----integrated spectrum 
-           nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
-           DO ne = 1, nspec
+c           chk = 0.0d0
+c           chkpop = 0.0d0
+c           chkpopd = 0.0d0
+c           chkpopa = 0.0d0
+c           chkpopda = 0.0d0
+           DO nth = 1, NAnghms
+             csx0(nth)=0.0d0
+            ENDDO
+           nspecl = min(INT(elf*ecres/DE) + 1,NDECSE)
+           DO ne = 1, nspecl
              CSEhmslab(ne,1,Inxr) = DXSnxlab(ne-1,jz,jn)
-            DO nu = 1, nspec - ne +1
-             POPhmslab = DXSnexlab(nu-1,ne-1,Inxr)*DE
-             CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) - POPhmslab
-             IF(ENDFA(Nnur).EQ.1) THEN
-              POPcsealab(NDAnghms,nu,1,ne,Inxr) = 
-     &                           DDXsnexlab(NDAnghms1,nu-1,ne-1,Inxr)
-              csfit(1) =   POPcsealab(NDAnghms,nu,1,ne,Inxr) 
+c             chk=chk+DXSnxlab(ne-1,jz,jn)
+            DO nu = 1, ndspc
+             pops = DXSnexlab(nu-1,ne-1,Inxr)*DE
+             POPcsedlab(0,1,ne,Inxr) = POPcsedlab(0,1,ne,Inxr) + pops 
+c             chkpopd = chkpopd + pops
+             CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) - pops 
+              POPcsealab(NDAnghms,0,1,ne,Inxr) = 
+     &                  POPcsealab(NDAnghms,0,1,ne,Inxr) + 
+     &                             DDXsnexlab(NDAnghms1,nu-1,ne-1,Inxr)
               thx = PI_g - dth
               xhi = DCOS(thx)
               dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
@@ -6144,28 +6162,98 @@ C-----integrated spectrum
                thx = thx - dth
                xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
                dxlo = xlo - xhi
-               POPcsealab(nth,nu,1,ne,Inxr) = 
+               POPcsealab(nth,0,1,ne,Inxr) = 
+     &            POPcsealab(nth,0,1,ne,Inxr) +
      &            (dxhi*DDXsnexlab(nth,nu-1,ne-1,Inxr)
      &            +dxlo*DDXsnexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
-               csfit(NDAnghms-nth+1) = POPcsealab(nth,nu,1,ne,Inxr) 
                xhi = xlo
                dxhi = dxlo
               ENDDO
-              POPcsealab(1,nu,1,ne,Inxr) =DDXsnexlab(1,nu-1,ne-1,Inxr)
-              csfit(NDAnghms) =  POPcsealab(1,nu,1,ne,Inxr)
+              POPcsealab(1,0,1,ne,Inxr) = POPcsealab(1,0,1,ne,Inxr)
+     &                        + DDXsnexlab(1,nu-1,ne-1,Inxr)
+             ENDDO ! nu
+              csfit(1) =   POPcsealab(NDAnghms,0,1,ne,Inxr) 
+              DO nth = NDAnghms1, 2, -1
+               csfit(NDAnghms-nth+1) = POPcsealab(nth,0,1,ne,Inxr) 
+              ENDDO
+              csfit(NDAnghms) =  POPcsealab(1,0,1,ne,Inxr)
               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
               IF (qq(1).NE.0.0D+0) THEN
-               xnor = POPhmslab/(4.0*3.14159*qq(1))
+               xnor = POPcsedlab(0,1,ne,Inxr)/(4.0*PI_g*qq(1))
+               IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,1,ne,Inxr) = 0.0d0
                DO nth = 1, NDAnghms
-                POPcsealab(nth,nu,1,ne,Inxr) = 
-     &                                 POPcsealab(nth,nu,1,ne,Inxr)*xnor
+                POPcsealab(nth,0,1,ne,Inxr) = 
+     &                                 POPcsealab(nth,0,1,ne,Inxr)*xnor
                 CSEahmslab(ne,nth,1) = CSEahmslab(ne,nth,1)
-     &                              - POPcsealab(nth,nu,1,ne,Inxr)
+     &                              - POPcsealab(nth,0,1,ne,Inxr)
+c                IF(nth.GT.1) 
+c     &             chkpopda = chkpopda + 
+c     &                (POPcsealab(nth,0,1,ne,Inxr)+
+c     &                       POPcsealab(nth-1,0,1,ne,Inxr))*
+c     &                           (CAngler(nth)-CANgler(nth-1))
+               IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+                csx0(nth) = csx0(nth) + POPcsealab(nth,0,1,ne,Inxr)
+                POPcsealab(nth,0,1,ne,Inxr) = 0.0d0
+               ENDIF
                ENDDO
               ENDIF
-             ENDIF
-            ENDDO
-           ENDDO
+
+            IF(ne.LE.2*nspecl-nspec-ndspc) THEN
+            DO nu = ndspc + 1, 2*nspecl - nspec - ne + 1
+             nux = nu-ndspc
+             POPcsedlab(nux,1,ne,Inxr) = DXSnexlab(nu-1,ne-1,Inxr)*DE
+c             chkpop = chkpop + POPcsedlab(nux,1,ne,Inxr)
+             CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) 
+     &                                      - POPcsedlab(nux,1,ne,Inxr)
+              POPcsealab(NDAnghms,nux,1,ne,Inxr) = 
+     &                             DDXsnexlab(NDAnghms1,nu-1,ne-1,Inxr)
+              csfit(1) =   POPcsealab(NDAnghms,nux,1,ne,Inxr) 
+              thx = PI_g - dth
+              xhi = DCOS(thx)
+              dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
+              DO nth = NDAnghms1, 2, -1
+               thx = thx - dth
+               xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
+               dxlo = xlo - xhi
+               POPcsealab(nth,nux,1,ne,Inxr) = 
+     &            (dxhi*DDXsnexlab(nth,nu-1,ne-1,Inxr)
+     &            +dxlo*DDXsnexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
+               csfit(NDAnghms-nth+1) = POPcsealab(nth,nux,1,ne,Inxr) 
+               xhi = xlo
+               dxhi = dxlo
+              ENDDO
+              POPcsealab(1,nux,1,ne,Inxr) = DDXsnexlab(1,nu-1,ne-1,Inxr)
+              csfit(NDAnghms) =  POPcsealab(1,nux,1,ne,Inxr)
+              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+              IF (qq(1).NE.0.0D+0) THEN
+               xnor = POPcsedlab(nux,1,ne,Inxr)/(4.0*PI_g*qq(1))
+               DO nth = 1, NDAnghms
+                POPcsealab(nth,nux,1,ne,Inxr) = 
+     &                                POPcsealab(nth,nux,1,ne,Inxr)*xnor
+                CSEahmslab(ne,nth,1) = CSEahmslab(ne,nth,1)
+     &                              - POPcsealab(nth,nux,1,ne,Inxr)
+c                IF(nth.GT.1) 
+c     &             chkpopa = chkpopa + 
+c     &                (POPcsealab(nth,nux,1,ne,Inxr)+
+c     &                       POPcsealab(nth-1,nux,1,ne,Inxr))*
+c     &                           (CAngler(nth)-CANgler(nth-1))
+               ENDDO
+              ENDIF
+             ENDDO ! nu
+            ENDIF
+          ENDDO
+c          write(8,'(a5,i8,6f12.6)') ' l-n:',nnur,chk*DE,XSNx(jz,jn),
+c     &            chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+            recorp = 1. + EJMass(1)/AMAss(1)
+            DO nth = 1, NDAnghms
+              difcon = csx0(nth)*DE/recorp/NLV(nnur)
+              DO il = 1, NLV(nnur)
+                CSAlev(nth,il,1) = difcon
+               ENDDO
+             ENDDO
+           ENDIF
+          ENDIF ! ENDF(nnur) = 1
          ENDIF ! iloc
 C
 C-----transfer exclusive proton CM spectrum
@@ -6179,56 +6267,121 @@ C
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
              ndspc = nspec - nspecc
-C             chk = 0.0d0
-C             chkpop = 0.0d0
-C             chkpopd = 0.0d0
+c             chk = 0.0d0
+c             chkpop = 0.0d0
+c             chkpopd = 0.0d0
              Inxr=INExc(nnur)
              DO ne = 1,nspec
-               POPhmsx(ne,2,Inxr) = 0.0d0
-               DO nu = 1, min(ndspc,nspec-ne+1)
-                 pops =  DXSpex(nu-1,ne-1,Inxr)*DE
-C                 chkpopd = chkpopd + pops
-                 POPhmsx(ne,2,Inxr) =  POPhmsx(ne,2,Inxr) + pops
-                ENDDO
-               IF(ne.GT.nspecc)
-     &           CSEhms(ne,2,0) = CSEhms(ne,2,0) - POPhmsx(ne,2,Inxr)
-               POPcsed(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
-               IF(jz.NE.0 .OR. jn.NE.0)
-     &                    POPcse(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+              POPhmsx(ne,2,Inxr) = 0.0d0
+              DO nu = 1, min(ndspc,nspec-ne+1)
+                pops =  DXSpex(nu-1,ne-1,Inxr)*DE
+c                chkpopd = chkpopd + pops
+                POPhmsx(ne,2,Inxr) =  POPhmsx(ne,2,Inxr) + pops
               ENDDO
-             DO ne = 1, nspecc
+              IF(jz.NE.0 .OR. jn.NE.0) THEN
+                POPcse(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+                POPcsed(0,2,ne,Inxr) = POPhmsx(ne,2,Inxr) 
+               ENDIF
+              IF(ne.GT.nspecc) THEN
+               CSEhms(ne,2,0) = CSEhms(ne,2,0) - POPhmsx(ne,2,Inxr)
+              ELSE
 C              CSEhms(ne,2,nnuc) = DXSpx(ne-1,jz,jn)
-C               chk=chk+DXSpx(ne-1,jz,jn)
+c               chk=chk+DXSpx(ne-1,jz,jn)
                pops = DXSpx(ne-1,jz,jn)
                IF(ne.EQ.1 .OR. ne.EQ.nspecc) pops = 2*pops
                CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + pops
                DO nu = 1, nspecc-ne+1
                  pops =  DXSpex(nu+ndspc-1,ne-1,Inxr)*DE
-C                 chkpop = chkpop + pops
+c                 chkpop = chkpop + pops
                  POPhmsx(ne,2,Inxr) =  POPhmsx(ne,2,Inxr) + pops
                  POPcse(nu,2,ne,Inxr) = POPcse(nu,2,ne,Inxr) + pops
                  POPcsed(nu,2,ne,Inxr) = POPcsed(nu,2,ne,Inxr) + pops
                 ENDDO
                CSEhms(ne,2,0) = CSEhms(ne,2,0) - POPhmsx(ne,2,Inxr)
-              ENDDO
-C             write(8,'(a5,i8,4f12.6)') '   p:',nnuc,chk*DE,XSPx(jz,jn),
-C     1                            chkpop*DE,chkpopd*DE
-            ENDIF
+              ENDIF
+             ENDDO
+c             write(8,'(a5,i8,4f12.6)') '   p:',nnur,chk*DE,XSPx(jz,jn),
+c     1                            chkpop*DE,chkpopd*DE
 C
 C-----transfer exclusive proton lab spectrum
 C-----transfer exclusive proton lab double-differential cross sections
 C-----integrate ddx over angle and normalize ddx to the angle
 C-----integrated spectrum
-           nspec = min(INT(elf*EMAx(nnur)/DE) + 1,NDECSE)
-           DO ne = 1, nspec
-             CSEhmslab(ne,2,nnuc) = DXSpxlab(ne-1,jz,jn)
-            DO nu = 1, nspec - ne +1
-             POPhmslab = DXSpexlab(nu-1,ne-1,Inxr)*DE
-             CSEhmslab(ne,2,0) = CSEhmslab(ne,2,0)-POPhmslab
-             IF(ENDFA(Nnur).EQ.1) THEN
-              POPcsealab(NDAnghms,nu,2,ne,Inxr) = 
-     &                              DDXspexlab(NDAnghms1,nu-1,ne-1,Inxr)
-              csfit(1) =   POPcsealab(NDAnghms,nu,2,ne,Inxr) 
+c           chk = 0.0d0
+c           chkpop = 0.0d0
+c           chkpopd = 0.0d0
+c           chkpopa = 0.0d0
+c           chkpopda = 0.0d0
+           IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+             DO nth = 1, NAnghms
+               csx0(nth)=0.0d0
+              ENDDO
+             ENDIF
+           nspecl = min(INT(elf*ecres/DE) + 1,NDECSE)
+           DO ne = 1, nspecl
+             CSEhmslab(ne,2,Inxr) = DXSpxlab(ne-1,jz,jn)
+c             chk=chk+DXSpxlab(ne-1,jz,jn)
+            DO nu = 1, ndspc
+             pops = DXSpexlab(nu-1,ne-1,Inxr)*DE
+             POPcsedlab(0,2,ne,Inxr) = POPcsedlab(0,2,ne,Inxr) + pops 
+c             chkpopd = chkpopd + pops
+             CSEhmslab(ne,2,0) = CSEhmslab(ne,2,0) - pops 
+             POPcsealab(NDAnghms,0,2,ne,Inxr) = 
+     &                  POPcsealab(NDAnghms,0,2,ne,Inxr) + 
+     &                             DDXspexlab(NDAnghms1,nu-1,ne-1,Inxr)
+             thx = PI_g - dth
+             xhi = DCOS(thx)
+             dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
+             DO nth = NDAnghms1, 2, -1
+              thx = thx - dth
+              xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
+              dxlo = xlo - xhi
+              POPcsealab(nth,0,2,ne,Inxr) = 
+     &            POPcsealab(nth,0,2,ne,Inxr) +
+     &            (dxhi*DDXspexlab(nth,nu-1,ne-1,Inxr)
+     &            +dxlo*DDXspexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
+              xhi = xlo
+              dxhi = dxlo
+             ENDDO 
+             POPcsealab(1,0,2,ne,Inxr) = POPcsealab(1,0,2,ne,Inxr)
+     &                        + DDXspexlab(1,nu-1,ne-1,Inxr)
+            ENDDO ! nu
+            csfit(1) =   POPcsealab(NDAnghms,0,2,ne,Inxr) 
+            DO nth = NDAnghms1, 2, -1
+              csfit(NDAnghms-nth+1) = POPcsealab(nth,0,2,ne,Inxr) 
+             ENDDO
+             csfit(NDAnghms) =  POPcsealab(1,0,2,ne,Inxr)
+             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+             IF (qq(1).NE.0.0D+0) THEN
+              xnor = POPcsedlab(0,2,ne,Inxr)/(4.0*PI_g*qq(1))
+              IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,2,ne,Inxr) = 0.0d0
+              DO nth = 1, NDAnghms
+               POPcsealab(nth,0,2,ne,Inxr) = 
+     &                               POPcsealab(nth,0,2,ne,Inxr)*xnor
+               CSEahmslab(ne,nth,2) = CSEahmslab(ne,nth,2)
+     &                              - POPcsealab(nth,0,2,ne,Inxr)
+c               IF(nth.GT.1) 
+c     &             chkpopda = chkpopda + 
+c     &                (POPcsealab(nth,0,2,ne,Inxr)+
+c     &                       POPcsealab(nth-1,0,2,ne,Inxr))*
+c     &                           (CAngler(nth)-CANgler(nth-1))
+               IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+                csx0(nth) = csx0(nth) + POPcsealab(nth,0,2,ne,Inxr)
+                POPcsealab(nth,0,2,ne,Inxr) = 0.0d0
+               ENDIF
+              ENDDO
+             ENDIF
+
+           IF(ne.LE.2*nspecl-nspec-ndspc) THEN
+            DO nu = ndspc + 1, 2*nspecl - nspec - ne + 1
+             nux = nu-ndspc
+             POPcsedlab(nux,2,ne,Inxr) = DXSpexlab(nu-1,ne-1,Inxr)*DE
+c             chkpop = chkpop + POPcsedlab(nux,2,ne,Inxr)
+             CSEhmslab(ne,2,0) = CSEhmslab(ne,2,0) 
+     &                                      - POPcsedlab(nux,2,ne,Inxr)
+               POPcsealab(NDAnghms,nux,2,ne,Inxr) = 
+     &                             DDXspexlab(NDAnghms1,nu-1,ne-1,Inxr)
+              csfit(1) =   POPcsealab(NDAnghms,nux,2,ne,Inxr) 
               thx = PI_g - dth
               xhi = DCOS(thx)
               dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
@@ -6236,28 +6389,45 @@ C-----integrated spectrum
                thx = thx - dth
                xlo = DCOS(thx)   ! xlo = DCOS((nth-2)*dth)
                dxlo = xlo - xhi
-               POPcsealab(nth,nu,2,ne,Inxr) = 
+               POPcsealab(nth,nux,2,ne,Inxr) = 
      &            (dxhi*DDXspexlab(nth,nu-1,ne-1,Inxr)
      &            +dxlo*DDXspexlab(nth-1,nu-1,ne-1,Inxr))/(dxhi+dxlo)
-               csfit(NDAnghms-nth+1) =  POPcsealab(nth,nu,2,ne,Inxr) 
+               csfit(NDAnghms-nth+1) = POPcsealab(nth,nux,2,ne,Inxr) 
                xhi = xlo
                dxhi = dxlo
               ENDDO
-              POPcsealab(1,nu,2,ne,Inxr) = DDXspexlab(1,nu-1,ne-1,Inxr)
-              csfit(NDAnghms) =  POPcsealab(1,nu,2,ne,Inxr)
+              POPcsealab(1,nux,2,ne,Inxr) = DDXspexlab(1,nu-1,ne-1,Inxr)
+              csfit(NDAnghms) =  POPcsealab(1,nux,2,ne,Inxr)
               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
               IF (qq(1).NE.0.0D+0) THEN
-               xnor = POPhmslab/(4.0*3.14159*qq(1))
+               xnor = POPcsedlab(nux,2,ne,Inxr)/(4.0*PI_g*qq(1))
                DO nth = 1, NDAnghms
-                POPcsealab(nth,nu,2,ne,Inxr) = 
-     &                                 POPcsealab(nth,nu,2,ne,Inxr)*xnor
+                POPcsealab(nth,nux,2,ne,Inxr) = 
+     &                                POPcsealab(nth,nux,2,ne,Inxr)*xnor
                 CSEahmslab(ne,nth,2) = CSEahmslab(ne,nth,2)
-     &                             - POPcsealab(nth,nu,2,ne,Inxr)
+     &                              - POPcsealab(nth,nux,2,ne,Inxr)
+c                IF(nth.GT.1) 
+c     &             chkpopa = chkpopa + 
+c     &                (POPcsealab(nth,nux,2,ne,Inxr)+
+c     &                       POPcsealab(nth-1,nux,2,ne,Inxr))*
+c     &                           (CAngler(nth)-CANgler(nth-1))
                ENDDO
               ENDIF
-             ENDIF
-            ENDDO
+             ENDDO ! nu
+            ENDIF
            ENDDO
+c           write(8,'(a5,i8,6f12.6)') ' l-p:',nnur,chk*DE,XSPx(jz,jn),
+c     &           chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+            recorp = 1. + EJMass(2)/AMAss(1)
+            DO nth = 1, NDAnghms
+              difcon = csx0(nth)*DE/recorp/NLV(nnur)
+              DO il = 1, NLV(nnur)
+                CSAlev(nth,il,2) = difcon
+               ENDDO
+             ENDDO
+           ENDIF
+          ENDIF ! ENDF(nnuc) = 1
          ENDIF ! iloc
 
         ENDDO ! jz
@@ -6363,7 +6533,7 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
                ENDDO
 
                sumcon = sumcon*DE
-                chk = sumcon
+               chk = sumcon
                IF (nnur.GT.3 .AND. FIRst_ein) THEN
                   IF (IDNa(2,5).EQ.0) THEN
                      WRITE (8,*) ' '

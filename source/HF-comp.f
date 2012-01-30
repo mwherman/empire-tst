@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Rev: 2376 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -277,8 +277,11 @@ C-----DE spectra
      &                = POPcsed(Ief,iejc,ie,INExc(Nnur))
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                 ENDIF
-                IF (POPcsealab(1,Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 DO nth = 1, NDAnghmx
+                IF (POPcsedlab(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                 POPcsedlab(Ief,iejc,ie,INExc(Nnur))
+     &                = POPcsedlab(Ief,iejc,ie,INExc(Nnur))
+     &                + POPcsedlab(Iec,iejc,ie,INExc(Nnuc))*xnor
+                 DO nth = 1, NDAng
                   POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
      &                = POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
      &                + POPcsealab(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -391,8 +394,11 @@ C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
      &                = POPcsed(0,iejc,iesp,INExc(Nnur))
      &                + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
                 ENDIF
-                IF (POPcsealab(1,Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 DO nth = 1, NDAnghmx
+                IF (POPcsedlab(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                 POPcsedlab(0,iejc,iesp,INExc(Nnur))
+     &                = POPcsedlab(0,iejc,iesp,INExc(Nnur))
+     &                + POPcsedlab(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                 DO nth = 1, NDAng
                   POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
      &                = POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
      &                + POPcsealab(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor

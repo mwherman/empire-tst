@@ -1,8 +1,8 @@
       PARAMETER(
-     * NDNUC= 20
-     *,NDEXCLUS = 10
+     * NDNUC= 100
+     *,NDEXCLUS = 15
      *,NDEJC=6
-     *,NDEX= 101
+     *,NDEX= 151
      *,NDLW= 40
      *,LEVCC=20
      *,NDLV=40

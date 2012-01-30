@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2345 $
+Ccc   * $Rev: 2376 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-27 21:22:51 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -78,6 +78,7 @@ C
       POPcseaf = 0.d0
       POPcse   = 0.d0
       POPcsed  = 0.d0
+      POPcsedlab=0.d0
       POPcsealab=0.d0
       POPhmsx  = 0.d0
       POPhmslab= 0.d0
@@ -1122,6 +1123,7 @@ C--------start intrpolation
       ENDDO
       END
 
+
       SUBROUTINE HINTERMAT(Xi,Si,Yi,N,Xo,So,Yo,M,L,Emin,Emax)
 Ccc
 Ccc   ********************************************************************
@@ -1166,8 +1168,6 @@ Ccc   *       Yo   interpolated function values corresponding to XO(i)   *
 Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       IMPLICIT NONE
@@ -1182,9 +1182,9 @@ C
 C Local variables
 C
 C     DOUBLE PRECISION ABS, MIN
-      INTEGER nn, mm, ll, it 
+      INTEGER nn, mm, ll, it, Nx
 C     INTEGER INT, MAX
-      DOUBLE PRECISION En, Em, E
+      DOUBLE PRECISION En, Em, E, facx, Yif, dY, Yitot, Yotot
 C-----Check ranges and steps
       IF (Emin - Xo .LT. -0.0001) THEN
          WRITE (8,*) ' '
@@ -1226,9 +1226,22 @@ C-----Check ranges and steps
          WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
+C-----Determine last bin in initial histogram
+C-----The following places the contents of the last bin below Emax
+      Nx=(Emax-Xi)/Si
+      IF(ABS(Xi+Nx*Si-Emax).gt.1.0d-6) Nx = Nx+1
+      facx=Si/(Emax-Xi-Nx*Si+Si)
+C-----To assume the contents of last bin evenly distributed, uncomment this line
+C      Nx=Nx+1
 C-----Start with the matrix
       DO ll = 1, L   !take one column at a time
-C--------first sum the initial array to determine the norm
+
+        Yitot = 0.0d0
+        DO nn = 1, N
+          Yitot = Yitot + Yi(nn,ll)
+         END DO
+
+        Yif=facx*Yi(Nx,ll)
         nn = INT((Emin-Xi)/Si)
         En = Si*nn + Xi
         nn = nn + 1
@@ -1236,21 +1249,41 @@ C--------first sum the initial array to determine the norm
         Em = So*mm + Xo
         mm = mm + 1
         E = Emin
-        DO it = 1, Max(N,M)
+        Yotot = 0.0d0
+
+        DO it = 1, N+M
           IF(En+Si.LT.Em+So) THEN
             En = MIN(En + Si,Emax)
-            Yo(mm,ll) = Yo(mm,ll) + (En-E)*Yi(nn,ll)/So
+            IF(nn.LT.NX) THEN
+              dY = (En-E)*Yi(nn,ll)/So
+             ELSE
+              dY = (En-E)*Yif/So
+             ENDIF
+            Yo(mm,ll) = Yo(mm,ll) + dY
+            Yotot = Yotot + dY
             nn = nn + 1
             E = En
            ELSEIF(Em+So.LT.En+Si) THEN
             Em = MIN(Em + So,Emax)
-            Yo(mm,ll) = Yo(mm,ll) + (Em-E)*Yi(nn,ll)/So
+            IF(nn.LT.Nx) THEN
+              dY = (Em-E)*Yi(nn,ll)/So
+             ELSE
+              dY = (Em-E)*Yif/So
+             ENDIF
+            Yo(mm,ll) = Yo(mm,ll) + dY
+            Yotot = Yotot + dY
             mm = mm + 1
             E = Em
            ELSE
             Em = MIN(Em + So,Emax)
             En = Em
-            Yo(mm,ll) = Yo(mm,ll) + (Em-E)*Yi(nn,ll)/So
+            IF(nn.LT.Nx) THEN
+              dY = (Em-E)*Yi(nn,ll)/So
+             ELSE
+              dY =  (Em-E)*Yif/So
+             ENDIF
+            Yo(mm,ll) = Yo(mm,ll) + dY
+            Yotot = Yotot + dY
             mm = mm + 1
             nn = nn + 1
             E = Em
@@ -1258,6 +1291,8 @@ C--------first sum the initial array to determine the norm
           IF(ABS(E-Emax).LT.1.0D-6) Go TO 10
          ENDDO
  10     CONTINUE 
+c        WRITE(8,'(''HIST - L='',i3,'' Yitot='', f8.3,'' Yotot='',f8.3)')
+c     &                                            ll,Yitot*Si, Yotot*So 
        ENDDO
       RETURN
       END

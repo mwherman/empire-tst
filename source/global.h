@@ -1,6 +1,6 @@
-C $Rev: 2365 $
-C $Author: rcapote $
-C $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+C $Rev: 2376 $
+C $Author: bcarlson $
+C $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -98,6 +98,7 @@ C
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,2,ndecsed,0:ndexclus),
+     &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
      &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
      &                 0:ndexclus), POPhmsx(ndecsed,2,0:ndexclus),
@@ -164,7 +165,7 @@ C
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
       COMMON /DEPTH / POTe
-      COMMON /ENDFEA/  POPcsed, POPcsealab, POPcseaf
+      COMMON /ENDFEA/  POPcsed, POPcsedlab, POPcsealab, POPcseaf
       COMMON /ENDFEMIS/ POPcs
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,
