@@ -42,7 +42,7 @@ ifeq ($(IPO),TRUE)
 
   lib: endf_unx.o ipo_out.o
 	ar -csr endf_io.a *.o
-	rm *.o
+#	rm *.o
 
   ipo_out.o: *.f90
 	ifort -x=host -O3 -real-size 64 -ipo-c endf_blklin.f90 endf_line.f90\
@@ -58,7 +58,7 @@ else
 
   lib: $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
 	ar -csr endf_io.a *.o
-	rm *.o
+#	rm *.o
 
   endf_blklin.o : endf_unx.o
   endf_line.o : $(LINIO)
