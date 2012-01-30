@@ -1,6 +1,6 @@
-Ccc   * $Rev:      $
-Ccc   * $Author:        $
-Ccc   * $Date:                                              $
+Ccc   * $Rev$
+Ccc   * $Author$
+Ccc   * $Date$
 
 Ccc
 Ccc   ********************************************************************
