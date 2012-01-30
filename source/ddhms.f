@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2376 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2377 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 07:47:46 +0100 (Mo, 30 Jän 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2376 $
+C CVS Version Management $Revision: 2377 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2376 $')
+99005 FORMAT ('  xddhms version: $Revision: 2377 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -6140,9 +6140,9 @@ c           chkpop = 0.0d0
 c           chkpopd = 0.0d0
 c           chkpopa = 0.0d0
 c           chkpopda = 0.0d0
-           DO nth = 1, NAnghms
+           DO nth = 1, NDAnghms
              csx0(nth)=0.0d0
-            ENDDO
+           ENDDO
            nspecl = min(INT(elf*ecres/DE) + 1,NDECSE)
            DO ne = 1, nspecl
              CSEhmslab(ne,1,Inxr) = DXSnxlab(ne-1,jz,jn)
@@ -6313,7 +6313,7 @@ c           chkpopd = 0.0d0
 c           chkpopa = 0.0d0
 c           chkpopda = 0.0d0
            IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-             DO nth = 1, NAnghms
+             DO nth = 1, NDAnghms
                csx0(nth)=0.0d0
               ENDDO
              ENDIF
