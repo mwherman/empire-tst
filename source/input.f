@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2380 $
+Ccc   * $Rev: 2382 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 07:53:40 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -583,8 +583,8 @@ C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
 
          IF (NEMc.GT.0 .and. aclu.le.4) THEN
-           WRITE (8,*)'WARNING: Light clusters should be included expli
-     >citly (d,t,h,a)'
+           WRITE (8,*)'WARNING: Light clusters should be included explic
+     >itly (d,t,h,a)'
            WRITE (8,*)'WARNING: Number of emitted clusters set to zero'
 	     NEMc = 0
          ENDIF
@@ -1150,9 +1150,7 @@ C        endif
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
-     &'WARNING: For HI induced reactions it is recommended Lmax~150-200'
-            WRITE (8,*)
-     &'WARNING: Increase NDLW parameter in dimension.h and recompile'
+     &'WARNING: For HI induced reactions Lmax~100-150 may be needed'
             WRITE (8,*)         
          ENDIF
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
@@ -2769,6 +2767,7 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
       ENDIF
 
       IF (FISshi(1).NE.0) THEN
+         WRITE (8,*)
          WRITE (8,99025)
 99025    FORMAT ('    Nucleus   ',6X,'Shell Corr.  Deform.',
      &           '  Fiss. barr.')
@@ -3271,11 +3270,11 @@ C
       WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
       irun = 0
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A1)',ERR = 200) name(1:1)
+      READ (5,'(A1)') name(1:1)
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
          BACKSPACE (5)
-         READ (5,'(A6,G10.5,4I5)',ERR = 200) name, val, i1, i2, i3, i4
+         READ (5,'(A6,G10.5,4I5)') name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
 C-----------Print some final input options
@@ -3283,11 +3282,12 @@ C-----------Print some final input options
                ECUtcoll = 0.
                JCUtcoll = 0
 	      ELSE
-               ecutof = 1.5d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
+                 ecutof = 1.5d0*30./A(0)**0.6666666d0
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
+                 ecutof =  2.d0*30./A(0)**0.6666666d0
 	           IF(ECUtcoll.GT.ecutof) then
                    ECUtcoll = ecutof
                    WRITE(8,*) 
@@ -3299,8 +3299,8 @@ C-----------Print some final input options
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
      &     ) ECUtcoll
             WRITE (8,
-     &'('' All levels with spin less or equal to '',I1, '' will be autom
-     &atically retrieved for DWBA calculations'')') JCUtcoll
+     &'('' Maximum spin of retrieved collective levels J <'',I1)') 
+     &     JCUtcoll
             ENDIF
 
             IF (KEY_shape.EQ.0) WRITE (8,
@@ -4022,10 +4022,15 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'DFUS  ') THEN
-            DFUs = val
-            WRITE (8,
-     &'('' Difusness in the transmission coefficients for fusion set to
-     &'',F5.2)') DFUs
+			IF(val.gt.0) THEN
+			  DFUs = val
+              WRITE (8,
+     &'('' Difusseness in the transmission coefficients for fusion set t
+     &o '',F5.2)') DFUs
+	        ELSE 
+              WRITE (8,
+     &'('' WARNING: DFUS input keyword must be > 0, reset to 1'')') 
+	        ENDIF 
             GOTO 100
          ENDIF
 C-----

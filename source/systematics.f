@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2382 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 
             
       
@@ -90,6 +90,7 @@ C------Printout
 C
        OPEN(48, FILE='SYSTEMATICS.TXT', STATUS='unknown') 
        WRITE(48,*)'Cross sections provided by systematics (mb)'
+       WRITE(48,*)' neutron induced reactions up to 20 MeV '
        WRITE(48,*)'(-1.000 indicates systematics out of range)'
        WRITE(48,*)' '
        WRITE(48,'(''          A = '',I3,''    Z = '',I3)') 
@@ -104,6 +105,7 @@ C
        WRITE(48,'('' (n,2n)       '',2G15.4)') csn2n 
        WRITE(48,'('' (n,2p)       '',2G15.4)') csn2p 
        WRITE(48,'('' (n,np)       '',15x, G15.4)') csnnp2  
+       CLOSE(48) 
        RETURN
        END
        

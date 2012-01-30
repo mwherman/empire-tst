@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2379 $
+Ccc   * $Rev: 2382 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 07:51:45 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -124,12 +124,12 @@ C--------Here the old calculated files should be read
             ENDIF
             CLOSE (45)
             IF (IOUt.EQ.5) CLOSE (46)
-            IF (IOUt.EQ.5) THEN
+            IF (IOUt.GT.1) THEN
                WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
                WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
+               WRITE (8,*)
             ENDIF
-C           NLW = maxlw
             WRITE(8,*) ' Maximum CN spin is ', maxlw
             WRITE(8,*) ' Spin dimension  is ', NDLW
             NLW = NDLW
@@ -305,7 +305,7 @@ C--------and calculate transmission coefficients
          ENDDO
 
   150    NLW = il - 1
-         maxlw = NLW
+         maxlw = min(NLW,NDLW-1)
          ABScs = CSFus
          SINlcc=0.d0
          SINl=0.d0
@@ -575,7 +575,6 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (8,*) ' ERROR: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
-C        NLW = maxlw
          WRITE(8,*) ' Maximum CN spin is ', maxlw
          WRITE(8,*) ' Spin dimension  is ', NDLW
          NLW = NDLW
@@ -595,9 +594,9 @@ C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
 C--------calculation of h.i. transmission coefficients for fusion
          maxlw = NDLW-1
          CALL HITL(stl)
-         if(NLW.GT.0) maxlw = min(NLW,maxlw)
-C        NLW = maxlw
-         WRITE(8,*) ' Maximum CN spin is ', maxlw
+         if(NLW.GT.0) maxlw = min(NDLW-1,maxlw)
+         WRITE(8,*) 
+         WRITE(8,*) ' Maximum CN spin is ', maxlw + 1
          WRITE(8,*) ' Spin dimension  is ', NDLW
          NLW = NDLW
          WRITE(8,*) 
@@ -611,7 +610,6 @@ C--------channel spin min and max
          mul = smax - smin + 1.0001
          CSFus = 0.0
          DO ip = 1, 2     ! over parity
-C         DO j = 1, NDLW !over compound nucleus spin
           DO j = 1, NLW !over compound nucleus spin
             sum = 0.0
             DO ichsp = 1, mul
@@ -932,17 +930,15 @@ C
          ELTl(i) = stl(i)
       ENDDO
       DO j = NDLW, 1, -1
-         NLW = j + 1  ! added + 1,  Oct2011
+         NLW = j 
          IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
          IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
       ENDDO
 
-
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
 C-----Plujko_new-2005
-C 400 NLW = NLW + 3
-  400 NLW = NLW + 1 + MAXmult
+  400 NLW = min(NLW + 1 + MAXmult,NDLW)
       RETURN
       END
 
@@ -1026,9 +1022,26 @@ C
    50    IF (Ein.GT.ee2) Crl = le2
          IF (Ein.LT.E1) Crl = Crl + (Ein - vmax)/(vmm - vmax)
          Csfus = 657.*(Ap + At)*Crl**2/(Ap*At*Ein)
+
+         WRITE (8,*) ' '
+         WRITE (8,*)
+     &' Fusion cross section calculated using Bass model as a reference'
+         WRITE (8,*) ' see Nucl. Phys. A231(1974)45'
+         WRITE (8,*) 
+     &     ' Nuclear potential from Phys. Rev. Lett. 39(1977)265'
+         WRITE (8,*) ' '
+         WRITE (8,*) ' Bass Barr =',sngl(Bfus),  ' Crit.L =',sngl(Crl)
+         WRITE (8,*) ' '
+         WRITE (8,*) ' Bass XS   =',sngl(Csfus),' mb'
+         WRITE (8,*) 
+
       ELSE
+
          WRITE (8,'(1X,
-     >  ''WARNING: Incident energy below fusion barrier'')')
+     >  '' WARNING: Incident energy below the Bass fusion barrier'')')
+         WRITE (8,'(1X,
+     >  '' WARNING: For the Bass model, fusion cross section = 0'')')
+         WRITE (8,*)
          Csfus = 0.d0
       ENDIF
       RETURN

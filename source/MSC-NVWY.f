@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2277 $
+Ccc   * $Rev: 2382 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -387,13 +387,9 @@ C-----determination of the initial exciton configuration for H.I.
       ENDIF
 C-----determination of the initial exciton configuration **** done ****
       EXTr = EXCn
-      IF (NLW.GT.NDLW - 1) THEN
-         WRITE (8,*) 'NDLW IS TOO SMALL FOR MSC'
-         WRITE (8,'('' INCREASE IT TO '',I3,'' AND RECOMPILE'')')
-     &          NLW + 1
-         WRITE (8,*) 'EXECUTION STOPPED'
-         STOP
-      ENDIF
+      
+      IF (NLW.GT.NDLW - 1) NLW = NDLW - 1
+      WRITE (8,*) 'Maximum momentum allowed NLW = ',NLW
 C-----calculation of factorial
       FACt(1) = 1.
       DO i = 1, 99
@@ -611,7 +607,7 @@ C--------------------------------------------------
 C-----state density printout
       WRITE (8,
      &'('' Relative population of subsequent MSC classes from the open s
-     &pace:'',/)')
+     &pace:'')')
       WRITE (8,99105) popart
       IF (NOUt.GT.1) THEN
          WRITE (8,

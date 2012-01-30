@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2277 $
+Ccc   * $Rev: 2382 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1995,7 +1995,8 @@ C-----Read line of optional input
    50 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 50
-      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i3e,i4e
+      READ(inprecord,'(A6,G10.5,4I5)',END=70,ERR=70)
+     &    namee,vale,i1e,i2e,i3e,i4e
 C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          WRITE(7,'(A6)')namee
@@ -2117,7 +2118,8 @@ C-----Read line of optional input
   150 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 150
-      READ(inprecord,'(A6,G10.5,4I5)',ERR=200)namee,vale,i1e,i2e,i3e,i4e
+      READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)
+     & namee,vale,i1e,i2e,i3e,i4e
 C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN

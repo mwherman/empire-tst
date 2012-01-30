@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2375 $
+Ccc   * $Rev: 2382 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 04:18:49 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -61,19 +61,8 @@ C--------calculate projectile+target binding energy if not done already
          IF (distrb) THEN
             CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,
      &          ecrit1,critl,csfus)
-            WRITE (8,*) ' '
-            WRITE (8,*)
-     &' Fusion cross section calculated using Bass model as a reference'
-            WRITE (8,*) ' see Nucl. Phys. A231(1974)45'
-            WRITE (8,*) 
-     &            ' Nuclear potential from Phys. Rev. Lett. 39(1977)265'
-            WRITE (8,*) ' '
-            WRITE (8,*) ' Bass Barr    =',sngl(bfu)
-            WRITE (8,*) ' Bass crit. L =',sngl(critl)
-            WRITE (8,*) ' Bass XS   =',Csfus,' mb'
-            WRITE (8,*) '------------------ '
 
-            IF (BFUs.EQ.0.0D0) THEN
+            IF (Bfu.GE.0) THEN
 C--------------calculate fusion barrier using CCFUS routine BAR
                ra = 1.233*AEJc(0)**(1./3.) - 0.978/AEJc(0)**(1./3.)
                rb = 1.233*A(0)**(1./3.) - 0.978/A(0)**(1./3.)
@@ -87,21 +76,24 @@ C--------------calculate fusion barrier using CCFUS routine BAR
                A0R = 0.63
                ETAk = 1.43997*ZEJc(0)*Z(0)
                CALL BAR(rbar,BFUs,homega)
-               WRITE (8,*) 'CCFUS fusion barrier is ', BFUs, ' MeV'
+               WRITE (8,*) 
+     &             ' CCFUS fusion barrier is ', sngl(BFUs), ' MeV'
             ENDIF
 
 C           IF distributed barrier, then BASS barriers are used
             IF (BFUs.LT.0.0D0) BFUs = bfu
 
             IF (SIG.EQ.0.0D0) SIG = 0.05*BFUs
-            IF (IOUt.GT.0) THEN
-               WRITE (8,*) 'Distributed fusion barrier with extra push='
-     &                     , EXPush
-               WRITE (8,*) 'SIG=', SIG, ' and TRUNC=', TRUnc,
+
+	      WRITE (8,*)
+            WRITE (8,*) 
+     &         ' Distributed fusion barrier with extra push=', EXPush
+            WRITE (8,*) ' SIG=', sngl(SIG), ' and TRUNC=', sngl(TRUnc),
      &                     ' has been used'
-            ENDIF
+
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
      &                NLW,NDLW)
+
             RETURN
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model

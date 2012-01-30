@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2382 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 C
       SUBROUTINE CCFUS(Stl,Rkey)
 C
@@ -91,16 +91,6 @@ Ccc   *        E1   -see above
 Ccc   *        CRL  -critical angular momentum
 Ccc   *        CSFUS-fusion x-section
       CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,ecrit1,critl,csfus)
-      WRITE (8,*) ' =================================================='
-      WRITE (8,*) ' '
-      WRITE (8,*)
-     &' Fusion cross section calculated using Bass model as a reference'
-      WRITE (8,*) ' see Nucl. Phys. A231(1974)45'
-      WRITE (8,*) ' Nuclear potential from Phys. Rev. Lett. 39(1977)265'
-      WRITE (8,*) ' '
-      WRITE (8,*) ' Bass Barr =',sngl(bfu),  ' Crit.L =',sngl(critl)
-      WRITE (8,*) ' '
-      WRITE (8,*) ' Bass XS   =',Csfus,' mb'
       WRITE (8,*) ' =================================================='
 c -- generate printout
       WRITE (8,*) ' '

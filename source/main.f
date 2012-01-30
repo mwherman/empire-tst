@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2376 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2382 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -152,7 +152,9 @@ C-----
 C-----
 C-----Print results of the systematics
 C-----
-      IF (FIRst_ein) CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
+      IF (FIRst_ein .AND. AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) 
+     >    CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
+
 C-----Clear CN elastic cross section (1/4*pi)
       elcncs = 0.0D+0           
 C-----
@@ -206,29 +208,35 @@ C
 C---- Calculate compound nucleus (CN) level density
 C
       nnuc = 1
-C     CALL INP_LD(nnur)
 
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
 
       IF (NLW.GT.JSTab(1) .and. JSTab(1).GT.0) THEN
-         NLW = JSTab(1)
-         IF (IOUt.GT.0) THEN
-            WRITE (8,'('' Maximum spin to preserve stability is'',I4)')
+          WRITE (8,
+     & '('' WARNING: Maximum spin to preserve stability is'',I4)')
      &             JSTab(1)
+          WRITE (8,
+     & '('' WARNING: Calculations will be truncated at this limit'')')
+          WRITE (8,
+     & '('' WARNING: Maximum stable spin (rot. limit) Jstab < '',I3)') 
+     & Jstab(1) + 1
+          IF(Jstab(1).LE.NDLW) then
+            ftmp1 = 0.d0
+            DO j = Jstab(1), min(NDLW,NLW)
+              ftmp1 = ftmp1 + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
+              POP(NEX(1),j,1,1) = 0.0
+              POP(NEX(1),j,2,1) = 0.0
+            ENDDO
+            CSFus = CSFus - ftmp1
+            WRITE (8,'('' WARNING: Some fusion cross section lost : '',
+     & F9.3)') ftmp1, ' mb, due to the stability limit' 
+          ELSE
             WRITE (8,
-     &             '('' Calculations will be truncated at this limit'')'
-     &             )
-            WRITE (8,
-     &            '('' part of the fusion cross section will be lost'')'
-     &            )
-         ENDIF
-         DO j = NLW + 1, NDLW
-            CSFus = CSFus - POP(NEX(1),j,1,1) - POP(NEX(1),j,2,1)
-            POP(NEX(1),j,1,1) = 0.0
-            POP(NEX(1),j,2,1) = 0.0
-         ENDDO
-         RETURN
+     & '('' WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
+     & )')
+	    ENDIF
+          NLW = min(JSTab(1),NDLW)
       ENDIF
 
       csmax = 0.d0
@@ -689,16 +697,7 @@ C-----------print transmission coefficients
       ENDDO     !over nuclei (nnuc)
 C
 C-----determination of transmission coeff.--done
-C
-C-----LEVEL DENSITY for residual nuclei 
-C     DO nnur = 2, NNUct
-C        IF (NEX(nnur).LE.0) cycle
-C        CALL INP_LD(nnur)
-C     ENDDO
-C-----determination of the residual nucleus level density done
-C
 99011 FORMAT (1X,14(G10.4,1x))
-
 C
 C     Skipping all emission calculations
 C     GOTO 99999
@@ -1332,7 +1331,7 @@ C--------
             CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)                  
             CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
             CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
-            WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
+C           WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             IF (nvwful) GOTO 1500
          ENDIF
 
