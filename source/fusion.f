@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2247 $
+Ccc   * $Rev: 2379 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 07:32:46 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-01-30 07:51:45 +0100 (Mo, 30 Jän 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -297,37 +297,14 @@ C--------and calculate transmission coefficients
             CSFus = CSFus + csvalue*(2*(il-1)+1)*coef
             IF (stl(il).GT.1.0D0) THEN
                WRITE (8,
-     &'(''WARNING: INPUT FUSION TRANSMISSION > 1'', '' FOR l='',
-     &I3)') il - 1
-               WRITE (8,*) ' EXECUTION STOPPED!!!'
+     &'('' ERROR: INPUT FUSION TRANSMISSION > 1'', '' FOR l='',I3)') 
+     & il - 1
+               WRITE (8,*) ' FATAL: EXECUTION STOPPED!!!'
                STOP
             ENDIF
          ENDDO
 
   150    NLW = il - 1
-C--------if FUSREAD true read l distribution of fusion cross section
-C--------and calculate transmission coefficients
-C        el = EINl
-C        CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
-C        wf = ak2/10.D0
-C        DO j = 1, NDLW
-C           READ (11,*,END = 150) csvalue
-C           stl(j) = csvalue*wf/PI/(2*j - 1)
-C           IF (stl(j).GT.1.0D0) THEN
-C              WRITE (6,*) ' '
-C              WRITE (6,
-C    &'(''TOO LARGE INPUT FUSION CROSS SECTION'',              '' FOR l=
-C    &'',I3,'' RESULTING Tl>1'')') j - 1
-C              WRITE (6,*) ' EXECUTION STOPPED!!!'
-C              STOP
-C           ENDIF
-C        ENDDO
-C 150    NLW = j - 1
-C        CSFus = 0.d0
-C        DO j = 1, NLW
-C           CSFus = CSFus + (2*j - 1)*stl(j)
-C        ENDDO
-
          maxlw = NLW
          ABScs = CSFus
          SINlcc=0.d0
