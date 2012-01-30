@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
+Ccc   * $Rev: 2375 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-01-30 04:18:49 +0100 (Mo, 30 Jän 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -203,13 +203,11 @@ C
          WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'WARNING: None of the requested isotopes is '
-            WRITE (8,*)'WARNING: included in the selected potential.'
-            WRITE (8,*)
-     &                 'WARNING: File with RIPL discrete levels can not'
-            WRITE (8,*)'WARNING: be created.                    '
-            WRITE (8,*)
-     &                 'WARNING: Default collective levels will be used'
+            WRITE (8,*)'WARNING: Rigid rotor CC potential selected but '
+            WRITE (8,*)'WARNING: no isotopes defined for this OMP     '
+            WRITE (8,*)'ERROR: Error in RIPL database.                '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
+            WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
          ncalc = 0
@@ -222,7 +220,8 @@ C
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)'WARNING: RIPL OMP NCOll(target) not defined'
+            WRITE (8,*)'WARNING: RIPL CC rigid rotor NCOll(target) = 0 '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -396,13 +395,11 @@ C
          coll_defined = .TRUE.
          WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'WARNING: None of the requested isotopes is '
-            WRITE (8,*)'WARNING: included in the selected potential.'
-            WRITE (8,*)
-     &                 'WARNING: File with RIPL discrete levels can not'
-            WRITE (8,*)'WARNING: be created.                    '
-            WRITE (8,*)
-     &                 'WARNING: Default collective levels will be used'
+            WRITE (8,*)'WARNING: Vibrat. CC potential selected but    '
+            WRITE (8,*)'WARNING: no isotopes defined for this OMP     '
+            WRITE (8,*)'ERROR: Error in RIPL database.                '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
+            WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
          ncalc = 0
@@ -415,7 +412,9 @@ C
             GOTO 300
          ENDIF
          IF (NVIb(ncalc).EQ.0) THEN
-            WRITE (8,*)'WARNING: RIPL OMP NVIb(target) not defined'
+            WRITE (8,*)'WARNING: RIPL CC vibr. OMP NVIb(target) = 0    '
+            WRITE (8,*)'ERROR: Error in RIPL database.                 '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
@@ -465,7 +464,7 @@ C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc
             WRITE (8,*) 
      &  'WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
-     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'
+     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
             WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
 
@@ -583,12 +582,11 @@ C
          coll_defined = .TRUE.
          WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'ERROR: None of the requested isotopes is   '
-            WRITE (8,*)'ERROR: included in the selected potential !'
-            WRITE (8,*)
-     &      'ERROR: File with RIPL discrete levels can not be created'
-            WRITE (8,*)'ERROR: No default hamiltonian is available '
-            WRITE (8,*)'ERROR: for the soft rotor model !          '
+            WRITE (8,*)'ERROR: Soft rotor potential selected but      '
+            WRITE (8,*)'ERROR: no isotopes defined for this OMP.      '
+            WRITE (8,*)'ERROR: Error in RIPL database.                '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
+            WRITE (8,*)'ERROR: Change your selected RIPL potential    '
             WRITE (8,*)'ERROR: EMPIRE stops'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
@@ -598,15 +596,20 @@ C
             IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (8,*)'ERROR: Target nucleus not listed in RIPL OMP'
+            WRITE (8,*)'ERROR: Soft rotor potential selected but    '
+            WRITE (8,*)'ERROR: target nucleus not listed in RIPL OMP'
+            WRITE (8,*)'ERROR: No default hamiltonian is available  '
+            WRITE (8,*)'ERROR: for the soft rotor model !           '
             WRITE (8,*)'ERROR: EMPIRE stops !'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
 
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)
-     &       'ERROR: RIPL soft rotor OMP NCOLL(target) not defined '
-            WRITE (8,*)'ERROR: for selected nucleus, EMPIRE stops !'
+            WRITE (8,*)'ERROR: Soft rotor potential selected but zero'
+            WRITE (8,*)'ERROR: CC levels are available, error in RIPL'
+            WRITE (8,*)'ERROR: Report to r.capotenoy@iaea.org        '
+            WRITE (8,*)'ERROR: Change your selected RIPL potential '
+            WRITE (8,*)'ERROR: EMPIRE stops !'
             STOP       'ERROR: EMPIRE stops'
          ENDIF
 C

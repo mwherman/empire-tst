@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2373 $
+Ccc   * $Rev: 2375 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 00:07:47 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-30 04:18:49 +0100 (Mo, 30 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -312,15 +312,15 @@ C--------        Default value 0. i.e. none but those selected automatically
          JCUtcoll = 4
 C--------set fission defaults
          DO nnuc = 1, NDNUC
-           FISbar(nnuc) = 1     ! RIPL-3 empirical fission barriers 
-C          FISbar(nnuc) = 3     ! RIPL-3 HFB barriers
+           FISbar(nnuc) = 1  ! RIPL-3 empirical fission barriers 
+C          FISbar(nnuc) = 3  ! RIPL-3 HFB barriers
 C
-           FISden(nnuc) = 0     ! EGSM NLD at saddle points 
-C          FISden(nnuc) = 3     ! HFB NLD
+           FISden(nnuc) = 0  ! EGSM NLD at saddle points 
+C          FISden(nnuc) = 3  ! HFB NLD
 C
-           FISmod(nnuc) = 0     ! Single-modal fission
+           FISmod(nnuc) = 0  ! Single-modal fission
            FISopt(nnuc) = 0
-           FISDIS(nnuc) = 0     ! no discrete transition states except fundamental
+           FISDIS(nnuc) = 0  ! no discrete transition states except fundamental
          ENDDO
 C
 C--------CCFUS parameters
@@ -621,7 +621,7 @@ C--------set reaction string
 C
          IF(iz. ge. 90 .and. iz. le. 98) then ! only from Th to Cf
 C          retrieving NUBAR if available
-           IF(IOPsys .EQ. 1) then  !Linux, Mac
+           IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
 C            CHECKING and READING the file data/nubar.endf      
 C
