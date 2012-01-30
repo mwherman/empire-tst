@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2376 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2378 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-01-30 07:48:45 +0100 (Mo, 30 Jän 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -115,6 +115,7 @@ C
                 CSEpg(il)  = CSEpg(il) + pop1
 C
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
+C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
                 CYCLE ! for primary gammas no further processing is needed 
             
               ENDIF
@@ -137,14 +138,16 @@ C
    
             IF (popll.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
-                  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
+C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
+                  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
                ELSE
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
             IF (poph.NE.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
-                  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
+C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
+                  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
                ELSE
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
                ENDIF
@@ -229,7 +232,8 @@ C        fission of n,nx and npx nuclei considered
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
 C           DO iejc = 0, NDEJC
-            DO iejc = 0, 1  ! only neutrons and photons for the time being
+C           DO iejc = 0, 1  ! only neutrons and photons for the time being
+            DO iejc = 1, 1  ! only neutrons for the time being
               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
      &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
      &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -307,7 +311,11 @@ C-----------DDX spectra using portions
       END
 
 
-      SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
+C     SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
+C   
+C     Index Il needed if discrete levels are going to be treated (see ### below)    
+C 
+      SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,   Popt)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -383,6 +391,10 @@ C-----DE spectra
      &                = POPcse(0,iejc,iesp,INExc(Nnur))
      &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
 C---------------------Store also population spectra for discrete levels 
+C   
+C     ### Index Il as a dummy parameter of the routine. It is needed to uncomment this part
+C         SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
+C 
 C                      POPcselv(Il,iejc,iesp,INExc(Nnur)) 
 C     &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
 C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor

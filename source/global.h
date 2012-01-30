@@ -1,6 +1,6 @@
-C $Rev: 2376 $
-C $Author: bcarlson $
-C $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
+C $Rev: 2378 $
+C $Author: rcapote $
+C $Date: 2012-01-30 07:48:45 +0100 (Mo, 30 Jän 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -103,7 +103,10 @@ C
      &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
      &                 0:ndexclus), POPhmsx(ndecsed,2,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
-     &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),
+C
+C                      This array is only used in EXCLUSIVEL, commented 
+C    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),
+C
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
@@ -203,7 +206,11 @@ C
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
-     &                 D_nno, CSPfis, RECoil, POPcselv
+     &                 D_nno, CSPfis, RECoil
+C
+C                      This array is only used in EXCLUSIVEL, commented 
+C    &                 , POPcselv
+C
       COMMON /GSM_SYS/ om2_ig,delp_ig,atil_ig,dshift_ig
 C
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
