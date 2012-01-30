@@ -56,7 +56,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('TARGET_COLL.DAT', 'TARGET_COLL.RIPL', 'warnings', 'INPUT')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP')
-    rm('SENSITIVITY.MATRIX')
+    rm('SENSITIVITY.MATRIX'.)
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
         glob('*.LEG') + glob('TARGET-*.tl') )
     
@@ -121,10 +121,12 @@ def runE(proj):
     if not isEmpty(proj+'.rng'):
         cp(proj+'.rng','R250SEED.DAT')
         print('Using existing random number generator seed')
+    if not isEmpty(proj+'-nubar.endf'):
+        cp(proj+'-nubar.endf','NUBAR-EVAL.ENDF')
+        print('Using existing evaluated NUBAR file')
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
-    if not isEmpty(proj+'-nubar.endf'):
-        ln(proj+'-nubar.endf','NUBAR-EVAL.ENDF')    
+
 	
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -255,7 +257,8 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl') )
-    rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
+    # rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
+    rm('TARGET.LEV','OMP_A.DAT')
     rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
     rm('c4sort.scr')        
