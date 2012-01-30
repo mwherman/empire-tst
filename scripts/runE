@@ -123,7 +123,9 @@ def runE(proj):
         print('Using existing random number generator seed')
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
-    
+    if not isEmpty(proj+'-nubar.endf'):
+        ln(proj+'-nubar.endf','NUBAR-EVAL.ENDF')    
+	
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
     sys.stdout.flush() # print in correct order under 'qsub'
@@ -253,7 +255,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl') )
-    rm('TARGET.LEV','OMP_A.DAT')
+    rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
     rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
     rm('c4sort.scr')        
