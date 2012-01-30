@@ -2,8 +2,8 @@
      * NDNUC= 100
      *,NDEXCLUS = 15
      *,NDEJC=6
-     *,NDEX= 151
-     *,NDLW= 40
+     *,NDEX= 101
+     *,NDLW= 50
      *,LEVCC=20
      *,NDLV=40
      *,NDBR=40

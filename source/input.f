@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2375 $
+Ccc   * $Rev: 2380 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 04:18:49 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-30 07:53:40 +0100 (Mo, 30 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -556,8 +556,6 @@ C-----------GAMMA EMISSION
          QCC(1) = -e2p
          QCC(2) = -e3m
 
-         ECUtcoll = 3*30./A(0)**0.666666666666d0
-
 C--------product of target and projectile parities
 C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
 C        RCN, We assume is only the target parity !!!
@@ -575,22 +573,52 @@ C--------NEMP  number of protons  emitted
          READ (5,*) nemp
 C--------NEMA  number of alphas   emitted
          READ (5,*) nema
-C--------NEMC  number of deuterons emitted
+C--------NEMD  number of deuterons emitted
          READ (5,*) nemd
-C--------NEMC  number of tritons   emitted
+C--------NEMT  number of tritons   emitted
          READ (5,*) nemt
-C--------NEMC  number of he3       emitted
+C--------NEMH  number of he3       emitted
          READ (5,*) nemh
 C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
+
+         IF (NEMc.GT.0 .and. aclu.le.4) THEN
+           WRITE (8,*)'WARNING: Light clusters should be included expli
+     >citly (d,t,h,a)'
+           WRITE (8,*)'WARNING: Number of emitted clusters set to zero'
+	     NEMc = 0
+         ENDIF
+
+         IF (NEMc.GT.0 .OR.  NDEjc.EQ.7) THEN
+           WRITE (8,*)
+     >' WARNING: Emission of clusters is disabled in EMPIRE-3.1 version'
+           WRITE (8,*)
+     >' WARNING: Contact authors if interested to calculate them at:   '
+           WRITE (8,*)
+     >' WARNING: Number of emitted clusters set to zero'
+	     NEMc = 0
+           IF(NDEjc.EQ.7) THEN
+             WRITE (8,*)
+     >' ERROR: You must set NDEjc=6 in dimension.h and recompile EMPIRE'
+             STOP 
+     >' ERROR: You must set NDEjc=6 in dimension.h and recompile EMPIRE'
+           ENDIF
+         ENDIF
+
          IF (NEMc.GT.0 .and. NDEjc.EQ.6) THEN
            WRITE (8,*) ' '
            WRITE (8,*) ' WARNING: TO EMIT CLUSTERS change NDEJC to ',
      >                 7,' in dimension.h'
            STOP 'You have to increase NDEjc in dimension.h'
          ENDIF
+
 C--------cluster ejectile
-         IF (NDEJC.GT.6) THEN
+         IF (NDEJC.GT.6 .and. NEMc.GT.0) THEN
+C
+C           Emission of these clusters may be allowed providing
+C           OMP are retrieved from older EMPIRE versions and compiled
+C           into RIPL  
+C
             AEJc(NDEJC) = aclu
             ZEJc(NDEJC) = zclu
             SEJc(NDEJC) = 0.5
@@ -949,7 +977,11 @@ C-----------(McFadden global potential 9100 could be used)
             KTRlom(4,i) = 6200
             KTRlom(5,i) = 7100
             KTRlom(6,i) = 8100
-c           KTRlom(NPRoject,i) = KTRlom(0,0)
+C
+C           KTRlom(NDEJC,i) = xxx  ! default potential for cluster emission
+C                                 ! that needs to be compiled into RIPL
+C
+            KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
 
 C
@@ -979,7 +1011,11 @@ C
          IF(DIRECT.LT.-0.1) DIRECT = 0 ! Restoring the default to zero
                                        ! if DIRECT not present in the input
 
-         IF(DIRECT.GT.1.9) KTRlom(NPRoject,NTArget) = KTRompcc
+         IF(DIRECT.GT.1.9 .and. KTRompcc.eq.0) 
+     >      KTRompcc = KTRlom(NPRoject,NTArget)
+
+         IF(DIRECT.GT.1.9 .and. KTRompcc.ne.0) 
+     >      KTRlom(NPRoject,NTArget) = KTRompcc
 
          IF(ENDf(NTArget).EQ.10) ENDf(NTArget)=1
          IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
@@ -2544,7 +2580,7 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
  	    IF(nejc.eq.6) WRITE (12,*) 
      &      'He-3      o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
-          IF (NEMc.GT.0) WRITE (12,*)
+          IF (NEMc.GT.0 .and. nejc.eq.NDEJC) WRITE (12,*)
      &      'Cluster   o. m. parameters: RIPL catalog number ',
      &       KTRlom(NDEJC,nnur)
 	  ENDDO
@@ -2802,7 +2838,7 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
  	    IF(nejc.eq.6) WRITE (8,*) 
      &      'He-3      o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
-          IF (NEMc.GT.0) WRITE (8,*)
+          IF (NEMc.GT.0 .and. nejc.eq.NDEJC) WRITE (8,*)
      &      'Cluster   o. m. parameters: RIPL catalog number ',
      &       KTRlom(NDEJC,nnur)
 	  ENDDO
@@ -3117,11 +3153,7 @@ C
 C      By default, no covariance calculation is done
 C
       IPArCOV = 0
-C     Moved to io.h
-C     OPEN(95,FILE='COVAR.DAT',STATUS='UNKNOWN')
-C-----Go to the end of the COVAR.DAT file
-C  10 READ(95,*,END=11) dum
-C     GOTO 10
+
    11 CONTINUE
 
       WRITE (8,*)'                        __________________________'
@@ -3239,7 +3271,7 @@ C
       WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
       irun = 0
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A1)') name(1:1)
+      READ (5,'(A1)',ERR = 200) name(1:1)
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
          BACKSPACE (5)
@@ -3250,7 +3282,27 @@ C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
                JCUtcoll = 0
+	      ELSE
+               ecutof = 1.5d0*30./A(0)**0.6666666d0
+               IF(ECUtcoll.LE.0) THEN
+                 ECUtcoll=ecutof 
+                 JCUtcoll = 4
+               ELSE
+	           IF(ECUtcoll.GT.ecutof) then
+                   ECUtcoll = ecutof
+                   WRITE(8,*) 
+     & ' WARNING: INPUT ECDWBA value > Ecut,ECDWBA set to ',sngl(ecutof)
+                 ENDIF 
+                 IF(JCUTcoll.GT.4) JCUtcoll = 4
+               ENDIF
+               WRITE (8,
+     &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
+     &     ) ECUtcoll
+            WRITE (8,
+     &'('' All levels with spin less or equal to '',I1, '' will be autom
+     &atically retrieved for DWBA calculations'')') JCUtcoll
             ENDIF
+
             IF (KEY_shape.EQ.0) WRITE (8,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
             IF (KEY_shape.EQ.1) WRITE (8,
@@ -3458,16 +3510,6 @@ C           EcDWBA meaningless if Collective level file exists
             ENDIF
             ECUtcoll = val
             JCUtcoll = i1
-            ecutof = 2.*30./A(0)**0.666666666666d0
-            IF (ECUtcoll.LT.0.1 .or. ECUtcoll.GT.ecutof) ECUtcoll=ecutof
-            IF (JCUtcoll.EQ.0 .or. JCUTcoll.GT.8) JCUtcoll = 4
-C
-            WRITE (8,
-     &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
-     &     ) ECUtcoll
-            WRITE (8,
-     &'('' All levels with spin less or equal to '',I1,           '' con
-     &sidered in DWBA'')') JCUtcoll
             GOTO 100
          ENDIF
 C-----
