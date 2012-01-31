@@ -70,4 +70,4 @@ else
 endif
 
 clean:
-	rm *.mod endf_io.a
+	rm *.mod endf_io.a *.o
