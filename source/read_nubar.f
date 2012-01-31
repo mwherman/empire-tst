@@ -24,7 +24,6 @@ C
       integer*4 np
 
       type (endf_mat) nubar_mat
-      !type (mat), pointer :: p_nubar_mat
       type (mf_1), pointer :: mf1
 
       ierr = 0 
@@ -35,23 +34,22 @@ C
       allocate(nubar_mat%mf1)
 
       call find_mf(infile(1:nin),nubar_mat)
-C
-C     Checking the right material
-C        with mf1%za = iza
-C
+      
+c      write(*,*) 'Mat= ', nubar_mat%mat
+c      stop
+
       mf1 => nubar_mat%mf1
       do while(associated(mf1))
-C        retrieving %za = izatmp (e.g. 9.023100+4)
-         if( NINT(mf1%mt456%za) .eq. izatmp) exit
-         mf1 => mf1%next
-      enddo
-    
-      if( .not.(associated(mf1) )) then
+         if(mf1%mt .eq. 456) exit
+	 mf1 => mf1%next
+      end do
+      
+      if(.not.(associated(mf1))) then
           write(8,*) ' WARNING: MT456 not found in ',infile(1:nin)
           write(8,*) ' WARNING: for fissioning nucleus (IZA):',izatmp
           write(8,*) ' WARNING: Evaluated nubar will not be available'
           ierr = 1
-          return
+	  return
       endif 
       
       if(mf1%mt456%lnu .eq. 2) then
@@ -63,13 +61,13 @@ C        retrieving %za = izatmp (e.g. 9.023100+4)
           np = NDEPFN 
         endif
 
-c       Assigning energies to eniu_eval and converting to MeV
+c	Assigning energies to eniu_eval and converting to MeV
         eniu_eval(1:np) = mf1%mt456%tb%dat%x/1.d6
-c       Assigning nubars to vniu_eval
+c	Assigning nubars to vniu_eval
         vniu_eval(1:np) = mf1%mt456%tb%dat%y
-        num_niu = np
+	num_niu = np
 
-      else
+       else
 
         write(8,*) ' WARNING: Reading nubar (MT=456) in ',infile(1:nin)
         write(8,*) ' WARNING: Only lnu=2 reading in MT=456 implemented!'
@@ -79,43 +77,64 @@ c       Assigning nubars to vniu_eval
 
       endif
       
-      call del_mf(mf1) 
+      call del_mf(mf1)
+
+
+
+
+C
+C     Checking the right material
+C        with mf1%za = iza
+C
+c      mf1 => nubar_mat%mf1
+c      do while(associated(mf1))
+C        retrieving %za = izatmp (e.g. 9.023100+4)
+c         if( NINT(mf1%mt456%za) .eq. izatmp) exit
+c         mf1 => mf1%next
+c      enddo
+     
 
       return      
       END
 
-      real*8 FUNCTION fniu_nubar_eval(entmp)
 
-      real*8 entmp 
+
+
+      real*8 FUNCTION fniu_nubar_eval(entmp)
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+      
+      real*8, intent(in) :: entmp
+      
+      integer*4 i
+      real*8 xnus
+
 C
 C     Getting global values from common blocks
 C     eniu_eval
 C     vniu_eval
 C     num_niu 
 
-      integer i
- 
-      fniu_nubar_eval = vniu_eval(1)
-      if(entmp.lt.1.d-11) RETURN
-
-      if(entmp.gt.eniu_eval(num_niu)) then
-         WRITE(8,*) 
+      if(entmp .lt. eniu_eval(1)) then
+        fniu_nubar_eval = vniu_eval(1)
+        RETURN
+      else if(entmp .ge. eniu_eval(num_niu)) then
+        i=num_niu
+        WRITE(8,*) 
      &   ' WARNING: In NUBAR reading, the incident Einc=', sngl(entmp),
      &   ' > Emax_ENDF=', eniu_eval(num_niu)
-         WRITE(8,*) ' WARNING: Assumed that nubar(E) = nubar(Emax_ENDF)'
-         fniu_nubar_eval = vniu_eval(num_niu)
-         return
+	write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
+      else
+        do i=1,num_niu
+          if(Eniu_eval(i) .gt. en) exit
+        enddo
       endif
       
-      do i=1,num_niu
-        if(eniu_eval(i).gt.entmp) exit
-      enddo
-      fniu_nubar_eval = vniu_eval(i-1) +
-     &   (vniu_eval(i)-vniu_eval(i-1))*(entmp-eniu_eval(i-1))/
-     &   (eniu_eval(i)-eniu_eval(i-1))
+      xnus = (Vniu_eval(i)-Vniu_eval(i-1))/(Eniu_eval(i)-Eniu_eval(i-1))
+
+      fniu_nubar_eval = Vniu_eval(i-1) + xnus*(entmp-Eniu_eval(i-1))
+
 
       return
       end

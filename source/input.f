@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2386 $
+Ccc   * $Rev: 2397 $
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-30 18:14:00 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-01-31 21:59:11 +0100 (Di, 31 Jän 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -651,16 +651,16 @@ C
 C          retrieving NUBAR if available
            IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
-C            CHECKING and READING the file data/nubar.endf      
+C            CHECKING for the presence of the file 'NUBAR-EVAL.ENDF'
+C            in the local directory
 C
+             nubar_filename = 'NUBAR-EVAL.ENDF'
+             len_nubar_filename = len_trim(nubar_filename) 
+             INQUIRE(FILE=nubar_filename,EXIST=fexist_nu)
 
-C            nubar_filename = 'NUBAR-EVAL.ENDF'
-C            len_nubar_filename = len_trim(nubar_filename) 
-C            INQUIRE(FILE='NUBAR-EVAL.ENDF',EXIST=fexist_nu)
-C
-C            IF(fexist_nu) then
-C
-C              NUBarread = .TRUE.
+            IF(fexist_nu) then
+
+              NUBarread = .TRUE.
 C------------------------------------------------------------------------------------
 C            To uncomment (till endif) once read_nubar.f is fixed 
 C            to use either the local file NUBAR-EVAL.ENDF or the EMPIRE database data/nubar.endf
@@ -674,7 +674,7 @@ C              len_nubar_filename = len_trim(nubar_filename)
 C              INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
 C    &               EXIST=NUBarread)
 C
-C            endif
+            endif
 C------------------------------------------------------------------------------------
 
 C
