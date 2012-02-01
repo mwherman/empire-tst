@@ -8,8 +8,11 @@
 makList = *.mak
 
 
-all:
+all: zvview.exe
 	@for makfile in $(makList); do (echo $$makfile; $(MAKE) -f $$makfile); done
 
 clean:
 	rm *.o
+
+zvview.exe:
+	python pickZVView.py
