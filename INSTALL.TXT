@@ -1,0 +1,105 @@
+                 E M P I R E  3.1 (Rivoli)
+               Sao Jose dos Campos, Brazil   
+                       June 2011
+                    Upton, NY, USA   
+                      January 2012
+
+
+EMPIRE 3.1 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X (10.5 and higher).  
+It can also be run on Windows with either the MinGW and Cygwin environments.  EMPIRE is provided 
+as a source code that must be compiled to function.
+
+Required:
+    Fortran90 compiler: gfortran (version XXX or higher) or ifort (version ...)
+    C/C++ compiler
+    Python, Tcl/Tk
+
+Recommended:
+    ActiveTcl extension to Tcl/Tk
+
+
+
+Graphical Installation 
+======================
+
+
+
+Non-graphical Installation
+==========================
+
+1)  Download the following files from http://www.nndc.bnl.gov/empire-3.1/ and place 
+    them in the same temporary directory (e.g. ~/empire-tmp/):
+
+        setup.sh
+        EMPIRE-3.1-RIVOLI.tgz
+        level-densities-hfb.tgz [Optional]
+        C4-latest.tgz [Optional]
+        ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz [Optional - for Linux]
+        ActiveTcl8.4.19.5.19.294317-macosx-universal-threaded.dmg [Optional - for Mac OSX]
+
+2)  Run the setup.sh script
+
+        $ sh install.sh
+
+    Then follow the on screen instructions.  The installation script will detect whether 
+    the optional files are present in your temporary directory and attempt to install them.
+    On the Mac, you may need to install the ActiveTcl package manually.  If so, follow the 
+    manual instructions below.
+
+
+To run empire you may create a working subdirectory of your empire root 
+[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
+
+    $ mkdir Fe56new
+    $ cd Fe56new
+    $ ../scripts/Xrun.tcl & 
+
+
+
+Manual Installation
+===================
+
+1)  Download the files listed above in the non-graphical installation.
+
+2)  Unpack EMPIRE-3.1-RIVOLI.tgz
+
+        $ tar xzf EMPIRE-3.1-RIVOLI.tgz
+
+    This will unpack to a directory called EMPIRE-3.1-RIVOLI/.
+    Once the distribution is unpacked, you may rename the this level directory.
+
+3)  Build the package
+
+        $ cd EMPIRE-3.1-RIVOLI
+        $ make
+
+4)  [Optional] Unpack the HFB level densities
+    Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
+       corresponding subdirectory RIPL/densities/total/level-densities-hfb 
+       (if you plan to use RIPL HFB level densities)
+
+5)  [Optional] Unpack the EXFOR data
+    Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
+       EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
+       data.  One is available on the EMPIRE download site and from the IAEA at
+       http://www-nds.iaea.org/x4toc4-master/.   Once you unzip it, run the 
+       parseC4.py script.
+
+6)  [Optional] Install ActiveTcl
+
+7)  [Optional] Add $EMPIREXXX to your .bashrc or .cshrc
+
+
+To run empire you may create a working subdirectory of your empire root 
+[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
+
+    $ mkdir Fe56new
+    $ cd Fe56new
+    $ ../scripts/Xrun.tcl & 
+
+
+
+Good calculations !
+The EMPIRE team
+_______________________________________________________________________
+Report problems to: r.capotenoy@iaea.org (IAEA); mwherman@bnl.gov (BNL)
