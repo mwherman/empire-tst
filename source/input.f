@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2397 $
+Ccc   * $Rev: 2405 $
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-31 21:59:11 +0100 (Di, 31 Jän 2012) $
+Ccc   * $Date: 2012-02-01 21:01:35 +0100 (Mi, 01 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -661,21 +661,17 @@ C
             IF(fexist_nu) then
 
               NUBarread = .TRUE.
-C------------------------------------------------------------------------------------
-C            To uncomment (till endif) once read_nubar.f is fixed 
-C            to use either the local file NUBAR-EVAL.ENDF or the EMPIRE database data/nubar.endf
-C 
-C            else              
+
+            else              
 C
 C              CHECKING and READING the file data/nubar.endf      
 C
-C              nubar_filename = trim(empiredir)//'/data/nubar.endf'
-C              len_nubar_filename = len_trim(nubar_filename) 
-C              INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
-C    &               EXIST=NUBarread)
+              nubar_filename = trim(empiredir)//'/data/nubar.endf'
+              len_nubar_filename = len_trim(nubar_filename) 
+              INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
+     &               EXIST=NUBarread)
 C
             endif
-C------------------------------------------------------------------------------------
 
 C
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
@@ -685,7 +681,7 @@ C
              IF(NUBarread) THEN 
 
                CALL READNUBAR(trim(nubar_filename),len_nubar_filename,
-     &                        ierr, ia, iz)
+     &                        ierr)
 
                if(ierr.gt.0) NUBarread = .FALSE.
 
