@@ -88,38 +88,47 @@ Manual Installation
 
         $ cd EMPIRE-3.1-RIVOLI/
         $ make
+        $ cd ~/empire-tmp/
 
 4)  [Optional] Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
-       corresponding subdirectory RIPL/densities/total/level-densities-hfb 
-       (if you plan to use RIPL HFB level densities)
+    corresponding subdirectory RIPL/densities/total/level-densities-hfb (if you plan to use 
+    RIPL HFB level densities):
 
         $ cd EMPIRE-3.1-RIVOLI/RIPL/densities/total/
-        $ tar xzf $sourcedir/level-densities-hfb.tgz
+        $ tar xzf ~/empire-tmp/level-densities-hfb.tgz
+        $ cd ~/empire-tmp/
 
 5)  [Optional] Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
-    EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
-    data.  
+    (EXFOR/) to get the automatic retrieval and plotting of EXFOR experimental 
+    data:
 
-        $ tar xzf $sourcedir/C4-latest.tgz
+        $ cd EMPIRE-3.1-RIVOLI/
+        $ tar xzf ~/empire-tmp/C4-latest.tgz
+        $ cd ~/empire-tmp/
 
-    you can update the EXFOR files by downloading the latest ...
+    You may also update the EXFOR files yourself using the latest version available from 
+    the IAEA at http://www-nds.iaea.org/x4toc4-master/.   The C4 formatted source files 
+    have names like C4-Dec-11-2012.zip.  Unzip it, in the EMPIRE-3.1-RIVOLI/EXFOR/ directory 
+    and run the parseC4.py script:
 
-    One is available on the EMPIRE download site and from the IAEA at
-       http://www-nds.iaea.org/x4toc4-master/.   Once you unzip it, run the 
-       parseC4.py script.
+        $ python parseC4.py C4-Dec-11-2012.x4c4
 
 6)  [Optional] Install ActiveTcl
 
-    On MacOSX systems:
+    On MacOSX systems download the dmg file and click on it using your file manager and 
+    follow the installation instructions.
 
     On Linux systems:
-        $ tar xzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
+        $ tar xzf ~/empire-tmp/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
         $ cd ActiveTcl8.4.7.0-linux-ix86/
         $ sh install.sh
+        $ cd ~/empire-tmp/
 
-6)  After this is all completed, you may more or rename your empire directory
+6)  After this is all completed, you may move or rename your empire directory and delete 
+    the temporary directory.
 
-7)  [Optional] Add $EMPIREDIR to your .bashrc or .cshrc and put empire in your $PATH:
+7)  [Optional] Add $EMPIREDIR to your .bashrc or .cshrc and put empire in your $PATH.  In
+    this step, we assume that your files are in the directory $instdir:
 
     For a sh or similar perform
         EMPIREDIR="'$instdir'" 
@@ -131,7 +140,7 @@ Manual Installation
         setenv PATH "'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
         export EMPIREDIR PATH 
 
-    Mac ZVView installed, please set:
+    On the Mac, to make sure zvview works, you must also add to your bashrc file:
         export DISPLAY=:0
 
 To run empire you may create a working subdirectory of your empire root 
