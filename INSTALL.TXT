@@ -5,12 +5,12 @@
                       January 2012
 
 
-EMPIRE 3.1 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X (10.5 and higher).  
-It can also be run on Windows with either the MinGW and Cygwin environments.  EMPIRE is provided 
-as a source code that must be compiled to function.
+EMPIRE 3.1 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X (10.5 
+and higher).  It can also be run on Windows with either the MinGW and Cygwin 
+environments.  EMPIRE is provided as source code that must be compiled to function.
 
 Required:
-    Fortran90 compiler: gfortran (version XXX or higher) or ifort (version ...)
+    Fortran90 compiler: gfortran (version 4.4 on Linux or 4.6 on MacOSX or higher) or ifort (version 11?)
     C/C++ compiler
     Python, Tcl/Tk
 
@@ -22,12 +22,28 @@ Recommended:
 Graphical Installation 
 ======================
 
+EMPIRE now has a graphical installer using IzPack.  To use it, download either the base 
+distribution () or the full, web-based distribution ().
+Then execute the jar file:
+
+    $ java -jar EMPIRE-3.1-base.jar
+
+On both MacOSX and Linux systems, you can do this by simply clicking on the jar file 
+from a file manager.  This installer has been tested on Linux and MacOSX.
+
+To run empire you may create a working subdirectory of your empire root 
+[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
+
+    $ mkdir Fe56new
+    $ cd Fe56new
+    $ ../scripts/Xrun.tcl & 
+
 
 
 Non-graphical Installation
 ==========================
 
-1)  Download the following files from http://www.nndc.bnl.gov/empire-3.1/ and place 
+1)  Download the following files from http://www.nndc.bnl.gov/empire/ and place 
     them in the same temporary directory (e.g. ~/empire-tmp/):
 
         setup.sh
@@ -46,7 +62,6 @@ Non-graphical Installation
     On the Mac, you may need to install the ActiveTcl package manually.  If so, follow the 
     manual instructions below.
 
-
 To run empire you may create a working subdirectory of your empire root 
 [e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
 
@@ -59,36 +74,65 @@ To run empire you may create a working subdirectory of your empire root
 Manual Installation
 ===================
 
-1)  Download the files listed above in the non-graphical installation.
+1)  Download the files listed above in the non-graphical installation.  We will assume 
+    that you put all of the downloaded files in the directory ~/empire-tmp/ and are working 
+    from this directory.
 
 2)  Unpack EMPIRE-3.1-RIVOLI.tgz
 
         $ tar xzf EMPIRE-3.1-RIVOLI.tgz
 
     This will unpack to a directory called EMPIRE-3.1-RIVOLI/.
-    Once the distribution is unpacked, you may rename the this level directory.
 
 3)  Build the package
 
-        $ cd EMPIRE-3.1-RIVOLI
+        $ cd EMPIRE-3.1-RIVOLI/
         $ make
 
-4)  [Optional] Unpack the HFB level densities
-    Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
+4)  [Optional] Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
        corresponding subdirectory RIPL/densities/total/level-densities-hfb 
        (if you plan to use RIPL HFB level densities)
 
-5)  [Optional] Unpack the EXFOR data
-    Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
-       EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
-       data.  One is available on the EMPIRE download site and from the IAEA at
+        $ cd EMPIRE-3.1-RIVOLI/RIPL/densities/total/
+        $ tar xzf $sourcedir/level-densities-hfb.tgz
+
+5)  [Optional] Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
+    EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
+    data.  
+
+        $ tar xzf $sourcedir/C4-latest.tgz
+
+    you can update the EXFOR files by downloading the latest ...
+
+    One is available on the EMPIRE download site and from the IAEA at
        http://www-nds.iaea.org/x4toc4-master/.   Once you unzip it, run the 
        parseC4.py script.
 
 6)  [Optional] Install ActiveTcl
 
-7)  [Optional] Add $EMPIREXXX to your .bashrc or .cshrc
+    On MacOSX systems:
 
+    On Linux systems:
+        $ tar xzf $sourcedir/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
+        $ cd ActiveTcl8.4.7.0-linux-ix86/
+        $ sh install.sh
+
+6)  After this is all completed, you may more or rename your empire directory
+
+7)  [Optional] Add $EMPIREDIR to your .bashrc or .cshrc and put empire in your $PATH:
+
+    For a sh or similar perform
+        EMPIREDIR="'$instdir'" 
+        PATH="'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
+        export EMPIREDIR PATH
+
+    For a csh or compatible perform
+        setenv EMPIREDIR "'$instdir'" 
+        setenv PATH "'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
+        export EMPIREDIR PATH 
+
+    Mac ZVView installed, please set:
+        export DISPLAY=:0
 
 To run empire you may create a working subdirectory of your empire root 
 [e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
