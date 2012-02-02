@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2382 $
+Ccc   * $Rev: 2414 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-02 08:35:00 +0100 (Do, 02 Feb 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -95,7 +95,8 @@ C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
-      IF (fexist) THEN
+C     no TLs stored for HI reactions (on M Gupta request)  
+      IF (fexist .and. (ZEJc(0).le.2 .and. AEJc(0).le.4)) THEN
 C--------Here the old calculated files should be read
          OPEN (45,FILE = (ctldir//ctmp23//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
