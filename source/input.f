@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2405 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-01 21:01:35 +0100 (Mi, 01 Feb 2012) $
+Ccc   * $Rev: 2420 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -36,7 +36,8 @@ C Local variables
 C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
-     &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej
+     &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
+     &         qatom,qnucl
       CHARACTER*1 cnejec
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
@@ -93,7 +94,7 @@ C-----15 (2000) REFERRING FOR THESE VALUES TO THE 1998 CODATA SET WHICH MAY
 C-----BE FOUND AT http://physics.nist.gov/constants
 C-----CM=931.494013 +/- 0.000037 MeV
 C-----The above value is the one used also in the ENDF-6 manual (April 2001, 2009)
-      AMUmev = 9.31494013D+02
+      AMUmev= 9.31494013D+02
 C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
       HHBarc = 197.3269601D0
 C-----HHBarc = 1.97327053D+02  (EMPIRE v 2.18)
@@ -105,11 +106,12 @@ C-----From SCAT2000
 C     ELE2 = e*e in MeV.fm
       ELE2 = 1.4399652D+00
 C-----Neutron mass = 1.008 664 915 60(55) u
-      AMUneu = 1.008665D0
-C-----Proton mass = 1.007 276 466 88(13) u
-      AMUpro = 1.007276D0
+      AMUneu =  1.008665D0
+C-----Nuclear proton mass = 1.007 276 466 88(13) u
+      AMUpro =  1.007276D0 
 C-----Electron mass = 5.485 799 0945 x 10-4 u
       AMUele = 0.00054857990945D0
+C-----Atomic proton mass = AMUpro + AMUele
 C
 C mn    neutron mass  1.008 664 915 78 amu 
 C me    electron mass 5.485 799 110 �10-4 amu 
@@ -757,7 +759,7 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
                   A(nnuc) = atmp
 C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
-                  AMAss(nnuc) = atmp
+C                 AMAss(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
                   IZA(nnuc) = izatmp
@@ -1546,23 +1548,6 @@ C Set number of angles to minimum for first energy of automatic search
 C--------READ nuclear deformations and masses
          CALL READNIX
 
-C--------set projectile/ejectile masses
-C
-C        Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
-C        ions have to be calculated separately
-         DO nejc = 0, min(6,NDEJC)
-C          Setting projectile/ejectiles mass 
-C          these are nuclear masses following ENDF Manual 2009, so electron mass is not considered
-C          EJMass(nejc) = (AEJc(nejc)*AMUmev - ZEJc(nejc)*AMUele + XMAss_ej(nejc))/AMUmev
-           EJMass(nejc) = AEJc(nejc) + XMAss_ej(nejc)/AMUmev
-         ENDDO
-C
-C        Light ion nuclear mass estimated from mass excess table
-C
-         IF(NDEJC.gt.6)   
-     &     EJMass(NDEJC) = AEJc(NDEJC) + XMAss_ej(NDEJC)/AMUmev         
-C    &    (AEJc(NDEJC)*AMUmev - ZEJc(NDEJC)*AMUele + XMAss_ej(NDEJC))/AMUmev
-
 C--------READ shell corrections of RIPL
          CALL READ_SHELL_CORR
 C--------Read number of reasonably known levels and level density parameter 'a'
@@ -1720,8 +1705,37 @@ C-----set giant resonance parameters for CN
       GMRpar(6,nnuc) = 0.0
       GMRpar(7,nnuc) = 1.0
       GMRpar(8,nnuc) = 0.0
-      AMAss(0) = (A(0)*AMUmev + XMAss(0))/AMUmev
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
+
+	write(8,*)
+      write(8,*)' *****************************************************'
+      write(8,*)' *  Table of Reaction Q-values (Mass inc - Mass out) *'
+      write(8,*)' *     for the first emitted particle from the CN    *'
+      write(8,*)' *                                                   *'
+      write(8,*)' *                    Q(at.mass)  Q(nucl.mass)       *'
+	                                 
+
+      CALL QVAL(1,1,qatom,qnucl) 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+	&      '*          neutron :',qatom,qnucl
+      CALL QVAL(2,1,qatom,qnucl) 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+     &      '*          proton  :',qatom,qnucl
+      CALL QVAL(3,1,qatom,qnucl)
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+     &      '*          alpha   :',qatom,qnucl
+      CALL QVAL(4,1,qatom,qnucl) 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+     &      '*          deuteron:',qatom,qnucl
+      CALL QVAL(5,1,qatom,qnucl) 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+     &      '*          triton  :',qatom,qnucl
+      CALL QVAL(6,1,qatom,qnucl) 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+     &      '*          He-3    :',qatom,qnucl
+      write(8,*)' *                                                   *'
+      write(8,*)' *****************************************************'
+	write(8,*)
 
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
@@ -1775,7 +1789,7 @@ C-----WRITE heading on FILE6
          WRITE (8,'(60(''=''))')
          WRITE (8,*) ' '
          WRITE (8,'('' Compound nucleus energy'',F9.3,'' MeV'')') EXCn
-         WRITE (8,'('' Projectile binding energy'',F8.3,'' MeV'')')
+         WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
       ENDIF
 C
@@ -2490,8 +2504,8 @@ C--------------------only gamma decay is considered up to now
   300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
         IF(FIRst_ein) WRITE (8,
      &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
-     &  '' not found in local file (.lev). Default RIPL levels will be
-     & used'')') ia, iz
+     &  '' not found in local file (.lev). Default RIPL levels will be u
+     &sed'')') ia, iz
         CLOSE(13)
         WRITE (ctmp3,'(I3.3)') iz
         finp = 'z'//ctmp3//'.dat'
@@ -2616,11 +2630,11 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 99007 FORMAT ('              ',12(6X,I2,A2))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F10.3)
-99012 FORMAT (1X,10x,4X,12(F10.6,1x))
+99012 FORMAT (1X,10x,4X,12(F10.6,1x))	 
 
 99045 FORMAT(1X,I3,'-',A2,'-',I3,4X,10F12.3)
-99050 FORMAT(25x,'B i n d i n g    e n e r g i e s [MeV]')
-99060 FORMAT(25x,'E j e c t i l e    m a s s e s   [amu]')
+99050 FORMAT(10x,'S e p a r a t i o n   e n e r g i e s [MeV]')
+99060 FORMAT(10x,'E j e c t i l e    m a s s e s   [amu]')
 
       WRITE (8,*)
       WRITE (8,99060)
@@ -3306,7 +3320,8 @@ C-----------Print some final input options
 	           IF(ECUtcoll.GT.ecutof) then
                    ECUtcoll = ecutof
                    WRITE(8,*) 
-     & ' WARNING: INPUT ECDWBA value > Ecut,ECDWBA set to ',sngl(ecutof)
+     & ' WARNING: Cut-of of added collective levels for DWBA calcs (ECDW
+     &BA) set to ',sngl(ecutof)
                  ENDIF 
                  IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
@@ -3321,17 +3336,17 @@ C-----------Print some final input options
             IF (KEY_shape.EQ.0) WRITE (8,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
             IF (KEY_shape.EQ.1) WRITE (8,
-     &                        '('' E1 strength function set to MLO1'')')
+     &                   '('' E1 strength function set to RIPL MLO1'')')
             IF (KEY_shape.EQ.2) WRITE (8,
-     &                        '('' E1 strength function set to MLO2'')')
+     &                   '('' E1 strength function set to RIPL MLO2'')')
             IF (KEY_shape.EQ.3) WRITE (8,
-     &                        '('' E1 strength function set to MLO3'')')
+     &                   '('' E1 strength function set to RIPL MLO3'')')
             IF (KEY_shape.EQ.4) WRITE (8,
-     &                        '('' E1 strength function set to EGLO'')')
+     &                   '('' E1 strength function set to RIPL EGLO'')')
             IF (KEY_shape.EQ.5) WRITE (8,
-     &                        '('' E1 strength function set to GFL'')')
+     &                    '('' E1 strength function set to RIPL GFL'')')
             IF (KEY_shape.EQ.6) WRITE (8,
-     &                   '('' E1 strength shape function set to SLO'')')
+     &              '('' E1 strength shape function set to RIPL SLO'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(8,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(8,
@@ -3361,23 +3376,17 @@ C
             IF (KEY_shape.EQ.0) WRITE (12,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
             IF (KEY_shape.EQ.1) WRITE (12,
-     &                         '('' E1 strength function set to MLO1'')'
-     &                         )
+     &                   '('' E1 strength function set to RIPL MLO1'')')
             IF (KEY_shape.EQ.2) WRITE (12,
-     &                         '('' E1 strength function set to MLO2'')'
-     &                         )
+     &                   '('' E1 strength function set to RIPL MLO2'')')
             IF (KEY_shape.EQ.3) WRITE (12,
-     &                         '('' E1 strength function set to MLO3'')'
-     &                         )
+     &                   '('' E1 strength function set to RIPL MLO3'')')
             IF (KEY_shape.EQ.4) WRITE (12,
-     &                         '('' E1 strength function set to EGLO'')'
-     &                         )
+     &                   '('' E1 strength function set to RIPL EGLO'')')
             IF (KEY_shape.EQ.5) WRITE (12,
-     &                          '('' E1 strength function set to GFL'')'
-     &                          )
+     &                    '('' E1 strength function set to RIPL GFL'')')
             IF (KEY_shape.EQ.6) WRITE (12,
-     &                    '('' E1 strength shape function set to SLO'')'
-     &                    )
+     &              '('' E1 strength shape function set to RIPL SLO'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
@@ -3388,7 +3397,7 @@ C
             IF(Key_gdrgfl.EQ.2)WRITE(12,
      &          '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Goriely calc.'')')
-C-----      print  maximal gamma-ray multipolarity  'MAXmult'
+C-----      print  maximum gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(12,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
@@ -3613,9 +3622,9 @@ C
             IF(val.gt.0.) THEN
               WIDcoll = val
               WRITE (8,
-     &     '('' Collective levels in continuum will be spREAD using'')')
+     &  '('' Collective levels in continuum will be spread using a'')')
               WRITE (8,
-     &     '('' Gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
+     &  '('' Gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
      &       ''R = '',F6.3, '' keV'' )') WIDcoll*1000
              ENDIF
             GOTO 100
@@ -3976,26 +3985,29 @@ C-----
      &       ) CSRead
 
             IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
-              WRITE (8,'('' CSRead value in input ignored: '')') CSRead
+              WRITE (8,
+     &	   '('' WARNING: CSRead value in input ignored: '')') 
+              WRITE (8,
+     &	   '('' WARNING: CSRead valid only for HI reactions '')') 
               CSRead = -2.0D0
               GOTO 100
             ENDIF
 
             IF (CSRead.EQ.0.0D0) THEN
                WRITE (8,
-     &'('' Bass option disabled CCFUS will be used instead          '')'
+     &'('' Bass option disabled; CCFUS will be used instead         '')'
      &)
                CSRead = -2.0D0
             ENDIF
             IF (CSRead.EQ.( - 1.0D0)) WRITE (8,
-     &'('' Fusion cross section will be calculated according to distribu
-     &ted barrier model'')')
+     &'('' HI fusion cross section will be calculated according to distr
+     &ibuted barrier model'')')
             IF (CSRead.EQ.( - 2.0D0)) WRITE (8,
-     &'('' Fusion cross section will be calculated using CCFUS simplifie
-     &d coupled channel approach'')')
+     &'('' HI fusion cross section will be calculated using CCFUS simpli
+     &fied coupled channel approach'')')
             IF (CSRead.EQ.( - 3.0D0)) WRITE (8,
-     &'('' Fusion cross section will be calculated using CCFUS uncoupled
-     & barriers'')')
+     &'('' HI fusion cross section will be calculated using CCFUS assumi
+     &ng uncoupled barriers'')')
             GOTO 100
          ENDIF
 C-----
@@ -4039,12 +4051,13 @@ C-----
          IF (name.EQ.'DFUS  ') THEN
 			IF(val.gt.0) THEN
 			  DFUs = val
-              WRITE (8,
+                WRITE (8,
      &'('' Difusseness in the transmission coefficients for fusion set t
      &o '',F5.2)') DFUs
 	        ELSE 
-              WRITE (8,
+                WRITE (8,
      &'('' WARNING: DFUS input keyword must be > 0, reset to 1'')') 
+                DFUs = 1.d0
 	        ENDIF 
             GOTO 100
          ENDIF
@@ -4060,8 +4073,8 @@ C-----
          IF (name.EQ.'SHRT  ') THEN
             SHRt = val
             WRITE (8,
-     &'('' Parameter in the teperature shell correction fade-out set to
-     &'',F6.3)') SHRt
+     &'('' Parameter in the temperature shell correction fade-out set to
+     & '',F6.3)') SHRt
             GOTO 100
          ENDIF
 C-----
@@ -7185,11 +7198,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION beta2x(NMASSE), ebin, efermi, emicx(NMASSE),
-     &                 excess(NMASSE), xmassexp, xmassth, zmn, zmx
-      DOUBLE PRECISION DMAX1
+     &                 excess(NMASSE), xmassexp, xmassth, zmn, zmx, dtmp
       INTEGER ia, iapro, iatar, iflag, ii, iloc, in, iz, izaf(NMASSE),
      &        izpro, iztar, k, nixa, nixz, nnuc
-      REAL REAL
+      
 C
 C
 Ccc
@@ -7209,9 +7221,14 @@ Ccc   *                                                                  *
 Ccc   * author: M.Herman & R.Sturiale                                    *
 Ccc   * date:   27.Sep.1996                                              *
 Ccc   * revision:1    by: R.Capote               on:09.2004              *
-Ccc   * RIPL database used                                             *
+Ccc   * RIPL database used                                               *
+Ccc   * revision:2    by: R.Capote               on:02.2012              *
 Ccc   ********************************************************************
 Ccc
+C
+C     This corresponds to RIPL-2 file. There is a new RIPL-3 file containing mass uncertainties
+C	and additional one for the HFB-14 model. With a minor change we could use those mases as well.
+C	or the time being we use FRDM theoretical masses if Audi masses are not availableC
       OPEN (UNIT = 27,STATUS = 'OLD',
      &      FILE = trim(empiredir)//'/RIPL/masses/mass-frdm95.dat'
      &      ,ERR = 300)
@@ -7228,59 +7245,68 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
          ELSE
-            excess(k) = xmassth
+            excess(k) = xmassth  ! FRDM model assumed for the time being
          ENDIF
       ENDDO
   100 CLOSE (UNIT = 27)
-      DO iz = 0, 130
-         DO ia = 0, 400
-            RESmas(iz,ia) = 0
-            EXCessmass(iz,ia) = 0
-         ENDDO
-      ENDDO
+
+      RESmas = 0.d0
+      EXCessmass = 0.d0
+
       DO k = 1, NMASSE
          iz = izaf(k)/1000
          ia = MOD(izaf(k),1000)
-         IF (iz.GT.130 .OR. ia.GT.400) GOTO 200
-         RESmas(iz,ia) = REAL(ia) + excess(k)/AMUmev
+         IF (iz.GT.130 .OR. ia.GT.400) cycle
+C        Corresponds to the definition of atomic mass excess in Audi
+         RESmas(iz,ia) = REAL(ia) + excess(k)/AMUmev 
          EXCessmass(iz,ia) = excess(k)
-  200 ENDDO
-C
-C-----mass10: subroutine for formula of Duflo-Zuker for masses outside M-N
-C
+      ENDDO
+
       DO iz = 6, 100
          DO ia = 2*iz - 10, 3*iz
-            IF (RESmas(iz,ia).EQ.0.D0) THEN
-               in = ia - iz
-               if (in.le.0) cycle
-               CALL mass10(in,iz,ebin)
-               RESmas(iz,ia) = iz*AMUpro + in*AMUneu - ebin/AMUmev
-               EXCessmass(iz,ia) = RESmas(iz,ia)*AMUmev - REAL(ia)
-            ENDIF
+           IF (RESmas(iz,ia).EQ.0.D0) cycle
+           in = ia - iz
+           if (in.le.0) cycle
+           CALL mass10(in,iz,ebin)
+C          Following DZ recommendation - see mass10() routine
+           dtmp = iz*EXCessmass(1,1) + in*EXCessmass(0,1) - ebin	! (*)
+C          Audi masses includes electrons, both definitions of dtmp (*) and (**) !!!
+C          dtmp = iz*(AMUpro+AMUele-1.D0)*AMUmev + 
+C    *            in*(AMUneu       -1.D0)*AMUmev - ebin			! (**)
+           EXCessmass(iz,ia)= dtmp
+           RESmas(iz,ia) = REAL(ia) + dtmp/AMUmev
          ENDDO
       ENDDO
+
+
+C     The solution below is the last resource proposed by mbc
+C     Usually these masses are not used
+C-------------------------------------------------------------------------  
 C-----mbc1 a quick/temp? solution to weird light undefined masses: define
 C-----resmas=A for all nuclei so far undefined
 C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
       DO iz = 1, 130
          DO ia = 1, 400
             IF (RESmas(iz,ia).EQ.0.D0) THEN
-               RESmas(iz,ia) = REAL(ia)/AMUmev
+               RESmas(iz,ia) = REAL(ia)
                EXCessmass(iz,ia) = 0
             ENDIF
          ENDDO
       ENDDO
+
       zmx = 0.
       zmn = 200.
       DO nnuc = 0, NNUct
-         zmx = DMAX1(Z(nnuc),zmx)
+         zmx = MAX(Z(nnuc),zmx)
          zmn = MIN(Z(nnuc),zmn)
       ENDDO
+
       DO k = 1, NMASSE
          nixz = izaf(k)/1000
          nixa = MOD(izaf(k),1000)
          iz = izaf(k)/1000
          ia = MOD(izaf(k),1000)
+
          IF (nixz.GE.zmn .AND. nixz.LE.zmx) THEN
             CALL WHERE(izaf(k),nnuc,iloc)
             IF (iloc.EQ.0) THEN
@@ -7288,46 +7314,64 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
                DEF(1,nnuc) = beta2x(k)
                XMAss(nnuc) = EXCessmass(iz,ia)
-               AMAss(nnuc) = (A(nnuc)*AMUmev + XMAss(nnuc))/AMUmev
+C              Atomic masses
+               AMAss(nnuc) = A(nnuc) +  XMAss(nnuc)/AMUmev
+C              Nuclear masses
+C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev   
             ENDIF
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
                IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)
                XMAss(0) = EXCessmass(iz,ia)
+C              Atomic masses
+               AMAss(0) = A(0) + XMAss(0)/AMUmev
+C              Nuclear masses
+C              AMAss(0) = A(0) + (XMAss(0)- iz*AMUele)/AMUmev   
             ENDIF
+C
          ELSE
+C
+C-----------set projectile/ejectile masses
+C
+C           Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
             DO ii = 0, NDEJC
-             IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
-              DEFprj = beta2x(k)
-              XMAss_ej(ii) = EXCessmass(iz,ia)
+               IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
+                 DEFprj = beta2x(k)
+C                Atomic mass excess 
+                 XMAss_ej(ii) = EXCessmass(iz,ia)
 C
-C             Rounded ENDF values of nuclear masses
+C                Rounded ENDF values of nuclear masses  (without electron mass)
 C
-C              mn    neutron mass  1.008 665 amu 
-C              mp    proton mass   1.007 276 amu 
-C              ma    4He mass      4.001 506 amu 
-C              md    deuteron mass 2.013 553 amu 
-C              mt    triton mass   3.015 501 amu 
-C              m3He  3He mass      3.014 932 amu 
+C                mn    neutron mass  1.008 665 amu 
+C                mp    proton mass   1.007 276 amu 	  ! bare proton (no electron)
+C                      hidrogen mass = mp + me = 1.0078245799                       
+C                ma    4He mass      4.001 506 amu 
+C                md    deuteron mass 2.013 553 amu 
+C                mt    triton mass   3.015 501 amu 
+C                m3He  3He mass      3.014 932 amu 
 
-C              me    electron mass 5.485 799�10-4 amu 
+C                me    electron mass 5.485 799�10-4 amu 
 C
-               IF (nixa.EQ.1 .AND. nixz.EQ.0)
-     >           XMAss_ej(ii)=(AMUneu-1.d0)*AMUmev
-               IF (nixa.EQ.1 .AND. nixz.EQ.1)
-     >           XMAss_ej(ii)=(AMUpro-1.d0)*AMUmev
-               IF (nixa.EQ.4 .AND. nixz.EQ.2)
-     &           XMAss_ej(ii)=(4.001506d0-4.d0)*AMUmev  ! he4
-               IF (nixa.EQ.2 .AND. nixz.EQ.1)
-     &           XMAss_ej(ii)=(2.013553d0-2.d0)*AMUmev  ! deut
-               IF (nixa.EQ.3 .AND. nixz.EQ.1)
-     &           XMAss_ej(ii)=(3.015501d0-3.d0)*AMUmev  ! triton 
-               IF (nixa.EQ.3 .AND. nixz.EQ.2)
-     &           XMAss_ej(ii)=(3.014932d0-3.d0)*AMUmev  ! he3
+C                Setting projectile/ejectiles mass 
+C
+C                Nuclear masses following ENDF Manual 2009, so electron mass is not considered
+
+C                In general we assume that all incident and outgoing particles have nuclear masses
+C                   (i.e. they are stripped of electrons)
+C
+                 EJMass(ii) = 
+     &              AEJc(ii) +(XMAss_ej(ii)- ZEJc(ii)*AMUele)/AMUmev
+C
+C                Atomic masses 
+C                EJMass(ii) = AEJc(ii) + XMAss_ej(ii)/AMUmev
+
              ENDIF
+
             ENDDO
+
          ENDIF
+
       ENDDO
 C-----Fermi energies calculated for all nuclei and projectile combinations
       DO nnuc = 0, NNUct
@@ -8098,28 +8142,74 @@ C
 C
 C Local variables
 C
-      INTEGER ar, zr, ap, zp, ac, zc
-      DOUBLE PRECISION b1, b2, b3
-      zc = Z(Nnuc)
-      ac = A(Nnuc)
-      zp = ZEJc(Nejc)
-      ap = AEJc(Nejc)
-      zr = Z(Nnuc) - ZEJc(Nejc)
-      ar = A(Nnuc) - AEJc(Nejc)
-      b1 = A(Nnuc)*AMUmev + EXCessmass(zc,ac)
-      b2 = ar*AMUmev + EXCessmass(zr,ar)
-C
-C     The calculated ejectile mass below correspond to the use
-C     of atomic masses 
-C     Obtained Q-values consistent with all available calculators (NUDAT, LUND, etc)
-      b3 = AEJc(Nejc)*AMUmev + EXCessmass(zp,ap)
-C
-C     The calculated ejectile mass below correspond to the use
-C     of nuclear masses dtripped of electrons (as recom in ENDF manual) 
-C     b3 = AEJc(nejc)*AMUmev + XMAss_ej(nejc)
+      INTEGER iiar, iizr, iiac, iizc
 
-      Bnd = b2 + b3 - b1
+      iizc = Z(Nnuc)
+      iiac = A(Nnuc)
+      iizp = ZEJc(Nejc)
+      iiap = AEJc(Nejc)
+      iizr = iizc - iizp
+      iiar = iiac - iiap
+C
+
+      Bnd = (RESmas(iizr,iiar) + RESmas(iizp,iiap) 
+     &     - RESmas(iizc,iiac))*AMUmev
+
+	RETURN
       END
+
+      SUBROUTINE QVAL(Nejc,Nnuc,Qnucl,Qatom)
+Ccc
+Ccc   ******************************************************************
+Ccc   *                         Q V A L                                *
+Ccc   *                                                                *
+Ccc   *           Calculates reaction Q-values                         *
+Ccc   *                                                                *
+Ccc   * input:NEJC, NNUC                                               *
+Ccc   *                                                                *
+Ccc   * output:Qtmp                                                    *
+Ccc   *                                                                *
+Ccc   * calls:where                                                    *
+Ccc   *                                                                *
+Ccc   ******************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Qnucl,Qatom
+      INTEGER Nejc, Nnuc
+      INTEGER nnur
+C
+C Local variables
+C
+      INTEGER iiar, iizr, iiat, iizt, iiao, iizo
+
+C-----Target corresponds to nnurec = 0
+      CALL WHERE(IZA(Nnuc) - IZAejc(Nejc),nnur,iloc)
+
+      Qnucl = ( AMAss(NTArget) + EJMass(NPRoject) 
+     &        - AMAss(Nnur)    - EJMass(Nejc) ) * AMUmev
+
+      iizt = Z(0)
+      iiat = A(0)
+      
+	  iizp = ZEJc(0)
+      iiap = AEJc(0)
+      
+	  iizo = ZEJc(Nejc)
+      iiao = AEJc(Nejc)
+
+      iizr = Z(Nnur)
+      iiar = A(Nnur)
+C
+      Qatom = (- RESmas(iizr,iiar) - RESmas(iizo,iiao) 
+     &         + RESmas(iizt,iiat) + RESmas(iizp,iiap) ) * AMUmev
+
+	return
+      END
+
 C
 C
 C

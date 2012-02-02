@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2377 $
+Ccc   * $Rev: 2420 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 07:47:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2377 $
+C CVS Version Management $Revision: 2420 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2377 $')
+99005 FORMAT ('  xddhms version: $Revision: 2420 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4245,7 +4245,9 @@ C
       REAL*8 r0,akf0,ekf0,vsigma
 
 C     ZMNuc = 939.D0
-      ZMNuc = AMUpro*AMUmev
+      ZMNuc = AMUpro*AMUmev          ! bare proton mass
+C     ZMNuc = (AMUpro+AMUele)*AMUmev ! hydrogen mass 
+C
 C     PI_g = DACOS( - 1.D0)
       PI_g = PI
 C     HBArc = 197.D0

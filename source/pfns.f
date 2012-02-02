@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2365 $
+Ccc   * $Rev: 2420 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 10:56:57 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -440,8 +440,8 @@ C ma    4He mass      4.001 506 amu 1
       exc = EXCessmass(nz,nz+nn)
 C     bind = dble(nz*7.28903+nn*8.07138 - exc)
 C     Corrected values
-      
-      bind = dble(nz*AMUpro+nn*AMUneu - exc)
+     
+      bind = dble(nz*(AMUpro+AMUele) + nn*AMUneu - exc)
 C     print *, ' N=',nn,' Z=',nz,' B.E.=',e,' MassExcess=', exc
       return
       end
