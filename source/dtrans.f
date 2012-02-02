@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2421 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-02 21:11:32 +0100 (Do, 02 Feb 2012) $
 
 
       SUBROUTINE DTRANS(iemin,iemax)
@@ -27,7 +27,9 @@ C     DOUBLE PRECISION bndd
       data jno/1,0,2,2/                  
       data jpo/0,1,2,1/
       data jst/2,2,1,2/
-      irea=ndejc
+C
+C 
+C
 C-----Only deuteron reactions allowed
       if(Zejc(0).ne.1.D0.and.Aejc(0).ne.2.D0) return
       if(DXSred.LE.0.d0) return
@@ -42,6 +44,8 @@ C-----gdel is the single-particle density for neutrons
         write(8,*) ' EMISSION SPECTRA : DIRECT reactions'
         write(8,*) 
       ENDIF
+C     irea=NDEjc
+      irea = 4 
       do ip=2,irea,2
          IF(IOUt.GE.3 .and. ip.eq.2) write(8,*)'(d,p) break-up reaction'
          IF(IOUt.GE.3 .and. ip.eq.4) write(8,*)'(d,t) pick-up  reaction'
