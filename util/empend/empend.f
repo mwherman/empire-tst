@@ -3172,7 +3172,8 @@ C...        print *,' nubar',ee,xs
 C...
         GO TO 312
       END IF
-      IF(REC(1:20).EQ.'          S e p a r ') THEN
+      IF(REC(1:20).EQ.'          B i n d i ' .OR.
+     &   REC(1:20).EQ.'          S e p a r ') THEN
 C* Read the binding energies of the last nucleon, if given
 C* (Omission allowed in new files where Q values are specified explicitly)
         READ (LIN,891)
