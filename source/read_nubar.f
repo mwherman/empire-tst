@@ -16,11 +16,18 @@ C
       
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-      
+C
+C     Dummy parameters
+C
       integer*4, intent(in) :: nin
       character*200, intent(in) :: infile
-      integer*4 ierr, izatmp 
-      integer*4 np
+C
+C     defined as integer without fixed length in input.f
+      integer ierr
+C      
+C     Local variables
+C
+      integer*4 np, izatmp
       integer*4 izaread
       logical lfound
       
@@ -46,27 +53,27 @@ c     desired material is found in 'infile'
 c     Loop over materials
       do while(associated(nubar_mat) .and. (.not. lfound))
 
-c	 Pointing 'mf1' to the file 1 of current material
+c      Pointing 'mf1' to the file 1 of current material
          mf1 => nubar_mat%mf1
 
 c        Loop over mf/mt
          do while(associated(mf1) .and. (.not. lfound))
 
 c          Checking if current material/mf1 contains MT=456
-	   if(mf1%mt .eq. 456) then
-c	    Reading ZA and converting to integer for comparison
-	    izaread = nint(mf1%mt456%za)
-c	    Checking if this mf1/mt corresponds to the right material (ZA)
+         if(mf1%mt .eq. 456) then
+c         Reading ZA and converting to integer for comparison
+          izaread = nint(mf1%mt456%za)
+c         Checking if this mf1/mt corresponds to the right material (ZA)
             if(izatmp .eq. izaread) lfound = .TRUE.
            endif
-	   
-c	   If MT=456 for desired material not found, going to next MT
+         
+c        If MT=456 for desired material not found, going to next MT
            if (.not. lfound) mf1 => mf1%next
 
          end do
-	 
-c	 If MT=456 for desired material not found, going to next material
-	 if (.not. lfound) nubar_mat => nubar_mat%next
+       
+c      If MT=456 for desired material not found, going to next material
+       if (.not. lfound) nubar_mat => nubar_mat%next
 
       end do
       
@@ -76,7 +83,7 @@ c     In case searched into whole file and did not find MT=456 for ZA
           write(8,*) ' WARNING: for fissioning nucleus (IZA):',izatmp
           write(8,*) ' WARNING: Evaluated nubar will not be available'
           ierr = 1
-	  return
+        return
       endif 
       
       if(mf1%mt456%lnu .eq. 2) then
@@ -88,11 +95,11 @@ c     In case searched into whole file and did not find MT=456 for ZA
           np = NDEPFN 
         endif
 
-c	Assigning energies to eniu_eval and converting to MeV
+c     Assigning energies to eniu_eval and converting to MeV
         eniu_eval(1:np) = mf1%mt456%tb%dat%x/1.d6
-c	Assigning nubars to vniu_eval
+c     Assigning nubars to vniu_eval
         vniu_eval(1:np) = mf1%mt456%tb%dat%y
-	num_niu = np
+      num_niu = np
 
        else
 
@@ -157,7 +164,7 @@ c      stop
       mf1 => nubar_mat%mf1
       do while(associated(mf1))
          if(mf1%mt .eq. 456) exit
-	 mf1 => mf1%next
+       mf1 => mf1%next
       end do
       
       if(.not.(associated(mf1))) then
@@ -165,7 +172,7 @@ c      stop
           write(8,*) ' WARNING: for fissioning nucleus (IZA):',izatmp
           write(8,*) ' WARNING: Evaluated nubar will not be available'
           ierr = 1
-	  return
+        return
       endif 
       
       if(mf1%mt456%lnu .eq. 2) then
@@ -177,11 +184,11 @@ c      stop
           np = NDEPFN 
         endif
 
-c	Assigning energies to eniu_eval and converting to MeV
+c     Assigning energies to eniu_eval and converting to MeV
         eniu_eval(1:np) = mf1%mt456%tb%dat%x/1.d6
-c	Assigning nubars to vniu_eval
+c     Assigning nubars to vniu_eval
         vniu_eval(1:np) = mf1%mt456%tb%dat%y
-	num_niu = np
+      num_niu = np
 
        else
 
@@ -226,7 +233,7 @@ C     num_niu
         WRITE(8,*) 
      &   ' WARNING: In NUBAR reading, the incident Einc=', sngl(entmp),
      &   ' > Emax_ENDF=', eniu_eval(num_niu)
-	write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
+      write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
       else
         do i=1,num_niu
           if(Eniu_eval(i) .gt. en) exit

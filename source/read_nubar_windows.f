@@ -1,14 +1,12 @@
 
-      SUBROUTINE READNUBAR(infile,nin,ierr, ia, iz)
+      SUBROUTINE READNUBAR(infile,nin,ierr)
       integer*4 nin
-	integer ierr, ia, iz, iat, izt
-      character*120 infile
+	integer ierr
+      character*200 infile
 C     to avoid compiler warnings 
       infile = ' '
       nin    = 10 
       ierr   = 0
-      iat    = ia
-      izt    = iz
       return      
       END
 
