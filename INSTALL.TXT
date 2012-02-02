@@ -15,7 +15,9 @@ Required:
     Python, Tcl/Tk
 
 Recommended:
-    ActiveTcl extension to Tcl/Tk
+    Tcl/Tk version 8.4 and the [incr Tcl] extension to Tcl/Tk, both are included in the ActiveTcl 
+    distributions on the empire download page.  The Empire GUI may also work on Tcl/Tk version 8.5 and 
+    higher as elements of [incr Tcl] were added in versions 8.5 and 8.6.
 
 
 
@@ -113,7 +115,7 @@ Manual Installation
 
         $ python parseC4.py C4-Dec-11-2012.x4c4
 
-6)  [Optional] Install ActiveTcl
+6)  [Optional] Install ActiveTcl8.4
 
     On MacOSX systems download the dmg file and click on it using your file manager and 
     follow the installation instructions.
