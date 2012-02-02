@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2382 $
+Ccc   * $Rev: 2416 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-02 11:37:01 +0100 (Do, 02 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -122,7 +122,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       ENDIF
       DO i = 1, NDLW
          arg = (CRL - i + 1)/DFUs
-         arg = MIN(174.0D0,arg)
+         arg = MIN(70.0D0,arg)
          Stl(i) = 1.0/(1.0 + EXP((-arg)))
       ENDDO
       END
@@ -879,10 +879,10 @@ C
       OMEmin(Nejc,Nnuc) = EEMin
       OMEmax(Nejc,Nnuc) = EEMax
 C     IRElat(Nejc,Nnuc) = IREl
-C     xmas_nejc = (AEJc(Nejc)*AMUmev + XMAss_ej(Nejc))/AMUmev
+C     xmas_nejc = AEJc(Nejc) + XMAss_ej(Nejc)/AMUmev
 C     xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
-      xmas_nejc = AEJc(Nejc) + XMAss_ej(Nejc)/AMUmev
-      xmas_nnuc = A(Nnuc)    + XMAss(Nnuc)/AMUmev
+      xmas_nejc = EJMass(Nejc)
+      xmas_nnuc = AMAss(Nnuc)
 C
 C-----INITIALIZING /RIPLXX
 C
@@ -1896,12 +1896,7 @@ C
       DO l = 0, lmax
          READ (45,END = 300) TTLl(ien,l)
          IF (IOUt.EQ.5) WRITE (46,*) l, TTLl(ien,l)
-C
-C        Newly added 
-C
-C        TTLl(ien,l) = TTLl(ien,l)*OUTred(Nejc,Nnuc)   
       ENDDO
-C     SIGabs(ien,Nejc,Nnuc) = SIGabs(ien,Nejc,Nnuc)*OUTred(Nejc,Nnuc)
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45)
@@ -2071,8 +2066,6 @@ C------------------------------------------
 C-----Opening ecis03 output file containing Smatrix
       OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis06.smat', ERR=90)
       READ (45,*,END = 90)   ! To skip first line <SMATRIX> ..
-C  80 READ (45,'(1x,f4.1,1x,a1,1x,i4,1x,i4)',END=90)
-C    &     jc, parc, nceq, nctot
    80 READ (45,'(1x,f9.1,4x,a1,2(1x,i4))',END = 90) 
      &     jc, parc, nceq, nctot ! ecis06
 C     JC,ParC is the channel spin and parity
@@ -2085,15 +2078,7 @@ C     Loop over the number of coupled equations
 C       Reading the coupled level number nlev, the orbital momentum L,
 C           angular momentum j and Transmission coefficient Tlj,c(JC)
 C       (nlev=1 corresponds to the ground state)
-C       read (45,
-C    &  '(1x,3(I3,1x),I3,1x,F5.1,1x,2(D15.7,1x),1x,4x,F11.8)',END=90)
-C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
-C       read (45, ! ecis06                
-C    &  '(3I3,I4,1x,F6.1,1x,2(D15.7,1x),1x,4x,F12.8)',END=90)
-C        (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),'I',4X,F11.8)
-C    &  nc1,nc2,nlev,l,jj,sreal,simag,stmp
         read (45, ! ecis06 (Dec 2008)               
-C    &  '(3I3,I4,1x,F5.1,2x,2(D14.7,2x),1x,4x,F12.8)',END=90,ERR=90)
      &  '(1X,3(I3,1X),I3,1X,F5.1,1X,2(D15.7,1X),1x,4X,F11.8)'
      &  ,END=90,ERR=90) nc1,nc2,nlev,l,jj,sreal,simag,stmp
 
@@ -2114,15 +2099,12 @@ C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
       READ (45,*,END = 200)   ! To skip first line <TLJs.> ..
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
-C 100 READ (45,'(1x,f4.1,1x,a1,1x,i4)',END = 200) jc, parc, nceq
   100 READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-C        READ (45,'(1x,I2,1x,I3,1x,F5.1,1x,e15.6)',END = 200) nlev, l,
-C    &         jj, dtmp
          READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
@@ -2166,9 +2148,9 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
 C
 C-----Estimating absorption cross section from obtained TLs
 C
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+C     xmas_nnuc = A(Nnuc) + XMAss(Nnuc)/AMUmev
       xmas_nejc = EJMass(Nejc)
-C     xmas_nnuc = AMAss(Nnuc)
+      xmas_nnuc = AMAss(Nnuc)
       elab = EINl
       relcal = .FALSE.
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
@@ -2289,16 +2271,13 @@ C
 C
 C-----Renormalizing TLs to correct very small difference
 C     between calculated and read ECIS XS
-C     Discrete level inelastic scattering (not coupled levels) also included
+C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
+C     continuum also included
 C
       DO l = 0, Maxlw
         Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
       ENDDO
       CSFus = ABScs - SINlcc - SINl - SINlcont
-C     DO l = 0, Maxlw
-C        Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl)/sabs
-C     ENDDO
-C     CSFus = ABScs - SINlcc - SINl 
 
       RETURN
       END
@@ -2357,15 +2336,12 @@ C-----
       READ (45,*,END = 200)  ! Skipping one line
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
-C 100 READ (45,'(1x,f4.1,1x,a1,1x,i4)',END = 200) jc, parc, nceq
   100 READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-C        READ (45,'(1x,I2,1x,I3,1x,F5.1,1x,e15.6)',END = 200) nlev, l,
-C    &         jj, dtmp
          READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
@@ -2398,7 +2374,7 @@ C-----For vibrational the Tls must be multiplied by
       SIGabs(J,Nejc,Nnuc) = 0.D0
       IF (sreacecis.LE.0.D0) RETURN
       IF (IOUt.EQ.5) THEN
-         xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+         xmas_nnuc = AMAss(Nnuc)
          xmas_nejc = EJMass(Nejc)
          relcal = .FALSE.
          IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
@@ -2444,12 +2420,10 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) lmax, J, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
          WRITE (46) TTLl(J,l)
-C        TTLl(J,l) = TTLl(J,l)*OUTred(Nejc,Nnuc)   
       ENDDO
       WRITE (46) sreacecis
       MAXl(J) = lmax
       SIGabs(J,Nejc,Nnuc) = sreacecis
-C     SIGabs(J,Nejc,Nnuc) = sreacecis*OUTred(Nejc,Nnuc)
       END
 C
 C
@@ -2497,7 +2471,6 @@ C               123456789 123456789 123456789 123456789 123456789
 
 C               +50     +60        +70      +80        +90
 C               123456789 123456789 123456789 123456789 123456789
-c     BECis2 = 'FFFFFFFFTFFFFTFFTTTFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       BECis2 = 'FFFFFFFFFFFFFTFFTTTFFTTFTFFFFFFFFFFFFFFFFFFFFFFFFF'
 C
 C-----*** OPTICAL POTENTIALS ***
@@ -3315,7 +3288,7 @@ c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
       xmas_nejc = EJMass(Nejc)
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+      xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 C-----From cms system to Lab (ECIS do inverse convertion)
       IF (El.LT.0.D0) THEN
@@ -3861,7 +3834,7 @@ C     angstep = 2.5
       angstep = 180.d0/(NANgela-1)
 
       xmas_nejc = EJMass(Nejc)
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+      xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
       IF (El.LT.0.D0) THEN
          El = DABS( - El)
