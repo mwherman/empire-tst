@@ -1,4 +1,4 @@
-Retrieved by E4-Web: 2012/01/29,21:33:04                             1 0  0    0
+Retrieved by E4-Web: 2012/02/02,12:26:03                             1 0  0    0
  9.023200+4 2.300400+2          1          1          5          19040 1451    1
  0.000000+0 0.000000+0          0          0          0          69040 1451    2
  1.000000+0 2.000000+7          1          0         10          39040 1451    3
@@ -132,6 +132,7 @@ REFERENCE                                                         9040 1451  112
  1.500000+7 4.027400+0 1.600000+7 4.171200+0 1.700000+7 4.320000+09040 1456   13
  1.800000+7 4.471000+0 1.900000+7 4.620000+0 2.000000+7 4.770000+09040 1456   14
  0.000000+0 0.000000+0          0          0          0          09040 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09040 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223300+4 2.310400+2          1          1          5          29222 1451    1
  0.000000+0 1.000000+0          0          0          0          69222 1451    2
@@ -272,6 +273,7 @@ AUTHORS: Bao-Sheng YU,                                            9222 1451   11
  2.100000+6 2.710900+0 6.500000+6 3.356200+0 1.400000+7 4.248700+09222 1456    9
  1.500000+7 4.377900+0 2.000000+7 5.002300+0                      9222 1456   10
  0.000000+0 0.000000+0          0          0          0          09222 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09222 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223400+4 2.320300+2          1          1          5          19225 1451    1
  0.000000+0 0.000000+0          0          0          0          69225 1451    2
@@ -422,6 +424,7 @@ REFERENCES                                                        9225 1451  119
  1.000000-5 2.354000+0 6.500000+6 3.225000+0 7.500000+6 3.359000+09225 1456    4
  2.000000+7 5.034000+0                                            9225 1456    5
  0.000000+0 0.000000+0          0          0          0          09225 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09225 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223500+4 2.330200+2          1          1          5          29228 1451    1
  0.000000+0 1.000000+0          0          0          0          69228 1451    2
@@ -606,6 +609,7 @@ AUTHORS: Bao-Sheng YU,                                            9228 1451   11
  1.850000+7 5.026580+0 1.900000+7 5.088600+0 1.950000+7 5.149200+09228 1456   29
  2.000000+7 5.208440+0                                            9228 1456   30
  0.000000+0 0.000000+0          0          0          0          09228 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09228 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223600+4 2.340180+2          1          1          5          29231 1451    1
  0.000000+0 1.000000+0          0          0          0          69231 1451    2
@@ -756,6 +760,7 @@ MF=5  ENERGY DISTRIBUTIONS OF SECONDARY NEUTRONS                  9231 1451  119
  1.000000-5 2.360500+0 2.350000+6 2.613900+0 6.000000+6 3.178600+09231 1456    4
  7.000000+6 3.333400+0 2.000000+7 5.345800+0                      9231 1456    5
  0.000000+0 0.000000+0          0          0          0          09231 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09231 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223700+4 2.350100+2          1          1          5          39234 1451    1
  0.000000+0 1.000000+0          0          0          0          69234 1451    2
@@ -929,6 +934,7 @@ REFERENCES                                                        9234 1451  150
  1.200000+7 4.344780+0 1.300000+7 4.519830+0 1.400000+7 4.561010+09234 1456    7
  1.460000+7 4.736050+0 2.000000+7 5.436220+0                      9234 1456    8
  0.000000+0 0.000000+0          0          0          0          09234 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09234 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.223800+4 2.360100+2          1          1          5          39237 1451    1
  0.000000+0 0.000000+0          0          0          0          69237 1451    2
@@ -1097,6 +1103,7 @@ DELT= 0.610  1.000  0.000  0.580  0.52  0.000  0.610  1.100  0.9109237 1451   85
  1.000000-5 2.441200+0 2.900000+6 2.647300+0 5.150000+6 3.075300+09237 1456    4
  1.585000+7 4.697300+0 2.000000+7 5.167900+0                      9237 1456    5
  0.000000+0 0.000000+0          0          0          0          09237 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09237 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.323600+4 2.340200+2          1          1          5          29343 1451    1
  0.000000+0 0.000000+0          0          0          0          69343 1451    2
@@ -1260,6 +1267,7 @@ References                                                        9343 1451  140
  1.000000-5 2.400000+0 5.500000+6 3.148000+0 7.000000+6 3.352000+09343 1456    4
  2.000000+7 5.120000+0                                            9343 1456    5
  0.000000+0 0.000000+0          0          0          0          09343 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09343 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.323700+4 2.350100+2          1          1          5          39346 1451    1
  0.000000+0 0.000000+0          0          0          0          69346 1451    2
@@ -1694,6 +1702,7 @@ REFERENCES                                                        9346 1451  393
           2          2                                            9346 1456    3
  1.000000-5 2.602070+0 2.000000+7 5.515430+0                      9346 1456    4
  0.000000+0 0.000000+0          0          0          0          09346 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09346 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.323900+4 2.370000+2          0          1          5          29352 1451    1
  0.000000+0 0.000000+0          0          0          0          69352 1451    2
@@ -1901,6 +1910,7 @@ References                                                        9352 1451  183
           2          2                                            9352 1456    3
  1.000000-5 2.639900+0 2.000000+7 5.639900+0                      9352 1456    4
  0.000000+0 0.000000+0          0          0          0          09352 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09352 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.423600+4 2.340200+2          1          1          5          29428 1451    1
  0.000000+0 0.000000+0          0          0          0          69428 1451    2
@@ -2030,6 +2040,7 @@ HISTORY                                                           9428 1451   14
           2          2                                            9428 1456    3
  1.000000-5 2.811800+0 2.000000+7 5.531800+0                      9428 1456    4
  0.000000+0 0.000000+0          0          0          0          09428 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09428 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.423800+4 2.360040+2          1          1          5          29434 1451    1
  0.000000+0 1.000000+0          0          0          0          69434 1451    2
@@ -2200,6 +2211,7 @@ HISTORY                                                           9434 1451   16
  1.000000-5 2.890820+0 4.000000+6 3.482820+0 7.000000+6 3.926560+09434 1456    4
  2.000000+7 5.852560+0                                            9434 1456    5
  0.000000+0 0.000000+0          0          0          0          09434 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09434 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.423900+4 2.370000+2          1          1          5          09437 1451    1
  0.000000+0 0.000000+0          0          0          0          69437 1451    2
@@ -2381,6 +2393,7 @@ AUTHORS: Qi-Chang LIANG, Chong-Hai CAI,                           9437 1451   11
  5.300000+6 3.653000+0 1.000000+7 4.367900+0 1.150000+7 4.596000+09437 1456   13
  1.500000+7 5.052800+0 1.960000+7 5.653000+0 2.000000+7 5.689000+09437 1456   14
  0.000000+0 0.000000+0          0          0          0          09437 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09437 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.424000+4 2.379920+2          1          1          5          29440 1451    1
  0.000000+0 1.000000+0          0          0          0          69440 1451    2
@@ -2598,6 +2611,7 @@ MF=1  GENERAL INFORMATION                                         9440 1451   48
  1.000000-5 2.794000+0 4.000000+6 3.402000+0 7.000000+6 3.858210+09440 1456    4
  1.400000+7 4.922420+0 2.000000+7 5.834600+0                      9440 1456    5
  0.000000+0 0.000000+0          0          0          0          09440 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09440 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.424100+4 2.389860+2          1          1          5          39443 1451    1
  0.000000+0 1.000000+0          0          0          0          69443 1451    2
@@ -2984,6 +2998,7 @@ MF=1                  GENERAL INFORMATION                         9443 1451  254
           2          2                                            9443 1456    3
  1.000000-5 2.915300+0 2.000000+7 5.897300+0                      9443 1456    4
  0.000000+0 0.000000+0          0          0          0          09443 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09443 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.424200+4 2.399800+2          1          1          5          29446 1451    1
  0.000000+0 1.000000+0          0          0          0          69446 1451    2
@@ -3160,6 +3175,7 @@ MF=1           GENERAL INFORMATION                                9446 1451   34
  1.000000-5 2.790300+0 4.000000+6 3.420700+0 7.000000+6 3.899500+09446 1456    4
  2.000000+7 5.950180+0                                            9446 1456    5
  0.000000+0 0.000000+0          0          0          0          09446 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09446 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  9.524100+4 2.389900+2          1          1          5          49543 1451    1
  0.000000+0 0.000000+0          0          0          0          69543 1451    2
@@ -3285,5 +3301,202 @@ REFERENCES                                                        9543 1451  107
  2.000000+7 5.835000+0                                            9543 1456    5
  0.000000+0 0.000000+0          0          0          0          09543 1  099999
  0.000000+0 0.000000+0          0          0          0          09543 0  0    0
+ 0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
+ 9.724900+4 2.469400+2          1          1          5          09752 1451    1
+ 0.000000+0 0.000000+0          0          0          0          69752 1451    2
+ 1.000000+0 2.000000+7          1          0         10          39752 1451    3
+ 0.000000+0 0.000000+0          0          0         88          29752 1451    4
+ 97-Bk-249 CNDC       EVAL-JUN86 D.L.ZHOU                         9752 1451    5
+                      DIST-DEC09                       950818     9752 1451    6
+----CENDL-3           MATERIAL 9752                               9752 1451    7
+-----INCIDENT NEUTRON DATA                                        9752 1451    8
+------ENDF-6 FORMAT                                               9752 1451    9
+******************************************************************9752 1451   10
+AUTHORS: De-Lin ZHOU,                                             9752 1451   11
+         China Nuclear Data Center.                               9752 1451   12
+******************************************************************9752 1451   13
+                                                                  9752 1451   14
+        DATA CONVERTED FROM CENDL-2.1                             9752 1451   15
+                                                                  9752 1451   16
+******************************************************************9752 1451   17
+ HISTORY                                                          9752 1451   18
+  THIS EVALUATION WAS PERFORMED BY ZHOU DELIN ET. AL. UNDER THE   9752 1451   19
+  CONTRACTS BETWEEN IAEA/NDS AND CNDC , A COMPLETE DISCUSSION OF  9752 1451   20
+  THIS EVALUATION REFER TO THE REPORT OF "EVALUATION OF NEUTRON   9752 1451   21
+  NUCLEAR  DATA FOR BK-249"  1| .                                 9752 1451   22
+******************************************************************9752 1451   23
+ MF=1 GENERAL INFORMATION                                         9752 1451   24
+  MT=451 COMMENTS AND DICTIONARY                                  9752 1451   25
+  MT=452 TOTAL NUMBER OF NEUTRONS PER FISSION                     9752 1451   26
+     IT IS THE SUM OF DELAYED NEUTRONS (MT=455) AND PROMPT        9752 1451   27
+    NEUTRONS PER FISSION (MT=456) .                               9752 1451   28
+  MT=455 DELAYED NEUTRON DATA                                     9752 1451   29
+     CALCULATION FORMULA TAKEN FROM Y. KIKUCHI ET. AL.  2| .      9752 1451   30
+  MT=456 PROMPT NEUTRON PER FISSION                               9752 1451   31
+     CALCULATION FORMULA TAKEN FROM QIU XIJUN ET. AL.  3| .       9752 1451   32
+ MF=2 , MT=151 RESONANCE PARAMETERS                               9752 1451   33
+     RESOLVED RESONANCES FOR MLBW FORMULA :1.0E-5 EV TO 60 EV     9752 1451   34
+    RESONANCE ENERGIES , RECOMMENDED PARAMETERS MAINLY BASED ON   9752 1451   35
+    THE MEASUREMENT OF BENJAMIN ET. AL.  4| AND ANUFRIEV ET. AL.  9752 1451   36
+     5| CONSULTING THE EVALUATION OF Y. KIKUCHI ET. AL.  2| AND   9752 1451   37
+    MUGHABGHAB  6| .                                              9752 1451   38
+     UNRESOLVED RESONANCE PARAMETERS WERE OBTAINED ON THE BASES   9752 1451   39
+    OF RECOMMENDED RESOLVED RESONANCE PARAMETERS CONSULTING THE   9752 1451   40
+    EVALUATION OF Y. KIKUCHI ET. AL.  2| .                        9752 1451   41
+ MF=3 NEUTRONS CROSS SECTION                                      9752 1451   42
+  MT=1,2,4,16,17,51-68,91,102      TOTAL,ELASTIC,                 9752 1451   43
+     INELASTIC,(N,2N),(N,3N),CAPTURE CROSS SECTIONS               9752 1451   44
+      CALCULATED WITH OPTICAL , HAUSER-FESHBACH STATISTICAL       9752 1451   45
+     THEORY WITH WIDTH FLUCTUATION CORRECTION , EXCITON AND       9752 1451   46
+     EVAPORATION MODEL.                                           9752 1451   47
+  MT=18    FISSION CROSS SECTIONS                                 9752 1451   48
+   EVALUATED ON THE BASES OF MEASURED DATA BY M.SILBERT  7|,      9752 1451   49
+   E.FOMUSHKIN  8| AND I. VOROTNIKOV  9|                          9752 1451   50
+  MT=103,107   (N,P),(N,ALPHA) CROSS SECTIONS                     9752 1451   51
+   THE EXCITATION FUNCTION OF (N,P)AND (N,ALPHA) REACTION WERE    9752 1451   52
+   CALCULATED BY USING SYSTEMATICS WITH EVAPORATION MODEL         9752 1451   53
+   INCLUDING PRE-EQUILIBRIUM EFFECT                               9752 1451   54
+ MF=4   ANGULAR DISTRIBUTIONS OF SECONDARY NEUTRONS               9752 1451   55
+  MT=2,51-68 CALCULATED WITH OPTICAL MODEL & H-F THEORY           9752 1451   56
+  MT=16,17,18 ASSUMED ISOTROPIC IN THE MASS-CENTER SYSTEM         9752 1451   57
+  MT=91 ASSUMED ISOTROPIC IN THE LAB. SYSTEM                      9752 1451   58
+ MF=5    ENERGY DISTRIBUTIONS OF SECONDARY NEUTRONS               9752 1451   59
+  MT=16,17,18,91  CALCULATED WITH OPTICAL,EXCITON AND EVAPORATION 9752 1451   60
+   MODEL  AND GIVEN IN TABULATED DISTRIBUTION FORM                9752 1451   61
+  MT=18  MAXWELLIAN FISSION SPECTRUM                              9752 1451   62
+   TEMPERATURE ESTIMATED FROM HU JIMIN ET. AL. 10|                9752 1451   63
+ REFERENCES                                                       9752 1451   64
+   1| ZHOU DELIN ET AL.,  EVALUATION OF NEUTRON NUCLEAR           9752 1451   65
+      DATA FOR BK-249(1986), INTERNAL REPORT                      9752 1451   66
+   2| Y. KIKUCHI ET AL., JAERI-M 85-138(1985)                     9752 1451   67
+   3| QIU XIJUN ET AL., HSJ-78235(LLJS), INTERNAL REPORT (1978)   9752 1451   68
+   4| R.BENJAMIN ET AL., NUCL. SCI. ENG., 85, 261(1983)           9752 1451   69
+   5| V.ANUFRIEV ET AL., AE, 55,285(1983)                         9752 1451   70
+   6| S.MUGHABGHAB, NEUTRON CROSS SECTIONS, VOL.1, NEUTRON        9752 1451   71
+      RESONANCE PARAMETERS AND THERMAL CROSS SECTIONS (1984)      9752 1451   72
+   7| M. SILBERT, NUCL. SCI. ENG., 63,198(1977)                   9752 1451   73
+   8| E. FOMSHKIN ET AL., SOV. J. NUCL. PHYS., 14,41(1972)        9752 1451   74
+   9| I. VOROTNIKOV ET AL., SOV. J. NUCL. PHYS., 10,419(1970)     9752 1451   75
+   10| HU JIMIN ET AL., HSJ-78221(LLJS),INTERNAL REPORT(1978)     9752 1451   76
+ ***************** PROGRAM LINEAR (VERSION 89-1) *****************9752 1451   77
+ DATA LINEARIZED TO WITHIN AN ACCURACY OF     0.300 PER-CENT      9752 1451   78
+ ***************** PROGRAM FIXUP (VERSION 89-2) ******************9752 1451   79
+ *RECONSTRUCTED MT NUMBERS                                        9752 1451   80
+   4 =+( 50, 91)                                                  9752 1451   81
+ 103 =+(600,649)                                                  9752 1451   82
+ 104 =+(650,699)                                                  9752 1451   83
+ 105 =+(700,749)                                                  9752 1451   84
+ 106 =+(750,799)                                                  9752 1451   85
+ 107 =+(800,849)                                                  9752 1451   86
+ 101 =+( 18, 18)+(102,116)                                        9752 1451   87
+  27 =+(101,101)                                                  9752 1451   88
+   3 =+(  4,  5)+( 16, 17)+( 22, 37)+( 41, 42)                    9752 1451   89
+  19 =+( 18, 18)-( 20, 21)-( 38, 38)                              9752 1451   90
+   1 =+(  2,  3)                                                  9752 1451   91
+************************ C O N T E N T S ************************ 9752 1451   92
+                                1        451        152          09752 1451   93
+                                1        456          7          09752 1451   94
+ 0.000000+0 0.000000+0          0          0          0          09752 1  099999
+ 9.724900+4 2.469400+2          0          2          0          09752 1456    1
+ 0.000000+0 0.000000+0          0          0          1         129752 1456    2
+         12          2                                            9752 1456    3
+ 1.000000-5 3.337500+0 5.500000+6 4.345500+0 6.000000+6 4.533200+09752 1456    4
+ 7.000000+6 4.686800+0 8.000000+6 4.846900+0 9.000000+6 5.019400+09752 1456    5
+ 1.350000+7 5.826900+0 1.400000+7 5.812700+0 1.450000+7 5.864800+09752 1456    6
+ 1.500000+7 5.939400+0 1.600000+7 6.108700+0 2.000000+7 6.814700+09752 1456    7
+ 0.000000+0 0.000000+0          0          0          0          09752 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09752 0  0    0
+ 0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
+ 9.824900+4 2.469400+2          1          1          5          09852 1451    1
+ 0.000000+0 0.000000+0          0          0          0          69852 1451    2
+ 1.000000+0 2.000000+7          1          0         10          39852 1451    3
+ 0.000000+0 0.000000+0          0          0         76          29852 1451    4
+ 98-Cf-249 CNDC       EVAL-APR89 D.L.ZHOU, Z.D.SU, J.ZHANG        9852 1451    5
+                      DIST-DEC09 REV1-AUG95            950818     9852 1451    6
+----CENDL-3           MATERIAL 9852         REVISION 1            9852 1451    7
+-----INCIDENT NEUTRON DATA                                        9852 1451    8
+------ENDF-6 FORMAT                                               9852 1451    9
+******************************************************************9852 1451   10
+AUTHORS: De-Lin ZHOU, Zhong-Di SU, Jin ZHANG,                     9852 1451   11
+         China Nuclear Data Center.                               9852 1451   12
+******************************************************************9852 1451   13
+                                                                  9852 1451   14
+        DATA CONVERTED FROM CENDL-2.1                             9852 1451   15
+                                                                  9852 1451   16
+******************************************************************9852 1451   17
+ HISTORY                                                          9852 1451   18
+  THIS EVALUATION WAS PERFORMED BY SU ZHONGDI AND ZHANG JIN       9852 1451   19
+  ET AL. UNDER THE CONTRACTS BETWEEN IAEA/NDS AND CNDC ,          9852 1451   20
+  (FOR A COMPLETE DISCUSSION OF THIS EVALUATION REFER TO THE      9852 1451   21
+  REPORT "EVALUATION OF NEUTRON NUCLEAR DATA FOR CF-249"          9852 1451   22
+  1| .) AND REVISED BY ZHOU DELIN AND LIU TONG .                  9852 1451   23
+******************************************************************9852 1451   24
+ MF=1 GENERAL INFORMATION                                         9852 1451   25
+  MT=451 COMMENTS AND DICTIONARY                                  9852 1451   26
+  MT=452 TOTAL NUMBER OF NEUTRONS PER FISSION                     9852 1451   27
+     IT IS THE SUM OF DELAYED NEUTRONS (MT=455) AND PROMPT        9852 1451   28
+    NEUTRONS PER FISSION (MT=456) .                               9852 1451   29
+  MT=455 DELAYED NEUTRON DATA                                     9852 1451   30
+     T.R.ENGLAND+,LA-11151,LA-11534,LAURA-88-4118.                9852 1451   31
+  MT=456 PROMPT NEUTRON PER FISSION                               9852 1451   32
+     CALCULATION FORMULA TAKEN FROM QIU XIJUN ET AL.  3| .        9852 1451   33
+ MF=2 , MT=151 RESONANCE PARAMETERS                               9852 1451   34
+     RESOLVED RESONANCES FOR MLBW FORMULA :1.0E-5 EV TO 70 EV     9852 1451   35
+    RESONANCE ENERGIES , RECOMMENDED PARAMETERS MAINLY BASED ON   9852 1451   36
+    THE MEASUREMENT OF BENJAMIN ET AL.  4| AND ANUFRIEV ET AL.    9852 1451   37
+     5| CONSULTING THE EVALUATION OF MUGHABGHAB  6| AND  Y.       9852 1451   38
+    KIKUCHI ET AL.  2| .                                          9852 1451   39
+     UNRESOLVED RESONANCE PARAMETERS WERE OBTAINED ON THE BASES   9852 1451   40
+    OF RECOMMENDED RESOLVED RESONANCE PARAMETERS CONSULTING THE   9852 1451   41
+    EVALUATION OF Y. KIKUCHI ET AL.  2| .                         9852 1451   42
+ MF=3 NEUTRONS CROSS SECTION                                      9852 1451   43
+  MT=1,2,4,16,17,51-65,91,102      TOTAL,ELASTIC,                 9852 1451   44
+     INELASTIC,(N,2N),(N,3N),CAPTURE CROSS SECTIONS               9852 1451   45
+      CALCULATED WITH OPTICAL , HAUSER-FESHBACH STATISTICAL       9852 1451   46
+     THEORY WITH WIDTH FLUCTUATION CORRECTION , EXCITON AND       9852 1451   47
+     EVAPORATION MODEL .                                          9852 1451   48
+  MT=18    FISSION CROSS SECTIONS                                 9852 1451   49
+   EVALUATED ON THE BASES OF MEASURED DATA BY M.SILBERT  7|,      9852 1451   50
+   E.FOMUSHKIN  8| AND I. VOROTNIKOV  9|                          9852 1451   51
+  MT=103,107   (N,P),(N,ALPHA) CROSS SECTIONS                     9852 1451   52
+   THE EXCITATION FUNCTION OF (N,P) AND (N,ALPHA) REACTION WERE   9852 1451   53
+   CALCULATED BY ZHAO ZHIXIANG USING SYSTEMATICS WITH EVAPORATION 9852 1451   54
+   MODEL  INCLUDING PRE-EQUILIBRIUM EFFECT  10|                   9852 1451   55
+ MF=4   ANGULAR DISTRIBUTIONS OF SECONDARY NEUTRONS               9852 1451   56
+  MT=2,51-65 CALCULATED WITH OPTICAL MODEL                        9852 1451   57
+  MT=16,17,18 ASSUMED ISOTROPIC IN THE MASS-CENTER SYSTEM         9852 1451   58
+  MT=91 ASSUMED ISOTROPIC IN THE LAB. SYSTEM                      9852 1451   59
+ MF=5    ENERGY DISTRIBUTIONS OF SECONDARY NEUTRONS               9852 1451   60
+  MT=16,17,18,91  CALCULATED WITH OPTICAL,EXCITON AND EVAPORATION 9852 1451   61
+   MODEL  AND GIVEN IN TABULATED DISTRIBUTION FORM                9852 1451   62
+  MT=18  MAXWELLIAN FISSION SPECTRUM                              9852 1451   63
+   TEMPERATURE ESTIMATED FROM HU JIMIN ET AL. 11|                 9852 1451   64
+ REFERENCES                                                       9852 1451   65
+   1| SU ZHONGDI ET AL., REPORT OF EVALUATION OF NEUTRON NUCLEAR  9852 1451   66
+      DATA FOR CF-249(1986), TO BE PUBLISHED                      9852 1451   67
+   2| Y. KIKUCHI ET AL., JAERI-M 85-138(1985)                     9852 1451   68
+   3| QIU XIJUN ET AL., HSJ-78235(LLJS), INTERNAL REPORT (1978)   9852 1451   69
+   4| R.BENJAMIN ET AL.,NUCL. SCI.ENG.,85, 261(1983)              9852 1451   70
+   5| V.ANUFRIEV ET AL., AE, 55,285(1983)                         9852 1451   71
+   6| S.MUGHABGHAB, NEUTRON CROSS SECTIONS, VOL.1, NEUTRON        9852 1451   72
+      RESONANCE PARAMETERS AND THERMAL CROSS SECTIONS(1984)       9852 1451   73
+   7| M. SILBERT,NUCL. SCI. ENG.,63,198(1977)                     9852 1451   74
+   8| E. FOMSHKIN ET AL., SOV. J. NUCL. PHYS.,14,41(1972)         9852 1451   75
+   9| I. VOROTNIKOV ET AL., SOV. J. NUCL. PHYS.,10,419(1970)      9852 1451   76
+   10| ZHAO ZHIXIANG ET AL., "SYSTEMATICS OF EXCITATION FUCTION   9852 1451   77
+       FOR (N,CHARGED PARTICLE) REACTIONS" , MASTER THESIS,       9852 1451   78
+       INSTITUTE OF ATOMIC ENERGY, BEIJING, CHINA, 1985.          9852 1451   79
+************************ C O N T E N T S ************************ 9852 1451   80
+                                1        451        135          09852 1451   81
+                                1        456          6          09852 1451   82
+ 0.000000+0 0.000000+0          0          0          0          09852 1  099999
+ 9.824900+4 2.469400+2          0          2          0          09852 1456    1
+ 0.000000+0 0.000000+0          0          0          1          99852 1456    2
+          9          2                                            9852 1456    3
+ 1.000000-5 3.884100+0 3.100000+6 4.433700+0 4.000000+6 4.700800+09852 1456    4
+ 6.000000+6 5.026000+0 8.000000+6 5.372000+0 9.500000+6 5.634300+09852 1456    5
+ 1.100000+7 5.880000+0 1.150000+7 5.959200+0 2.000000+7 7.429200+09852 1456    6
+ 0.000000+0 0.000000+0          0          0          0          09852 1  099999
+ 0.000000+0 0.000000+0          0          0          0          09852 0  0    0
  0.000000+0 0.000000+0          0          0          0          0   0 0  0    0
  0.000000+0 0.000000+0          0          0          0          0  -1 0  0    0
