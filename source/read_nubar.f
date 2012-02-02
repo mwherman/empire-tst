@@ -236,14 +236,13 @@ C     num_niu
       write(8,*) ' WARNING: Extrapolating nubar beyond highest E bin'
       else
         do i=1,num_niu
-          if(Eniu_eval(i) .gt. en) exit
+          if(Eniu_eval(i) .gt. entmp) exit
         enddo
       endif
       
       xnus = (Vniu_eval(i)-Vniu_eval(i-1))/(Eniu_eval(i)-Eniu_eval(i-1))
 
       fniu_nubar_eval = Vniu_eval(i-1) + xnus*(entmp-Eniu_eval(i-1))
-
 
       return
       end
