@@ -1,5 +1,5 @@
 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789  <-  Column indicator
-011111111000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000                                                                                                                                                                
+011111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000                                                                                                                                                                
 Each column correspond to one reaction. 
 For the zvd file to be produced the second column should contain 1.
 
@@ -13,5 +13,6 @@ The first six reactions are always fixed:
 6.- (z,n)
 7.- (z,2n)   ! if two   neutrons or more are allowed
 8.- (z,3n)   ! if three neutrons or more are allowed
+9.- (z,4n)   ! if four  neutrons or more are allowed
 
 This file could be edited to print more reactions
