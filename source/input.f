@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2420 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
+Ccc   * $Rev: 2428 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-03 15:40:08 +0100 (Fr, 03 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1707,17 +1707,17 @@ C-----set giant resonance parameters for CN
       GMRpar(8,nnuc) = 0.0
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
-	write(8,*)
+      write(8,*)
       write(8,*)' *****************************************************'
       write(8,*)' *  Table of Reaction Q-values (Mass inc - Mass out) *'
       write(8,*)' *     for the first emitted particle from the CN    *'
       write(8,*)' *                                                   *'
       write(8,*)' *                    Q(at.mass)  Q(nucl.mass)       *'
-	                                 
+                                 
 
       CALL QVAL(1,1,qatom,qnucl) 
       write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
-	&      '*          neutron :',qatom,qnucl
+     &      '*          neutron :',qatom,qnucl
       CALL QVAL(2,1,qatom,qnucl) 
       write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
      &      '*          proton  :',qatom,qnucl
