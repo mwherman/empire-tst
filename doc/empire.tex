@@ -126,13 +126,23 @@ The package contains the full EXFOR library of experimental
 data in computational format C4 that are automatically retrieved during the
 calculations. 
 
-EMPIRE contains  the resonance module that retrieves data from the electronic version of the Atlas of Neutron Resonances by Mughabghab (not provided with the EMPIRE distribution), to produce resonance section and related covariances for the ENDF-6 formatted files. 
-EMPIRE can be used to determine covariances of the calculated data using either sensitivity matrices along with the KALMAN code or employing Monte Carlo approach to produce  model generated covariances. In both cases  experimental data can be taken into account, either directly (KALMAN) or by using Monte Carlo prior and covariance in the least square fitting GANDR system.
+EMPIRE contains  the resonance module that retrieves data from the electronic
+version of the Atlas of Neutron Resonances by Mughabghab (not provided with the EMPIRE distribution),
+to produce resonance section and related covariances for the ENDF-6 formatted files. 
+EMPIRE can be used to determine covariances of the calculated data using either
+sensitivity matrices along with the KALMAN code or employing Monte Carlo approach
+to produce  model generated covariances. In both cases  experimental data can be
+taken into account, either directly (KALMAN) or by using Monte Carlo prior and
+covariance in the least square fitting GANDR system.
 
-Publication quality graphs can be obtained using the powerful and flexible plotting package ZVView. Interactive plots with ZVView comparing experimental results with calculations can be produced with ENDVER modules. 
+Publication quality graphs can be obtained using the powerful and flexible
+plotting package ZVView. Interactive plots with ZVView comparing experimental
+results with calculations can be produced with ENDVER modules. 
 
-The backbone of the EMPIRE system are bash-shell UNIX scripts that provide for seamless console operation of EMPIRE on Linux, Mac OS X, and Windows with gfortran installed. Additionally,  the graphical interface,  provides for an
-easy operation of the system on Linux and Mac OS X.
+The backbone of the EMPIRE system are bash-shell UNIX scripts that provide
+for seamless console operation of EMPIRE on Linux, Mac OS X, and Windows
+with GNU gfortran compiler installed. Additionally,  the graphical interface,
+provides for an easy operation of the system on Linux and Mac OS X.
 
 
 \end{abstract}
@@ -7246,6 +7256,12 @@ printed independently of the keyword PRGAMM.
 
 = 2 PFNS are calculated using Kornilov parameterization \cite{PFNS_kornilov}
 
+\item [{BENCHM}] Controls if benchmark calculation is requested. 
+
+= 0 no benchmark calculation (default),
+
+> 0 benchmark calculation requested. Energies do not need to be in increasing order.
+
 \item [{KALMAN}] Controls calculation of a sensitivity matrix,
 
 = 0 no sensitivity matrix  calculations (default),
@@ -7416,6 +7432,19 @@ All transmission coefficients calculated with spherical OM.
 NOTE: OM potential to be used by ECIS/OPTMAN might be different from the
 one used in the rest of the calculations and can be specified with
 the DIRPOT option.
+
+\item [{CALCTL}] Controls use of calculated transmission coefficients for both 
+projectile and ejectiles.\\
+
+= 0 Transmission coefficients calculated during the first run are stored, and reused
+    in subsequent EMPIRE runs (default),
+       
+> 0 Transmission coefficients are calculated independently for each run; no reusage
+    is allowed. This option is useful to calculate some quantities that are only used
+    if TL are not already present (e.g. Bass fusion barrier in HI induced reactions).
+    However, this potion slows down the execution of the code in subsequent runs up
+    to a factor of 10 times (additional time is needed to calculate TLs again; reading
+    them is much faster.
 
 \item [{EcDWBA}] Automatically selects all discrete levels to be used in DWBA
 calculations for uncoupled collective levels. \\
