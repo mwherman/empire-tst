@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2428 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-03 15:40:08 +0100 (Fr, 03 Feb 2012) $
+$DEBUG
+Ccc   * $Rev: 2433 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -249,6 +250,7 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.0
          SHRd = 2.5            ! diffuness of the shell correction damping
 C--------fusion parameters
+         CAlctl = .FALSE.
          CSRead = -2.0
          SIG = 0.0
          TRUnc = 2.0
@@ -271,6 +273,7 @@ C
          KTRompcc = 0
          SOFt = .FALSE.
          CCCalc = .FALSE.
+	   BENchm = .FALSE.
 C       
 C
          NUBarread = .FALSE.
@@ -1136,34 +1139,9 @@ C
             WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
             STOP 'INSUFFICIENT DIMENSION NDExclus'
          ENDIF
-
 C
 C        Checking fission input consistency 
 C
-C	   To add printout of fission options default values: 
-C           (by setting all of them to -1)
-C     
-C        itmp = 0
-C        DO i = 1, NDNUC
-C          IF(FISbar(i).eq.3) THEN
-C            itmp = 1
-C            FISdis(i)=0.
-C            FISopt(i)=0.
-C          ENDIF
-C        ENDDO
-C        if(itmp .gt. 0) then
-C             WRITE (8,*) 
-C    & 'WARNING: Fiss. transitional states can not be used with '
-C            WRITE (8,*) 
-C    & 'WARNING: HFB fission barriers, FISDIS set to 0 FOR Z=', 
-C    &                   NINT(Z(i)), ' A=', NINT(A(i))
-C            WRITE (8,*) 
-C    & 'WARNING: Optical model for fission can not be used with '
-C            WRITE (8,*) 
-C    & 'WARNING: HFB fission barriers, FISOPT reset to 0 FOR Z=', 
-C    &                   NINT(Z(i)), ' A=', NINT(A(i))
-C        endif
-
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
@@ -1206,6 +1184,14 @@ C
             WRITE (8,*) ' WARNING!!!! MSC has been turned off '
             WRITE (8,*) ' WARNING!!!! (It is not allowed for '
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
+            WRITE (8,*) ' '
+         ENDIF
+         IF (MSC.NE.0 .AND. AEJc(0).GT.4.0D0) THEN
+            MSC = 0
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING!!!! MSC has been turned off    '
+            WRITE (8,*) ' WARNING!!!! (It is not well tested for '
+            WRITE (8,*) ' WARNING!!!! HI reactions)'
             WRITE (8,*) ' '
          ENDIF
          IF (LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
@@ -1305,33 +1291,42 @@ C--------initialize matrix with 0's
             ENDDO
          ENDDO
 C--------set ECIS (.,1)
-         IF (DIRect.GT.0) THEN
+         IF (DIRect.GT.0 ) THEN
             IF (NPRoject.EQ.1) THEN
-               IDNa(1,1) = 1
+               IDNa(1,1) = 1	 ! neutron discrete
             ELSEIF (NPRoject.EQ.2) THEN
-               IDNa(3,1) = 1
+               IDNa(3,1) = 1	 ! proton discrete
+            ELSEIF (NPRoject.EQ.3) THEN
+               IDNa(11,1) = 1	 ! alpha discrete
+            ELSEIF (NPRoject.EQ.4) THEN
+               IDNa(12,1) = 1	 ! deut  discrete
+            ELSEIF (NPRoject.EQ.5) THEN
+               IDNa(13,1) = 1	 ! trit  discrete
+            ELSEIF (NPRoject.EQ.2) THEN
+               IDNa(14,1) = 1	 ! He-3  discrete
             ENDIF
          ENDIF
 C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
-         IF (MSD.EQ.1) THEN
+         IF (MSD.EQ.1 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IF (NPRoject.EQ.1) THEN
                IF (DIRect.EQ.0) IDNa(1,2) = 1
                IDNa(2,2) = 1
-            ELSEIF (NPRoject.EQ.2) THEN
+            ELSE ! (NPRoject.EQ.2) 
                IF (DIRect.EQ.0) IDNa(3,2) = 1
                IDNa(4,2) = 1
             ENDIF
-         ELSEIF(MSD.EQ.2) THEN
+	   ENDIF
+         IF (MSD.EQ.2 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IF (NPRoject.EQ.1) THEN
                IDNa(1,2) = 1
                IDNa(2,2) = 1
-            ELSEIF (NPRoject.EQ.2) THEN
+            ELSE ! (NPRoject.EQ.2) 
                IDNa(3,2) = 1
                IDNa(4,2) = 1
             ENDIF
          ENDIF
 C--------set MSC  (.,3) (note no discrete transitions in MSC)
-         IF (MSC.GT.0) THEN
+         IF (MSC.GT.0 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IDNa(2,3) = 1
             IDNa(4,3) = 1
             IF (GST.GT.0) IDNa(5,3) = 1
@@ -1339,38 +1334,26 @@ C-----------stop MSC charge-exchange if DDHMS or PCROSS active
             IF (LHMs.GT.0 .OR. PEQc.GT.0.) THEN
                IF (NPRoject.EQ.1) THEN
                   IDNa(4,3) = 0
-               ELSEIF (NPRoject.EQ.2) THEN
+               ELSE ! (NPRoject.EQ.2) 
                   IDNa(2,3) = 0
-               ELSE
-                  WRITE (8,*) ''
-                  WRITE (8,*)
-     &                       'PCROSS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                  WRITE (8,*)
-     &                       'THIS CASE. EXECUTION S T O P P E D       '
-                  STOP 'ILLEGAL COMBINATION PCROSS + MSC/MSD !!!!'
-               ENDIF
+               ENDIF 
             ENDIF
          ENDIF
 C--------set HMS  (.,5)
-         IF (LHMs.GT.0) THEN
+         IF (LHMs.GT.0 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IDNa(1,5) = 1  ! neutron discrete levels
             IDNa(2,5) = 1
             IDNa(3,5) = 1  ! proton  discrete levels
             IDNa(4,5) = 1
 C-----------stop HMS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-               IF (NPRoject.EQ.2) THEN
-                  IDNa(3,5) = 0
-                  IDNa(4,5) = 0
-               ELSEIF (NPRoject.EQ.1) THEN
-                  IDNa(1,5) = 0
-                  IDNa(2,5) = 0
-               ELSE
-                  WRITE (8,*) ''
-                  WRITE (8,*) 'HMS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                  WRITE (8,*) 'THIS CASE. EXECUTION S T O P P E D !!!! '
-                  STOP 'ILLEGAL COMBINATION HMS + MSC/MSD'
-               ENDIF
+              IF (NPRoject.EQ.2) THEN
+                IDNa(3,5) = 0
+                IDNa(4,5) = 0
+              ELSE ! (NPRoject.EQ.1) 
+		      IDNa(1,5) = 0
+                IDNa(2,5) = 0
+              ENDIF
             ENDIF
          ENDIF
 
@@ -1394,16 +1377,14 @@ C
          IF (PEQc.eq.0.d0) THEN
 C--------dismiss discrete levels key as PCROSS is not active
             PEQcont = 0.d0
-            WRITE (8,
-     &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
-              WRITE (12,
-     &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
+C           WRITE (8,
+C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
+C             WRITE (12,
+C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
          ENDIF
 C--------set PCROSS  (.,6) cluster emission
          IF (PEQc.GT.0.d0) THEN
-            IF(PEQcont.gt.0) IDNa(1,6) = 1  ! discrete N is included even with ECIS active
             IDNa(2,6) = 1
-            IF(PEQcont.gt.0) IDNa(3,6) = 1  ! discrete P is included even with ECIS active
             IDNa(4,6) = 1
             IDNa(5,6) = 1  ! gammas
             IDNa(6,6) = 1  ! cont A 
@@ -1415,16 +1396,19 @@ C
 C           It could be calculated but probably not formatted 
 C
             IF(PEQcont.gt.0) then
-              IDNa(11,6) = 1 ! alpha discrete
-              IDNa(12,6) = 1 ! deut  discrete
-              IDNa(13,6) = 1 ! trit  discrete
-              IDNa(14,6) = 1 ! He-3  discrete
+C             Discrete levels calculated in PCROSS if ECIS is not active in the inelastic channel 
+              IF(IDNa(1 ,1).LE.0) IDNa(1 ,6) = 1 ! neut  discrete
+              IF(IDNa(3 ,1).LE.0) IDNa(3 ,6) = 1 ! prot  discrete
+              IF(IDNa(11,1).LE.0) IDNa(11,6) = 1 ! alpha discrete
+              IF(IDNa(12,1).LE.0) IDNa(12,6) = 1 ! deut  discrete
+              IF(IDNa(13,1).LE.0) IDNa(13,6) = 1 ! trit  discrete
+              IF(IDNa(14,1).LE.0) IDNa(14,6) = 1 ! He-3  discrete
             ENDIF
 C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-               IF (NPRoject.EQ.2) THEN
+		     IF (NPRoject.EQ.2) THEN
                   IDNa(3,6) = 0
                   IDNa(4,6) = 0
                ELSEIF (NPRoject.EQ.1) THEN
@@ -1433,9 +1417,17 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
                ELSE
                   WRITE (8,*) ''
                   WRITE (8,*)
-     &                       'PCROSS AND MSD/MSC ARE NOT COMPATIBLE IN '
-                  WRITE (8,*) 'THIS CASE. EXECUTION S T O P P E D !!!! '
-                  STOP 'ILLEGAL COMBINATION PCROSS + MSC/MSD'
+     &             'WARNING: MSD/MSC DISABLED FOR INCIDENT PARTICLES '
+                  WRITE (8,*)
+     &             'WARNING: OTHER THAN NUCLEONS, PCROSS WILL BE USED'
+                  IDNa(1,2) = 0 ! MSD	 
+                  IDNa(2,2) = 0
+                  IDNa(3,2) = 0
+                  IDNa(4,2) = 0
+                  IDNa(1,3) = 0 ! MSC
+                  IDNa(2,3) = 0
+                  IDNa(3,3) = 0
+                  IDNa(4,3) = 0
                ENDIF
             ENDIF
 C-----------stop PCROSS nucleon channels if HMS active
@@ -1707,14 +1699,14 @@ C-----set giant resonance parameters for CN
       GMRpar(8,nnuc) = 0.0
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
-      write(8,*)
+	write(8,*)
       write(8,*)' *****************************************************'
       write(8,*)' *  Table of Reaction Q-values (Mass inc - Mass out) *'
       write(8,*)' *     for the first emitted particle from the CN    *'
       write(8,*)' *                                                   *'
       write(8,*)' *                    Q(at.mass)  Q(nucl.mass)       *'
-                                 
-
+      write(8,*)' *                      [MeV]        [MeV]           *'
+      write(8,*)' *                   --------------------------      *'
       CALL QVAL(1,1,qatom,qnucl) 
       write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
      &      '*          neutron :',qatom,qnucl
@@ -3151,6 +3143,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION GRAND,DRAND
+      CHARACTER*72 rtitle
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
       INTEGER IPArCOV
@@ -3186,13 +3179,13 @@ C
 
       WRITE (8,*)'                        __________________________'
       WRITE (8,*)'                       |                          |'
-      open(200,file=trim(empiredir)//"/version",status='OLD',
+      open(23,file=trim(empiredir)//"/version",status='OLD',
      >    ERR=753)
 C     VERSIONNUMBER = 3.1
 C     VERSIONNAME   = RIVOLI
-      read(200,'(16x,A5)',ERR=753,END=753) emp_ver
-      read(200,'(16x,A6)',ERR=753,END=753) emp_nam
-      close(200)
+      read(23,'(16x,A5)',ERR=753,END=753) emp_ver
+      read(23,'(16x,A6)',ERR=753,END=753) emp_nam
+      close(23)
 
       WRITE(8,'(A44,A5,A3)') 
      > '                        |    E M P I R E  -  ',emp_ver ,'  |'
@@ -3210,10 +3203,10 @@ C     VERSIONNAME   = RIVOLI
       WRITE (8,*)
      > '                       |          Rivoli          |'
 C
-  754 open(200,file=trim(empiredir)//"/source/.svn/entries",
+  754 open(23,file=trim(empiredir)//"/source/.svn/entries",
      &status='OLD',ERR=755)
-      read(200,'(3/,A5,7/,A5)',ERR=755,END=755) emp_rev,source_rev
-      close(200)
+      read(23,'(3/,A5,7/,A5)',ERR=755,END=755) emp_rev,source_rev
+      close(23)
       WRITE(8,20) emp_rev
    20 FORMAT(24X,'| SVN empire     rev. ',A5,'|')
       WRITE(8,30) source_rev
@@ -3230,13 +3223,15 @@ C
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
+      WRITE (8,*)'        ', trim(EMPtitle)
+      WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
       WRITE (8,*) '-------------------------------------------'
-      WRITE (8,*) ' '
+      WRITE (8,*) ' '  
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
-      WRITE (12,*) 'Authors:'
-      WRITE (12,*) '_________________________________'
+      WRITE (12,*) trim(EMPtitle)
+      WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
      > trim(emp_ver), ' ',trim(emp_nam)
@@ -3299,11 +3294,26 @@ C
       WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
       irun = 0
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A1)') name(1:1)
+      READ (5,'(A1)',END=150) name(1:1)
+
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
-         BACKSPACE (5)
-         READ (5,'(A6,G10.5,4I5)') name, val, i1, i2, i3, i4
+
+      BACKSPACE (5)
+      IF(name(1:1).eq.'@') THEN 
+	  READ(5,'(A72)') rtitle ! read running title
+ 
+        rtitle(1:1)=' '
+
+        write(*,*) '***',trim(rtitle)
+        WRITE( 8,*)'***************************************************'
+	  write( 8,*)'***',trim(rtitle)
+        WRITE( 8,*)'***************************************************'
+	  GOTO 100  ! next line
+      ENDIF
+
+	READ (5,'(A6,G10.5,4I5)',END=150) name, val, i1, i2, i3, i4
+
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
 C-----------Print some final input options
@@ -3311,12 +3321,15 @@ C-----------Print some final input options
                ECUtcoll = 0.
                JCUtcoll = 0
 	      ELSE
+               ecutof = 3.0d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
-                 ecutof = 1.5d0*30./A(0)**0.6666666d0
+                 IF(A(0).ge.40)
+     &              ecutof = 2.0d0*30./A(0)**0.6666666d0
+                 IF(A(0).gt.220 .or. (A(0).ge.150 .and. A(0).le.190))
+     &              ecutof = 1.5d0*30./A(0)**0.6666666d0 ! deformed
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
-                 ecutof =  2.d0*30./A(0)**0.6666666d0
 	           IF(ECUtcoll.GT.ecutof) then
                    ECUtcoll = ecutof
                    WRITE(8,*) 
@@ -3328,9 +3341,9 @@ C-----------Print some final input options
                WRITE (8,
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
      &     ) ECUtcoll
-            WRITE (8,
+               WRITE (8,
      &'('' Maximum spin of retrieved collective levels J <'',I1)') 
-     &     JCUtcoll
+     &         JCUtcoll+1
             ENDIF
 
             IF (KEY_shape.EQ.0) WRITE (8,
@@ -3421,6 +3434,17 @@ C-----------Printout of some final input options   *** done ***
          i2 = i2e
          i3 = i3e
          i4 = i4e
+         ENDIF
+
+C--------DEGAS input
+         IF (name.EQ.'DEGAS ') THEN
+              WRITE (8,
+     &'('' Exciton model calculations with code DEGAS'',/,
+     &  ''  are disabled in the current EMPIRE version'')')
+              WRITE (12,
+     &'('' Exciton model calculations with code DEGAS'',/,
+     &  ''  are disabled in the current EMPIRE version'')')
+            GOTO 100
          ENDIF
 
 C--------PCROSS input
@@ -3978,6 +4002,32 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'BENCHM') THEN
+	      IF(val.ne.0) then 
+              BENchm = .TRUE.
+              WRITE (8,
+     &     '('' Benchmark calculations: Input energies in any order'')') 
+              WRITE (12,
+     &     '('' Benchmark calculations: Input energies in any order'')') 
+            endif
+		  GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'CALCTL') THEN
+	      IF(val.ne.0) then 
+              CALctl = .TRUE.
+              WRITE (8,
+     &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
+              WRITE (8,
+     &  '('' OMP (TLs) calculations will be undertaken (instead of readi 
+     &ng stored TLs)'')') 
+              WRITE (8,
+     &  '('' WARNING: CALCTL option slows down the execution by 3-5 time
+     &s (for the 2nd and subsequent runs)'')') 
+            endif
+		  GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'CSREAD') THEN
             CSRead = val
             IF (CSRead.GT.0.0D0) WRITE (8,
@@ -3986,7 +4036,7 @@ C-----
 
             IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
               WRITE (8,
-     &	   '('' WARNING: CSRead value in input ignored: '')') 
+     &	   '('' WARNING: CSRead value in input ignored '')') 
               WRITE (8,
      &	   '('' WARNING: CSRead valid only for HI reactions '')') 
               CSRead = -2.0D0
@@ -4904,6 +4954,24 @@ C-----
 C-----
          IF (name.EQ.'MSC   ') THEN
             MSC = val
+            IF (MSC.NE.0 .AND. AEJc(0).GT.4.0D0) THEN
+              MSC = 0
+              WRITE (8,*) ' '
+              WRITE (8,*) ' WARNING!!!! MSC has been turned off    '
+              WRITE (8,*) ' WARNING!!!! (It is not well tested for '
+              WRITE (8,*) ' WARNING!!!! HI reactions)'
+              WRITE (8,*) ' '
+              GOTO 100
+            ENDIF
+            IF (MSC.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
+              MSC = 0
+              WRITE (8,*) ' '
+              WRITE (8,*) ' WARNING!!!! MSC has been turned off  '
+              WRITE (8,*) ' WARNING!!!! (It is not suitable for  '
+              WRITE (8,*) ' WARNING!!!!  photo-induced reactions)'
+              WRITE (8,*) ' '
+              GOTO 100
+           ENDIF
             IF (MSC.NE.0) WRITE (8,
      &                '('' Heidelberg MSC calculations were selected'')'
      &                )
@@ -7141,10 +7209,15 @@ C-----
          WRITE (8,'('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
      &          name
       GOTO 100
+C
+  150 WRITE (*,*) ' WARNING: END OF INPUT FILE REACHED !' 
+      WRITE (8,*) ' WARNING: END OF INPUT FILE REACHED !' 
+      RETURN
+C
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
-     &  '', EMPIRE STOPPED'')') name
-      STOP ' FATAL: INVALID FORMAT in input KEY '
+     &  '', EMPIRE STOPPED, check your INPUT file'')') name
+      STOP ' FATAL: INVALID FORMAT in input KEY, check your INPUT file '
       END
 C
       SUBROUTINE ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,
@@ -7245,7 +7318,7 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
          ELSE
-            excess(k) = xmassth  ! FRDM model assumed for the time being
+            excess(k) = xmassth    ! FRDM model assumed for the time being
          ENDIF
       ENDDO
   100 CLOSE (UNIT = 27)
@@ -7264,7 +7337,7 @@ C        Corresponds to the definition of atomic mass excess in Audi
 
       DO iz = 6, 100
          DO ia = 2*iz - 10, 3*iz
-           IF (RESmas(iz,ia).EQ.0.D0) cycle
+           IF (RESmas(iz,ia).NE.0) cycle
            in = ia - iz
            if (in.le.0) cycle
            CALL mass10(in,iz,ebin)
@@ -7280,17 +7353,16 @@ C    *            in*(AMUneu       -1.D0)*AMUmev - ebin			! (**)
 
 
 C     The solution below is the last resource proposed by mbc
-C     Usually these masses are not used
+C     Usually these masses are not used in calculations
 C-------------------------------------------------------------------------  
 C-----mbc1 a quick/temp? solution to weird light undefined masses: define
 C-----resmas=A for all nuclei so far undefined
 C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
       DO iz = 1, 130
          DO ia = 1, 400
-            IF (RESmas(iz,ia).EQ.0.D0) THEN
-               RESmas(iz,ia) = REAL(ia)
-               EXCessmass(iz,ia) = 0
-            ENDIF
+            IF (RESmas(iz,ia).NE.0) cycle
+            RESmas(iz,ia) = REAL(ia)
+            EXCessmass(iz,ia) = 0
          ENDDO
       ENDDO
 
@@ -7360,6 +7432,7 @@ C                Nuclear masses following ENDF Manual 2009, so electron mass is 
 C                In general we assume that all incident and outgoing particles have nuclear masses
 C                   (i.e. they are stripped of electrons)
 C
+C              Nuclear masses
                  EJMass(ii) = 
      &              AEJc(ii) +(XMAss_ej(ii)- ZEJc(ii)*AMUele)/AMUmev
 C
@@ -8598,7 +8671,7 @@ C--------82 208    nucleus is treated as spherical
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
 C        '  40  90    nucleus is treated as dynamically deformed                                              '
-         idefault = SCAN(comment(34:40),'sphe')                  
+         idefault = SCAN(comment(34:37),'sphe')                  
          if(idefault.eq.0) then
 C
 C          Soft rotator optical model
@@ -8639,6 +8712,18 @@ C----------'collective levels:'
            WRITE (12,*)' '
            WRITE (12,'(a80)') comment
 C----------Reading ground state information (to avoid overwriting deformation)
+
+C          From ccsoftrot
+C
+C          do k=1,ND_nlv
+C            IF(ICOllev(k).GT.LEVcc) CYCLE
+C            iparit = -1
+C            if(D_Lvp(k).gt.0.d0) iparit = +1
+C            write(1,'(e11.6,1x,6I2)') 
+C     +        D_Elv(k), nint(2*D_Xjlv(k)), iparit,
+C     +        IPH(k), D_Klv(k), D_Llv(k), D_nno(k) 
+C          enddo
+
            READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
@@ -9826,6 +9911,7 @@ C
      &        NANa(9000), NANz(9000), NARam(700), NG, NNA(300), NNG(300)
      &        , NNZ(300), NUMram, NZRam(700)
       CHARACTER*64 EMPiredir
+      CHARACTER*72 EMPtitle
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLOCOM2/ KEYload, KZZ, KAA
@@ -9834,7 +9920,7 @@ C
      &                 NARam, NUMram
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
 
-      COMMON /GLOBAL_E/ EMPiredir
+      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
 C
 C Dummy arguments
 C

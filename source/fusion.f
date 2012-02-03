@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2414 $
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-02 08:35:00 +0100 (Do, 02 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -95,9 +95,9 @@ C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
-C     no TLs stored for HI reactions (on M Gupta request)  
-      IF (fexist .and. (ZEJc(0).le.2 .and. AEJc(0).le.4)) THEN
-C--------Here the old calculated files should be read
+C  
+      IF (fexist .and. .not.CALctl) THEN
+C--------Here the old calculated files are read
          OPEN (45,FILE = (ctldir//ctmp23//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
@@ -352,17 +352,8 @@ C-----------DWBA calculation. All collective levels considered
                WRITE (8,*) '    to uncoupled coll. levels and continuum'
             ENDIF
 
-C           Setting the normalization factor for OMP (used in covariance calculation)
-C           FNvvomp(0,0) = FNvvomp(Npro,Ntrg)
-C           FNwvomp(0,0) = FNwvomp(Nejc,i)
-C           FNwsomp(0,0) = FNwsomp(Nejc,i)
-C           FNavomp(0,0) = FNavomp(Nejc,i)
-C           FNasomp(0,0) = FNasomp(Nejc,i)
-C           FNrvomp(0,0) = FNrvomp(Nejc,i)
-C           FNrwvomp(0,0) = FNrwvomp(Nejc,i)
-C           FNrsomp(0,0) = FNrsomp(Nejc,i)
- 
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+
             IF (DIRect.NE.3) THEN
                CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
             ELSE

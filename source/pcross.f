@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2250 $
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-19 08:33:01 +0100 (Do, 19 Jän 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -235,6 +235,7 @@ C
         IF(DXSRED.GT.0.d0) then
           scompn = Sigr - cross(2) -cross(5)
           scompn = Sigr - cross(2) -cross(5)
+C
           IF(scompn.le.0.d0) THEN
             scompn  = 0.d0
             dbreak  = Sigr/(cross(2)+cross(5))*cross(2)

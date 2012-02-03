@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2277 $
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-21 20:57:12 +0100 (Sa, 21 Jän 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -63,19 +63,23 @@ C-----do loop over decaying nucleus parity
       sumGg = 0.d0
       sumtg = 0.d0
       tgexper=0.d0
-      IF(FIRst_ein) THEN          
+      IF(FIRst_ein .or. BENchm) THEN          
         IF(EINl.LE.0.002d0) THEN
           WRITE(8,
      &    '(1x,''Renormalization of gamma-ray strength function'')')
 	  ELSE
           WRITE(8,'(1x,
-     &    ''WARNING: First Einc must be < 2keV for Do and Gg calculation
-     &s'')')
+     &    ''WARNING: First incident energy Einc must be < 2keV for Do an
+     &d Gg calculations'')')
+          WRITE(8,'(1x,
+     &    ''WARNING: for the renormalization of gamma-ray strength funct
+     &ion'')')
 	  ENDIF
         WRITE(8,'(1x,
      &    ''------------------------------------------------------------
      &-'')')
       ENDIF
+
       DO ipar = 1, 2
          ip = INT(( - 1.0)**(ipar + 1))
 C--------do loop over decaying nucleus spin
@@ -239,7 +243,7 @@ C--------------calculate total emission
 C
 C           Gamma width calculation
 C
-            IF(FIRst_ein .AND. EINl.LE.0.002d0) THEN
+            IF((FIRst_ein  .or. BENchm) .AND. EINl.LE.0.002d0) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn-1
               if( ip.eq.LVP(LEVtarg,0) .AND.
@@ -258,7 +262,7 @@ C
       ENDDO          !loop over decaying nucleus parity
       IF(d0c.gt.0.d0) d0c = 1000.0/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
-      IF(EINl.LE.0.002d0  .AND. FIRst_ein) THEN
+      IF(EINl.LE.0.002d0 .AND. (FIRst_ein .or. BENchm)) THEN
          IF(D0_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(8,'(1x,
@@ -295,18 +299,27 @@ C
      &        ''Calculated Tgamma = 0'',
      &        '' or D_obs not available, no Normalization'')')
          endif
-
+C
+C        renormalization of the gamma-ray strength function only undertaken for the fir
+C
          IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
-            if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
-              TUNe(0, Nnuc) = tgexper/sumtg
-              WRITE(8 ,
+            IF(FIRst_ein .or. BENchm) then
+              if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
+                TUNe(0, Nnuc) = tgexper/sumtg
+                WRITE(8 ,
      &         '(1x,''Gamma emission width normalized ''/
      &           1x,''internally by a factor '',F7.3)')
      &         TUNe(0, Nnuc)
-              WRITE(8,*)
-            ELSE
-              WRITE(8 ,
+                WRITE(8,*)
+              ELSE
+                WRITE(8 ,
      &       '(1x,''Gamma emission width is not normalized to Do'')')
+              ENDIF
+            ELSE
+                WRITE(8 ,
+     &         '(1x,''Gamma emission width normalized ''/
+     &           1x,''internally by a factor '',F7.3)')
+     &         TUNe(0, Nnuc)
             ENDIF
          ELSE
             IF(ABS(TUNe(0, Nnuc)-1.d0).LT.0.00001D+0) THEN

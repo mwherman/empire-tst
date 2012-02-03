@@ -1,6 +1,6 @@
-C $Rev: 2378 $
+C $Rev: 2433 $
 C $Author: rcapote $
-C $Date: 2012-01-30 07:48:45 +0100 (Mo, 30 Jän 2012) $
+C $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -77,7 +77,7 @@ C
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead, EXClusiv, SOFt, NUBarread 
+     &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -115,6 +115,7 @@ C
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
+      CHARACTER*72 EMPtitle
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
      &                 ROFis(0:nfisenmax,ndlw,nfhump), ROPaa(ndnuc),
      &                 ROFisp(0:nfisenmax,ndlw,2,nfhump),
@@ -214,7 +215,7 @@ C
       COMMON /GSM_SYS/ om2_ig,delp_ig,atil_ig,dshift_ig
 C
       COMMON /GLOBAL_C/ SYMb, SYMbe, REAction
-      COMMON /GLOBAL_E/ EMPiredir
+      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc,
      &                  FHMs, LHMs, NHMs, NEXreq, FISspe, NRSmooth, 
      &                  ISIsom, IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX,
@@ -232,7 +233,7 @@ C
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
-     &                  NUBarread
+     &                  NUBarread, BENchm, CALctl
        COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt

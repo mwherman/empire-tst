@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2382 $
+$DEBUG
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -22,9 +23,10 @@ C--- The logical variable sensit is true for sensitivity calc., false for a norm
 C
       parameter(mxfit=20)
       CHARACTER*64 EMPiredir
+      CHARACTER*72 EMPtitle
       logical autofit, sensit
       dimension pars(mxfit),dparmx(mxfit)
-      COMMON /GLOBAL_E/ EMPiredir
+      COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
       CALL GETENV ('EMPIREDIR', empiredir)
 C
@@ -444,15 +446,19 @@ C--- for posterior consistency of parameters to be varied
         write(2,*) ' A collective level file, *-lev.col, is ',
      *               'necessary for fitting. STOP.'
         stop
-       else
+      else
         open(unit=70,file='TARGET_COLL.DAT',status='old')
         do i=1,3
           read(70,'(8x,a35)') cmnd
          end do
         idef=0
         if(cmnd(28:35).eq.'deformed') idef=1
+        if(cmnd(28:35).eq.'dynamica') then
+          WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
+          STOP 'ERROR: OPTMAN OMP fit is not implemented' 
+        endif 
         close(70)
-       endif
+      endif
 
 C--- Fit weights for types of cross sections (MF, MT) are initialized to 1.
       do n=1,15
@@ -724,7 +730,6 @@ C
 
 	real*8 emin,emax 
       logical fexist
-      character*64 empiredir
       character metat*1,metap*1,ex4st*1,cm*1,lvl*3
       dimension mf(mxind),mt(mxind)
       dimension ex(mxind),dex(mxind),six(mxind),dsix(mxind)
@@ -733,7 +738,9 @@ C
       dimension ipe(mxind),ipt(mxinda),istat(15,3)
       dimension angtmp(mxind),idtmp(mxind),loca(mxind)
 
-      COMMON /GLOBAL_E/ EMPiredir
+      CHARACTER*64 EMPiredir
+      CHARACTER*72 EMPtitle
+      COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
       common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
@@ -1719,11 +1726,9 @@ C--- Check to see if rotational or vibrational or soft
         idef=0
         if(line(36:43).eq.'deformed') idef=1
         if(line(36:43).eq.'dynamica') then
-C         Added for soft rotor potentials
-C         SOFt = .TRUE.
           idef = 0
           WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
-          STOP 'OPTMAN OMP fit is not implemented' 
+          STOP 'ERROR: OPTMAN OMP fit is not implemented' 
         endif    
         write(71,'(a50)') line(1:50)
         do i=1,2
@@ -1861,6 +1866,11 @@ Ccc   ********************************************************************
 Ccc
 
       IMPLICIT NONE
+
+      CHARACTER*64 EMPiredir
+      CHARACTER*72 EMPtitle
+      COMMON /GLOBAL_E/ EMPiredir,EMPtitle
+
       logical fexist
       logical LINUX
       CHARACTER*6 name, namee, namelst
@@ -1870,7 +1880,7 @@ Ccc
       character*132 ctmp
       character*1 namecat, category, dum
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
-     &        ndreac, ndkeys
+     &        ndreac, ndkeys, j
 
 C     integer nreac
       parameter (ndreac=90, ndkeys=132)
@@ -1897,7 +1907,7 @@ C
      &  'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH',
      &  'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA',
      &  'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ',
-     &  'TRUNC ', 'WIDEX ', 'COMPFF', '      ', 'DIRECT', 'DIRPOT',
+     &  'TRUNC ', 'WIDEX ', 'COMPFF', 'PFNALP', 'DIRECT', 'DIRPOT',
      &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN',
      &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP',
      &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT',
@@ -1906,8 +1916,11 @@ C
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
-     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', '      ',
-     &  '      ', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', '      '/
+     &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'PFNNIU',
+     &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT'/
+C
+C     Fission barr and LD keys, to be included 
+C
       data namecat /
      &  'A'     , 'A'     , 'T'     , 'T'     , 'T'     , 'A'     ,   
      &  'A'     , 'A'     , 'A'     , 'A'     , 'T'     , 'A'     ,   
@@ -1920,7 +1933,7 @@ C
      &  'R'     , 'R'     , 'R'     , 'R'     , 'T'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
      &  'R'     , 'R'     , 'R'     , 'R'     , 'R'     , 'R'     ,   
-     &  'R'     , 'R'     , 'F'     , ' '     , 'F'     , 'F'     ,   
+     &  'R'     , 'R'     , 'F'     , 'A'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
@@ -1929,8 +1942,8 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
-     &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , ' '     ,
-     &  ' '     , 'A'     , 'A'     , 'A'     , 'A'     , ' ' /
+     &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A' /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1995,6 +2008,15 @@ C-----Read line of optional input
    50 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 50
+
+      IF(inprecord(1:1).EQ.'@') THEN 
+	  do j = 1,72
+	    EMPtitle(j:j) = inprecord(j:j) ! title of the run
+	  enddo
+	  EMPtitle(1:1)= ' '
+	  GOTO 50  ! next line
+      ENDIF
+
       READ(inprecord,'(A6,G10.5,4I5)',END=70,ERR=70)
      &    namee,vale,i1e,i2e,i3e,i4e
 C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
@@ -2117,13 +2139,22 @@ C-----
 C-----Read line of optional input
   150 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
-     &    inprecord(1:1).EQ.'!') GOTO 150
+     &    inprecord(1:1).EQ.'!') GOTO 150  ! comments 
+
+      IF(inprecord(1:1).EQ.'@') THEN ! title
+	  do j = 1,72
+	    EMPtitle(j:j) = inprecord(j:j) ! title of the run
+	  enddo
+	  EMPtitle(1:1)= ' '
+	  GOTO 150  ! next line
+      ENDIF
+
       READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)
      & namee,vale,i1e,i2e,i3e,i4e
-C  150 READ (44,'(A6,G10.5,4I5)',ERR = 300) namee,vale,i1e, i2e, i3e, i4e
+C
       IF(namee.EQ.'GO    ' ) THEN
          IF(ifound.EQ.0) THEN
-c           IF(category.EQ.'A') THEN
+C           IF(category.EQ.'A') THEN
             IF(category.EQ.'A'.OR.category.EQ.'T') THEN
                IF(name(1:4).EQ.'UOMP') THEN !special treatment for omp parameters (they must be negative)
                   WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val),
@@ -2277,7 +2308,7 @@ C-----------Relative sensitivity (per variation interval)
       GOTO 100 !Parameter done, return and get another parameter to vary
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
-     &  '', EMPIRE STOPPED'')') name
+     &  '', EMPIRE STOPPED, check INPUT file'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
 C-----Restore standard input
   350 IF(LINUX) THEN
@@ -2300,6 +2331,7 @@ C-----Restore standard input
          itmp=PIPE(ctmp)
       ENDIF
       return
+
       end
 
 

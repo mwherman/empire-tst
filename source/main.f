@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2386 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-01-30 18:14:00 +0100 (Mo, 30 Jän 2012) $
+$DEBUG
+Ccc   * $Rev: 2433 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -103,6 +104,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       CHARACTER*6 keyname
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
+      CHARACTER*72 rtitle
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -147,8 +149,8 @@ C-----
 C-----Print input data
 C-----
       IF (IOUt.GT.0) CALL PRINPUT
-      WRITE (*,'( ''  C.M. incident energy '',G10.5,'' MeV'')') EIN
-      WRITE (8,'(/''  C.M. incident energy '',G10.5,'' MeV'')') EIN
+      WRITE (*,'( ''   C.M. incident energy '',G10.5,'' MeV'')') EIN
+      WRITE (8,'(/''   C.M. incident energy '',G10.5,'' MeV'')') EIN
 C-----
 C-----Print results of the systematics
 C-----
@@ -2910,9 +2912,9 @@ C     ENDDO
      &  '('' * Calculated total cross section                 '',G13.6,
      &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
      &    SINlcont + ELAred*ELAcs
-          WRITE (8,
-     &  '('' * Scaled total cross section:TOTcs*TOTred*TOTcorr'',G13.6,
-     &              '' mb  '')') TOTcs*TOTred*TOTcorr
+C         WRITE (8,
+C    &  '('' * Scaled total cross section:TOTcs*TOTred*TOTcorr'',G13.6,
+C    &              '' mb  '')') TOTcs*TOTred*TOTcorr
 C         WRITE (8,
 C    &  '('' * OM FUSred*ABScs + ELAred*ELAcs                 '',
 C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
@@ -3501,34 +3503,83 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
 C-----End of ENDF spectra (inclusive)
 C
  1155 IF( FITomp.GE.0 ) THEN
-        READ (5,'(A36)',END=1200) nextenergy
+
+ 1156   READ (5,'(A36)',END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
            READ(nextenergy,'(1x,A6,G10.5,4I5)',END=1200) 
      &        keyname, val, ikey1, ikey2, ikey3, ikey4
            CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
-           GO TO 1155
-        ELSE
-           READ(nextenergy,'(G15.5)',END=1200) EIN
+           GO TO 1156
         ENDIF
+        IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' 
+     &   .OR. nextenergy(1:1) .EQ.'!') GOTO 1156
+
+        IF(nextenergy(1:1).eq.'@') THEN 
+          BACKSPACE 5
+          READ (5,'(A72)') rtitle
+ 
+          rtitle(1:1)=' '
+
+          write(*,*) '***',trim(rtitle)
+          WRITE( 8,*)
+     &      '***************************************************'
+	    write( 8,*) '***',trim(rtitle)
+          WRITE( 8,*)
+     &      '***************************************************'
+	    GOTO 1156  ! next line
+        ENDIF
+
+	  BACKSPACE 5
+C       READ(nextenergy,'(G15.5)',END=1200) EIN
+        READ(5,*,END=1200) EIN
+
       ELSE
+
+ 1158   READ (5,'(A36)',END=1200) nextenergy
+        IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
+     &      nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158
+
+        IF(nextenergy(1:1).eq.'@') THEN 
+          BACKSPACE 5
+          READ (5,'(A72)') rtitle
+
+          rtitle(1:1)=' '
+
+          write(*,*) '***',trim(rtitle)
+          WRITE( 8,*)
+     &      '***************************************************'
+	    write( 8,*)'***',trim(rtitle)
+          WRITE( 8,*)
+     &      '***************************************************'
+	    GOTO 1158  ! next line
+        ENDIF
+
+	  BACKSPACE 5
+
         READ (5,*,END=1200) EIN, NDAng, ICAlangs
-          IF(NDAng.lt.2) THEN
+
+        IF(NDAng.lt.2) THEN
             NDAng=2
             ANGles(1) = 0.
             ANGles(2) = 180.
-           ELSE
+        ELSE
             READ (5,*,END=1200) (ANGles(na),na=1,NDAng)
-           ENDIF
-          NANGela=NDAng
-          IF(NANgela.GT.NDAngecis) THEN
+        ENDIF
+
+        NANGela=NDAng
+        IF(NANgela.GT.NDAngecis) THEN
           WRITE(8,*)
      &        'ERROR: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
+
       ENDIF
+
 	GOTO 1250
+
  1200	EIN = -1
- 1250  IF (EIN.LT.0.0D0) THEN
+
+ 1250 IF (EIN.LT.0.0D0) THEN
 C
 C        CLOSING FILES
 C
@@ -3578,7 +3629,7 @@ C--------Saving random seeds
          close(102)
          RETURN
       ENDIF
-      IF(EIN.LT.epre) THEN
+      IF(EIN.LT.epre .and. .NOT. BENchm) THEN
          WRITE(8,*) EIN,epre
          WRITE(8,*) 'ERROR: INPUT ENERGIES OUT OF ORDER !!'
          WRITE(8,*) 'ERROR: CHECK YOUR INPUT FILE'
@@ -3592,23 +3643,10 @@ C-----
         IF(LHMs.EQ.0) THEN
           NANgela = 91
           NDAng   = 91
-         ELSE
+        ELSE
           NANgela = NDAnghmx
           NDAng   = NDAnghmx
-         ENDIF
-C       IF(EIN.GT.20. .AND. EIN.LE.50.) THEN
-C         NANgela = 73
-C         NDAng   = 73
-C       ENDIF
-C       IF(EIN.GT.50.) THEN
-C         NANgela = 91
-C         NDAng   = 91
-C       ENDIF
-C       IF(NANgela.GT.NDAngecis) THEN
-C         WRITE(8,*)
-C    &        'ERROR: increase NDAngecis in dimension.h up to ',NANgela
-C        STOP 'FATAL: increase NDAngecis in dimension.h'
-C       ENDIF
+        ENDIF
 C-------Set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
         DO na = 1, NDANG
@@ -3619,7 +3657,9 @@ C-------Set angles for inelastic calculations
         CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
         SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
       ENDDO
+C     IF(.not.BENchm) FIRst_ein = .FALSE.
       FIRst_ein = .FALSE.
+C
       GOTO 1300
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12G10.3)

@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2416 $
+$DEBUG
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-02 11:37:01 +0100 (Do, 02 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -41,13 +42,13 @@ C
       distrb = .FALSE.
 C-----if critical l given in input jump directly to Tl calculations
       IF (CRL.LE.0.D0) THEN
-C-----CCFUS calculations (coupled barriers)
+C--------CCFUS calculations (coupled barriers)
          IF (CSRead.EQ.( - 2.D0)) THEN
             CALL CCFUS(Stl,CSRead)
             RETURN
          ENDIF
 
-C-----CCFUS calculations (uncoupled barriers)
+C--------CCFUS calculations (uncoupled barriers)
          IF (CSRead.EQ.( - 3.D0)) THEN
             CALL CCFUS(Stl,CSRead)
             RETURN
@@ -148,13 +149,14 @@ C
 C Local variables
 C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
-      DOUBLE PRECISION EcollTarget, RCCC, elevcc, array_tmp(100)
+      DOUBLE PRECISION EcollTarget, RCCC, elevcc
       CHARACTER*80 ch_iuf
 	CHARACTER*1 dum
       LOGICAL coll_defined
       CHARACTER*132 ctmp
       REAL FLOAT
-      INTEGER iainp, izinp, k, n, ncalc, nld_cc, idefault, nlev
+      INTEGER iainp, izinp, k, n, ncalc, nld_cc, idefault, nlev 
+	INTEGER index_e(100)
       INTEGER*4 iwin
       INTEGER*4 PIPE
 C
@@ -580,7 +582,7 @@ C
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
             WRITE (8,*)'ERROR: Change your selected RIPL potential    '
             WRITE (8,*)'ERROR: EMPIRE stops'
-            STOP       'ERROR: EMPIRE stops'
+            STOP       'ERROR: See *.lst, EMPIRE stops'
          ENDIF
 
          ncalc = 0
@@ -593,7 +595,7 @@ C
             WRITE (8,*)'ERROR: No default hamiltonian is available  '
             WRITE (8,*)'ERROR: for the soft rotor model !           '
             WRITE (8,*)'ERROR: EMPIRE stops !'
-            STOP       'ERROR: EMPIRE stops'
+            STOP       'ERROR: See *.lst, EMPIRE stops'
          ENDIF
 
          IF (NCOll(ncalc).EQ.0) THEN
@@ -602,7 +604,7 @@ C
             WRITE (8,*)'ERROR: Report to r.capotenoy@iaea.org        '
             WRITE (8,*)'ERROR: Change your selected RIPL potential '
             WRITE (8,*)'ERROR: EMPIRE stops !'
-            STOP       'ERROR: EMPIRE stops'
+            STOP       'ERROR: See *.lst, EMPIRE stops'
          ENDIF
 C
 C        Overwriting ICOllev() to rearrange coupled channels
@@ -648,27 +650,7 @@ C--------Setting EMPIRE global variables
             WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
 
-C--------Setting EMPIRE global variables
          WRITE (8,*)
-         nld_cc = 0
-         DO k = 1, ND_nlv
-            IF (k.le.NCOll(ncalc)) then
-              IF (ICOllev(k).GE.LEVcc) then 
-                ICOllev(k) = ICOllev(k) - LEVCC
-                nld_cc = nld_cc + 1
-                WRITE (8,*) 'WARNING: soft rotor level ',k,' COUPLED'
-	        ELSE
-                nld_cc = nld_cc + 1
-              ENDIF 
-            ELSE
-              IF (ICOllev(k).LT.LEVcc) then 
-                ICOllev(k) = ICOllev(k) + LEVCC
-                WRITE (8,*) 'WARNING:  soft rotor level ',k,' unCOUPLED'
-              ENDIF
-	      ENDIF
-         ENDDO
-         WRITE (8,*)
-
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
@@ -700,7 +682,7 @@ C
 
          SOFT = .TRUE.
          DEFormed = .FALSE.
-         idefault = SCAN(ch_iuf(34:50),'sphe')                  
+         idefault = SCAN(ch_iuf(34:37),'sphe')                  
          if(idefault.gt.0) then
 C           first run with default TARGET_COLL.DAT
             WRITE (8,*)
@@ -782,71 +764,95 @@ C        WRITE (8 ,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          WRITE (32,*) ' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def. No'
          WRITE (96,*) ' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def. No'
 
-         array_tmp = 0.d0
-         nttt = 1
-         DO k = 2, nld_cc
-         ftmp = D_Elv(k)
-           DO j = 2, NCOll(ncalc)
+         if(idefault.gt.0) then
+C          first run with default TARGET_COLL.DAT
+
+  	     index_e = 0
+           nttt = 1
+	     index_e(1) = 1 
+           DO k = 2, nld_cc
+             ftmp = D_Elv(k)
+             DO j = 2, NCOll(ncalc)
 C
-C            This accuracy 0.005 could be a problem, pls double check 
-C            levels' energies before compiling RIPL potentials
+C              This accuracy 0.005 could be a problem, pls double check 
+C              levels' energies before compiling RIPL potentials
 C
-             IF(dabs(EXV(j,ncalc)-ftmp).gt.0.005d0) cycle
-             nttt = nttt + 1
-             array_tmp(k)=EXV(j,ncalc)
-             IPH  (k)=SR_ntu(j,ncalc)
-             D_Klv(k)=SR_nnb(j,ncalc)
-             D_Llv(k)=SR_nng(j,ncalc)
-             D_nno(k)=SR_nno(j,ncalc)
-             EXIT
-           ENDDO 
-         ENDDO
+               IF(dabs(EXV(j,ncalc)-ftmp).gt.0.005d0) cycle
+               nttt = nttt + 1
+	         index_e (nttt) = j
+               EXIT
+             ENDDO 
+           ENDDO
        
-         if(nttt.ne.nld_cc) then
-           WRITE (8 ,*) 
-     &       'ERROR: Wrong energy of OMP coupled levels: soft rotor'
-           STOP 
-     &       'ERROR: Wrong energy of OMP coupled levels: soft rotor'
-         endif
+           if(nttt.ne.nld_cc) then
+           WRITE (8,*)
+     & 'ERROR: Soft rotor potential selected but energies of coupled'
+           WRITE (8,*)
+     & 'ERROR: levels are inconsistent with energies of RIPL discrete le
+     &vels'
+           WRITE (8,*)'ERROR: Report this error to r.capotenoy@iaea.org'
+           WRITE (8,*)'ERROR: EMPIRE stops !'
+           STOP       'ERROR: See *.lst, EMPIRE stops'
+           endif
 
-         DO k = 2, nld_cc
-           D_Elv(k) = array_tmp(k) 
-         ENDDO
+           DO j = 1, nld_cc
+	      
+  		   k = index_e(j) ! reindexing
 
-         DO k = 1, nld_cc
-            WRITE (32,
+	       if(k.eq.0) cycle
+
+	       IPH(j)   = SR_ntu(k,ncalc)
+		   D_Llv(j)	= SR_nnb(k,ncalc)
+		   D_Klv(j)	= SR_nng(k,ncalc)
+		   D_nno(j)	= SR_nno(k,ncalc)
+
+             WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), EXV(k,ncalc),
      &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             IPH(k),D_Klv(k),D_Llv(k),0.01,
-     &             D_nno(k)
+     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
+     &             SR_nno(k,ncalc)
 
-            WRITE (8 ,
+C    &             ICOllev(k), , D_Xjlv(k), D_Lvp(k),
+C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k) 
+
+             WRITE (8 ,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), EXV(k,ncalc),
      &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             IPH(k),D_Klv(k),D_Llv(k),0.01,
-     &             D_nno(k)
+     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
+     &             SR_nno(k,ncalc)
 
-            WRITE (96,
+             WRITE (96,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), EXV(k,ncalc),
      &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             IPH(k),D_Klv(k),D_Llv(k),0.01,
-     &             D_nno(k)
-         ENDDO
-         CLOSE(32)
+     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
+     &             SR_nno(k,ncalc)
+           ENDDO
+           CLOSE(32)
 
-         DO k = 1, nld_cc
-            READ (97,'(A80)',END=290,ERR=290) ch_iuf        
-         ENDDO
+           DO k = 1, nld_cc
+             READ (97,'(A80)',END=290,ERR=290) ch_iuf        
+           ENDDO
 
-         DO k = nld_cc + 1 , ND_nlv 
-            READ (97,'(A80)',END=290,ERR=290) ch_iuf      
-            WRITE (96,'(A80)') ch_iuf
-            WRITE (8 ,'(A80)') ch_iuf
-         ENDDO
-         WRITE (8,*)
+           DO k = nld_cc + 1 , ND_nlv 
+             READ (97,'(A80)',END=290,ERR=290) ch_iuf      
+             WRITE (96,'(A80)') ch_iuf
+             WRITE (8 ,'(A80)') ch_iuf
+           ENDDO
+           WRITE (8,*)
+         
+	   ELSE ! second run, soft rotor coll level file exists !
+
+           DO k = 1, ND_nlv 
+             READ (97,'(A80)',END=290,ERR=290) ch_iuf      
+             WRITE (96,'(A80)') ch_iuf
+             WRITE (8 ,'(A80)') ch_iuf
+           ENDDO
+           WRITE (8,*)
+
+         ENDIF
 
   290    CLOSE (96)
          CLOSE (97)
@@ -855,10 +861,8 @@ C
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
-            iwin = PIPE('copy COLL.DAT TARGET_COLL.DAT')
-C           Reading of the TARGET_COLL.DAT should be adapted to soft rotor COLL.DAT
-C RCN0811
+C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
+            iwin = PIPE('copy COLL.DAT TARGET_COLL.DAT>nul:')
          ENDIF
 
       ENDIF
@@ -1503,6 +1507,8 @@ C Temporal arrays
               read(ki,*) EXV(k,n), SPInv(k,n), IPArv(k,n),
      +               SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
             enddo
+
+	      IF( IZ(n).ne.NINT(ZTAR) .or. IA(n).ne.NINT(ATAR) ) cycle 
 C
 C           Reordering NCOll(n) coupled levels following TARGET_COLL.DAT order in D_Elv array
 C
@@ -1547,7 +1553,7 @@ C    +               SR_ntu(i,n),SR_nnb(i,n),SR_nng(i,n),SR_nno(i,n)
 
          ENDDO
       ENDIF
-      READ (Ki,99005,END = 100) idum
+  90  READ (Ki,99005,END = 100) idum
       RETURN
   100 Ieof = 1
 99005 FORMAT (80A1)

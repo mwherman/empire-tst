@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2420 $
+$DEBUG
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +11,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2420 $
+C CVS Version Management $Revision: 2433 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2469,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2420 $')
+99005 FORMAT ('  xddhms version: $Revision: 2433 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -2577,6 +2578,13 @@ C
 99100 FORMAT ('******************** end input information *************'
      &        )
 C
+      if(npv.eq.0 .or. nhv.eq.0) then
+        write(8,*) ' ERROR: Wrong calculation in HMS, EMPIRE stops' 
+        write(8,*) ' ERROR: Change the selected PE model to PCROSS'
+        write(*,*) ' ERROR: Wrong calculation in HMS, EMPIRE stops' 
+        write(*,*) ' ERROR: Change the selected PE model to PCROSS'
+        STOP ' ERROR: Wrong calculation in HMS, EMPIRE stops'
+      endif 
       vp=vp/npv
       vp2=sqrt(vp2/npv-vp**2)
       vh=vh/nhv

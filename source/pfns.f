@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2420 $
+Ccc   * $Rev: 2433 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-02 20:35:21 +0100 (Do, 02 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -908,7 +908,8 @@ c=========================================
       COMMON /siglh/ nrll,nrhh,eell,sigll,eehh,sighh
 
       CHARACTER*64 EMPiredir
-      COMMON /GLOBAL_E/ EMPiredir
+      CHARACTER*72 EMPtitle
+      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
    
       open(unit=23,file=trim(EMPiredir)//'/data/CNxs.dat',
      >  status='old',ERR=100)
