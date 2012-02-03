@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2433 $
+Ccc   * $Rev: 2437 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -86,7 +85,7 @@ C           IF distributed barrier, then BASS barriers are used
 
             IF (SIG.EQ.0.0D0) SIG = 0.05*BFUs
 
-	      WRITE (8,*)
+            WRITE (8,*)
             WRITE (8,*) 
      &         ' Distributed fusion barrier with extra push=', EXPush
             WRITE (8,*) ' SIG=', sngl(SIG), ' and TRUNC=', sngl(TRUnc),
@@ -151,12 +150,12 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       CHARACTER*80 ch_iuf
-	CHARACTER*1 dum
+      CHARACTER*1 dum
       LOGICAL coll_defined
       CHARACTER*132 ctmp
       REAL FLOAT
       INTEGER iainp, izinp, k, n, ncalc, nld_cc, idefault, nlev 
-	INTEGER index_e(100)
+      INTEGER index_e(100)
       INTEGER*4 iwin
       INTEGER*4 PIPE
 C
@@ -268,7 +267,7 @@ C--------Setting EMPIRE global variables
                 ICOllev(k) = ICOllev(k) - LEVCC
                 nld_cc = nld_cc + 1
                 WRITE (8,*) 'WARNING: rotat. level ',k,' COUPLED'
-	        ELSE
+              ELSE
                 nld_cc = nld_cc + 1
               ENDIF 
             ELSE
@@ -276,12 +275,11 @@ C--------Setting EMPIRE global variables
                 ICOllev(k) = ICOllev(k) + LEVCC
                 WRITE (8,*) 'WARNING: rotat. level ',k,' unCOUPLED'
               ENDIF
-	      ENDIF
+            ENDIF
          ENDDO
 
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
-
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
@@ -321,12 +319,10 @@ C
          WRITE (32,*) 
          WRITE (96,*) 
          DEFormed = .TRUE.
-
          READ (97,*) 
          WRITE (8,*) '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE (32,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE (96,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
-
          READ (97,*) 
          WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
@@ -337,12 +333,10 @@ C
          WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-
          READ (97,*) 
          WRITE (8,*)
          WRITE (32,*)
          WRITE (96,*)
-
          READ (97,*) 
          WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
@@ -381,7 +375,6 @@ C-----------rotational model so we are setting it to 0.01
          WRITE (8,*)
          WRITE (8,*)
       ENDIF
-
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
 C
 C--------model = 'coupled-channels vibrational model'
@@ -453,7 +446,6 @@ C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
-
          IF (nld_cc.NE.NVIb(ncalc)) THEN
             WRITE (8,*) 
      &  'WARNING: Default number of coupled levels ', nld_cc
@@ -470,7 +462,7 @@ C--------Setting EMPIRE global variables
                 ICOllev(k) = ICOllev(k) - LEVCC
                 nld_cc = nld_cc + 1
                 WRITE (8,*) 'WARNING: phonon level ',k,' COUPLED'
-	        ELSE
+              ELSE
                 nld_cc = nld_cc + 1
               ENDIF 
             ELSE
@@ -478,7 +470,7 @@ C--------Setting EMPIRE global variables
                 ICOllev(k) = ICOllev(k) + LEVCC
                 WRITE (8,*) 'WARNING: phonon level ',k,' unCOUPLED'
               ENDIF
-	      ENDIF
+            ENDIF
          ENDDO
          WRITE (8,*)
 C
@@ -520,7 +512,6 @@ C
                WRITE (8 ,*) '   Ncoll'
                WRITE (32,*) '   Ncoll'
                WRITE (96,*) '   Ncoll'
-
                READ (97,'(A80)') ch_iuf
                WRITE (8,'(3x,3I5)') NVIb(n)
                WRITE (32,'(3x,3I5)') NVIb(n)
@@ -535,12 +526,12 @@ C
                WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
                WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
                WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-	         itmp = 0
+               itmp = 0
   150          READ (97,'(A80)',END = 200) ch_iuf
                itmp = itmp + 1
-               write(ch_iuf(1:3),'(1x,I2)') ICOllev(itmp)	
+               write(ch_iuf(1:3),'(1x,I2)') ICOllev(itmp)   
                WRITE (96,'(A80)') ch_iuf
-			 GOTO 150
+                   GOTO 150
             ENDIF
          ENDDO
   200    CLOSE (96)
@@ -597,7 +588,6 @@ C
             WRITE (8,*)'ERROR: EMPIRE stops !'
             STOP       'ERROR: See *.lst, EMPIRE stops'
          ENDIF
-
          IF (NCOll(ncalc).EQ.0) THEN
             WRITE (8,*)'ERROR: Soft rotor potential selected but zero'
             WRITE (8,*)'ERROR: CC levels are available, error in RIPL'
@@ -641,7 +631,6 @@ C--------Setting EMPIRE global variables
          DO k = 1, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
-
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
      &  'WARNING: Default number of coupled levels ', nld_cc
@@ -767,9 +756,9 @@ C        WRITE (8 ,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          if(idefault.gt.0) then
 C          first run with default TARGET_COLL.DAT
 
-  	     index_e = 0
+           index_e = 0
            nttt = 1
-	     index_e(1) = 1 
+           index_e(1) = 1 
            DO k = 2, nld_cc
              ftmp = D_Elv(k)
              DO j = 2, NCOll(ncalc)
@@ -779,7 +768,7 @@ C              levels' energies before compiling RIPL potentials
 C
                IF(dabs(EXV(j,ncalc)-ftmp).gt.0.005d0) cycle
                nttt = nttt + 1
-	         index_e (nttt) = j
+               index_e (nttt) = j
                EXIT
              ENDDO 
            ENDDO
@@ -794,17 +783,16 @@ C
            WRITE (8,*)'ERROR: EMPIRE stops !'
            STOP       'ERROR: See *.lst, EMPIRE stops'
            endif
-
            DO j = 1, nld_cc
-	      
-  		   k = index_e(j) ! reindexing
+            
+               k = index_e(j) ! reindexing
 
-	       if(k.eq.0) cycle
+             if(k.eq.0) cycle
 
-	       IPH(j)   = SR_ntu(k,ncalc)
-		   D_Llv(j)	= SR_nnb(k,ncalc)
-		   D_Klv(j)	= SR_nng(k,ncalc)
-		   D_nno(j)	= SR_nno(k,ncalc)
+             IPH(j)   = SR_ntu(k,ncalc)
+               D_Llv(j) = SR_nnb(k,ncalc)
+               D_Klv(j) = SR_nng(k,ncalc)
+               D_nno(j) = SR_nno(k,ncalc)
 
              WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
@@ -831,7 +819,6 @@ C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k)
      &             SR_nno(k,ncalc)
            ENDDO
            CLOSE(32)
-
            DO k = 1, nld_cc
              READ (97,'(A80)',END=290,ERR=290) ch_iuf        
            ENDDO
@@ -843,7 +830,7 @@ C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k)
            ENDDO
            WRITE (8,*)
          
-	   ELSE ! second run, soft rotor coll level file exists !
+         ELSE ! second run, soft rotor coll level file exists !
 
            DO k = 1, ND_nlv 
              READ (97,'(A80)',END=290,ERR=290) ch_iuf      
@@ -1508,7 +1495,7 @@ C Temporal arrays
      +               SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
             enddo
 
-	      IF( IZ(n).ne.NINT(ZTAR) .or. IA(n).ne.NINT(ATAR) ) cycle 
+            IF( IZ(n).ne.NINT(ZTAR) .or. IA(n).ne.NINT(ATAR) ) cycle 
 C
 C           Reordering NCOll(n) coupled levels following TARGET_COLL.DAT order in D_Elv array
 C

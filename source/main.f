@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2433 $
+cc   * $Rev: 2437 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -237,7 +236,7 @@ C-----max spin at which nucleus is still stable
             WRITE (8,
      & '('' WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
      & )')
-	    ENDIF
+          ENDIF
           NLW = min(JSTab(1),NDLW)
       ENDIF
 
@@ -1105,7 +1104,7 @@ c           ENDDO
                   ELSEIF(FISden(Nnuc).EQ.3) then
                      CALL DAMI_RO_HFB_FIS(nnuc,i,AFIs(i))
                   ELSE
-	              WRITE(8,'('' ERROR: CHECK FISDEN (not 0 or 3)!'')')
+                    WRITE(8,'('' ERROR: CHECK FISDEN (not 0 or 3)!'')')
                     STOP ' FATAL: CHECK FISDEN (not 0 or 3)!'
                   ENDIF
                ENDDO
@@ -1265,7 +1264,7 @@ C--------------Write elastic to tape 12 and to tape 68
                   IF (elcncs.EQ.0 .AND. EINl.LT.10.d0) 
      &              WRITE (8,*) 'WARNING: CN elastic is 0'
                   IF (FITomp.LT.0) THEN
-                   WRITE(40,'(F12.4,3D12.5)')	EINl,TOTcs,ABScs
+                   WRITE(40,'(F12.4,3D12.5)')   EINl,TOTcs,ABScs
                    IF (ncoll.GT.0) THEN
 C-------------------locate position of the projectile among ejectiles
                     CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -2254,7 +2253,7 @@ C     emission and first CN.
         WRITE ( 8,*) ' *******************************************'
         WRITE ( 8,*) ' PROMPT FISSION NEUTRON SPECTRA calculations'
         WRITE (12,*) ' PROMPT FISSION NEUTRON SPECTRA calculations'
-	ENDIF
+      ENDIF
 c fisspec===============
 C     For Kalbach parameterization
       do i=1,NDAng
@@ -2606,7 +2605,7 @@ C             endif
 
               fnubar = fniuEVAL * PFNniu ! scaling of NUBAR
 
-	      ELSE
+            ELSE
 
 C             For higher emission chances, the corresponding  
 C             neutron binding energy is substracted iteratively
@@ -2620,7 +2619,7 @@ C           If no more excitation energy available, then PFN emission stopped
 
             WRITE (12,*)
             WRITE (8,*) 
-		
+            
             WRITE(8,'(1x,a11,i2,a7,f8.3,A18,1x,i3,A1,A2,A1,i3)')  
      &      ' Fiss. Nucl ',nfission + 1, ', Uexc=',eincid + Q(1,nnuc), 
      &      ' MeV, for nucleus:',izf,'-',SYMb(nnuc),'-',iaf
@@ -2772,9 +2771,9 @@ C       Correcting normalization
         WRITE ( 8,'(''  Equivalent Tmaxwell '',G12.5,A5)') tequiv
      &   ,'  MeV'
         WRITE ( 8,'(''  Multiplicity (nue) '',F6.3)') fnubar
-	  if(fnubar.ne.1) 
+        if(fnubar.ne.1) 
      &         WRITE ( 8,'(''  Nubar from evaluated library '')')
-	  if(fnubar.ne.1 .and. PFNniu. ne. 1) 
+        if(fnubar.ne.1 .and. PFNniu. ne. 1) 
      &         WRITE ( 8,'(''  Nubar scaled by '',f6.4)') PFNniu
         WRITE(8,*)
 
@@ -2795,7 +2794,7 @@ C       Correcting normalization
         WRITE (12,'(''  Multiplicity (nue) '',F6.3)') fnubar
         if(fnubar.ne.1) 
      &        WRITE (12,'(''  Nubar from evaluated library '')')
-	  if(fnubar.ne.1 .and. PFNniu. ne. 1) 
+        if(fnubar.ne.1 .and. PFNniu. ne. 1) 
      &        WRITE (12,'(''  Nubar scaled by '',f6.4)') PFNniu
         WRITE(12,*)
 
@@ -2827,9 +2826,9 @@ C       Correcting normalization
         ENDDO
         WRITE (12,'(F10.5,E14.5,2x,E14.5)')
      &     enepfns(nepfns), 0.d0, 0.d0
-	  WRITE(8,*) '...   PFNS Output supressed for Epfns > 7 MeV '
+        WRITE(8,*) '...   PFNS Output supressed for Epfns > 7 MeV '
       ENDIF
-	
+      
  4536 WRITE (12,*) ' '
       WRITE ( 8,*) ' ' 
 C  
@@ -3503,7 +3502,6 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
 C-----End of ENDF spectra (inclusive)
 C
  1155 IF( FITomp.GE.0 ) THEN
-
  1156   READ (5,'(A36)',END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
            READ(nextenergy,'(1x,A6,G10.5,4I5)',END=1200) 
@@ -3523,18 +3521,17 @@ C
           write(*,*) '***',trim(rtitle)
           WRITE( 8,*)
      &      '***************************************************'
-	    write( 8,*) '***',trim(rtitle)
+          write( 8,*) '***',trim(rtitle)
           WRITE( 8,*)
      &      '***************************************************'
-	    GOTO 1156  ! next line
+          GOTO 1156  ! next line
         ENDIF
 
-	  BACKSPACE 5
+        BACKSPACE 5
 C       READ(nextenergy,'(G15.5)',END=1200) EIN
         READ(5,*,END=1200) EIN
 
       ELSE
-
  1158   READ (5,'(A36)',END=1200) nextenergy
         IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &      nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158
@@ -3548,16 +3545,15 @@ C       READ(nextenergy,'(G15.5)',END=1200) EIN
           write(*,*) '***',trim(rtitle)
           WRITE( 8,*)
      &      '***************************************************'
-	    write( 8,*)'***',trim(rtitle)
+          write( 8,*)'***',trim(rtitle)
           WRITE( 8,*)
      &      '***************************************************'
-	    GOTO 1158  ! next line
+          GOTO 1158  ! next line
         ENDIF
 
-	  BACKSPACE 5
+        BACKSPACE 5
 
         READ (5,*,END=1200) EIN, NDAng, ICAlangs
-
         IF(NDAng.lt.2) THEN
             NDAng=2
             ANGles(1) = 0.
@@ -3565,20 +3561,15 @@ C       READ(nextenergy,'(G15.5)',END=1200) EIN
         ELSE
             READ (5,*,END=1200) (ANGles(na),na=1,NDAng)
         ENDIF
-
         NANGela=NDAng
         IF(NANgela.GT.NDAngecis) THEN
           WRITE(8,*)
      &        'ERROR: INCREASE NDANGECIS IN dimension.h UP TO ',NANgela
           STOP 'FATAL: INCREASE NDAngecis IN dimension.h'
         ENDIF
-
       ENDIF
-
-	GOTO 1250
-
- 1200	EIN = -1
-
+      GOTO 1250
+ 1200 EIN = -1
  1250 IF (EIN.LT.0.0D0) THEN
 C
 C        CLOSING FILES

@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2433 $
+Ccc   * $Rev: 2437 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -34,7 +33,6 @@ C     The follwing line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
       if(empiredir(1:1).eq.' ') empiredir(1:3)='../'
-
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
@@ -54,7 +52,7 @@ C
          CALL EMPIRE
       ENDIF
 
-	CLOSE(8)
+      CLOSE(8)
 
       STOP
       END
@@ -459,7 +457,6 @@ C--- for posterior consistency of parameters to be varied
         endif 
         close(70)
       endif
-
 C--- Fit weights for types of cross sections (MF, MT) are initialized to 1.
       do n=1,15
         wt(n,1)=1.0
@@ -728,7 +725,7 @@ C
       parameter(mxind=5000,mxinda=5000,mxelvls=9,nexlvl=2)
       parameter(disc=1.0e4)
 
-	real*8 emin,emax 
+      real*8 emin,emax 
       logical fexist
       character metat*1,metap*1,ex4st*1,cm*1,lvl*3
       dimension mf(mxind),mt(mxind)
@@ -737,7 +734,6 @@ C
       dimension sixa(mxinda),dsixa(mxinda),thex(mxinda),dthex(mxinda)
       dimension ipe(mxind),ipt(mxinda),istat(15,3)
       dimension angtmp(mxind),idtmp(mxind),loca(mxind)
-
       CHARACTER*64 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
@@ -2010,11 +2006,11 @@ C-----Read line of optional input
      &    inprecord(1:1).EQ.'!') GOTO 50
 
       IF(inprecord(1:1).EQ.'@') THEN 
-	  do j = 1,72
-	    EMPtitle(j:j) = inprecord(j:j) ! title of the run
-	  enddo
-	  EMPtitle(1:1)= ' '
-	  GOTO 50  ! next line
+        do j = 1,72
+          EMPtitle(j:j) = inprecord(j:j) ! title of the run
+        enddo
+        EMPtitle(1:1)= ' '
+        GOTO 50  ! next line
       ENDIF
 
       READ(inprecord,'(A6,G10.5,4I5)',END=70,ERR=70)
@@ -2142,11 +2138,11 @@ C-----Read line of optional input
      &    inprecord(1:1).EQ.'!') GOTO 150  ! comments 
 
       IF(inprecord(1:1).EQ.'@') THEN ! title
-	  do j = 1,72
-	    EMPtitle(j:j) = inprecord(j:j) ! title of the run
-	  enddo
-	  EMPtitle(1:1)= ' '
-	  GOTO 150  ! next line
+        do j = 1,72
+          EMPtitle(j:j) = inprecord(j:j) ! title of the run
+        enddo
+        EMPtitle(1:1)= ' '
+        GOTO 150  ! next line
       ENDIF
 
       READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)

@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2433 $
+Ccc   * $Rev: 2437 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -273,7 +272,7 @@ C
          KTRompcc = 0
          SOFt = .FALSE.
          CCCalc = .FALSE.
-	   BENchm = .FALSE.
+         BENchm = .FALSE.
 C       
 C
          NUBarread = .FALSE.
@@ -591,7 +590,7 @@ C--------NEMC  number of clusters emitted
            WRITE (8,*)'WARNING: Light clusters should be included explic
      >itly (d,t,h,a)'
            WRITE (8,*)'WARNING: Number of emitted clusters set to zero'
-	     NEMc = 0
+           NEMc = 0
          ENDIF
 
          IF (NEMc.GT.0 .OR.  NDEjc.EQ.7) THEN
@@ -601,7 +600,7 @@ C--------NEMC  number of clusters emitted
      >' WARNING: Contact authors if interested to calculate them at:   '
            WRITE (8,*)
      >' WARNING: Number of emitted clusters set to zero'
-	     NEMc = 0
+           NEMc = 0
            IF(NDEjc.EQ.7) THEN
              WRITE (8,*)
      >' ERROR: You must set NDEjc=6 in dimension.h and recompile EMPIRE'
@@ -1017,7 +1016,7 @@ C
      &       'Default actinide CC OMP 2408 used for n + A if A > 220'
             WRITE (8,*)'Coupled channels calculations will be performed'
             WRITE (8,*)'   for the incident neutron channel (DIRECT 1) '
- 	   ENDIF
+         ENDIF
 
          IF( KTRlom(0,0).eq.5408 .and.  DIRECT. LT. -0.1) then
             DIRECT = 1
@@ -1026,7 +1025,7 @@ C
      &       'Default actinide CC OMP 5408 used for p + A if A > 220'
             WRITE (8,*)'Coupled channels calculations will be performed'
             WRITE (8,*)'   for the incident proton channel (DIRECT 1)  '
- 	   ENDIF
+         ENDIF
 
          IF(DIRECT.LT.-0.1) DIRECT = 0 ! Restoring the default to zero
                                        ! if DIRECT not present in the input
@@ -1293,17 +1292,17 @@ C--------initialize matrix with 0's
 C--------set ECIS (.,1)
          IF (DIRect.GT.0 ) THEN
             IF (NPRoject.EQ.1) THEN
-               IDNa(1,1) = 1	 ! neutron discrete
+               IDNa(1,1) = 1   ! neutron discrete
             ELSEIF (NPRoject.EQ.2) THEN
-               IDNa(3,1) = 1	 ! proton discrete
+               IDNa(3,1) = 1   ! proton discrete
             ELSEIF (NPRoject.EQ.3) THEN
-               IDNa(11,1) = 1	 ! alpha discrete
+               IDNa(11,1) = 1  ! alpha discrete
             ELSEIF (NPRoject.EQ.4) THEN
-               IDNa(12,1) = 1	 ! deut  discrete
+               IDNa(12,1) = 1  ! deut  discrete
             ELSEIF (NPRoject.EQ.5) THEN
-               IDNa(13,1) = 1	 ! trit  discrete
+               IDNa(13,1) = 1  ! trit  discrete
             ELSEIF (NPRoject.EQ.2) THEN
-               IDNa(14,1) = 1	 ! He-3  discrete
+               IDNa(14,1) = 1  ! He-3  discrete
             ENDIF
          ENDIF
 C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
@@ -1315,7 +1314,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IF (DIRect.EQ.0) IDNa(3,2) = 1
                IDNa(4,2) = 1
             ENDIF
-	   ENDIF
+         ENDIF
          IF (MSD.EQ.2 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IF (NPRoject.EQ.1) THEN
                IDNa(1,2) = 1
@@ -1351,7 +1350,7 @@ C-----------stop HMS inelastic scattering if MSC and/or MSD active
                 IDNa(3,5) = 0
                 IDNa(4,5) = 0
               ELSE ! (NPRoject.EQ.1) 
-		      IDNa(1,5) = 0
+                  IDNa(1,5) = 0
                 IDNa(2,5) = 0
               ENDIF
             ENDIF
@@ -1408,7 +1407,7 @@ C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-		     IF (NPRoject.EQ.2) THEN
+                 IF (NPRoject.EQ.2) THEN
                   IDNa(3,6) = 0
                   IDNa(4,6) = 0
                ELSEIF (NPRoject.EQ.1) THEN
@@ -1420,7 +1419,7 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
      &             'WARNING: MSD/MSC DISABLED FOR INCIDENT PARTICLES '
                   WRITE (8,*)
      &             'WARNING: OTHER THAN NUCLEONS, PCROSS WILL BE USED'
-                  IDNa(1,2) = 0 ! MSD	 
+                  IDNa(1,2) = 0 ! MSD      
                   IDNa(2,2) = 0
                   IDNa(3,2) = 0
                   IDNa(4,2) = 0
@@ -1699,7 +1698,7 @@ C-----set giant resonance parameters for CN
       GMRpar(8,nnuc) = 0.0
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
-	write(8,*)
+      write(8,*)
       write(8,*)' *****************************************************'
       write(8,*)' *  Table of Reaction Q-values (Mass inc - Mass out) *'
       write(8,*)' *     for the first emitted particle from the CN    *'
@@ -1727,7 +1726,7 @@ C-----set giant resonance parameters for CN
      &      '*          He-3    :',qatom,qnucl
       write(8,*)' *                                                   *'
       write(8,*)' *****************************************************'
-	write(8,*)
+      write(8,*)
 
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
@@ -2576,10 +2575,10 @@ C         residual nuclei must be heavier than alpha
           IF(nejc.eq.1) WRITE (12,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
      &      KTRlom(nejc,nnur)
- 	    IF(nejc.eq.2) WRITE (12,*) 
+          IF(nejc.eq.2) WRITE (12,*) 
      &      'Proton    o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.3) THEN
+          IF(nejc.eq.3) THEN
 C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
              if(ABS(KTRlom(nejc,nnur)).ne.9602) then
                WRITE (12,*) 
@@ -2590,19 +2589,19 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
      &          'Alpha     o. m. parameters: Kumar & Kailas 2007 '
              endif
           ENDIF
- 	    IF(nejc.eq.4) WRITE (12,*) 
+          IF(nejc.eq.4) WRITE (12,*) 
      &      'Deuteron  o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.5) WRITE (12,*) 
+          IF(nejc.eq.5) WRITE (12,*) 
      &      'Triton    o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.6) WRITE (12,*) 
+          IF(nejc.eq.6) WRITE (12,*) 
      &      'He-3      o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
           IF (NEMc.GT.0 .and. nejc.eq.NDEJC) WRITE (12,*)
      &      'Cluster   o. m. parameters: RIPL catalog number ',
      &       KTRlom(NDEJC,nnur)
-	  ENDDO
+        ENDDO
 
         WRITE (12,*)
         WRITE (12,99060)
@@ -2622,7 +2621,7 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 99007 FORMAT ('              ',12(6X,I2,A2))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
 99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F10.3)
-99012 FORMAT (1X,10x,4X,12(F10.6,1x))	 
+99012 FORMAT (1X,10x,4X,12(F10.6,1x))      
 
 99045 FORMAT(1X,I3,'-',A2,'-',I3,4X,10F12.3)
 99050 FORMAT(10x,'S e p a r a t i o n   e n e r g i e s [MeV]')
@@ -2835,10 +2834,10 @@ C         residual nuclei must be heavier than alpha
           IF(nejc.eq.1) WRITE (8,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
      &      KTRlom(nejc,nnur)
- 	    IF(nejc.eq.2) WRITE (8,*) 
+          IF(nejc.eq.2) WRITE (8,*) 
      &      'Proton    o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.3) THEN
+          IF(nejc.eq.3) THEN
 C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
              if(ABS(KTRlom(nejc,nnur)).ne.9602) then
                WRITE (8,*) 
@@ -2849,19 +2848,19 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
      &          'Alpha     o. m. parameters: Kumar & Kailas 2007 '
              endif
           ENDIF
- 	    IF(nejc.eq.4) WRITE (8,*) 
+          IF(nejc.eq.4) WRITE (8,*) 
      &      'Deuteron  o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.5) WRITE (8,*) 
+          IF(nejc.eq.5) WRITE (8,*) 
      &      'Triton    o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
- 	    IF(nejc.eq.6) WRITE (8,*) 
+          IF(nejc.eq.6) WRITE (8,*) 
      &      'He-3      o. m. parameters: RIPL catalog number ',
      &       KTRlom(nejc,nnur)
           IF (NEMc.GT.0 .and. nejc.eq.NDEJC) WRITE (8,*)
      &      'Cluster   o. m. parameters: RIPL catalog number ',
      &       KTRlom(NDEJC,nnur)
-	  ENDDO
+        ENDDO
       ENDIF  
       WRITE (12,*) ' '
       WRITE (12,*) ' '
@@ -3196,7 +3195,7 @@ C     VERSIONNAME   = RIVOLI
       WRITE (8,*)
      > '                       |                          |'
       GOTO 754
-  753	WRITE (8,*)
+  753 WRITE (8,*)
      > '                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)
      > '                       |                          |'
@@ -3212,7 +3211,7 @@ C
       WRITE(8,30) source_rev
    30 FORMAT(24X,'| empire/source  rev. ',A5,'|')
       GOTO 756
-  755	emp_rev = "     "
+  755 emp_rev = "     "
       WRITE (8,*)'                       |       Not under SVN      |'
 C
   756 WRITE (8,*)'                       |                          |'
@@ -3295,32 +3294,30 @@ C
       irun = 0
   100 IF(irun.EQ.1) RETURN
       READ (5,'(A1)',END=150) name(1:1)
-
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
 
       BACKSPACE (5)
       IF(name(1:1).eq.'@') THEN 
-	  READ(5,'(A72)') rtitle ! read running title
+        READ(5,'(A72)') rtitle ! read running title
  
         rtitle(1:1)=' '
 
         write(*,*) '***',trim(rtitle)
         WRITE( 8,*)'***************************************************'
-	  write( 8,*)'***',trim(rtitle)
+        write( 8,*)'***',trim(rtitle)
         WRITE( 8,*)'***************************************************'
-	  GOTO 100  ! next line
+        GOTO 100  ! next line
       ENDIF
 
-	READ (5,'(A6,G10.5,4I5)',END=150) name, val, i1, i2, i3, i4
-
+      READ (5,'(A6,G10.5,4I5)',END=150) name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
                JCUtcoll = 0
-	      ELSE
+            ELSE
                ecutof = 3.0d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
                  IF(A(0).ge.40)
@@ -3330,7 +3327,7 @@ C-----------Print some final input options
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
-	           IF(ECUtcoll.GT.ecutof) then
+                 IF(ECUtcoll.GT.ecutof) then
                    ECUtcoll = ecutof
                    WRITE(8,*) 
      & ' WARNING: Cut-of of added collective levels for DWBA calcs (ECDW
@@ -4003,18 +4000,18 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'BENCHM') THEN
-	      IF(val.ne.0) then 
+            IF(val.ne.0) then 
               BENchm = .TRUE.
               WRITE (8,
      &     '('' Benchmark calculations: Input energies in any order'')') 
               WRITE (12,
      &     '('' Benchmark calculations: Input energies in any order'')') 
             endif
-		  GOTO 100
+              GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CALCTL') THEN
-	      IF(val.ne.0) then 
+            IF(val.ne.0) then 
               CALctl = .TRUE.
               WRITE (8,
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
@@ -4025,7 +4022,7 @@ C-----
      &  '('' WARNING: CALCTL option slows down the execution by 3-5 time
      &s (for the 2nd and subsequent runs)'')') 
             endif
-		  GOTO 100
+              GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CSREAD') THEN
@@ -4036,9 +4033,9 @@ C-----
 
             IF (CSRead.LE.0 .AND. AEJc(0).LE.4.0D0) THEN
               WRITE (8,
-     &	   '('' WARNING: CSRead value in input ignored '')') 
+     &         '('' WARNING: CSRead value in input ignored '')') 
               WRITE (8,
-     &	   '('' WARNING: CSRead valid only for HI reactions '')') 
+     &         '('' WARNING: CSRead valid only for HI reactions '')') 
               CSRead = -2.0D0
               GOTO 100
             ENDIF
@@ -4099,16 +4096,16 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'DFUS  ') THEN
-			IF(val.gt.0) THEN
-			  DFUs = val
+                  IF(val.gt.0) THEN
+                    DFUs = val
                 WRITE (8,
      &'('' Difusseness in the transmission coefficients for fusion set t
      &o '',F5.2)') DFUs
-	        ELSE 
+              ELSE 
                 WRITE (8,
      &'('' WARNING: DFUS input keyword must be > 0, reset to 1'')') 
                 DFUs = 1.d0
-	        ENDIF 
+              ENDIF 
             GOTO 100
          ENDIF
 C-----
@@ -6782,7 +6779,7 @@ C
      & F8.3)') val
             endif
             GOTO 100
-	   ENDIF
+         ENDIF
 C-----         
          IF (name.EQ.'PFNRAT') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
@@ -6813,7 +6810,7 @@ C-----
      & F8.3)') val
             endif
             GOTO 100
-	   ENDIF
+         ENDIF
 C-----         
          IF (name.EQ.'PFNALP') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
@@ -6844,7 +6841,7 @@ C-----
      & F8.3)') val
             endif
             GOTO 100
-	   ENDIF
+         ENDIF
 C-----         
          IF (name.EQ.'PFNNIU') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
@@ -6875,7 +6872,7 @@ C-----
 
             endif
             GOTO 100
-	   ENDIF
+         ENDIF
 C-----         
          IF (name.EQ.'FISVF1') THEN
             char =' Fission barrier first hump height  '
@@ -7300,8 +7297,8 @@ Ccc   ********************************************************************
 Ccc
 C
 C     This corresponds to RIPL-2 file. There is a new RIPL-3 file containing mass uncertainties
-C	and additional one for the HFB-14 model. With a minor change we could use those mases as well.
-C	or the time being we use FRDM theoretical masses if Audi masses are not availableC
+C     and additional one for the HFB-14 model. With a minor change we could use those mases as well.
+C     or the time being we use FRDM theoretical masses if Audi masses are not availableC
       OPEN (UNIT = 27,STATUS = 'OLD',
      &      FILE = trim(empiredir)//'/RIPL/masses/mass-frdm95.dat'
      &      ,ERR = 300)
@@ -7322,7 +7319,6 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          ENDIF
       ENDDO
   100 CLOSE (UNIT = 27)
-
       RESmas = 0.d0
       EXCessmass = 0.d0
 
@@ -7334,7 +7330,6 @@ C        Corresponds to the definition of atomic mass excess in Audi
          RESmas(iz,ia) = REAL(ia) + excess(k)/AMUmev 
          EXCessmass(iz,ia) = excess(k)
       ENDDO
-
       DO iz = 6, 100
          DO ia = 2*iz - 10, 3*iz
            IF (RESmas(iz,ia).NE.0) cycle
@@ -7342,10 +7337,10 @@ C        Corresponds to the definition of atomic mass excess in Audi
            if (in.le.0) cycle
            CALL mass10(in,iz,ebin)
 C          Following DZ recommendation - see mass10() routine
-           dtmp = iz*EXCessmass(1,1) + in*EXCessmass(0,1) - ebin	! (*)
+           dtmp = iz*EXCessmass(1,1) + in*EXCessmass(0,1) - ebin  ! (*)
 C          Audi masses includes electrons, both definitions of dtmp (*) and (**) !!!
 C          dtmp = iz*(AMUpro+AMUele-1.D0)*AMUmev + 
-C    *            in*(AMUneu       -1.D0)*AMUmev - ebin			! (**)
+C    *            in*(AMUneu       -1.D0)*AMUmev - ebin                 ! (**)
            EXCessmass(iz,ia)= dtmp
            RESmas(iz,ia) = REAL(ia) + dtmp/AMUmev
          ENDDO
@@ -7365,14 +7360,12 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             EXCessmass(iz,ia) = 0
          ENDDO
       ENDDO
-
       zmx = 0.
       zmn = 200.
       DO nnuc = 0, NNUct
          zmx = MAX(Z(nnuc),zmx)
          zmn = MIN(Z(nnuc),zmn)
       ENDDO
-
       DO k = 1, NMASSE
          nixz = izaf(k)/1000
          nixa = MOD(izaf(k),1000)
@@ -7416,7 +7409,7 @@ C
 C                Rounded ENDF values of nuclear masses  (without electron mass)
 C
 C                mn    neutron mass  1.008 665 amu 
-C                mp    proton mass   1.007 276 amu 	  ! bare proton (no electron)
+C                mp    proton mass   1.007 276 amu      ! bare proton (no electron)
 C                      hidrogen mass = mp + me = 1.0078245799                       
 C                ma    4He mass      4.001 506 amu 
 C                md    deuteron mass 2.013 553 amu 
@@ -7440,11 +7433,9 @@ C                Atomic masses
 C                EJMass(ii) = AEJc(ii) + XMAss_ej(ii)/AMUmev
 
              ENDIF
-
             ENDDO
 
          ENDIF
-
       ENDDO
 C-----Fermi energies calculated for all nuclei and projectile combinations
       DO nnuc = 0, NNUct
@@ -8228,7 +8219,7 @@ C
       Bnd = (RESmas(iizr,iiar) + RESmas(iizp,iiap) 
      &     - RESmas(iizc,iiac))*AMUmev
 
-	RETURN
+      RETURN
       END
 
       SUBROUTINE QVAL(Nejc,Nnuc,Qnucl,Qatom)
@@ -8268,10 +8259,10 @@ C-----Target corresponds to nnurec = 0
       iizt = Z(0)
       iiat = A(0)
       
-	  iizp = ZEJc(0)
+        iizp = ZEJc(0)
       iiap = AEJc(0)
       
-	  iizo = ZEJc(Nejc)
+        iizo = ZEJc(Nejc)
       iiao = AEJc(Nejc)
 
       iizr = Z(Nnur)
@@ -8280,7 +8271,7 @@ C
       Qatom = (- RESmas(iizr,iiar) - RESmas(iizo,iiao) 
      &         + RESmas(iizt,iiat) + RESmas(iizp,iiap) ) * AMUmev
 
-	return
+      return
       END
 
 C
@@ -8748,9 +8739,9 @@ C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
             if (D_Elv(i) .gt. ELV( NLV(0),0)) then
-		    ctmp5 = ' cont'
-	      else
-		    ctmp5 = '     '
+                ctmp5 = ' cont'
+            else
+                ctmp5 = '     '
             endif
 C
 C           For covariance calculation of dynamical deformation
@@ -8883,9 +8874,9 @@ C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
             if (D_Elv(i) .gt. ELV( NLV(0),0)) then
-		    ctmp5 = ' cont'
-	      else
-		    ctmp5 = '     '
+                ctmp5 = ' cont'
+            else
+                ctmp5 = '     '
             endif
 C
 C           For covariance calculation of dynamical deformation
@@ -8934,7 +8925,7 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               if(sgmr.gt.0)  isgmr = ICOllev(i)
               if(sgqr.gt.0)  isgqr = ICOllev(i)
               if(sleor.gt.0) isgor = ICOllev(i)            
-		ENDIF
+            ENDIF
 
            ENDDO
          ENDIF
@@ -9919,7 +9910,6 @@ C
      &                 NANz, NANa, HALpha2, HBEtagfl, HENergygfl, NZRam,
      &                 NARam, NUMram
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
-
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
 C
 C Dummy arguments
