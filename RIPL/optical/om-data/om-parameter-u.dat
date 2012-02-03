@@ -13056,7 +13056,7 @@ Best description of the fission cross section data for Th232
    .55690000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   605
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Unpublished.
 A new dispersive coupled channel neutron OMP for incident energies between 1 keV
  and 200 MeV valid for Th-U
@@ -13133,7 +13133,7 @@ Local Fermi energy used. Recommended for Th230,232,U233
    .22940000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   606
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Unpublished.
 A new dispersive coupled channel neutron OMP for incident energies between 1 keV
  and 200 MeV valid for U238.
@@ -13204,7 +13204,7 @@ Local Fermi energy used. Recommended for U238.
    .51830000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   607
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Unpublished.
 A new dispersive coupled channel neutron OMP for incident energies between 1 keV
  and 200 MeV valid for U-233.
@@ -13275,7 +13275,7 @@ Local Fermi energy used. Recommended for U233
    .22940000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   608
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba.
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba.
 Phys.Rev.C72 (2005) 024604
 A dispersive coupled channel neutron OMP for incident energies between 1 keV and
  200 MeV valid for Th, fitted to the new average cross section derived by Geel
@@ -13363,10 +13363,10 @@ energy used. Recommended for Th232 and Pa-231,233. Used in ENDF-B/VII.0 evals.
    .19320000    4.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   609
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
-and 200 MeV for Zr isotopes. Recommended for Zr-90,92. Local Fermi energy used.
+and 200 MeV for Zr isotopes. Recommended for Zr-90-96. Local Fermi energy used.
 See 4609 for proton OMP. Soft rotor, OPTMAN should be used.
 
       .001  200.0000
@@ -13431,22 +13431,22 @@ See 4609 for proton OMP. Soft rotor, OPTMAN should be used.
    .53202E-02   .93896E-01   .69718E+00   .17000E+01   .19893E+00   .15263E+01
    .35000E+00   .48730E-02   .00000E+00   .81906E+00   .00000E+00
    .00000000     .0   1 1 0 0 0
-  1.76070000     .0   1 1 1 0 0
-  2.18650000    2.0   1 1 0 0 0
-  2.31191000    5.0  -1 1 0 0 1
-  2.74790000    3.0  -1 1 0 0 1
-  3.07220000    4.0   1 1 0 0 0
-  3.30870000    2.0   1 2 0 0 0
+  1.76071000     .0   1 1 1 0 0
+  2.18627000    2.0   1 1 0 0 0
+  2.31900000    5.0  -1 1 0 0 1
+  2.74788000    3.0  -1 1 0 0 1
+  3.07693000    4.0   1 1 0 0 0
+  3.30880000    2.0   1 2 0 0 0
    40   92    7
   0.59277E+00  0.15054E+02  0.76000E+00  0.36272E+00  0.05900E-01  0.05400E+00
   0.53202E-02  0.93896E-01  0.69718E+00  1.25000E+00  0.49181E+00  0.436538182
   0.35000E+00  0.48730E-02  0.00000E+00  0.64288E+01  0.00000E+00  
    .00000000     .0   1 1 0 0 0
-   .93448000    2.0   1 1 0 0 0
-  1.38282000     .0   1 1 1 0 0
-  1.49545000    4.0   1 1 0 0 0
+   .93447000    2.0   1 1 0 0 0
+  1.38281000     .0   1 1 1 0 0
+  1.49546000    4.0   1 1 0 0 0
   1.84728000    2.0   1 2 0 0 0
-  2.06669000    2.0   1 1 1 0 0
+  2.06668000    2.0   1 1 1 0 0
   2.33972000    3.0  -1 1 0 0 1
    40   94    9
   0.64199E+00  0.88778E+01  0.76000E+00  0.35779E+00  0.11000E-01  0.05100E+00
@@ -13456,7 +13456,7 @@ See 4609 for proton OMP. Soft rotor, OPTMAN should be used.
   0.918750000   2.0   1 1 0 0 0
   1.300190000   0.0   1 1 1 0 0
   1.469620000   4.0   1 1 0 0 0
-  1.671000000   2.0   1 2 0 0 0  
+  1.671400000   2.0   1 2 0 0 0  
   2.057640000   3.0  -1 1 0 0 1
   2.151310000   2.0   1 1 1 0 0
   2.507700000   3.0   1 1 0 0 0
@@ -13466,13 +13466,13 @@ See 4609 for proton OMP. Soft rotor, OPTMAN should be used.
   0.53202E-02  0.93896E-01  0.69718E+00  0.90141E+00  0.49181E+00  0.78087E+00
   0.35000E+00  0.10595E-01  0.00000E+00  0.20754E+01  0.00000E+00
   0.000000000   0.0   1 1 0 0 0         
-  1.581640000   0.0   1 1 1 0 0			
-  1.750470000   2.0   1 1 0 0 0			
-  1.897160000   3.0  -1 1 0 0 1			
-  2.225850000   2.0   1 2 0 0 0			
+  1.581650000   0.0   1 1 1 0 0                 
+  1.750500000   2.0   1 1 0 0 0                 
+  1.897160000   3.0  -1 1 0 0 1                 
+  2.225840000   2.0   1 2 0 0 0                 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  610
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
 and 200 MeV for Hf-W-Ta isotopes. Recommended for Hf-178,180, Ta-181, all W.
@@ -13581,11 +13581,200 @@ used.
    .80861000    6.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   611
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
 and 200 MeV for Zr isotopes. Recommended for Zr-91,93,95. Local Fermi energy 
 used. See 4611 for proton OMP. Equivalent to 609 with rigid rotor couplings.
+
+      .001  200.0000
+   40   40
+   91   95
+    1    0    1    1    3
+    1
+   200.000
+     1.23840   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .58600   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+     1.00000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0  5.36600+1  1.01300-2   .00000+0   .00000+0
+             -1.53000+1   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.16580   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .92700   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    11.75000   .00000+0  7.95800+1   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0  5.20000+1  3.80000-1   .00000+0  1.00000+0   .00000+0
+    0
+    1
+   200.000
+     1.20140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .56600   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    11.77000  1.39600-2   .00000+0   .00000+0   .00000+0  1.27400+1   .00000+0
+             -2.73000+1   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.12140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .59000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .00000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0  7.90000+0   .00000+0  5.00000-3   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.12140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .59000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    -3.10000   .00000+0  1.60000+2   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    0
+    3
+   40   91    4    8    6  2.5  0.068      0.014     -0.0042    
+   .00000000    2.5   1
+  1.88220000    3.5   1
+  2.13150000    4.5   1
+  2.85710000    5.5   1
+   40   93    4    8    6  2.5  0.053      0.001     -0.0010    
+   .00000000    2.5   1
+  1.47800000    3.5   1
+  2.04000000    4.5   1
+  2.63800000    5.5   1                                     
+   40   95    4    8    6  2.5  0.180      0.022     -0.0170    
+   .00000000    2.5   1
+  1.67632000    3.5   1
+  1.79220000    4.5   1
+  2.62910000    5.5   1  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  612
+E.Soukhovitskii and R.Capote
+Unpublished.
+New Lane consistent dispersive CC neutron OMP for incident energies between 1 ke
+V and 200 MeV for Zr isotopes. Recommended for Zr-90-96. Local Fermi energy used
+. Soft rotor, OPTMAN should be used.
+
+      .001  200.0000
+   40   40
+   90   96
+    3    0    1    1    3
+    1
+   200.000
+     1.23840   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .58600   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+     1.00000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0  5.36600+1  1.01300-2   .00000+0   .00000+0
+             -1.53000+1   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.16580   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .92700   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    11.75000   .00000+0  7.95800+1   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0  5.20000+1  3.80000-1   .00000+0  1.00000+0   .00000+0
+    0
+    1
+   200.000
+     1.20140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .56600   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    11.77000  1.39600-2   .00000+0   .00000+0   .00000+0  1.27400+1   .00000+0
+             -2.73000+1   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.12140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .59000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .00000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0  7.90000+0   .00000+0  5.00000-3   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    1
+   200.000
+     1.12140   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+      .59000   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+    -3.10000   .00000+0  1.60000+2   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0  2.00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
+               .00000+0   .00000+0   .00000+0   .00000+0  1.00000+0   .00000+0
+    0
+    4
+   40   90    7
+   .97538E+00   .24094E+02   .76000E+00   .31843E+00   .30000E-02   .39000E-01
+   .53202E-02   .93896E-01   .69718E+00   .17000E+01   .19893E+00   .15263E+01
+   .35000E+00   .48730E-02   .00000E+00   .81906E+00   .00000E+00
+   .00000000     .0   1 1 0 0 0
+  1.76071000     .0   1 1 1 0 0
+  2.18627000    2.0   1 1 0 0 0
+  2.31900000    5.0  -1 1 0 0 1
+  2.74788000    3.0  -1 1 0 0 1
+  3.07693000    4.0   1 1 0 0 0
+  3.30880000    2.0   1 2 0 0 0
+   40   92    7
+  0.59277E+00  0.15054E+02  0.76000E+00  0.36272E+00  0.05900E-01  0.05400E+00
+  0.53202E-02  0.93896E-01  0.69718E+00  1.25000E+00  0.49181E+00  0.436538182
+  0.35000E+00  0.48730E-02  0.00000E+00  0.64288E+01  0.00000E+00  
+   .00000000     .0   1 1 0 0 0
+   .93447000    2.0   1 1 0 0 0
+  1.38281000     .0   1 1 1 0 0
+  1.49546000    4.0   1 1 0 0 0
+  1.84728000    2.0   1 2 0 0 0
+  2.06668000    2.0   1 1 1 0 0
+  2.33972000    3.0  -1 1 0 0 1
+   40   94    9
+  0.64199E+00  0.88778E+01  0.76000E+00  0.35779E+00  0.11000E-01  0.05100E+00
+  0.53202E-02  0.93896E-01  0.69718E+00  1.178862807  0.49181E+00  0.411773492
+  0.35000E+00  0.48730E-02  0.00000E+00  0.38631E+01  0.00000E+00
+  0.000000000   0.0   1 1 0 0 0
+  0.918750000   2.0   1 1 0 0 0
+  1.300190000   0.0   1 1 1 0 0
+  1.469620000   4.0   1 1 0 0 0
+  1.671400000   2.0   1 2 0 0 0  
+  2.057640000   3.0  -1 1 0 0 1
+  2.151310000   2.0   1 1 1 0 0
+  2.507700000   3.0   1 1 0 0 0
+  2.604500000   5.0  -1 1 0 0 1
+   40   96    5
+  0.81799E+00  0.17354E+02  0.76000E+00  0.49179E+00  0.05700E-01  0.05900E+00
+  0.53202E-02  0.93896E-01  0.69718E+00  0.90141E+00  0.49181E+00  0.78087E+00
+  0.35000E+00  0.10595E-01  0.00000E+00  0.20754E+01  0.00000E+00
+  0.000000000   0.0   1 1 0 0 0         
+  1.581650000   0.0   1 1 1 0 0                 
+  1.750500000   2.0   1 1 0 0 0                 
+  1.897160000   3.0  -1 1 0 0 1                 
+  2.225840000   2.0   1 2 0 0 0                 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  613
+E.Soukhovitskii and R.Capote
+Unpublished
+New Lane consistent dispersive CC neutron OMP for incident energies between 1 ke
+V and 200 MeV for Zr isotopes. Recommended for Zr-91,93,95. Local Fermi energy 
+used. Equivalent to 612 with rigid rotor couplings.
 
       .001  200.0000
    40   40
@@ -18690,7 +18879,7 @@ The dispersive integral is solved numerically in the interface code.
     0
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1479
-L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitski, et al.
+L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitskii, et al.
 Proc.Int.Conf. on NDST, ND2007, Nice, France, #617, DOI: 10.1051/ndata:07617
 Geometry is different for Vhf and Wv. Dispersive coupled channel neutron OMP
 for incident energies between 1 keV and 200 MeV. Recommended for Rh-100 - 104.
@@ -18762,7 +18951,7 @@ Local Fermi energy used.
   1.41089000    5.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1480
-R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba
+R.Capote, E.Soukhovitskii, J.M.Quesada, S.Chiba
 Unpublished.
 A dispersive coupled channel neutron OMP for incident energies between 1 keV and
 200 MeV valid for W-182,183. Local Fermi energy used. Used in IAEA eval (2008).
@@ -18838,7 +19027,7 @@ A dispersive coupled channel neutron OMP for incident energies between 1 keV and
    .30890000    4.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1481
-R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba
+R.Capote, E.Soukhovitskii, J.M.Quesada, S.Chiba
 Unpublished.
 A dispersive coupled channel neutron OMP for incident energies between 1 keV and
 200 MeV valid for W-183,184. Local Fermi energy used. Used in IAEA eval (2008).
@@ -18914,7 +19103,7 @@ A dispersive coupled channel neutron OMP for incident energies between 1 keV and
    .30890000    4.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1482
-R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba
+R.Capote, E.Soukhovitskii, J.M.Quesada, S.Chiba
 Unpublished.
 A dispersive coupled channel neutron OMP for incident energies between 1 keV and
 200 MeV valid for W-186. Local Fermi energy used. Used in IAEA eval (2008).
@@ -18984,7 +19173,7 @@ A dispersive coupled channel neutron OMP for incident energies between 1 keV and
    .80861000    6.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1483
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
 and 200 MeV for gold. Local Fermi energy used.
@@ -19054,7 +19243,7 @@ Geometry is different for Vhf and Wv.
    .85550000    4.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1484
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
 and 200 MeV for Mn-55. Local Fermi energy used.
@@ -19124,7 +19313,7 @@ Geometry is different for Vhf and Wv.
   1.29218000    5.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1485
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Geometry is different for Vhf and Wv. Dispersive coupled channel neutron OMP
 for incident energies between 1 keV and 200 MeV. Recommended for Rh-100 - 104.
@@ -21211,7 +21400,7 @@ A dispersive global spherical optical model potential for neutrons with incident
     0
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  2408
-R.Capote, E.Soukhovitski, S.Chiba, J.M.Quesada
+R.Capote, E.Soukhovitskii, S.Chiba, J.M.Quesada
 J. Nucl. Sc.&Tech. (Japan) 45 (2008) 333-340. Nice ND2007 proceedings(pap#765).
 Dispersive coupled channel neutron OMP for incident energies between 1 keV and
 200 MeV for actinides. Local Fermi energy used. Tested for 31 actinides.
@@ -21457,7 +21646,7 @@ Approximately Lane consistent (see PRC76 (2007) 057602).
    .15583000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  2409
-R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba
+R.Capote, E.Soukhovitskii, J.M.Quesada, S.Chiba
 Unpublished.
 Lane consistent dispersive CC neutron OMP for incident energies between 1 keV
 and 200 MeV for actinides. Local Fermi energy used. Tested for 31 actinides.
@@ -21831,7 +22020,7 @@ Bi(A=209). Taken from the Table 2 for neutrons (M.R.07b)
     0
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  2600
-E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
+E.Soukhovitskii, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
 J. Phys. G: Nucl. Part. Phys. 30, 905-920 (2004).
 A new global coupled channel neutron OMP for incident energies between 1 keV and
  200 MeV and valid for actinides. Vr: -25.9826 = -41.45 + 0.06667*232;
@@ -21937,7 +22126,7 @@ Smooth Fermi energy dependence.
    .51810000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  2601
-E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
+E.Soukhovitskii, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
 J. Phys. G: Nucl. Part. Phys. 30, 905-920 (2004).
 A new global coupled channel neutron OMP for incident energies between 1 keV and
  200 MeV and valid for actinides. Vr: -25.9826 = -41.45 + 0.06667*232;
@@ -22043,7 +22232,7 @@ Local Fermi energy used. Recommended for Th230,232; U233,235,238; Pu239,240,242
    .51810000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  2602
-E.Soukhovitski, S. Chiba and J. Lee
+E.Soukhovitskii, S. Chiba and J. Lee
 CP 769, Int.Conf.NDST, Santa Fe, USA, ed.by R.C.Haight et al, AIP 2005, p. 1100.
 A global coupled channel soft rotor neutron OMP for incident energies between 1
 keV and 200 MeV and valid for A=24-122 nuclei. Local Fermi energy used. Updated
@@ -25709,7 +25898,7 @@ See ref # 5405 for a global potential with same methodology.
    200.000     .0000    1.2200     .0000     .0000     .0000     .0000    .00000
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4430
-L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitski, et al.
+L.C.Mihailescu,I.Sirakov,R.Capote,E.Soukhovitskii, et al.
 Proc.Int.Conf. on NDST, ND2007, Nice, France, #617, DOI: 10.1051/ndata:07617
 Geometry is different for Vhf and Wv. Dispersive coupled channel proton OMP
 for incident energies between 1 keV and 200 MeV for Rh-103 (based on 1479).
@@ -25782,7 +25971,7 @@ Local Fermi energy used. Recommended for Rh-100 - 104
   1.41089000    5.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4431
-R.Capote, E.Soukhovitski, J.M. Quesada, S. Chiba
+R.Capote, E.Soukhovitskii, J.M. Quesada, S. Chiba
 Unpublished.
 A dispersive coupled channel proton OMP for incident energies between 1 keV and
 200 MeV valid for W-182,183. (proton potential for 1480)
@@ -25859,7 +26048,7 @@ Local Fermi energy used. Recommended for W-178,W-183
    .30890000    4.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4432
-R.Capote, E.Soukhovitski, J.M. Quesada, S. Chiba
+R.Capote, E.Soukhovitskii, J.M. Quesada, S. Chiba
 Unpublished.
 A dispersive coupled channel proton OMP for incident energies between 1 keV and
 200 MeV valid for tantalum
@@ -25930,7 +26119,7 @@ Local Fermi energy used. Used in IAEA tungsten evaluation (proton emission).
    .49520000    6.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4433
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane-consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for gold. Local Fermi energy used. See 1483 for neutron OMP.
@@ -26001,7 +26190,7 @@ See RIPL paper, Table 6.
    .85550000    4.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4434
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane-consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for Mn-55. Local Fermi energy used.  See 1484 for neutron OMP.
@@ -26072,7 +26261,7 @@ See RIPL paper, Table 6.
   1.29218000    5.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4435
-E.Soukhovitski and R.Capote
+E.Soukhovitskii and R.Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane-consistent dispersive coupled channel proton OMP for incident energies
 between 1 keV and 200 MeV. Recommended for Rh-100 - 104.
@@ -26619,7 +26808,7 @@ rc taken according to Koning recommendations
    .55690000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4605
-E.Soukhovitski, R. Capote, J.M.Quesada, S.Chiba
+E.Soukhovitskii, R. Capote, J.M.Quesada, S.Chiba
 Unpublished.
 A dispersive coupled channel proton OMP for incident energies between 1 keV
 and 200 MeV valid for Th.
@@ -26697,7 +26886,7 @@ Local Fermi energy used. Recommended for Th232,U233
    .22940000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4606
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Unpublished.
 A dispersive coupled channel proton OMP for incident energies between 1 keV
 and 200 MeV valid for U238.
@@ -26769,7 +26958,7 @@ Local Fermi energy used. Recommended for U238.
    .51830000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4607
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Unpublished.
 A dispersive coupled channel proton OMP for incident energies between 1 keV
 and 200 MeV valid for U-233.
@@ -26841,7 +27030,7 @@ Local Fermi energy used. Recommended for U233
    .22940000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4608
-E.Soukhovitski, R. Capote, J.M. Quesada, S. Chiba
+E.Soukhovitskii, R. Capote, J.M. Quesada, S. Chiba
 Phys.Rev.C72 (2005) 024604
 A dispersive coupled channel proton OMP for incident energies between 1 keV and
 200 MeV valid for Th, fitted to the new average cross section derived by Geel g
@@ -26922,7 +27111,7 @@ pot(1,1,9) = Ccoul/1.73*rc = 0.935699; rc=1.2452 Ccoul = 1.3 acoul = 0.545
    .07050000    2.5  -1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4609
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane-consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for Zr isotopes. Recommended for Zr-90,92,94,96. Local Fermi energy
@@ -27032,7 +27221,7 @@ Following paper E = Ep - 1.1 * Z/A**1/3.
   2.885740000   3.0  -1 1 0 0 1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4610
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for Hf-W-Ta isotope. Recommended for Hf-178,180, Ta-181, all W.
@@ -27103,7 +27292,7 @@ be used. Ep = Ep - 1.33 Z/A**1/3, rc=1.0626, ac=0.64.
   1.63217900    6.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  4611
-E.Soukhovitski and R. Capote
+E.Soukhovitskii and R. Capote
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Lane-consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for Zr isotopes. Recommended for Zr-91,93,95. Local Fermi energy
@@ -29465,7 +29654,7 @@ Lane model - valid to 16 MeV.
    .39655000    4.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  5408
-R.Capote, E.Soukhovitski, S. Chiba, J.M.Quesada
+R.Capote, E.Soukhovitskii, S. Chiba, J.M.Quesada
 J. Nucl. Sc.&Tech. (Japan) 45 (2008) 333-340. Nice ND2007 proceedings(pap#765).
 Dispersive coupled channel proton OMP for incident energies between 1 keV and
 200 MeV for actinides. Local Fermi energy used. Tested for 31 actinides.
@@ -29712,7 +29901,7 @@ pot(1,1,9) = Ccoul/1.73*rc = 1.13999; rc=1.2174 Ccoul = 1.62 acoul = 0.551
    .15583000    6.5   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  5409
-R.Capote, E.Soukhovitski, J.M.Quesada, S.Chiba
+R.Capote, E.Soukhovitskii, J.M.Quesada, S.Chiba
 Unpublished.
 Lane consistent dispersive CC proton OMP for incident energies between 1 keV
 and 200 MeV for actinides. Local Fermi energy used. Tested for 31 actinides.
@@ -30154,7 +30343,7 @@ Parameter set corresponding to the LAB energies (priv. comm. by authors)
    200.000     .0000    1.1000     .0000     .0000     .0000     .0000    .00000
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  5600
-E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
+E.Soukhovitskii, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
 J. Phys. G: Nucl. Part. Phys. 30, 905-920 (2004).
 A new global coupled channel proton OMP for incident energies between 1 keV and
 200 MeV and valid for actinides. Vr: -25.9826  = -41.45 + 0.06667*232; Ccoul=1;
@@ -30261,7 +30450,7 @@ Updated parameters: VR1=0.024; VR2=1.7E-4; Smooth Fermi energy dependence.
    .51810000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  5601
-E.Soukhovitski, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
+E.Soukhovitskii, S. Chiba, J. Lee, O. Iwamoto and T.Fukahori
 J. Phys. G: Nucl. Part. Phys. 30, 905-920 (2004).
 A new global coupled channel proton OMP for incident energies between 1 keV and
 200 MeV and valid for actinides. Vr: -25.9826  = -41.45 + 0.06667*232; Ccoul=1;
@@ -30368,7 +30557,7 @@ Updated parameters: VR1=0.024; VR2=1.7E-4; Local Fermi energy dependence.
    .51810000    8.0   1
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
  5602
-E.Soukhovitski, S. Chiba and J. Lee
+E.Soukhovitskii, S. Chiba and J. Lee
 CP 769, Int.Conf.NDST, Santa Fe, USA, ed.by R.C.Haight et al, AIP 2005, p. 1100.
 A global coupled channel soft rotor proton OMP for incident energies between 1
 keV and 200 MeV and valid for A=24-122 nuclei. Local Ef used. Updated parameters
@@ -31131,7 +31320,7 @@ Vc=0.642/0.4=1.605
 Yinlu Han, Yuyang Shi, Qingbiao Shen.
 Phys.Rev.C74, 044615 (2006)
 Elastic deuteron scattering and deuteron reaction cross sections for energies
-up to 200 MeV.
+up to 200 MeV. Missprint in compiled potential corrected on 30/11/2010. 
 Vc=1.0584/0.4=2.646
 
      1.000  200.0000
@@ -31165,7 +31354,7 @@ Vc=1.0584/0.4=2.646
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
       .46490   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0  4.50000-2   .00000+0   .00000+0   .00000+0
-    20.96770 -7.93900-2 -4.33977+1   .00000+0   .00000+0   .00000+0   .00000+0
+    20.96770 -7.93900-2   .00000+0   .00000+0   .00000+0   .00000+0 -4.33977+1
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
@@ -31196,7 +31385,7 @@ Vc=1.0584/0.4=2.646
 Yinlu Han, Yuyang Shi, Qingbiao Shen.
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Elastic deuteron scattering and deuteron reaction cross sections for energies
-up to 200 MeV on Lithium. Local potential.
+up to 200 MeV on Lithium. Local potential. Misprint corrected on 30/11/2010.
 Vc=0.7593/0.4=1.89825. See theory in Phys. Rev. C74 044615 (2006)
 
      1.000  200.0000
@@ -31230,7 +31419,7 @@ Vc=0.7593/0.4=1.89825. See theory in Phys. Rev. C74 044615 (2006)
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
       .35650   .00000+0  7.00000-1   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
-     9.89680 -5.96700-2  6.72960+0   .00000+0   .00000+0   .00000+0   .00000+0
+     9.89680 -5.96700-2   .00000+0   .00000+0   .00000+0   .00000+0  6.72960+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
@@ -31252,7 +31441,7 @@ Vc=0.7593/0.4=1.89825. See theory in Phys. Rev. C74 044615 (2006)
 Yinlu Han, Yuyang Shi, Qingbiao Shen.
 Nucl. Data Sheets 110 (2009) 3107-3214 (RIPL paper)
 Elastic deuteron scattering and deuteron reaction cross sections for energies
-up to 200 MeV on Be-9. Local potential.
+up to 200 MeV on Be-9. Local potential. Misprint corrected on 30/11/2010.
 Vc=1.7719/0.4=4.42975. See theory in Phys. Rev. C74 044615 (2006)
 
      1.000  200.0000
@@ -31286,7 +31475,7 @@ Vc=1.7719/0.4=4.42975. See theory in Phys. Rev. C74 044615 (2006)
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
       .49520   .00000+0  7.00000-1   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
-    21.29500 -9.56200-2  7.73400-1   .00000+0   .00000+0   .00000+0   .00000+0
+    21.29500 -9.56200-2   .00000+0   .00000+0   .00000+0   .00000+0  7.73400-1
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0
                .00000+0   .00000+0   .00000+0   .00000+0   .00000+0   .00000+0

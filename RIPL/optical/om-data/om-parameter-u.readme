@@ -14,16 +14,15 @@ The library contains all potentials we have compiled, starting
 from the users file of the RIPL-2 library. A table below
 summarizes its contents.
 
- SUMMARY of RIPL-3 optical potential library:
- Number of library entries =  495
- Number of spherical potentials =  384
- Number of coupled channel vibrational potentials =  10
- Number of coupled channel rigid rotor potentials =  97
- Number of coupled channel soft rotor  potentials =  4
- Number of dispersive potentials =  53
- Number of potentials defined above 100 MeV =  182
- Number of references =  135
-
+SUMMARY of RIPL-3 optical potential library:
+Number of library entries =         571
+Number of spherical potentials =         460
+Number of coupled channel vibrational potentials =          10
+Number of coupled channel rigid rotor potentials =          96
+Number of coupled channel soft rotor  potentials =           5
+Number of dispersive potentials =          53
+Number of potentials defined above 100 MeV =         182
+Number of references =         139
 
 Format
 ------
