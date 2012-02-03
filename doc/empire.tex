@@ -4370,9 +4370,7 @@ $T$ is a nuclear temperature, and $\beta_{v}=3.2\cdot10^{-21}\, s^{-1}$
 is assumed to separate under-damped and over-damped motion.
 
 
-%##############################################################
 \subsection{Prompt Fission Neutrons}
-%##############################################################
 \label{pfns}
 The Madland-Nix or Los Alamos model~\cite{Madland:1982a} constitutes the basis for the evaluation
 of prompt fission neutrons spectra in most current evaluated nuclear data libraries.
@@ -7135,7 +7133,7 @@ contains basic data necessary to specify the case, and the structure
 is illustrated by the following example: 
 \begin{verbatim}
 14.8                       ;INCIDENT ENERGY (IN LAB)
-56      26                   ;TARGET A , Z
+56      26                 ;TARGET A , Z
  1     0                   ;PROJECTILE A, Z
 3                          ;NUMBER OF NEUTRONS TO BE EMITTED
 1                          ;NUMBER OF PROTONS TO BE EMITTED
@@ -7178,12 +7176,21 @@ The mandatory input is followed by optional input, which allows modifications
 to the default model parameters. Optional input consists of an arbitrary
 number of records, entered in any order and closed with the GO record,
 which indicates the end of the input. In the simplest case (all defaults),
-only the GO record must be entered. Each record starts with an alphanumeric
-keyword NAME which is followed by the value VAL and four positional
+only the GO record must be entered. Each optional record starts with an alphanumeric
+keyword NAME. If the first character of the line (i.e. NAME(1:1)) is \*,\# or \!, 
+then this line contains comments and is ignored by the code.
+If the first character of the line (i.e. NAME(1:1)) is \@, 
+then this line contains a title, which will be printed in EMPIRE outputs; obviously
+the title is not used in any calculations. Multiple titles are allowed.
+Users are strongly encouraged to use titles and comments in EMPIRE inputs; that will be a 
+significant step toward a better documentation of our theoretical calculations 
+and evaluations.\\
+
+The optional-input keyword NAME is followed by the value VAL and four positional
 parameters I1, I2, I3, I4. The keyword indicates a physical quantity, such as the
 binding energy or level density parameter or an option*, or scaling parameter. 
-VAL takes numerical value  of the  quantity or  option*).  The  positional
-parameters are typically  used to  specify to which nucleus the quantity 
+VAL takes numerical value  of the  quantity or  option*).  \\
+The  positional parameters are typically  used to  specify to which nucleus the quantity 
 should be applied (generally  if these are omitted  the value is applied to all
 nuclei in the given calculation). Positional parameters may be also used to 
 indicate the estimated uncertainty of the quantity defined by the input keyword 
@@ -7195,7 +7202,8 @@ FORMAT (A6,G10.5,4I5) NAME,VAL,I1,I2,I3,I4
 Fixed format allows to avoid typing zeros if no input is needed for some 
 positional parameters.
 
-The GO record indicates end of the optional input and starts calculations. It may be followed by an unlimited list of incident energies
+The GO record indicates end of the optional input and starts calculations. 
+It may be followed by an unlimited list of incident energies
 (one per record) terminated with a record containing a negative value.
 Anything below this line will be ignored by the code. If no line with 
 negative value is found, then the code will terminate at the end of file (EOF). 
