@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2437 $
+Ccc   * $Rev: 2440 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -352,8 +352,7 @@ C
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
-            iwin = PIPE('copy COLL.DAT TARGET_COLL.DAT')
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
          ENDIF
 C
 C--------JOIN finished
@@ -848,8 +847,7 @@ C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k)
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-C           iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
-            iwin = PIPE('copy COLL.DAT TARGET_COLL.DAT>nul:')
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
          ENDIF
 
       ENDIF

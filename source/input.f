@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2438 $
+Ccc   * $Rev: 2440 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -277,6 +277,7 @@ C
          SOFt = .FALSE.
          CCCalc = .FALSE.
          BENchm = .FALSE.
+         EMPtitle(1:1)=' '
 C       
 C
          NUBarread = .FALSE.

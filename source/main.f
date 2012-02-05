@@ -1,6 +1,6 @@
-cc   * $Rev: 2438 $
+cc   * $Rev: 2440 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -18,23 +18,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD), ELTl(NDLW),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
-
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &                 rohfb_norm(NFHump)
 
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
@@ -44,14 +29,9 @@ C
 
       DOUBLE PRECISION XCOs(NDAngecis)                                    ! KALB
 
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
+      DOUBLE PRECISION ELTl(NDLW)
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd, rohfb_norm, barnorm, hnorm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -1073,8 +1053,9 @@ C
 C-----Start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
          IF(QPRod(nnuc).LT.-999.d0) CYCLE
-         ROFis  = 0.d0
-         ROFisp = 0.d0
+
+C        ROFisp = 0.d0
+
          IF (IOUt.GT.0) THEN
 C        if(nnuc.le.NNUcd)
          if(nnuc.le.NDEJC)  ! limiting screen printout 
@@ -3866,24 +3847,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
-
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
@@ -3925,7 +3891,6 @@ C
             DEStepp(2) = DEStepm(m)
             DO kk = 1, NRBinfis(2)
                UGRid(kk,2) = UGRidf(kk,m)
-               ROFis(kk,Jcn,2) = ROFism(kk,Jcn,m)
                ROFisp(kk,Jcn,1,2) = ROFism(kk,Jcn,m)
                ROFisp(kk,Jcn,2,2) = ROFism(kk,Jcn,m)
             ENDDO
@@ -3983,24 +3948,9 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
 
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
-
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 

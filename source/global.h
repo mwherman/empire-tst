@@ -1,6 +1,6 @@
-C $Rev: 2438 $
+C $Rev: 2440 $
 C $Author: rcapote $
-C $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
+C $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -112,8 +112,7 @@ C
       CHARACTER*64 EMPiredir
       CHARACTER*72 EMPtitle
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
-     &                 ROFis(0:nfisenmax,ndlw,nfhump), ROPaa(ndnuc),
-     &                 ROFisp(0:nfisenmax,ndlw,2,nfhump),
+     &                 ROPaa(ndnuc),ROFisp(nfisenmax,ndlw,2,nfhump),
      &                 ROPar(ndropm,ndnuc), RECoil,
      &                 RVOm(0:ndejc,0:ndnuc),
      &                 RVSo(0:ndejc,0:ndnuc),
@@ -149,7 +148,28 @@ C
      &                 atil_ig(0:NDNUC),dshift_ig(0:NDNUC)
 
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
-      COMMON /COMFIS_CON/ ROFis, ROFisp, UGRid, ENH_ld, SHCfis,
+
+      DOUBLE PRECISION ROFism(NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+     & EFDism(NFTRANS,NFMOD), UGRidf(NFISENMAX,NFMOD), EFBm(NFMOD),
+     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
+     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
+     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
+     & TFB, TDIrect, ECFism(NFMOD),
+     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
+
+      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+
+      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
+      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
+     &                 rohfb_norm(NFHUMP)
+
+      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
+     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
+     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
+     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
+      
+	  
+	  COMMON /COMFIS_CON/ ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
      &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp,
      &                    HCOnt, ECFis
@@ -158,7 +178,10 @@ C
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
       COMMON /COMFIS_PAR/FISv_n, FISh_n, FISa_n, FISd_n, FISn_n
-      COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
+
+      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
+      
+	  COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
       COMMON /DEPTH / POTe
       COMMON /ENDFEA/  POPcsed, POPcsedlab, POPcsealab, POPcseaf

@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-05 17:29:38 +0100 (So, 05 Feb 2012) $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -2150,37 +2150,17 @@ C
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      REAL*8 ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
-
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
 
       INTEGER NLWst                                             ! PARAM
-
-      REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
-      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &       rohfb_norm(NFHump)
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
 
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
-
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C Dummy arguments
 C
@@ -2277,15 +2257,6 @@ C              IF (Iff.EQ.3) rotemp = rotemp*2.   ! axial, mass asymmetry
          ENDDO
       ENDDO
 
-346   ACRtf(Ib) = ACRt
-      UCRtf(Ib) = UCRt
-      ECOndf(Ib) = ECOnd
-      DETcrtf(Ib) = DETcrt
-      TCRtf(Ib) = TCRt
-      SCRtf(Ib) = SCR
-C     VIBf12(Ib)= vibbf12
-C     VIBfdt(Ib)= vibbfdt
-
       IF(IOUT.EQ.6)CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       
       END
@@ -2309,12 +2280,6 @@ CCC   *********************************************************************
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-
-      REAL*8 barnorm(NFHump),hnorm                              ! ROHFBSADD
-      REAL*8 rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &       rohfb_norm(NFHump)
-C
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C PARAMETER definitions
 C
@@ -2488,25 +2453,12 @@ C
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      REAL*8 ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                     ! FISSMOD int
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       INTEGER NLWst                                             ! PARAM
 
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 C
 C Dummy arguments
@@ -2626,11 +2578,11 @@ C
 C
       aj=0.
       u=0.
+C     ROFisp(nfisenmax,ndlw,2,nfhump),
       DO kk = 1, NDEX
          DO i = 1, NDLW
-               ROFis(kk,jj,Ib) = 0.d0
-               ROFisp(kk,jj,1,Ib) = 0.d0
-               ROFisp(kk,jj,2,Ib) = 0.d0
+           ROFisp(kk,i,1,Ib) = 0.d0
+           ROFisp(kk,i,2,Ib) = 0.d0
          ENDDO
       ENDDO
 
@@ -2696,13 +2648,40 @@ c-----------Nonaxial symmetry with mass symmetry
 c---------- Axial symmetry with mass asymmetry
             IF (Iff.EQ.3) rotemp = rotemp * 2.d0
 c
-            ROFis(kk,jj,Ib) = rotemp
             ROFisp(kk,jj,1,Ib) = rotemp
             ROFisp(kk,jj,2,Ib) = rotemp
 
             IF (Mmod.GT.0) ROFism(kk,jj,Mmod) = rotemp 
          ENDDO
       ENDDO
+
+      IF (Mmod.EQ.0) THEN
+      
+	  ACRtf(Ib) = ACRt
+        UCRtf(Ib) = UCRt
+        ECOndf(Ib) = ECOnd
+        DETcrtf(Ib) = DETcrt
+        TCRtf(Ib) = TCRt
+        SCRtf(Ib) = SCR
+
+        VIBf12(Ib)= vibbf12
+        VIBfdt(Ib)= vibbfdt
+        VIBfnorm(Ib)= vn
+
+      ELSE ! Mmod.GT.0
+        
+	  ACRtf(Mmod) = ACRt
+        UCRtf(Mmod) = UCRt
+        ECOndf(Mmod) = ECOnd
+        DETcrtf(Mmod) = DETcrt
+        TCRtf(Mmod) = TCRt
+        SCRtf(Mmod) = SCR
+
+        VIBf12(Mmod)= vibbf12
+        VIBfdt(Mmod)= vibbfdt
+        VIBfnorm(Mmod)= vn
+      
+	ENDIF
 
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       RETURN

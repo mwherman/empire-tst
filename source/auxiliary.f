@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2376 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2012-01-30 04:43:56 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2440 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -70,6 +70,8 @@ C
       TNUcf    = 0.d0
       RO       = 0.d0
       ROF      = 0.d0
+      ROFisp   = 0.d0
+
       POP      = 0.d0
       RECcse   = 0.d0
       POPlv    = 0.d0

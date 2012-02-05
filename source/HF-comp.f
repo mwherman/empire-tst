@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2378 $
+Ccc   * $Rev: 2440 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 07:48:45 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1717,13 +1717,13 @@ C
          tdircont(ih) =0.d0
       ENDDO
       ibar = 1
-      ii = int(vbarmax(1)/destepp(1))
+      ii = max(int(vbarmax(1)/destepp(1)),1)
       romin= ROFisp(ii,JCC,ipa,ih)
       DO ib = 1, NRHump
          IF(romin.gt.ROFisp(ii,JCC,ipa,ib))THEN
             romin = ROFisp(ii,JCC,ipa,ib)
             ibar = ib
-            ii = int(vbarmax(ib)/destepp(ib))
+            ii = max(int(vbarmax(ib)/destepp(ib)),1)
          ENDIF
       ENDDO
       DO i = 1, NRBinfis(Ibar)               
@@ -1751,7 +1751,7 @@ C
             ENDIF
 c           arg1 =  - 2.d0 * PI * (ux1 + EFB(NRHump + ih1) - Ee)
 c     &               /HCOnt(Nrhump + ih1)
-            arg1=0.d0   ! to avoid fluctuations
+C           arg1=0.d0   ! to avoid fluctuations
             dmom = (1.d0 - tdirc(ih1, ih1)) *
      &             (1.d0 - tdirc(ih1 + 1, nrhump))
             tdirc(ih1, nrhump) = tdirc(ih1, ih1) *
