@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2373 $
+Ccc   * $Rev: 2441 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 00:07:47 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Date: 2012-02-05 21:32:23 +0100 (So, 05 Feb 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -20,40 +20,19 @@ C
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect, ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
       INTEGER NLWst                                                       ! PARAM
 
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &                 rohfb_norm(NFHUMP)
-
       COMMON /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
 
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
-
       COMMON /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 C Dummy arguments
 C
@@ -680,30 +659,10 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &                 rohfb_norm(NFHUMP)
-
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
-
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 C
 
 C Dummy arguments
@@ -1093,36 +1052,15 @@ C
      & DETcrtf(NFHUMP),SCRtf(NFHUMP),MORtcrt(NFPARAB),
      & MPArcrt(NFPARAB), ECOndf(NFHUMP)
 
-      DOUBLE PRECISION ROFism(0:NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
-     & EFDism(NFTRANS,NFMOD), UGRidf(0:NFISENMAX,NFMOD), EFBm(NFMOD),
-     & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
-     & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
-     & DEStepm(NFMOD), TFBm(NFMOD), TDIrm(NFMOD), CSFism(NFMOD),
-     & TFB, TDIrect,  ECFism(NFMOD),
-     & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
-
-      INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
-
-      DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
-      DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
-     &                 rohfb_norm(NFHUMP)
 
       DOUBLE PRECISION  TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
 
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
 
-      COMMON /FISSMOD/ ROFism, HM, EFDism, UGRidf, EFBm, XMInnm, AFIsm,
-     &                 DEFbm, SHCfism, DELtafism, GAMmafism, WFIsm,
-     &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
-     &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
-
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-
-      COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
