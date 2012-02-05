@@ -1,6 +1,6 @@
-C $Rev: 2433 $
+C $Rev: 2438 $
 C $Author: rcapote $
-C $Date: 2012-02-03 22:17:16 +0100 (Fr, 03 Feb 2012) $
+C $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -46,13 +46,8 @@ C
      &                 FNrvomp(0:ndejc,0:ndnuc),
      &                 FNrwvomp(0:ndejc,0:ndnuc),
      &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),
-     &                 FISV1(ndnuc),FISV2(ndnuc),FISV3(ndnuc),
-     &                 FISHO1(ndnuc),FISHO2(ndnuc),FISHO3(ndnuc),
      &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
-     &                 FISA1(ndnuc),FISA2(ndnuc),FISA3(ndnuc),
-     &                 FISDL1(ndnuc),FISDL2(ndnuc),FISDL3(ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
-     &                 FISNV1(ndnuc),FISNV2(ndnuc),FISNV3(ndnuc),
      &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
      &                 VNIu_eval(NDECSE),PFNtke,PFNalp,PFNrat,PFNniu 
 
@@ -162,9 +157,6 @@ C
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
       COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
-      COMMON /COMFIS_KEY/FISV1 ,FISV2 ,FISV3 ,FISHO1 ,FISHO2 ,FISHO3,
-     &                   FISA1 ,FISA2 ,FISA3 ,FISDL1 ,FISDL2 ,FISDL3,
-     &                   FISNV1,FISNV2,FISNV3
       COMMON /COMFIS_PAR/FISv_n, FISh_n, FISa_n, FISd_n, FISn_n
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele

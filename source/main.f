@@ -1,6 +1,6 @@
-cc   * $Rev: 2437 $
+cc   * $Rev: 2438 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1085,18 +1085,6 @@ C        if(nnuc.le.NNUcd)
          ENDIF
          IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
             CALL READ_INPFIS(nnuc)
-c           DO i = 1, NRHump
-c               IF (FISmod(nnuc).EQ.0. .OR.
-c     &            (FISmod(nnuc).GT.0. .AND. i.NE.2)) THEN
-c                  IF(FISden(Nnuc).le.1) then
-c                    CALL DAMI_ROFIS(nnuc,i,0,AFIs(i))
-c                  ELSEIF(FISDEN(Nnuc).eq.2) then
-c                    CALL DAMI_RO_HFB_FIS(nnuc,i,AFIs(i))
-c                  ELSE
-c                    STOP 'CHECK FISDEN (not 0, 1 or 2)!'
-c                  ENDIF
-c               ENDIF
-c           ENDDO
             IF (FISmod(nnuc).LT.0.1d0)THEN   ! Single mode fission 
                DO i = 1, NRHump
                   IF(FISden(Nnuc).EQ.0)then

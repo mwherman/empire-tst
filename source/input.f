@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2437 $
+Ccc   * $Rev: 2438 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-03 22:40:40 +0100 (Fr, 03 Feb 2012) $
+Ccc   * $Date: 2012-02-05 17:17:32 +0100 (So, 05 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -220,6 +220,10 @@ C--------set gamma-strength parameters
             GDRpar(5,nnuc) = 0.0
             GDRpar(6,nnuc) = 0.0
             GDRpar(7,nnuc) = 1.0
+         ENDDO
+C
+C--------set fission normalization factors
+         DO nnuc = 1, NDNUC
             DO hh=1,NFHump
                FISv_n(hh,nnuc)=1.0
                FISh_n(hh,nnuc)=1.0
