@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-29 21:02:09 +0100 (So, 29 Jän 2012) $
+Ccc   * $Date: 2012-02-05 17:29:38 +0100 (So, 05 Feb 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -2260,14 +2260,10 @@ C     See eq.(1.38) of the Ignatyuk Book (Stat.prop....)
          DO kk = 1,NRBinfis(Ib)
             temp = TNUcf(kk,Nnuc)
 c
-
 c-----------SYMMETRY ENHANCEMENT
 c
-
 c           The normal GS is axial and mass symmetric
-
 c         
-
             DO ipp = 1, 2
                rotemp = ROFisp(kk,jj,ipp,Ib)
 C              Nonaxial symmetry with mass symmetry
@@ -2280,6 +2276,16 @@ C              IF (Iff.EQ.3) rotemp = rotemp*2.   ! axial, mass asymmetry
             ENDDO
          ENDDO
       ENDDO
+
+346   ACRtf(Ib) = ACRt
+      UCRtf(Ib) = UCRt
+      ECOndf(Ib) = ECOnd
+      DETcrtf(Ib) = DETcrt
+      TCRtf(Ib) = TCRt
+      SCRtf(Ib) = SCR
+C     VIBf12(Ib)= vibbf12
+C     VIBfdt(Ib)= vibbfdt
+
       IF(IOUT.EQ.6)CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       
       END
