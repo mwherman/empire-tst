@@ -18,14 +18,7 @@ MSC        0.                               ! Recommended default for nucleon in
 ENDF       0.                               ! No ENDF formatting by default (much faster than formatting)
 PCROSS    0.0                               ! Default prequilibrium: exciton model (PCROSS) with default MFP parameter
 HMS        0.                               ! Monte Carlo Hybrid preequilibrium model
-*TUNE       0.90    Z0   A0    0            ! To fit the capture channel (commented)
-* OPTICAL MODEL INPUT
-*OMPOT  -2405.       1                      ! OMP for the inverse neutron channel - Koning - Delaroche
-*OMPOT  -5405.       2                      ! OMP for the inverse proton channel  - Koning and Delaroche
-*OMPOT  -9600.       3                      ! OMP for the inverse alpha channel   - Avrigeanu et al
-*DIRECT     0.                              ! Spherical optical model by default
 DIRECT     0.                               ! CC calculation for the incident channel only  
-*DIRPOT -2405.                              ! OMP for collective calculations (if DIRECT>0)
 GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
 RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
 BENCHM     1.                               ! Benchmark calculations, the order of the incident energies is not checked

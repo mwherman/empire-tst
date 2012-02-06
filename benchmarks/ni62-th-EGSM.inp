@@ -18,11 +18,6 @@ ENDF       0.
 HRTW       1.
 RECOIL     0.
 DIRECT     0. 
-*FISSHI     2.
-*FISBAR     3.
-*OMPOT  -2101.   1
-*DIRPOT -2405.
-*DIRPOT  -609.
 GO
 -1.
 1.0

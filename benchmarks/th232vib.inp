@@ -7,7 +7,6 @@
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
 IOUT       4.
 LEVDEN     0.
-*FITLEV     1.
 NEX      100.
 DIRECT     1.
 EFIT     .730       2
@@ -17,7 +16,6 @@ MSC        1.
 DIRPOT  -608.
 OMPOT   -608.       1
 OMPOT  -4608.       2
-*DEGAS      0.
 ENDF       0.
 GO
 .2
@@ -30,13 +28,3 @@ GO
 5.
 6.
 -1.
-11.
-12.
-13.
-14.
-15.
-16.
-17
-19
-20
--1

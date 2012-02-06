@@ -17,6 +17,4 @@ MSC        0.
 ENDF       0.                     
 HRTW       0.
 RECOIL     0.
-*DIRECT     2. 
-*DIRPOT  2408.
 GO

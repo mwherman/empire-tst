@@ -14,7 +14,6 @@ NEX       50.
 MSD        0.                                                     
 MSC        0.                                                         
 ENDF       0. 
-*PCROSS    1.5 
 DIRECT     1.
 DIRPOT   609.
 GO
