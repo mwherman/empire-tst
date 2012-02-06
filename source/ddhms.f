@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2454 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2012-02-06 22:47:18 +0100 (Mo, 06 Feb 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2443 $
+C CVS Version Management $Revision: 2454 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2443 $')
+99005 FORMAT ('  xddhms version: $Revision: 2454 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -2577,21 +2577,18 @@ C
 99100 FORMAT ('******************** end input information *************'
      &        )
 C
-      if(npv.eq.0 .or. nhv.eq.0) then
-        write(8,*) ' ERROR: Wrong calculation in HMS, EMPIRE stops' 
-        write(8,*) ' ERROR: Change the selected PE model to PCROSS'
-        write(*,*) ' ERROR: Wrong calculation in HMS, EMPIRE stops' 
-        write(*,*) ' ERROR: Change the selected PE model to PCROSS'
-        STOP ' ERROR: Wrong calculation in HMS, EMPIRE stops'
-      endif 
-      vp=vp/npv
-      vp2=sqrt(vp2/npv-vp**2)
-      vh=vh/nhv
-      vh2=sqrt(vh2/nhv-vh**2)
-      vpe=vpe/npv
-      vpe2=sqrt(vpe2/npv-vpe**2)
-      vhe=vhe/nhv
-      vhe2=sqrt(vhe2/nhv-vhe**2)
+c      IF(npv.NE.0) THEN
+c        vp=vp/npv
+c        vp2=sqrt(vp2/npv-vp**2)
+c        vpe=vpe/npv
+c        vpe2=sqrt(vpe2/npv-vpe**2)
+c       ENDIF
+c      IF(nhv.NE.0) THEN
+c        vh=vh/nhv
+c        vh2=sqrt(vh2/nhv-vh**2)
+c        vhe=vhe/nhv
+c        vhe2=sqrt(vhe2/nhv-vhe**2)
+c       ENDIF
 c      write(28,*) '            n         v    st.dev_v2',
 c     1                            '     ve    st.dev_ve2'
 c      write(28,'(a4,2x,i10,4f10.3)') 'part',npv,vp,vp2,vpe,vpe2  
@@ -6587,9 +6584,9 @@ C--------------population of discrete levels (evenly distributed)
                      sumcon=sumcon+difcon
                   ENDDO
                ENDIF
-C              WRITE(8,*)' discrete pop  = ',real(difcon*NLV(nnur)),' mb'
-C              WRITE(8,*)' continuum pop = ', chk, ' mb'
-C              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
+c              WRITE(8,*)' discrete pop  = ',real(difcon*NLV(nnur)),' mb'
+c              WRITE(8,*)' continuum pop = ', chk, ' mb'
+c              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
 C
 C--------------transfer excitation energy dependent recoil spectra
 C
