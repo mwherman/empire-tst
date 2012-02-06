@@ -1,6 +1,6 @@
-cc   * $Rev: 2440 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
+cc   * $Rev: 2443 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc

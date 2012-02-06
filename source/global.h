@@ -1,6 +1,6 @@
-C $Rev: 2440 $
-C $Author: rcapote $
-C $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
+C $Rev: 2443 $
+C $Author: mherman $
+C $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common

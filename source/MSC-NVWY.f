@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2382 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 10:38:46 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2443 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc

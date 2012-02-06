@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2374 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-30 00:11:59 +0100 (Mo, 30 Jän 2012) $
+Ccc   * $Rev: 2443 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'

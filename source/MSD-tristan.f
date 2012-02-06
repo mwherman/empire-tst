@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2301 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-01-25 04:20:05 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Rev: 2443 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC

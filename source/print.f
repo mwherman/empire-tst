@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2305 $
+Ccc   * $Rev: 2443 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-25 07:33:30 +0100 (Mi, 25 Jän 2012) $
+Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
 
 C
       SUBROUTINE Print_Total(Nejc)
