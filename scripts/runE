@@ -59,7 +59,7 @@ def runE(proj):
     rm('SENSITIVITY.MATRIX','NUBAR-EVAL.ENDF')
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
         glob('*.LEG') + glob('TARGET-*.tl') )
-    
+  
     
     if (not os.path.exists(proj+'.inp')):
         print("Input file : %s does not exist" % proj+'.inp')
@@ -83,7 +83,7 @@ def runE(proj):
                 proj+'-omp.ripl')
     if not isEmpty(proj+'-omp.dir'):
         cp(proj+'-omp.dir','OMPAR.DIR')
-        print('Using existing file with optical model par: %s' % 
+        print('Using existing file with optical model par (inel scatt): %s' % 
                 proj+'-omp.dir')
     # make symlink to transmission coefficient directory:
     if os.path.isdir(proj+'-tl'):
@@ -108,10 +108,10 @@ def runE(proj):
         print('Using existing file with fission input: %s' % proj+'-inp.fis')
     if not isEmpty(proj+'.exf'):
         cp(proj+'.exf','EXFOR.DAT')
-        print('Using existing file with EXFOR data: %s' % proj+'.exf')
+        print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
     if not isEmpty(proj+'.c4'):
         cp(proj+'.c4','C4.DAT')
-        print('Using existing file with C4 fit data: %s' % proj+'.c4')
+        print('Using existing file with experimental data (C4): %s' % proj+'.c4')
     if not isEmpty(proj+'-inp.sen'):
         cp(proj+'-inp.sen','SENSITIVITY.INP')
         print('File with sensitivity input exists: %s' % proj+'-inp.sen')
@@ -144,10 +144,10 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
+    mv('XSECTIONS.OUT',proj+'.xsc')
     mv('FISS_XS.OUT',proj+'-fiss.xsc',0) # no message if not present
     mv('FISSION.INP',proj+'-inp.fis',0)  # no message if not present
-    
-    
+
     if not (os.path.isdir(proj+'-tl')):
         mv('TL',proj+'-tl')
     if os.path.islink('TL'):
@@ -209,16 +209,17 @@ def runE(proj):
     
     if not isEmpty('SYSTEMATICS.TXT'):
         mv('SYSTEMATICS.TXT',proj+'.sys')
-    if not isEmpty('XSECTIONS.OUT'):
-        mv('XSECTIONS.OUT',proj+'.xsc')
     if not isEmpty('SENSITIVITY.MATRIX'):
         mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
-    if not isEmpty('OMP_A.DAT'):
-        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+
     
     # move files, no warning if files DNE:
-    mv('EXFOR.DAT',proj+'.exf',0)
-    mv('C4.DAT',proj+'.c4',0)
+    if not isEmpty('OMP_A.DAT'):
+        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+    if not isEmpty('EXFOR.DAT'):
+        mv('EXFOR.DAT',proj+'.exf',0)
+    if not isEmpty('C4.DAT'):
+        mv('C4.DAT',proj+'.c4',0)
     mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
     mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
     mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
@@ -227,18 +228,26 @@ def runE(proj):
     mv('ecVIB.inp',proj+'-ecis-vib.in',0)
     mv('ecROT.inp',proj+'-ecis-rot.in',0)
     mv('ecVIBROT.inp',proj+'-ecis-vibrot.in',0)
-    mv('FISSION.OUT',proj+'-fiss.out',0)
     mv('R250SEED.DAT',proj+'.rng',0)
-    mv('PFNM.OUT',proj+'-pfnm.out',0)
-    mv('PFNS.OUT',proj+'-pfns.out',0)
-    mv('FIT.OUT',proj+'-ompfit.lst',0)
+    # fission chances and spectra for one energy run:
+    if not isEmpty('FISS_XS.ZVD'):
+        mv('FISS_XS.ZVD',proj+'-fiss.zvd',0)
+    if not isEmpty('FISSION.OUT'):
+        mv('FISSION.OUT',proj+'-fiss.out',0)
+    if not isEmpty('FIT.OUT'):
+        mv('FIT.OUT',proj+'-ompfit.lst',0)
+    if not isEmpty('PFNS.OUT'):
+        mv('PFNS.OUT',proj+'-pfns.out',0)
+    if not isEmpty('PFNM.OUT'):
+        mv('PFNM.OUT',proj+'-pfnm.out',0)
+
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
         mv(LDfile,proj+LDfile,0)
     # spectra for one energy run:
     for LDfile in glob("sp_*.zvd"):
         mv(LDfile,proj+LDfile,0)
-    
+
     # Extract Warnings from the list file:
     # this is portable version of 'grep WARNING infile > outfile
     listfile = open(proj+'.lst','r').readlines()
@@ -256,7 +265,7 @@ def runE(proj):
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
-    rm( glob('TARGET-*.tl') )
+    rm( glob('TARGET-*.tl'))
     rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
     rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
