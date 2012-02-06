@@ -1,6 +1,6 @@
-cc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+cc   * $Rev: 2449 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-06 13:54:46 +0100 (Mo, 06 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -84,6 +84,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       CHARACTER*23 ctmp23
       CHARACTER*36 nextenergy
       CHARACTER*72 rtitle
+      CHARACTER*72 inprecord
       DOUBLE PRECISION DMAX1, val
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
@@ -118,6 +119,26 @@ C             -----------------------------------------------
            ENDDO
          ENDDO
        ENDDO
+
+C-----
+C-----Skip mandatory part of the standard input
+C-----
+	REWIND 5
+      DO i=1,10
+         READ(5,*)
+      ENDDO
+C-----Read line of optional input
+  150 READ (5,'(A72)') inprecord
+      IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
+     &    inprecord(1:1).EQ.'!') GOTO 150  ! comments 
+
+      IF(inprecord(1:1).EQ.'@') THEN ! title
+        do j = 1,72
+          EMPtitle(j:j) = inprecord(j:j) ! title of the run
+        enddo
+        EMPtitle(1:1)= ' '
+      ENDIF
+	REWIND 5
 C-----
 C-----Read and prepare input data
 C-----
