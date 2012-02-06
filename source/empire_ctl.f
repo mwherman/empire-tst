@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2448 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-06 13:15:05 +0100 (Mo, 06 Feb 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -28,8 +28,10 @@ C
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
       CALL GETENV ('EMPIREDIR', empiredir)
+
+	EMPtitle='***'
 C
-C     The follwing line defines the proper default for WINDOWS work
+C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
       if(empiredir(1:1).eq.' ') empiredir(1:3)='../'

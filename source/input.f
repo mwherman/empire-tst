@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2448 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-06 13:15:05 +0100 (Mo, 06 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3227,7 +3227,7 @@ C
       WRITE (8,*)'                       |__________________________|'
       WRITE (8,*) ' '
       WRITE (8,*) ' '
-      WRITE (8,*)'        ', trim(EMPtitle)
+      WRITE (8,*) trim(EMPtitle)
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
       WRITE (8,*) '-------------------------------------------'
