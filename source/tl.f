@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2455 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-06 23:14:59 +0100 (Mo, 06 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3952,7 +3952,7 @@ C-----Maximum number of channel spin
 C     njmax = MAX(2*ldwmax,20)
 C
 C-----Writing OPTMAN input
-      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'optman.inp')
+      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
 C-----CARD 1 : Title
       WRITE (1,
      &'(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SOFT ROTOR CC'',i3)'
@@ -4114,11 +4114,11 @@ C-----Running OPTMAN
 C
       IF (IOPsys.EQ.0) THEN
 C        CALL OPTMAN('ecis06')
-         ctmp = 'optmand'
+         ctmp = '$EMPIREDIR/source/optmand'
          iwin = PIPE(ctmp)
-         ctmp = 'mv ecis06.out ECIS_VIB.out'
-         iwin = PIPE(ctmp)
-         ctmp = 'rm optman.inp'
+C        ctmp = 'mv ecis06.out ECIS_VIB.out'
+C        iwin = PIPE(ctmp)
+         ctmp = 'rm OPTMAN.INP'
          iwin = PIPE(ctmp)
       ELSE
 C        CALL OPTMAN('ecis06')
