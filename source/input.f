@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2448 $
+Ccc   * $Rev: 2452 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-06 13:15:05 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Date: 2012-02-06 22:05:41 +0100 (Mo, 06 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3225,15 +3225,20 @@ C
       WRITE (8,*)'                       |    Upton, New York       |'
       WRITE (8,*)'                       |      USA, Jan 2012       |'
       WRITE (8,*)'                       |__________________________|'
-      WRITE (8,*) ' '
-      WRITE (8,*) ' '
-      WRITE (8,*) trim(EMPtitle)
+
+      if(EMPtitle(1:5).ne.'     ') then
+        WRITE (8,*) ' '
+        WRITE (8,*) trim(EMPtitle)
+        WRITE (*,*) ' '
+        WRITE (*,*) trim(EMPtitle)
+      endif
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
       WRITE (8,*) '-------------------------------------------'
       WRITE (8,*) ' '  
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
+      WRITE (12,*) ''
       WRITE (12,*) trim(EMPtitle)
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
@@ -3307,6 +3312,8 @@ C
         READ(5,'(A72)') rtitle ! read running title
  
         rtitle(1:1)=' '
+
+        if(EMPtitle(1:5).ne.'     ' .and. FIRst_ein) GOTO 100
 
         write(*,*) '***',trim(rtitle)
         WRITE( 8,*)'***************************************************'
