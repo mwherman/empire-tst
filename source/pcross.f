@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2446 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-06 12:48:12 +0100 (Mo, 06 Feb 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
@@ -23,8 +23,8 @@ C     MFPp = MEAN FREE PATH PARAMETER
 C
 C PARAMETER definitions
 C
-      REAL*8 C1, EPS, PI26
-      PARAMETER (C1 = 3.6824121D17,EPS = 1.D-4,PI26 = 1.6449340107D0)
+      REAL*8 C1, EPS
+      PARAMETER (C1 = 3.6824121D17,EPS = 1.D-4)
       INTEGER*4 PMAX
       PARAMETER (PMAX = 50)
 C
@@ -580,7 +580,7 @@ C           fanisot is assumed 1, i.e. pure PE emission
 C
             fanisot = 1.d0
 C           fmsd set to 0.d0 means isotropic distribution
-            Call Kalbach( ac, zc, zp, ap-zp, zo, ao-zo, EINl, EXCn,
+            Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
      &              ebind, eee, ftmp, fanisot, ddxs, NDAng)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
@@ -598,7 +598,7 @@ c     totemis=sigr*fr
 99020 FORMAT (/' ',57('-')/)
       END
 
-      SUBROUTINE KALBACH(Jcom,Jzcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
+      SUBROUTINE KALBACH(Jcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
      &Bin, Eps, Total, Fmsd, Sigma, NDang)
 C
 C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
@@ -671,10 +671,7 @@ C
 C     Calculate energy independent quantities
 C     and print headings
 C
-      acom=jcomt
-      azcom=jzcom
       jin=jpin+jnin
-      xin=jin
       jout=jpout+jnout
 C
 C     Start of parametrization

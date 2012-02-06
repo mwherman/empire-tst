@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2446 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-06 12:48:12 +0100 (Mo, 06 Feb 2012) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -2352,26 +2352,25 @@ C
 C     Output of Cross Sections
 C
       IF (Iout.GT.3) THEN
-         OPEN (3,FILE = 'xs.d',STATUS = 'unknown')
+C        OPEN (3,FILE = 'xs.d',STATUS = 'unknown')
          DO l1 = 0, L1Maxm
             WRITE (8,99015) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
 99015       FORMAT (/' 1- and 2-step Cross Sections for L1:',
      &              I3/'   Theta',5X,'L1:',I2,9(7X,'L2:',I2))
-            WRITE (3,99020) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
-99020       FORMAT ('# 1- and 2-step Cross Sections for L1:',
-     &              I3/'#  Theta',8X,'L1:',I2,9(10X,'L2:',I2))
+C            WRITE (3,99020) l1, l1, (l2,l2 = 0,MIN(9,L2Maxm))
+C99020       FORMAT ('# 1- and 2-step Cross Sections for L1:',
+C    &              I3/'#  Theta',8X,'L1:',I2,9(10X,'L2:',I2))
             DO na = 1, NANglr
                WRITE (8,99025) ANGler(na), xsig1(l1,na),
      &                         (xsig2(l1,l2,na),l2 = 0,MIN(9,L2Maxm))
 99025          FORMAT (F8.3,10E12.4)
-               WRITE (3,99030) ANGler(na), xsig1(l1,na),
-     &                         (xsig2(l1,l2,na),l2 = 0,MIN(9,L2Maxm))
-99030          FORMAT (F9.4,10E15.7)
+C               WRITE (3,99030) ANGler(na), xsig1(l1,na),
+C     &                         (xsig2(l1,l2,na),l2 = 0,MIN(9,L2Maxm))
+C99030          FORMAT (F9.4,10E15.7)
             ENDDO
-            WRITE (3,99035)
-99035       FORMAT ()
+C           WRITE(3,*)
          ENDDO
-         CLOSE (3)
+C        CLOSE (3)
       ENDIF
       END
 C
