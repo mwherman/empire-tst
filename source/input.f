@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2471 $
+Ccc   * $Rev: 2483 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 08:34:54 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-07 17:23:00 +0100 (Di, 07 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3316,18 +3316,15 @@ C
       WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
       irun = 0
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A1)',END=150) name(1:1)
+      READ (5,'(A1)',END=150,ERR=160) name(1:1)
       IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
      &    .EQ.'!') GOTO 100
 
       BACKSPACE (5)
       IF(name(1:1).eq.'@') THEN 
         READ(5,'(A72)') rtitle ! read running title
- 
         rtitle(1:1)=' '
-
         if(EMPtitle(1:5).ne.'     ' .and. FIRst_ein) GOTO 100
-
         write(*,*) '***',trim(rtitle)
         WRITE( 8,*)'***************************************************'
         write( 8,*)'***',trim(rtitle)
@@ -3335,7 +3332,7 @@ C
         GOTO 100  ! next line
       ENDIF
 
-      READ (5,'(A6,G10.5,4I5)',END=150) name, val, i1, i2, i3, i4
+      READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name, val, i1, i2, i3, i4
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
 C-----------Print some final input options
@@ -7252,6 +7249,11 @@ C
   150 WRITE (*,*) ' WARNING: END OF INPUT FILE REACHED !' 
       WRITE (8,*) ' WARNING: END OF INPUT FILE REACHED !' 
       RETURN
+C
+  160 WRITE (*,*) ' WARNING: ERROR IN INPUT FILE !' 
+      WRITE (8,*) ' WARNING: ERROR IN INPUT FILE !' 
+      WRITE (8,*) name
+      GOTO 100
 C
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
