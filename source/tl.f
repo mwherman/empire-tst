@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2455 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-06 23:14:59 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2464 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-07 04:39:17 +0100 (Di, 07 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -868,8 +868,6 @@ C
       OMEmin(Nejc,Nnuc) = EEMin
       OMEmax(Nejc,Nnuc) = EEMax
 C     IRElat(Nejc,Nnuc) = IREl
-C     xmas_nejc = AEJc(Nejc) + XMAss_ej(Nejc)/AMUmev
-C     xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
       xmas_nejc = EJMass(Nejc)
       xmas_nnuc = AMAss(Nnuc)
 C
@@ -2139,7 +2137,6 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
 C
 C-----Estimating absorption cross section from obtained TLs
 C
-C     xmas_nnuc = A(Nnuc) + XMAss(Nnuc)/AMUmev
       xmas_nejc = EJMass(Nejc)
       xmas_nnuc = AMAss(Nnuc)
       elab = EINl
@@ -2558,6 +2555,9 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER INT, NINT
+	LOGICAL inc_channel
+
+      inc_channel = .false.
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -2634,9 +2634,11 @@ c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
       xmas_nejc = EJMass(Nejc)
-      xmas_nnuc = (A(Nnuc)*AMUmev + XMAss(Nnuc))/AMUmev
+      xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
+
       IF (El.LT.0.D0) THEN
+	   inc_channel = .true.
          El = DABS( - El)
          elab = El
          ikey = -1
@@ -3107,6 +3109,11 @@ C
 C
 C-----Running ECIS06
 C
+      IF(inc_channel .and. Inlkey.NE.0) 
+     >  write (*,*) '  Running ECIS (vibr) ...'
+      IF(inc_channel .and. Inlkey.EQ.0) 
+     >  write (*,*) '  Running ECIS (sphe) ...'
+
       CALL ECIS('ecis06 ')
 
       IF (Inlkey.EQ.0) THEN
@@ -3202,6 +3209,9 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER INT, NINT
+	LOGICAL inc_channel
+
+      inc_channel = .false.
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -3283,6 +3293,7 @@ C        ECIs2(40:40) = 'T'
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 C-----From cms system to Lab (ECIS do inverse convertion)
       IF (El.LT.0.D0) THEN
+	   inc_channel = .true.
          El = DABS( - El)
          elab = El
          ikey = -1
@@ -3726,8 +3737,11 @@ C
       ELSE
         iwin = PIPE('copy ecVIBROT.inp ecis06.inp >NUL')
       ENDIF
+
 C-----Running ECIS
+      IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
       CALL ECIS('ecis06 ')
+
       IF (npho.GT.0) THEN
 C        CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out')
          IF (IOPsys.EQ.0) THEN
@@ -3758,8 +3772,9 @@ C
 C     -------------------------------------------------------------
 C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
 C     |        calculation of transmission coefficients in        |
-C     |        the soft rotor model                               |
-C     |    R.Capote  05/2011                                      |
+C     |        the soft/rigid rotor model                         |
+C     |    R.Capote  05/2011 OPTMAN v10,v11                       |
+C     |    R.Capote  02/2012 OPTMAN v12                           |                                     |
 C     -------------------------------------------------------------
 C
 C     ****
@@ -3806,6 +3821,9 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER NINT
+	LOGICAL inc_channel
+
+      inc_channel = .false.
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -3828,6 +3846,7 @@ C     angstep = 2.5
       xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
       IF (El.LT.0.D0) THEN
+         inc_channel = .true.
          El = DABS( - El)
          elab = El
          ikey = -1
@@ -3993,12 +4012,16 @@ C-------LMaxCC   = maximum L in multipole decomposition
       endif
 
 C     write(1,'(9I3)') ncol  ,ne,npd,las,mtet   ,90,200,180,0
-      write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,1  ! KODMA = 1
+C     write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,1  ! KODMA = 1
+C
+C     KODMA 0 needed as coupled states are not ordered
+C
+      write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,0  ! KODMA = 0
 
       write(1,'(6e12.5)') elab
       if(ZEJc(Nejc).gt.0) then
         write(1,'(36I2.2)') 1
-      ANGles(1) = 0.5d0
+        ANGles(1) = 0.5d0
       else
         write(1,'(36I2.2)') 0
       endif
@@ -4036,12 +4059,16 @@ C           endif
         endif
       endif
 
+C     This line is new for OPTMAN v.12 (from November 2011)
+C     Flags for inclusion of resonances
+      write(1,'(I3)') 0   ! no resonances are considered
+
 C     Ef=dble(int(100000*efermi))/100000
       Ef=EEFermi(Nejc,Nnuc)
       if(pot(1,1,18).ne.0.) Ef=pot(1,1,18) + pot(1,1,19)*atar
 C     Ef=dble(int(100000*(pot(1,1,18) + pot(1,1,19)*atar)))/100000
 
-      write(1,'(6e12.5)') xmas_nejc,SEJc(Nejc),xmas_nnuc,Z(0),Ef,Ef
+      write(1,'(6g12.5)') xmas_nejc,SEJc(Nejc),xmas_nnuc,Z(0),Ef,Ef
 
       rc = RCOul(Nejc,Nnuc)
       ac = ACOul(Nejc,Nnuc)
@@ -4055,7 +4082,7 @@ C     All others potentials are calculated at a fixed energy,
 C     therefore loop over incident energies is needed. 
 C
 C     if(imodel.eq.3 .or. (idr.ne.0 .and. imodel.eq.1)) then 
-      write(1,'(6e12.5)')
+      write(1,'(6g12.5)')
 C               Vr0                         Vr1       
      +    pot(1,1,14)+pot(1,1,15)*iatar, -pot(1,1,3)-pot(1,1,4)*iatar, 
 C               Vr2                         Vr3      
@@ -4063,28 +4090,28 @@ C               Vr2                         Vr3
 C          VRLA         ALAVR  
      +    pot(1,1,16), pot(1,1,17)
 
-      write(1,'(6e12.5)')  0.d0, 0.d0, 0.d0, 
+      write(1,'(6g12.5)')  0.d0, 0.d0, 0.d0, 
 C                        W0       
      +    pot(4,1,1) +pot(4,1,7)*iatar +pot(4,1,9)*iatar**(-1.d0/3.d0), 
 C            Bs          Cs
      +    pot(4,1,6), pot(4,1,2)    
 
-      write(1,'(6e12.5)')  0.d0, 0.d0, 0.d0, 
+      write(1,'(6g12.5)')  0.d0, 0.d0, 0.d0, 
 C             Av=b(2,j,6)                  Bv=b(2,j,7)
      +    pot(2,1,1)+pot(2,1,2)*iatar, pot(2,1,3)+pot(2,1,4)*iatar, 0.d0    
 
-      write(1,'(6e12.5)')
+      write(1,'(6g12.5)')
 C               Vso                        Lso                   
      +     pot(5,1,10)+pot(5,1,11)*iatar, pot(5,1,12), 0.d0, 0.d0, 
 C                 Wso        Bso
      +     pot(6,1,1), pot(6,1,3)
          
 C                                                   nv
-      write(1,'(6e12.5)')  RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
+      write(1,'(6g12.5)')  RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
      &                           pot(2,1,13), AVOm (Nejc,Nnuc), 0.d0    
-      write(1,'(6e12.5)') RWOm(Nejc,Nnuc) ,   AWOm (Nejc,Nnuc), 0.d0,
+      write(1,'(6g12.5)') RWOm(Nejc,Nnuc) ,   AWOm (Nejc,Nnuc), 0.d0,
      &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0          
-      write(1,'(6e12.5)')1.d0, 1.d0, 0.d0 , 
+      write(1,'(6g12.5)')1.d0, 1.d0, 0.d0 , 
      &                    RVSo(Nejc,Nnuc) ,   AVSo (Nejc,Nnuc), 0.d0                
 
         Ccoul = 0.d0
@@ -4092,19 +4119,23 @@ C                                                   nv
      +        Ccoul =  pot(1,1,9)*1.73/rc
         if(izproj.gt.0 .and. mecul.eq.3) Ccoul =  pot(1,1,25)
 
-      write(1,'(6e12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0                      
-      write(1,'(6e12.5)')
+      write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0                      
+      write(1,'(6g12.5)')
 C                 Cviso          Cwiso                      Ea
      +    abs(pot(1,1,20)),abs(pot(4,1,8)), 0.d0, pot(2,1,21)
 
       AlphaV = pot(2,1,22)
       if(pot(2,1,21).ne.0.d0 .and. AlphaV.eq.0.d0) AlphaV=1.65d0
 
-C       This line is new for OPTMAN v.10 (from March 2008)
-      write(1,'(6e12.5)') AlphaV, 0.d0
+C     This line is new for OPTMAN v.10 (from March 2008)
+C     Modified for OPTMAN v.12 
+      write(1,'(6g12.5)') AlphaV, 0.d0, 0.d0, 0.d0, 0.d0, 0.d0
+
+C     This line is new for OPTMAN v.12 (from November 2011)
+      write(1,'(6g12.5)') 0.d0, A(Nnuc)
 
       if(meham.eq.1) ! rigid rotor
-     +  write(1,'(6e12.5)') (D_Def(1,k),k = 2,IDEfcc,2) 
+     +  write(1,'(6g12.5)') (D_Def(1,k),k = 2,IDEfcc,2) 
 
       close(1) 
 C
@@ -4112,19 +4143,12 @@ C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
+      IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
       IF (IOPsys.EQ.0) THEN
-C        CALL OPTMAN('ecis06')
-         ctmp = '$EMPIREDIR/source/optmand'
-         iwin = PIPE(ctmp)
-C        ctmp = 'mv ecis06.out ECIS_VIB.out'
-C        iwin = PIPE(ctmp)
-         ctmp = 'rm OPTMAN.INP'
+         ctmp = trim(empiredir)//'/source/optman'
          iwin = PIPE(ctmp)
       ELSE
-C        CALL OPTMAN('ecis06')
-         iwin = PIPE('optmand')
-         iwin = PIPE('move ecis06.out OPTMAN_SOFT.out >NUL')
-         iwin = PIPE('del optman.inp >NUL')
+         iwin = PIPE('optman-windows.exe')
       ENDIF
 
       RETURN
