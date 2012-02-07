@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2466 $
+Ccc   * $Rev: 2471 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 04:52:16 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-07 08:34:54 +0100 (Di, 07 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -140,7 +140,7 @@ C       starting seed is used
         Call R250Init(iseed)
       endif
 
-      IF (EIN.EQ.0.0D0) THEN
+      IF (EIN.EQ.0.0D0) THEN	! EIN IF BLOCK (I)
 C
 C--------default input parameters (skipped in non-first-energy calculation)
 C
@@ -1267,6 +1267,27 @@ c         ENDIF
          ENDIF
 
 C--------input consistency check  *** done ***
+         IF (NENdf.eq.0) THEN          
+            NPRIm_g = 0
+            WRITE (8,
+     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
+              WRITE (12,
+     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
+            RECoil = 0.d0
+            WRITE (8,
+     &'('' Recoils are not calculated as ENDF formatting is turned off''
+     &)')
+              WRITE (12,
+     &'('' Recoils are not calculated as ENDF formatting is turned off''
+     &)')
+         ENDIF 
+
+      ENDIF  ! END of EIN endif block (I)
+
+C************************************************************************
+C------PE model matrix initialization
+C      This block is always executed for all energies so
+C      preequilibrium models can be mixed/reset during calculations
 C
 C--------setup model matrix (IDNa) defining which model is used where
 C                      ECIS   MSD   MSC           HMS   PCROSS
@@ -1289,11 +1310,11 @@ C
 C--------with x=1 if used and x=0 if not.
 C
 C--------initialize matrix with 0's
-         DO i = 1, NDREGIONS   !over ejectiles/regions
-            DO j = 1, NDMODELS !over models in the order as above
-               IDNa(i,j) = 0
-            ENDDO
+      DO i = 1, NDREGIONS   !over ejectiles/regions
+         DO j = 1, NDMODELS !over models in the order as above
+            IDNa(i,j) = 0
          ENDDO
+      ENDDO
 C--------set ECIS (.,1)
          IF (DIRect.GT.0 ) THEN
             IF (NPRoject.EQ.1) THEN
@@ -1306,11 +1327,12 @@ C--------set ECIS (.,1)
                IDNa(12,1) = 1  ! deut  discrete
             ELSEIF (NPRoject.EQ.5) THEN
                IDNa(13,1) = 1  ! trit  discrete
-            ELSEIF (NPRoject.EQ.2) THEN
+            ELSEIF (NPRoject.EQ.6) THEN
                IDNa(14,1) = 1  ! He-3  discrete
             ENDIF
          ENDIF
 C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
+
          IF (MSD.EQ.1 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
             IF (NPRoject.EQ.1) THEN
                IF (DIRect.EQ.0) IDNa(1,2) = 1
@@ -1335,7 +1357,9 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
             IDNa(4,3) = 1
             IF (GST.GT.0) IDNa(5,3) = 1
 C-----------stop MSC charge-exchange if DDHMS or PCROSS active
-            IF (LHMs.GT.0 .OR. PEQc.GT.0.) THEN
+C           IF (LHMs.GT.0 .OR. PEQc.GT.0.) THEN
+C-----------stop MSC charge-exchange if PCROSS active
+            IF (               PEQc.GT.0.) THEN
                IF (NPRoject.EQ.1) THEN
                   IDNa(4,3) = 0
                ELSE ! (NPRoject.EQ.2) 
@@ -1351,31 +1375,15 @@ C--------set HMS  (.,5)
             IDNa(4,5) = 1
 C-----------stop HMS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-              IF (NPRoject.EQ.2) THEN
-                IDNa(3,5) = 0
-                IDNa(4,5) = 0
-              ELSE ! (NPRoject.EQ.1) 
-                  IDNa(1,5) = 0
-                IDNa(2,5) = 0
-              ENDIF
+              WRITE (8,*)
+     &             'WARNING: HMS DISABLED AS MSC/MSD ARE ACTIVE '
+              LHMs = 0
+              IDNa(1,5) = 0  ! neutron discrete levels
+              IDNa(2,5) = 0
+              IDNa(3,5) = 0  ! proton  discrete levels
+              IDNa(4,5) = 0
             ENDIF
          ENDIF
-
-         IF (NENdf.eq.0) THEN          
-            NPRIm_g = 0
-            WRITE (8,
-     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
-              WRITE (12,
-     &'('' Primary gammas not stored: ENDF formatting is turned off'')')
-            RECoil = 0.d0
-            WRITE (8,
-     &'('' Recoils are not calculated as ENDF formatting is turned off''
-     &)')
-              WRITE (12,
-     &'('' Recoils are not calculated as ENDF formatting is turned off''
-     &)')
-         ENDIF 
-C
 C--------check if PCROSS active
 C
          IF (PEQc.eq.0.d0) THEN
@@ -1519,7 +1527,11 @@ C----------------------------------------------------------
          WRITE(12,'('' He-3  disc. '',8I7)')
      &     (IDNa(14,j),j = 1,3),(IDNa(14,j),j = 5,NDMODELS)
          WRITE(12,*) ' '
-C--------model matrix *** done ***
+C
+C------PE model matrix initialization done
+C************************************************************************
+
+      IF (FIRst_ein) THEN	! EIN IF BLOCK (II)
 
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
@@ -1549,8 +1561,9 @@ C--------READ shell corrections of RIPL
 C--------Read number of reasonably known levels and level density parameter 'a'
          CALL READLDP
 C--------fix-up deformations for CCFUS coupled channels
-         IF (CSRead.EQ.( - 2.0D0) .AND. AEJc(0).GT.4.0D0) THEN
-C-----------fix-up deformations and discrete levels for CCFUS
+C        IF (CSRead.EQ.( - 2.0D0) .AND. AEJc(0).GT.4.0D0) THEN
+         IF (                           AEJc(0).GT.4.0D0) THEN
+C-----------fix-up deformations and discrete levels for CCFUS (for all HI reactions)
             ierr = IFindColl_CCFUS()
 
             DO j = 1, NSCc
@@ -1609,7 +1622,7 @@ C--------fix-up deformations for coupled channels *** done ***
             ENDDO
          ENDDO
 
-      ENDIF  ! END of EIN endif block
+      ENDIF  ! END of EIN endif block (II)
 
       NLW = NDLW
       CSFus = CSRead

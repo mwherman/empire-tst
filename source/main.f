@@ -1,6 +1,6 @@
-cc   * $Rev: 2450 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-06 21:29:16 +0100 (Mo, 06 Feb 2012) $
+cc   * $Rev: 2471 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-07 08:34:54 +0100 (Di, 07 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -60,7 +60,7 @@ C
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), totsp,
-     &                 totemis, weight, xcse, xizat, xnl, xnor,
+     &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
 C                      -----------------------------------------------
@@ -794,6 +794,7 @@ C        xsinl is calculated by MSD
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis,xsinl)
       ENDIF          ! PCRoss done
+
       IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. nejcec.gt.0
      &    .AND. NREs(nejcec).GE.0 ) THEN
 C--------Print inelastic PE double differential cross sections
@@ -945,57 +946,26 @@ C----------Add PE contribution to the total NEJC emission
          ENDDO
       ENDIF
 
-C***************** OLD *************************************
-
-C--------add MSD contribution to the residual nucleus population
-C--------locate residual nucleus after MSD emission
-c        ares = A(1) - AEJc(nejc)
-c        zres = Z(1) - ZEJc(nejc)
-c        izares = INT(1000.0*zres + ares)
-c        CALL WHERE(izares, nnur, iloc)
-c        IF(iloc.EQ.1)THEN
-c           WRITE(6, *)' RESIDUAL NUCLEUS WITH A=', ares, ' AND Z=',
-c    &                 zres, ' HAS NOT BEEN INITIALIZED'
-c           WRITE(6, *)' EXECUTION STOPPED'
-c           STOP
-c        ENDIF
-
-C--------second chance preequilibrium emission after MSD emission
-C--------neutron emission (probably could be used for HMS implementation)
-c        izares = INT(1000.0*Z(nnur) + A(nnur) - 1)
-c        CALL WHERE(izares, nnurn, iloc)
-c        IF(iloc.EQ.0)CALL SCNDPREEQ(nnur, nnurn, 1, 0)
-c        IF(iloc.EQ.0 .AND. IOUt.GT.3)CALL AUERST(nnur, 1,0)
-C--------proton emission
-c        izares = izares - 1000
-c        CALL WHERE(izares, nnurp, iloc)
-c        IF(iloc.EQ.0)THEN
-c           CALL SCNDPREEQ(nnur, nnurp, 2, 1)
-c           IF(IOUt.GT.3)CALL AUERST(nnur, 2,0)
-c        ELSE
-c           CALL SCNDPREEQ(nnur, nnurp, 2, 2)
-c        ENDIF
-C--------second chance preequilibrium *** done ***
-C--------
-C--------HMS Monte Carlo preequilibrium emission
-C--------        
-         IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
-            xizat = IZA(0)
-            CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
+      tothms = 0.d0
+C-----
+C-----HMS Monte Carlo preequilibrium emission
+C-----        
+      IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
+         xizat = IZA(0)
+         CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
      &             CSFus*corrmsd,CHMs,DE,DERec,FHMs,NHMs,QDFrac,
      &                 0,1,0,icalled)
-            icalled = 1
-c            CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
-c            CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
-            WRITE (8,
+         icalled = 1
+c        CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
+c        CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
+         WRITE (8,
      &        '('' HMS inclusive neut. emission ='',G12.5,
-     &          ''mb'')') CSHms(1,0)
-            WRITE (8,
+     &        ''mb'')') CSHms(1,0)
+         WRITE (8,
      &        '('' HMS inclusive prot. emission ='',G12.5,
      &          ''mb'')') CSHms(2,0)
-         totemis = CSHms(1,1) + CSHms(2,1)
-         ENDIF
-
+         tothms = CSHms(1,1) + CSHms(2,1) 
+      ENDIF
 C-----
 C-----PE + DWBA cont. *** done ***
 C-----
@@ -2937,7 +2907,7 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         if(FCCred.ne.1)
      &  WRITE (8,'('' * Direct collective cross section scaled by '',
      &  G12.5)') FCCred
-         WRITE (8,'('' ********************************************'',
+        WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
         IF (INT(ZEJc(0)).EQ.0) THEN
@@ -2971,6 +2941,7 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         ENDIF
 
       ENDIF
+
       IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)
      &  .GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont)) THEN
         WRITE (8,*)
@@ -2993,6 +2964,10 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      & 100.d0*abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*TOTcorr)/
      &                 (TOTred*TOTcs*TOTcorr)
       ENDIF
+
+      WRITE (8,*)
+      WRITE (8,*) '+++++'
+      WRITE (8,*)
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----

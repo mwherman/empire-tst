@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2471 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-07 08:34:54 +0100 (Di, 07 Feb 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3184,15 +3184,19 @@ C
 C     Discrete levels not used for alpha (please do not include levels into
 C                   continuum for alpha emission)
 C
-C     IF (Nejc.eq.0 .or. Nejc.gt.2) return
-      IF (Nejc.eq.1 .and. IDNa(1,2).EQ.0 .and. IDNa(1,6).EQ.0 ) return
-      IF (Nejc.eq.2 .and. IDNa(3,2).EQ.0 .and. IDNa(3,6).EQ.0 ) return
+      IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.0 ) return
+      IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.0 ) return
 
-      IF (Nejc.eq.0 .and. IDNa(1,2).EQ.0 ) return ! Skipping discrete gammas if MSC not active 
-      IF (Nejc.eq.3 .and. IDNa(11,6).EQ.0 ) return
-      IF (Nejc.eq.4 .and. IDNa(12,6).EQ.0 ) return
-      IF (Nejc.eq.5 .and. IDNa(13,6).EQ.0 ) return
-      IF (Nejc.eq.6 .and. IDNa(14,6).EQ.0 ) return
+      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 ) return
+      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 ) return
+C     IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 ) return ! 
+
+      IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 ) return
+      IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa(3,6).EQ.0 ) return
+      IF (Nejc.eq.3 .and. PEQc.GT.0 .and. IDNa(11,6).EQ.0 ) return
+      IF (Nejc.eq.4 .and. PEQc.GT.0 .and. IDNa(12,6).EQ.0 ) return
+      IF (Nejc.eq.5 .and. PEQc.GT.0 .and. IDNa(13,6).EQ.0 ) return
+      IF (Nejc.eq.6 .and. PEQc.GT.0 .and. IDNa(14,6).EQ.0 ) return
 C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
@@ -3240,13 +3244,18 @@ C
          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
 C        Setting it to zero to delete discrete spectra before redistributing 
          IF (ENDf(1).GT.0) then
-           if( IDNa(1,6).GT.0 .and. Nejc.eq.1 ) CSEmsd(ie,Nejc) = 0.d0
-           if( IDNa(3,6).GT.0 .and. Nejc.eq.2 ) CSEmsd(ie,Nejc) = 0.d0
+           if( IDNa(1,2).GT.0 .and. MSD .GT.0 .and. Nejc.eq.1 ) 
+     >       CSEmsd(ie,Nejc) = 0.d0
+           if( IDNa(3,2).GT.0 .and. MSD .GT.0 .and. Nejc.eq.2 ) 
+     >       CSEmsd(ie,Nejc) = 0.d0
+           if( IDNa(1,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.1 ) 
+     >       CSEmsd(ie,Nejc) = 0.d0
+           if( IDNa(3,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.2 ) 
+     >       CSEmsd(ie,Nejc) = 0.d0
            if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
 	   ENDIF
        ENDDO
        csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
-
 C
 C
 C      Inelastic channel
