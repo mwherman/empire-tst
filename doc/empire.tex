@@ -38,7 +38,7 @@
 %  \setlength{\labelsep}{\textwidth}
 %}
 %{\endlist}
-\usepackage{enumitem}
+%sin\usepackage{enumitem}
 %\setdescription{labelsep=\textwidth}
 
 \begin{document}
@@ -266,12 +266,12 @@ by V. Zerkin~\cite{ZVView}.
 covariances using Monte Carlo (parameter uncertainties must be specified 
 in the input file).
 \item [{\textbf{cs2zvd}}] Produces zvd plots of cross sections directly from EMPIRE output without ENDF-6 formatting.
-\item [{\textbf{endf33zvd}}] Produces three-dimensional zvd plots of covariances (written by by V. Zerkin).
+\item [{\textbf{endf33zvd}}] Produces three-dimensional zvd plots of covariances (written by V. Zerkin).
 \item [{\textbf{IO}}] Set of f90 modules for reading and writing  ENDF-6 files (written by S. Hoblit).
 \item [{\textbf{KALMAN}}] KALMAN code for generating covariances and fitting experimental data (written by T. Kawano).
 \item [{\textbf{KERCEN}}] C++ code for generating covariances in the resonance region using kernel approximation method to be executed as a standalone code (written by Young-Sik Cho).
 \item [{\textbf{MRGMAT}}] Code for merging ENDF-6 files for different materials into a single file.
-\item [{\textbf{PLTSENMAT}}] Produces zed plot of cross section sensitivity to model parameters (written by G. Nobre).
+\item [{\textbf{PLTSENMAT}}] Produces zvd plot of cross section sensitivity to model parameters (written by G. Nobre).
 \item [{\textbf{RESONANCE}}] Resonance module for extracting data from the Atlas of Neutron Resonances and producing ENDF-6 formatted resonance file with covariances (written by Young-Sik Cho).
 \item [{\textbf{STAN}}] Modern f90 replacement for STANEF (written by S. Hoblit).
 \end{description}
@@ -302,12 +302,12 @@ coefficients $T_{l}^{a}(\epsilon)$ using the expression
 and $S$ indicate projectile, target, compound nucleus, and channel
 spin, respectively, and $l$ is the orbital angular momentum of the
 projectile $a$. The function $f(l,\pi)$ ensures parity conservation.
-It is unity if $p*P*(-1)^{l}=\pi$ and zero otherwise. Here $p,\, P,$
+It is unity if ~~$p*P*(-1)^{l}=\pi$ and zero otherwise. Here $p,\, P,$
 and $\pi$ are projectile, target, and compound nucleus parities and
 $\epsilon$ and $U$ stand for the projectile and compound nucleus
 energy. 
 
-For projectiles with mass numbers A<5 the transmission coefficients
+For projectiles with mass numbers $A<5$ the transmission coefficients
 entering Eq.~\ref{fusion} are calculated using optical model routine
 ECIS06\cite{ECIS} unless an external file FUSION exists. In the latter
 case, the spin distribution of the Compound Nucleus is constructed
@@ -397,7 +397,7 @@ In the latter two cases the transmission coefficients are assumed
 to be of the form
 
 \begin{equation}
-T_{l}^{a}(\epsilon)=\frac{1}{1+exp(-\frac{l_{cr}-l}{\delta l})}\,,\label{Tlfus}
+T_{l}^{a}(\epsilon)=\frac{1}{1+\exp(-\frac{l_{cr}-l}{\delta l})}\,,\label{Tlfus}
 \end{equation}
 
 
@@ -506,9 +506,57 @@ by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.c
 .
 \end{description}
 
-\section{Coupled-Channels Code OPTMAN   UPDATE!!!}
+\section{Coupled-Channels Code OPTMAN}
+For more than twenty years, an original coupled-channels optical model code
+OPTMAN has been developed at Joint Institute of Energy and Nuclear Research
+to investigate nucleon-nucleus interaction mechanisms and as a basic tool
+for nuclear data evaluation for reactor design and other applications, being 
+widely used in BROND-2 evaluations~\cite{Blokhin91}. In addition to standard
+rigid rotator and harmonic vibrator coupling schemes encoded in widely-used 
+ECIS \cite{Raynal70} code (which is already included in EMPIRE), 
+level-coupling schemes based on a non-axial soft-rotator model are included for 
+even-even nuclei in OPTMAN. This allows accounting of stretching of soft
+nuclei by rotations, which results in change of equilibrium deformations for
+excited collective states compared with that of the ground state.
 
-(to be completed)
+Calculations with OPTMAN are now possible both for neutrons and protons as
+the projectile, and the upper incident nucleon energy is extended up to 200 MeV
+\cite{tsukuba}. Current version of soft-rotator model of
+OPTMAN takes into account the non-axial quadrupole, octupole and
+hexadecapole deformations, and $\beta _{2}$, $\beta _{3}$ and $\gamma -$%
+vibrations with account of nuclear volume conservation. With this option,
+OPTMAN is able to analyze the collective level structure, E2, E3, E4 $\gamma
+-$transition probabilities and reaction data in a self-consistent manner.
+OPTMAN can be applied not only to heavy rotational nuclei  \cite{sukhjnst00,
+sukhnd2001U8}, but can be also applied
+very successfully even to a very light nucleus, namely $^{12}$C \cite%
+{chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
+vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite%
+{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. many of those soft-rotor
+potentials are available within the RIPL library, being therefore available for EMPIRE 
+calculations, once OPTMAN was included. 
+
+Since 2005 the main efforts in the development of the OPTMAN code were
+devoted to the improvement of the optical model formalism. Dispersion 
+relationships between imaginary and real parts of the
+optical potential were included \cite{socaqu05,casoqu05}, allowing to decrease 
+significantly the number of optical parameters used. We also extended the OPTMAN code
+allowing for calculations of the (p,n) cross sections with excitation of isobaric analog
+states and therefore, making possible to derive Lane consistent potentials including a 
+new Lane-consistent Coulomb correction. 
+
+A complete OPTMAN\ code's manual \cite%
+{OPTMANmanual2005} and its newest extension \cite{OPTMANmanual2008} give details
+of the soft-rotator theory, physical ideas and computation algorithms developed
+and incorporated into OPTMAN code, and description of input and output files, 
+allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
+amy consult those documents. OPTMAN is called as an independent module by EMPIRE; 
+EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing channels. 
+
+
+The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
+withint the EMPIRE system allowing the use of state-of-the-art optical model potentials
+based on soft-rotor couplings in EMPIRE theoretical modeling.
 
 \section{Photoabsorption}
 
@@ -977,7 +1025,7 @@ in a global way the internal nuclear dissipation of the model states
 is parametrized as
 
 \begin{equation}
-\Gamma_{\alpha}^{\downarrow}=\Gamma_{0}(\frac{1}{1+exp((E_{\alpha}-E_{thr})/a)}-\frac{1}{1+exp((-E_{\alpha}-E_{thr})/a)})\end{equation}
+\Gamma_{\alpha}^{\downarrow}=\Gamma_{0}(\frac{1}{1+\exp((E_{\alpha}-E_{thr})/a)}-\frac{1}{1+\exp((-E_{\alpha}-E_{thr})/a)})\end{equation}
 an odd function of $E_{\alpha}$. The parameters $\Gamma_{0},\, E_{thr},\, a$
 are taken equal to the width and energy of the giant dipole resonance.
 The maximum $l$-transfer $\lambda$ is internally set between 1 and
@@ -1011,7 +1059,7 @@ transfers are calculated with the compressional form factor while
 the remaining ones are determined with the standard form factor. The
 extension of the original version of ORION to the compressional form
 factor for $\lambda=0$ was performed according to the suggestions
-by H. Lenske)
+by H. Lenske).
 
 The TRISTAN\index{TRISTAN} code has been modified to automate blocking
 of the shell model orbital by the unpaired nucleon. In the stand alone
@@ -1020,7 +1068,7 @@ the orbitals are reordered during the calculations two runs are necessary
 (the first one without blocking to identify a correct orbital). In
 the version of TRISTAN that is included in EMPIRE this preliminary
 calculation is performed internally, whenever necessary, and the blocking
-is set up. 
+is set up.
 
 Results of the MSD\index{MSD} calculations are sensitive to the coupling
 constants $\kappa_{\lambda}$. By default, these are determined such
@@ -1043,8 +1091,8 @@ spectra can only be calculated for the inelastic scattering . It should
 be stressed, however, that due to the collective nature of the MSD\index{MSD}
 approach, its contribution to the inelastic scattering is much bigger
 than to the charge-exchange channels and thus the latter ones can
-be calculated with the exciton model PCROSS (see Section
-\ref{PCROSS}) or Monte Carlo approach (see Section \ref{DDHMS})with
+be calculated with the exciton model PCROSS (see Section~
+\ref{PCROSS}) or Monte Carlo approach (see Section~\ref{DDHMS}) with
 reasonable accuracy.
 
 
@@ -1189,7 +1237,7 @@ The accessible state density for the $\Delta=0$ transition reads
 Y_{n}^{n} & = & Bg^{2}h\frac{\rho_{p-1,h}^{B}(U)}{\rho_{ph}^{B}(E)}\nonumber \\
  &  & +\alpha\frac{1}{2}(h+1)(h+2)\frac{g}{\rho_{ph}^{B}}\biggl[\frac{U-E+2B}{h+2}g\rho_{p-2,h+1}^{B}(U)\label{Yzero}\\
  &  & +\beta\rho_{p-2,h+2}^{B}(E-2B)-\rho_{p-2,h+2}^{B}(U)\biggr]\,,\nonumber \end{eqnarray}
-with $\alpha=1$for $E\leq2B+U,\,\,\beta=1$ for $E>2B$, and both
+with $\alpha=1$ for $E\leq2B+U,\,\,\beta=1$ for $E>2B$, and both
 equal to 0 elsewhere. The density of states available for the creation
 of the particle-hole pair is
 
@@ -1206,7 +1254,7 @@ Y_{n}^{n+1}\downarrow & = & g\frac{(h+1)(h+2)}{\rho_{ph}^{B}(E)}\biggl\{\frac{1}
 \noindent with $\alpha$ equal 1 for $E>B$ and 0 for $E\leq B$. 
 
 
-\subsection{$\gamma$-emission in Multi-step Compound}
+\subsection{Gamma-emission in Multi-step Compound}
 
 The emission of $\gamma$ in the Multi-step Compound\index{MSC} mechanism
 is treated in terms of the model proposed by Hoering and Weidenmueller
@@ -1291,7 +1339,7 @@ $^{16}$O, on the other hand, 90\% of the width is due to the decay
 width \cite{BBB83}. This separation can be entered into the calculations
 as an input parameter. The result depends only weakly on this coefficient.
 The level densit\index{p-h level density}ies $\rho_{Mm}^{J,\pi}(E)$
-for m=1,2,3 are given by the exciton level densities $\rho_{M-1}^{(J-1),-\pi}(E-E_{GDR})$,
+for $m$ = 1, 2, 3 are given by the exciton level densities $\rho_{M-1}^{(J-1),-\pi}(E-E_{GDR})$,
 $\rho_{M-1}^{J,-\pi}(E-E_{GDR})$ and $\rho_{M-1}^{(J+1),-\pi}(E-E_{GDR})$,
 respectively. These correspond to the level densities of the non-collective
 states on which GDR is built. Implicitly, all of them are for bound
@@ -1308,9 +1356,9 @@ change the angular momentum this part is diagonal in the subclass
 indices, i. e. $(\Pi^{-1})_{Mm,(M+1)m}\not=0$, only. Thus, these
 matrix elements are given by \begin{equation}
 (\Pi^{-1})_{Mm,(M+1)m}=2\pi\rho_{Mm}v_{n.c.}^{2}2\pi\rho_{Mm\rightarrow(M+1)m}^{acc},\end{equation}
-where $\rho_{Mm}^{J}(E)$, m=1,2,3, is the exciton level densit\index{p-h level densities}y
+where $\rho_{Mm}^{J}(E)$, $m$ = 1, 2, 3, is the exciton level densit\index{p-h level densities}y
 $\rho_{M-1}^{(J^{\prime},-\pi)}(E-E_{GDR})$ with $J^{\prime}=(J-1),J,(J+1)$
-$\rho_{Mm\rightarrow(M+1)m}^{acc}(E)$, m=1, 2, 3 are the accessible
+$\rho_{Mm\rightarrow(M+1)m}^{acc}(E)$, $m$ = 1, 2, 3 are the accessible
 state densities $\rho_{(M-1),J\rightarrow M,J^{\prime}}^{acc}(E-E_{GDR})$
 with $J^{\prime}=(J-1),\,,J,\,(J+1)$, respectively. $v_{n.c.}$ stands
 for the average transition matrix element between two non-collective
@@ -1341,7 +1389,7 @@ to have the required energy $\epsilon$ within the configuration with
 the total exciton number $(p+h)$ is given by \begin{equation}
 P(\epsilon)=N\frac{\rho(p,h-1,E-\epsilon)}{\rho(p,h,E)},\end{equation}
 where $\rho(p,h-1,E-\epsilon)$ is the level density\index{p-h level densities}
-of the remaining excitons after removing a hole of the energy $\epsilon$.
+of the remaining excitons after removing a hole of the energy $\epsilon$ and
 $\rho(p,h,E)$ is the total level density at energy $E$ for $(p+h)$
 excitons. $N$ is the normalization constant. \begin{equation}
 \frac{1}{N}=\int_{0}^{E}\frac{\rho(p,h-1,E-\epsilon)}{\rho(p,h,E)}d\epsilon=\frac{\rho(p,h-1,E)}{\rho(p,h,E)(p+h-1)}.\end{equation}
@@ -1826,7 +1874,7 @@ the continuum contribution from the MSD is retained.
 To avoid double-counting when combining different models EMPIRE applies
 the following priorities:
 
-\begin{description
+\begin{description}
 \item [{ECIS06\index{ECIS}}] provides inelastic scattering to collective
 levels independently of the settings for the remaining models. 
 \item [{MSD\index{MSD}}] provides inelastic continuum independently of
@@ -1847,7 +1895,7 @@ to the continuum if these are not provided by any of the above listed
 models. Provides $\gamma$-emission if not suppressed by $\gamma$-emission
 from MSC. Provides preequilibrium emission of clusters independently
 of settings for other models.
-\end{description
+\end{description}
 This scheme allows the user to activate any combination of reaction
 mechanisms while the code ensures the internal consistency of calculations.
 Overlapping contributions from various models are summed up and the
@@ -2278,14 +2326,14 @@ Alternatively can be used the general form given by Eq. \ref{apiccoloGC} which
 accounts for the shell effects, and their fade-out
 with increasing energy.
 The three relevant systematics available in EMPIRE are:
-\begin{description
+\begin{description}
 \item[Ignatyuk~\emph{et al.}~\cite{ignaa}]: $\widetilde{a}=0.154A+6.3\cdot10^{-5}A^{2}$
 and $\gamma=-0.054$
 \item[Arthur~\cite{arthura}]: $\widetilde{a}=0.1375A-8.36\cdot10^{-5}A^{2}$
 and $\gamma=-0.054$
 \item[Iljinov~\emph{et al.}~\cite{Mebel}]: $\widetilde{a}=0.114A+9.80\cdot10^{-2}A^{2/3}$
 and $\gamma=-0.051$
-\end{description
+\end{description}
 
 
 The spin cut-off factor $\sigma(E_x)$ is given by
@@ -2414,7 +2462,8 @@ Above $U_c$ the condensation energy is subtracted from the effective excitation 
 \begin{equation}
 U^{*}=U-E_{cond}.
 \end{equation}
-The quantities entering GSM formulation are calculated with the following expressions
+The quantities entering GSM formulation are calculated with the following
+expressions
 
 \begin{equation}
 a=\left\{\begin{array}{lr}
@@ -6246,7 +6295,7 @@ All the main processing sequences (`runE', `format', `process' and `verify') are
 % 
 % \begin{description}
 % \item [{\texttt{../source/empire}}]~
-% \end{description
+% \end{description}
 % on UNIX systems or appropriately modified on other operating systems
 % (e.g., ..\textbackslash{}source\textbackslash{}empire under DOS).
 % Successful execution will produce some or all all of the following
@@ -6309,7 +6358,7 @@ All the main processing sequences (`runE', `format', `process' and `verify') are
 % \item [{FIT.OUT}] Information on variations in optical model or deformation
 % fit parameters and the minimization of $\chi^{2}$ (only when FITOPT
 % input different from 0). 
-% \end{description
+% \end{description}
 % Disadvantage of the manual operation is that the same file names are
 % used for different runs, and the results of previous calculations
 % are overwritten. Therefore, it is difficult to keep track of various
@@ -6324,7 +6373,7 @@ All the main processing sequences (`runE', `format', `process' and `verify') are
 % The associated codes can be run in the \textbf{following} order to
 % produce the ENDF formatted file:
 % 
-% \begin{description
+% \begin{description}
 % \item [{1.}] \textbf{EMPEND\index{EMPEND}} to transform OUTPUT.DAT file
 % into the ENDF format. The following UNIX line command must be issued
 % from the \emph{work} sub-directory to achieve this objective: \\
@@ -6371,7 +6420,7 @@ All the main processing sequences (`runE', `format', `process' and `verify') are
 % \texttt{DONE }~\\
 % \texttt{EOF }~\\
 % \texttt{../util/stanef/stanef <INPUT }
-% \end{description
+% \end{description}
 % Running EMPEND\index{EMPEND}, FIXUP\index{FIXUP}, ENDRES, and STANEF
 % makes sense only if the ENDF option was selected in the EMPIRE input
 % and the calculations were performed for at least a few incident energies. 
@@ -6420,13 +6469,16 @@ extensions.%
 In the above example, EMPIRE was executed in the `empire/work' directory. In this case EMPIRE automatically finds the path to all required scripts. If the user wishes to work in other directories outside of `empire', an environment variable should be set so that the system knows where to find the required scripts and executables.
 \par
 In bash, for example, the variable may be set in any of the bash setup files (.bashrc, etc) with the line:
-\begin{verbatim}export EMPIREDIR=/path/to/empire
-\end{verbatim} \break
-On Windows, the variable should be added to the registry.
-\par
-Again, setting the EMPIREDIR variable is only required in order to run a project some place other than in a direct sub-directory of the empire installation.
+\\
+\begin{verbatim}
+export EMPIREDIR=/path/to/empire
+\end{verbatim}
+\\
+On Windows, the variable should be added to the registry.\\
+Again, setting the EMPIREDIR variable is only required in order to run a project some place other than in a
+direct sub-directory of the empire installation directory.
 
-%%%%%%%%%%%%%%% 1 %%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% 1 %%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}[top]
 \caption{\label{tab:files1}The most important files generated by EMPIRE for a given project (usually not
 all are used). User created files are marked with $\clubsuit$.}
@@ -6469,13 +6521,6 @@ processed with FIXUP and STANEF (the final ENDF file for distribution)\tabularne
 \end{tabular}
 \par\end{centering}
 \end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-%
 %%%%%%%%%%%%%%%%%% 2 %%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}[top]
 \caption{\label{tab:files2}The most important files for a given project (continuation).}
@@ -9696,10 +9741,10 @@ and closed with the GO record, which indicates the end of the input.
 In the simplest case (all defaults), only the GO record must be entered. \\
 
 Each optional record starts with an alphanumeric keyword NAME. If the first 
-character of the line (i.e. NAME(1:1)) is \*,\# or \!, then this line contains
+character of the line (i.e. NAME(1:1)) is *,# or !, then this line contains
 comments and is ignored by the code. There might be an arbitrary number of comments
 line in the optional input. If the first character of the line (i.e. NAME(1:1))
-is \@, then this line contains a title, which will be printed in EMPIRE outputs; 
+is @, then this line contains a title, which will be printed in EMPIRE outputs; 
 obviously the title is not used in any calculations. Multiple titles are allowed. 
 Users are strongly encouraged to use titles and comments in EMPIRE inputs; that will be a 
 significant step toward a better documentation of our theoretical calculations 
