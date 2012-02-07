@@ -7,7 +7,7 @@ xxx.   xx.           ;TARGET  A , Z
 1                    ;NUMBER OF DEUTERONS TO BE EMITTED
 0                    ;NUMBER OF TRITONS   TO BE EMITTED
 0                    ;NUMBER OF He-3      TO BE EMITTED
-0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+0  0. 0.            
 *********************************************************************************************************************
 * Optional input starts here
 IOUT       3.                                               
