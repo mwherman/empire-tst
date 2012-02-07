@@ -6,6 +6,8 @@ clean HI-pcross-ccfus
 clean n_eu153-dir-msc-msd 
 clean ni62-th-EGSM 
 clean n-zr92-soft--dccomp 
+clean p-th232
+clean test-HRTW-fis
 clean test-LD-mo100 
 clean test-PE-models 
 mv th232-rot-vib-lev.col temporaryfile

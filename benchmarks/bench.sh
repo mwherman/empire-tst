@@ -6,6 +6,8 @@ runE HI-pcross-ccfus
 runE n_eu153-dir-msc-msd 
 runE ni62-th-EGSM 
 runE n-zr92-soft--dccomp 
+runE p-th232
+runE test-HRTW-fis
 runE test-LD-mo100 
 runE test-PE-models 
 runE th232-rot-vib 
