@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2483 $
+Ccc   * $Rev: 2487 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 17:23:00 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-07 19:12:52 +0100 (Di, 07 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -8505,6 +8505,7 @@ c            CCFUS deformations
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
+	       IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
          ENDIF
       ENDDO
  250  IF (beta2.EQ.0.D0) THEN
@@ -8521,6 +8522,12 @@ c            CCFUS deformations
          WRITE (8,*) ' WARNING: ',
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
+
+	IF(ZEJc(0).GT.0 .and. beta3.gt.0.03) then
+        WRITE (8,*) ' WARNING: ',
+     &        '3- dynamical deformation reduced to 0.03'
+	  beta3 = max(0.03d0,beta3)
+	ENDIF
       IF(AEJc(0).LE.4) GOTO 350
       ia = AEJc(0)
       iz = ZEJc(0)
@@ -9144,6 +9151,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,'(/1x,A34/1x,A11,F7.3,A13,F7.4)')
      &           'EXPERIMENTAL DEFORMATION (RIPL):', 'BETA (2+) =',
      &          beta2, '  BETA (3-) =', beta3
+         IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
          IF (DEFormed) THEN
             WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
             WRITE (8,*)
