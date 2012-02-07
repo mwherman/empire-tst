@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2464 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 04:39:17 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Rev: 2482 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-07 17:06:05 +0100 (Di, 07 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -4145,7 +4145,7 @@ C-----Running OPTMAN
 C
       IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
       IF (IOPsys.EQ.0) THEN
-         ctmp = trim(empiredir)//'/source/optman'
+         ctmp = trim(empiredir)//'/source/optmand'
          iwin = PIPE(ctmp)
       ELSE
          iwin = PIPE('optman-windows.exe')
