@@ -52,9 +52,9 @@ C  *************************************************************
      *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
       DIMENSION TITLE(20)
 
-      DOUBLE PRECISION LFA(400),A,dtmp  
+      REAL*16 LFA(400),dtmp  
+	  DOUBLE PRECISION A
       COMMON/LOFAC/A(800)
-
 C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C     FACTORIAL CALCULATION AVOIDING A LONG DATA STATEMENT (common /LOFAC/A)
@@ -80,7 +80,6 @@ C    *0.,.693147180559945309417232D+00,0.,.179175946922805500081248D+01,
 C    *0.,.317805383034794561964694D+01,0.,.478749174278204599424770D+01,
 C    *0.,.657925121201010099506018D+01,0.,.852516136106541430016553D+01,
 C    *0.,.106046029027452502284172D+02,0.,.128018274800814696112077D+02,
-
 C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C
@@ -97,7 +96,9 @@ C       Input filename fixed to OPTMAN.INP for EMPIRE
 C       Output root filename fixed to ecis06 for EMPIRE
         fname='ecis06'  
 C       Output filename fixed to OPTMAN.OUT for EMPIRE
+
         open(unit=21,file='OPTMAN.OUT')
+
         WRITE(21,'(5x,A)')
      *  '***********************************************'
         WRITE(21,'(5x,A)')
@@ -3602,7 +3603,6 @@ C     *******************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
 C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
       DOUBLE PRECISION VL,VSL,PV,PW,WSL,PVC,PRC
-      REAL*16 CVNR,CVNRPN
       COMMON/QNS1/LNJ1(250),JNJ1(250),NNJ1(250),KPJ1(250)
      */ENA/EN,EL(20),BET(10),NUR,NMAX,NPD,LAS
       COMMON/JNN/CSS,INCC,NCLL,NSS,NJ,INCR
@@ -4283,7 +4283,7 @@ C     *******************************************************
      */FBN/FBR1(20,90),FBI1(20,90),FNR2(20,90),FNI2(20,90),FNR1(20,90),
      *FNI1(20,90),FBR2(20,90),FBI2(20,90)
      */CCMAT/CRD(180,10,200),CID(180,10,200)
-      COMMON/CV/BMR(40000),BMI(40000),ABR(40000),ABI(40000)
+      COMMON/CVINV/BMR(40000),BMI(40000),ABR(40000),ABI(40000)
       COMMON/AUK/AUR(400),AUI(400)
       COMMON/INF/INFOR
       CSS=0.
@@ -4411,7 +4411,7 @@ C     *******************************************************
       REAL*16 FR1,FR2,FI1,FI2
       REAL*16 FFR1,AB,FR
       COMMON/JNN/CSS,INCC,NCLL,NSS,NJ,INCR
-      COMMON/CV/BMR(40000),BMI(40000),ABR(40000),ABI(40000)
+      COMMON/CVINV/BMR(40000),BMI(40000),ABR(40000),ABI(40000)
       COMMON/IW/LG
      */FV/FR1(40000),FR2(40000),FI1(40000),FI2(40000)
       LG=NCLL
@@ -4780,7 +4780,6 @@ C     ***********************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
 C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
       DOUBLE PRECISION WPSL,PL,PSL,PR,PI,PVC,PRC
-      REAL*16 CVNR,CVNRPN
       COMMON/RAD/RR,RC,RD,RW,RS,AR,AC,AW,AD,AS,ALF,AT,ANEU,RZ,ZNUC,ASP
      *,AZ
       COMMON/QNS1/LNJ1(250),JNJ1(250),NNJ1(250),KPJ1(250)
@@ -9144,7 +9143,6 @@ C     *******************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
 C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       DOUBLE PRECISION PVC,PRC
-      REAL*16 CVNR,CVNRPN
       COMMON/LNP/JSS,NPIS,NPIO,JSO,NN1,LNO(180),NS1(180),JNO(180),NSPI
       COMMON/QNB/JO(20),NPO(20),KO(20),NCA(20)
      */QNBBAND/NUMB(20),BETB(20)                                  
