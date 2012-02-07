@@ -42,7 +42,7 @@ up:
 
 upall: up all 
 
-IZPACK = /home/dbrown/Projects/Current/IzPack
+IZPACK = $(HOME)/Projects/Current/IzPack
 
 
 release: 
