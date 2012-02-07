@@ -1,0 +1,42 @@
+  0.001              ;INCIDENT ENERGY (IN LAB)
+100.   42.           ;TARGET  A , Z 
+  1.    0.           ;PROJECTILE A, Z
+3                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+1                    ;NUMBER OF PROTONS   TO BE EMITTED
+0                    ;NUMBER OF ALPHAS    TO BE EMITTED
+0                    ;NUMBER OF DEUTERONS TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
+0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+@ Test of EMPIRE level density models: first EGSM (default)
+IOUT       3.                                               
+LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
+FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
+NEX       50.                               ! Number of points in the outgoing energy grid
+HRTW       2.                               ! Width fluctuation are considered up to 3 MeV
+MSD        0.                               ! Recommended default for nucleon induced reactions MSD=1
+MSC        0.                               ! Recommended default for nucleon induced reactions MSC=1
+ENDF       0.                               ! No ENDF formatting by default (much faster than formatting)
+PCROSS    0.0                               ! Default prequilibrium: exciton model (PCROSS) with default MFP parameter
+HMS        0.                               ! Monte Carlo Hybrid preequilibrium model
+DIRECT     0.                               ! CC calculation for the incident channel only  
+GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
+RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
+BENCHM     1.                               ! Benchmark calculations, the order of the incident energies is not checked
+GO                                                  
+0.01 
+1.
+20.
+@ Gilbert & Cameron level densities (as of EMPIRE 2.18)
+$LEVDEN     4.                               ! 
+0.001 
+0.01 
+1.
+20.
+@ RIPL-3 HFB level densities 
+$LEVDEN     3.                               ! HFB level densities
+0.001 
+0.01 
+1.
+20.
+-1

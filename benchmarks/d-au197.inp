@@ -2,9 +2,9 @@
 197.   79.           ;TARGET  A , Z 
   2.    1.           ;PROJECTILE A, Z
 2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
-1                    ;NUMBER OF PROTONS  TO BE EMITTED
-0                    ;NUMBER OF ALPHAS   TO BE EMITTED
-0
+1                    ;NUMBER OF PROTONS   TO BE EMITTED
+0                    ;NUMBER OF ALPHAS    TO BE EMITTED
+1                    ;NUMBER OF DEUTERONS TO BE EMITTED
 0
 0
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
@@ -15,5 +15,6 @@ MSD        0.
 MSC        0.                                                         
 ENDF       0. 
 PCROSS    1.5 
-DXSRED    1.2
+DXSRED    1.1
 GO 
+-1
