@@ -1,13 +1,14 @@
- 20.00               ;INCIDENT ENERGY (IN LAB)
+ 10.00               ;INCIDENT ENERGY (IN LAB)
 100.   42.           ;TARGET  A , Z 
   1.    0.           ;PROJECTILE A, Z
-3                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
 1                    ;NUMBER OF PROTONS   TO BE EMITTED
 0                    ;NUMBER OF ALPHAS    TO BE EMITTED
 0                    ;NUMBER OF DEUTERONS TO BE EMITTED
 0                    ;NUMBER OF TRITONS   TO BE EMITTED
 0                    ;NUMBER OF He-3      TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+@ PE models: PCROSS, MSC/MSD, HMS 
 IOUT       3.                                               
 LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
 FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
@@ -23,25 +24,41 @@ GSTRFN     1.                               ! Default gamma ray strength functio
 RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
 BENCHM     1.                               ! Benchmark calculations, the order of the incident energies is not checked
 GO    
-@ Reference calculation, no preequilibrium, 2nd run
-20.
-@ Excitonmodel: PCROSS
+@ Exciton model: PCROSS
 $PCROSS     1.5                              ! Add PCROSS
-20.
-@ quantum-statistical models: MSD & MSC
+10.
+@ Quantum-statistical models: MSD & MSC
 $PCROSS     0.0                              ! disable PCROSS
 $MSD        1.                               ! Add MSD
 $MSC        1.                               ! Add MSC
-20.
+10.
 @ Hybrid Monte Carlo model (HMS)
 $MSD        0.                               ! disable MSD
 $MSC        0.                               ! disable MSC
 $HMS        1.                               ! Add HMS
-20.
-@ All model together: PCROSS + HMS + MSD/MSC (checking automatic selection)
-$MSD        1.                               ! disable MSD
-$MSC        1.                               ! disable MSC
+10.
+@ PCROSS + MSC/MSD
+$HMS        0.                               ! disable HMS
+$PCROSS     1.5                              ! Add PCROSS
+$MSD        1.                               ! Add MSD
+$MSC        1.                               ! Add MSC
+10.
+@ PCROSS + HMS
+$PCROSS     1.5                              ! Add PCROSS
+$MSD        0.                               ! disable MSD
+$MSC        0.                               ! disable MSC
 $HMS        1.                               ! Add HMS
-$PCROSS     1.5                              ! disable PCROSS
-20.
+10.
+@ HMS + MSC/MSD
+$PCROSS     0.0                              ! disable PCROSS
+$HMS        1.                               ! Add HMS
+$MSD        1.                               ! Add MSD
+$MSC        1.                               ! Add MSC
+10.
+@ All model together: PCROSS + HMS + MSD/MSC 
+$MSD        1.                              
+$MSC        1.                               
+$HMS        1.                               
+$PCROSS     1.5                              
+10.
 -1
