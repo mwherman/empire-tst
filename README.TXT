@@ -4,58 +4,50 @@
                     Upton, NY, USA   
                       January 2012
 
-RECOMMENDED SETUP 
-_________________
+EMPIRE is a modular system of nuclear reaction codes for advanced modeling
+of nuclear reactions using various theoretical models. It consists of a
+number of FORTRAN codes, input parameter libraries, and experimental data
+library (EXFOR/CSISRS) -  operated through the Graphic User Interface (GUI).
 
-1) You may create your new EMPIRE-3.1 directory [e.g. /home/empire-3.1-rivoli] 
-and change to it by typing:
+EMPIRE 3.1 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X
+(10.5 and higher).  It can also be run on Windows with either the MinGW and
+Cygwin environments.  EMPIRE is provided as source code that must be compiled to 
+function.  See the file INSTALL.TXT for installation instructions.
 
-cd /home/empire-3.1-rivoli
- 
-2) Untar the distribution file EMPIRE-3.1-RIVOLI.tgz by typing 
+EMPIRE is intended to be a general, flexible, and easy to use tool 
+for basic research and evaluation of nuclear data. It offers a  possibility
+of combining several theoretical approaches, choosing among alternative 
+input parameters and calculating extended set of observables in a single run.
+Nuclear data evaluation is facilitated by the ENDF-6 formatting, file 
+verification and graphical comparison with experimental data.
 
-tar xvfz EMPIRE-3.1-RIVOLI.tgz
+Major new features in 3.1
+-------------------------
+* Covariance capabilities using Kalman filter and Monte Carlo
+* Resonance module to produce MF2 and MF32 from the Atlas of Neutron Resonances
+* RIPL-3 library of input parameters
+* New version of Coupled Channel code ECIS-2006
+* Coupled Channel code OPTMAN for soft-rotor calculations
+* Improved treatment of fission
+* Parity dependent level densities
+* New parametrization of EGSM level densities
+* Three additional ejectiles (d, t,3He)
+* Platform independent retrieval of EXFOR data
+* Fully operational on Mac OS X
 
-3) Run install.sh script and follow instructions: 
+Installation
+------------
+See the INSTALL.TXT file included in the EMPIRE distribution.
 
-install.sh
-
---- setup finished 
-
-4) To run empire you may create a working subdirectory of your empire root 
+To run EMPIRE
+-------------
+To run empire you may create a working subdirectory of your empire root 
 [e.g. /home/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
 
-mkdir Fe56new
-cd Fe56new
-../scripts/Xrun.tcl & 
+    $ mkdir Fe56new
+    $ cd Fe56new
+    $ ../scripts/Xrun.tcl & 
 
-Good calculations !
-The EMPIRE team
-
-
-
-MANUAL SETUP 
-____________
-
-1) You may create your new EMPIRE-3.1 directory [e.g. /home/empire-3.1-rivoli]
-2) Untar the distribution file EMPIRE-3.1-RIVOLI.tgz
-3) Untar the HFB level-density distribution file level-densities-hfb.tgz to the 
-       corresponding subdirectory RIPL/densities/total/level-densities-hfb 
-       (if you plan to use RIPL HFB level densities)
-4) Unzip the distribution file C4-latest.zip to the corresponding subdirectory 
-       EXFOR/ to get the automatic retrieval and plotting of EXFOR experiemntal 
-       data.  One is available on the EMPIRE download site and from the IAEA at
-       http://www-nds.iaea.org/x4toc4-master/.   Once you unzip it, run the 
-       parseC4.py script.
-
---- setup finished 
-
-4) To run empire you may create a working subdirectory of your empire root 
-[e.g. /home/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
-
-mkdir Fe56new
-cd Fe56new
-../scripts/Xrun.tcl & 
 
 Good calculations !
 The EMPIRE team
