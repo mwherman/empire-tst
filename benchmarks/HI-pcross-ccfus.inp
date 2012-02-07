@@ -8,7 +8,7 @@
 0
 0
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
-@ Test of fusion cross section for HI reactions : default
+@ Test of fusion cross section for HI reactions : distributed barrier
 IOUT       3.                                               
 LEVDEN     0.                                              
 NEX       50.                                                   
@@ -16,14 +16,14 @@ MSD        0.
 MSC        0.                                                         
 ENDF       0. 
 PCROSS    1.5 
+CSREAD    -1.                                        
 GO 
-@ distributed barriers
-$CSREAD    -1.                                       
-212.0
-@ CSFUS (  coupled barriers)
+@ CSFUS (  coupled barriers - default)
 $CSREAD    -2.                                        
+$CALCTL     1.
 212.0
 @ CSFUS (uncoupled barriers)
 $CSREAD    -3.                                       
+$CALCTL     1.
 212.0
 -1
