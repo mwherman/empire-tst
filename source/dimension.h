@@ -1,7 +1,6 @@
       PARAMETER(
      * NDNUC= 100
      *,NDEXCLUS = 15
-     *,NDEJC=6
      *,NDEX= 101
      *,NDLW= 50
      *,LEVCC=20
@@ -13,6 +12,7 @@ C    DO NOT CHANGE parameters below
 C    unless you REALLY know what you are doing.
 C    You may render the code unusable.
 C
+     *,NDEJC=6
      *,NDZMAX=110
      *,NDECSE=NDEX+30
      *,NDEPFN=251     
