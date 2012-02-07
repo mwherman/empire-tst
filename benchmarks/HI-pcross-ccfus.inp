@@ -18,9 +18,12 @@ ENDF       0.
 PCROSS    1.5 
 GO 
 @ distributed barriers
-CSREAD    -1.                                       
+$CSREAD    -1.                                       
+212.0
 @ CSFUS (  coupled barriers)
-CSREAD    -2.                                        
+$CSREAD    -2.                                        
+212.0
 @ CSFUS (uncoupled barriers)
-CSREAD    -3.                                       
+$CSREAD    -3.                                       
+212.0
 -1
