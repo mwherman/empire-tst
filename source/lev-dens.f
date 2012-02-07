@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-05 21:29:29 +0100 (So, 05 Feb 2012) $
+Ccc   * $Date: 2012-02-07 21:31:01 +0100 (Di, 07 Feb 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1694,7 +1694,7 @@ C
       WRITE (filename,99005) iz
 99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
-      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename, ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3)  !,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
@@ -1745,7 +1745,7 @@ C
         WRITE (filename,99007) iz
 99007   FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
-        OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR = 440)
+        OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR=440)
         pcorr = 0.d0
         acorr = 0.d0
   110   READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
@@ -2301,28 +2301,12 @@ C
 
       CHARACTER*2 car2
       REAL*8 DLOG10
-      CHARACTER*56 filename
-
-      LOGICAL fexist
+	CHARACTER*38 filename
       INTEGER i, ia, iar, ipp, iugrid, iz, izr, j, jmaxl, k, khi, kk,
      &        klo
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
-
-      WRITE (filename,99006) ib, iz
-99006 FORMAT
-     & ('/RIPL/fission/leveldensities/Max',i1,'/z',i3.3)
-      INQUIRE(file = trim(empiredir)//filename, exist = fexist)
-      IF(.NOT.fexist) THEN
-        WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
-     &                  ' IN HFB at saddle ',ib
-        WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
-     &                    TERMINATED '
-        WRITE (8,*)
-     &           ' ERROR: HFB lev dens. at saddle ',ib,'  missing'
-        STOP ' ERROR: HFB lev dens. at saddle missing'
-      ENDIF
 C
 C-----initialization
 C
@@ -2339,8 +2323,14 @@ C
             ENDDO
          ENDDO
       ENDDO       
+
+     
 C-----reading microscopic lev. dens. from the RIPL-3 file
-      OPEN (UNIT = 34,FILE = trim(empiredir)//filename,ERR = 300)
+      WRITE (filename,99005) ib, iz
+99005 FORMAT ('/RIPL/fission/leveldensities/Max',i1,'/z',i3.3)  
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename, ERR = 300)
+C     OPEN (UNIT = 34,FILE = trim(empiredir)//
+C    &'/RIPL/fission/leveldensities/Max/'//ctmp6, ERR = 300)
   100 READ (34,99010,ERR=300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3)
       IF (car2.NE.'Z=') GOTO 100
@@ -2372,13 +2362,13 @@ C     SKIPPING 4 TITLE LINES
       IF (i.EQ.NLDGRID) GOTO 400
       i = i + 1
       GOTO 280
- 300  WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
+  300 WRITE (8,*) ' NO LEV. DENS. FOR Z=', iz, ' A=', ia,
      &                  ' IN HFB at saddle ',ib
       WRITE (8,*) ' USE OTHER LEVEL DENSITIES. EXECUTION
      &                    TERMINATED '
       WRITE (8,*)
      &           ' ERROR: HFB lev dens. at saddle',ib,'  missing'
-            STOP ' ERROR: HFB lev dens. at saddle missing'
+      STOP ' ERROR: HFB lev dens. at saddle missing'
   400 CLOSE (34)
       iugrid = i - 1      
       DO kk = 1,NRBinfis(Ib)

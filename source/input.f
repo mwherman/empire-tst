@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2487 $
+Ccc   * $Rev: 2492 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 19:12:52 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-07 21:31:01 +0100 (Di, 07 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1040,6 +1040,9 @@ C
 
          IF(DIRECT.GT.1.9 .and. KTRompcc.ne.0) 
      >      KTRlom(NPRoject,NTArget) = KTRompcc
+
+         IF(DIRECT.EQ.0 .and. KTRlom(NPRoject,NTArget).ne.KTRlom(0,0)) 
+     >      KTRlom(0,0) = KTRlom(NPRoject,NTArget) 
 
          IF(ENDf(NTArget).EQ.10) ENDf(NTArget)=1
          IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
@@ -2234,7 +2237,7 @@ C
       CHARACTER*3 ctmp3
       DOUBLE PRECISION egamma, pelm, pgamma, qn, sum, t12, xicc
       DOUBLE PRECISION dd0tmp, dd0_unc, ss0tmp, ss0_unc, gggtmp, ggg_unc
-      CHARACTER*9 finp
+      CHARACTER*8 finp
       CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
@@ -2949,7 +2952,7 @@ C
       CHARACTER*1 dum
       CHARACTER*5 chelem
       CHARACTER*3 ctmp3
-      CHARACTER*9 finp
+      CHARACTER*8 finp
       INTEGER i, iar, ilv, ilvr, iptmp, itmp2, izr, lvpr, natmp,
      &        ndbrlin, ngamr, nlvr, nmax, nztmp
       CHARACTER*6 reftmp
@@ -8660,7 +8663,7 @@ C
       CHARACTER*5 ctmp5
       DOUBLE PRECISION DBLE
       LOGICAL fexist,odd
-      CHARACTER*9 finp
+      CHARACTER*8 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, ilv, iptmp,
      &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
