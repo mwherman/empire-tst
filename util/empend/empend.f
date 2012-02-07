@@ -93,7 +93,10 @@ C-V        - Update the comments and input instructions.
 C-V  11/06 - Fix calculation of outgoing energy when no recoils given
 C-V        - Print warning when no recoils given on output
 C-V        - Improved identification of insignificant cross sections.
-C-V  12/12 - Fix to previous fix when recoils spectra are given.
+C-V  11/12 - Fix to previous fix when recoils spectra are given.
+C-V  12/02 - Output changed - fix search string.
+C-V        - Fix processing of ENDF=0 option, recognised by lack of
+C-V          spectrum data - except (z,x) (left in by mistake?)
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -331,6 +334,7 @@ c...  NMOD= 0
       I600=0
       I800=0
       IRCOIL=0
+      NT6 =0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -402,7 +406,7 @@ C*
 C* Read the EMPIRE output file to extract the cross sections
       CALL REAMF3(LIN,LTT,LER,MXE,MXT,MXM
      1    ,EIN,RWO(LXS),RWO(LXG),QQM,QQI,IWO(MTH),IWO(IZB),RWO(LBE)
-     1    ,IZI,IZA,LISO,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS)
+     1    ,IZI,IZA,LISO,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,ISPE)
       IF(NEN.LE.0) THEN
         WRITE(LTT,995) ' EMPEND ERROR - Number of energy points:',NEN
         WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
@@ -430,19 +434,22 @@ C...      CALL FIXALF(LIN,IZI,IZA,NXS,NEN,IWO(MTH)
 C...     &           ,RWO(LXS),QQM,QQI,MXE,MXT,RWO(LSC),LXR,LTT,LER)
 C* Separate out (z,t) from (z,2np) into MT105
       REWIND LIN
-      CALL FIXTRI(LIN,IZI,IZA,NXS,NEN,IWO(MTH)
+      IF(ISPE.NE.0)
+     &CALL FIXTRI(LIN,IZI,IZA,NXS,NEN,IWO(MTH)
      &           ,RWO(LXS),QQM,QQI,MXE,MXT,RWO(LSC),LXR,LTT,LER)
 C* Eliminate all (nearly)-zero cross sections
       CALL FIXZRO(NXS,NEN,IWO(MTH),RWO(LXS),RWO(LXG)
      &           ,QQM,QQI,MXE,MXT,LTT,LER)
 C*
 C* Scan the EMPIRE output for all reactions with energy/angle distrib.
-      REWIND LIN
-      JT6=MXI-LBI
-      CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA)
+      IF(ISPE.NE.0) THEN
+        REWIND LIN
+        JT6=MXI-LBI
+        CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA)
 C* Summ MT 5 contributions as necessary
-      CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
-     &           ,RWO(LXS),QQM,QQI,MXE,MXT)
+        CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
+     &             ,RWO(LXS),QQM,QQI,MXE,MXT)
+      END IF
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
       NS =-1
@@ -3086,9 +3093,9 @@ C*
   933 FORMAT(1P,'Ei',E7.2E1,' Eo',E7.1E1,' MT',I3,' PZA',I5)
   934 FORMAT(1P,6E11.4)
       END
-      SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM
-     1                 ,EIN,XSC,XSG,QQM,QQI,MTH,IZB,BEN
-     1                 ,IZI,IZA,LISO,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS)
+      SUBROUTINE REAMF3(LIN,LTT,LER,MXE,MXT,MXM,EIN,XSC,XSG,QQM,QQI
+     1                 ,MTH,IZB,BEN,IZI,IZA,LISO,AWR,SPI
+     1                 ,STF0,GAMG,D0LV,NEN,NXS,ISPE)
 C-Title  : REAMF3 Subroutine
 C-Purpose: Read EMPIRE output to be converted into ENDF format
 C-Description:
@@ -3122,11 +3129,13 @@ C*   NEN counts the Number of energy points
 C*   NXS counts the Number of reaction types
 C*   IMT count of the nucleons for which binding energies are given
 C*   IPOP Flag to mark the presence of population cross-sections
+C*   ISPE Flag to mark that spectra other than (z,x) are given
       NXS=0
       NEN=0
       IMT=0
       IPOP=-2
       IPRG= 0
+      ISPE= 0
       DO I=1,MXT
         DO J=1,MXE
           XSC(J,I)= 0
@@ -3145,6 +3154,9 @@ C*    -- Reaction - without "Decaying nucleus" --> no Q-value!!!
       IF(REC(13:35).EQ.'ground state population'     ) GO TO 220
       IF(REC(13:35).EQ.'isomer state population'     ) GO TO 224
       IF(REC( 1:10).EQ.' TOTAL  CR'                  ) GO TO 290
+C*    -- Check if spectra other than (z,x) are given
+      IF(REC( 1:13).EQ.'  Spectrum of' .AND.
+     &   REC(24:28).NE.'(z,x)'                       ) ISPE=1
 c...  IF(REC( 5:20).EQ.'fission  cross s'            ) THEN
       IF(REC( 2:19).EQ.'Tot. fission cross'          ) THEN
         QQ=2.0E8
@@ -3172,8 +3184,8 @@ C...        print *,' nubar',ee,xs
 C...
         GO TO 312
       END IF
-      IF(REC(1:20).EQ.'          B i n d i ' .OR.
-     &   REC(1:20).EQ.'          S e p a r ') THEN
+      IF(REC(26:45).EQ.'B i n d i n g    e n' .OR.
+     &   REC(11:30).EQ.'S e p a r a t i o n ') THEN
 C* Read the binding energies of the last nucleon, if given
 C* (Omission allowed in new files where Q values are specified explicitly)
         READ (LIN,891)
