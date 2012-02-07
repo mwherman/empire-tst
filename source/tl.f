@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2482 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-07 17:06:05 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Rev: 2486 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-07 19:07:45 +0100 (Di, 07 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2198,11 +2198,12 @@ C--- SINlcc in next IF changed to SINl - BVC
      &'(6x,''Inelastic cross section ='',F8.2,'' mb''/
      &  6x,''Reaction  cross section ='',F8.2,'' mb''/)') SINl, ABScs
          WRITE (8,
-     &     '(5x,'' Either change OMP or change calculation method   '')'
-     &     )
-         WRITE (8,
-     &     '(5x,''        (DIRPOT)   or   (DIRECT) parameters       '')'
-     &     )
+
+     &     '(5x,'' You may try to reduce the number of collective level
+
+     &s (leaving only CCs) or '')') 
+
+         WRITE (8,'(5x,'' change the selected OMP '')')
          WRITE (8,
      &     '(5x,'' This problem usually happens using DWBA method   '')'
      &     )
@@ -2557,7 +2558,10 @@ C
       INTEGER INT, NINT
 	LOGICAL inc_channel
 
+
+
       inc_channel = .false.
+
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -2601,6 +2605,8 @@ C     for non-zero spins or energies below 10 MeV
         ECIs1(21:21) = 'T'
         convg=1.0d-10
       endif
+
+      ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -2634,10 +2640,14 @@ c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
       xmas_nejc = EJMass(Nejc)
+
       xmas_nnuc = AMAss(Nnuc)
+
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 
+
       IF (El.LT.0.D0) THEN
+
 	   inc_channel = .true.
          El = DABS( - El)
          elab = El
@@ -3109,10 +3119,16 @@ C
 C
 C-----Running ECIS06
 C
+
       IF(inc_channel .and. Inlkey.NE.0) 
+
      >  write (*,*) '  Running ECIS (vibr) ...'
+
       IF(inc_channel .and. Inlkey.EQ.0) 
+
      >  write (*,*) '  Running ECIS (sphe) ...'
+
+
 
       CALL ECIS('ecis06 ')
 
@@ -3209,7 +3225,10 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER INT, NINT
+
 	LOGICAL inc_channel
+
+
 
       inc_channel = .false.
 
@@ -3293,6 +3312,7 @@ C        ECIs2(40:40) = 'T'
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
 C-----From cms system to Lab (ECIS do inverse convertion)
       IF (El.LT.0.D0) THEN
+
 	   inc_channel = .true.
          El = DABS( - El)
          elab = El
@@ -3738,9 +3758,12 @@ C
         iwin = PIPE('copy ecVIBROT.inp ecis06.inp >NUL')
       ENDIF
 
+
 C-----Running ECIS
+
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
       CALL ECIS('ecis06 ')
+
 
       IF (npho.GT.0) THEN
 C        CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out')
@@ -3774,6 +3797,7 @@ C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
 C     |        calculation of transmission coefficients in        |
 C     |        the soft/rigid rotor model                         |
 C     |    R.Capote  05/2011 OPTMAN v10,v11                       |
+
 C     |    R.Capote  02/2012 OPTMAN v12                           |                                     |
 C     -------------------------------------------------------------
 C
@@ -3793,6 +3817,7 @@ C-----For dispersive optical model potentials
 C-----It is ripl2empireS.h because it must be compatible
 C-----with global.h declarations so some variables must be renamed
       INCLUDE 'ripl2empireS.h'
+
 C
 C COMMON variables
 C
@@ -3823,7 +3848,10 @@ C
       INTEGER NINT
 	LOGICAL inc_channel
 
+
+
       inc_channel = .false.
+
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -3846,6 +3874,7 @@ C     angstep = 2.5
       xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
       IF (El.LT.0.D0) THEN
+
          inc_channel = .true.
          El = DABS( - El)
          elab = El
@@ -4014,13 +4043,18 @@ C-------LMaxCC   = maximum L in multipole decomposition
 C     write(1,'(9I3)') ncol  ,ne,npd,las,mtet   ,90,200,180,0
 C     write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,1  ! KODMA = 1
 C
+
 C     KODMA 0 needed as coupled states are not ordered
+
 C
+
       write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,0  ! KODMA = 0
+
 
       write(1,'(6e12.5)') elab
       if(ZEJc(Nejc).gt.0) then
         write(1,'(36I2.2)') 1
+
         ANGles(1) = 0.5d0
       else
         write(1,'(36I2.2)') 0
@@ -4059,9 +4093,13 @@ C           endif
         endif
       endif
 
+
 C     This line is new for OPTMAN v.12 (from November 2011)
+
 C     Flags for inclusion of resonances
+
       write(1,'(I3)') 0   ! no resonances are considered
+
 
 C     Ef=dble(int(100000*efermi))/100000
       Ef=EEFermi(Nejc,Nnuc)
@@ -4128,11 +4166,15 @@ C                 Cviso          Cwiso                      Ea
       if(pot(2,1,21).ne.0.d0 .and. AlphaV.eq.0.d0) AlphaV=1.65d0
 
 C     This line is new for OPTMAN v.10 (from March 2008)
+
 C     Modified for OPTMAN v.12 
       write(1,'(6g12.5)') AlphaV, 0.d0, 0.d0, 0.d0, 0.d0, 0.d0
 
+
 C     This line is new for OPTMAN v.12 (from November 2011)
+
       write(1,'(6g12.5)') 0.d0, A(Nnuc)
+
 
       if(meham.eq.1) ! rigid rotor
      +  write(1,'(6g12.5)') (D_Def(1,k),k = 2,IDEfcc,2) 
@@ -4143,12 +4185,15 @@ C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
+
       IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
+
       IF (IOPsys.EQ.0) THEN
          ctmp = trim(empiredir)//'/source/optmand'
          iwin = PIPE(ctmp)
       ELSE
          iwin = PIPE('optman-windows.exe')
+
       ENDIF
 
       RETURN
@@ -5452,5 +5497,4 @@ C
       DOM_INT = (resg1*hlgth1 + resg2*hlgth2 + corr)*(E - Ef)
      &          /(ACOS( - 1.D0))
       END
-
 
