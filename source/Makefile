@@ -1,6 +1,6 @@
-#$Rev: 2475 $
+#$Rev: 2477 $
 #$Author: rcapote $
-#$Date: 2012-02-07 13:06:42 +0100 (Di, 07 Feb 2012) $
+#$Date: 2012-02-07 13:51:05 +0100 (Di, 07 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -8,7 +8,8 @@
 FC     =  gfortran
 #CC     =  gcc
 #----flags for production compilation with gfortran
-FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -I ../util/IO/
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
@@ -35,8 +36,8 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 #---------------------------
 #FC     =  ifort
 #----flags for production compilation using ifort
-#FFLAGS = -arch pn4 -O3 -ipo 
-#FFLAGS = -O3 -x=host  
+#FFLAGS = -arch pn4 -O3 -ipo -I ../util/IO/
+#FFLAGS = -O3 -x=host  -I ../util/IO/
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #----flags for debuging using ifort compiler
 #FFLAGS =  -C -ftrapuv -g -debug all
@@ -68,11 +69,13 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 #----flag for Lahey/Fujitsu for debugging
 #FFLAGS = -g --chk
 
+
+
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
             gamma-strgth.o    input.o           lev-dens.o    main.o\
             ph-lev-dens.o     pipe.o            print.o       \
-            tl.o              HRTW-comp.o   	ddhms.o\      
+            tl.o              HRTW-comp.o   	ddhms.o       read_nubar.o\
             pcross.o          gamma-strength-analytic.o\
             thora.o           empire_ctl.o      pfns.o        dtrans.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
@@ -82,10 +85,7 @@ all:
 	$(MAKE) empire
 	$(MAKE) optmand
 
-read_nubar:	
-	$(FC) -O3 -std=legacy -c read_nubar.f -I ../util/IO/
-
-empire:	$(OBJF) read_nubar
+empire:	$(OBJF)
 	$(FC) -o $@ $(OBJF) $(LIBS)
 
 optmand:	optmand.o
@@ -104,6 +104,7 @@ optmand:	optmand.o
 #for profiling (also turn on -pg option for each -o file above):
 #empire:   $(OBJF) $(OBJE)
 #	$(FC) -o $@ -pg $(OBJF) $(OBJE)
+
 
 #empire:   $(OBJF) $(OBJE)
 #     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
