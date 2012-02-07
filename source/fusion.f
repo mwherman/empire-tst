@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2465 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-07 04:40:21 +0100 (Di, 07 Feb 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -67,8 +67,8 @@ C
       ldbwacalc = .FALSE.
 C
 C-----Reduced mass corrected for proper mass values
-      xmas_npro = AEJc(Npro) + XMAss_ej(Npro)/AMUmev
-      xmas_ntrg = A(Ntrg) + XMAss(Ntrg)/AMUmev
+      xmas_npro = EJMass(Npro) 
+	xmas_ntrg = AMAss(Ntrg)
 
       el = EINl
       ecms = EIN
