@@ -1,0 +1,45 @@
+ 2.000               ;INCIDENT ENERGY (IN LAB)
+240.   94.           ;TARGET  A , Z 
+  1.    0.           ;PROJECTILE A, Z
+1                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+0                    ;NUMBER OF PROTONS   TO BE EMITTED
+0                    ;NUMBER OF ALPHAS    TO BE EMITTED
+0                    ;NUMBER OF DEUTERONS TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
+0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+@ Test of Pu-240 case : FISOPT & HRTW : reference HRTW =3, FISOPT=1
+IOUT       3.                                               
+LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
+FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
+NEX       50.                               ! Number of points in the outgoing energy grid
+HRTW       3.                               ! Width fluctuation are considered up to 3 MeV
+MSD        0.                               ! Recommended default for nucleon induced reactions MSD=1
+MSC        0.                               ! Recommended default for nucleon induced reactions MSC=1
+ENDF       2.                               ! No ENDF formatting by default (muxh faster than formatting)
+PCROSS    1.5                               ! Default prequilibrium using the exciton model code PCROSS with default MFP parameter
+HMS        0.                               ! Monte Carlo Hybrid preequilibrium model
+DIRECT     1.                               ! Spherical optical model by default
+DIRPOT -2408.                               !
+OMPOT  -2408.    1                          !
+OMPOT  -5409.    2                          !
+FISBAR     1.                               !
+FISDEN     3.                               !
+FISDIS     0.                               !
+FISMOD     0.                               !
+FISOPT     1.                               !
+GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
+RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
+BENCHM     1. 
+GO      
+@ HRTW =3, FISOPT=0
+$FISOPT    0.                               
+2.000
+@ HRTW =0, FISOPT=0
+$FISOPT    0.                               
+$HRTW      0. 
+2.000
+@ HRTW =0, FISOPT=1
+$FISOPT    1.                               
+$HRTW      0. 
+2.000
