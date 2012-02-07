@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2452 $
+Ccc   * $Rev: 2466 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-06 22:05:41 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Date: 2012-02-07 04:52:16 +0100 (Di, 07 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3809,14 +3809,21 @@ C-----
      &    '('' ERROR: LEVDEN must be 0,1,2; default EGSM = 0 used '')')
               GOTO 100
             ENDIF
-            ADIv = val
             IF (ADIv.EQ.0.0D0) WRITE (8,
      & '('' EMPIRE-specific level densities (J>>K aprox.) selected '')')
             IF (ADIv.EQ.1.0D0) WRITE (8,
      &           '('' GSM (Ignatyuk) level densities selected '')')
-            IF (ADIv.EQ.2.0D0) WRITE (8,
-     &           '('' Gilbert-Cameron level densities selected '')'
-     &           )
+            IF (ADIv.EQ.2.0D0) THEN
+C 		    WRITE (8,
+C    &           '('' Gilbert-Cameron level densities selected '')')
+  	        WRITE (8,
+     &           '('' WARNING: Gilbert-Cameron level densities should be 
+     & refitted to the available experimental data '')')
+  	        WRITE (8,
+     &           '('' Changed to EMPIRE 2.18 Gilbert-Cameron (LEVDEN 4)
+     &'')')
+	        val = 4.d0
+            ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (8,
      &          '('' Microscopic parity dependent HFB level densities se
      &lected'')')
@@ -3826,12 +3833,22 @@ C-----
      &           '('' EMPIRE-specific level densities (J>>K aprox.)'')')
             IF (ADIv.EQ.1.0D0) WRITE (12,
      &           '('' GSM level densities (Ignatyuk)  '')')
-            IF (ADIv.EQ.2.0D0) WRITE (12,
-     &           '('' Gilbert-Cameron level densities '')')
+            IF (ADIv.EQ.2.0D0) THEN
+C 		    WRITE (12,
+C    &           '('' Gilbert-Cameron level densities '')')
+  	        WRITE (12,
+     &           '('' WARNING: Gilbert-Cameron level densities should be 
+     & refitted to the available experimental data '')')
+  	        WRITE (12,
+     &           '('' WARNING: Changed to EMPIRE 2.18 Gilbert-Cameron (L
+     &EVDEN 4)'')')
+	        val = 4.d0
+            ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
             IF (ADIv.EQ.4.0D0) WRITE (12,
-     & '('' Gilbert-Cameron (EMPIRE 2.18) level densities selected '')')
+     & '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
+            ADIv = val
             GOTO 100
          ENDIF
 C-----
