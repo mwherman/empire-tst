@@ -1,6 +1,6 @@
-# $Rev: 2269 $
+# $Rev: 2497 $
 # $Author: mherman $
-# $Date: 2012-01-20 22:46:17 +0100 (Fr, 20 Jän 2012) $
+# $Date: 2012-02-08 00:26:37 +0100 (Mi, 08 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5650,7 +5650,7 @@ global widget file profilter zvfilter archfilter
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer pdfviewer wwwviewer compeval mat EXPDAT
+global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer wwwviewer compeval mat EXPDAT
 global svnfilelist selsvnfilelist svnlog repository
 
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
@@ -5659,7 +5659,6 @@ if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    gets $rcfl editor
    gets $rcfl workdir
    gets $rcfl psviewer
-   gets $rcfl pdfviewer
    gets $rcfl wwwviewer
    gets $rcfl compeval
    gets $rcfl mat
@@ -5672,7 +5671,6 @@ close $rcfl
    set editor ""
    set psviewer ""
    set wwwviewer ""
-   set pdfviewer ""
    set compeval ""
    set mat 1111
    set EXPDAT 1
@@ -6287,7 +6285,6 @@ puts $rcfl $file
 puts $rcfl $editor
 puts $rcfl $workdir
 puts $rcfl $psviewer
-puts $rcfl $pdfviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
 puts $rcfl $mat
@@ -8143,7 +8140,6 @@ puts $rcfl $file
 puts $rcfl $editor
 puts $rcfl $workdir
 puts $rcfl $psviewer
-puts $rcfl $pdfviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
 puts $rcfl $mat
@@ -8221,10 +8217,17 @@ exit} \
 set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
         -label other 
     $site_3_0.menu90 add cascade \
-        -menu "$site_3_0.menu90.men87" -command {} -label {Select PS viewer} 
+        -menu "$site_3_0.menu90.men87" -command {} -label {Select PS/pdf viewer} 
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.men87 \
         -tearoff 0 
+
+    $site_4_0.men87 add radiobutton \
+        -value kpdf -variable psviewer -command {} -label kpdf 
+    $site_4_0.men87 add radiobutton \
+        -value kghostview -variable psviewer -command {} -label kghostview 
+    $site_4_0.men87 add radiobutton \
+        -value evince -variable psviewer -command {} -label evince 
     $site_4_0.men87 add radiobutton \
         -value kghostview -variable psviewer -command {} -label kghostview 
     $site_4_0.men87 add radiobutton \
@@ -8235,7 +8238,7 @@ set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
     $site_4_0.men87 add radiobutton \
         -value gotfile -variable psviewer \
         -command {
-set psviewer [tk_getOpenFile -parent .top75 -title "Select PS viewer"]} \
+set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -label other 
     $top.m88 add cascade \
         -menu "$top.m88.menu92" -command {} -label Inputs 
@@ -8656,7 +8659,7 @@ cd $workdir} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/doc/inplist.txt } \
+        -command { pspdfView $::env(EMPIREDIR)/doc/inplist.pdf } \
         -label {EMPIRE input} 
     $site_3_0.menu96 add command \
         \
