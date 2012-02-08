@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2500 $
+Ccc   * $Rev: 2514 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
+Ccc   * $Date: 2012-02-08 22:53:43 +0100 (Mi, 08 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1016,7 +1016,7 @@ C
 C           KTRlom(NDEJC,i) = xxx  ! default potential for cluster emission
 C                                 ! that needs to be compiled into RIPL
 C
-            KTRlom(NPRoject,i) = KTRlom(0,0)
+C           KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
 
 C
