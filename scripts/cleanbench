@@ -1,0 +1,23 @@
+cd $EMPIREDIR/benchmarks
+$EMPIREDIR/scripts/clean a-ni58-pcross 
+$EMPIREDIR/scripts/clean d-au197 
+$EMPIREDIR/scripts/clean fe54-blind 
+$EMPIREDIR/scripts/clean fe54-vib-CC-direct-2 
+$EMPIREDIR/scripts/clean HI-pcross-ccfus 
+$EMPIREDIR/scripts/clean n_eu153-dir-msc-msd 
+$EMPIREDIR/scripts/clean ni62-th-EGSM 
+$EMPIREDIR/scripts/clean n-zr92-soft--dccomp 
+$EMPIREDIR/scripts/clean p-th232
+$EMPIREDIR/scripts/clean test-HRTW-fis
+$EMPIREDIR/scripts/clean test-LD-mo100 
+$EMPIREDIR/scripts/clean test-PE-models 
+mv th232-rot-vib-lev.col temporaryfile
+$EMPIREDIR/scripts/clean th232-rot-vib 
+mv temporaryfile th232-rot-vib-lev.col
+$EMPIREDIR/scripts/clean u235-blind 
+$EMPIREDIR/scripts/clean u235-pf 
+$EMPIREDIR/scripts/clean u238-blind 
+$EMPIREDIR/scripts/clean u238-HFB-num-fis 
+$EMPIREDIR/scripts/clean u238-HFB-par-fis 
+$EMPIREDIR/scripts/clean u238-rot-CC-direct-2 
+rm *.zvd file* spec ecis* >& /dev/null
