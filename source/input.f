@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2492 $
+Ccc   * $Rev: 2500 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 21:31:01 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -278,7 +278,14 @@ C
          CCCalc = .FALSE.
          BENchm = .FALSE.
          EMPtitle(1:1)=' '
-C       
+         FITomp = 0.d0
+
+         FISshi = 0
+         FISmod = 0
+         FISopt = 0
+         FISbar = 1
+         FISdis = 1
+         FISden = 0
 C
          NUBarread = .FALSE.
 
@@ -321,6 +328,7 @@ C--------        Default value 0. i.e. none but those selected automatically
          JCUtcoll = 4
 C--------set fission defaults
          DO nnuc = 1, NDNUC
+
            FISbar(nnuc) = 1  ! RIPL-3 empirical fission barriers 
 C          FISbar(nnuc) = 3  ! RIPL-3 HFB barriers
 C
@@ -328,8 +336,11 @@ C
 C          FISden(nnuc) = 3  ! HFB NLD
 C
            FISmod(nnuc) = 0  ! Single-modal fission
-           FISopt(nnuc) = 0
-           FISDIS(nnuc) = 0  ! no discrete transition states except fundamental
+           FISopt(nnuc) = 0  ! Independent fission barriers (full damping)
+
+C          FISDIS(nnuc) = 0  ! no discrete transition states except fundamental
+           FISDIS(nnuc) = 1  !    discrete transition states considered         
+
          ENDDO
 C
 C--------CCFUS parameters
@@ -1149,6 +1160,24 @@ C
 C
 C        Checking fission input consistency 
 C
+         IF( FISshi(1).eq.1 .and. FISden(1).ne.0 )  THEN        
+            WRITE(8,*)  'WARNING: ',
+     >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
+            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
+            DO i = 1, NDNUC
+	        FISden(i) = 0
+            ENDDO
+         ENDIF
+
+         IF( FISmod(1).GT.0 .and. FISden(1).ne.0 )  THEN        
+            WRITE(8,*)  'WARNING: ',
+     >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
+            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
+            DO i = 1, NDNUC
+	        FISden(i) = 0
+            ENDDO
+         ENDIF
+
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
@@ -6392,7 +6421,7 @@ C--------checking for fission data in the optional input
          IF (name.EQ.'FISSHI') THEN
             izar = i1*1000 + i2
             IF (val.EQ.0) THEN
-               fstring = 'advanced treatment of fission'
+               fstring = 'fission of light projectiles    '
             ELSEIF (val.EQ.1) THEN
                fstring = 'HI-fission over 1-humped barrier'
             ELSEIF (val.EQ.2) THEN

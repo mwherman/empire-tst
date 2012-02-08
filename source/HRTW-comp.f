@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2465 $
+Ccc   * $Rev: 2500 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 04:40:21 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -36,7 +36,7 @@ C
       DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
      &              fisxse, sumtg
-      REAL FLOAT
+C     DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       CHARACTER*1 cpar(2)
@@ -89,16 +89,16 @@ C           WRITE(8,*)'DECAY STATE J=',jcn,' PI=',ipar
 C           WRITE(8,*)'  '
             nhrtw = 0
 C-----------initialize variables
-            DENhf = 0.0
+            DENhf = 0.d0
             NSCh = 0
             NH_lch = 0
-            H_Sumtls = 0.0
-            H_Sumtl = 0.0
-            H_Tav = 0.0
-            H_Sweak = 0.0
+            H_Sumtls = 0.d0
+            H_Sumtl = 0.d0
+            H_Tav = 0.d0
+            H_Sweak = 0.d0
             DO i = 1, NDHRTW1
-               H_Tl(i,1) = 0.0
-               H_Tl(i,2) = 0.0
+               H_Tl(i,1) = 0.d0
+               H_Tl(i,2) = 0.d0
             ENDDO
 C-----------prepare gamma-strength (GMR) parameters (if spin
 C-----------dependent GDR selected)
@@ -111,32 +111,42 @@ C-----------do loop over ejectiles
 C              emitted nuclei must be heavier than alpha
                if(NREs(nejc).lt.0) cycle
                nnur = NREs(nejc)
+               sum = 0.d0
 C              WRITE(8,*)'emitting ejectile=', nejc
                CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
 C              WRITE(8,*)'sum for ejectile=' , nejc, sum
                H_Sumtl = H_Sumtl + sum
             ENDDO
 C-----------do loop over ejectiles       ***done***
-C-----------gamma emision
+
+C-----------gamma emision is always a weak channel
             sumg = 0.0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
+C
 C-----------fission
+C
             dencomp = H_Sumtl
-            IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
-     &          CALL FISSION(nnuc,ke,jcn,sumfis)
-            IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
-     &          CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,dencomp,
+            sumfis = 0.d0
+C
+	      IF (FISsil(nnuc)) THEN
+              IF (FISshi(nnuc).EQ.1.) THEN
+                CALL FISSION(nnuc,ke,jcn,sumfis)
+              ELSE
+                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,dencomp,
      &          aafis,1)
-            IF (FISmod(nnuc).GT.0.) THEN
-               DO m = 1, INT(FISmod(nnuc)) + 1
+              ENDIF
+              IF (FISmod(nnuc).GT.0.) THEN
+                DO m = 1, INT(FISmod(nnuc)) + 1
                   sumfis = sumfis + sumfism(m)
-               ENDDO
-               sumfis = sumfis/(INT(FISmod(nnuc)) + 1)
-            ENDIF
-            H_Sumtl = H_Sumtl + sumfis
-            H_Sweak = H_Sweak + sumfis
+                ENDDO
+                sumfis = sumfis/(INT(FISmod(nnuc)) + 1)
+              ENDIF
+              H_Sumtl = H_Sumtl + sumfis
+              H_Sweak = H_Sweak + sumfis
+	      ENDIF
+
             IF (H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)
      &          THEN
                tlump = (H_Sumtl - H_Sweak)
@@ -145,6 +155,7 @@ C              !define a good Tlump
             ELSE
                tlump = H_Sweak
             ENDIF
+C
             IF (H_Sumtl.GT.0.0D0) THEN
 C--------------check whether tfis is not too big compared to a good Tlump
                NDIvf = INT(sumfis/tlump + 1.0)

@@ -1,6 +1,6 @@
-cc   * $Rev: 2471 $
+cc   * $Rev: 2500 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 08:34:54 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1043,18 +1043,18 @@ C
       OPEN (80,FILE = 'FISSION.OUT',STATUS = 'UNKNOWN')
 C-----Start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
+
          IF(QPRod(nnuc).LT.-999.d0) CYCLE
 
-C        ROFisp = 0.d0
+         ROFisp = 0.d0  ! setting saddle point LD to zero (again as protection)
 
-         IF (IOUt.GT.0) THEN
 C        if(nnuc.le.NNUcd)
          if(nnuc.le.NDEJC)  ! limiting screen printout 
      &     WRITE (*,1234) nnuc,  NNUcd, INT(Z(nnuc)),
      &                  SYMb(nnuc), INT(A(nnuc))
 1234       FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,
      &   ' (',I3,'-',A2,'-',I3,')' )
-         ENDIF
+
          IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
             CALL READ_INPFIS(nnuc)
             IF (FISmod(nnuc).LT.0.1d0)THEN   ! Single mode fission 
@@ -1116,23 +1116,23 @@ C--------Reset variables for life-time calculations
             WRITE (8,*) ' -------------------------------------'
             WRITE (8,*) ' '
          ENDIF
-         IF (ENDf(nnuc).NE.0 .OR. FITomp.LT.0) THEN
-            WRITE (12,*) ' '
-            WRITE (12,*)
+         WRITE (12,*) ' '
+         WRITE (12,*)
      &' ---------------------------------------------------------------'
-            IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
-               WRITE (12,
+         IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+            WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-            ELSE
-               WRITE (12,
+         ELSE
+            WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-            ENDIF
-            WRITE (12,*)
+         ENDIF
+         WRITE (12,*)
      &' ---------------------------------------------------------------'
+         IF (FITomp.LE.0) THEN
             IF (nnuc.NE.1) THEN
                IF (nnuc.EQ.mt91) THEN
                  nejc = 1
@@ -1163,7 +1163,7 @@ C-----------------Check for the number of branching ratios
                   ENDDO
  1455             IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
      &                (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
-     &                nnuc.EQ.mt849)) WRITE (8,*)
+     &                nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0) WRITE (8,*)
      &                 ' WARNING: Branching ratios for level ', il,
      &                ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                ' are missing'
@@ -1179,7 +1179,7 @@ C-----------------originating from the direct population
 C-----------------of discrete levels by a neutron, proton or alpha.
 C-----------------These gammas should not go into MT=91, 649, or 849.
                   IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
-     &                mt849) .AND. il.NE.1) THEN
+     &                mt849) .AND. il.NE.1 .AND. ENDf(nnuc).NE.0 ) THEN
                      POPlv(1,nnuc) = POPlv(1,nnuc) + CSDirlev(il,nejc)
                      POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
                   ENDIF
@@ -1187,9 +1187,9 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
 C--------------Decay direct population of discrete levels by a neutron,
 C--------------proton or alpha without storing emitted gammas in the spectra.
                IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
-     &              mt849) .AND. il.NE.1) THEN
-                  CALL DECAYD_DIR(nnuc, nejc)
-               ENDIF
+     &              mt849) .AND. ENDf(nnuc).NE.0 .AND. il.NE.1) 
+     &              CALL DECAYD_DIR(nnuc, nejc)
+C
 C--------------Write elastic to tape 12 and to tape 68
  1460          IF (nnuc.EQ.mt2) THEN
                   WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1223,6 +1223,7 @@ C--------------Write elastic to tape 12 and to tape 68
                   WRITE (12,*) ' '
                   IF (elcncs.EQ.0 .AND. EINl.LT.10.d0) 
      &              WRITE (8,*) 'WARNING: CN elastic is 0'
+C
                   IF (FITomp.LT.0) THEN
                    WRITE(40,'(F12.4,3D12.5)')   EINl,TOTcs,ABScs
                    IF (ncoll.GT.0) THEN
@@ -1273,9 +1274,10 @@ C--------Prepare gamma transition parameters
 C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
-               IF (ADIv.EQ.0.0D0) CALL ROEMP(nnuc,1.D0,0.0D0)
-               IF (ADIv.eq.2.0D0) WRITE (8,*)
-     &  ' MUST NOT USE GILBERT-CAMERON LEVEL DENSITIES FOR SADDLE POINT'
+               CALL ROEMP(nnuc,1.D0,0.0D0)
+	         IF(FIRst_ein) WRITE (8,*)
+     &         ' WARNING: For HI reactions (FISSHI  1), LD model at sadd
+     &les is EGSM'
                IF (IOUt.EQ.6) THEN
                   WRITE (8,'(1X,/,'' Saddle point level density'',/)')
                   WRITE (8,99055) (EX(i,nnuc),(ROF(i,j,nnuc),j = 1,12),
@@ -2190,7 +2192,6 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
       WRITE (8,*) ' '
       WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-
 C----
 C---- Initialization of PFNS calculations
 C----
@@ -2890,6 +2891,9 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  '('' * Calculated nonelastic cross section            '',G13.6,
      &              '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
+  	    IF(FISsil(1)) WRITE (8,
+     &  '('' * Calculated fission cross section               '',G13.6,
+     &              '' mb  '')') TOTcsfis
         WRITE (8,
      &  '('' * Production cross section (incl.fission)        '',
      &           G13.6,'' mb'')')  checkXS
@@ -2924,7 +2928,10 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  '(''   Calculated nonelastic cross section            '',
      &        G13.6, '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
-
+        IF(FISsil(1)) 
+     &  WRITE (*,
+     &  '(''   Calculated fission cross section               '',
+     &        G13.6, '' mb '')') TOTcsfis
         WRITE (*,
      &  '(''   Production cross section (incl.fission)        '',
      &           G13.6,'' mb'')')  checkXS

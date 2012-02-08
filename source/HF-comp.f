@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2500 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1196,7 +1196,8 @@ C-----------
             Sumfis = Sumfis + sumr*DE
          ENDIF
       ENDIF
-  100 IF (Sumfis.EQ.0.0D0) RETURN
+  100 IF (Sumfis.LT.1.d-25) RETURN
+
       Sumfis = Sumfis*TUNEfi(Nnuc)
       IF (BETav.NE.0.0D0) THEN
 C--------reduction of the fission width due to possible return from the
@@ -1227,6 +1228,7 @@ C           GFIS = SUMFIS/RO(IEC,JC,NNUC)/2./PI
          ENDIF
       ENDIF
       DENhf = DENhf + Sumfis
+      RETURN
       END
 
 
@@ -1315,41 +1317,31 @@ C
       INTEGER ibar, ist, jnc, nr, ipa
 C
       ee = EX(Iec,Nnuc)
-      IF (ee.EQ.0.0D0) RETURN
-      JCC = Jc
+
 c-----initialization
       Sumfis = 0.D0
-      DO ih = 1, nrhump
-         DO ih1 = 1, nrhump
-            tdirp(ih, ih1) = 0.d0
-            tdirpp(ih, ih1) = 0.d0
-         ENDDO
-      ENDDO
+      JCC = Jc
+      tdirp  = 0.d0
+	tdirpp = 0.d0
+	sumtp  = 0.d0
+	wdir   = 0.d0
+	tabsp  = 0.d0
+	tabspp = 0.d0
+      tfdis  = 0.d0
+      tfcon  = 0.d0
+      tdircont = 0.d0
+      tf     = 0.d0
 
-      DO iw = 1, nrwel + 1
-         sumtp(iw) = 0.d0
-         wdir(iw) = 0.d0
-         DO iw1 = 2, nrwel + 1
-            tabsp(iw, iw1) = 0.d0
-            tabspp(iw, iw1) = 0.d0
-         ENDDO
-      ENDDO
+      TABs   = 0.d0
+      tabs1  = 0.d0
+      tdir   = 0.d0
 
-      DO ibar = 1, nrhump
-         tfdis(ibar) = 0.d0
-         tfcon(ibar) = 0.d0
-         tdircont(ibar) = 0.d0
-         tf(ibar)=0.d0
-      ENDDO
+      IF (ee.EQ.0.0D0) RETURN
 
       DO ib = 1, NRBar
          vbarmax(ib) = 0.d0
          vbarex(ib)=efb(ib)
       ENDDO
-
-      TABs = 0.D0
-      tabs1 = 0.d0
-      tdir = 0.d0
 
       DO k=1, NRBar,2 
          HO(k) = H(1, int(k/2)+1)
@@ -1489,13 +1481,13 @@ C-----Continuum contribution to each hump transmission coefficient
           TF(ih) = 0.d0
           tfdis(ih) = 0.d0
           tfcon(ih) = 0.d0
-          sumfis=0.d0
+          Sumfis=0.d0
           goto 890
         ENDIF
       ENDDO
 c
       IF(NRHump.EQ.1) THEN
-         SUMfis = TF(1)
+         Sumfis = TF(1)
          GOTO 890
       ENDIF
 
@@ -1526,7 +1518,7 @@ c--------COMPLETE DAMPING + surrogate OPT.MOD
                tfd(ih) = 0.d0
             ENDIF
          ENDDO
-         sumfis=tfd(1)
+         Sumfis=tfd(1)
 
       ELSE
 
@@ -1557,7 +1549,7 @@ c--------normalization factor for the indirect terms
               rap = 1.d0/(1.d0-rap0)
            ENDDO
          ENDDO
-c--------sumfis
+c--------Sumfis
          DO iw = 1, nrwel+1 
            tindp = 0.d0
            DO iw1 = 2, nrwel + 1
@@ -1566,9 +1558,9 @@ c--------sumfis
      &                   (sumtp(iw) * sumtp(iw1))
            ENDDO
            tindp = tindp + tdirpp(iw, nrhump)/sumtp(iw)
-           sumfis = sumfis + tindp * tabspp(1, iw)  * rap
+           Sumfis = Sumfis + tindp * tabspp(1, iw)  * rap
          ENDDO
-         sumfis = sumfis + tdirpp(1, nrhump)
+         Sumfis = Sumfis + tdirpp(1, nrhump)
          tabs = tabspp(1,2)
          tdir = tdirpp(1,nrhump)
 
@@ -1576,7 +1568,7 @@ c--------sumfis
 C----------gamma transition in isomeric well, as asuggested by MS
            tg2 = .002
            if(tg2.lt.0)tg2=0.d0
-           sumfis = tdir + tabs*(tf(2)+rfiso*tg2)/(tf(1)+tf(2)+tg2)
+           Sumfis = tdir + tabs*(tf(2)+rfiso*tg2)/(tf(1)+tf(2)+tg2)
          ELSE
            tg2 = 0.d0
          ENDIF
