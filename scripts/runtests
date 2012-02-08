@@ -1,0 +1,10 @@
+#! /bin/sh -
+# Script to run Empire for all the input files in test-cases directory, 
+# keeping only the original files and the .lst, .xsc, .out, .endf, and -s.endf files
+#
+cd $EMPIREDIR/test-cases
+$EMPIREDIR/scripts/runE a-ni58-pcross  
+$EMPIREDIR/scripts/runE HI-pcross-ccfus
+$EMPIREDIR/scripts/run  pd105            
+$EMPIREDIR/scripts/run  pu240            
+rm -r *-tl  *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-log.* *fiss.out angdis.p92 *-e.endf *-endres.endf >& /dev/null

@@ -1,3 +1,6 @@
+#! /bin/sh -
+# Script to clean the benchmarks directory, keeping only original files
+#
 cd $EMPIREDIR/benchmarks
 $EMPIREDIR/scripts/clean a-ni58-pcross 
 $EMPIREDIR/scripts/clean d-au197 

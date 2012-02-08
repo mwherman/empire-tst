@@ -1,0 +1,9 @@
+#! /bin/sh -
+# Script to clean the test-cases directory, keeping only original files
+#
+cd $EMPIREDIR/test-cases
+$EMPIREDIR/scripts/clean a-ni58-pcross  
+$EMPIREDIR/scripts/clean HI-pcross-ccfus
+$EMPIREDIR/scripts/clean pd105          
+$EMPIREDIR/scripts/clean pu240          
+rm *.zvd file* spec ecis* >& /dev/null

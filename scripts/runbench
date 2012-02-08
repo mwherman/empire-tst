@@ -1,3 +1,7 @@
+#! /bin/sh -
+# Script to run Empire for all the input files in benchmarks directory, 
+# keeping only the original files and the .lst and .xsc files
+#
 cd $EMPIREDIR/benchmarks
 $EMPIREDIR/scripts/runE a-ni58-pcross 
 $EMPIREDIR/scripts/runE d-au197 
