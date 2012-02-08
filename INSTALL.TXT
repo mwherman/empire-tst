@@ -27,12 +27,19 @@ Graphical Installation
 ======================
 
 EMPIRE now has a graphical installer using IzPack.  To use it, download either
-the base distribution () or the full, web-based distribution ().
+the base distribution at
+
+    http://www.nndc.bnl.gov/empire/Resources/EMPIRE-base-installer.jar
+
+or the full, web-based distribution at
+
+    http://www.nndc.bnl.gov/empire/Resources/EMPIRE-full-installer.jar
+
 Then execute the jar file:
 
-    $ java -jar EMPIRE-3.1-base.jar
+    $ java -jar EMPIRE-base-installer.jar
 
-On both MacOSX and Linux systems, you can do this by simply clicking on the jar
+On MacOSX systems, you can do this by simply clicking on the jar
 file from a file manager.  This installer has been tested on Linux and MacOSX.
 
 If you are on a Linux machine and need to install ActiveTcl, see the 
