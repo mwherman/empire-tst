@@ -1,0 +1,26 @@
+ 25.                 ;INCIDENT ENERGY (IN LAB)
+205.0   81.0         ;TARGET  A , Z
+  1.0    1.0         ;PROJECTILE A, Z
+  3                  ;NUMBER OF NEUTRONS  TO BE EMITTED
+  1                  ;NUMBER OF PROTONS   TO BE EMITTED
+  1                  ;NUMBER OF ALPHAS    TO BE EMITTED
+  1                  ;NUMBER OF DEUTERONS TO BE EMITTED
+  0                  ;NUMBER OF TRITONS   TO BE EMITTED
+  0                  ;NUMBER OF He-3      TO BE EMITTED
+  0   0.0   0.0      ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+IOUT       3.
+LEVDEN     3.
+FITLEV     0.
+NEX       50.
+HRTW       0.
+ENDF       0.
+RECOIL     0.
+MSD        0.
+MSC        0.
+PCROSS    1.5
+HMS        1.
+FISSHI     2.
+DIRECT     0.
+GSTRFN     1.
+GO
+-1.
