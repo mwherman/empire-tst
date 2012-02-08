@@ -9,10 +9,11 @@ CC     =  gcc
 FC     =  gfortran
 #FC     =  f95
 #FC     =  ifort
-# define IPO for ifort with full cross-file optimization
-#IPO = TRUE
+# define IPO with ifort with full cross-file optimization
+IPO = TRUE
 
-# define MODE = BLK if using block-mode I/O
+# define MODE = BLK if using unix block-mode I/O
+# not supported yet on windows
 MODE = BLK
 
 # make sure MAKE knows f90 extension
@@ -31,6 +32,7 @@ ifeq ($(FC),ifort)
   FFLAGS = -x=host -O3 -real-size 64
 else
   FFLAGS = -O3 -fdefault-real-8
+  IPO = FALSE
 endif
 
 # build library
