@@ -1,6 +1,6 @@
-cc   * $Rev: 2500 $
+cc   * $Rev: 2509 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-08 19:10:01 +0100 (Mi, 08 Feb 2012) $
+Ccc   * $Date: 2012-02-08 21:37:39 +0100 (Mi, 08 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -725,6 +725,7 @@ C-----
 C-----Calculate MSD contribution
 C-----
       corrmsd = 1.0
+	xsinl   = 0.d0
       IF (MSD.NE.0 .AND. EIN.GE.EMInmsd) THEN
 C
 C--------call ORION
