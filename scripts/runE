@@ -263,7 +263,7 @@ def runE(proj):
     
     # Delete Temporary files
     
-    rm('FUSION', 'fort.70', 'fort.66', 'fort.16')
+    rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
