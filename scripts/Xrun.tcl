@@ -1,6 +1,6 @@
-# $Rev: 2497 $
-# $Author: mherman $
-# $Date: 2012-02-08 00:26:37 +0100 (Mi, 08 Feb 2012) $
+# $Rev: 2502 $
+# $Author: rcapote $
+# $Date: 2012-02-08 19:30:08 +0100 (Mi, 08 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5775,7 +5775,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE 3.1 (Rivoli) GUI, Sao Jose dos Campos, Brazil, December 2011"
+    wm title $top "EMPIRE-3.1 (Rivoli), February 2012, Graphical User Interface (GUI) "
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -6551,7 +6551,7 @@ adjourn .top75} \
         -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \
         -selectmode extended -textbackground #ffffff \
-        -textfont {Helvetica -12 } -vscrollmode dynamic -width 170 
+        -textfont {Helvetica -12 } -vscrollmode dynamic -width 250 
     frame $site_8_2.fra84 \
         -borderwidth 2 -background #d9d9d9 -height 75 \
         -highlightbackground #dcdcdc 
