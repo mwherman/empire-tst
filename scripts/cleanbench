@@ -20,4 +20,5 @@ $EMPIREDIR/scripts/clean u238-blind
 $EMPIREDIR/scripts/clean u238-HFB-num-fis 
 $EMPIREDIR/scripts/clean u238-HFB-par-fis 
 $EMPIREDIR/scripts/clean u238-rot-CC-direct-2 
+$EMPIREDIR/scripts/clean p-tl205
 rm *.zvd file* spec ecis* >& /dev/null

@@ -18,6 +18,7 @@ $EMPIREDIR/scripts/runE u238-blind
 $EMPIREDIR/scripts/runE u238-HFB-num-fis 
 $EMPIREDIR/scripts/runE u238-HFB-par-fis 
 $EMPIREDIR/scripts/runE u238-rot-CC-direct-2 
+$EMPIREDIR/scripts/runE p-tl205
 mv th232-rot-vib-lev.col temporaryfile
 rm -r *-tl *.out *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis >& /dev/null
 mv temporaryfile th232-rot-vib-lev.col
