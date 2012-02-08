@@ -243,10 +243,12 @@ def runE(proj):
 
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
-        mv(LDfile,proj+LDfile,0)
+        mv(LDfile,proj+'-'+LDfile,0)
+    for LDfile in glob("NL_*.zvd"):
+        mv(LDfile,proj+'-'+LDfile,0)
     # spectra for one energy run:
     for LDfile in glob("sp_*.zvd"):
-        mv(LDfile,proj+LDfile,0)
+        mv(LDfile,proj+'-'+LDfile,0)
 
     # Extract Warnings from the list file:
     # this is portable version of 'grep WARNING infile > outfile
