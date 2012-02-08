@@ -13,24 +13,24 @@
 *-----!---------!----!----!----!-----!  
 @ Pd105: Example input file EMPIRE-3.1
 IOUT       3.                                               
-LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
-NEX      080.                               ! Number of points in the outgoing energy grid
-HRTW       3.                               ! Width fluctuation are considered up to 3 MeV
-MSD        1.                               ! Use Multistep Direct
-MSC        1.                               ! Use Multistep Compound
+LEVDEN     0.                         EMPIRE NLD (EGSM RIPL-3) as default
+NEX      080.                         Number of points in the outgoing energy grid
+HRTW       3.                         Width fluctuations considered up to 3 MeV (for neutron induced)
+MSD        0.                         Quantum statistical Multi-Step-Direct model
+MSC        0.                         Quantum statistical Multi-Step-Compound model
 MSDMIN    3.1                                
-ENDF       2.                               ! ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
-PCROSS    1.5                               ! Default prequilibrium using the exciton model code PCROSS with default MFP parameter
-TUNE        1.00  46. 106.   0.             ! To fit the capture channel (default value of 1.00)
+ENDF       2.                         ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
+PCROSS    1.5                         Exciton model with default 1.5 MFP parameter  
+TUNE        1.00  46  106    0        Gamma width of nucleus(Z=46,A=106) (default value of 1.00)
 * OPTICAL MODEL INPUT
-OMPOT   -523.       1                       ! Pd-105-specific spherical optical potential  
-DIRECT     0.                               ! Spherical optical model by default
-*DIRECT     1.                              ! CC calculation for the incident channel only  
-*DIRECT     2.                              ! CC calculation for both the incident and inelastic channels)
-*DIRECT     3.                              ! DWBA calculation using the potential given by DIRPOT (RIPL # 2408)
-*DIRPOT -2408.                              ! OMP used for the incident (and/or inelastic) channels if DIRECT>0
-GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
-RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
+OMPOT   -523.       1                 Pd-105-specific spherical optical potential  
+DIRECT     0.                         Spherical optical model by default
+*DIRECT     1.                        CC TLs for the incident channel + DWBA (uncoupled)  
+*DIRECT     2.                        CC TLs for the incident and outgoing channel + DWBA (uncoupled)
+*DIRECT     3.                        DWBA calculation for all collective levels
+*DIRPOT  2408.                        OMP for the scattering on collective levels if DIRECT>0 (CC/DWBA)
+GSTRFN     1.                         Default gamma ray strength function (PLujko MLO RIPL-2)
+RECOIL     0.                         No recoils are calculated. Sizeable speed-up if no ENDF file is required
 GO                                                  
 @ Running title may be given in any line starting with @ 
 0.002
