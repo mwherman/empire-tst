@@ -3737,7 +3737,7 @@ recommended are calculated according to:
 &\delta W_{f1}=\left\{
 \begin{array}{lr}
 2.6           & \qquad\qquad\qquad~~~~Z\leq 97 \notag \\
-2.6-0.1(Z-97) & \qquad\qquad\qquad~~~~Z>97
+2.6-0.1(Z-97) & \qquad\qquad\qquad~~~~$Z>97$
 \end{array}
 \right. \notag  \\ 
 &\delta W_{f2}=\left\{
@@ -4310,7 +4310,7 @@ and $T_{f}$ is the total fission coefficient
 T_{f}=\frac{T_{h1}\sum_{m}T_{h2,m}}{T_{h1}+\sum_{m}T_{h2,m}}.
 \end{equation}
 
-The multi-modal fission is selected by the key input FISMOD$>$0: FISMOD=1 stands
+The multi-modal fission is selected by the key input FISMOD$>0$: FISMOD=1 stands
 for (SL) + (S1) (illustrated in Figure~\ref{fis-multimod}) and FISMOD=2 for
 (SL) + (S1)+ (S2).
 It is implemented only for two humped barrier, for EGSM saddle-densities and in the limit of
@@ -7229,9 +7229,9 @@ to the default model parameters. Optional input consists of an arbitrary
 number of records, entered in any order and closed with the GO record,
 which indicates the end of the input. In the simplest case (all defaults),
 only the GO record must be entered. Each optional record starts with an alphanumeric
-keyword NAME. If the first character of the line (i.e. NAME(1:1)) is \*,\# or \!, 
+keyword NAME. If the first character of the line (i.e. NAME(1:1)) is *,# or !, 
 then this line contains comments and is ignored by the code.
-If the first character of the line (i.e. NAME(1:1)) is \@, 
+If the first character of the line (i.e. NAME(1:1)) is @, 
 then this line contains a title, which will be printed in EMPIRE outputs; obviously
 the title is not used in any calculations. Multiple titles are allowed.
 Users are strongly encouraged to use titles and comments in EMPIRE inputs; that will be a 
@@ -7240,19 +7240,20 @@ and evaluations.\\
 
 The optional-input keyword NAME is followed by the value VAL and four positional
 parameters I1, I2, I3, I4. The keyword indicates a physical quantity, such as the
-binding energy or level density parameter or an option*, or scaling parameter. 
-VAL takes numerical value  of the  quantity or  option*).  \\
+binding energy or level density parameter, or a scaling parameter (e.g. TOTRED) . 
+VAL takes numerical value  of the  quantity or scaling parameter).  \\
 The  positional parameters are typically  used to  specify to which nucleus the quantity 
 should be applied (generally  if these are omitted  the value is applied to all
 nuclei in the given calculation). Positional parameters may be also used to 
 indicate the estimated uncertainty of the quantity defined by the input keyword 
 (except optical model parameters for which the uncertainty is defined by VAL). 
-Each record must be in the FORTRAN format:
+Each record must be in the FORTRAN fixed-length format:
 \begin{quote}
 FORMAT (A6,G10.5,4I5) NAME,VAL,I1,I2,I3,I4
 \end{quote}
 Fixed format allows to avoid typing zeros if no input is needed for some 
-positional parameters.
+positional parameters, but attention should be paid by user to keep 
+numbers in the right position.
 
 The GO record indicates end of the optional input and starts calculations. 
 It may be followed by an unlimited list of incident energies
@@ -7714,7 +7715,7 @@ calculations for each decaying nucleus.
 
 In the case of Compound Nucleus all calls to the ORION\index{ORION}
 code are listed and the outputs of TRISTAN\index{TRISTAN} and ORION
-codes (the latter only if IOUT > 3) are printed. Next, the fusion
+codes (the latter only if $IOUT > 3$) are printed. Next, the fusion
 cross section and associated spin/parity distributions are given.
 For each decaying nucleus (including Compound Nucleus) the production
 cross section, population of discrete levels, intensities of discrete
@@ -7846,7 +7847,7 @@ below. In the sample file those collective levels are divided in three groups:
 
 How these three groups of levels are actually used in the calculations depends on the value of the DIRECT keyword:
   \begin{itemize}
-\item Direct excitation of all collective levels is only considered if DIRECT > 0.
+\item Direct excitation of all collective levels is only considered if DIRECT $> 0$.
 \item If DIRECT = 1 or 2, coupled channels are calculated within the CC method,
 remaining levels by DWBA.
 \item If DIRECT = 3, then scattering on all levels is calculated within the  DWBA approach.
@@ -8236,7 +8237,7 @@ by the PLOTC4 code, have been superseded by the interactive  ZVView plots and ar
 PostScript plots compare cumulative number of discrete levels and
 level densities\index{level densities} fitted to reproduce the last
 level. Plots are only produced for Gilbert-Cameron or EMPIRE-specific
-level densities when FITLEV>0 is specified in the input. All nuclei
+level densities when FITLEV$>0$ is specified in the input. All nuclei
 involved in a calculation and with at least 3 known discrete levels
 are included. 
 
@@ -8245,7 +8246,7 @@ are included.
 
 Information about variations in optical model or deformation fit parameters
 and the minimization of $\chi^{2}$ is written here. This file is
-written only when FITOPT>0 is specified in the input. 
+written only when FITOPT$>0$ is specified in the input. 
 
 
 \subsection{{*}.x42c4\_lst (empire/util/x4toc4/x4toc4.lst)}
@@ -8311,7 +8312,7 @@ data fitting, smoothing and others. Plots can be exported to the PostScript
 or encapsulated PostScript format for inclusion in the \LaTeX{} document. 
 
 Contrary to PLOTC4, ZVV plots are not generated automatically. The
-user has to select a desired reaction from the EMPIRE GUI (\fbox{Select MT and >}
+user has to select a desired reaction from the EMPIRE GUI (\fbox{Select MT and $>$}
 button or type MT number in the entry box at the bottom of the GUI)
 and click on the \fbox{ZVV} button. Internal scripts and components
 of the ZVView\index{ZVView} package process the ENDF and \emph{{*}.c4}
@@ -8969,7 +8970,7 @@ match experiment, the user may attempt to tune calculations by changing
 the positions of collective levels to which the response functions
 are fitted.
 \item \textbf{Double-differential spectra for inelastic scattering to continuum
-at small angles (<40$^{o}$) underestimated} - MSD\index{MSD} mechanism
+at small angles ($<40^{o}$) underestimated} - MSD\index{MSD} mechanism
 is responsible for the major part of the cross section in this range.
 Choosing the compressional form factor for the $l=0$ transfer (default
 is the surface form factor) should bring substantial improvement.
@@ -9042,7 +9043,7 @@ refer to them by keywords defined in the input description (see Section
 
 \subsubsection*{Fusion}
 
-We have to distinguish between heavy ion and Light Ion (A<5) of nucleon
+We have to distinguish between heavy ion and Light Ion ($A<5$) of nucleon
 induced reactions. Heavy ion induced reactions:
 
 \begin{description}[style=multiline,leftmargin=2cm]
@@ -9267,7 +9268,7 @@ adding a Gaussian centered at a certain spin. All of them are listed
 below: 
 
 \begin{description}[style=multiline,leftmargin=3cm]
-\item [{QFIS}] Liquid drop fission barrier multiplier. QFIS>1 decreases
+\item [{QFIS}] Liquid drop fission barrier multiplier. QFIS$>1$ decreases
 fission channel. 
 \item [{SHRJ}] Shell correction to fission barrier is damped to 1/2 (Eq.
 \ref{BfJfade}) at the spin defined by SHRJ. For negative shell corrections,
@@ -9311,11 +9312,11 @@ or even eliminates the effect.
 The EMPIRE input file provides the user with a full control of the
 GDR parameters. This possibility might be worth trying as the present
 version of the code makes use of the built-in systematics by default.
-This systematic approach is usually reasonable for nuclei with A>100,
+This systematic approach is usually reasonable for nuclei with $A>100$,
 but for lighter nuclei the experimental data show less regular behavior.
 GDR widths are particularly widely scattered and their deviation from
 systematics may reach 3 MeV. Also, peak cross sections for nuclei
-with A>225 can differ from the systematics by as much as 100 mb. The
+with $A>225$ can differ from the systematics by as much as 100 mb. The
 experimental values for the GDR parameters can be found in RIPL\index{RIPL}-2.
 Other multipolarities can also be modified by entering them explicitly
 in the input file but their effect on the cross sections is rather
@@ -9376,12 +9377,15 @@ similar solution, correlated sampling of energy-dependent scaling parameters, ha
 
 An additional source of low uncertainties has been discussed in the contribution by Leeb~\cite{Leeb-nds:2008} to  the present Workshop - neglecting correlations among numerous experiments implies statistical independence  of the respective systematic uncertainties and leads to reducing final uncertainty below individual systematic uncertainty. We refer to the original paper by Leeb for a description of an approximate method allowing one to avoid this source of underestimation. 
 
-\section{Description of test cases UPDATE!!!}
+\section{Description of test cases}
 
-The test cases are intended for the verification of the local
-installation.
-
-(to be completed by Roberto)
+In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
+The benchmarks (\emph{subdirectory \\benchmarks)}) are intended for the verification of the local
+installation, and most of them are single-energy calculations. About 15 benchmarks are currently 
+included with the system.
+The test cases (\emph{subdirectory \\test-cases)}) are intended to contain real
+physical show cases, a few of them are provided. This directory will ideally expand in the future
+to include the best cases of succesful applications of EMPIRE-3.1 submitted by users.
 
 % Some typical examples of EMPIRE input files are presented below for
 % illustrative purpose only. No attempt was made to ensure that the
@@ -9782,7 +9786,7 @@ VAL (default: min(50, NDEX)). NDEX parameter is defined in the \emph{dimension.h
 = 0 no  ENDF formatting (default).
   
     
-> 0 output for the full ENDF formatting will be created (including double differential MF=6) as shown in the two examples below
+$>0$ output for the full ENDF formatting will be created (including double differential MF=6) as shown in the two examples below
 
                 ~~~~= 2 means all reactions emitting 2 or less particles are exclusive
                 
@@ -9796,7 +9800,7 @@ VAL (default: min(50, NDEX)). NDEX parameter is defined in the \emph{dimension.h
 
 = 0 recoils are not calculated (default if ENDF = 0, no ENDF formatting)
 
-= 1 recoils are calculated     (default if ENDF > 0, ENDF formatting)
+= 1 recoils are calculated     (default if ENDF $>0$, ENDF formatting)
 
 If keyword ENDF=0 is given in the input, then recoils are not calculated
 independently of the keyword RECOIL.
@@ -9805,7 +9809,7 @@ independently of the keyword RECOIL.
 
 = 0 Primary gammas are not printed (default)
 
-> 1 Primary gammas are  printed
+$>1$ Primary gammas are  printed
 
 If keyword ENDF=0 is given in the input, then primary gammas are not
 printed independently of the keyword PRGAMM.
@@ -9814,7 +9818,7 @@ printed independently of the keyword PRGAMM.
 
 = 0 no HRTW 
 
-> 0 HRTW width fluctuation correction up to the energy set by VAL. 
+$>0$ HRTW width fluctuation correction up to the energy set by VAL. 
 
 \item [{FISSPE}] Controls calculation of prompt fission neutron spectra (PFNS).
 
@@ -9828,7 +9832,7 @@ printed independently of the keyword PRGAMM.
 
 = 0 no benchmark calculation (default),
 
-> 0 benchmark calculation requested. Energies do not need to be in increasing order.
+$>0$ benchmark calculation requested. Energies do not need to be in increasing order.
 
 \item [{KALMAN}] Controls calculation of a sensitivity matrix,
 
@@ -9841,9 +9845,9 @@ printed independently of the keyword PRGAMM.
 
 \item[= 0] no random sampling is allowed (default) 
 
-\item[> 0] random sampling based on normal (Gaussian) distribution with the given 1-sigma parameter uncertainty 
+\item[$>0$] random sampling based on normal (Gaussian) distribution with the given 1-sigma parameter uncertainty 
 
-\item[< 0] random sampling based on uniform distribution with the given 1-sigma parameter uncertainty 
+\item[$<0$] random sampling based on uniform distribution with the given 1-sigma parameter uncertainty 
 \end{description}
 
 \item [{ISOMER}] The minimum isomer half life (in seconds) set to VAL
@@ -9895,7 +9899,7 @@ population (up to spin 12),
         
         VAL must be set to a RIPL catalog number (e.g. 2408 for Capote et al OMP)
         of the potential as it appears in the empire/RIPL/optical/om-data/om-index.txt
-        file or in Help => 'RIPL omp' when using GUI. For backward compatibility this
+        file or in Help $=>$ 'RIPL omp' when using GUI. For backward compatibility this
         number can be entered with a negative sign.
 
 \item [{DIRPOT}] Optical model parameters to be used in DWBA or coupled-channels calculations by ECIS/OPTMAN codes. Parameters are the same as above, except that I1 need not be specified (always refers to the incident channel).
@@ -10007,7 +10011,7 @@ projectile and ejectiles.\\
 = 0 Transmission coefficients calculated during the first run are stored, and reused
     in subsequent EMPIRE runs (default),
        
-> 0 Transmission coefficients are calculated independently for each run; no reusage
+$>0$ Transmission coefficients are calculated independently for each run; no reusage
     is allowed. This option is useful to calculate some quantities that are only used
     if TL are not already present (e.g. Bass fusion barrier in HI induced reactions).
     However, this potion slows down the execution of the code in subsequent runs up
@@ -10026,7 +10030,7 @@ the cut-off energy, and the parameter I1 that sets the maximum spin.
 cross sections in the continuum set to VAL.\\
 This parameter is used if there are collective levels (in the {*}-lev.col file)
 that are located in the continuum (see the \emph{cont} flag). The scattering
-cross sections on these levels will be calculated by DWBA (if keyword DIRECT >0).
+cross sections on these levels will be calculated by DWBA (if keyword DIRECT $>0$).
 
 \item [{DEFNUC}] Deformation of the target nucleus set to VAL.\\
 The threshold value to assume that the nucleus is deformed is 0.1
@@ -10051,7 +10055,7 @@ Estimated uncertainty of this parameter can be given by I3.
 
 \item [{TUNEPE}] The preequilibrium decay width $\Gamma_i$ of the ejectile $i$ 
 given by I1 will be multiplied by VAL. It applies only to the PE decay from the
-compound nucleus calculated by PCROSS (exciton model), input keyword PCROSS > 0. \\
+compound nucleus calculated by PCROSS (exciton model), input keyword PCROSS $>0$. \\
 Estimated relative uncertainty in \% of this parameter can be given by I2.
 
 \item [{PFNNIU}] Used in prompt fission neutron (PFN) calculations.
@@ -10129,8 +10133,8 @@ This parameter has a dual use:\\
                  It  has no effect on other incident particles. 
                   
               \begin{description}[style=multiline,leftmargin=3cm]
-              \item[> 0] deuteron break-up/pick-up parameterization of Kalbach used for incident deuterons (default: 1.),
-               \item[= 0] deuteron break-up/pick-up suppressed.  
+              \item[$>0$] deuteron break-up/pick-up parameterization of Kalbach used for incident deuterons (default: 1.),
+               \item[$=0$] deuteron break-up/pick-up suppressed.  
                \end{description}
 
 \end{description}
@@ -10204,7 +10208,7 @@ These input parameters are typically used for heavy ion induced reactions.\\
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{CSREAD}] Controls HI fusion cross section determination,
 
-$>$ 0 HI fusion cross section is set to VAL {[}in mb], 
+$>0$ HI fusion cross section is set to VAL {[}in mb], 
 
 = -1 distributed barrier model used ,
 
@@ -10244,11 +10248,11 @@ a factor VAL
 
 CCFUS code provides a simplified coupled-channel treatment to obtain 
 the reaction cross section in near-barrier heavy ion reactions. 
-It is not recommended for reactions with light incident particles (A<5).\
+It is not recommended for reactions with light incident particles ($A<5$).\
 
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{DV}] DV barrier parameter in CCFUS set to VAL. This parameter can
-be used to adjust the fusion barrier. Typical range for changes -10<DV<10.
+be used to adjust the fusion barrier. Typical range for changes $-10<DV<10$.
 (default: 10).
 \item [{FCC}] FCC parameter in CCFUS\index{CCFUS} set to VAL
 \begin{description}[style=multiline,leftmargin=3cm]
@@ -10273,7 +10277,7 @@ sign (default: - energies of the first 2+ and 3- levels in the target
 and the projectile). 
 \item [{FCD}] Strength of the coupling at the barrier for I2$^{th}$ collective
 mode set to VAL. For FCC=1 the characteristic radial dependence of
-the one-particle transfer form factor is assumed. Used only if NACC>0
+the one-particle transfer form factor is assumed. Used only if NACC$>0$
 (no default).
 \end{description}
 
@@ -10383,7 +10387,7 @@ set to VAL (default: 0.8).
 \item [{PCROSS}] Controls calculations with PCROSS:
 \begin{description}[style=multiline,leftmargin=3cm]
 \item[= 0] PCROSS disabled (default)
-\item[> 0] PCROSS enabled with mean free path multiplier set to VAL.
+\item[$>0$] PCROSS enabled with mean free path multiplier set to VAL.
 VAL must be greater than 1.05 and lower than 2. 
 Estimated relative uncertainty in \% of this parameter can be given by I1.
 \end{description}
@@ -10392,11 +10396,11 @@ Estimated relative uncertainty in \% of this parameter can be given by I1.
 
 = 0 Preequilibrium contribution to discrete levels neglected (default).
 
-> 0 Preequilibrium contribution to discrete levels considered.
+$>0$ Preequilibrium contribution to discrete levels considered.
 
 \item [{PEPAIR}] Controls how pairing is treated in PCROSS.
 
-> 0 Pairing corrections included in PCROSS calculations (default).
+$>0$ Pairing corrections included in PCROSS calculations (default).
 
 = 0 Pairing corrections not considered in PCROSS calculations.
 
@@ -10431,7 +10435,7 @@ experimental $D_{obs}$ and to discrete levels,
 
 \item [{FITLEV}] Option for adjusting range of discrete levels used in the calculations. Plots of cumulative number of discrete levels along with the integrated level densities are created and calculations stop at this point.
 \begin{description}[style=multiline,leftmargin=3cm]
-\item[> 0] cumulative plots of discrete levels will be displayed.
+\item[$>0$] cumulative plots of discrete levels will be displayed.
 If LEVDEN=0 the energy range of the plot will extend VAL MeV above
 the last discrete level,
 \item[= 0] no cumulative plots (default).
@@ -10442,7 +10446,7 @@ the last discrete level,
 nucleus with Z=I1 and A=I2 (default 1.).\\
 The input value is being reduced by 1, allowing for positive or negative energy 
 shift. The default value of 1 means that the resulting energy shift is zero. \\
-This parameter is applicable for GSM type of LD models (LEVDEN < 2). \\
+This parameter is applicable for GSM type of LD models (LEVDEN $<2$). \\
 \textbf{}\\
 
 
@@ -10453,7 +10457,7 @@ This parameter is applicable for GSM type of LD models (LEVDEN < 2). \\
 \item [{ATILNO}] Value of the level density parameter $\widetilde{a}$
 will be multiplied by VAL for the nucleus with Z=I1 and A=I2. 
 Estimated relative uncertainty in \% of this parameter can be given by I3.\\
-This parameter is applicable if keyword LEVDEN <3 
+This parameter is applicable if keyword LEVDEN $<3$  
 (i.e. for all level density models but HFB). 
 
 \end{description}
@@ -10463,9 +10467,9 @@ This parameter is applicable if keyword LEVDEN <3
 \item [{GCROA}] Level density parameter \emph{a}
 in Gilbert-Cameron approach 
 
->~0 parameter $a$ in nucleus Z=I1, A=I2 set to VAL ,
+$>0$ parameter $a$ in nucleus Z=I1, A=I2 set to VAL ,
 
-= ~0 parameter $a$ in all nuclei according to Ignatyuk systematics,
+=  0 parameter $a$ in all nuclei according to Ignatyuk systematics,
 
 = -1 parameter $a$ in all nuclei according to Arthur systematics,
 
@@ -10475,7 +10479,7 @@ in Gilbert-Cameron approach
 for nucleus Z=I1, A=I2 set to VAL (default calculated internally).
 \item [{GCROD}] Pairing shift $\Delta$ in Gilbert-Cameron approach for
 nucleus Z=I1, A=I2 set to VAL (default determined internally according
-to Gilbert-Cameron table, for Z>98 and/or N>150 $\Delta=12/\sqrt{A}$
+to Gilbert-Cameron table, for $Z>98$ and/or $N>150$ $\Delta=12/\sqrt{A}$
 is taken).
 \item [{GCROE0}] Level density parameter $E_{0}$ in Gilbert-Cameron approach
 for nucleus Z=I1, A=I2 set to VAL (default calculated internally).
@@ -10677,7 +10681,7 @@ and A=I2,
 = 0  spin at which fission barrier (incl. shell correction)
 disappears (default),
 
- > 0 set to VAL.
+$>0$ set to VAL.
 \end{description}
 
 
@@ -10706,8 +10710,8 @@ Sao Jose dos Campos, June 2011}
 \item  Moments of inertia (spin distribution parameter) controlled from the input
 \item  Resonance module added
     \begin{itemize} 
-      \item  Parameters from Atlas of Neutron Resonances => MF2
-      \item  Parameter uncertainties => MF32
+      \item  Parameters from Atlas of Neutron Resonances $=>$ MF2
+      \item  Parameter uncertainties $=>$ MF32
       \item  Reproducing thermal cross section uncertainties 
       \item  Inclusion of arbitrary correlations among gamma-widths and among neutron-widths 
    \end{itemize}
@@ -10900,9 +10904,9 @@ loop (M. Herman).
 (M. Herman). 
 \item Problem with the discontinuity of neutron capture cross section when
 incident energy becomes lower than the integration bin width has been
-solved. Capture cross sections, even at very low energies (<10 keV)
+solved. Capture cross sections, even at very low energies ($<10$ keV)
 can now be calculated even with as few as 50 energy bins (tested on
-193-Ir) (M. Herman). 
+$^{193}$Ir) (M. Herman). 
 \item All collective levels are used in ECIS calculations with DIRECT=1,2,
 even if they can not be excited because of the too low incident energy.
 In the previous versions only open channels were taken into consideration
@@ -10970,7 +10974,7 @@ from the installation CD-ROM without copying them onto hard disk.
 the preliminary version of RIPL2 (R. Capote)
 \item Elastic is calculated in all cases on the 2.5$^{o}$ grid, while all
 the rest are on the 10$^{o}$ grid. Previous inconsistency removed
-(transfer of elastic when DIRECT>0 was used) (M. Herman)
+(transfer of elastic when DIRECT$>0$ was used) (M. Herman)
 \item GUI starts with gvim editor selected by default (M. Herman)
 \item Two compilation warnings in tl.f fixed (M. Herman)
 \item Cumulative plots of discrete levels created as a PostScript file rather
@@ -11000,7 +11004,7 @@ interaction with plot titles (use A + right shift)
 
 \begin{enumerate}
 \item EXFOR retrieval using FORTRAN instead of UNIX 'grep'.
-\item Fission barrier set to 1000 MeV for Z<19.
+\item Fission barrier set to 1000 MeV for $Z<19$.
 \item GDR second peak energy set to 0 for spherical nuclei.
 \item Temperature in the generalized Lorentzian protected against 0 excitation
 energy.
@@ -11144,7 +11148,7 @@ and parity coupling is performed to obtain Compound Nucleus spin distribution.
 \item Automatic retrieval of EXFOR data.
 \item Link to EMPEND to create ENDF formatted file.
 \item Link to X4TOC4 and PLOTC4 to produce plots at the end of the run.
-\item Fission barriers for Z>102 according to Myers\&Swiatecki, Phys. Rev.
+\item Fission barriers for $Z>102$ according to Myers\&Swiatecki, Phys. Rev.
 C60 1999.
 \item FITLEV creates a whole set of cumulative plots without interaction.
 \item Fusion barrier can be read from input (BFUS).
