@@ -1,0 +1,117 @@
+ 0.0001              ;INCIDENT ENERGY (IN LAB)
+240.   94.           ;TARGET  A , Z 
+  1.    0.           ;PROJECTILE A, Z
+3                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+0                    ;NUMBER OF PROTONS   TO BE EMITTED
+0                    ;NUMBER OF ALPHAS    TO BE EMITTED
+0                    ;NUMBER OF DEUTERONS TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
+0  0. 0.             ; reserved
+*************************************************************************************************************
+*   Optional input starts here, FIXED FORMAT, (lines starting with *,#,! are comments)
+*-----!---------!----!----!----!-----!  
+@ TITLE: This is a default EMPIRE-3.1 input
+IOUT       3.                                               
+NEX      080.                               ! Number of points in the outgoing energy grid
+HRTW       3.                               ! Width fluctuation are considered up to 3 MeV
+ENDF       2.                               ! ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
+PCROSS    1.5                               ! Default prequilibrium using the exciton model code PCROSS with default MFP parameter
+DIRECT     1.                               ! Coupled-channels model 
+DIRPOT -2408.                               ! CC optical potential
+OMPOT  -2408.    1                          ! CC optical potential
+OMPOT  -5409.    2                          ! CC optical potential
+FISBAR     1.                               !
+FISDEN     0.                               !
+FISDIS     0.                               !
+FISMOD     0.                               !
+FISOPT     0.                               !
+GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
+RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
+GO                                                  
+0.0005
+0.001
+0.005
+0.01
+0.05
+0.1
+0.5
+1.
+1.5
+2.
+2.5
+3.
+3.5
+4.
+4.5
+5.
+5.5
+6.
+7.
+8.
+9.
+10.
+11.
+12.
+13.
+14.
+15.
+16.
+17.
+18.
+19.
+20.
+-1.
+*
+* Lines below are not active unless moved above into the optional input block
+* (note that current values serve as examples, 'zz' and 'aaa' should be
+* replaced by the actual atomic and mass numbers). Below are some more
+* frequently used keywords (see GUI Help or manual for the full list)
+*
+* Fission inputs 
+*
+FISMOD     0.                        ! Single-mode fission (default), Multimodal fission (1-2)
+*FISMOD     1.                       ! Multimodal fission (2 modes: SL and ST1)
+*FISMOD     2.                       ! Multimodal fission (3 modes: SL, ST1 and ST2)
+FISOPT     0.                        ! Independent barriers (full damping approximation)
+*FISOPT     1.                       ! Optical model for fission (partial damping with absorption)
+*FISBAR     0.                       ! Internal EMPIRE library of fission barriers (\data)
+FISBAR     1.                        ! RIPL empirical fission barriers
+*FISBAR     2.                       ! Parabolic approximation of HFB numerical barriers
+*FISBAR     3.                       ! RIPL-3 HFB numerical barriers
+*FISDIS     0.                       ! No fission discrete states considered above the barrier
+FISDIS     1.                        ! RIPL fission discrete states above the barrier         
+FISDEN     0.                        ! EGSM level density used at saddle points
+*FISDEN     3.                       ! HFB  level density used at saddle points
+FISSHI     0.      zz  aaa           ! Fission of light projectiles  (default for A>220)
+*FISSHI    1.      zz  aaa           ! HI induced fission (high angular mom. transferred)
+*FISSHI    2.      zz  aaa           ! Fission neglected
+*
+* Parameters for optical model parameter fitting. 
+* The first value is an absolute (not a percentage) displacement from the current 
+* value of the parameter in the *-omp.dir file. The second is the absolute value 
+* (times 100) that defines the range of parameter variation. The third parameter
+* indicate the position of the parameter in the RIPL-2 format.
+FITOMP     1.                                    !manual omp fit
+#depths
+FITOMP     2.                                    !perform automatic omp search
+FITRVV     0.     500    1                       !fit real volume depth (+- 5 MeV)
+FITRVV     0.      10    2                       !fit real volume depth (+- 5 MeV)
+FITRVV     0.     200    7                       !fit real volume depth (+- 5 MeV)
+FITRVV     0.     200   18                       !fit real volume depth (+- 5 MeV)
+FITIVV     0.     100    1                       !fit imaginary volume depth (+- 1 MeV)
+FITIVV     0.      50    2                       !fit imaginary volume depth (+- 1 MeV)
+FITISV     0.     100    1                       !fit imaginary surface depth (+- 1 MeV)
+FITISV     0.      20    2                       !fit imaginary surface depth (+- 1 MeV)
+FITISV     0.     300    7                       !fit imaginary surface depth (+- 1 MeV)
+FITITR     6.08                                  !increase number of iterations (default 3.05)
+#geometry
+FITOMP     2.                                    !perform automatic omp search
+FITRVR     0.      10    1                       !fit real volume radius (+- 0.1 fm)
+FITIVR     0.      10    1                       !fit imaginary volume radius (+- 0.1 fm)
+FITISR     0.      10    1                       !fit imaginary surface radius (+- 0.1 fm)
+FITRVD     0.      10    1                       !fit real volume diffuseness (+- 0.1 fm)
+FITIVD     0.       5    1                       !fit imaginary volume diffuseness (+- 0.05 fm)
+FITISD     0.       5    1                       !fit imaginary surface diffuseness (+- 0.05 fm)
+FITGRD                                           !autmatic incident energy grid in omp fit
+FITITR     6.08                                  !increase number of iterations (default 3.05)
