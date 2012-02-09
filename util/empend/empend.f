@@ -528,7 +528,8 @@ C...
 C...
 C*
 C* Stop processing if no energy/angle distributions present
-      IF(NT6.LE.0) GO TO 880
+      IF(NT6.LE.0) GO TO 700
+C...  IF(NT6.LE.0) GO TO 880
       JT4=0
       JT6=0
 C*
@@ -683,7 +684,7 @@ C* Energy/angle distribution data processed
       END IF
 C*
 C* Write radioisotope and isomer production data (MF10)
-      WRITE(LTT,991)
+  700 WRITE(LTT,991)
       WRITE(LTT,991) ' BEGIN WRITING ACTIVATION DATA          '
       WRITE(LER,991)
       WRITE(LER,991) ' BEGIN WRITING ACTIVATION DATA          '
@@ -701,6 +702,7 @@ C* Write radioisotope and isomer production data (MF10)
       WRITE(LER,995) ' Number of MT sections written        : ',N10
       WRITE(LER,995) '            Total number of reactions : ',NRC
       WRITE(LER,991)
+      IF(ISPE.EQ.0) GO TO 870
 C*
 C* Process discrete level photon production
       WRITE(LTT,991)
