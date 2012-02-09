@@ -1,4 +1,4 @@
-8.0                  ;INCIDENT ENERGY (IN LAB)
+4.0                  ;INCIDENT ENERGY (IN LAB)
 232. 90.             ;TARGET  A , Z
 1.    1.             ;PROJECTILE A, Z
 1                    ;NUMBER OF NEUTRONS TO BE EMITTED
@@ -28,4 +28,5 @@ DIRECT     1.
 DIRPOT -5408.
 OMPOT  -2408.     1
 GO
+10.
 -1
