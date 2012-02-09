@@ -7229,16 +7229,16 @@ to the default model parameters. Optional input consists of an arbitrary
 number of records, entered in any order and closed with the GO record,
 which indicates the end of the input. In the simplest case (all defaults),
 only the GO record must be entered. Each optional record starts with an alphanumeric
-keyword NAME. If the first character of the line (i.e. NAME(1:1)) is *,# or !, 
-then this line contains comments and is ignored by the code.
-If the first character of the line (i.e. NAME(1:1)) is @, 
+keyword {\bf NAME}. If the first character of the line (i.e. {\bf NAME(1:1)}) is {\bf *}, {\bf \#}
+or {\bf !}, then this line contains comments and is ignored by the code.
+If the first character of the line {\bf NAME(1:1)} is {\bf @}, 
 then this line contains a title, which will be printed in EMPIRE outputs; obviously
 the title is not used in any calculations. Multiple titles are allowed.
 Users are strongly encouraged to use titles and comments in EMPIRE inputs; that will be a 
 significant step toward a better documentation of our theoretical calculations 
 and evaluations.\\
 
-The optional-input keyword NAME is followed by the value VAL and four positional
+The optional-input keyword {\bf NAME} is followed by the value VAL and four positional
 parameters I1, I2, I3, I4. The keyword indicates a physical quantity, such as the
 binding energy or level density parameter, or a scaling parameter (e.g. TOTRED) . 
 VAL takes numerical value  of the  quantity or scaling parameter).  \\
@@ -7249,7 +7249,7 @@ indicate the estimated uncertainty of the quantity defined by the input keyword
 (except optical model parameters for which the uncertainty is defined by VAL). 
 Each record must be in the FORTRAN fixed-length format:
 \begin{quote}
-FORMAT (A6,G10.5,4I5) NAME,VAL,I1,I2,I3,I4
+FORMAT (A6,G10.5,4I5) {\bf NAME},VAL,I1,I2,I3,I4
 \end{quote}
 Fixed format allows to avoid typing zeros if no input is needed for some 
 positional parameters, but attention should be paid by user to keep 
@@ -9729,32 +9729,31 @@ MacFarlane for his help in interfacing EMPIRE to his processing code NJOY.
 %BNL
 The work at BNL was sponsored by the Office of Nuclear Physics, Office of Science
 of the U.S. Department of Energy under Contract No. DE-AC02-98CH10886 with
-Brookhaven Science Associates, LLC. We are pleased to acknowledge strong support by the International Atomic Energy Agency over last ten years.
-
-
+Brookhaven Science Associates, LLC. We are pleased to acknowledge strong support
+by the International Atomic Energy Agency over last ten years.
 
 \bibliographystyle{prsty}
 \bibliography{scribus}
 
 \appendix
-\chapter{Appendix:  EMPIRE optional input keywords\label{InputList}}
+\chapter{EMPIRE optional input keywords\label{InputList}}
 
 The optional input allows modifications to the default model parameters. 
 Optional input consists of an arbitrary number of records, entered in any order
 and closed with the GO record, which indicates the end of the input. 
 In the simplest case (all defaults), only the GO record must be entered. \\
 
-Each optional record starts with an alphanumeric keyword NAME. If the first 
-character of the line (i.e. NAME(1:1)) is *,# or !, then this line contains
-comments and is ignored by the code. There might be an arbitrary number of comments
-line in the optional input. If the first character of the line (i.e. NAME(1:1))
-is @, then this line contains a title, which will be printed in EMPIRE outputs; 
+Each optional record starts with an alphanumeric keyword {\bf NAME}. If the first 
+character of the line (i.e. {\bf NAME(1:1)}) is {\bf *}, {\bf \#} or {\bf !}, then this
+line contains comments and is ignored by the code. There might be an arbitrary number of
+comments line in the optional input. If the first character of the line \bf NAME(1:1)} 
+is {\bf @}, then this line contains a title, which will be printed in EMPIRE outputs; 
 obviously the title is not used in any calculations. Multiple titles are allowed. 
 Users are strongly encouraged to use titles and comments in EMPIRE inputs; that will be a 
 significant step toward a better documentation of our theoretical calculations 
 and evaluations.\\
 
-The optional-input keyword NAME is followed by the value VAL and four positional
+The optional-input keyword {\bf NAME} is followed by the value VAL and four positional
 parameters I1, I2, I3, I4. The keyword indicates a physical quantity, such as the
 binding energy or level density parameter or scaling parameter. 
 VAL takes the numerical value  of the given quantity or scaling parameter.  \\
@@ -9765,7 +9764,7 @@ indicate the estimated uncertainty of the quantity defined by the input keyword
 (except optical model parameters for which the uncertainty is defined by VAL). 
 Each record must be in the FORTRAN format:\\
 \begin{quote}
-FORMAT (A6,G10.5,4I5) NAME,VAL,I1,I2,I3,I4
+FORMAT (A6,G10.5,4I5) {\bf NAME},VAL,I1,I2,I3,I4
 \end{quote}
 \\
 Fixed format allows to avoid typing zeros if no input is needed for some 
