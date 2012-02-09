@@ -92,6 +92,12 @@ module endf_nubars
     call del_endf(endf)
     ierr = 0
 
+    ! convert ENDF eV to MeV for use in empire
+
+    do i = 1,num
+        nu(i)%x = nu(i)%x/1.D0+06
+    end do
+
     ! save slopes for later
 
     allocate(slp(num-1))

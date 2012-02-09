@@ -1,6 +1,6 @@
-#$Rev: 2528 $
+#$Rev: 2530 $
 #$Author: shoblit $
-#$Date: 2012-02-09 22:58:49 +0100 (Do, 09 Feb 2012) $
+#$Date: 2012-02-10 00:33:19 +0100 (Fr, 10 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -118,7 +118,7 @@ optmand:	optmand.o
 ../util/IO/endf_io.mod :
 	cd ../util/IO/ ; $(MAKE) -e "FC=$(FC)" ;
 
-read_nubar.o : global.h dimension.h ../util/IO/endf_io.mod
+read_nubar.o : read_nubar.f90 global.h dimension.h ../util/IO/endf_io.mod
 	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f90
 
 $(OBJF) : global.h dimension.h
