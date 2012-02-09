@@ -42,9 +42,8 @@ ifeq ($(IPO),TRUE)
   # use ifort with block-mode I/O and cross-file optimization
   # this generally provides the fastest executable on unix
 
-  lib: endf_unx.o ipo_out.o
+  endf_io.a : endf_unx.o ipo_out.o
 	ar -csr endf_io.a *.o
-#	rm *.o
 
   ipo_out.o: *.f90
 	ifort -x=host -O3 -real-size 64 -ipo-c endf_blklin.f90 endf_line.f90\
@@ -58,9 +57,8 @@ else
        mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o\
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
-  lib: $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
+  endf_io.a : $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
 	ar -csr endf_io.a *.o
-#	rm *.o
 
   endf_blklin.o : endf_unx.o
   endf_line.o : $(LINIO)

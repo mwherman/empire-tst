@@ -1,6 +1,6 @@
-#$Rev: 2527 $
+#$Rev: 2528 $
 #$Author: shoblit $
-#$Date: 2012-02-09 21:38:28 +0100 (Do, 09 Feb 2012) $
+#$Date: 2012-02-09 22:58:49 +0100 (Do, 09 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -69,6 +69,9 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 #----flag for Lahey/Fujitsu for debugging
 #FFLAGS = -g --chk
 
+# make sure MAKE knows f90 extension
+%.o : %.f90
+	$(FC) $(FFLAGS) -c $<
 
 OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
@@ -86,7 +89,7 @@ all:
 	$(MAKE) empire
 	$(MAKE) optmand
 
-empire:	$(OBJF)
+empire:	$(OBJF) $(LIBS)
 	$(FC) -o $@ $(OBJF) $(LIBS)
 
 optmand:	optmand.o
@@ -110,10 +113,12 @@ optmand:	optmand.o
 #empire:   $(OBJF) $(OBJE)
 #     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
-../util/IO/endf_io.a :
+../util/IO/endf_io.a : ../util/IO/endf_io.mod
+
+../util/IO/endf_io.mod :
 	cd ../util/IO/ ; $(MAKE) -e "FC=$(FC)" ;
 
-read_nubar.o : global.h dimension.h ../util/IO/endf_io.a
+read_nubar.o : global.h dimension.h ../util/IO/endf_io.mod
 	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f90
 
 $(OBJF) : global.h dimension.h
