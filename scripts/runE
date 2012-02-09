@@ -169,7 +169,7 @@ def runE(proj):
             tfile.write('\n\n\n')
             tfile.write('NOTE: this line and those below will not\
                     be used by Empire. \n')
-			tfile.write('      The collective levels and ground state band\
+	    tfile.write('      The collective levels and ground state band\
                     deformation \n')
             tfile.write('      printed below are retrieved from RIPL optical\
                     model database\n')
