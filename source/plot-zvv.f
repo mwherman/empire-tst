@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2524 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-09 17:47:39 +0100 (Do, 09 Feb 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -18,59 +18,38 @@ C
 C
 C Local variables
 C
-      CHARACTER*22 ctmp
-      CHARACTER*7 caz
-      CHARACTER*10 fname
-      CHARACTER*20 title
+      CHARACTER*5 caz
+      CHARACTER*7 fname
+      CHARACTER*17 ctmp1
+      CHARACTER*50 title
 
       DOUBLE PRECISION u
 
       if(NLV(Nnuc).le.3) return
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-        write(caz,'(I2.2,A1,A1,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+        write(caz,'(A1,A1,I3.3)')
+     >      SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
       else
-        write(caz,'(I2.2,A2,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+        write(caz,'(A2,I3.3)')
+     >      SYMb(Nnuc), int(A(Nnuc))
       endif
 
-      IF(ADIv.eq.0) then
-        write(fname,'(A10)') 'LD_EGSM_GS'
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
-        write(caz,'(A7)') 'EGSM-GS'
-      ENDIF
+      IF(ADIv.eq.0)write(fname,'(A7)') 'LD_EGSM'
+      IF(ADIv.eq.1)write(fname,'(A7)') 'LD__GSM'
+      IF(ADIv.eq.2)write(fname,'(A7)') 'LD__GCM'
+      IF(ADIv.eq.3)write(fname,'(A7)') 'LD_HFBM'
+      IF(ADIv.eq.4)write(fname,'(A7)') 'LD_OGCM'
+      write(ctmp1,'(A17)') fname//'_'//caz//'.zvd'
 
-      IF(ADIv.eq.1) then
-        write(fname,'(A10)') 'LD__GSM_GS'
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
-        write(caz,'(A7)') 'GSM-GS '
-      ENDIF
+C     write(title,'('' Nucleus : '',
+C    &     i3,''-'',A2,''-'',I3)')
+C    &     int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+      title = '  '
 
-      IF(ADIv.eq.2) then
-        write(fname,'(A10)') 'LD_GCM__GS'
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
-        write(caz,'(A7)') 'GCM-GS '
-      ENDIF
+      OPEN (36, FILE=ctmp1, STATUS='unknown')
+      CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz,' ')
 
-      IF(ADIv.eq.3) then
-        write(fname,'(A10)') 'LD_HFBM_GS'
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
-        write(caz,'(A7)') 'HFB-GS '
-      ENDIF
-
-      IF(ADIv.eq.4) then
-        write(fname,'(A10)') 'LD_OGCM_GS'
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
-        write(caz,'(A7)') 'OGCM-GS'
-      ENDIF
-
-      write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
-     &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
-
-
-      OPEN (36, FILE=ctmp, STATUS='unknown')
-      CALL OPEN_ZVV(36,caz,title)
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
 
@@ -91,12 +70,31 @@ C
      &    WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint1+rolowint2
       ENDDO      
-      CALL CLOSE_ZVV(36,' ',' ')
 
-      IF(ADIv.NE.3) RETURN
+      IF(ADIv.NE.3) THEN 
+       IF(ADIv.eq.0) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'GS level density - EGSM (RIPL-3) = EMPIRE specific', title)
 
-      write(caz,'(A7)') 'Pos_GS+'
-      CALL OPEN_ZVV(36,caz,' ')
+       IF(ADIv.eq.1) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'GS level density - GSM (RIPL-2)', title)
+
+       IF(ADIv.eq.2) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'GS level density - Gilbert-Cameron ', title)
+
+       IF(ADIv.eq.4) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'GS level density - Gilbert-Cameron (as in EMPIRE 2.19)', title)
+
+       CLOSE (36)
+
+	 RETURN 
+
+	ELSE
+
+       CALL CLOSE_ZVV(36,' ',' ')
+
+	ENDIF  
+
+      CALL OPEN_ZVV(36,'RHO(U,+) at GS ',' ')
       DO kk = 1, NEX(Nnuc)
         u = EX(kk,Nnuc)
         rolowint1 = 0.D0
@@ -110,8 +108,7 @@ C
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
 
-      write(caz,'(A7)') 'Neg_GS-'
-      CALL OPEN_ZVV(36,caz,' ')
+      CALL OPEN_ZVV(36,'RHO(U,-) at GS ',' ')
       DO kk = 1, NEX(Nnuc)
          u = EX(kk,Nnuc)
          rolowint2 = 0.D0
@@ -123,8 +120,10 @@ C
      &       WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint2
        ENDDO
-       CALL CLOSE_ZVV(36,' ','GS Level Density')
-  
+
+       CALL CLOSE_ZVV_LEVDEN(36,
+     &  'GS level density - HFB tabulated (RIPL-3)', title)
+
       CLOSE (36)
       RETURN
       END
@@ -139,39 +138,40 @@ C
 C
 C Local variables
 C
-      CHARACTER*22 ctmp
+      CHARACTER*20 ctmp
       CHARACTER*7 caz
+      CHARACTER*5 ctmp1
       CHARACTER*10 fname
-      CHARACTER*20 title
+      CHARACTER*50 title
 
       DOUBLE PRECISION u,rocumul1,rocumul2
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-        write(caz,'(I2.2,A1,A1,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+        write(ctmp1,'(A1,A1,I3.3)')
+     >      SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
       else
-        write(caz,'(I2.2,A2,I3.3)')
-     >      int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+        write(ctmp1,'(A2,I3.3)')
+     >      SYMb(Nnuc), int(A(Nnuc))
       endif
 
       IF(FISden(Nnuc).LE.1) then
         write(fname,'(A9,I1)') 'LD_EGSM_S',ib
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(ctmp,'(A20)') fname//'_'//ctmp1//'.zvd'
         write(caz,'(A6,I1)') 'EGSM-S',Ib
       ENDIF
 
       IF(FISden(Nnuc).eq.3) then
         write(fname,'(A9,I1)') 'LD_HFBM_S',ib
-        write(ctmp,'(A22)') fname//'_'//caz//'.zvd'
+        write(ctmp,'(A20)') fname//'_'//ctmp1//'.zvd'
         write(caz,'(A6,I1)') 'HFBM-S',Ib
-c        pause
       ENDIF
  
-      write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
-     &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+C     write(title,'('' Fissioning nucleus: '', i3,''-'',A2,''-'',I3)')
+C    &     int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+      title = '    '
 
       OPEN (36, FILE=ctmp, STATUS='unknown')
-      CALL OPEN_ZVV(36,caz,title)
+      CALL OPEN_ZVV(36,'RHO(U)   at saddle of '//ctmp1,' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul1 = 0.d0
@@ -185,11 +185,39 @@ c        pause
      &        1e6*u,max(0.1d0,rocumul2+rocumul1)
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
+
+
+      IF(FISden(Nnuc).NE.3) THEN 
+
+       IF(FISden(Nnuc).eq.0) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'Saddle-point  level density - EGSM (RIPL-3) = EMPIRE specific',
+     &   title)
+
+       IF(FISden(Nnuc).eq.1) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'Saddle-point  level density - GSM (RIPL-2)', 
+     &   title)
+
+       IF(FISden(Nnuc).eq.2) CALL CLOSE_ZVV_LEVDEN(36,
+     &  'Saddle-point  level density - Gilbert-Cameron ', 
+     &   title)
+
+       IF(FISden(Nnuc).eq.4) CALL CLOSE_ZVV_LEVDEN(36,
+     &'Saddle-point level density - Gilbert-Cameron (as in EMPIRE 2.19)'
+     & , title)
+       CLOSE (36)
+
+	 RETURN 
+
+	ELSE
+
+       CALL CLOSE_ZVV(36,' ',' ')
+
+	ENDIF  
+
  
       IF(FISden(Nnuc).LT.3)RETURN
 
-      write(caz,'(A6,I1)') 'Pos_S_',Ib
-      CALL OPEN_ZVV(36,caz,' ')
+      CALL OPEN_ZVV(36,'RHO(U,+) at saddle point',' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul1 = 0.d0
@@ -202,8 +230,7 @@ c        pause
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
       
-      write(caz,'(A6,I1)') 'Neg_S_',Ib
-      CALL OPEN_ZVV(36,caz,' ')
+      CALL OPEN_ZVV(36,'RHO(U,-) at saddle point',' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul2 = 0.d0
@@ -214,14 +241,14 @@ c        pause
         WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &      1e6*u,max(0.1d0,rocumul2)
       ENDDO
-      CALL CLOSE_ZVV(36,' ',' SP Level Density') 
+       CALL CLOSE_ZVV_LEVDEN(36,
+     &  'Saddle-point level density - HFB tabulated (RIPL-3)', title)
       CLOSE (36)
       return
       end
      
 c==============================================================
       SUBROUTINE PLOT_ZVV_NumCumul(Nnuc,Defit,Nplot,Nlwst) 
-
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -241,38 +268,38 @@ C
 C
 C Local variables
 C
-      CHARACTER*7 caz
-      CHARACTER*10 fname
-      CHARACTER*22 ctmp1
-      CHARACTER*30 title
+      CHARACTER*5 caz
+      CHARACTER*7 fname
+      CHARACTER*24 ctmp1
+      CHARACTER*50 title
 
       REAL FLOAT
       INTEGER ij, kk,iugrid
       INTEGER INT
 
+      if(NLV(Nnuc).le.3) return
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-         write(caz,'(I2.2,A1,A1,I3.3)')
-     &         int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
+         write(caz,'(A1,A1,I3.3)')
+     &         SYMb(Nnuc)(1:1),'_',int(A(Nnuc))
       else
-         write(caz,'(I2.2,A2,I3.3)')
-     &         int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+         write(caz,'(A2,I3.3)')
+     &         SYMb(Nnuc), int(A(Nnuc))
       endif
 
-      IF(ADIv.eq.0)write(fname,'(A10)') 'CumNL_EGSM'
-      IF(ADIv.eq.1)write(fname,'(A10)') 'CumNL__GSM'
-      IF(ADIv.eq.2)write(fname,'(A10)') 'CumNL__GCM'
-      IF(ADIv.eq.3)write(fname,'(A10)') 'CumNL_HFBM'
-      IF(ADIv.eq.4)write(fname,'(A10)') 'CumNL_OGCM'
-      write(ctmp1,'(A22)') fname//'_'//caz//'.zvd'
-      write(title,'(a4,1x,i3,''-'',A2,''-'',I3,3H CN)')
-     &     'tit:',int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
+      IF(ADIv.eq.0)write(fname,'(A7)') 'NL_EGSM'
+      IF(ADIv.eq.1)write(fname,'(A7)') 'NL__GSM'
+      IF(ADIv.eq.2)write(fname,'(A7)') 'NL__GCM'
+      IF(ADIv.eq.3)write(fname,'(A7)') 'NL_HFBM'
+      IF(ADIv.eq.4)write(fname,'(A7)') 'NL_OGCM'
+      write(ctmp1,'(A24)') fname//'_'//caz//'.zvd'
+
+      write(title,'('' Nucleus: '',i3,''-'',A2,''-'',I3)')
+     &  int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
 
 
       OPEN (36, FILE=ctmp1, STATUS='unknown')
-      write(caz,'(A7)') 'Exp_Lev'
-
-      CALL OPEN_ZVV(36,caz,title)
+      CALL OPEN_ZVV(36,'Exp Cumul Levels',' ')
       WRITE (36,*) '0.0 1.0'
       DO kk = 2, NLV(Nnuc)
          WRITE (36,*) ELV(kk,Nnuc)*1d6,FLOAT(kk - 1)
@@ -280,10 +307,8 @@ C
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
 
-      write(caz,'(A7)') 'Cum_Tot'
-
-      CALL OPEN_ZVV(36,caz,title)
-
+      CALL OPEN_ZVV(36,'Int of RHO(E)',' ')
+	
       rocumul = 1.D0
       WRITE (36,*) '0.0 1.0'
 
@@ -314,7 +339,7 @@ C-----HFB
             WRITE (36,*) uugrid(kk)*1d6,cgrid(kk,1)+cgrid(kk,2)
          ENDDO
       ENDIF   
- 14   CALL CLOSE_ZVV(36,' ','NUMBER OF LEVELS ')
+ 14   CALL CLOSE_ZVV_CUMUL(36,'Cumulative number of levels',title)
       close(36)
       RETURN
       END
@@ -324,7 +349,7 @@ C======================================================
       character*(*) title, tfunct
       integer iout
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
-      if(title(1:1).ne.' ') write(iout,'(A30)') title      
+      if(title(1:1).ne.' ') write(iout,*) trim(title)      
       write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A10)') 'thick: 2   '
       write(iout,'(A10/2H//)') 'length: 92 '
@@ -337,12 +362,70 @@ C======================================================
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/u'
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
-      if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
-      if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
+      if(titlex(1:1).ne.' ') write(iout,*) 'x: ',trim(titlex)
+      if(titley(1:1).ne.' ') write(iout,*) 'y: ',trim(titley)
       write(iout,'(A19)') 'x-scale: auto      '
       write(iout,'(A17)') 'y-scale: auto      '
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/c  '
+      return
+      end   
+
+      SUBROUTINE CLOSE_ZVV_CUMUL(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/u'
+      write(iout,*) '#begin aa/c'
+      write(iout,*) 'tit:',trim(titlex)
+      write(iout,*) 'tit2:',trim(titley)
+	write(iout,*) 'x-unit:1000000, (MeV)'
+      write(iout,*) 'ix-unit: 1  '
+	write(iout,*) 'y-unit:1,   '
+      write(iout,*) 'iy-unit: 1'
+      write(iout,*) 'X-SCALE: lin'
+      write(iout,*) 'Y-SCALE: lin'
+      write(iout,*) 'X-RANGE: 0'
+      write(iout,*) 'Y-RANGE: 1'
+      write(iout,*) 'X-GRID: 1'
+      write(iout,*) 'NOSTAT: 1'
+      write(iout,*) 'legend: 1'
+      write(iout,*) 'X: E'
+      write(iout,*) 'x-long: Energy       '
+      write(iout,*) 'Y: Cumulative number of levels '
+      write(iout,*) 'x-scale: auto        '
+      write(iout,*) 'y-scale: auto        '
+      write(iout,'(A2)') '//'
+      write(iout,*) '#end aa/c'
+      return
+      end   
+
+      SUBROUTINE CLOSE_ZVV_LEVDEN(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/u'
+      write(iout,'(A19)') '#begin aa/c'
+      write(iout,*) 'tit:',trim(titlex)
+      write(iout,*) 'tit2:',trim(titley)
+	write(iout,*) 'x-unit:1000000, (MeV)'
+      write(iout,*) 'ix-unit: 1'
+	write(iout,*) 'y-unit:1, (1/MeV)'
+      write(iout,*) 'iy-unit: 1'
+      write(iout,*) 'X-SCALE: lin'
+      write(iout,*) 'Y-SCALE: log'
+C     write(iout,*) 'X-RANGE: 0'
+C     write(iout,*) 'Y-RANGE: 1'
+      write(iout,*) 'X-GRID: 1'
+      write(iout,*) 'NOSTAT: 1'
+      write(iout,*) 'legend: 1'
+      write(iout,*) 'X: E'
+      write(iout,*) 'x-long: Energy       '
+      write(iout,*) 'Y: Level density     '
+C     write(iout,*) 'x-scale: auto        '
+C     write(iout,*) 'y-scale: auto        '
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end aa/c  '
       return
       end   
 

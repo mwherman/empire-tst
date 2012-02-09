@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2514 $
+Ccc   * $Rev: 2524 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-08 22:53:43 +0100 (Mi, 08 Feb 2012) $
+Ccc   * $Date: 2012-02-09 17:47:39 +0100 (Do, 09 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1342,11 +1342,7 @@ C
 C--------with x=1 if used and x=0 if not.
 C
 C--------initialize matrix with 0's
-      DO i = 1, NDREGIONS   !over ejectiles/regions
-         DO j = 1, NDMODELS !over models in the order as above
-            IDNa(i,j) = 0
-         ENDDO
-      ENDDO
+         IDNa = 0
 C--------set ECIS (.,1)
          IF (DIRect.GT.0 ) THEN
             IF (NPRoject.EQ.1) THEN
@@ -1428,6 +1424,16 @@ C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
          ENDIF
 C--------set PCROSS  (.,6) cluster emission
          IF (PEQc.GT.0.d0) THEN
+            IF (MSC.GT.0 .OR. MSD.GT.0) THEN
+              WRITE (8,*) ''
+              WRITE (8,*)
+     &             'WARNING: MSD/MSC not compatible with PCROSS'
+              WRITE (8,*)
+     &             'WARNING: PCROSS disabled, use DDHMS (HMS 1)'
+              PEQcont = 0.d0
+	        PEQc = 0.d0
+	        GOTO 1256
+	      ENDIF
             IDNa(2,6) = 1
             IDNa(4,6) = 1
             IDNa(5,6) = 1  ! gammas
@@ -1452,13 +1458,13 @@ C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
-                 IF (NPRoject.EQ.2) THEN
+              IF (NPRoject.EQ.2) THEN
                   IDNa(3,6) = 0
                   IDNa(4,6) = 0
-               ELSEIF (NPRoject.EQ.1) THEN
+              ELSEIF (NPRoject.EQ.1) THEN
                   IDNa(1,6) = 0
                   IDNa(2,6) = 0
-               ELSE
+              ELSE
                   WRITE (8,*) ''
                   WRITE (8,*)
      &             'WARNING: MSD/MSC DISABLED FOR INCIDENT PARTICLES '
@@ -1472,7 +1478,7 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
                   IDNa(2,3) = 0
                   IDNa(3,3) = 0
                   IDNa(4,3) = 0
-               ENDIF
+              ENDIF
             ENDIF
 C-----------stop PCROSS nucleon channels if HMS active
             IF (LHMs.GT.0) THEN
@@ -1481,7 +1487,7 @@ C-----------stop PCROSS nucleon channels if HMS active
             ENDIF
          ENDIF
 C--------print IDNa matrix
-         WRITE (8,*) ' '
+ 1256    WRITE (8,*) ' '
          WRITE (8,*)
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
@@ -1866,7 +1872,7 @@ C-----check whether any residue excitation is higher than CN
       ENDDO
       
       IF(qmin.lt.0.d0) THEN
-        WRITE(8,'(1x,A19)')   'Exotermic reaction '
+C       WRITE(8,'(1x,A19)')   'Exotermic reaction '
         CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
 C-------check whether population array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
@@ -2161,7 +2167,8 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
          IF (ADIv.NE.3.0D0) THEN
-            WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
+            IF (ADIv.GT.1.0D0) 
+     &      WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
             WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
@@ -3845,10 +3852,10 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'LEVDEN') THEN
-            IF(val.lt.0 .or. val.gt.3) THEN
+            IF(val.lt.0 .or. val.gt.4) THEN
               WRITE (8,'('' ERROR: LEVDEN ='',I1)') NINT(val)
               WRITE (8,
-     &    '('' ERROR: LEVDEN must be 0,1,2; default EGSM = 0 used '')')
+     & '('' ERROR: LEVDEN must be 0,1,2,3,4; default EGSM = 0 used '')')
               GOTO 100
             ENDIF
             IF (ADIv.EQ.0.0D0) WRITE (8,
@@ -3871,6 +3878,7 @@ C    &           '('' Gilbert-Cameron level densities selected '')')
      &lected'')')
             IF (ADIv.EQ.4.0D0) WRITE (8,
      & '('' Gilbert-Cameron (EMPIRE 2.18) level densities selected '')')
+C
             IF (ADIv.EQ.0.0D0) WRITE (12,
      &           '('' EMPIRE-specific level densities (J>>K aprox.)'')')
             IF (ADIv.EQ.1.0D0) WRITE (12,
@@ -3889,7 +3897,7 @@ C    &           '('' Gilbert-Cameron level densities '')')
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
             IF (ADIv.EQ.4.0D0) WRITE (12,
-     & '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
+     &     '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
             ADIv = val
             GOTO 100
          ENDIF
@@ -9183,7 +9191,7 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,'(/1x,A34/1x,A11,F7.3,A13,F7.4)')
      &           'EXPERIMENTAL DEFORMATION (RIPL):', 'BETA (2+) =',
      &          beta2, '  BETA (3-) =', beta3
-         IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
+
          IF (DEFormed) THEN
             WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
             WRITE (8,*)
@@ -9207,8 +9215,8 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
          WRITE (8,*) ' WARNING: ',
-     &            'Default dynamical deformations 0.05(3-) will be used'
-         beta3 = 0.05
+     &        'Default dynamical deformations 0.005 (3-) will be used'
+         beta3 = 0.005
       ENDIF
 
   400 DO ilv = 1, nlvs
@@ -9252,7 +9260,7 @@ C           RCN 0811
 C
             D_Llv(ND_nlv) = 0
             D_Klv(ND_nlv) = 0
-            D_Def(ND_nlv,2) = 0.01
+            D_Def(ND_nlv,2) = 0.005
             IF (beta2.GT.0.D0 .AND. DEFormed) D_Def(ND_nlv,2) = beta2
             gspin = xjlvr
             gspar = DBLE(lvpr)
@@ -9312,7 +9320,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = beta2
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1) THEN
@@ -9325,7 +9333,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = beta2
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i22p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1) THEN
@@ -9336,7 +9344,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.05
+               D_Def(ND_nlv,2) = beta2
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.1.d0 .AND. lvpr.EQ.-1) THEN
@@ -9347,7 +9355,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i3m.EQ.0 .AND. xjlvr.EQ.3.d0 .AND. lvpr.EQ.-1) THEN
@@ -9370,7 +9378,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i41p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1) THEN
@@ -9381,7 +9389,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.05
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i31p.EQ.0 .AND. xjlvr.EQ.3.D0 .AND. lvpr.EQ.1) THEN
@@ -9392,7 +9400,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.05
+               D_Def(ND_nlv,2) = beta3
                GOTO 500
             ENDIF
             IF (ECUtcoll.GT.0. .AND. elvr.GE.ECUtcoll) GOTO 600
@@ -9404,7 +9412,7 @@ C-----------Additional levels are added for DWBA calculations
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.05
+               D_Def(ND_nlv,2) = 0.005
                ierr = 0
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
@@ -9429,7 +9437,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.(gspin + 2*delta_k) .AND.
@@ -9444,7 +9452,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
             IF (i6p.EQ.0 .AND. xjlvr.EQ.(gspin + 3*delta_k) .AND.
@@ -9459,7 +9467,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.01
                IF(odd) goto 600
                GOTO 500
             ENDIF
@@ -9476,7 +9484,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
@@ -9488,7 +9496,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
 c           IF (i12p.EQ.0 .AND. xjlvr.EQ.(gspin + 6*delta_k) .AND.
@@ -9500,7 +9508,7 @@ c              D_Elv(ND_nlv) = elvr
 c              D_Lvp(ND_nlv) = lvpr
 c              D_Xjlv(ND_nlv) = xjlvr
 c              IPH(ND_nlv) = 0
-c              D_Def(ND_nlv,2) = beta2*0.25
+c              D_Def(ND_nlv,2) = 0.01
 c              GOTO 500
 c            ENDIF
             IF (i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1
@@ -9512,7 +9520,7 @@ c            ENDIF
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.(gspin + NINT(delta_k)/2) .AND.
@@ -9524,7 +9532,7 @@ c            ENDIF
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i3m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
@@ -9548,7 +9556,7 @@ c            ENDIF
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i21p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
@@ -9560,7 +9568,7 @@ c            ENDIF
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i22p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
@@ -9572,7 +9580,7 @@ c            ENDIF
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
 C--------------Additional levels are added for DWBA calculations
@@ -9586,7 +9594,7 @@ C--------------Additional levels are added for DWBA calculations
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.02
+               D_Def(ND_nlv,2) = 0.005
                ierr = 0
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600

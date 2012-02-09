@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2486 $
+Ccc   * $Rev: 2524 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-07 19:07:45 +0100 (Di, 07 Feb 2012) $
+Ccc   * $Date: 2012-02-09 17:47:39 +0100 (Do, 09 Feb 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2146,8 +2146,8 @@ C
 
 C-----Absorption and elastic cross sections in mb
       DO l = 0, Maxlw
-         sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
-         selast = selast + Sel(l + 1)*DBLE(2*l + 1)
+        sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+        selast = selast + Sel(l + 1)*DBLE(2*l + 1)
       ENDDO
       sabs   = 10.d0*PI/ak2*sabs
       selast = 10.d0*PI/ak2*selast
@@ -2184,40 +2184,66 @@ C          SINl = SINl + dtmp
       ENDDO
   400 CLOSE (45)
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
-C--- SINlcc in next IF changed to SINl - BVC
+
+      IF (SINlcc.GT.ABScs) THEN
+         WRITE (8,*)
+         WRITE (8,*)
+     &     ' ERROR: Coupled channel calculation do not converge '
+         WRITE (8,'(
+     &1x, '' ERROR: Inelastic cross section ='',F8.2,'' mb''/
+     &1x, '' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, ABScs
+         WRITE (8,*)
+     &    ' ERROR: Change the selected OMP or coupled levels !! '
+         STOP ' ERROR: Change the selected OMP or coupled levels !! '
+      ENDIF
+
       IF (SINl.GT.ABScs) THEN
          WRITE (8,*)
-         WRITE (8,*) ' WARNING: POSSIBLE ECIS NON-CONVERGENCE !!'
-         WRITE (8,
-     &     '(5x,''**************************************************'')'
-     &     )
-         WRITE (8,
-     &     '(5x,'' Direct cross section calculation do not converge '')'
-     &     )
-         WRITE (8,
-     &'(6x,''Inelastic cross section ='',F8.2,'' mb''/
-     &  6x,''Reaction  cross section ='',F8.2,'' mb''/)') SINl, ABScs
-         WRITE (8,
-
-     &     '(5x,'' You may try to reduce the number of collective level
-
-     &s (leaving only CCs) or '')') 
-
-         WRITE (8,'(5x,'' change the selected OMP '')')
-         WRITE (8,
-     &     '(5x,'' This problem usually happens using DWBA method   '')'
-     &     )
-         WRITE (8,
-     &     '(5x,'' to treat strong coupled nuclei                   '')'
-     &     )
-         WRITE (8,
-     &     '(5x,''            CALCULATION STOPPED                   '')'
-     &     )
-         WRITE (8,
-     &     '(5x,''**************************************************'')'
-     &     )
-         STOP ' POSSIBLE ECIS NON-CONVERGENCE !!'
+         WRITE (8,*) 
+     &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
+         WRITE (8,*)
+     &' ERROR: DWBA calculation produces too big cross sections '
+         WRITE (8,'(
+     &1x,'' ERROR: DWBA cross section to uncoupled discrete levels ='',
+     &  F8.2,'' mb''/
+     &1x,'' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
+     &   SINl, ABScs
+         WRITE (8,*)
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of DWBA levels'
+         WRITE (8,*)
+C        STOP 
+C    &' ERROR: EDIT the collective level file to decrease dynamical defo
+C    &rmations of DWBA levels'
       ENDIF
+
+      IF (SINl+SINlcont.GT.ABScs) THEN
+         WRITE (8,*)
+         WRITE (8,*) 
+     &' ERROR: Too big dynam. deformations of DWBA uncoupled levels'
+         WRITE (8,*)
+     &' ERROR: DWBA calculation produces too big cross sections    '
+         WRITE (8,'(
+     &1x,'' ERROR: DWBA cross section to uncoupled discrete levels ='',
+     &  F8.2,'' mb  !!''/
+     &1x,'' ERROR: DWBA cross section to levels in the continuum ='',
+     &  F8.2,'' mb  !!''/
+     &1x,'' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
+     &   SINl, SINlcont, ABScs
+         WRITE (8,*)
+     &' ERROR: Reduce the dynamical deformations of your DWBA levels'
+         WRITE (8,*)
+     &' ERROR:     in the collective-level file (*-lev.col) '
+         WRITE (8,*)
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of DWBA levels'
+         WRITE (8,*)
+C        STOP 
+C    &' ERROR: EDIT the collective level file to decrease dynamical defo
+C    &rmations of DWBA levels'
+      ENDIF
+
 C
 C     Absorption cross section includes inelastic scattering cross section to coupled levels
 C
@@ -2263,10 +2289,53 @@ C     between calculated and read ECIS XS
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
 C     continuum also included
 C
-      DO l = 0, Maxlw
-        Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
-      ENDDO
-      CSFus = ABScs - SINlcc - SINl - SINlcont
+158   CONTINUE
+      IF(SINlcc+SINl+SINlcont.LE.ABScs) THEN 
+        DO l = 0, Maxlw
+          Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
+        ENDDO
+        CSFus = ABScs - SINlcc - SINl - SINlcont
+      ELSE 
+         WRITE (8,*)
+         WRITE (8,
+     &'(1x,'' WARNING: CC cross section to coupled discrete levels ='',
+     &  F8.2,'' mb  !!''/
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     & ,F8.2,'' mb  !!''/
+     & 1x,'' WARNING: DWBA cross section to levels in the continuum =''
+     & ,F8.2,'' mb  !!''/
+     & 1x,'' WARNING: Reaction  cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, SINl, SINlcont, ABScs
+	  IF(SINlcont.gt.0) then
+          SINlcont = 0.d0
+          WRITE (8,*) 
+     &	' WARNING: DWBA to the continuum neglected at Einc =',EINl
+	    goto 158
+	  ENDIF
+	  IF(SINl.gt.0) then
+          SINl = 0.d0
+          WRITE (8,*) 
+     &	' WARNING: DWBA to uncoupled levels neglected at Einc =',EINl
+	    goto 158
+	  ENDIF
+        WRITE (8,*) 
+     &' ERROR: Too big dynam. deformations of DWBA uncoupled levels'
+        WRITE (8,*) ' ERROR: or ECIS does not converge'
+        WRITE (8,*)
+     &  ' ERROR: You may change your collective level file to include'
+        WRITE (8,*)
+     &  ' ERROR:   fewer collective levels, or change your OMP'
+        WRITE (8,*)
+     &' ERROR: You may reduce the dynamical deformations of your DWBA'
+        WRITE (8,*)
+     &' ERROR:   levels in the collective-level file (*-lev.col) '
+        WRITE (8,*)
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of DWBA levels or reduce the number of collective levels'
+        STOP 
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of DWBA levels or reduce the number of collective levels'
+      ENDIF
 
       RETURN
       END

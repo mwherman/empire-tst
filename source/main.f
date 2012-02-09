@@ -1,6 +1,6 @@
-cc   * $Rev: 2509 $
+cc   * $Rev: 2524 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-08 21:37:39 +0100 (Mi, 08 Feb 2012) $
+Ccc   * $Date: 2012-02-09 17:47:39 +0100 (Do, 09 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -313,15 +313,18 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
          ggqr=85.*A(0)**(-2./3.)
          ggor=5.
          mintsp = mod(NINT(2*D_Xjlv(1)),2)
-         OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
+          OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
-         READ (46,*,END = 1400) ! To skip first line <INE.C.S.> ..
-C--------Get and add inelastic cross sections (including double-differential)
-         DO i = 2, ND_nlv
-            ilv = ICOller(i)
-C           RCN 2010 
-            IF(ilv.LE.NLV(nnurec)) then
-C           For odd nuclides, collective states in continuum have different spin than the ground state
+          READ (46,*,END = 1400) ! To skip first line <INE.C.S.> ..
+C---------Get and add inelastic cross sections (including double-differential)
+          DO i = 2, ND_nlv
+           ilv = ICOller(i)
+C          RCN 2010 
+           IF(ICOllev(i).le.LEVCC .and. SINlcc.le.0) exit
+           IF(ICOllev(i).gt.LEVCC .and. SINl+SINlcont.le.0) cycle
+
+           IF(ilv.LE.NLV(nnurec)) then
+C          For odd nuclides, collective states in continuum have different spin than the ground state
 C    &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
 C------------Adding inelastic to discrete levels
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
@@ -398,7 +401,7 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                READ (46,*,END = 1400) popread
                READ (45,*,END = 1400)     ! Skipping level identifier line
              ENDIF
-           ELSEIF (MSD.eq.0) then
+	     ELSEIF(MSD.eq.0)then
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0)
@@ -786,6 +789,7 @@ C-----PCROSS exciton model calculations of preequilibrium contribution
 C-----including cluster emission by Iwamoto-Harada model and angular
 C-----distributions according to Kalbach systematics
 C-----
+     
       totemis = 0.d0
       IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
 C        ftmp = CSFus - xsinl
@@ -796,6 +800,7 @@ C        xsinl is calculated by MSD
          CALL PCROSS(ftmp,totemis,xsinl)
       ENDIF          ! PCRoss done
 
+      corrmsd = 1.d0
       IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. nejcec.gt.0
      &    .AND. NREs(nejcec).GE.0 ) THEN
 C--------Print inelastic PE double differential cross sections
@@ -856,8 +861,14 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
          if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (8,*)
      &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
          WRITE (8,*) ' '
-C--------Correct CN population for PE continuum emission
-         corrmsd = (CSFus - (xsinl + totemis))/CSFus
+C--------Correct CN population for PE continuum emission in PCROSS and MSD/MSC
+	   ftmp = 0.d0
+         do i=1,NDEJC
+	     ftmp = ftmp + CSMsd(i)
+	   enddo
+
+         corrmsd = (CSFus - ftmp)/CSFus
+C        corrmsd = (CSFus - (xsinl + totemis))/CSFus
 C        write(*,*) ' CSFus=',sngl(CSFus)
 C    &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
 
@@ -911,9 +922,9 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
          ENDDO
          WRITE (8,*) ' '
          WRITE (8,'(1x,A32,F9.2,A3)') 
-     &     ' Reaction cross section         ', sngl(CSFus),' mb'
+     &     ' Absorption cross section       ', sngl(CSFus),' mb'
          WRITE (8,'(1x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     ' PE + Direct reduction factor   ',
+     &     ' PE + Direct contribution       ',
      &                               sngl((1.d0-corrmsd)*CSFus),' mb',
      &                               sngl((1.d0-corrmsd)*100),' %'
          WRITE (8,'(1x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
@@ -931,19 +942,21 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
 C--------TRISTAN *** done ***
 C--------Add MSD contribution to the residual nucleus population
 C--------Locate residual nucleus after MSD emission
-         DO nejc = 0, NDEjc
-           nnur = NREs(nejc)
+         DO i = 0, NDEjc
+           nnur = NREs(i)
            IF(nnur.LT.0) CYCLE
-           IF (CSMsd(nejc).NE.0.0D0) CALL ACCUMSD(1,nnur,nejc)
+           IF (CSMsd(i).LE.0.0D0) cycle
+
+           CALL ACCUMSD(1,nnur,i)
 C----------Add PE contribution to energy spectra (angle int.)
-C          ftmp = 0.d0
+           ftmp = 0.d0
            DO ie = 1, NDEcse
-              CSE(ie,nejc,1) = CSE(ie,nejc,1) + CSEmsd(ie,nejc)
-              CSEt(ie,nejc ) = CSEt(ie,nejc ) + CSEmsd(ie,nejc)      
-C             ftmp = ftmp + DE*CSEmsd(ie,nejc)
+              CSE (ie,i,1) = CSE (ie,i,1) + CSEmsd(ie,i)
+              CSEt(ie,i  ) = CSEt(ie,i  ) + CSEmsd(ie,i)      
+              ftmp = ftmp + DE*CSEmsd(ie,i)
            ENDDO
 C----------Add PE contribution to the total NEJC emission
-           CSEmis(nejc,1) = CSEmis(nejc,1) + CSMsd(nejc)
+           CSEmis(i,1) = CSEmis(i,1) + CSMsd(i)
          ENDDO
       ENDIF
 
@@ -994,13 +1007,13 @@ C-----
       IF (IOUt.GT.0) THEN
          IF (DIRect.EQ.0) THEN
             WRITE (8,
-     &'(''   Fusion cross section = '',G13.6,
+     &'(''   Absorption cross section = '',G13.6,
      &  '' mb including'')') CSFus
             WRITE (8,'(''   PE (not DWBA) = '',
      &  G13.6,'' mb'')') xsinl + totemis
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (8,
-     &'(''   Fusion cross section = '',G13.6,
+     &'(''   Absorption cross section = '',G13.6,
      &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
             WRITE (8,
      &'(''   DWBA inelastic to uncoupled discrete levels = '',
@@ -1017,7 +1030,7 @@ C-----
      &  ''CC transmission coefficients'')')
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,
-     &'(''   Fusion cross section = '',G13.6,
+     &'(''   Absorption cross section = '',G13.6,
      &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
             WRITE (8,
      &'(''   DWBA inelastic to discrete levels = '',
