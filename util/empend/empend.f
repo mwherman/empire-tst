@@ -97,6 +97,7 @@ C-V  11/12 - Fix to previous fix when recoils spectra are given.
 C-V  12/02 - Output changed - fix search string.
 C-V        - Fix processing of ENDF=0 option, recognised by lack of
 C-V          spectrum data - except (z,x) (left in by mistake?)
+C-V        - Allow incident deuterons, tritons, He-3
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3205,7 +3206,9 @@ C* Identify projectile, target and energy
   200 READ (REC(11:20),802) KZ,CH,KA
       IZI=KZ*1000+KA
       IF(IZI.NE.   0 .AND. IZI.NE.   1 .AND.
-     &   IZI.NE.1001 .AND. IZI.NE.2004) THEN
+     &   IZI.NE.1001 .AND. IZI.NE.1002 .AND.
+     &   IZI.NE.1003 .AND.
+     &   IZI.NE.2003 .AND. IZI.NE.2004) THEN
         WRITE(LTT,904) ' EMPEND ERROR - Invalid projectile ZA   ',IZI
 c...    STOP 'EMPEND ERROR - Invalid projectile'
       END IF
@@ -4870,6 +4873,12 @@ C*
         NSUB=   10
       ELSE IF(IZI.EQ.1001) THEN
         NSUB=10010
+      ELSE IF(IZI.EQ.1002) THEN
+        NSUB=10020
+      ELSE IF(IZI.EQ.1003) THEN
+        NSUB=10030
+      ELSE IF(IZI.EQ.2003) THEN
+        NSUB=20030
       ELSE IF(IZI.EQ.2004) THEN
         NSUB=20040
       ELSE
