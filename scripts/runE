@@ -54,7 +54,7 @@ def runE(proj):
     rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT')
     rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
-    rm('TARGET_COLL.DAT', 'TARGET_COLL.RIPL', 'warnings', 'INPUT')
+    rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP')
     rm('SENSITIVITY.MATRIX','NUBAR-EVAL.ENDF')
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
@@ -169,11 +169,11 @@ def runE(proj):
             tfile.write('\n\n\n')
             tfile.write('NOTE: this line and those below will not\
                     be used by Empire. \n')
-            tfile.write('      The collective levels and ground state band\
+			tfile.write('      The collective levels and ground state band\
                     deformation \n')
-            tfile.write('      printed below are inferred from the discrete\
-                    level file   \n')
-            tfile.write('      and provided for comparison with the RIPL data\
+            tfile.write('      printed below are retrieved from RIPL optical\
+                    model database\n')
+            tfile.write('      and provided for comparison with selected collective levels\
                     above.\n')
             tfile.write('\n\n')
             if not isEmpty('TARGET_COLL_RIPL.DAT'):
@@ -240,6 +240,8 @@ def runE(proj):
         mv('PFNS.OUT',proj+'-pfns.out',0)
     if not isEmpty('PFNM.OUT'):
         mv('PFNM.OUT',proj+'-pfnm.out',0)
+    if not isEmpty('ddhms.out'):
+        mv('ddhms.out',proj+'-hms.lst',0)
 
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
@@ -264,8 +266,8 @@ def runE(proj):
     # Delete Temporary files
     
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
-    rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
-    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
+    rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
+    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ddhms.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
     rm( glob('TARGET-*.tl'))
     rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
