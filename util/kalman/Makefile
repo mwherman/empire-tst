@@ -38,39 +38,38 @@ FFLAGS = -std=legacy -O3
 #FFLAGS = -g --chk
 
 #all: kalman3 kalend2 kalend3 c4tokal genkal
-all: kalman3 kalend2 c4tokal genkal
+all: kalman3.exe kalend2.exe c4tokal.exe genkal.exe
 
 OBJF =	kalman3.1.o
 
-
-kalman3:   $(OBJF)
-	$(FC) -o $@.exe $(OBJF)
+kalman3.exe :   $(OBJF)
+	$(FC) -o $@ $(OBJF)
 
 
 OBJG =	kalend2.o rctn.o strlen.o
 
 
-kalend2:   $(OBJG)
-	$(FC) -o $@.exe $(OBJG)
+kalend2.exe :   $(OBJG)
+	$(FC) -o $@ $(OBJG)
 
 
 OBJH =	c4tokal.o rctn.o strlen.o 
 
 
-c4tokal:   $(OBJH)
-	$(FC) -o $@.exe $(OBJH)
+c4tokal.exe:   $(OBJH)
+	$(FC) -o $@ $(OBJH)
 
 
 OBJI =	genkal.o rctn.o strlen.o 
 
-genkal:   $(OBJI)
-	$(FC) -o $@.exe $(OBJI)
+genkal.exe:   $(OBJI)
+	$(FC) -o $@ $(OBJI)
 
 
 #OBJL = kalend3.o rctn.o strlen.o
 
-#kalend3:   $(OBJL)
-#	$(FC) -o $@.exe $(OBJL)
+#kalend3.exe:   $(OBJL)
+#	$(FC) -o $@ $(OBJL)
 
 clean:
 	rm *.o
