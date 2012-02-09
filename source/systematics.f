@@ -1,10 +1,10 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
-
-            
-      
-      SUBROUTINE SYSTEMATICS(Atrg,Ztrg,iprojectile)
+Ccc   * $Rev: 2526 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
+ 
+ 
+ 
+      SUBROUTINE SYSTEMATICS(Atrg,Ztrg,Iprojectile)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
@@ -23,91 +23,107 @@ Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-Ccc 
-       IMPLICIT NONE
-       REAL*4 Atrg, Ztrg,csnp, csna,  csng, csn2p, csnna, csnnp2, csnp2,
-     &        csna2, csn2n, s
-       INTEGER iprojectile
-       IF(iprojectile.NE.1) RETURN
-       s = (Atrg - 2*Ztrg)/Atrg
+Ccc
+      IMPLICIT NONE
+C
+C*** Start of declarations rewritten by SPAG
+C
+C Dummy arguments
+C
+      REAL*4 :: Atrg, Ztrg
+      INTEGER :: Iprojectile
+C
+C Local variables
+C
+      REAL*4 :: csn2n, csn2p, csna, csna2, csng, csnna, csnnp2, csnp, 
+     &          csnp2, s
+      INTEGER :: INT
+C
+C*** End of declarations rewritten by SPAG
+C
+      IF(Iprojectile.NE.1)RETURN
+      s = (Atrg - 2*Ztrg)/Atrg
 C
 C------14.5 MeV
 C
 C------(n,p) at 14.5 MeV acccording to Forrest and Doczi
-       IF(Atrg.GE.40) THEN
-          csnp = 7.657*(Atrg**0.3333 + 1.0)**2*EXP(-28.80*s + 0.2365*
-     &           Atrg**0.5)
-       ELSE
-          csnp = 23.659*(Atrg**0.3333 + 1.0)**2*EXP(-23.041*(s+s**2))
-       ENDIF
+      IF(Atrg.GE.40)THEN
+        csnp = 7.657*(Atrg**0.3333 + 1.0)
+     &         **2*EXP( - 28.80*s + 0.2365*Atrg**0.5)
+      ELSE
+        csnp = 23.659*(Atrg**0.3333 + 1.0)**2*EXP( - 23.041*(s + s**2))
+      ENDIF
 C------(n,a) at 14.5 MeV acccording to Majdeddin
-       csna = 15.0678*(Atrg**0.3333 + 1.0)**2*EXP(-27.55*(s+s**2))
+      csna = 15.0678*(Atrg**0.3333 + 1.0)**2*EXP( - 27.55*(s + s**2))
 C------(n,g) at 14.5 MeV acccording to Kopecky at al.
-       csng = 1.18-1.13*EXP(-0.01338*Atrg)
+      csng = 1.18 - 1.13*EXP( - 0.01338*Atrg)
 C------(n,2n) at 14.5 MeV acccording to Badikov et al.
-       IF(Atrg.LE.210) THEN
-          csn2n = 47.015*(Atrg**0.3333 + 1.0)**2*(1.0-3.9777*
-     &            EXP(-24.116*s))
-       ELSE
-          csn2n = -1.0
-       ENDIF
+      IF(Atrg.LE.210)THEN
+        csn2n = 47.015*(Atrg**0.3333 + 1.0)
+     &          **2*(1.0 - 3.9777*EXP( - 24.116*s))
+      ELSE
+        csn2n = -1.0
+      ENDIF
 C------(n,2p) at 14.5 MeV acccording to Kopecky at al.
-       csn2p = 48.49*EXP(-2.99*s)/1000.
+      csn2p = 48.49*EXP( - 2.99*s)/1000.
 C------(n,na) at 14.5 MeV acccording to Kopecky at al.
-       csnna = 17.48*EXP(-24.2*s)
-
+      csnna = 17.48*EXP( - 24.2*s)
+ 
 C
 C------20.0 MeV
 C
-       IF(Atrg.GT.40) THEN
+      IF(Atrg.GT.40)THEN
 C------(n,np) at 20 MeV according to Konobeyev
-       csnnp2 = 53.066*(Atrg**0.3333 + 1.0)**2*(Atrg**(-0.3333)*(-2.7098
-     &    *(s+1.5/Atrg)+0.67115)**2 + EXP(-496.74*(s+1.5/Atrg)**2 + 
-     &    48.162*(s+1.5/Atrg)-1.6714))
+        csnnp2 = 53.066*(Atrg**0.3333 + 1.0)
+     &           **2*(Atrg**( - 0.3333)*( - 2.7098*(s+1.5/Atrg)
+     &           + 0.67115)
+     &           **2 + EXP( - 496.74*(s+1.5/Atrg)**2 + 48.162*(s+
+     &           1.5/Atrg) - 1.6714))
 C------(n,p) at 20 MeV according to Konobeyev
-       IF(Ztrg.LT.50) THEN
-          csnp2 = 53.066*(Atrg**0.3333 + 1.0)**2*EXP(-47.384*
-     &               (s+1.0/Atrg)**2 - 2.3294*(s+0.5/Atrg) - 
-     &               0.10405*Ztrg/Atrg**0.3333 - 2.3483)
-       ELSE
-          csnp2 = 53.066*(Atrg**0.3333 + 1.0)**2*
-     &            (-1.2477*(s+1.0/Atrg)+0.4087)**3
-       ENDIF
+        IF(Ztrg.LT.50)THEN
+          csnp2 = 53.066*(Atrg**0.3333 + 1.0)
+     &            **2*EXP( - 47.384*(s + 1.0/Atrg)
+     &            **2 - 2.3294*(s + 0.5/Atrg)
+     &            - 0.10405*Ztrg/Atrg**0.3333 - 2.3483)
+        ELSE
+          csnp2 = 53.066*(Atrg**0.3333 + 1.0)
+     &            **2*( - 1.2477*(s + 1.0/Atrg) + 0.4087)**3
+        ENDIF
 C------(n,a) at 20 MeV according to Konobeyev
-       csna2 = -1. 
-       IF(Ztrg.LT.50)
-     & csna2 = 53.066*(Atrg**0.3333 + 1.0)**2*
-     &         EXP(-37.317*(s+1.0/Atrg)**2 - 7.2027*(s+0.5/Atrg) - 
-     &         0.22669*Ztrg/Atrg*0.3333 - 2.027)
-       ELSE
-          csnnp2 = -1. 
-          csnp2 = -1. 
-          csna2 = -1. 
-       ENDIF
-        
+        csna2 = -1.
+        IF(Ztrg.LT.50)csna2 = 53.066*(Atrg**0.3333 + 1.0)
+     &                        **2*EXP( - 37.317*(s + 1.0/Atrg)
+     &                        **2 - 7.2027*(s + 0.5/Atrg)
+     &                        - 0.22669*Ztrg/Atrg*0.3333 - 2.027)
+      ELSE
+        csnnp2 = -1.
+        csnp2 = -1.
+        csna2 = -1.
+      ENDIF
+ 
 C
 C------Printout
 C
-       OPEN(48, FILE='SYSTEMATICS.TXT', STATUS='unknown') 
-       WRITE(48,*)'Cross sections provided by systematics (mb)'
-       WRITE(48,*)' neutron induced reactions up to 20 MeV '
-       WRITE(48,*)'(-1.000 indicates systematics out of range)'
-       WRITE(48,*)' '
-       WRITE(48,'(''          A = '',I3,''    Z = '',I3)') 
-     & INT(Atrg), INT(Ztrg)
-       WRITE(48,*)' '
-       WRITE(48,*)'Reaction         14.5 MeV         20 MeV'
-       WRITE(48,*)' '
-       WRITE(48,'('' (n,g)        '',2G15.4)') csng
-       WRITE(48,'('' (n,p)        '',2G15.4)') csnp, csnp2
-       WRITE(48,'('' (n,a)        '',2G15.4)') csna, csna2
-       WRITE(48,'('' (n,na)       '',2G15.4)') csnna 
-       WRITE(48,'('' (n,2n)       '',2G15.4)') csn2n 
-       WRITE(48,'('' (n,2p)       '',2G15.4)') csn2p 
-       WRITE(48,'('' (n,np)       '',15x, G15.4)') csnnp2  
-       CLOSE(48) 
-       RETURN
-       END
-       
-
-
+      OPEN(48,FILE = 'SYSTEMATICS.TXT',STATUS = 'unknown')
+      WRITE(48,*)'Cross sections provided by systematics (mb)'
+      WRITE(48,*)' neutron induced reactions up to 20 MeV '
+      WRITE(48,*)'(-1.000 indicates systematics out of range)'
+      WRITE(48,*)' '
+      WRITE(48,'(''          A = '',I3,''    Z = '',I3)')INT(Atrg), 
+     &      INT(Ztrg)
+      WRITE(48,*)' '
+      WRITE(48,*)'Reaction         14.5 MeV         20 MeV'
+      WRITE(48,*)' '
+      WRITE(48,'('' (n,g)        '',2G15.4)')csng
+      WRITE(48,'('' (n,p)        '',2G15.4)')csnp, csnp2
+      WRITE(48,'('' (n,a)        '',2G15.4)')csna, csna2
+      WRITE(48,'('' (n,na)       '',2G15.4)')csnna
+      WRITE(48,'('' (n,2n)       '',2G15.4)')csn2n
+      WRITE(48,'('' (n,2p)       '',2G15.4)')csn2p
+      WRITE(48,'('' (n,np)       '',15x, G15.4)')csnnp2
+      CLOSE(48)
+      RETURN
+      END SUBROUTINE SYSTEMATICS
+ 
+ 
+ 

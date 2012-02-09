@@ -1,24 +1,32 @@
-Ccc   * $Rev: 1882 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2010-11-27 09:24:51 +0100 (Sa, 27 Nov 2010) $
-
+Ccc   * $Rev: 2526 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
+ 
       PROGRAM COVARIANCE
-      integer*4 PIPE,itmp,i1,i2
-      character*80 command
-      character*4 crun
+C
+C*** Start of declarations rewritten by SPAG
+C
+C Local variables
+C
+      CHARACTER(4) :: crun
+      INTEGER :: i, nruns, nstart
+      INTEGER*4 :: i1, i2
+C
+C*** End of declarations rewritten by SPAG
+C
 C     write(*,*) 'Number of sampling runs?'
-      OPEN(10,file='RUNS.INP')
-      read (10,*) Nstart,Nruns
+      OPEN(10,FILE = 'RUNS.INP')
+      READ(10,*)nstart, nruns
       CLOSE(10)
-      do i=Nstart,Nruns+Nruns
-         CALL system("../source/empire")
-         write(crun,'(I4.4)') i
-         CALL system('mv OUTPUT.DAT OUT'//crun)
-         CALL system('mv LIST.DAT LST'//crun)
-         open(10,file='R250SEED.DAT',status='OLD')
-         read(10,*) i1,i2
-         write(*,'(1x,A6,i12,1x,i12/)') 'SEEDS:',i1,i2
-         close(10)
-      enddo
-      stop
-      end
+      DO i = nstart, nruns + nruns
+        CALL SYSTEM('../source/empire')
+        WRITE(crun,'(I4.4)')i
+        CALL SYSTEM('mv OUTPUT.DAT OUT'//crun)
+        CALL SYSTEM('mv LIST.DAT LST'//crun)
+        OPEN(10,FILE = 'R250SEED.DAT',STATUS = 'OLD')
+        READ(10,*)i1, i2
+        WRITE(*,'(1x,A6,i12,1x,i12/)')'SEEDS:', i1, i2
+        CLOSE(10)
+      ENDDO
+      STOP
+      END PROGRAM COVARIANCE

@@ -1,6 +1,6 @@
-C $Rev: 2443 $
-C $Author: mherman $
-C $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+C $Rev: 2526 $
+C $Author: shoblit $
+C $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -48,8 +48,8 @@ C
      &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),
      &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
-     &                 FISn_n(NFHUMP,ndnuc),ENIu_eval(NDECSE),
-     &                 VNIu_eval(NDECSE),PFNtke,PFNalp,PFNrat,PFNniu 
+     &                 FISn_n(NFHUMP,ndnuc),
+     &                 PFNtke,PFNalp,PFNrat,PFNniu 
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -61,7 +61,7 @@ C
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
-     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc), num_niu,
+     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc),
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
@@ -210,8 +210,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, ENIu_eval, VNIu_eval, PFNtke, PFNalp,
-     &                 PFNrat, PFNniu
+     &                 rELAred, PFNtke, PFNalp, PFNrat, PFNniu
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -238,7 +237,6 @@ C
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite,
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
-     &                  num_niu,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
      &                  NENdf, NENdfa, NEMn, NEMp, NEMa, NEXclusive,

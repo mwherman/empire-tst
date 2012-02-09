@@ -1,6 +1,6 @@
-#$Rev: 2513 $
+#$Rev: 2526 $
 #$Author: shoblit $
-#$Date: 2012-02-08 22:02:14 +0100 (Mi, 08 Feb 2012) $
+#$Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -111,10 +111,10 @@ optmand:	optmand.o
 #     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
 ../util/IO/endf_io.a :
-	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
+	cd ../util/IO/ ; $(MAKE) -e "FC=$(FC)" ;
 
 read_nubar.o : global.h dimension.h ../util/IO/endf_io.a
-	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f
+	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f90
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h

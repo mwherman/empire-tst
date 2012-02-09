@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2228 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-01-17 23:44:39 +0100 (Di, 17 Jän 2012) $
+Ccc   * $Rev: 2526 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
 C
       SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
 C
@@ -95,40 +95,49 @@ C    THE FOLLOWING IS NECESSARY FOR 32-BIT MACHINES LIKE DEC VAX, IBM,ET
 C
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - z)
 C
+C*** Start of declarations rewritten by SPAG
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Bfis, Segs, Selmax
-      INTEGER Ia, Il, Iz
+      REAL*8 :: Bfis, Segs, Selmax
+      INTEGER :: Ia, Il, Iz
 C
 C Local variables
 C
-      DOUBLE PRECISION a, a1, a2, aa, aj, ak, amax, amax2, amin, amin2, 
-     &                 bfis0, egs, egs1(5,7), egs2(5,7), egs3(5,7), 
-     &                 egs4(5,7), egs5(5,7), egscof(5,7,5), el, el20, 
-     &                 el80, ell, elmax, elmcof(5,4), elzcof(7,7), 
-     &                 emncof(5,4), emxcof(7,5), pa(7), pl(10), pz(7), 
-     &                 q, qa, qb, sel20, sel80, x, y, z, zz
-      DOUBLE PRECISION DBLE
-      REAL FLOAT
-      INTEGER i, j, k, l, m
+      REAL*8 :: a, a1, a2, aa, aj, ak, amax, amax2, amin, amin2, bfis0, 
+     &          egs, el, el20, el80, ell, elmax, q, qa, qb, sel20, 
+     &          sel80, x, y, z, zz
+      REAL*8 :: DBLE
+      REAL*8, DIMENSION(5,7) :: egs1, egs2, egs3, egs4, egs5
+      REAL*8, DIMENSION(5,7,5) :: egscof
+      REAL*8, DIMENSION(5,4) :: elmcof, emncof
+      REAL*8, DIMENSION(7,7) :: elzcof
+      REAL*8, DIMENSION(7,5) :: emxcof
+      REAL :: FLOAT
+      INTEGER :: i, j, k, l, m
+      REAL*8, DIMENSION(7) :: pa, pz
+      REAL*8, DIMENSION(10) :: pl
+C
+C*** End of declarations rewritten by SPAG
+C
+C
 C
 C     DOUBLE PRECISION ELZCOF,PA,PZ,AA,ZZ,EL20,EL80,BFIS0,ELMAX,PL,ELL
 C     DOUBLE PRECISION EGS,EGS1,EGS2,EGS3,EGS4,EGS5,EGSCOF
 C
 C
-      EQUIVALENCE (egs1,egscof)
-      EQUIVALENCE (egs2,egscof(1,1,2))
-      EQUIVALENCE (egs3,egscof(1,1,3))
-      EQUIVALENCE (egs4,egscof(1,1,4))
-      EQUIVALENCE (egs5,egscof(1,1,5))
+      EQUIVALENCE(egs1,egscof)
+      EQUIVALENCE(egs2,egscof(1,1,2))
+      EQUIVALENCE(egs3,egscof(1,1,3))
+      EQUIVALENCE(egs4,egscof(1,1,4))
+      EQUIVALENCE(egs5,egscof(1,1,5))
       DATA emncof/ - 9.01100E+2, -1.40818E+3, 2.77000E+3, -7.06695E+2, 
-     &     8.89867E+2, 1.35355E+4, -2.03847E+4, 1.09384E+4, -4.86297E+3,
-     &     -6.18603E+2, -3.26367E+3, 1.62447E+3, 1.36856E+3, 1.31731E+3,
-     &     1.53372E+2, 7.48863E+3, -1.21581E+4, 5.50281E+3, -1.33630E+3,
+     &     8.89867E+2, 1.35355E+4, -2.03847E+4, 1.09384E+4, -4.86297E+3, 
+     &     -6.18603E+2, -3.26367E+3, 1.62447E+3, 1.36856E+3, 1.31731E+3, 
+     &     1.53372E+2, 7.48863E+3, -1.21581E+4, 5.50281E+3, -1.33630E+3, 
      &     5.05367E-02/
       DATA elmcof/1.84542E+3, -5.64002E+3, 5.66730E+3, -3.15150E+3, 
-     &     9.54160E+2, -2.24577E+3, 8.56133E+3, -9.67348E+3, 5.81744E+3,
+     &     9.54160E+2, -2.24577E+3, 8.56133E+3, -9.67348E+3, 5.81744E+3, 
      &     -1.86997E+3, 2.79772E+3, -8.73073E+3, 9.19706E+3, 
      &     -4.91900E+3, 1.37283E+3, -3.01866E+1, 1.41161E+3, 
      &     -2.85919E+3, 2.13016E+3, -6.49072E+2/
@@ -142,32 +151,32 @@ C
      &     2.15409246E5, -1.45539891E6, 3.64961835E6, -4.21267423E6, 
      &     3.24312555E6, -1.67927904E6, 5.23795062E5, -7.66576599E4/
       DATA elzcof/5.11819909E+5, -1.30303186E+6, 1.90119870E+6, 
-     &     -1.20628242E+6, 5.68208488E+5, 5.48346483E+4, -2.45883052E+4,
-     &     -1.13269453E+6, 2.97764590E+6, -4.54326326E+6, 3.00464870E+6,
-     &     -1.44989274E+6, -1.02026610E+5, 6.27959815E+4, 1.37543304E+6,
-     &     -3.65808988E+6, 5.47798999E+6, -3.78109283E+6, 1.84131765E+6,
-     &     1.53669695E+4, -6.96817834E+4, -8.56559835E+5, 2.48872266E+6,
-     &     -4.07349128E+6, 3.12835899E+6, -1.62394090E+6, 1.19797378E+5,
+     &     -1.20628242E+6, 5.68208488E+5, 5.48346483E+4, -2.45883052E+4, 
+     &     -1.13269453E+6, 2.97764590E+6, -4.54326326E+6, 3.00464870E+6, 
+     &     -1.44989274E+6, -1.02026610E+5, 6.27959815E+4, 1.37543304E+6, 
+     &     -3.65808988E+6, 5.47798999E+6, -3.78109283E+6, 1.84131765E+6, 
+     &     1.53669695E+4, -6.96817834E+4, -8.56559835E+5, 2.48872266E+6, 
+     &     -4.07349128E+6, 3.12835899E+6, -1.62394090E+6, 1.19797378E+5, 
      &     4.25737058E+4, 3.28723311E+5, -1.09892175E+6, 2.03997269E+6, 
      &     -1.77185718E+6, 9.96051545E+5, -1.53305699E+5, 
-     &     -1.12982954E+4, 4.15850238E+4, 7.29653408E+4, -4.93776346E+5,
-     &     6.01254680E+5, -4.01308292E+5, 9.65968391E+4, -3.49596027E+3,
-     &     -1.82751044E+5, 3.91386300E+5, -3.03639248E+5, 1.15782417E+5,
+     &     -1.12982954E+4, 4.15850238E+4, 7.29653408E+4, -4.93776346E+5, 
+     &     6.01254680E+5, -4.01308292E+5, 9.65968391E+4, -3.49596027E+3, 
+     &     -1.82751044E+5, 3.91386300E+5, -3.03639248E+5, 1.15782417E+5, 
      &     -4.24399280E+3, -6.11477247E+3, 3.66982647E+2/
       DATA egs1/ - 1.781665232E6, -2.849020290E6, 9.546305856E5, 
      &     2.453904278E5, 3.656148926E5, 4.358113622E6, 6.960182192E6, 
      &     -2.381941132E6, -6.262569370E5, -9.026606463E5, 
-     &     -4.804291019E6, -7.666333374E6, 2.699742775E6, 7.415602390E5,
+     &     -4.804291019E6, -7.666333374E6, 2.699742775E6, 7.415602390E5, 
      &     1.006008724E6, 3.505397297E6, 5.586825123E6, -2.024820713E6, 
      &     -5.818008462E5, -7.353683218E5, -1.740990985E6, 
      &     -2.759325148E6, 1.036253535E6, 3.035749715E5, 3.606919356E5, 
-     &     5.492532874E5, 8.598827288E5, -3.399809581E5, -9.852362945E4,
+     &     5.492532874E5, 8.598827288E5, -3.399809581E5, -9.852362945E4, 
      &     -1.108872347E5, -9.229576432E4, -1.431344258E5, 
      &     5.896521547E4, 1.772385043E4, 1.845424227E4/
       DATA egs2/4.679351387E6, 7.707630513E6, -2.718115276E6, 
      &     -9.845252314E5, -1.107173456E6, -1.137635233E7, 
      &     -1.870617878E7, 6.669154225E6, 2.413451470E6, 2.691480439E6, 
-     &     1.237627138E7, 2.030222826E7, -7.334289876E6, -2.656357635E6,
+     &     1.237627138E7, 2.030222826E7, -7.334289876E6, -2.656357635E6, 
      &     -2.912593917E6, -8.854155353E6, -1.446966194E7, 
      &     5.295832834E6, 1.909275233E6, 2.048899787E6, 4.290642787E6, 
      &     6.951223648E6, -2.601557110E6, -9.129731614E5, 
@@ -178,17 +187,17 @@ C
       DATA egs3/ - 3.600471364E6, -5.805932202E6, 1.773029253E6, 
      &     4.064280430E5, 7.419581557E5, 8.829126250E6, 1.422377198E7, 
      &     -4.473342834E6, -1.073350611E6, -1.845960521E6, 
-     &     -9.781712604E6, -1.575666314E7, 5.161226883E6, 1.341287330E6,
+     &     -9.781712604E6, -1.575666314E7, 5.161226883E6, 1.341287330E6, 
      &     2.083994843E6, 7.182555931E6, 1.156915972E7, -3.941330542E6, 
      &     -1.108259560E6, -1.543982755E6, -3.579820035E6, 
      &     -5.740079339E6, 2.041827680E6, 5.981648181E5, 7.629263278E5, 
-     &     1.122573403E6, 1.777161418E6, -6.714631146E5, -1.952833263E5,
+     &     1.122573403E6, 1.777161418E6, -6.714631146E5, -1.952833263E5, 
      &     -2.328129775E5, -1.839672155E5, -2.871137706E5, 
      &     1.153532734E5, 3.423868607E4, 3.738902942E4/
       DATA egs4/2.421750735E6, 4.107929841E6, -1.302310290E6, 
      &     -5.267906237E5, -6.197966854E5, -5.883394376E6, 
      &     -9.964568970E6, 3.198405768E6, 1.293156541E6, 1.506909314E6, 
-     &     6.387411818E6, 1.079547152E7, -3.517981421E6, -1.424705631E6,
+     &     6.387411818E6, 1.079547152E7, -3.517981421E6, -1.424705631E6, 
      &     -1.629099740E6, -4.550695232E6, -7.665548805E6, 
      &     2.530844204E6, 1.021187317E6, 1.141553709E6, 2.182540324E6, 
      &     3.646532772E6, -1.228378318E6, -4.813626449E5, 
@@ -199,139 +208,134 @@ C
       DATA egs5/ - 4.902668827E5, -8.089034293E5, 1.282510910E5, 
      &     -1.704435174E4, 8.876109934E4, 1.231673941E6, 2.035989814E6, 
      &     -3.727491110E5, 4.071377327E3, -2.375344759E5, 
-     &     -1.429330809E6, -2.376692769E6, 5.216954243E5, 7.268703575E4,
+     &     -1.429330809E6, -2.376692769E6, 5.216954243E5, 7.268703575E4, 
      &     3.008350125E5, 1.114306796E6, 1.868800148E6, -4.718718351E5, 
      &     -1.215904582E5, -2.510379590E5, -5.873353309E5, 
      &     -9.903614817E5, 2.742543392E5, 9.055579135E4, 1.364869036E5, 
-     &     1.895325584E5, 3.184776808E5, -9.500485442E4, -3.406036086E4,
+     &     1.895325584E5, 3.184776808E5, -9.500485442E4, -3.406036086E4, 
      &     -4.380685984E4, -2.969272274E4, -4.916872669E4, 
      &     1.596305804E4, 5.741228836E3, 6.669912421E3/
 C
 C     THE PROGRAM STARTS HERE
 C
-      IF (Iz.GE.19) THEN
-         IF (Iz.GT.111) THEN
-            PRINT 99005
+      IF(Iz.GE.19)THEN
+        IF(Iz.GT.111)THEN
+          PRINT 1010
 C
-99005       FORMAT (/10X,
-     &             '*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19 OR '
-     &             ,
-     &             ' GREATER THAN 111.  BFIS IS SET TO 0.0.  *  *  *  *'
-     &             )
-         ELSEIF (Iz.GT.102 .AND. Il.GT.0) THEN
-            PRINT 99010
-99010       FORMAT (/10X,
-     &             '*  *  *  *  BARFIT CALLED WITH  Z  GREATER THAN 102'
-     &             ,
+ 1010     FORMAT(/10X,
+     &           '*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19 OR ',
+     &           ' GREATER THAN 111.  BFIS IS SET TO 0.0.  *  *  *  *')
+        ELSEIF(Iz.GT.102.AND.Il.GT.0)THEN
+          PRINT 1020
+ 1020     FORMAT(/10X,
+     &           '*  *  *  *  BARFIT CALLED WITH  Z  GREATER THAN 102',
      &    ' AND  L  NOT EQUAL TO ZERO.  BFIS IS SET TO 0.0.  *  *  *  *'
      &    )
-         ELSE
-            z = FLOAT(Iz)
-            a = FLOAT(Ia)
-            el = FLOAT(Il)
-            amin = 1.2*z + 0.01*z*z
-            amax = 5.8*z - 0.024*z*z
-            IF (a.LT.amin .OR. a.GT.amax) THEN
-               PRINT 99015, Ia
-99015          FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  A =',I3,
-     &                 ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
-     &                 ' *  *  *  *')
+        ELSE
+          z = FLOAT(Iz)
+          a = FLOAT(Ia)
+          el = FLOAT(Il)
+          amin = 1.2*z + 0.01*z*z
+          amax = 5.8*z - 0.024*z*z
+          IF(a.LT.amin.OR.a.GT.amax)THEN
+            PRINT 1030, Ia
+ 1030       FORMAT(/10X,'*  *  *  *  BARFIT CALLED WITH  A =',I3,
+     &             ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
+     &             ' *  *  *  *')
+          ELSE
+            aa = a/400.
+            zz = z/100.
+            bfis0 = 0.
+            CALL LPOLY(zz,7,pz)
+            CALL LPOLY(aa,7,pa)
+            DO i = 1, 7
+              DO j = 1, 7
+                bfis0 = bfis0 + elzcof(j,i)*pz(j)*pa(i)
+              ENDDO
+            ENDDO
+            egs = 0.
+            Segs = egs
+            Bfis = bfis0
+            amin2 = 1.4*z + 0.009*z*z
+            amax2 = 20. + 3.0*z
+            IF((a.LT.amin2 - 5.D0.OR.a.GT.amax2 + 10.D0).AND.Il.GT.0)
+     &         THEN
+              PRINT 1040, Ia, Il
+ 1040         FORMAT(/10X,'*  *  *  *  BARFIT CALLED WITH  A  =',I3,
+     &               ', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',I3/26X,
+     &               'FOR NONZERO  L =',I3,'  *  *  *  *')
             ELSE
-               aa = a/400.
-               zz = z/100.
-               bfis0 = 0.
-               CALL LPOLY(zz,7,pz)
-               CALL LPOLY(aa,7,pa)
-               DO i = 1, 7
-                  DO j = 1, 7
-                     bfis0 = bfis0 + elzcof(j,i)*pz(j)*pa(i)
-                  ENDDO
-               ENDDO
-               egs = 0.
-               Segs = egs
-               Bfis = bfis0
-               amin2 = 1.4*z + 0.009*z*z
-               amax2 = 20. + 3.0*z
-               IF ((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
-     &             Il.GT.0) THEN
-                  PRINT 99020, Ia, Il
-99020             FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  A  =',
-     &                    I3,', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',
-     &                    I3/26X,'FOR NONZERO  L =',I3,'  *  *  *  *')
-               ELSE
-                  el80 = 0.
-                  el20 = 0.
-                  elmax = 0.
-                  DO i = 1, 4
-                     DO j = 1, 5
-                        el80 = el80 + DBLE(elmcof(j,i))*pz(j)*pa(i)
-                        el20 = el20 + DBLE(emncof(j,i))*pz(j)*pa(i)
-                     ENDDO
-                  ENDDO
-                  sel80 = el80
-                  sel20 = el20
-                  DO i = 1, 5
-                     DO j = 1, 7
-                        elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
-                     ENDDO
-                  ENDDO
-                  Selmax = elmax
-                  IF (Il.LT.1) RETURN
-                  x = sel20/Selmax
-                  y = sel80/Selmax
-                  IF (el.LE.sel20) THEN
-                     q = 0.2/(sel20**2*sel80**2*(sel20 - sel80))
-                     qa = q*(4.*sel80**3 - sel20**3)
-                     qb = -q*(4.*sel80**2 - sel20**2)
-                     Bfis = Bfis*(1. + qa*el**2 + qb*el**3)
-                  ELSE
-                     aj = (( - 20.*x**5) + 25.*x**4 - 4.)*(y - 1.)
-     &                    **2*y*y
-                     ak = (( - 20.*y**5) + 25.*y**4 - 1.)*(x - 1.)
-     &                    **2*x*x
-                     q = 0.2/((y - x)*((1.-x)*(1.-y)*x*y)**2)
-                     qa = q*(aj*y - ak*x)
-                     qb = -q*(aj*(2.*y + 1.) - ak*(2.*x + 1.))
-                     z = el/Selmax
-                     a1 = 4.*z**5 - 5.*z**4 + 1.
-                     a2 = qa*(2.*z + 1.)
-                     Bfis = Bfis*(a1 + (z - 1.)*(a2 + qb*z)*z*z*(z - 1.)
-     &                      )
-                  ENDIF
-                  IF (Bfis.LE.0.0D0 .OR. el.GT.Selmax) Bfis = 0.0
+              el80 = 0.
+              el20 = 0.
+              elmax = 0.
+              DO i = 1, 4
+                DO j = 1, 5
+                  el80 = el80 + DBLE(elmcof(j,i))*pz(j)*pa(i)
+                  el20 = el20 + DBLE(emncof(j,i))*pz(j)*pa(i)
+                ENDDO
+              ENDDO
+              sel80 = el80
+              sel20 = el20
+              DO i = 1, 5
+                DO j = 1, 7
+                  elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
+                ENDDO
+              ENDDO
+              Selmax = elmax
+              IF(Il.LT.1)RETURN
+              x = sel20/Selmax
+              y = sel80/Selmax
+              IF(el.LE.sel20)THEN
+                q = 0.2/(sel20**2*sel80**2*(sel20 - sel80))
+                qa = q*(4.*sel80**3 - sel20**3)
+                qb = -q*(4.*sel80**2 - sel20**2)
+                Bfis = Bfis*(1. + qa*el**2 + qb*el**3)
+              ELSE
+                aj = (( - 20.*x**5) + 25.*x**4 - 4.)*(y - 1.)**2*y*y
+                ak = (( - 20.*y**5) + 25.*y**4 - 1.)*(x - 1.)**2*x*x
+                q = 0.2/((y - x)*((1.-x)*(1.-y)*x*y)**2)
+                qa = q*(aj*y - ak*x)
+                qb = -q*(aj*(2.*y + 1.) - ak*(2.*x + 1.))
+                z = el/Selmax
+                a1 = 4.*z**5 - 5.*z**4 + 1.
+                a2 = qa*(2.*z + 1.)
+                Bfis = Bfis*(a1 + (z - 1.)*(a2 + qb*z)*z*z*(z - 1.))
+              ENDIF
+              IF(Bfis.LE.0.0D0.OR.el.GT.Selmax)Bfis = 0.0
 C
 C                 NOW CALCULATE ROTATING GROUND-STATE ENERGY
 C
-                  IF (el.GT.Selmax .AND. Il.NE.1000) RETURN
-                  ell = el/elmax
-                  IF (Il.EQ.1000) ell = 1.D0
-                  CALL LPOLY(ell,9,pl)
-                  DO k = 1, 5
-                     DO l = 1, 7
-                        DO m = 1, 5
-                           egs = egs + egscof(m,l,k)*pz(l)*pa(k)
-     &                           *pl(2*m - 1)
-                        ENDDO
-                     ENDDO
+              IF(el.GT.Selmax.AND.Il.NE.1000)RETURN
+              ell = el/elmax
+              IF(Il.EQ.1000)ell = 1.D0
+              CALL LPOLY(ell,9,pl)
+              DO k = 1, 5
+                DO l = 1, 7
+                  DO m = 1, 5
+                    egs = egs + egscof(m,l,k)*pz(l)*pa(k)*pl(2*m - 1)
                   ENDDO
-                  Segs = egs
-                  IF (Segs.LT.0.0D0) Segs = 0.0
-                  RETURN
-               ENDIF
+                ENDDO
+              ENDDO
+              Segs = egs
+              IF(Segs.LT.0.0D0)Segs = 0.0
+              RETURN
             ENDIF
-         ENDIF
-         Bfis = 0.0
-         Segs = 0.0
-         Selmax = 0.0
-         RETURN
+          ENDIF
+        ENDIF
+        Bfis = 0.0
+        Segs = 0.0
+        Selmax = 0.0
+        RETURN
       ENDIF
-      PRINT 99025
-99025 FORMAT (/10X,'*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19    '
-     &        ,' BFIS IS SET TO 100.0.  *  *  *  *')
+      PRINT 1050
+ 1050 FORMAT(/10X,'*  *  *  *  BARFIT CALLED WITH  Z  LESS THAN 19    ',
+     &       ' BFIS IS SET TO 100.0.  *  *  *  *')
       Bfis = 100.
       Segs = 0.0
       Selmax = 0.0
-      END
+      END SUBROUTINE BARFIT
+ 
+!---------------------------------------------------------------------------
 C
       SUBROUTINE MOMFIT(Iz,Ia,Il,Saimin,Saimid,Saimx,Selmax)
 C
@@ -405,29 +409,35 @@ C        OR RESPONSIBILITY FOR THE USE OF THIS SOFTWARE.
 C
       IMPLICIT DOUBLE PRECISION(a - H), DOUBLE PRECISION(O - z)
 C
+C*** Start of declarations rewritten by SPAG
 C
 C Dummy arguments
 C
-      INTEGER Ia, Il, Iz
-      DOUBLE PRECISION Saimid, Saimin, Saimx, Selmax
+      INTEGER :: Ia, Il, Iz
+      REAL*8 :: Saimid, Saimin, Saimx, Selmax
 C
 C Local variables
 C
-      DOUBLE PRECISION a, aa, aa2, aa3, aa4, ai70, ai70c(6,5), ai95, 
-     &                 ai952, ai952c(6,5), ai95c(6,5), aimax, aimax2, 
-     &                 aimaxc(6,5), aimaxh, aimidh, aimx2c(6,5), 
-     &                 aimx3c(4,4), aimx4c(4,4), aizro, aizroc(6,5), 
-     &                 alpha, amax, amax2, amin, amin2, bb, bb2, bb3, 
-     &                 bb4, beta, bi70, bi70c(6,4), bi95, bi95c(6,4), 
-     &                 bimax, bimaxc(6,4), bizro, bizroc(6,4), el, ell, 
-     &                 elmax, emxcof(7,5), f1, f1m, f2, f2m, f3, f4, 
-     &                 ff1, ff2, fg1, fg2, gam, gam2, gam3, pa(7), pi, 
-     &                 pz(7), q1, q2, q3, q4, q5, q6, sai70, sai95, 
-     &                 sai952, saimax, saizro, sbi70, sbi95, sbimax, 
-     &                 sbizro, sigt, sigt2, silt, silt2, simax2, sjgt
-      REAL FLOAT
-      INTEGER i, j, k, l
-      DOUBLE PRECISION sjlt, z, zz
+      REAL*8 :: a, aa, aa2, aa3, aa4, ai70, ai95, ai952, aimax, aimax2, 
+     &          aimaxh, aimidh, aizro, alpha, amax, amax2, amin, amin2, 
+     &          bb, bb2, bb3, bb4, beta, bi70, bi95, bimax, bizro, el, 
+     &          ell, elmax, f1, f1m, f2, f2m, f3, f4, ff1, ff2, fg1, 
+     &          fg2, gam, gam2, gam3, pi, q1, q2, q3, q4, q5, q6, sai70, 
+     &          sai95, sai952, saimax, saizro, sbi70, sbi95, sbimax, 
+     &          sbizro, sigt, sigt2, silt, silt2, simax2, sjgt, sjlt, z, 
+     &          zz
+      REAL*8, DIMENSION(6,5) :: ai70c, ai952c, ai95c, aimaxc, aimx2c, 
+     &                          aizroc
+      REAL*8, DIMENSION(4,4) :: aimx3c, aimx4c
+      REAL*8, DIMENSION(6,4) :: bi70c, bi95c, bimaxc, bizroc
+      REAL*8, DIMENSION(7,5) :: emxcof
+      REAL :: FLOAT
+      INTEGER :: i, j, k, l
+      REAL*8, DIMENSION(7) :: pa, pz
+C
+C*** End of declarations rewritten by SPAG
+C
+C
       DATA emxcof/ - 4.10652732E6, 1.00064947E7, -1.09533751E7, 
      &     7.84797252E6, -3.78574926E6, 1.12237945E6, -1.77561170E5, 
      &     1.08763330E7, -2.63758245E7, 2.85472400E7, -2.01107467E7, 
@@ -527,217 +537,213 @@ C
 C
 C     THE PROGRAM STARTS HERE
 C
-      IF (Iz.GE.19 .AND. Iz.LE.111) THEN
-         IF (Iz.GT.102 .AND. Il.GT.0) THEN
-            PRINT 99005
-99005       FORMAT (/10X,
-     &             '*  *  *  *  MOMFIT CALLED WITH  Z  GREATER THAN 102'
-     &             ,
+      IF(Iz.GE.19.AND.Iz.LE.111)THEN
+        IF(Iz.GT.102.AND.Il.GT.0)THEN
+          PRINT 1010
+ 1010     FORMAT(/10X,
+     &           '*  *  *  *  MOMFIT CALLED WITH  Z  GREATER THAN 102',
      &  ' AND  L  NOT EQUAL TO ZERO.  MOMENTS ARE SET TO 0.0.*  *  *  *'
      &  )
-            GOTO 100
-         ELSE
-            z = FLOAT(Iz)
-            a = FLOAT(Ia)
-            el = FLOAT(Il)
-            amin = 1.2*z + 0.01*z*z
-            amax = 5.8*z - 0.024*z*z
-            IF (a.LT.amin .OR. a.GT.amax) THEN
-               PRINT 99010, Ia
-99010          FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  A =',I3,
-     &                 ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
-     &                 ' *  *  *  *')
-               GOTO 100
+          GOTO 20
+        ELSE
+          z = FLOAT(Iz)
+          a = FLOAT(Ia)
+          el = FLOAT(Il)
+          amin = 1.2*z + 0.01*z*z
+          amax = 5.8*z - 0.024*z*z
+          IF(a.LT.amin.OR.a.GT.amax)THEN
+            PRINT 1020, Ia
+ 1020       FORMAT(/10X,'*  *  *  *  MOMFIT CALLED WITH  A =',I3,
+     &             ', OUTSIDE ','THE ALLOWED VALUES FOR Z = ',I3,
+     &             ' *  *  *  *')
+            GOTO 20
+          ELSE
+            aa = a/400.
+            zz = z/100.
+            amin2 = 1.4*z + 0.009*z*z
+            amax2 = 20. + 3.0*z
+            IF((a.LT.amin2 - 5.D0.OR.a.GT.amax2 + 10.D0).AND.Il.GT.0)
+     &         THEN
+              PRINT 1030, Ia, Il
+ 1030         FORMAT(/10X,'*  *  *  *  MOMFIT CALLED WITH  A  =',I3,
+     &               ', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',I3/26X,
+     &               'FOR NONZERO  L =',I3,'  *  *  *  *')
+              GOTO 20
             ELSE
-               aa = a/400.
-               zz = z/100.
-               amin2 = 1.4*z + 0.009*z*z
-               amax2 = 20. + 3.0*z
-               IF ((a.LT.amin2 - 5.D0 .OR. a.GT.amax2 + 10.D0) .AND. 
-     &             Il.GT.0) THEN
-                  PRINT 99015, Ia, Il
-99015             FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  A  =',
-     &                    I3,', OUTSIDE',' THE ALLOWED VALUES FOR Z = ',
-     &                    I3/26X,'FOR NONZERO  L =',I3,'  *  *  *  *')
-                  GOTO 100
-               ELSE
-                  CALL LPOLY(aa,6,pa)
-                  elmax = 0.
-                  CALL LPOLY(zz,7,pz)
-                  DO i = 1, 5
-                     DO j = 1, 7
-                        elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
-                     ENDDO
-                  ENDDO
-                  Selmax = elmax
+              CALL LPOLY(aa,6,pa)
+              elmax = 0.
+              CALL LPOLY(zz,7,pz)
+              DO i = 1, 5
+                DO j = 1, 7
+                  elmax = elmax + emxcof(j,i)*pz(j)*pa(i)
+                ENDDO
+              ENDDO
+              Selmax = elmax
 C--------in case l is larger than the stability limit set it to selmax
-                  IF (el.GT.Selmax) el = Selmax
-                  ell = el/Selmax
-                  IF (Il.EQ.1000) ell = 1.0
-                  aizro = 0.
-                  ai70 = 0.
-                  aimax = 0.
-                  ai95 = 0.
-                  bizro = 0.
-                  bi70 = 0.
-                  bimax = 0.
-                  bi95 = 0.
-                  aimax2 = 0.
-                  ai952 = 0.
+              IF(el.GT.Selmax)el = Selmax
+              ell = el/Selmax
+              IF(Il.EQ.1000)ell = 1.0
+              aizro = 0.
+              ai70 = 0.
+              aimax = 0.
+              ai95 = 0.
+              bizro = 0.
+              bi70 = 0.
+              bimax = 0.
+              bi95 = 0.
+              aimax2 = 0.
+              ai952 = 0.
 C
 C                 NOW CALCULATE ROTATING MOMENTS OF INERTIA
 C
-                  IF (el.GT.Selmax .AND. Il.LT.1000) RETURN
-                  DO l = 1, 6
-                     DO k = 1, 5
-                        aizro = aizro + aizroc(l,k)*pz(l)*pa(k)
-                        ai70 = ai70 + ai70c(l,k)*pz(l)*pa(k)
-                        ai95 = ai95 + ai95c(l,k)*pz(l)*pa(k)
-                        aimax = aimax + aimaxc(l,k)*pz(l)*pa(k)
-                        ai952 = ai952 + ai952c(l,k)*pz(l)*pa(k)
-                        aimax2 = aimax2 + aimx2c(l,k)*pz(l)*pa(k)
-                     ENDDO
-                     DO k = 1, 4
-                        bizro = bizro + bizroc(l,k)*pz(l)*pa(k)
-                        bi70 = bi70 + bi70c(l,k)*pz(l)*pa(k)
-                        bi95 = bi95 + bi95c(l,k)*pz(l)*pa(k)
-                        bimax = bimax + bimaxc(l,k)*pz(l)*pa(k)
-                     ENDDO
-                  ENDDO
-                  ff1 = 1.0
-                  ff2 = 0.0
-                  fg1 = 1.0
-                  fg2 = 0.0
+              IF(el.GT.Selmax.AND.Il.LT.1000)RETURN
+              DO l = 1, 6
+                DO k = 1, 5
+                  aizro = aizro + aizroc(l,k)*pz(l)*pa(k)
+                  ai70 = ai70 + ai70c(l,k)*pz(l)*pa(k)
+                  ai95 = ai95 + ai95c(l,k)*pz(l)*pa(k)
+                  aimax = aimax + aimaxc(l,k)*pz(l)*pa(k)
+                  ai952 = ai952 + ai952c(l,k)*pz(l)*pa(k)
+                  aimax2 = aimax2 + aimx2c(l,k)*pz(l)*pa(k)
+                ENDDO
+                DO k = 1, 4
+                  bizro = bizro + bizroc(l,k)*pz(l)*pa(k)
+                  bi70 = bi70 + bi70c(l,k)*pz(l)*pa(k)
+                  bi95 = bi95 + bi95c(l,k)*pz(l)*pa(k)
+                  bimax = bimax + bimaxc(l,k)*pz(l)*pa(k)
+                ENDDO
+              ENDDO
+              ff1 = 1.0
+              ff2 = 0.0
+              fg1 = 1.0
+              fg2 = 0.0
 C-----NEXT LINE WAS AFTER AIMAXH=0. (MOVED HERE TO AVOID UNDEFINE)
-                  aimidh = 0.
-                  IF (Iz.GT.70) THEN
-                     aimaxh = 0.
-                     DO l = 1, 4
-                        DO k = 1, 4
-                           aimaxh = aimaxh + aimx3c(l,k)*pz(l)*pa(k)
-                           aimidh = aimidh + aimx4c(l,k)*pz(l)*pa(k)
-                        ENDDO
-                     ENDDO
-                     IF (Iz.GT.80) ff1 = 0.0
-                     IF (Iz.GE.80 .OR. bimax.GT.0.95D0) fg1 = 0.0
-                     IF (aimaxh.GT.aimax) ff1 = 0.0
-                     ff2 = 1.0 - ff1
-                     fg2 = 1.0 - fg1
-                     aimax = aimax*ff1 + ff2*aimaxh
-                     aimax2 = aimax2*ff1 + ff2*aimidh
-                  ENDIF
-                  saizro = aizro
-                  bimax = bimax*fg1 + aimidh*fg2
-                  IF (saizro.LT.0.0D0) saizro = 0.0
-                  sai70 = ai70
-                  IF (sai70.LT.0.0D0) sai70 = 0.0
-                  sai95 = ai95
-                  IF (sai95.LT.0.0D0) sai95 = 0.0
-                  saimax = aimax
-                  IF (saimax.LT.0.0D0) saimax = 0.0
-                  sai952 = ai952
-                  IF (sai952.LT.0.0D0) sai952 = 0.0
-                  simax2 = aimax2
-                  IF (simax2.LT.0.0D0) simax2 = 0.0
-                  sbimax = bimax
-                  IF (sbimax.LT.0.0D0) sbimax = 0.0
-                  sbi70 = bi70
-                  IF (sbi70.LT.0.0D0) sbi70 = 0.0
-                  sbi95 = bi95
-                  IF (sbi95.LT.0.0D0) sbi95 = 0.0
-                  sbizro = bizro
-                  IF (sbizro.LT.0.0D0) sbizro = 0.0
-                  q1 = -3.148849569
-                  q2 = 4.465058752
-                  q3 = -1.316209183
-                  q4 = 2.26129233
-                  q5 = -4.94743352
-                  q6 = 2.68614119
-                  gam = -
-     &                  20.*LOG(ABS(saizro - sai95)/ABS(saizro - saimax)
-     &                  )
-                  aa = q1*saizro + q2*sai70 + q3*sai95
-                  bb = q4*saizro + q5*sai70 + q6*sai95
-                  gam2 = -20.*LOG(ABS(saizro - sai952)/ABS(saizro - 
-     &                   simax2))
-                  aa2 = q1*saizro + q2*sai70 + q3*sai952
-                  bb2 = q4*saizro + q5*sai70 + q6*sai952
-                  aa3 = q1*sbizro + q2*sbi70 + q3*sbi95
-                  bb3 = q4*sbizro + q5*sbi70 + q6*sbi95
-                  gam3 = 60.
-                  alpha = pi*(ell - 0.7)
-                  beta = 5.*pi*(ell - 0.9)
-                  sigt = saizro + (saimax - saizro)*EXP(gam*(ell - 1.0))
-                  silt = saizro + aa*ell**2 + bb*ell**4
-                  sjgt = sbi95 + (sbimax - sbi95)*EXP(gam3*(ell - 1.0))
-                  sjlt = sbizro + aa3*ell**2 + bb3*ell**4
-                  sigt2 = saizro + (simax2 - saizro)
-     &                    *EXP(gam2*(ell - 1.0))
-                  silt2 = saizro + aa2*ell**2 + bb2*ell**4
-                  f1 = silt*COS(alpha)**2 + sigt*SIN(alpha)**2
-                  f2 = silt*COS(beta)**2 + sigt*SIN(beta)**2
-                  f1m = silt2*COS(alpha)**2 + sigt2*SIN(alpha)**2
-                  f2m = silt2*COS(beta)**2 + sigt2*SIN(beta)**2
-                  f3 = sjlt*COS(alpha)**2 + sjgt*SIN(alpha)**2
-                  f4 = sjlt*COS(beta)**2 + sjgt*SIN(beta)**2
-                  IF (ell.LE.0.95D0) THEN
-                     IF (ell.LE.0.70D0) THEN
+              aimidh = 0.
+              IF(Iz.GT.70)THEN
+                aimaxh = 0.
+                DO l = 1, 4
+                  DO k = 1, 4
+                    aimaxh = aimaxh + aimx3c(l,k)*pz(l)*pa(k)
+                    aimidh = aimidh + aimx4c(l,k)*pz(l)*pa(k)
+                  ENDDO
+                ENDDO
+                IF(Iz.GT.80)ff1 = 0.0
+                IF(Iz.GE.80.OR.bimax.GT.0.95D0)fg1 = 0.0
+                IF(aimaxh.GT.aimax)ff1 = 0.0
+                ff2 = 1.0 - ff1
+                fg2 = 1.0 - fg1
+                aimax = aimax*ff1 + ff2*aimaxh
+                aimax2 = aimax2*ff1 + ff2*aimidh
+              ENDIF
+              saizro = aizro
+              bimax = bimax*fg1 + aimidh*fg2
+              IF(saizro.LT.0.0D0)saizro = 0.0
+              sai70 = ai70
+              IF(sai70.LT.0.0D0)sai70 = 0.0
+              sai95 = ai95
+              IF(sai95.LT.0.0D0)sai95 = 0.0
+              saimax = aimax
+              IF(saimax.LT.0.0D0)saimax = 0.0
+              sai952 = ai952
+              IF(sai952.LT.0.0D0)sai952 = 0.0
+              simax2 = aimax2
+              IF(simax2.LT.0.0D0)simax2 = 0.0
+              sbimax = bimax
+              IF(sbimax.LT.0.0D0)sbimax = 0.0
+              sbi70 = bi70
+              IF(sbi70.LT.0.0D0)sbi70 = 0.0
+              sbi95 = bi95
+              IF(sbi95.LT.0.0D0)sbi95 = 0.0
+              sbizro = bizro
+              IF(sbizro.LT.0.0D0)sbizro = 0.0
+              q1 = -3.148849569
+              q2 = 4.465058752
+              q3 = -1.316209183
+              q4 = 2.26129233
+              q5 = -4.94743352
+              q6 = 2.68614119
+              gam = -20.*LOG(ABS(saizro - sai95)/ABS(saizro - saimax))
+              aa = q1*saizro + q2*sai70 + q3*sai95
+              bb = q4*saizro + q5*sai70 + q6*sai95
+              gam2 = -20.*LOG(ABS(saizro - sai952)/ABS(saizro - simax2))
+              aa2 = q1*saizro + q2*sai70 + q3*sai952
+              bb2 = q4*saizro + q5*sai70 + q6*sai952
+              aa3 = q1*sbizro + q2*sbi70 + q3*sbi95
+              bb3 = q4*sbizro + q5*sbi70 + q6*sbi95
+              gam3 = 60.
+              alpha = pi*(ell - 0.7)
+              beta = 5.*pi*(ell - 0.9)
+              sigt = saizro + (saimax - saizro)*EXP(gam*(ell - 1.0))
+              silt = saizro + aa*ell**2 + bb*ell**4
+              sjgt = sbi95 + (sbimax - sbi95)*EXP(gam3*(ell - 1.0))
+              sjlt = sbizro + aa3*ell**2 + bb3*ell**4
+              sigt2 = saizro + (simax2 - saizro)*EXP(gam2*(ell - 1.0))
+              silt2 = saizro + aa2*ell**2 + bb2*ell**4
+              f1 = silt*COS(alpha)**2 + sigt*SIN(alpha)**2
+              f2 = silt*COS(beta)**2 + sigt*SIN(beta)**2
+              f1m = silt2*COS(alpha)**2 + sigt2*SIN(alpha)**2
+              f2m = silt2*COS(beta)**2 + sigt2*SIN(beta)**2
+              f3 = sjlt*COS(alpha)**2 + sjgt*SIN(alpha)**2
+              f4 = sjlt*COS(beta)**2 + sjgt*SIN(beta)**2
+              IF(ell.LE.0.95D0)THEN
+                IF(ell.LE.0.70D0)THEN
 C
 C                       ELL IS LESS THAN 0.7,  USE ILT
 C
-                        Saimin = sjlt
-                        Saimx = silt
-                        Saimid = silt2
-                        IF (ff2.GT.0.01D0 .AND. fg2.GT.0.01D0) GOTO 5
-                        GOTO 10
+                  Saimin = sjlt
+                  Saimx = silt
+                  Saimid = silt2
+                  IF(ff2.LE.0.01D0.OR.fg2.LE.0.01D0)GOTO 10
+                  GOTO 5
 C
 C                       ELL IS GREATER THAN 0.7, LESS THAN 0.95  USE FIRST L. C.
 C
-                     ENDIF
-                     Saimx = f1
-                     Saimin = f3
-                     Saimid = f1m
-                     IF (ff2.GT.0.01D0 .AND. fg2.GT.0.01D0) GOTO 5
-                     GOTO 10
+                ENDIF
+                Saimx = f1
+                Saimin = f3
+                Saimid = f1m
+                IF(ff2.LE.0.01D0.OR.fg2.LE.0.01D0)GOTO 10
+                GOTO 5
 C
 C                    ELL IS GREATER THAN 0.95,  USE 2ND L. C.
 C
-                  ENDIF
-                  Saimx = f2
-                  Saimin = f4
-                  Saimid = f2m
-                  IF (ff2.LE.0.01D0 .OR. fg2.LE.0.01D0) GOTO 10
+              ENDIF
+              Saimx = f2
+              Saimin = f4
+              Saimid = f2m
+              IF(ff2.LE.0.01D0.OR.fg2.LE.0.01D0)GOTO 10
 C
 C                 FOR NUCLEI WITH Z GT 80 USE 4TH ORDER FUNCTION WITH SEPARATE
 C                 FIT TO IMAX AND IMAX2
 C
-    5             q1 = 4.001600640
-                  q2 = 0.960784314
-                  q3 = 2.040816327
-                  aa3 = q1*sai70 - q2*saimax - (1. + q3)*saizro
-                  bb3 = ( - q1*sai70) + (1. + q2)*saimax + q3*saizro
-                  aa4 = q1*sai70 - q2*simax2 - (1. + q3)*saizro
-                  bb4 = ( - q1*sai70) + (1. + q2)*simax2 + q3*saizro
-                  Saimx = saizro + aa3*ell**2 + bb3*ell**4
-                  Saimid = saizro + aa4*ell**2 + bb4*ell**4
-               ENDIF
-   10          Saimid = MIN(Saimx,Saimid)
-               IF (Saimin.LT.0.0D0) Saimin = 0.0
-               RETURN
+    5         q1 = 4.001600640
+              q2 = 0.960784314
+              q3 = 2.040816327
+              aa3 = q1*sai70 - q2*saimax - (1. + q3)*saizro
+              bb3 = ( - q1*sai70) + (1. + q2)*saimax + q3*saizro
+              aa4 = q1*sai70 - q2*simax2 - (1. + q3)*saizro
+              bb4 = ( - q1*sai70) + (1. + q2)*simax2 + q3*saizro
+              Saimx = saizro + aa3*ell**2 + bb3*ell**4
+              Saimid = saizro + aa4*ell**2 + bb4*ell**4
             ENDIF
-         ENDIF
+   10       Saimid = MIN(Saimx,Saimid)
+            IF(Saimin.LT.0.0D0)Saimin = 0.0
+            RETURN
+          ENDIF
+        ENDIF
       ENDIF
-      PRINT 99020
+      PRINT 1040
 C
-99020 FORMAT (/10X,'*  *  *  *  MOMFIT CALLED WITH  Z  LESS THAN 19 OR '
-     &        ,' GREATER THAN 111.  MOMENTS ARE SET TO 0.0.  *  *  *  *'
-     &        )
-  100 aimax = 0.0
+ 1040 FORMAT(/10X,'*  *  *  *  MOMFIT CALLED WITH  Z  LESS THAN 19 OR ',
+     &       ' GREATER THAN 111.  MOMENTS ARE SET TO 0.0.  *  *  *  *')
+   20 aimax = 0.0
       Saimx = 0.0
       Saimin = 0.0
       Saimid = 0.0
       Selmax = 0.0
-      END
+      END SUBROUTINE MOMFIT
+ 
+!---------------------------------------------------------------------------
 C
       SUBROUTINE LPOLY(X,N,Pl)
 C
@@ -752,21 +758,26 @@ C    NOTE:  PL AND X MUST BE DOUBLE PRECISION ON 32-BIT COMPUTERS
 C
       IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
+C*** Start of declarations rewritten by SPAG
 C
 C Dummy arguments
 C
-      INTEGER N
-      DOUBLE PRECISION X
-      DOUBLE PRECISION Pl(N)
+      INTEGER :: N
+      REAL*8 :: X
+      REAL*8, DIMENSION(N) :: Pl
 C
 C Local variables
 C
-      INTEGER i
+      INTEGER :: i
+C
+C*** End of declarations rewritten by SPAG
+C
+C
       Pl(1) = 1.0
       Pl(2) = X
       DO i = 3, N
-         Pl(i) = ((2*i - 3)*X*Pl(i - 1) - (i - 2)*Pl(i - 2))/(i - 1)
+        Pl(i) = ((2*i - 3)*X*Pl(i - 1) - (i - 2)*Pl(i - 2))/(i - 1)
       ENDDO
-      END
-
-
+      END SUBROUTINE LPOLY
+ 
+ 
