@@ -1,6 +1,6 @@
-#$Rev: 2526 $
+#$Rev: 2527 $
 #$Author: shoblit $
-#$Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
+#$Date: 2012-02-09 21:38:28 +0100 (Do, 09 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -117,7 +117,8 @@ read_nubar.o : global.h dimension.h ../util/IO/endf_io.a
 	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f90
 
 $(OBJF) : global.h dimension.h
-main.o  : io.h
+main.o  : io.h read_nubar.o
+input.o : read_nubar.o
 ddhms.o : ddhms.cmb
 tl.o  : pre_ecis.h
 
