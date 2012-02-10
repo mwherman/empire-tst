@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 2539 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -17,6 +17,8 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      use endf_nubars
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -697,13 +699,11 @@ C
 
 C
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
-C            and initialization of the ENIu_eval(Einc) ,VNIu_eval(Einc)
-C            global arrays 
 C
              IF(NUBarread) THEN 
 
-               CALL READNUBAR(trim(nubar_filename),len_nubar_filename,
-     &                        ierr)
+               CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
+     &                        A(0), Z(0), ierr)
 
                if(ierr.gt.0) NUBarread = .FALSE.
 

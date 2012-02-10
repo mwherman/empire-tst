@@ -1,6 +1,6 @@
-!cc   * $Rev: 2355 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2012-01-28 09:34:54 +0100 (Sat, 28 Jan 2012) $
+!cc   * $Rev: 2539 $
+!cc   * $Author: shoblit $
+!cc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
 
 module endf_nubars
 

@@ -1,6 +1,6 @@
-cc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+cc   * $Rev: 2539 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -12,6 +12,9 @@ Ccc   *               Used to be main of the EMPIRE code                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+
+      use endf_nubars
+
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 C
@@ -43,10 +46,6 @@ C
       DOUBLE PRECISION eenc(500),signcf(500)
       INTEGER nrnc
       COMMON /inp_sp5/ eenc,signcf,nrnc
-C
-C Local functions
-C
-      DOUBLE PRECISION fniu_nubar_eval
 C
 C Local variables
 C
@@ -2556,6 +2555,7 @@ C             This allows for Windows use and testing avoiding
 C             compilation errors of IO package in Windows 
 C
               if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
+
 C             The total nubar is calculated for the first incident (real)
 C             energy and used for the normalization of the total PFNS
               if(fniuEVAL.LE.0.d0) then
