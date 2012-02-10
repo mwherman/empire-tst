@@ -1,6 +1,6 @@
-!cc   * $Rev: 2539 $
+!cc   * $Rev: 2546 $
 !cc   * $Author: shoblit $
-!cc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
+!cc   * $Date: 2012-02-10 18:21:40 +0100 (Fr, 10 Feb 2012) $
 
 module endf_nubars
 
@@ -117,7 +117,6 @@ module endf_nubars
     real*8, intent(in) :: en
 
     integer*4 i
-    real*8 xnus
 
     if(.not.allocated(nu)) then
         write(8,*) ' ERROR: fniu_nubar_eval called without being initialized!'
