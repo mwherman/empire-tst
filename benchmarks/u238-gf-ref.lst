@@ -1,0 +1,931 @@
+
+                      Start time: 12:28.50 (10-02-2012)
+
+ cp /home/gnobre/empire/EXFOR/gammas/092_U_238.c4 TMP.c4                                                                             
+   Retrieving and sorting EXFOR(C4) file: /EXFOR/gammas/092_U_238.c4
+                         __________________________
+                        |                          |
+                        |    E M P I R E  - 3.1    |
+                        |                          |
+                        |        RIVOLI            |
+                        |                          |
+                        | SVN empire     rev. 2544 |
+                        | empire/source  rev. 2543 |
+                        |                          |
+                        |    Sao Jose dos Campos   |
+                        |     Brazil, May 2011     |
+                        |    Upton, New York       |
+                        |      USA, Jan 2012       |
+                        |__________________________|
+  
+   Photon induced fission on U-238
+  
+ Following options/parameters have been used
+ -------------------------------------------
+  
+ Number of energy steps in the integration set to  50
+ Main calculations output control set to  1
+ EMPIRE-specific level densities (J>>K aprox.) selected 
+ Exciton model calculations with code PCROSS
+ Cluster emission in terms of the Iwamoto-Harada model
+ Kalbach systematics angular distributions (see RIPL-1)
+ Mean free path parameter in PCROSS set to  1.5 (Recommended ~ 1.5)
+ Max hole number in PCROSS set to 0.20*sqrt(g*U)
+    being U the CN excitation energy 
+ Exciton model calculations with code DEGAS
+  are disabled in the current EMPIRE version
+ ENDF formatting disabled
+ Recoils are not calculated
+ Shell corrections according to Myers-Swiatecki
+ Emission width of ejectile 0 from 238U  multiplied by   2.100
+ Coupled Channels Method used for direct inelastic scattering
+ Optical model parameters for direct inelastic scattering set  to RIPL #2408
+ Optical model parameters for ejectile 1 set to RIPL #2408
+ Optical model parameters for ejectile 2 set to RIPL #5408
+ Optical model for fission with partial damping used 
+ Collective levels up to   1.2 MeV used in DWBA
+ Maximum spin of retrieved collective levels J <5
+ E1 strength function set to RIPL MLO1
+ GDR parameters from RIPL/Exp.data+Plujko systematics
+  
+  
+
+
+  
+  WARNING!!!! Direct mechanism is not supported
+  WARNING!!!! for photo-nuclear reactions and 
+  WARNING!!!! has been turned off  
+  
+ Primary gammas not stored: ENDF formatting is turned off
+ Recoils are not calculated as ENDF formatting is turned off
+  
+            Use of direct and preequilibrium models 
+            --------------------------------------- 
+  
+ Exit channel    ECIS    MSD    MSC    HMS   PCROSS
+  
+ neut. disc.       0      0      0      0      0
+ neut. cont.       0      0      0      0      1
+ prot. disc.       0      0      0      0      0
+ prot. cont.       0      0      0      0      1
+ gammas            0      0      0      0      1
+ alpha cont.       0      0      0      0      1
+ deut. cont.       0      0      0      0      1
+ trit. cont.       0      0      0      0      1
+ He-3  cont.       0      0      0      0      1
+ LI    cont.       0      0      0      0      0
+ alpha disc.       0      0      0      0      0
+ deut. disc.       0      0      0      0      0
+ trit. disc.       0      0      0      0      0
+ He-3  disc.       0      0      0      0      0
+  
+
+
+    L e v e l  d e n s i t y  p a r a m e t e r s  a(Qn)
+    ------------------------------------------------------
+
+   Nucleus    a_exp     a_sys.   int. nor.  ext. nor. a_final
+
+ 91-Pa-234  20.99960  20.58394   1.02019   1.00000  20.99960
+ 92-U -236  21.78490  21.30861   1.02235   1.00000  21.78490
+ 92-U -237  21.27220  21.39627   0.99420   1.00000  21.27220
+ 92-U -238  21.88040  21.78584   1.00434   1.00000  21.88040
+
+   Nucleus                   final  norm.
+
+ 92-U -238                       1.00434
+ 92-U -237                       0.99420
+ 91-Pa-237                       1.01430
+ 90-Th-234                       1.09290
+ 91-Pa-236                       1.01430
+ 91-Pa-235                       1.01430
+ 90-Th-235                       1.09290
+ 92-U -236                       1.02235
+ 90-Th-233                       1.09290
+ 91-Pa-234                       1.02019
+
+
+  *****************************************************
+  *  Table of Reaction Q-values (Mass inc - Mass out) *
+  *     for the first emitted particle from the CN    *
+  *                                                   *
+  *                    Q(at.mass)  Q(nucl.mass)       *
+  *                      [MeV]        [MeV]           *
+  *                   --------------------------      *
+  *          neutron :  -6.1530      -6.1530          *
+  *          proton  :  -7.6205      -7.6210          *
+  *          alpha   :   4.2711       4.2700          *
+  *          deuteron: -11.1725     -11.1730          *
+  *          triton  :  -9.9695      -9.9700          *
+  *          He-3    : -11.8759     -11.8770          *
+  *                                                   *
+  *****************************************************
+
+  
+  
+  
+============================================================
+ Reaction   0g +238U  at incident energy  5.60     MeV
+============================================================
+  
+ Compound nucleus energy    5.600 MeV
+ Projectile separation energy   0.000 MeV
+  WARNING: Number of energy steps set to           44
+ Energy step in calculations  100.3 keV
+ Number of energy points = 50   NDEX =101
+
+  WARNING: Ecrt= Ucrt-DEL > Bn, Calculated D0 may be not accurate
+  WARNING: Tuning of the CN ATILNO may be required
+
+  
+ Total number of nuclei considered :          10
+  
+
+
+          E j e c t i l e    m a s s e s   [amu]
+
+                     1n        1p        4He       2d        3t        3h 
+
+                 1.008665   1.007824   4.002602   2.014101   3.016049   3.016028
+
+
+          S e p a r a t i o n   e n e r g i e s [MeV]
+
+    Nucleus          1n        1p        4He       2d        3t        3h 
+
+  92-U -238         6.153     7.621    -4.270    11.173     9.970    11.877
+  92-U -237         5.126     7.244    -4.232    10.074     9.900    10.154
+
+
+    Nucleus         Shell Corr.  Deform.
+                      (J=0)       (J=0)    
+
+  92-U -238           2.035       0.215
+  90-Th-234           2.548       0.215
+
+ Neutron   o. m. parameters: RIPL catalog number         2408
+ Proton    o. m. parameters: RIPL catalog number         5408
+ Alpha     o. m. parameters: RIPL catalog number         9600
+ Deuteron  o. m. parameters: RIPL catalog number         6200
+ Triton    o. m. parameters: RIPL catalog number         7100
+ He-3      o. m. parameters: RIPL catalog number         8100
+
+   C.M. incident energy 5.6000     MeV
+  RIPL GDR parameters used
+
+ ---------------------------------------------------------
+
+
+
+      Preequilibrium decay (PCROSS)
+
+
+ Mean free path parameter = 1.50
+
+ g  PCROSS emission cross section 0.57034E-06 mb  (accepted)
+ n  PCROSS emission cross section  0.0000     mb  (accepted)
+ p  PCROSS emission cross section  0.0000     mb  (accepted)
+ He PCROSS emission cross section 0.12898E-13 mb  (accepted)
+ d  PCROSS emission cross section  0.0000     mb  (accepted)
+ t  PCROSS emission cross section  0.0000     mb  (accepted)
+ h  PCROSS emission cross section  0.0000     mb  (accepted)
+
+ PCROSS preequilibrium total cross section   =    0.00 mb
+ PCROSS preequilibrium fraction              =    0.00
+
+
+ ---------------------------------------------------------
+
+
+  g PE emission cross section   5.70335477038714714E-007  mb
+  a PE emission cross section   1.28983903130278723E-014  mb
+  
+  
+  Absorption cross section            8.22 mb
+  PE + Direct contribution            0.00 mb (  0.00 %)
+  MSD contribution                    0.00 mb (  0.00 %)
+  PCROSS contribution                 0.00 mb (  0.00 %)
+  Total CN population                 8.22 mb
+  
+  PE XS to discrete levels      0.0000000      for nejc =           0
+   Absorption cross section =   8.21685     mb including
+   PE (not DWBA) =  0.570335E-06 mb
+  
+  
+  -------------------------------------
+  1  Decaying nucleus 238-U 
+  -------------------------------------
+  
+
+ Population neglected because too small  0.25942E-28
+
+
+          Discrete level population
+
+          ----------------------------------------
+
+           1   0.00000    1     0.0   0.786598    
+           2   0.04492    1     2.0    1.93044    
+  WARNING: Branching ratios for level            2  in          238 -U  are missing
+           3   0.14838    1     4.0   0.331319    
+  WARNING: Branching ratios for level            3  in          238 -U  are missing
+           4   0.30718    1     6.0   0.658957E-02
+  WARNING: Branching ratios for level            4  in          238 -U  are missing
+           5   0.51810    1     8.0   0.288826E-04
+  WARNING: Branching ratios for level            5  in          238 -U  are missing
+           6   0.68011   -1     1.0   0.747724    
+           7   0.73193   -1     3.0   0.283270    
+           8   0.77590    1    10.0   0.507483E-07
+  WARNING: Branching ratios for level            8  in          238 -U  are missing
+           9   0.82664   -1     5.0   0.762651E-02
+          10   0.92721    1     0.0   0.105670    
+  WARNING: Branching ratios for level           10  in          238 -U  are missing
+          11   0.93055   -1     1.0   0.355751    
+          12   0.95012   -1     2.0   0.257144    
+          13   0.96613    1     2.0   0.174279    
+          14   0.96631   -1     7.0   0.323202E-04
+          15   0.99723    1     0.0   0.917420E-01
+  WARNING: Branching ratios for level           15  in          238 -U  are missing
+          16   0.99758   -1     3.0   0.122253    
+          17   1.02800   -1     4.0   0.136014E-01
+  WARNING: Branching ratios for level           17  in          238 -U  are missing
+          18   1.03725    1     2.0   0.145557    
+          19   1.05638    1     4.0   0.173906E-01
+          20   1.05773    1     3.0   0.597301E-01
+  WARNING: Branching ratios for level           20  in          238 -U  are missing
+          21   1.05966    1     3.0   0.593543E-01
+  WARNING: Branching ratios for level           21  in          238 -U  are missing
+          22   1.06027    1     2.0   0.137433    
+          23   1.07670    1    12.0   0.839200E-08
+  WARNING: Branching ratios for level           23  in          238 -U  are missing
+          24   1.10571    1     3.0   0.510682E-01
+          25   1.12884   -1     2.0   0.149232    
+          26   1.13075    1     4.0   0.133971E-01
+  WARNING: Branching ratios for level           26  in          238 -U  are missing
+          27   1.13570    1     1.0   0.134461    
+          28   1.15070   -1     9.0   0.337101E-07
+  WARNING: Branching ratios for level           28  in          238 -U  are missing
+          29   1.15100   -1     6.0   0.872324E-04
+  WARNING: Branching ratios for level           29  in          238 -U  are missing
+          30   1.16300    1     4.0   0.119708E-01
+  WARNING: Branching ratios for level           30  in          238 -U  are missing
+          31   1.16799    1     4.0   0.117645E-01
+          32   1.16888   -1     3.0   0.709742E-01
+          33   1.22378    1     2.0   0.925920E-01
+          34   1.23200    1     5.0   0.854786E-03
+  WARNING: Branching ratios for level           34  in          238 -U  are missing
+          35   1.23930    1     3.0   0.331099E-01
+  WARNING: Branching ratios for level           35  in          238 -U  are missing
+          36   1.24290   -1     6.0   0.530070E-04
+  WARNING: Branching ratios for level           36  in          238 -U  are missing
+          37   1.26090    1     4.0   0.852814E-02
+          38   1.26920    1     6.0   0.113592E-03
+  WARNING: Branching ratios for level           38  in          238 -U  are missing
+          39   1.27854    1     2.0   0.815331E-01
+          40   1.28565   -1     5.0   0.983724E-03
+
+          ----------------------------------------
+
+  92-U -238 production cross section   6.2943     mb  reaction: (z,gamma)            
+
+  92-U -238 fission cross  section   1.9226       mb  
+
+  g  emission cross section  22.180      mb
+   Primary g  emission cross section  0.0000      mb
+  He emission cross section 0.10973E-06  mb
+  
+  
+  
+  -------------------------------------
+  2  Decaying nucleus 237-U 
+  -------------------------------------
+  
+  
+ Continuum of this nucleus has not been populated
+
+          ----------------------------------------
+
+  92-U -237 production cross section   0.0000     mb  reaction: (z,n)                
+  
+  
+  Tot. fission cross section    1.923     mb
+  
+  
+
+
+
+
+ +++++
+
+  
+            Use of direct and preequilibrium models 
+            --------------------------------------- 
+  
+ Exit channel    ECIS    MSD    MSC    HMS   PCROSS
+  
+ neut. disc.       0      0      0      0      0
+ neut. cont.       0      0      0      0      1
+ prot. disc.       0      0      0      0      0
+ prot. cont.       0      0      0      0      1
+ gammas            0      0      0      0      1
+ alpha cont.       0      0      0      0      1
+ deut. cont.       0      0      0      0      1
+ trit. cont.       0      0      0      0      1
+ He-3  cont.       0      0      0      0      1
+ LI    cont.       0      0      0      0      0
+ alpha disc.       0      0      0      0      0
+ deut. disc.       0      0      0      0      0
+ trit. disc.       0      0      0      0      0
+ He-3  disc.       0      0      0      0      0
+  
+
+
+  *****************************************************
+  *  Table of Reaction Q-values (Mass inc - Mass out) *
+  *     for the first emitted particle from the CN    *
+  *                                                   *
+  *                    Q(at.mass)  Q(nucl.mass)       *
+  *                      [MeV]        [MeV]           *
+  *                   --------------------------      *
+  *          neutron :  -6.1530      -6.1530          *
+  *          proton  :  -7.6205      -7.6210          *
+  *          alpha   :   4.2711       4.2700          *
+  *          deuteron: -11.1725     -11.1730          *
+  *          triton  :  -9.9695      -9.9700          *
+  *          He-3    : -11.8759     -11.8770          *
+  *                                                   *
+  *****************************************************
+
+  
+  
+  
+============================================================
+ Reaction   0g +238U  at incident energy  8.00     MeV
+============================================================
+  
+ Compound nucleus energy    8.000 MeV
+ Projectile separation energy   0.000 MeV
+ Energy step in calculations  137.0 keV
+ Number of energy points = 50   NDEX =101
+  
+ Total number of nuclei considered :          10
+  
+
+
+          E j e c t i l e    m a s s e s   [amu]
+
+                     1n        1p        4He       2d        3t        3h 
+
+                 1.008665   1.007824   4.002602   2.014101   3.016049   3.016028
+
+
+          S e p a r a t i o n   e n e r g i e s [MeV]
+
+    Nucleus          1n        1p        4He       2d        3t        3h 
+
+  92-U -238         6.153     7.621    -4.270    11.173     9.970    11.877
+  92-U -237         5.126     7.244    -4.232    10.074     9.900    10.154
+    Nucleus         Shell Corr.  Deform.
+                      (J=0)       (J=0)    
+
+  92-U -238           2.035       0.215
+  92-U -237           1.806       0.215
+  91-Pa-237           2.736       0.215
+  90-Th-234           2.548       0.215
+  90-Th-233           2.516       0.215
+
+   C.M. incident energy 8.0000     MeV
+
+ ---------------------------------------------------------
+
+
+
+      Preequilibrium decay (PCROSS)
+
+
+ Mean free path parameter = 1.50
+
+ g  PCROSS emission cross section 0.28106E-04 mb  (accepted)
+ n  PCROSS emission cross section 0.14714     mb  (accepted)
+ p  PCROSS emission cross section  0.0000     mb  (accepted)
+ He PCROSS emission cross section 0.28865E-10 mb  (accepted)
+ d  PCROSS emission cross section  0.0000     mb  (accepted)
+ t  PCROSS emission cross section  0.0000     mb  (accepted)
+ h  PCROSS emission cross section  0.0000     mb  (accepted)
+
+ PCROSS preequilibrium total cross section   =    0.15 mb
+ PCROSS preequilibrium fraction              =    0.00
+
+
+ ---------------------------------------------------------
+
+
+  g PE emission cross section   2.81060515403017319E-005  mb
+  n PE emission cross section   0.14714158486070267       mb
+  a PE emission cross section   2.88650525144439079E-011  mb
+  
+  
+  Absorption cross section           46.74 mb
+  PE + Direct contribution            0.15 mb (  0.31 %)
+  MSD contribution                    0.00 mb (  0.00 %)
+  PCROSS contribution                 0.15 mb (  0.31 %)
+  Total CN population                46.60 mb
+  
+  PE XS to discrete levels      0.0000000      for nejc =           0
+   Absorption cross section =   46.7437     mb including
+   PE (not DWBA) =  0.147170     mb
+  
+  
+  -------------------------------------
+  1  Decaying nucleus 238-U 
+  -------------------------------------
+  
+
+ Population neglected because too small  0.11652E-27
+
+
+          Discrete level population
+
+          ----------------------------------------
+
+           1   0.00000    1     0.0   0.496684E-01
+           2   0.04492    1     2.0   0.147638    
+           3   0.14838    1     4.0   0.334429E-01
+           4   0.30718    1     6.0   0.114841E-02
+           5   0.51810    1     8.0   0.121367E-04
+           6   0.68011   -1     1.0   0.412934E-01
+           7   0.73193   -1     3.0   0.191726E-01
+           8   0.77590    1    10.0   0.103202E-05
+           9   0.82664   -1     5.0   0.116573E-02
+          10   0.92721    1     0.0   0.472222E-02
+          11   0.93055   -1     1.0   0.210529E-01
+          12   0.95012   -1     2.0   0.169791E-01
+          13   0.96613    1     2.0   0.112438E-01
+          14   0.96631   -1     7.0   0.115158E-04
+          15   0.99723    1     0.0   0.394014E-02
+          16   0.99758   -1     3.0   0.862804E-02
+          17   1.02800   -1     4.0   0.214188E-02
+          18   1.03725    1     2.0   0.914617E-02
+          19   1.05638    1     4.0   0.181250E-02
+          20   1.05773    1     3.0   0.556183E-02
+          21   1.05966    1     3.0   0.552815E-02
+          22   1.06027    1     2.0   0.855847E-02
+          23   1.07670    1    12.0   0.406379E-06
+          24   1.10571    1     3.0   0.478410E-02
+          25   1.12884   -1     2.0   0.103868E-01
+          26   1.13075    1     4.0   0.140436E-02
+          27   1.13570    1     1.0   0.894457E-02
+          28   1.15070   -1     9.0   0.250166E-06
+          29   1.15100   -1     6.0   0.306321E-04
+          30   1.16300    1     4.0   0.125813E-02
+          31   1.16799    1     4.0   0.123696E-02
+          32   1.16888   -1     3.0   0.522465E-02
+          33   1.22378    1     2.0   0.538031E-02
+          34   1.23200    1     5.0   0.173130E-03
+          35   1.23930    1     3.0   0.316037E-02
+          36   1.24290   -1     6.0   0.195270E-04
+          37   1.26090    1     4.0   0.903873E-03
+          38   1.26920    1     6.0   0.247908E-04
+          39   1.27854    1     2.0   0.462092E-02
+          40   1.28565   -1     5.0   0.182163E-03
+
+          ----------------------------------------
+
+  92-U -238 production cross section  0.44060     mb  reaction: (z,gamma)            
+
+  92-U -238 fission cross  section   10.134       mb  
+
+  g  emission cross section  2.0513      mb
+   Primary g  emission cross section  0.0000      mb
+
+
+
+ ****************************************************** neutron spectrum  ******************************************************
+
+
+ Ener.      Spectr.     .1E+00                         .1E+01                         .1E+02                         .1E+03
+  MeV       mb/MeV      I                              I                              I                              I 
+                        ---------------------------------------------------------------------------------------------
+   0.00    0.7448E-01  I                                                                                              I 
+   0.14    0.1972E+02  I ***********************************************************************                      I 
+   0.27    0.3120E+02  I *****************************************************************************                I 
+   0.41    0.3287E+02  I ******************************************************************************               I 
+   0.55    0.2997E+02  I *****************************************************************************                I 
+   0.68    0.2600E+02  I ***************************************************************************                  I 
+   0.82    0.2238E+02  I *************************************************************************                    I 
+   0.96    0.9713E+01  I **************************************************************                               I 
+   1.09    0.1897E+02  I ***********************************************************************                      I 
+   1.23    0.2194E+02  I *************************************************************************                    I 
+   1.36    0.1103E+02  I ***************************************************************                              I 
+   1.50    0.2834E+01  I *********************************************                                                I 
+   1.64    0.1315E+02  I ******************************************************************                           I 
+   1.77    0.1996E+02  I ***********************************************************************                      I 
+   1.91    0.5281E+01  I *****************************************************                                        I 
+   2.05    0.0000E+00  I                                                                                              I 
+                        ---------------------------------------------------------------------------------------------
+     Integrated spectrum     36.169      mb
+  n  emission cross section  36.169      mb
+  
+  He emission cross section 0.20113E-06  mb
+  
+  
+  
+  -------------------------------------
+  2  Decaying nucleus 237-U 
+  -------------------------------------
+  
+
+ Population neglected because too small  0.55093E-03
+
+
+          Discrete level population
+
+          ----------------------------------------
+
+           1   0.00000    1     0.5    4.31672    
+           2   0.01139    1     1.5    5.77789    
+           3   0.05630    1     2.5    4.15929    
+           4   0.08286    1     3.5    2.11089    
+           5   0.15996    1     2.5    3.10785    
+           6   0.16300    1     4.5   0.669134    
+           7   0.20419    1     3.5    1.52938    
+           8   0.20500    1     5.5   0.762818E-01
+           9   0.26095    1     4.5   0.530209    
+          10   0.27400   -1     3.5   0.958938    
+          11   0.31600   -1     4.5   0.123216    
+          12   0.32700    1     5.5   0.420927E-01
+          13   0.36700   -1     5.5   0.359036E-01
+          14   0.42615    1     3.5   0.859672    
+          15   0.43200   -1     6.5   0.663863E-02
+          16   0.43200    1     6.5   0.118680E-01
+          17   0.48200    1     4.5   0.321976    
+          18   0.48400    1     4.5   0.320451    
+          19   0.50600   -1     7.5   0.154847E-01
+          20   0.53000   -1     2.5   0.684345    
+          21   0.54062   -1     0.5   0.793387    
+          22   0.54500    1     2.5    1.12834    
+          23   0.55100    1     5.5   0.116318E-01
+          24   0.55498   -1     1.5   0.968341    
+          25   0.57500    1     4.5   0.258223    
+          26   0.57801   -1     2.5   0.541845    
+          27   0.63200    1     6.5   0.325312E-02
+          28   0.65700   -1     3.5   0.155372    
+          29   0.66427    1     1.5    1.03330    
+          30   0.66645    1     2.5   0.847471    
+          31   0.67759    1     1.5    1.00728    
+          32   0.68800    1     3.5   0.422028    
+          33   0.69765    1     2.5   0.788577    
+          34   0.69800    1     1.5   0.969810    
+          35   0.71800    1     3.5   0.384610    
+          36   0.72045   -1     1.5   0.462731    
+          37   0.73434   -1     0.5   0.335237    
+          38   0.75816   -1     1.5   0.395635    
+
+          ----------------------------------------
+
+  92-U -237 production cross section   36.165     mb  reaction: (z,n)                
+
+  92-U -237 fission cross  section  0.13901E-17   mb  
+
+  g  emission cross section  42.355      mb
+  
+  
+  Tot. fission cross section    10.13     mb
+  
+  
+
+
+
+
+ +++++
+
+  
+            Use of direct and preequilibrium models 
+            --------------------------------------- 
+  
+ Exit channel    ECIS    MSD    MSC    HMS   PCROSS
+  
+ neut. disc.       0      0      0      0      0
+ neut. cont.       0      0      0      0      1
+ prot. disc.       0      0      0      0      0
+ prot. cont.       0      0      0      0      1
+ gammas            0      0      0      0      1
+ alpha cont.       0      0      0      0      1
+ deut. cont.       0      0      0      0      1
+ trit. cont.       0      0      0      0      1
+ He-3  cont.       0      0      0      0      1
+ LI    cont.       0      0      0      0      0
+ alpha disc.       0      0      0      0      0
+ deut. disc.       0      0      0      0      0
+ trit. disc.       0      0      0      0      0
+ He-3  disc.       0      0      0      0      0
+  
+
+
+  *****************************************************
+  *  Table of Reaction Q-values (Mass inc - Mass out) *
+  *     for the first emitted particle from the CN    *
+  *                                                   *
+  *                    Q(at.mass)  Q(nucl.mass)       *
+  *                      [MeV]        [MeV]           *
+  *                   --------------------------      *
+  *          neutron :  -6.1530      -6.1530          *
+  *          proton  :  -7.6205      -7.6210          *
+  *          alpha   :   4.2711       4.2700          *
+  *          deuteron: -11.1725     -11.1730          *
+  *          triton  :  -9.9695      -9.9700          *
+  *          He-3    : -11.8759     -11.8770          *
+  *                                                   *
+  *****************************************************
+
+  
+  
+  
+============================================================
+ Reaction   0g +238U  at incident energy  12.0     MeV
+============================================================
+  
+ Compound nucleus energy   12.000 MeV
+ Projectile separation energy   0.000 MeV
+ Energy step in calculations  218.7 keV
+ Number of energy points = 50   NDEX =101
+  
+ Total number of nuclei considered :          10
+  
+
+
+          E j e c t i l e    m a s s e s   [amu]
+
+                     1n        1p        4He       2d        3t        3h 
+
+                 1.008665   1.007824   4.002602   2.014101   3.016049   3.016028
+
+
+          S e p a r a t i o n   e n e r g i e s [MeV]
+
+    Nucleus          1n        1p        4He       2d        3t        3h 
+
+  92-U -238         6.153     7.621    -4.270    11.173     9.970    11.877
+  92-U -237         5.126     7.244    -4.232    10.074     9.900    10.154
+    Nucleus         Shell Corr.  Deform.
+                      (J=0)       (J=0)    
+
+  92-U -238           2.035       0.215
+  92-U -237           1.806       0.215
+  91-Pa-237           2.736       0.215
+  90-Th-234           2.548       0.215
+  91-Pa-236           2.525       0.215
+  91-Pa-235           2.505       0.215
+  90-Th-235           2.784       0.215
+  92-U -236           1.855       0.215
+  90-Th-233           2.516       0.215
+
+   C.M. incident energy 12.000     MeV
+
+ ---------------------------------------------------------
+
+
+
+      Preequilibrium decay (PCROSS)
+
+
+ Mean free path parameter = 1.50
+
+ g  PCROSS emission cross section 0.37497E-02 mb  (accepted)
+ n  PCROSS emission cross section  16.091     mb  (accepted)
+ p  PCROSS emission cross section 0.16391E-11 mb  (accepted)
+ He PCROSS emission cross section 0.33405E-05 mb  (accepted)
+ d  PCROSS emission cross section  0.0000     mb  (accepted)
+ t  PCROSS emission cross section  0.0000     mb  (accepted)
+ h  PCROSS emission cross section  0.0000     mb  (accepted)
+
+ PCROSS preequilibrium total cross section   =   16.09 mb
+ PCROSS preequilibrium fraction              =    0.04
+
+
+ ---------------------------------------------------------
+
+
+  g PE emission cross section   3.74965607174706280E-003  mb
+  n PE emission cross section    16.090869810439770       mb
+  p PE emission cross section   1.63912952761633374E-012  mb
+  a PE emission cross section   3.34054116650174385E-006  mb
+  
+  
+  Absorption cross section          384.55 mb
+  PE + Direct contribution           16.09 mb (  4.18 %)
+  MSD contribution                    0.00 mb (  0.00 %)
+  PCROSS contribution                16.09 mb (  4.19 %)
+  Total CN population               368.46 mb
+  
+  PE XS to discrete levels      0.0000000      for nejc =           0
+   Absorption cross section =   384.554     mb including
+   PE (not DWBA) =   16.0946     mb
+  
+  
+  -------------------------------------
+  1  Decaying nucleus 238-U 
+  -------------------------------------
+  
+
+ Population neglected because too small  0.36894E-26
+
+
+          Discrete level population
+
+          ----------------------------------------
+
+           1   0.00000    1     0.0   0.707324E-02
+           2   0.04492    1     2.0   0.215942E-01
+           3   0.14838    1     4.0   0.567252E-02
+           4   0.30718    1     6.0   0.662562E-03
+           5   0.51810    1     8.0   0.272525E-03
+           6   0.68011   -1     1.0   0.525923E-02
+           7   0.73193   -1     3.0   0.270877E-02
+           8   0.77590    1    10.0   0.121421E-03
+           9   0.82664   -1     5.0   0.294711E-03
+          10   0.92721    1     0.0   0.673998E-03
+          11   0.93055   -1     1.0   0.263983E-02
+          12   0.95012   -1     2.0   0.226928E-02
+          13   0.96613    1     2.0   0.169818E-02
+          14   0.96631   -1     7.0   0.618028E-04
+          15   0.99723    1     0.0   0.560783E-03
+          16   0.99758   -1     3.0   0.119072E-02
+          17   1.02800   -1     4.0   0.403293E-03
+          18   1.03725    1     2.0   0.138295E-02
+          19   1.05638    1     4.0   0.316984E-03
+          20   1.05773    1     3.0   0.892089E-03
+          21   1.05966    1     3.0   0.886777E-03
+          22   1.06027    1     2.0   0.129438E-02
+          23   1.07670    1    12.0   0.495251E-04
+          24   1.10571    1     3.0   0.769224E-03
+          25   1.12884   -1     2.0   0.138049E-02
+          26   1.13075    1     4.0   0.246589E-03
+          27   1.13570    1     1.0   0.139636E-02
+          28   1.15070   -1     9.0   0.271224E-04
+          29   1.15100   -1     6.0   0.353627E-04
+          30   1.16300    1     4.0   0.221280E-03
+          31   1.16799    1     4.0   0.217611E-03
+          32   1.16888   -1     3.0   0.711332E-03
+          33   1.22378    1     2.0   0.813034E-03
+          34   1.23200    1     5.0   0.522838E-04
+          35   1.23930    1     3.0   0.511107E-03
+          36   1.24290   -1     6.0   0.245358E-04
+          37   1.26090    1     4.0   0.159715E-03
+          38   1.26920    1     6.0   0.206112E-04
+          39   1.27854    1     2.0   0.697332E-03
+          40   1.28565   -1     5.0   0.502728E-04
+
+          ----------------------------------------
+
+  92-U -238 production cross section  0.65314E-01 mb  reaction: (z,gamma)            
+
+  92-U -238 fission cross  section   81.937       mb  
+
+  g  emission cross section  1.2856      mb
+   Primary g  emission cross section  0.0000      mb
+
+
+
+ ****************************************************** neutron spectrum  ******************************************************
+
+
+ Ener.      Spectr.     .1E+01                         .1E+02                         .1E+03                         .1E+04
+  MeV       mb/MeV      I                              I                              I                              I 
+                        ---------------------------------------------------------------------------------------------
+   0.00    0.6566E-01  I                                                                                              I 
+   0.22    0.1579E+03  I ********************************************************************                         I 
+   0.44    0.2086E+03  I ************************************************************************                     I 
+   0.65    0.1928E+03  I ***********************************************************************                      I 
+   0.87    0.1755E+03  I **********************************************************************                       I 
+   1.09    0.1603E+03  I ********************************************************************                         I 
+   1.31    0.1347E+03  I ******************************************************************                           I 
+   1.52    0.1023E+03  I **************************************************************                               I 
+   1.74    0.7278E+02  I **********************************************************                                   I 
+   1.96    0.5004E+02  I *****************************************************                                        I 
+   2.18    0.3399E+02  I ***********************************************                                              I 
+   2.40    0.2320E+02  I ******************************************                                                   I 
+   2.61    0.1611E+02  I *************************************                                                        I 
+   2.83    0.1152E+02  I *********************************                                                            I 
+   3.05    0.8575E+01  I *****************************                                                                I 
+   3.27    0.6713E+01  I **************************                                                                   I 
+   3.48    0.5557E+01  I ***********************                                                                      I 
+   3.70    0.4863E+01  I *********************                                                                        I 
+   3.92    0.4472E+01  I ********************                                                                         I 
+   4.14    0.4285E+01  I ********************                                                                         I 
+   4.35    0.4238E+01  I *******************                                                                          I 
+   4.57    0.4293E+01  I ********************                                                                         I 
+   4.79    0.4428E+01  I ********************                                                                         I 
+   5.01    0.2328E+01  I ***********                                                                                  I 
+   5.23    0.3672E-01  I                                                                                              I 
+   5.44    0.1679E-01  I                                                                                              I 
+   5.66    0.1901E-01  I                                                                                              I 
+   5.88    0.7493E-02  I                                                                                              I 
+   6.10    0.0000E+00  I                                                                                              I 
+                        ---------------------------------------------------------------------------------------------
+     Integrated spectrum     302.56      mb
+  n  emission cross section  302.56      mb
+  
+  He emission cross section 0.14755E-04  mb
+  
+  
+  
+  -------------------------------------
+  2  Decaying nucleus 237-U 
+  -------------------------------------
+  
+
+ Population neglected because too small  0.20299E-01
+
+
+          Discrete level population
+
+          ----------------------------------------
+
+           1   0.00000    1     0.5    13.8330    
+           2   0.01139    1     1.5    22.3176    
+           3   0.05630    1     2.5    21.1580    
+           4   0.08286    1     3.5    16.7015    
+           5   0.15996    1     2.5    14.8965    
+           6   0.16300    1     4.5    9.09636    
+           7   0.20419    1     3.5    10.8561    
+           8   0.20500    1     5.5    5.09242    
+           9   0.26095    1     4.5    6.26967    
+          10   0.27400   -1     3.5    8.77452    
+          11   0.31600   -1     4.5    5.20077    
+          12   0.32700    1     5.5    3.05350    
+          13   0.36700   -1     5.5    2.69007    
+          14   0.42615    1     3.5    4.83968    
+          15   0.43200   -1     6.5    1.47216    
+          16   0.43200    1     6.5    1.47906    
+          17   0.48200    1     4.5    2.66919    
+          18   0.48400    1     4.5    2.64875    
+          19   0.50600   -1     7.5    2.12925    
+          20   0.53000   -1     2.5    4.46870    
+          21   0.54062   -1     0.5    2.59704    
+          22   0.54500    1     2.5    3.91843    
+          23   0.55100    1     5.5    1.17932    
+          24   0.55498   -1     1.5    3.99109    
+          25   0.57500    1     4.5    1.87280    
+          26   0.57801   -1     2.5    3.82979    
+          27   0.63200    1     6.5   0.517557    
+          28   0.65700   -1     3.5    2.36797    
+          29   0.66427    1     1.5    2.54654    
+          30   0.66645    1     2.5    2.60059    
+          31   0.67759    1     1.5    2.43944    
+          32   0.68800    1     3.5    1.90250    
+          33   0.69765    1     2.5    2.34524    
+          34   0.69800    1     1.5    2.28461    
+          35   0.71800    1     3.5    1.71592    
+          36   0.72045   -1     1.5    2.42108    
+          37   0.73434   -1     0.5    1.45992    
+          38   0.75816   -1     1.5    2.17048    
+
+          ----------------------------------------
+
+  92-U -237 production cross section   201.81     mb  reaction: (z,n)                
+
+  92-U -237 fission cross  section  0.50943       mb  
+
+  g  emission cross section  570.49      mb
+
+
+
+ ****************************************************** neutron spectrum  ******************************************************
+
+
+ Ener.      Spectr.     .1E+01                         .1E+02                         .1E+03                         .1E+04
+  MeV       mb/MeV      I                              I                              I                              I 
+                        ---------------------------------------------------------------------------------------------
+   0.00    0.2120E+03  I ************************************************************************                     I 
+   0.22    0.1860E+03  I **********************************************************************                       I 
+   0.44    0.1474E+03  I *******************************************************************                          I 
+   0.65    0.2056E+02  I *****************************************                                                    I 
+   0.87    0.0000E+00  I                                                                                              I 
+                        ---------------------------------------------------------------------------------------------
+     Integrated spectrum     100.15      mb
+  n  emission cross section  100.15      mb
+  
+  He emission cross section 0.15057E-06  mb
+  
+  
+  
+  Tot. fission cross section    82.45     mb
+  
+  
+
+
+
+
+ WARNING: Sum of production XS(incl.fission)
+ WARNING: is not equal reaction cross section
+ WARNING:     difference:  26.07 %
+
+ +++++
+
+  
+  CALCULATIONS COMPLETED SUCCESSFULLY
+
+  End time: 12:29.18 (10-02-2012)
+
+  Calculation time:   0 min 29 s
