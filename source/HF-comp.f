@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1577,7 +1577,7 @@ C--------FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 
       ENDIF ! END OF COMPLETE OR PARTIAL DAMPING
 
- 890  DENhf = DENhf + Sumfis
+ 890  IF(FISmod(nnuc).lt.0.1) DENhf = DENhf + Sumfis
 
 c-----WRITING FISSION OUTPUT
 

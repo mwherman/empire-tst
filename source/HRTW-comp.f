@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -33,7 +33,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, csemist, cnspin, dencomp, sgamc, tgexper,
+      DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
      &              fisxse, sumtg
 C     DOUBLE PRECISION VT1
@@ -50,7 +50,6 @@ C-----set CN nucleus
       nnuc = 1
 C-----reset variables
       sgamc = 0.d0
-      csemist = 0.d0
       CSFis = 0.d0
       sumfis = 0.d0
 C
@@ -127,15 +126,14 @@ C-----------gamma emision is always a weak channel
 C
 C-----------fission
 C
-            dencomp = H_Sumtl
+C           dencomp = H_Sumtl
             sumfis = 0.d0
 C
 	      IF (FISsil(nnuc)) THEN
               IF (FISshi(nnuc).EQ.1.) THEN
                 CALL FISSION(nnuc,ke,jcn,sumfis)
               ELSE
-                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,dencomp,
-     &          aafis,1)
+                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
               ENDIF
               IF (FISmod(nnuc).GT.0.) THEN
                 DO m = 1, INT(FISmod(nnuc)) + 1
@@ -243,13 +241,12 @@ C--------------
 C              stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
                IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
-               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
-     &                    dencomp,aafis,fisxse)
+               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)
 C--------------calculate total emission
-               DO nejc = 0, NEJcm
-                  csemist = csemist + CSEmis(nejc,nnuc)
-               ENDDO
-               csemist = csemist + CSFis
+C              DO nejc = 0, NEJcm
+C                 csemist = csemist + CSEmis(nejc,nnuc)
+C              ENDDO
+C              csemist = csemist + CSFis
             ENDDO    !loop over partial wave contributions to CN state
 C
 C           Gamma width calculation

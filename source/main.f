@@ -1,6 +1,6 @@
-cc   * $Rev: 2543 $
+cc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 17:34:21 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -51,7 +51,7 @@ C Local variables
 C
       DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, 
-     &                 dang, ded, delang, dencomp, echannel,
+     &                 dang, ded, delang, echannel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
      &                 epre, ftmp, gang, grand, ! spechk(4),
@@ -71,7 +71,7 @@ C                             and assumed isotropic
      &                 ratio2maxw(NDEPFN),enepfns(NDEPFN),fmed, 
 C                      -----------------------------------------------
      &                 csprnt(ndnuc), csetmp(ndecse),
-     &                 fisxse, dtmp0, dtmp1, csinel, eps, checkprd,
+     &                 fisxse, csinel, eps, checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(2,NDExclus)
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
@@ -723,23 +723,6 @@ C        residual nuclei must be heavier than alpha
          CALL WHERE(izares,nnur,iloc)
          NREs(nejc) = nnur
       ENDDO
-
-C-----PCROSS exciton model calculations of preequilibrium contribution
-C-----including cluster emission by Iwamoto-Harada model and angular
-C-----distributions according to Kalbach systematics
-C-----
-     
-      totemis = 0.d0
-      IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
-C        ftmp = CSFus - xsinl
-C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission
-C        so it should not used for normalization
-C        xsinl is calculated by MSD
-         ftmp = CSFus
-         CALL PCROSS(ftmp,totemis,xsinl)
-      ENDIF          ! PCRoss done
-
-
 C-----
 C-----Calculate MSD contribution
 C-----
@@ -800,6 +783,20 @@ C--------Set to Q's to 0 if negative due to rounding error
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
          CLOSE(15)
       ENDIF
+
+C-----PCROSS exciton model calculations of preequilibrium contribution
+C-----including cluster emission by Iwamoto-Harada model and angular
+C-----distributions according to Kalbach systematics
+C-----
+      totemis = 0.d0
+      IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
+C        ftmp = CSFus - xsinl
+C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission
+C        so it should not used for normalization
+C        xsinl is calculated by MSD
+         ftmp = CSFus
+         CALL PCROSS(ftmp,totemis,xsinl)
+      ENDIF          ! PCRoss done
 
       IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. nejcec.gt.0
      &    .AND. NREs(nejcec).GE.0 ) THEN
@@ -959,7 +956,6 @@ C----------Add PE contribution to the total NEJC emission
            CSEmis(i,1) = CSEmis(i,1) + CSMsd(i)
          ENDDO
       ENDIF
-
       tothms = 0.d0
 C-----
 C-----HMS Monte Carlo preequilibrium emission
@@ -1007,13 +1003,13 @@ C-----
       IF (IOUt.GT.0) THEN
          IF (DIRect.EQ.0) THEN
             WRITE (8,
-     &'(''   Absorption cross section = '',G13.6,
+     &'(''   Non-elastic cross section = '',G13.6,
      &  '' mb including'')') CSFus
             WRITE (8,'(''   PE (not DWBA) = '',
      &  G13.6,'' mb'')') xsinl + totemis
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (8,
-     &'(''   Absorption cross section = '',G13.6,
+     &'(''   Non-elastic cross section = '',G13.6,
      &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
             WRITE (8,
      &'(''   DWBA inelastic to uncoupled discrete levels = '',
@@ -1030,7 +1026,7 @@ C-----
      &  ''CC transmission coefficients'')')
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,
-     &'(''   Absorption cross section = '',G13.6,
+     &'(''   Non-elastic cross section = '',G13.6,
      &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
             WRITE (8,
      &'(''   DWBA inelastic to discrete levels = '',
@@ -1068,7 +1064,6 @@ C        if(nnuc.le.NNUcd)
      &                  SYMb(nnuc), INT(A(nnuc))
 1234       FORMAT(1x, '  Decaying nucleus # ',I3,' of ',I3,
      &   ' (',I3,'-',A2,'-',I3,')' )
-
          IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
             CALL READ_INPFIS(nnuc)
             IF (FISmod(nnuc).LT.0.1d0)THEN   ! Single mode fission 
@@ -1404,8 +1399,6 @@ C                 before calling HRTW
          ENDIF
 C
          skip_fiss = .FALSE.
-         dtmp1 = 0.d0
-         dtmp0 = 0.d0
          cspg = 0.d0 
 
 C--------DO loop over c.n. excitation energy
@@ -1503,8 +1496,7 @@ C-----------------Fission ()
                     IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
                     IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
-     &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism,
-     &                              dencomp,aafis,0)
+     &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
                   ELSE
                     sumfis  = 0.d0
                     aafis   = 0.d0
@@ -1518,13 +1510,9 @@ C-----------------
                   stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
                   IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*POP(ke,jcn,ipar,nnuc)*step/RO(ke,jcn,ipar,nnuc)
-                  CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,
-     &                       dencomp,aafis,fisxse)
 C
-C                 It should be updated for the multimodal fission
-C                                          fisxse ->  fisxse(m)
-C
-                  dtmp1 = dtmp1 + fisxse
+                  CALL XSECT(nnuc,m,xnor,sumfis,
+     &                       sumfism,ke,ipar,jcn,fisxse)
 C
 C-----------------Calculate total emission
                   DO nejc = 0, NEJcm
@@ -1534,23 +1522,21 @@ C-----------------Calculate total emission
  1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
 C
-C           the following if could be commented to calculate fission for
-C           all excitation energies
-C           if(dtmp1.lt.dabs(dtmp1-dtmp0).lt.1.d-5) skip_fiss = .TRUE.
-            dtmp0 =dtmp1
-
             IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
-            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0) THEN
-               IF (FISmod(nnuc).EQ.0. .and. .not. skip_fiss)
-     &              WRITE (80,*) 'csfis=', CSFis,
-     &              ' mb', '   fisxse=', dtmp1, ' mb'
-               IF (FISmod(nnuc).GT.0. .and. dtmp1.ge.0.d0) THEN
+            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0
+     &         .and. fisxse.gt.0) THEN
+               IF (FISmod(nnuc).lt.0.1) THEN
+                  WRITE (80,*) 'csfis=', CSFis,
+     &              ' mb', '   fisxse=', fisxse, ' mb'
+               ELSE
                   WRITE (80,*) '  '
                   DO m = 1, INT(FISmod(nnuc)) + 1
                      WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),
      &                            ' mb'
                   ENDDO
+                  WRITE (80,*) 'csfis=', CSFis,
+     &            ' mb', '   fisxse=', fisxse, ' mb'
                ENDIF
             ENDIF
          ENDDO                  !loop over c.n. excitation energy
@@ -1946,12 +1932,12 @@ c                 ENDDO
              WRITE (8,*) ' '
            ENDIF
          ENDIF
-         IF (FISmod(nnuc).GT.0) THEN
-           CSFis  = 0.d0 ! RCN Jan 2006
-           DO m = 1, INT(FISmod(nnuc)) + 1
-              CSFis = CSFis + CSFism(m)
-           ENDDO
-         ENDIF
+C        IF (FISmod(nnuc).GT.0) THEN
+C          CSFis  = 0.d0 ! RCN Jan 2006
+C          DO m = 1, INT(FISmod(nnuc)) + 1
+C             CSFis = CSFis + CSFism(m)
+C          ENDDO
+C        ENDIF
          IF (CSFis.NE.0.0D0) THEN
            WRITE (80,*)
            WRITE (8,*)
@@ -2928,7 +2914,6 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  G12.5)') FCCred
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
-
         IF (INT(ZEJc(0)).EQ.0) THEN
          WRITE (*,*)
          WRITE (*,
@@ -2963,7 +2948,6 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         ENDIF
 
       ENDIF
-
       IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)
      &  .GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont)) THEN
         WRITE (8,*)
@@ -2986,7 +2970,6 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      & 100.d0*abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*TOTcorr)/
      &                 (TOTred*TOTcs*TOTcorr)
       ENDIF
-
       WRITE (8,*)
       WRITE (8,*) '+++++'
       WRITE (8,*)
@@ -3056,7 +3039,7 @@ C             Subtract HMS contribution to CM emission spectrum
             ENDDO 
          ENDIF
 
-         IF (nspec.gt.0) THEN
+         IF (nspec.gt.1) THEN
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
           WRITE (12,*) ' '
@@ -3132,7 +3115,7 @@ C             Subtract HMS contribution to CM emission spectrum
            ENDDO 
          ENDIF
 
-         IF (nspec.gt.0) THEN
+         IF (nspec.gt.1) THEN
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
           WRITE (12,*) ' '
@@ -3190,7 +3173,7 @@ C---------------Inclusive DDX spectrum (protons)
 C--------alphas
          recorp = 1. + EJMass(3)/AMAss(1)
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
-         IF(nspec.gt.0) then
+         IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
@@ -3224,7 +3207,7 @@ C---------Exact endpoint
 C--------deuterons
          recorp = (1. + EJMass(4)/AMAss(1))
          nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
-         IF(nspec.gt.0) then
+         IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
@@ -3257,7 +3240,7 @@ C---------Exact endpoint
 C--------tritons
          recorp = (1. + EJMass(5)/AMAss(1))
          nspec = INT((EMAx(1) - Q(5,1))/DE) + 2
-         IF(nspec.gt.0) then
+         IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
@@ -3290,7 +3273,7 @@ C---------Exact endpoint
 C--------helium-3
          recorp = (1. + EJMass(6)/AMAss(1))
          nspec = INT((EMAx(1) - Q(6,1))/DE) + 2
-         IF(nspec.gt.0) then
+         IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
           WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
@@ -3323,7 +3306,7 @@ C--------light ions
          IF (NDEJC.EQ.7) THEN
            recorp = (1. + EJMass(NDEJC)/AMAss(1))
            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
-           IF(nspec.gt.0) then
+           IF(nspec.gt.1) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
              WRITE (12,
@@ -3857,8 +3840,7 @@ C    &                             RECcse(ilast + 1,0,Nnuc)
       END
 
 
-      SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism,Dencomp,Aafis,
-     &                    Ifluct)
+      SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3876,28 +3858,22 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Aafis, Dencomp, Sumfis
-      INTEGER Ifluct, Ip, Jcn, Ke, Nnuc
+      DOUBLE PRECISION Sumfis
+      INTEGER Ip, Jcn, Ke, Nnuc
       DOUBLE PRECISION Sumfism(NFMOD)
 C
 C Local variables
 C
-      DOUBLE PRECISION bbfis, cota, cota1, cotaexp, tout
       INTEGER INT
       INTEGER k, kk, m
 
-      IF (Ifluct.EQ.0) Dencomp = DENhf
-      Aafis = 0.
-      cota1 = 0.d0
       IF (FISmod(Nnuc).EQ.0.) THEN
+
          CALL FISFIS(Nnuc,Ke,Ip,Jcn,Sumfis,0)
-         IF (FISopt(Nnuc).GT.0.) THEN
-            IF (NRWel.EQ.1) cota1 = (TF(1) + TF(2) + TG2)/2
-         ENDIF
-      ENDIF
-      IF (FISmod(Nnuc).GT.0.) THEN
-         TFB = 0.
-         TDIrect = 0.
+
+      ELSE ! FISmod(Nnuc).GT.0 = Multimodal 
+
+         TFB = 0.d0
          DO m = 1, INT(FISmod(Nnuc)) + 1
             EFB(2) = EFBm(m)
             Hcont(2) = HM(1,m)
@@ -3916,51 +3892,23 @@ C
             CALL FISFIS(Nnuc,Ke,Ip,Jcn,Sumfis,m)
             TFBm(m) = TF(2)
             TFB = TFB + TFBm(m)
-            IF (FISopt(Nnuc).GT.0.) THEN
-               TDIrm(m) = TDIr
-               TDIrect = TDIrect + TDIr
-            ENDIF
-            IF (FISopt(Nnuc).GT.0.) cota1 = (TF(1) + TFB + TG2)/2
          ENDDO
-      ENDIF
-      IF (cota1.LE.EXPmax) THEN
-         cotaexp = EXP( - cota1)
-      ELSE
-         cotaexp = 0.D0
-      ENDIF
-      cota = (1 + cotaexp**2)/(1 - cotaexp**2 + 0.00000001)
-      IF (FISmod(Nnuc).EQ.0. .AND. FISopt(Nnuc).GT.0.) THEN
-         IF (NRHump.EQ.2 .AND. NRWel.EQ.1) tout = TF(2)
-         IF (tout*TABs.GT.0.) THEN
-            bbfis = (TDIr + Dencomp)*(TF(1) + tout + TG2)
-     &              /(TABs*(tout + TG2))
-            Aafis = (1. + bbfis**2 + 2*bbfis*cota)**( - 0.5)
-         ELSE
-            Aafis = 0.
+
+         Sumfism = 0.d0
+         IF ((TF(1) + TFB).GT.0.) then
+           DO m = 1, INT(FISmod(Nnuc)) + 1
+             Sumfism(m) = TF(1)*TFBm(m)/(TF(1) + TFB)
+           ENDDO
          ENDIF
-         PFIso = 0.
-         IF (tout.GT.0 .AND. TG2.GT.0.) PFIso = (TDIr + Dencomp)
-     &       *(RFIso - 1.)*TG2*Aafis/(tout + TG2)
+
+         DENhf = DENhf + TF(1)*TFB/(TF(1) + TFB)
+ 
       ENDIF
-      IF (FISmod(Nnuc).GT.0.) THEN
-         IF (TFB*TABs.GT.0.) THEN
-            bbfis = (TDIrect + Dencomp)*(TF(1) + TFB)/(TABs*TFB)
-            Aafis = (1. + bbfis**2 + 2*bbfis*cota)**( - 0.5)
-         ELSE
-            Aafis = 0.
-         ENDIF
-         DO m = 1, INT(FISmod(Nnuc)) + 1
-            IF ((TF(1) + TFB).GT.0.) THEN
-               Sumfism(m) = TF(1)*TFBm(m)/(TF(1) + TFB)
-            ELSE
-               Sumfism(m) = 0.
-            ENDIF
-         ENDDO
-      ENDIF
+C
+      RETURN
       END
 
-      SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Dencomp,
-     &                 Aafis,Fisxse)
+      SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Fisxse)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3978,7 +3926,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Aafis, Dencomp, Sumfis, Xnor, Fisxse
+      DOUBLE PRECISION Sumfis, Xnor, Fisxse
       INTEGER Ipar, Jcn, Ke, M, Nnuc
       DOUBLE PRECISION Sumfism(NFMOD)
 
@@ -3987,64 +3935,10 @@ C Local variables
 C
       INTEGER INT
       INTEGER nejc, nnur, izares, iloc
-      DOUBLE PRECISION xnorfis, ares, zres
+      DOUBLE PRECISION ares, zres
 
-      Dencomp = DENhf - Sumfis
-      IF(NRBar.GT.3) GOTO 101
-      GOTO 101
-      IF (FISsil(Nnuc) .AND. FISopt(Nnuc).GT.0. .AND. FISshi(Nnuc)
-     &    .NE.1.) THEN
-         IF (FISmod(Nnuc).EQ.0.) THEN
-            IF ((Dencomp + TDIr).GT.0.) THEN
-               xnorfis = Xnor*DENhf/(Dencomp + TDIr)
-            ELSE
-               xnorfis = 0.d0
-            ENDIF
-C-----------Fission
-            Fisxse = xnorfis*(TDIr + Dencomp*Aafis + PFIso)
-            CSFis = CSFis + Fisxse
-            IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-     &        POPbin(Ke,Nnuc).GT.0.d0)
-     &          CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
-         ENDIF
-         IF (FISmod(Nnuc).GT.0.) THEN
-            IF ((Dencomp + TDIrect).GT.0.) THEN
-               xnorfis = Xnor*DENhf/(Dencomp + TDIrect)
-            ELSE
-               xnorfis = 0.
-            ENDIF
-            Fisxse = 0.d0
-            DO M = 1, INT(FISmod(Nnuc)) + 1
-              Fisxse = xnorfis*(TDIrm(M)*(1. - Aafis) + TFBm(M)
-     &                        *Aafis*(Dencomp + TDIrect)/TFB)
-              CSFism(M) = CSFism(M) + Fisxse
-            ENDDO
-C
-C-----------Multimodal should be updated to allow for PFNS calculation !!!!
-C
-         ENDIF
-C--------particles
-         DO nejc = 1, NEJcm
-            ares = A(nnuc) - AEJc(nejc)
-            zres = Z(nnuc) - ZEJc(nejc)
-C           residual nuclei must be heavier than alpha
-            if(ares.le.4. and. zres.le.2.) cycle
-            izares = INT(1000.0*zres + ares)
-            CALL WHERE(izares,nnur,iloc)
-            if(iloc.eq.1) CYCLE
-            CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
-            CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + xnorfis*SCRtem(nejc)
-     &                          *(1 - Aafis)
-         ENDDO
-C--------gammas
-         CALL ACCUM(Ke,Nnuc,Nnuc,0,Xnor)
-         CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + xnorfis*SCRtem(0)*(1 - Aafis)
-         POP(Ke,Jcn,Ipar,Nnuc) = 0.0
-         RETURN
-      ENDIF
-C-----No subbarrier effects
 C-----particles
-101   DO nejc = 1, NEJcm
+      DO nejc = 1, NEJcm
          ares = A(nnuc) - AEJc(nejc)
          zres = Z(nnuc) - ZEJc(nejc)
 C        residual nuclei must be heavier than alpha
@@ -4060,19 +3954,24 @@ C-----gammas
       CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + Xnor*SCRtem(0)
       POP(Ke,Jcn,Ipar,Nnuc) = 0.0
 C-----fission
-      IF (FISmod(Nnuc).EQ.0.) THEN
-           Fisxse = Sumfis*Xnor
-           CSFis  = CSFis + Fisxse
-           IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
-     &        POPbin(Ke,Nnuc).GT.0.d0)
-     &      CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
-      ENDIF
-C
-C-----------Multimodal should be updated to allow for PFNS calculation !!!!
-C
-      IF (FISmod(Nnuc).GT.0.) THEN
+      IF (FISmod(Nnuc).LT.0.1) THEN
+         Fisxse = Sumfis*Xnor
+         CSFis  = CSFis + Fisxse
+         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+     &       POPbin(Ke,Nnuc).GT.0.d0)
+     &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
+
+      ELSE ! Multimodal
+
+         Fisxse = 0.d0
          DO M = 1, INT(FISmod(Nnuc)) + 1
+            Fisxse = Fisxse + Sumfism(M)*Xnor
             CSFism(M) = CSFism(M) + Sumfism(M)*Xnor
          ENDDO
+         CSFis  = CSFis + Fisxse
+         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+     &       POPbin(Ke,Nnuc).GT.0.d0)
+     &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF
+      RETURN
       END

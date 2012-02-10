@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -819,7 +819,7 @@ C
 C
 C
       Iloc = 0
-      DO Nejc = 1, NDEJC
+      DO Nejc = 0, NDEJC
          IF (IZAejc(Nejc).EQ.Izaf) RETURN
       ENDDO
 C     For HI calculations

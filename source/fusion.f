@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -190,7 +190,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             SINlcc=0.d0
             SINl  =0.d0
             SINlcont =0.d0
-                  NLW = i - 1 ! RCN Aug 2008
+            NLW = i - 1 ! RCN Aug 2008
 C--------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW
@@ -276,8 +276,14 @@ C-----------end of E2
                ENDDO
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
+ 
+            ABScs=CSFus
+            SINlcc=0.d0
+            SINl  =0.d0
+            SINlcont =0.d0
+  
          ENDIF
-             NLW = NDLW
+         NLW = NDLW
 C--------END of calculation of fusion cross section
 C--------for photon induced reactions
   100    RETURN

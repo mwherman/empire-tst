@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2539 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 2553 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6730,7 +6730,7 @@ C--------FISDEN(Nnuc)= 0 EMPIRE
 C--------FISDEN(Nnuc)= 3 HFB
 C        
          IF (name.EQ.'FISDEN') THEN
-            IF(val.ne.0 .and. val.ne.3) THEN
+            IF(nint(val).ne.0 .and. nint(val).ne.3) THEN
               WRITE (8,'('' ERROR: FISDEN ='',I1)') NINT(val)
               WRITE (8,
      &          '('' ERROR: FISDEN must be 0 or 3; default 0 used '')')
@@ -6739,15 +6739,15 @@ C
             izar = i1*1000 + i2
             IF (izar.EQ.0) THEN
                DO nnuc = 1, NDNUC
-                  FISden(nnuc) = val
+                  FISden(nnuc) = nint(val)
                ENDDO
-               IF(val.eq.0) then
+               IF(nint(val).eq.0) then
                  WRITE (8,
      &  '('' EGSM (J>>K approx.) used for fission LD for all nuclei'')') 
                  WRITE (12,
      &  '('' EGSM (J>>K approx.) used for fission LD for all nuclei'')') 
                ENDIF
-               IF(val.eq.3) then
+               IF(nint(val).eq.3) then
                  WRITE (8 ,'('' HFB fission LD used for all nuclei'')') 
                  WRITE (12,'('' HFB fission LD used for all nuclei'')') 
                ENDIF
@@ -6761,9 +6761,8 @@ C
                GOTO 100
             ENDIF
 
-            FISden(nnuc) = val
-
-            IF(val.eq.0) then
+            FISden(nnuc) = nint(val)
+            IF(nint(val).eq.0) then
                WRITE (8,
      &          '('' EGSM (J>>K approx.) used for fission LD for '',
      &             I3,A2,'' (FISDEN=0)'')') i2, SYMb(nnuc)
@@ -6771,7 +6770,7 @@ C
      &          '('' EGSM (J>>K approx.) used for fission LD for '',
      &             I3,A2,'' (FISDEN=0)'')') i2, SYMb(nnuc)
             ENDIF
-            IF(val.eq.3) then
+            IF(nint(val).eq.3) then
                WRITE (8 ,'('' RIPL HFB fission LD used for '',
      &             I3,A2,'' (FISDEN=3)'')') i2, SYMb(nnuc)
                WRITE (12,'('' RIPL HFB fission LD used for '',

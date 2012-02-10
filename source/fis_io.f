@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2543 $
+Ccc   * $Rev: 2553 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 17:34:21 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -170,7 +170,8 @@ c-----                ../data/HFB-fisbar.dat (default)
       DO i = 1, NRBar
          Hcont(i)= H(1,i)
       ENDDO
-      CALL DEFO_FIS(Nnuc)
+
+      IF(FISbar(Nnuc).LE.2.1) CALL DEFO_FIS(Nnuc)
 C
 C-----FISBAR(Nnuc)=3.  RIPL-3 HFB numerical barriers-------------------
       IF(FISbar(Nnuc).EQ.3.)THEN
@@ -438,7 +439,6 @@ C--------multiplier of atil
          HM(1,1)= 1.2
          HM(1,2)=H(1,1)
          HM(1,3)=H(1,1)
-
  	   BFFm(1)=1.
   	   BFFm(2)=2.
   	   BFFm(3)=2.
@@ -905,7 +905,7 @@ c      EFB(1) = EFB(1) * FISbin (Nnuc)
       ENDDO
       ENDIF
 
-      IF(FISbar(Nnuc).LE.2.AND.FISmod(Nnuc).EQ.0.)CALL DEFO_FIS(Nnuc)
+      IF(FISbar(Nnuc).LE.2.AND.FISmod(Nnuc).LT.0.1)CALL DEFO_FIS(Nnuc)
 
       RETURN
       END
