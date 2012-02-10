@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2543 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 17:34:21 +0100 (Fr, 10 Feb 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -735,17 +735,17 @@ c
      &                          (EFB(i),HCOnt(i),i = 1,NRBar)
       IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.1) 
      &    READ (79,*,ERR=385,END=385) EFB(1),
-     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFB(3), H(1,3)
+     &    Hcont(1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFB(3),H(1,3)
       IF (FISmod(Nnuc).EQ.1. .AND. NRWel.EQ.0)
      &    READ (79,*,ERR=385,END=385) EFB(1),
-     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2)
+     &    Hcont(1), EFBm(1), HM(1,1), EFBm(2), HM(1,2)
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.1) 
      &    READ (79,*,ERR=385,END=385) EFB(1),
-     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3),
+     &    Hcont(1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3),HM(1,3),
      &    EFB(3), H(1,3)
       IF (FISmod(Nnuc).EQ.2. .AND. NRWel.EQ.0) 
      &    READ (79,*,ERR=385,END=385) EFB(1),
-     &    H(1,1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
+     &    Hcont(1), EFBm(1), HM(1,1), EFBm(2), HM(1,2), EFBm(3), HM(1,3)
 c
       READ (79,' (/)',ERR=385,END=385)
       READ (79,*,ERR=385,END=385) (HJ(Nnuc,i),i = 1,NRBar)
@@ -1080,8 +1080,12 @@ C
       DATA chstar/70*'='/
 C
 C
+      WRITE (80,*)
+      WRITE (80,'(a40)')
+     &            '++++++++++++++++++++++++++++++++++++++++' 
       WRITE (80,'(a8)') 'Isotope:'
-      WRITE (80,'(a40)') '----------------------------------------'
+      WRITE (80,'(a40)') 
+     &            '----------------------------------------'
       WRITE (80,'(4x,a2,i3,2x,a2,i3)') 'Z=', INT(Z(Nnuc)), 'A=',
      &                                 INT(A(Nnuc))
       WRITE (80,'(a40)') '----------------------------------------'

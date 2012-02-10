@@ -1,6 +1,6 @@
-cc   * $Rev: 2539 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
+cc   * $Rev: 2543 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 17:34:21 +0100 (Fr, 10 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3900,6 +3900,7 @@ C
          TDIrect = 0.
          DO m = 1, INT(FISmod(Nnuc)) + 1
             EFB(2) = EFBm(m)
+            Hcont(2) = HM(1,m)
             DO k = 1, NRFdis(2)
                H(k,2) = HM(k,m)
                EFDis(k,2) = EFDism(k,m)
