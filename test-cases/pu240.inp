@@ -15,7 +15,7 @@
 IOUT       3.                                               
 NEX      080.                         Number of points in the outgoing energy grid
 HRTW       3.                         Width fluctuations considered up to 3 MeV (for neutron induced)
-ENDF       0.                         ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
+ENDF       2.                         ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
 PCROSS    1.5                         Exciton model with default 1.5 MFP parameter  
 DIRECT     1.                         CC TLs for the incident channel + DWBA (uncoupled)  
 DIRPOT  2408.                         OMP for the scattering on collective levels if DIRECT>0 (CC/DWBA)
