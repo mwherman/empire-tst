@@ -37,6 +37,18 @@ $MSD        0.                               ! disable MSD
 $MSC        0.                               ! disable MSC
 $HMS        1.                               ! Add HMS
 10.
+@ PCROSS + MSC
+$HMS        0.                               ! disable HMS
+$PCROSS     1.5                              ! Add PCROSS
+$MSD        0.                               ! Add MSD
+$MSC        0.                               ! Add MSC
+10.
+@ PCROSS + MSD
+$HMS        0.                               ! disable HMS
+$PCROSS     1.5                              ! Add PCROSS
+$MSD        0.                               ! Add MSD
+$MSC        1.                               ! Add MSC
+10.
 @ PCROSS + MSC/MSD
 $HMS        0.                               ! disable HMS
 $PCROSS     1.5                              ! Add PCROSS
