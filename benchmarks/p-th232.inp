@@ -1,7 +1,7 @@
 4.0                  ;INCIDENT ENERGY (IN LAB)
 232. 90.             ;TARGET  A , Z
 1.    1.             ;PROJECTILE A, Z
-1                    ;NUMBER OF NEUTRONS TO BE EMITTED
+2                    ;NUMBER OF NEUTRONS TO BE EMITTED
 1                    ;NUMBER OF PROTONS  TO BE EMITTED
 0                    ;NUMBER OF ALPHAS   TO BE EMITTED
 0                    ;NUMBER OF DEUTERONS TO BE EMITTED
