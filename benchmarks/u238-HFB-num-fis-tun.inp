@@ -1,0 +1,43 @@
+  0.5                ;INCIDENT ENERGY (IN LAB)
+238. 92.             ;TARGET  A , Z
+1.    0.             ;PROJECTILE A, Z
+1                    ;NUMBER OF NEUTRONS TO BE EMITTED
+0                    ;NUMBER OF PROTONS  TO BE EMITTED
+0                    ;NUMBER OF ALPHAS   TO BE EMITTED
+0                    ;NUMBER OF DEUTERONS TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
+0  0  0              ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+NEX       50.
+IOUT       6.
+LEVDEN     0.
+FITLEV     0.
+MSD        0.
+MSC        0.
+PCROSS     1.5 
+MAXHOL     0.2
+RECOIL     0.
+HMS        0.
+DEGAS      0.
+HRTW       3.0 
+ENDF       0.
+GST        0.
+NIXSH      0.
+GSTRFN     1.0
+GDRGFL     1.0
+*CCM calculation
+DIRECT     1.
+DIRPOT -2408.
+OMPOT  -2408.     1
+OMPOT  -5408.     2
+FISBAR     3.
+FISMOD     0.
+FISDEN     3.
+FISDIS     1.
+FISOPT     0.
+FISSHI     0.                     
+GO
+1.
+5.
+8.
+-1
