@@ -1,0 +1,27 @@
+  0.053              ;INCIDENT ENERGY (IN LAB)
+ 23.   11.           ;TARGET  A , Z 
+  1.    0.           ;PROJECTILE A, Z
+1                    ;NUMBER OF NEUTRONS  TO BE EMITTED
+0                    ;NUMBER OF PROTONS  TO BE EMITTED
+0                    ;NUMBER OF ALPHAS   TO BE EMITTED
+0
+0
+0
+0  0. 0.            
+@ Benchmark of primary gammas at 53 keV on Na-23
+@ Compare list of prompt gammas in *.out with 
+@ J. Radioan. Nucl. Chem. 238 (1998) 193-197
+IOUT       3.                                               
+LEVDEN     0.                                              
+NEX       50.                                                   
+LEVDEN     0.                                              
+MSD        0.                                                     
+MSC        0.                                                         
+HRTW       0.
+RECOIL     0.
+DIRECT     0.   
+@ Primary gammas stored -> ENDF =1, PRGAMM =1
+ENDF       1.                     
+PRGAMM     1.
+GO
+-1.

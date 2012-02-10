@@ -1,0 +1,38 @@
+  5.6                ;INCIDENT ENERGY (IN LAB)
+238. 92.             ;TARGET  A , Z
+0.    0.             ;PROJECTILE A, Z
+1                    ;NUMBER OF NEUTRONS TO BE EMITTED
+0                    ;NUMBER OF PROTONS  TO BE EMITTED
+0                    ;NUMBER OF ALPHAS   TO BE EMITTED
+0                    ;NUMBER OF DEUTERONS TO BE EMITTED
+0                    ;NUMBER OF TRITONS   TO BE EMITTED
+0                    ;NUMBER OF He-3      TO BE EMITTED
+0  0  0              ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+@ Photon induced fission on U-238
+NEX       50.
+IOUT       1.
+LEVDEN     0.
+FITLEV     0.
+MSD        0.
+MSC        0.
+PCROSS     1.5
+MAXHOL     0.2
+HMS        0.
+DEGAS      0.
+HRTW       0.0
+ENDF       0.
+RECOIL     0. 
+GST        0.
+NIXSH      0.
+GSTRFN     1.0
+TUNE       2.10   92   238    0                                  
+*CCM calculation
+DIRECT     1.
+DIRPOT -2408.                                
+OMPOT  -2408.     1
+OMPOT  -5408.     2
+FISOPT     1.                                
+GO
+8.
+12.
+-1
