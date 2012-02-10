@@ -1,6 +1,6 @@
-#$Rev: 2530 $
-#$Author: shoblit $
-#$Date: 2012-02-10 00:33:19 +0100 (Fr, 10 Feb 2012) $
+#$Rev: 2557 $
+#$Author: dbrown $
+#$Date: 2012-02-10 23:02:30 +0100 (Fr, 10 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -83,7 +83,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
             systematics.o     subecis06m.o
 
-LIBS =  ../util/IO/endf_io.a
+LIBS =  ../util/IO/*.o #endf_io.a
 
 all: 
 	$(MAKE) empire

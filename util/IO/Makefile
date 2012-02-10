@@ -58,7 +58,7 @@ else
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
   endf_io.a : $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
-	ar -csr endf_io.a *.o
+	#ar -csr endf_io.a $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
 
   endf_blklin.o : endf_unx.o
   endf_line.o : $(LINIO)
