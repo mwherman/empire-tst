@@ -1,29 +1,9 @@
-Ccc   * $Rev: 2526 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
- 
+Ccc   * $Rev: 2537 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+
 C
-      FUNCTION WT(In,Ip,Ih,X)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
-      COMMON /EB    / E, B, FACt, G
-C
-C Dummy arguments
-C
-      INTEGER :: Ih, In, Ip
-      REAL*8 :: X
-      REAL*8 :: WT
-C
-C Local variables
-C
-      REAL*8 :: W
-C
-C*** End of declarations rewritten by SPAG
+      DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
 C
 C     calculates conditional p-h state densities according
 C     to Nucl. Phys. A430(1984)69 (including all necessary factors)
@@ -34,36 +14,25 @@ C     X  - excitation energy
 C     G  - single particle density
 C
 C
-      WT = W(Ip,Ih,X)/FACt(Ip + 1)/FACt(Ih + 1)*G**In
-
-      RETURN
-      END FUNCTION WT
- 
-!---------------------------------------------------------------------------
-C
-      FUNCTION W(Ip,Ih,X)
-C
-C*** Start of declarations rewritten by SPAG
-C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: X
-      REAL*8 :: W
+      INTEGER Ih, In, Ip
+      DOUBLE PRECISION X
 C
 C Local variables
 C
-      INTEGER :: ix
-      REAL*8 :: pix
-      REAL*8 :: W1, W2, W3
+      DOUBLE PRECISION W
 C
-C*** End of declarations rewritten by SPAG
+      WT = W(Ip,Ih,X)/FACt(Ip + 1)/FACt(Ih + 1)*G**In
+      END
+C
+C
+      DOUBLE PRECISION FUNCTION W(Ip,Ih,X)
 C
 C     calculates conditional p-h state densities according
 C     to Nucl. Phys. A430(1984)69 without g**n/p!/h!
@@ -72,72 +41,55 @@ C     IP - particle number
 C     IH - hole number
 C     X  - excitation energy
 C     B  - binding energy
-
-      W = 0.D0
-
-      IF(X .LE. 0.0D0)              RETURN
-      IF((Ip.EQ.0) .AND. (Ih.EQ.0)) RETURN
-
-      ix = INT(X/B)
-      pix = ABS(ix*B - X)
-      IF(pix.LT.1.D-8)ix = ix - 1
-
-      ! W1 is eq.7b of reference above without g**(p+h)/p!/h! factor
-      ! W2 is eq.7a of reference above without g**(p+h)/p!/h! factor
-
-      IF(Ip .EQ. 0) THEN
-        W = W2(0,Ih,0,X)
-        RETURN
-      ENDIF
-
-      IF(Ih.EQ.0)THEN
-        IF(ix.GE.Ip)RETURN
-        W = W2(Ip,0,ix,X)
-        RETURN
-      ENDIF
-
-      ! check of the E>PB condition
-
-      IF(ix.LT.Ip)THEN
-        W = W2(Ip,Ih,ix,X)
-        RETURN
-      ENDIF
-
-      IF(Ip.GE.Ih)THEN
-        W = W1(Ip,Ih,Ih-1,X)
-        RETURN
-      ENDIF
-
-      W = W2(Ip,Ih,Ip-1,X) + W3(Ip,Ih,Ip-1,X)
-
-      RETURN
-      END FUNCTION W
-
-!---------------------------------------------------------------------------
-C
-      SUBROUTINE GDOWN(Yd,Ip,Ih,X)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: X, Yd
+      INTEGER Ih, Ip
+      DOUBLE PRECISION X
 C
 C Local variables
 C
-      REAL*8 :: e1b, r, ro1, roph, xh2
-      INTEGER :: ip1
-      REAL*8 :: W
+      INTEGER INT
+      INTEGER ix
+      DOUBLE PRECISION pix
+      DOUBLE PRECISION W1, W2, W3
+      W = 0.
+      IF (X.LE.0.0D0) RETURN
+      IF (Ip.EQ.0 .AND. Ih.EQ.0) RETURN
+      ix = INT(X/B)
+      pix = ABS(ix*B - X)
+      IF (pix.LT.1.D-8) ix = ix - 1
+      IF (Ip.NE.0) THEN
+         IF (Ih.EQ.0) THEN
+            IF (ix.GE.Ip) RETURN
+            W = W2(Ip,0,ix,X)
+            GOTO 99999
+         ELSE
+C-----------check of the E>PB condition
+            IF (ix.LT.Ip) THEN
+C--------------W2 is eq.7a of reference above without g**(p+h)/p!/h! factor
+               W = W2(Ip,Ih,ix,X)
+               RETURN
+            ENDIF
+            IF (Ip.GE.Ih) THEN
+C--------------W1 is eq.7b of reference above without g**(p+h)/p!/h! factor
+               W = W1(Ip,Ih,Ih - 1,X)
+               RETURN
+            ENDIF
+            W = W2(Ip,Ih,Ip - 1,X) + W3(Ip,Ih,Ip - 1,X)
+            RETURN
+         ENDIF
+      ENDIF
+      W = W2(0,Ih,0,X)
+99999 END
 C
-C*** End of declarations rewritten by SPAG
 C
+      SUBROUTINE GDOWN(Yd,Ip,Ih,X)
 C
 C     calculates gamma down for multistep compound according to
 C     Nucl. Phys. A435(1985)67
@@ -146,6 +98,22 @@ C     of the reference above
 C     the actual version accounts for the factor 1/2 as pointed
 C     out by Oblozinsky (Nucl. Phys. A453(1986)127)
 C
+C
+C COMMON variables
+C
+      DOUBLE PRECISION B, E, FACt(100), G
+      COMMON /EB    / E, B, FACt, G
+C
+C Dummy arguments
+C
+      INTEGER Ih, Ip
+      DOUBLE PRECISION X, Yd
+C
+C Local variables
+C
+      DOUBLE PRECISION e1b, r, ro1, roph, xh2
+      INTEGER ip1
+      DOUBLE PRECISION W
       e1b = X - B
       roph = 0.
       xh2 = Ih
@@ -154,547 +122,431 @@ C
       roph = roph + r*xh2
       r = W(Ip - 1,Ih + 3,X)
       roph = roph + r*Ip
-      IF(e1b.GT.0.D0)THEN
-        r = W(Ip,Ih + 2,e1b)
-        roph = roph - r*xh2
-        ro1 = 0.
-        r = W(ip1,Ih + 3,e1b)
-        ro1 = ro1 + r
-        r = W(ip1,Ih + 1,e1b)
-        ro1 = ro1 + r*B*B/2.
-        r = W(ip1,Ih + 2,e1b)
-        ro1 = ro1 + B*r
-        roph = roph - ro1*Ip
+      IF (e1b.GT.0.D0) THEN
+         r = W(Ip,Ih + 2,e1b)
+         roph = roph - r*xh2
+         ro1 = 0.
+         r = W(ip1,Ih + 3,e1b)
+         ro1 = ro1 + r
+         r = W(ip1,Ih + 1,e1b)
+         ro1 = ro1 + r*B*B/2.
+         r = W(ip1,Ih + 2,e1b)
+         ro1 = ro1 + B*r
+         roph = roph - ro1*Ip
       ENDIF
       Yd = roph/2.
-      END SUBROUTINE GDOWN
- 
-!---------------------------------------------------------------------------
+      END
+C
 C
       SUBROUTINE ZERO(Y0,Ip,Ih,X)
 C
-C*** Start of declarations rewritten by SPAG
-C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: X, Y0
+      INTEGER Ih, Ip
+      DOUBLE PRECISION X, Y0
 C
 C Local variables
 C
-      REAL*8 :: a, a1, e2b, roph
-      REAL*8 :: W
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION a, a1, e2b, roph
+      DOUBLE PRECISION W
       e2b = E - 2*B
       roph = W(Ip - 1,Ih,X)
       a = roph*B*Ih
       a1 = 0.
-      IF(e2b.LT.X)THEN
-        roph = W(Ip - 2,Ih + 2,X)
-        a1 = a1 - roph
-        roph = W(Ip - 2,Ih + 1,X)
-        a1 = a1 + roph*(X - e2b)
-        IF(e2b.GT.0.D0)THEN
-          roph = W(Ip - 2,Ih + 2,e2b)
-          a1 = a1 + roph
-        ENDIF
+      IF (e2b.LT.X) THEN
+         roph = W(Ip - 2,Ih + 2,X)
+         a1 = a1 - roph
+         roph = W(Ip - 2,Ih + 1,X)
+         a1 = a1 + roph*(X - e2b)
+         IF (e2b.GT.0.D0) THEN
+            roph = W(Ip - 2,Ih + 2,e2b)
+            a1 = a1 + roph
+         ENDIF
       ENDIF
       a1 = a1*(Ip - 1)/2
       Y0 = (a + a1)*Ip
-      END SUBROUTINE ZERO
- 
-!---------------------------------------------------------------------------
+      END
+C
 C
       SUBROUTINE MINUS(Ym,Ip,Ih,X)
 C
-C*** Start of declarations rewritten by SPAG
-C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: X, Ym
+      INTEGER Ih, Ip
+      DOUBLE PRECISION X, Ym
 C
 C Local variables
 C
-      REAL*8 :: rp, rp1
-      REAL*8 :: W
-C
-C*** End of declarations rewritten by SPAG
-C
-      IF(Ip.NE.2.OR.Ih.NE.1)THEN
-        rp = W(2,1,E - X)
-        rp1 = W(Ip - 2,Ih - 1,X)
-        Ym = rp*rp1*Ip*(Ip - 1)*Ih/2.
-        RETURN
+      DOUBLE PRECISION rp, rp1
+      DOUBLE PRECISION W
+      IF (Ip.NE.2 .OR. Ih.NE.1) THEN
+         rp = W(2,1,E - X)
+         rp1 = W(Ip - 2,Ih - 1,X)
+         Ym = rp*rp1*Ip*(Ip - 1)*Ih/2.
+         RETURN
       ENDIF
       Ym = 0.
-      END SUBROUTINE MINUS
- 
-!---------------------------------------------------------------------------
+      END
 C
-      FUNCTION W1(J,L,K,X)
 C
-C*** Start of declarations rewritten by SPAG
+      DOUBLE PRECISION FUNCTION W1(J,L,K,X)
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: J, K, L
-      REAL*8 :: X
-      REAL*8 :: W1
+      INTEGER J, K, L
+      DOUBLE PRECISION X
 C
 C Local variables
 C
-      REAL*8 :: a1, a2, s, sumx, sum1, x1, z1
-      INTEGER :: i, ii, j1, k1, l1, m, m1
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION a1, a2, s, sum, sum1, x1, z1
+      INTEGER i, ii, j1, k1, l1, m, m1
 C-----seems to be 7b
       j1 = J + 1
       x1 = X - J*B
       l1 = L - 1
-      IF(K.LE.l1)THEN
-        k1 = K + 1
-        a1 = x1**l1
-        s = -1.
-        sumx = 0.
-        DO i = 1, J
-          ii = i - 1
-          s = -s
-          sum1 = 0.
-          a2 = (J - ii)*B
-          z1 = x1/a2
-          DO m = 1, k1
-            m1 = m - 1
-            z1 = z1*a2/x1
-            sum1 = sum1 + z1/FACt(J + m)/FACt(L - m1)
-          ENDDO
-          a2 = a2**J
-          sumx = sumx + a2/FACt(i)/FACt(j1 - ii)*sum1*s
-        ENDDO
-        W1 = sumx*a1*FACt(j1)
-        RETURN
+      IF (K.LE.l1) THEN
+         k1 = K + 1
+         a1 = x1**l1
+         s = -1.
+         sum = 0.
+         DO i = 1, J
+            ii = i - 1
+            s = -s
+            sum1 = 0.
+            a2 = (J - ii)*B
+            z1 = x1/a2
+            DO m = 1, k1
+               m1 = m - 1
+               z1 = z1*a2/x1
+               sum1 = sum1 + z1/FACt(J + m)/FACt(L - m1)
+            ENDDO
+            a2 = a2**J
+            sum = sum + a2/FACt(i)/FACt(j1 - ii)*sum1*s
+         ENDDO
+         W1 = sum*a1*FACt(j1)
+         RETURN
       ENDIF
-      WRITE(50,1010)J, L, K, X
- 1010 FORMAT(1X,'ERROR:',5X,'W1(',I1,',',I1,',',I1,',',E12.5,')')
+      WRITE (50,99005) J, L, K, X
+99005 FORMAT (1X,'ERROR:',5X,'W1(',I1,',',I1,',',I1,',',E12.5,')')
       STOP
-      END FUNCTION W1
- 
-!---------------------------------------------------------------------------
+      END
 C
-      FUNCTION W2(J,L,K,X)
 C
-C*** Start of declarations rewritten by SPAG
+      DOUBLE PRECISION FUNCTION W2(J,L,K,X)
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: J, K, L
-      REAL*8 :: X
-      REAL*8 :: W2
+      INTEGER J, K, L
+      DOUBLE PRECISION X
 C
 C Local variables
 C
-      INTEGER :: i, ii, j1, jl, k1
-      REAL*8 :: s, sumx, xx
-C
-C*** End of declarations rewritten by SPAG
-C
+      INTEGER i, ii, j1, jl, k1
+      DOUBLE PRECISION s, sum, xx
 C-----looks like 7a
       j1 = J + 1
-      IF(K.EQ.0.AND.X.EQ.0.0D0)THEN
-        W2 = 0.
-        RETURN
+      IF (K.EQ.0 .AND. X.EQ.0.0D0) THEN
+         W2 = 0.
+         RETURN
       ENDIF
-      IF(J.LT.0.OR.K.GT.15)THEN
+      IF (J.LT.0 .OR. K.GT.15) THEN
 C        WRITE (8,*) 'WARNING: message from W2 J, L, K,', J, L, K
-        W2 = 0.0
-        RETURN
+         W2 = 0.0
+         RETURN
       ENDIF
       jl = J + L - 1
       k1 = K + 1
       s = -1.
-      sumx = 0.
+      sum = 0.
       DO i = 1, k1
-        ii = i - 1
-        s = -s
-        xx = X - ii*B
-        xx = xx**jl
-        sumx = sumx + s/FACt(i)/FACt(j1 - ii)*xx
+         ii = i - 1
+         s = -s
+         xx = X - ii*B
+         xx = xx**jl
+         sum = sum + s/FACt(i)/FACt(j1 - ii)*xx
       ENDDO
-      W2 = sumx/FACt(jl + 1)*FACt(j1)
-      END FUNCTION W2
- 
-!---------------------------------------------------------------------------
+      W2 = sum/FACt(jl + 1)*FACt(j1)
+      END
 C
-      FUNCTION W3(J,L,K,X)
 C
-C*** Start of declarations rewritten by SPAG
+      DOUBLE PRECISION FUNCTION W3(J,L,K,X)
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: J, K, L
-      REAL*8 :: X
-      REAL*8 :: W3
+      INTEGER J, K, L
+      DOUBLE PRECISION X
 C
 C Local variables
 C
-      REAL*8 :: a1, a2, s, sumx, sum1, x1, z1
-      INTEGER :: i, ii, j1, j11, k1, m, m1
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION a1, a2, s, sum, sum1, x1, z1
+      INTEGER i, ii, j1, j11, k1, m, m1
 C-----seems to be second part of 7c
       x1 = X - J*B
       j1 = J - 1
       j11 = J + 1
       k1 = K + 1
-      IF(K.LE.j1)THEN
-        a1 = x1**L
-        s = 1.
-        sumx = 0.
-        DO i = 1, J
-          ii = i - 1
-          s = -s
-          sum1 = 0.
-          a2 = (J - ii)*B
-          z1 = a2/x1
-          DO m = 1, k1
-            m1 = m - 1
-            z1 = z1*x1/a2
-            sum1 = sum1 + z1/FACt(L + m)/FACt(J - m1)
-          ENDDO
-          a2 = a2**j1
-          sumx = sumx + a2/FACt(i)/FACt(j11 - ii)*s*sum1
-        ENDDO
-        W3 = sumx*a1*FACt(j11)
-        RETURN
+      IF (K.LE.j1) THEN
+         a1 = x1**L
+         s = 1.
+         sum = 0.
+         DO i = 1, J
+            ii = i - 1
+            s = -s
+            sum1 = 0.
+            a2 = (J - ii)*B
+            z1 = a2/x1
+            DO m = 1, k1
+               m1 = m - 1
+               z1 = z1*x1/a2
+               sum1 = sum1 + z1/FACt(L + m)/FACt(J - m1)
+            ENDDO
+            a2 = a2**j1
+            sum = sum + a2/FACt(i)/FACt(j11 - ii)*s*sum1
+         ENDDO
+         W3 = sum*a1*FACt(j11)
+         RETURN
       ENDIF
-      WRITE(50,1010)J, L, K, X
- 1010 FORMAT(1X,'ERROR',5X,'W3(',I1,',',I1,',',I1,',',E12.5,')')
+      WRITE (50,99005) J, L, K, X
+99005 FORMAT (1X,'ERROR',5X,'W3(',I1,',',I1,',',I1,',',E12.5,')')
       STOP
-      END FUNCTION W3
- 
-!---------------------------------------------------------------------------
+      END
 C
-      FUNCTION WOBL(Ip,Ih,U,Ni)
 C
-C*** Start of declarations rewritten by SPAG
 C
-C COMMON variables
-C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
-      COMMON /EB    / E, B, FACt, G
-C
-C Dummy arguments
-C
-      INTEGER :: Ih, Ip, Ni
-      REAL*8 :: U
-      REAL*8 :: WOBL
-C
-C Local variables
-C
-      INTEGER :: i, ii, ipm, n
-      REAL*8 :: s, w
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION FUNCTION WOBL(Ip,Ih,U,Ni)
 C
 C     calculates conditional state densities according to Oblozinsky
 C     Nucl. Phys. A453(1986)127 formula 13; without factor
 C     g**(p+h)/p!h!(n-1)! and neglecting well depth
-      WOBL = 0.0
-      IF(U.LE.0.0D0)RETURN
-      n = Ip + Ih + Ni
-      IF(Ip.GE.0.AND.Ih.GE.0.AND.n.NE.0)THEN
-        ipm = AINT(U/B)
-        ipm = MIN(Ip,ipm)
-        ipm = ipm + 1
-        s = -1.0
-        DO ii = 1, ipm
-          i = ii - 1
-          s = -s
-          w = (U - i*B)**n
-          w = w*s/FACt(ii)/FACt(Ip - i + 1)
-          WOBL = WOBL + w
-        ENDDO
-        WOBL = WOBL*FACt(Ip + 1)
-        RETURN
-      ENDIF
-      WRITE(8,1010)Ip, Ih, n
- 1010 FORMAT(1X,/1X,' ERROR IN WOBL CALL P=',I2,'  H=',I2,'  N=',I2,
-     &       '    WOBL=0.0 RETURNED',/)
-      END FUNCTION WOBL
- 
-!---------------------------------------------------------------------------
-C
-      SUBROUTINE BACK(Yb,Ip,Ih)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: Yb
+      INTEGER Ih, Ip, Ni
+      DOUBLE PRECISION U
 C
 C Local variables
 C
-      REAL*8 :: ebe
-      INTEGER :: n1, n2
-      REAL*8 :: WOBL
+      INTEGER i, ii, ipm, n
+      DOUBLE PRECISION s, w
+      WOBL = 0.0
+      IF (U.LE.0.0D0) RETURN
+      n = Ip + Ih + Ni
+      IF (Ip.GE.0 .AND. Ih.GE.0 .AND. n.NE.0) THEN
+         ipm = AINT(U/B)
+         ipm = MIN(Ip,ipm)
+         ipm = ipm + 1
+         s = -1.0
+         DO ii = 1, ipm
+            i = ii - 1
+            s = -s
+            w = (U - i*B)**n
+            w = w*s/FACt(ii)/FACt(Ip - i + 1)
+            WOBL = WOBL + w
+         ENDDO
+         WOBL = WOBL*FACt(Ip + 1)
+         RETURN
+      ENDIF
+      WRITE (8,99005) Ip, Ih, n
+99005 FORMAT (1X,/1X,' ERROR IN WOBL CALL P=',I2,'  H=',I2,'  N=',I2,
+     &        '    WOBL=0.0 RETURNED',/)
+      END
 C
-C*** End of declarations rewritten by SPAG
 C
+C
+      SUBROUTINE BACK(Yb,Ip,Ih)
 C
 C     calculates density of accessible states (conditional) for internal
 C     backward transitions  (without g/w(p,h,e,-1) factor)
 C     using Oblozinsky's formula for cond. st. den.
-      Yb = 0.0
-      n1 = Ip + Ih - 1
-      n2 = n1 - 1
-      IF(n2.LE.1)RETURN
-      IF(E.LE.0.0D0)RETURN
-      Yb = WOBL(Ip - 2,Ih - 1,E,2) + WOBL(Ip - 1,Ih - 2,E,2)*(Ih - 1)
-     &     /(Ip - 1)
-      ebe = E - B
-      IF(ebe.GT.0.0D0)Yb = Yb - WOBL(Ip - 2,Ih - 1,ebe,2)
-     &                     - B*n1*WOBL(Ip - 2,Ih - 1,ebe,1)
-     &                     - 0.5*B*B*n1*n2*WOBL(Ip - 2,Ih - 1,ebe,0)
-      Yb = 0.5*Ip*(Ip - 1)*Ih*Yb
-      END SUBROUTINE BACK
- 
-!---------------------------------------------------------------------------
-C
-C
-      FUNCTION VQ(Ip,Ih,U)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
+      DOUBLE PRECISION B, E, FACt(100), G
       COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: Ih, Ip
-      REAL*8 :: U
-      REAL*8 :: VQ
+      INTEGER Ih, Ip
+      DOUBLE PRECISION Yb
 C
 C Local variables
 C
-      REAL*8 :: c, ub, w1, w2, w3, w4, w5, w6, w7, w8
-      INTEGER :: ih1, ip1, n
-      REAL*8 :: WOBL
+      DOUBLE PRECISION ebe
+      INTEGER n1, n2
+      DOUBLE PRECISION WOBL
+      Yb = 0.0
+      n1 = Ip + Ih - 1
+      n2 = n1 - 1
+      IF (n2.LE.1) RETURN
+      IF (E.LE.0.0D0) RETURN
+      Yb = WOBL(Ip - 2,Ih - 1,E,2) + WOBL(Ip - 1,Ih - 2,E,2)*(Ih - 1)
+     &     /(Ip - 1)
+      ebe = E - B
+      IF (ebe.GT.0.0D0) Yb = Yb - WOBL(Ip - 2,Ih - 1,ebe,2)
+     &                       - B*n1*WOBL(Ip - 2,Ih - 1,ebe,1)
+     &                       - 0.5*B*B*n1*n2*WOBL(Ip - 2,Ih - 1,ebe,0)
+      Yb = 0.5*Ip*(Ip - 1)*Ih*Yb
+      END
 C
-C*** End of declarations rewritten by SPAG
 C
+      DOUBLE PRECISION FUNCTION VQ(Ip,Ih,U)
 C
 C     calculates avrage of imaginary part of o.m. pot. given as W=C*E**2
 C     exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
 C     weighting funtion in the case of particles (analogous for holes)
-      VQ = 0.0
-      IF(Ip.NE.0.OR.Ih.NE.0)THEN
-        IF(Ip.GE.0.AND.Ih.GE.0)THEN
-          IF(U.LE.0.0D0)RETURN
-          n = Ip + Ih
-          ip1 = Ip - 1
-          ih1 = Ih - 1
-          ub = U - B
-          c = 0.003
-          w1 = WOBL(ip1,Ih,U,0)
-          w2 = WOBL(ip1,Ih,ub,0)
-          w3 = WOBL(ip1,Ih,U,2)
-          w4 = WOBL(ip1,Ih,ub,2)
-          w5 = WOBL(ip1,Ih,ub,1)
-          w6 = WOBL(ip1,Ih,ub,0)
-          w7 = WOBL(Ip,ih1,U,2)
-          w8 = WOBL(Ip,ih1,U,0)
-C-----------particle part
-          VQ = 2.0/n/(n + 1)*(w3 - w4) - 2.0/n*w5*B - w6*B*B
-          VQ = VQ*Ip*c/n/(w1 - w2)
-C-----------hole part
-          VQ = VQ + 2.0*c*Ih*w7/(n*n*(n + 1)*w8)
-          RETURN
-        ENDIF
-      ENDIF
-      WRITE(8,1010)Ip, Ih, U
- 1010 FORMAT(1X,'ERROR IN VQ INPUT: P=',I2,' H=',I2,' E=',F8.4,
-     &       '  VQ=0 RETURNED')
-      END FUNCTION VQ
- 
-!---------------------------------------------------------------------------
-C
-      SUBROUTINE TRATES
-C
-C*** Start of declarations rewritten by SPAG
-C
-C*** End of declarations rewritten by SPAG
-C
-      WRITE(8,*)'ERROR: TRATES NOT IMPLEMENTED'
-      END SUBROUTINE TRATES
- 
-!---------------------------------------------------------------------------
-C
-C
-      FUNCTION ROPHM(N,I,E,G)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: E, G
-      INTEGER :: I, N
-      REAL*8 :: ROPHM
-C
-C*** End of declarations rewritten by SPAG
-C
-C     Just dummy line to avoid compiler warning
-      ROPHM = N + I + E + G
-      WRITE(8,*)
-     &      'ERROR: MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
-      ROPHM = 0.0
-      END FUNCTION ROPHM
- 
-!---------------------------------------------------------------------------
-C
-C
-      FUNCTION WILLI(N,X)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: BP, E, G
-      REAL*8, DIMENSION(100) :: FACt
-      COMMON /EB    / E, BP, FACt, G
+      DOUBLE PRECISION B, E, FACt(100), G
+      COMMON /EB    / E, B, FACt, G
 C
 C Dummy arguments
 C
-      INTEGER :: N
-      REAL*8 :: X
-      REAL*8 :: WILLI
-C
-C*** End of declarations rewritten by SPAG
-C
-C
-C     calculates p-h state densities according to williams formula
-C     (without g**n/p!h! factor which is contained in omj)
-      WILLI = 0.0
-      IF(X.LT.0.D0.OR.N.LE.0)RETURN
-      WILLI = X**(N - 1)/FACt(N)
-      END FUNCTION WILLI
- 
-!---------------------------------------------------------------------------
-C
-C
-      FUNCTION OMJ(N,Ip,Ih,J,S,Ngs)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8 :: BP, E, G, SIGnx
-      REAL*8, DIMENSION(100) :: FACt
-      COMMON /EB    / E, BP, FACt, G
-      COMMON /PRSI  / SIGnx
-C
-C Dummy arguments
-C
-      INTEGER :: Ih, Ip, J, N, Ngs
-      REAL*8 :: S
-      REAL*8 :: OMJ
+      INTEGER Ih, Ip
+      DOUBLE PRECISION U
 C
 C Local variables
 C
-      REAL*8 :: sig, w, xj
+      DOUBLE PRECISION c, ub, w1, w2, w3, w4, w5, w6, w7, w8
+      INTEGER ih1, ip1, n
+      DOUBLE PRECISION WOBL
+      VQ = 0.0
+      IF (Ip.NE.0 .OR. Ih.NE.0) THEN
+         IF (Ip.GE.0 .AND. Ih.GE.0) THEN
+            IF (U.LE.0.0D0) RETURN
+            n = Ip + Ih
+            ip1 = Ip - 1
+            ih1 = Ih - 1
+            ub = U - B
+            c = 0.003
+            w1 = WOBL(ip1,Ih,U,0)
+            w2 = WOBL(ip1,Ih,ub,0)
+            w3 = WOBL(ip1,Ih,U,2)
+            w4 = WOBL(ip1,Ih,ub,2)
+            w5 = WOBL(ip1,Ih,ub,1)
+            w6 = WOBL(ip1,Ih,ub,0)
+            w7 = WOBL(Ip,ih1,U,2)
+            w8 = WOBL(Ip,ih1,U,0)
+C-----------particle part
+            VQ = 2.0/n/(n + 1)*(w3 - w4) - 2.0/n*w5*B - w6*B*B
+            VQ = VQ*Ip*c/n/(w1 - w2)
+C-----------hole part
+            VQ = VQ + 2.0*c*Ih*w7/(n*n*(n + 1)*w8)
+            RETURN
+         ENDIF
+      ENDIF
+      WRITE (8,99005) Ip, Ih, U
+99005 FORMAT (1X,'ERROR IN VQ INPUT: P=',I2,' H=',I2,' E=',F8.4,
+     &        '  VQ=0 RETURNED')
+      END
 C
-C*** End of declarations rewritten by SPAG
+      SUBROUTINE TRATES
+      WRITE (8,*) 'ERROR: TRATES NOT IMPLEMENTED'
+      END
 C
+C
+      DOUBLE PRECISION FUNCTION ROPHM(N,I,E,G)
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION E, G
+      INTEGER I, N
+C
+C Local variables
+C
+C     Just dummy line to avoid compiler warning
+      ROPHM = N + I + E + G
+      WRITE (8,*)
+     > 'ERROR: MICROSCOPIC PARTIAL LEVEL DENSITIES NOT IMPLEMENTED'
+      ROPHM = 0.0
+      END
+C
+C
+      DOUBLE PRECISION FUNCTION WILLI(N,X)
+C
+C     calculates p-h state densities according to williams formula
+C     (without g**n/p!h! factor which is contained in omj)
+C
+C COMMON variables
+C
+      DOUBLE PRECISION BP, E, FACt(100), G
+      COMMON /EB    / E, BP, FACt, G
+C
+C Dummy arguments
+C
+      INTEGER N
+      DOUBLE PRECISION X
+      WILLI = 0.0
+      IF (X.LT.0.D0 .OR. N.LE.0) RETURN
+      WILLI = X**(N - 1)/FACt(N)
+      END
+C
+C
+      DOUBLE PRECISION FUNCTION OMJ(N,Ip,Ih,J,S,Ngs)
 C
 C     calculates spin dependent factor in state density including
 C     1/2 for parity and g**n/p!h! missing in w function
 C     the latter factor is set to 1 when microscopic densities are
 C     used (ngs=1)
-      OMJ = 0.
-      IF(N.LE.0.OR.Ip.LT.0.OR.Ih.LT.0)RETURN
-      sig = SIGnx*N
-      xj = J + S
-      w = (xj + 1.0)*xj/2./sig
-      IF(w.GT.50.D0)RETURN
-      OMJ = 1.
-      IF(Ngs.EQ.0)OMJ = G**N/FACt(Ip + 1)/FACt(Ih + 1)
-      OMJ = OMJ*(2*xj + 1.)*EXP(( - w))/4./2.50663/sig**1.5
-C     2.50663 STANDS FOR SQRT(2*PI)
-      END FUNCTION OMJ
- 
-!---------------------------------------------------------------------------
-C
-C
-      FUNCTION WOB1(X,Np,Nh,F)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: B, E, G
-      REAL*8, DIMENSION(100) :: FACt
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION BP, E, FACt(100), G, SIGnx
+      COMMON /EB    / E, BP, FACt, G
+      COMMON /PRSI  / SIGnx
 C
 C Dummy arguments
 C
-      REAL*8 :: F, X
-      INTEGER :: Nh, Np
-      REAL*8 :: WOB1
+      INTEGER Ih, Ip, J, N, Ngs
+      DOUBLE PRECISION S
 C
 C Local variables
 C
-      REAL*8 :: alpha, aph, ch, cp, d, ecor, ecor1, h, p, sumx, t1, t2
-      REAL*8 :: FCTR
-      REAL :: FLOAT
-      INTEGER :: i, ii, j, jj, n, nn
+      DOUBLE PRECISION sig, w, xj
+      OMJ = 0.
+      IF (N.LE.0 .OR. Ip.LT.0 .OR. Ih.LT.0) RETURN
+      sig = SIGnx*N
+      xj = J + S
+      w = (xj + 1.0)*xj/2./sig
+      IF (w.GT.50.D0) RETURN
+      OMJ = 1.
+      IF (Ngs.EQ.0) OMJ = G**N/FACt(Ip + 1)/FACt(Ih + 1)
+      OMJ = OMJ*(2*xj + 1.)*EXP(( - w))/4./2.50663/sig**1.5
+C     2.50663 STANDS FOR SQRT(2*PI)
+      END
 C
-C*** End of declarations rewritten by SPAG
 C
+      DOUBLE PRECISION FUNCTION WOB1(X,Np,Nh,F)
 Ccc   **************************************************************************
 Ccc   *                                                              class:PPU *
 Ccc   *                            W O B 1                                     *
@@ -722,6 +574,24 @@ Ccc   *                                                                        *
 Ccc   * Output: WOB1 - p-h level density at X                                  *
 Ccc   *                                                                        *
 Ccc   **************************************************************************
+C
+C COMMON variables
+C
+      DOUBLE PRECISION B, E, FACt(100), G
+      COMMON /EB    / E, B, FACt, G
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION F, X
+      INTEGER Nh, Np
+C
+C Local variables
+C
+      DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum,
+     &                 t1, t2
+      DOUBLE PRECISION FCTR
+      REAL FLOAT
+      INTEGER i, ii, j, jj, nn
       FCTR(n) = FACt(n + 1)
       WOB1 = 0.
       nn = Np + Nh
@@ -733,21 +603,24 @@ CIN   Alpha=(P*(P+1.)+H*(H-1.))/(2.*G)
 CIN   Aph=(P*(P+1.)+H*(H-3.))/(4.*G)
       alpha = (p*p + h*h)/(2.*G)
       aph = (p*(p - 1.) + h*(h - 1.))/(4.*G)
-      IF((X + alpha - p*B - h*F).GT.0.)RETURN
-      sumx = 0.
+      IF ((X + alpha - p*B - h*F).GT.0.) RETURN
+      sum = 0.
       DO ii = 1, Np + 1
-        i = ii - 1
-        DO jj = 1, Nh + 1
-          j = jj - 1
-          ecor = X - aph - i*B - j*F
-          ecor1 = X - alpha - i*B - j*F
-          IF(ecor1.GT.0.)THEN
-            d = ( - 1.)**(i + j)
-            cp = FCTR(Np)/(FCTR(Np - i)*FCTR(i))
-            ch = FCTR(Nh)/(FCTR(Nh - j)*FCTR(j))
-            sumx = sumx + d*cp*ch*ecor**(nn - 1)/t2
-          ENDIF
-        ENDDO
+         i = ii - 1
+         DO jj = 1, Nh + 1
+            j = jj - 1
+            ecor = X - aph - i*B - j*F
+            ecor1 = X - alpha - i*B - j*F
+            IF (ecor1.GT.0.) THEN
+               d = ( - 1.)**(i + j)
+               cp = FCTR(Np)/(FCTR(Np - i)*FCTR(i))
+               ch = FCTR(Nh)/(FCTR(Nh - j)*FCTR(j))
+               sum = sum + d*cp*ch*ecor**(nn - 1)/t2
+            ENDIF
+         ENDDO
       ENDDO
-      WOB1 = t1*sumx
-      END FUNCTION WOB1
+      WOB1 = t1*sum
+      END
+
+
+

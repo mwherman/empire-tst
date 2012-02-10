@@ -1,27 +1,8 @@
-Ccc   * $Rev: 2526 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
- 
-      SUBROUTINE THORA(Iout)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      INTEGER :: Iout
-C
-C Local variables
-C
-      REAL, SAVE :: begday, begtim, difti1, diftim, endday, endtim
-      CHARACTER(8) :: date
-      INTEGER, DIMENSION(8) :: dt
-      INTEGER :: INT, NINT
-      LOGICAL :: never_called
-      CHARACTER(10) :: time
-      CHARACTER(5) :: zone
-C
-C*** End of declarations rewritten by SPAG
-C
+Ccc   * $Rev: 2537 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+
+      SUBROUTINE THORA(IOUT)
 C
 C     R. Capote, March 2005
 C
@@ -30,36 +11,45 @@ C     Note: Elapsed time must be less than one month
 C
 C     (g77, g95, LAHEY, and MS FORTRAN compatible)
 C
-      DATA never_called/.TRUE./
- 
-      IF(never_called)THEN
-        never_called = .FALSE.
-        CALL DATE_AND_TIME(date,time,zone,dt)
-        begday = dt(3)
-        begtim = dt(5)*3600 + dt(6)*60 + dt(7) + dt(8)/1000.
-        WRITE(Iout,1010)time(1:2), time(3:4), time(5:6), date(7:8), 
-     &                  date(5:6), date(1:4)
+      REAL BEGTIM,ENDTIM,BEGDAY,ENDDAY,DIFTIM,DIFTI1
+      INTEGER IOUT
+      CHARACTER*8 DATE
+      CHARACTER*10 TIME
+      CHARACTER*5 ZONE
+      INTEGER DT
+      DIMENSION DT(8)
+      LOGICAL NEVER_CALLED
+      DATA NEVER_CALLED/.TRUE./
+      SAVE BEGTIM,BEGDAY,NEVER_CALLED
+
+      IF (NEVER_CALLED) then
+        NEVER_CALLED = .FALSE.
+        CALL DATE_AND_TIME (DATE,TIME,ZONE,DT)
+        BEGDAY=DT(3)
+        BEGTIM=DT(5)*3600+DT(6)*60+DT(7)+DT(8)/1000.
+        WRITE(IOUT,1001) time(1:2),time(3:4),time(5:6),
+     >                   DATE(7:8),DATE(5:6),DATE(1:4)
       ELSE
-        CALL DATE_AND_TIME(date,time,zone,dt)
-        endtim = dt(5)*3600 + dt(6)*60 + dt(7) + dt(8)/1000.
-        endday = dt(3)
-        endtim = endtim + (endday - begday)*86400.
-        diftim = (endtim - begtim)/60.
-        difti1 = (diftim - INT(diftim))*60.
-        WRITE(Iout,1030)time(1:2), time(3:4), time(5:6), date(7:8), 
-     &                  date(5:6), date(1:4)
-        WRITE(Iout,1020)INT(diftim), NINT(difti1)
+        CALL DATE_AND_TIME (DATE,TIME,ZONE,DT)
+        ENDTIM=DT(5)*3600+DT(6)*60+DT(7)+DT(8)/1000.
+        ENDDAY=DT(3)
+        ENDTIM = ENDTIM +  (ENDDAY-BEGDAY)*86400.
+        DIFTIM=(ENDTIM-BEGTIM)/60.
+        DIFTI1=(DIFTIM-INT(DIFTIM))*60.
+        WRITE(IOUT,1003) time(1:2),time(3:4),time(5:6),
+     >                   DATE(7:8),DATE(5:6),DATE(1:4)
+        WRITE(IOUT,1002) INT(DIFTIM),NINT(DIFTI1)
       ENDIF
- 
+
       RETURN
- 1010 FORMAT(/22X,'Start time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,
-     &       ')'/)
- 1020 FORMAT(2X,'Calculation time: ',I3,' min ',I2,' s')
- 1030 FORMAT(/2X,'End time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,
-     &       ')'/)
- 
- 
+ 1001 FORMAT
+     >(/22X,'Start time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
+ 1002 FORMAT(2X,'Calculation time: ',I3,' min ',I2,' s')
+ 1003 FORMAT
+     >(/2X,'End time: ',A2,':',A2,'.',A2,' (',A2,'-',A2,'-',A4,')'/)
+
+
 C====================================================================
-      END SUBROUTINE THORA
- 
- 
+      END
+
+

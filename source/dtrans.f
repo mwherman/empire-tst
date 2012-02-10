@@ -1,104 +1,88 @@
-Ccc   * $Rev: 2526 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
- 
- 
-      SUBROUTINE DTRANS(Iemin,Iemax)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(0:NDEjc) :: CROss
-      REAL*8, DIMENSION(0:NDEjc,NDEx) :: SPEc
-      COMMON /PEXS  / CROss, SPEc
-C
-C Dummy arguments
-C
-      INTEGER*2, DIMENSION(0:NDEjc) :: Iemax, Iemin
-C
-C Local variables
-C
-      REAL*8 :: ab, fac1, fac2, fk, gdel, ggg, sg, spectr
-      REAL :: ares, ek, zres
-      INTEGER :: ip, irea, ke, nnur
-      INTEGER, DIMENSION(4) :: jno, jpo, jst
-C
-C*** End of declarations rewritten by SPAG
-C
+Ccc   * $Rev: 2537 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+
+
+      SUBROUTINE DTRANS(iemin,iemax)
 C
 C     DEUTERON INDUCED DIRECT STRIPPING d,p AND PICK-UP d,t
 C     following C.Kalbach /PRECOC-1997/
 C
 C     Introduced into EMPIRE by A.V.Ignatyuk, April 2007
 C
+      include 'dimension.h'
+      include 'global.h'
 C
+      INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
+      DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
+      COMMON /PEXS/ cross, spec
 C
 C     Local variables
 C
+      DOUBLE PRECISION ab,gdel,fac1,fac2,fk,ggg
 C     DOUBLE PRECISION bndd
- 
-      DATA jno/1, 0, 2, 2/
-      DATA jpo/0, 1, 2, 1/
-      DATA jst/2, 2, 1, 2/
+      DOUBLE PRECISION spectr,sg
+      DIMENSION jno(4),jpo(4),jst(4)
+
+      data jno/1,0,2,2/                  
+      data jpo/0,1,2,1/
+      data jst/2,2,1,2/
 C
-C
+C 
 C
 C-----Only deuteron reactions allowed
-      IF(ZEJc(0).NE.1.D0.AND.AEJc(0).NE.2.D0)RETURN
-      IF(DXSred.LE.0.D0)RETURN
- 
-      ggg = GDIv
-      IF(GDIv.EQ.0)ggg = 13.D0
+      if(Zejc(0).ne.1.D0.and.Aejc(0).ne.2.D0) return
+      if(DXSred.LE.0.d0) return
+
+      ggg = GDIV
+      if(GDIV.eq.0) ggg=13.d0
 C-----gdel is the single-particle density for neutrons
-      gdel = (A(0) - Z(0))/ggg*GTIlnor(1)
- 
-      IF(IOUt.GE.3)THEN
-        WRITE(8,*)
-        WRITE(8,*)' EMISSION SPECTRA : DIRECT reactions'
-        WRITE(8,*)
+      gdel = (A(0)-Z(0))/ggg*GTIlnor(1)
+
+      IF(IOUt.GE.3) then
+        write(8,*) 
+        write(8,*) ' EMISSION SPECTRA : DIRECT reactions'
+        write(8,*) 
       ENDIF
 C     irea=NDEjc
-      irea = 4
-      DO ip = 2, irea, 2
-        IF(IOUt.GE.3.AND.ip.EQ.2)WRITE(8,*)'(d,p) break-up reaction'
-        IF(IOUt.GE.3.AND.ip.EQ.4)WRITE(8,*)'(d,t) pick-up  reaction'
-        ab = jno(ip) + jpo(ip)
-        ares = A(1) - ab
-        zres = Z(1) - jpo(ip)
+      irea = 4 
+      do ip=2,irea,2
+         IF(IOUt.GE.3 .and. ip.eq.2) write(8,*)'(d,p) break-up reaction'
+         IF(IOUt.GE.3 .and. ip.eq.4) write(8,*)'(d,t) pick-up  reaction'
+         ab = jno(ip)+jpo(ip)
+         ares  = A(1) - ab
+         zres  = Z(1) - jpo(ip)
 C        residual nuclei must be heavier than alpha
-        IF(ares.LE.4.AND.zres.LE.2.)CYCLE
- 
-        nnur = NREs(ip)
-        IF(nnur.LT.0)CYCLE
+         if(ares.le.4. and. zres.le.2.) cycle
+
+         nnur = NREs(ip)
+         if (nnur.lt.0) cycle
 C--------Factors for stripping and pickup
-        fac1 = jst(ip)/3.*ab*(3800./ares)/EINl/(EINl + 50.D0)**2
-        fk = 12.D0
-        IF(ip.EQ.2)fk = fk*(3.0 + 35.0/(1. + EXP((EINl-11.)/2.25)))
-        fk = MAX(0.D0,fk)
-        fac2 = .0127*fk*gdel
-        DO ke = Iemin(ip), Iemax(ip)
-          ek = DE*(ke - 1)
+         fac1=jst(ip)/3.*ab*(3800./ares)/Einl/(Einl+50.D0)**2
+         fk=12.D0
+         if(ip.eq.2) fk=fk*(3.0+35.0/(1.+exp((Einl-11.)/2.25)))
+         fk=max(0.D0,fk)
+         fac2=.0127*fk*gdel
+         DO ke = iemin(ip), iemax(ip)
+            ek = DE*(ke - 1)
 C-----------sigabs(ke,ip,nnur) was estimated in global
-          IF(ETL(5,ip,nnur).EQ.0)THEN
-            sg = SIGabs(ke + 5,ip,nnur)
-          ELSE
-            sg = SIGabs(ke,ip,nnur)
-          ENDIF
-          spectr = sg*ek*fac1*fac2*DXSred
-          IF(spectr.LE.0.D0)CYCLE
-          SPEc(ip,ke) = spectr
-          CROss(ip) = CROss(ip) + spectr*DE
-          IF(IOUt.GE.3)WRITE(8,1010)ek, SPEc(ip,ke)
+            IF (ETL(5,ip,nnur).EQ.0) THEN
+               sg = SIGabs(ke+5,ip,nnur)
+            ELSE
+               sg = SIGabs(ke,ip,nnur)
+            ENDIF
+            spectr=sg*ek*fac1*fac2*DXSred
+            if(spectr.le.0.D0) cycle
+            spec(ip,ke)=spectr
+            cross(ip)=cross(ip)+spectr*DE
+            IF(IOUt.GE.3) write(8,100) ek, spec(ip,ke)
 C           write(8,102)ke,ek,fac1,fac2,sg,spec(ip,ke)
-        ENDDO
-        IF(IOUt.GE.3)WRITE(8,*)
-      ENDDO
-      RETURN
- 1010 FORMAT(1x,f6.2,3x,d12.6)
- 1020 FORMAT(i5,f8.4,6(1pe11.3))
-      END SUBROUTINE DTRANS
- 
- 
+         enddo
+         IF(IOUt.GE.3) write(8,*) 
+      enddo
+      return
+100   format(1x,f6.2,3x,d12.6)
+102   format(i5,f8.4,6(1pe11.3))
+      end
+
+

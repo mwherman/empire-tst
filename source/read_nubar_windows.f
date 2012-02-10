@@ -1,64 +1,42 @@
- 
-      SUBROUTINE READNUBAR(Infile,Nin,Ierr)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      INTEGER :: Ierr
-      CHARACTER(200) :: Infile
-      INTEGER*4 :: Nin
-C
-C*** End of declarations rewritten by SPAG
-C
-C     to avoid compiler warnings
-      Infile = ' '
-      Nin = 10
-      Ierr = 0
-      RETURN
-      END SUBROUTINE READNUBAR
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION FNIU_NUBAR_EVAL(En)
-      IMPLICIT REAL*8(A - H,O - Z)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: En
-      REAL*8 :: FNIU_NUBAR_EVAL
-C
-C Local variables
-C
-      REAL*8, DIMENSION(20) :: eniu, vniu
-      INTEGER :: i
-C
-C*** End of declarations rewritten by SPAG
-C
-      DATA eniu/1.D-11, 1.D0, 3.D0, 4.D0, 5.7D0, 7.D0, 10.D0, 14.7D0, 
-     &     20.D0, 22.D0, 24.D0, 26.D0, 28.D0, 30.D0, 35.D0, 40.D0, 
-     &     45.D0, 50.D0, 55.D0, 60.D0/
-      DATA vniu/2.05D0, 2.127D0, 2.263D0, 2.4023D0, 2.64D0, 2.996D0, 
-     &     3.37D0, 3.97D0, 4.79D0, 5.052D0, 5.2731D0, 5.5143D0, 
-     &     5.7053D0, 5.9263D0, 6.4284D0, 6.8801D0, 7.3217D0, 7.7434D0, 
-     &     8.1242D0, 8.5053D0/
- 
-      FNIU_NUBAR_EVAL = vniu(1)
-      IF(En.LT.1.D-11)RETURN
- 
-C     if(en.gt.60) STOP 'En & 60 MeV, NO PFNM data'
-      IF(En.GT.60.D0)THEN
-        WRITE(8,*)' ERROR: Einc > 60 MeV in NUBAR calculation'
+
+      SUBROUTINE READNUBAR(infile,nin,ierr)
+      integer*4 nin
+	integer ierr
+      character*200 infile
+C     to avoid compiler warnings 
+      infile = ' '
+      nin    = 10 
+      ierr   = 0
+      return      
+      END
+
+      real*8 FUNCTION fniu_nubar_eval(en)
+      implicit real*8 (A-H,O-Z)
+      real*8 Eniu(20),Vniu(20),en
+      integer i
+      data Eniu/
+     & 1.D-11, 1.D0, 3.d0, 4.d0, 5.7d0, 7.d0, 10.d0,14.7d0, 20.d0,
+     & 22.d0 ,24.d0,26.d0,28.d0,30.d0 ,35.d0,40.d0, 45.d0 , 50.d0,
+     & 55.d0 ,60.d0/
+      data Vniu/
+     & 2.05D0, 2.127D0, 2.263D0, 2.4023D0, 2.64D0, 2.996D0, 3.37D0,
+     & 3.97D0, 4.79D0, 5.052D0, 5.2731D0, 5.5143D0, 5.7053D0, 5.9263D0,
+     & 6.4284D0, 6.8801D0, 7.3217D0, 7.7434D0, 8.1242D0, 8.5053D0/
+
+      fniu_nubar_eval = Vniu(1)
+      if(en.lt.1.d-11) RETURN
+
+c     if(en.gt.60) STOP 'En & 60 MeV, NO PFNM data'
+      if(en.gt.60.d0) THEN
+        WRITE(8,*) ' ERROR: Einc > 60 MeV in NUBAR calculation'
         STOP ' ERROR: Einc > 60 MeV in NUBAR calculation'
-      ENDIF
- 
-      DO i = 1, 20
-        IF(eniu(i).GT.En)EXIT
-      ENDDO
-      FNIU_NUBAR_EVAL = vniu(i - 1) + (vniu(i) - vniu(i - 1))
-     &                  *(En - eniu(i - 1))/(eniu(i) - eniu(i - 1))
- 
-      RETURN
-      END FUNCTION FNIU_NUBAR_EVAL
+	endif
+
+      do i=1,20
+        if(Eniu(i).gt.en) exit
+      enddo
+      fniu_nubar_eval = Vniu(i-1) +
+     &   (Vniu(i)-Vniu(i-1))*(en-Eniu(i-1))/(Eniu(i)-Eniu(i-1))
+
+      return
+      end

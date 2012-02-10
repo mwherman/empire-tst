@@ -1,35 +1,9 @@
-Ccc   * $Rev: 2526 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
- 
+Ccc   * $Rev: 2537 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+
 C
       SUBROUTINE ULM(Nnuc)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8 :: A2, A4, CE1, CE2, CM1, CS1, CS2, D1, D2, DE2, DM1, ED1, 
-     &          ED2, EE2, EG1, EG2, EM1, GW1, GW2, TE1, TE2, TM1, W1, 
-     &          W2L, WE2, WM1
-      INTEGER :: NG
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
-     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
-C
-C Dummy arguments
-C
-      INTEGER :: Nnuc
-C
-C Local variables
-C
-      REAL*8, DIMENSION(2) :: e, g, s
-      REAL*8 :: esys1, esys2, ewsrs
-C
-C*** End of declarations rewritten by SPAG
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:PPU*
@@ -55,6 +29,26 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C COMMON variables
+C
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, CS1, CS2, D1, D2, DE2, 
+     &                 DM1, ED1, ED2, EE2, EG1, EG2, EM1, GW1, GW2, TE1,
+     &                 TE2, TM1, W1, W2L, WE2, WM1
+      INTEGER NG
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
       A2 = A(Nnuc)**0.666667
       A4 = A(Nnuc)**1.333333
       TE1 = GDRpar(7,Nnuc)
@@ -63,25 +57,25 @@ Ccc
       CE2 = GQRpar(8,Nnuc)
       TM1 = GMRpar(7,Nnuc)
       CM1 = GMRpar(8,Nnuc)
-      IF(CE1.EQ.0.0D0)CE1 = 0.01
-      IF(CE2.EQ.0.0D0)CE2 = 0.1
-      IF(CM1.EQ.0.0D0)CM1 = 0.1
-C-----Plujko_new-2005
-      IF(KEY_gdrgfl.EQ.0.AND.KEY_shape.EQ.0)THEN
+      IF (CE1.EQ.0.0D0) CE1 = 0.01
+      IF (CE2.EQ.0.0D0) CE2 = 0.1
+      IF (CM1.EQ.0.0D0) CM1 = 0.1
+C-----Plujko_new-2005      
+      IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
 C-----GDR parameters according to Messina sytematics
         esys2 = 50.0*A(Nnuc)**( - 0.232)
         NG = 2
-        IF(ABS(DEF(1,Nnuc)).GE.0.064D0)THEN
-          esys1 = esys2*EXP
-     &            (( - SIGN(1.D0,DEF(1,Nnuc))*0.946*DEF(1,Nnuc)))
-          e(1) = esys1 + GDResh
-          e(2) = esys2 + GDResh
-          g(1) = esys1*(0.283 - 0.263*DEF(1,Nnuc)) + GDRwa1
-          g(2) = esys2*(0.35 - 0.14*DEF(1,Nnuc)) + GDRwa2
-          s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
-          s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
+        IF (ABS(DEF(1,Nnuc)).GE.0.064D0) THEN
+         esys1 = esys2*EXP(( - SIGN(1.D0,DEF(1,Nnuc))*0.946*DEF(1,Nnuc))
+     &           )
+         e(1) = esys1 + GDResh
+         e(2) = esys2 + GDResh
+         g(1) = esys1*(0.283 - 0.263*DEF(1,Nnuc)) + GDRwa1
+         g(2) = esys2*(0.35 - 0.14*DEF(1,Nnuc)) + GDRwa2
+         s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
+         s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
         ELSE
-          IF(EWSr1.NE.EWSr2)THEN
+         IF (EWSr1.NE.EWSr2) THEN
             esys1 = esys2*EXP(( - SIGN(1.,0.065)*0.946*0.065))
             g(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
             g(2) = esys2*(0.35 - 0.14*0.065) + GDRwa2
@@ -89,48 +83,48 @@ C-----GDR parameters according to Messina sytematics
             s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
             ewsrs = (EWSr1*s(1)*g(1) + EWSr2*s(2)*g(2))
      &              /(s(1)*g(1) + s(2)*g(2))
-          ELSE
+         ELSE
             ewsrs = EWSr1
-          ENDIF
-          esys1 = (49.336 + 7.34*DEF(1,Nnuc))*A(Nnuc)**( - 0.2409)
-          e(1) = esys1 + GDResh
-          g(1) = esys1*0.3 + GDRwa1
-          s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
-          e(2) = 0.
-          s(2) = 0.
-          g(2) = 1.
-          NG = 1
+         ENDIF
+         esys1 = (49.336 + 7.34*DEF(1,Nnuc))*A(Nnuc)**( - 0.2409)
+         e(1) = esys1 + GDResh
+         g(1) = esys1*0.3 + GDRwa1
+         s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
+         e(2) = 0.
+         s(2) = 0.
+         g(2) = 1.
+         NG = 1
         ENDIF
-        IF(ABS(DEF(1,Nnuc)).GT.0.064D0)THEN
-          IF(e(1) - e(2).LT.GDRspl)THEN
+        IF (ABS(DEF(1,Nnuc)).GT.0.064D0) THEN
+         IF (e(1) - e(2).LT.GDRspl) THEN
             e(1) = e(1) - GDRspl
-          ELSE
+         ELSE
             e(2) = e(1)
-          ENDIF
+         ENDIF
         ENDIF
-        IF(GDRpar(1,Nnuc).EQ.0.0D0)GDRpar(1,Nnuc) = e(1)
-        IF(GDRpar(2,Nnuc).EQ.0.0D0)GDRpar(2,Nnuc) = g(1)
-        IF(GDRpar(3,Nnuc).EQ.0.0D0)GDRpar(3,Nnuc) = s(1)
-        IF(GDRpar(4,Nnuc).EQ.0.0D0)GDRpar(4,Nnuc) = e(2)
-        IF(GDRpar(5,Nnuc).EQ.0.0D0)GDRpar(5,Nnuc) = g(2)
-        IF(GDRpar(6,Nnuc).EQ.0.0D0)GDRpar(6,Nnuc) = s(2)
+        IF (GDRpar(1,Nnuc).EQ.0.0D0) GDRpar(1,Nnuc) = e(1)
+        IF (GDRpar(2,Nnuc).EQ.0.0D0) GDRpar(2,Nnuc) = g(1)
+        IF (GDRpar(3,Nnuc).EQ.0.0D0) GDRpar(3,Nnuc) = s(1)
+        IF (GDRpar(4,Nnuc).EQ.0.0D0) GDRpar(4,Nnuc) = e(2)
+        IF (GDRpar(5,Nnuc).EQ.0.0D0) GDRpar(5,Nnuc) = g(2)
+        IF (GDRpar(6,Nnuc).EQ.0.0D0) GDRpar(6,Nnuc) = s(2)
 C-------Plujko_new-2005
-        EG1 = GDRpar(1,Nnuc)
-        GW1 = GDRpar(2,Nnuc)
-        CS1 = GDRpar(3,Nnuc)
-        EG2 = GDRpar(4,Nnuc)
-        GW2 = GDRpar(5,Nnuc)
-        CS2 = GDRpar(6,Nnuc)
+        EG1 = GDRpar(1, Nnuc)
+        GW1 = GDRpar(2, Nnuc)
+        CS1 = GDRpar(3, Nnuc)
+        EG2 = GDRpar(4, Nnuc)
+        GW2 = GDRpar(5, Nnuc)
+        CS2 = GDRpar(6, Nnuc)
       ELSE
 C-------GDR parameters according to RIPL
-        CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
-C       Transferring to EMPIRE arrays
-        IF(GDRpar(1,Nnuc).EQ.0.0D0)GDRpar(1,Nnuc) = EG1
-        IF(GDRpar(2,Nnuc).EQ.0.0D0)GDRpar(2,Nnuc) = GW1
-        IF(GDRpar(3,Nnuc).EQ.0.0D0)GDRpar(3,Nnuc) = CS1
-        IF(GDRpar(4,Nnuc).EQ.0.0D0)GDRpar(4,Nnuc) = EG2
-        IF(GDRpar(5,Nnuc).EQ.0.0D0)GDRpar(5,Nnuc) = GW2
-        IF(GDRpar(6,Nnuc).EQ.0.0D0)GDRpar(6,Nnuc) = CS2
+        CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
+C       Transferring to EMPIRE arrays 
+        IF(GDRpar(1, Nnuc).EQ.0.0D0)GDRpar(1, Nnuc) = EG1
+        IF(GDRpar(2, Nnuc).EQ.0.0D0)GDRpar(2, Nnuc) = GW1
+        IF(GDRpar(3, Nnuc).EQ.0.0D0)GDRpar(3, Nnuc) = CS1
+        IF(GDRpar(4, Nnuc).EQ.0.0D0)GDRpar(4, Nnuc) = EG2
+        IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = GW2
+        IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = CS2
       ENDIF
       D1 = 5.46E-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
       D2 = 5.46E-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
@@ -138,41 +132,41 @@ C
 C-----GQR parameters due to: Z.Phys.A 315(1984)103 (width and peak c.s)
 C                            Rep. Prog. Phys. 44(1981)719 (energy)
 C
-      IF(GQRpar(1,Nnuc).EQ.0.0D0)THEN
-        GQRpar(1,Nnuc) = 63.0/A(Nnuc)**0.3333
-        GQRpar(2,Nnuc) = 6.11 - 0.012*A(Nnuc)
-        GQRpar(3,Nnuc) = 1.5E-4*Z(Nnuc)**2*GQRpar(1,Nnuc)**2/A(Nnuc)
-     &                   **0.33333/GQRpar(2,Nnuc)
+      IF (GQRpar(1,Nnuc).EQ.0.0D0) THEN
+         GQRpar(1,Nnuc) = 63.0/A(Nnuc)**0.3333
+         GQRpar(2,Nnuc) = 6.11 - 0.012*A(Nnuc)
+         GQRpar(3,Nnuc) = 1.5E-4*Z(Nnuc)**2*GQRpar(1,Nnuc)**2/A(Nnuc)
+     &                    **0.33333/GQRpar(2,Nnuc)
       ENDIF
       DE2 = 3.276E-7*GQRpar(3,Nnuc)*GQRpar(2,Nnuc)**2
 C
 C-----giant M1 resonance parameters due to: Bohr and Mottelson
 C
-      IF(GMRpar(1,Nnuc).EQ.0.0D0)THEN
-        GMRpar(1,Nnuc) = 41.0/A(Nnuc)**0.3333
-        GMRpar(2,Nnuc) = 4.0
-        GMRpar(3,Nnuc) = 1.0
+      IF (GMRpar(1,Nnuc).EQ.0.0D0) THEN
+         GMRpar(1,Nnuc) = 41.0/A(Nnuc)**0.3333
+         GMRpar(2,Nnuc) = 4.0
+         GMRpar(3,Nnuc) = 1.0
       ENDIF
       DM1 = 5.46E-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
 C
 C-----printout of gamma transition parameters
 C
-      IF(IOUt.GT.1)THEN
-        WRITE(8,1010)
- 1010   FORMAT(1X,' Gamma transitions parameters',//10X,'E1 ',11X,'E2 ',
-     &         11X,'M1 '/)
-        WRITE(8,1020)TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
-     &               GQRpar(1,Nnuc), GMRpar(1,Nnuc)
- 1020   FORMAT(1X,'TE',7X,F4.2,2(9X,F4.2),/,1X,'CE ',4X,F7.3,2(6X,F7.3),
-     &         /,1X,'E1 ',4X,F6.2,2(7X,F6.2))
-        WRITE(8,1030)GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
-     &               GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
- 1030   FORMAT(1X,'W1 ',4X,F6.2,2(7X,F6.2),/,1X,'D1',1X,F10.2,
-     &         2(3X,F10.2))
-        WRITE(8,1040)GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
- 1040   FORMAT(1X,'E2 ',4X,F6.2,/,1X,'W2 ',4X,F6.2,/,1X,'D2 ',F10.2)
-        WRITE(8,1050)
- 1050   FORMAT(1X,/,7X,'(1-TE)*Weiss. + TE*GMR',//)
+      IF (IOUt.GT.1) THEN
+         WRITE (8,99005)
+99005    FORMAT (1X,' Gamma transitions parameters',//10X,'E1 ',11X,
+     &           'E2 ',11X,'M1 '/)
+         WRITE (8,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
+     &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
+99010    FORMAT (1X,'TE',7X,F4.2,2(9X,F4.2),/,1X,'CE ',4X,F7.3,
+     &           2(6X,F7.3),/,1X,'E1 ',4X,F6.2,2(7X,F6.2))
+         WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
+     &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
+99015    FORMAT (1X,'W1 ',4X,F6.2,2(7X,F6.2),/,1X,'D1',1X,F10.2,
+     &           2(3X,F10.2))
+         WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
+99020    FORMAT (1X,'E2 ',4X,F6.2,/,1X,'W2 ',4X,F6.2,/,1X,'D2 ',F10.2)
+         WRITE (8,99025)
+99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR',//)
       ENDIF
       W1 = GDRpar(2,Nnuc)**2
       W2L = GDRpar(5,Nnuc)**2
@@ -182,35 +176,10 @@ C
       ED2 = GDRpar(4,Nnuc)**2
       EE2 = GQRpar(1,Nnuc)**2
       EM1 = GMRpar(1,Nnuc)**2
-      END SUBROUTINE ULM
+      END
  
-!---------------------------------------------------------------------------
  
       SUBROUTINE ULMDYN(Nnuc,Jcn,Exc)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8 :: A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, ED2, EE2, 
-     &          EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
-     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-C
-C Dummy arguments
-C
-      REAL*8 :: Exc
-      INTEGER :: Jcn, Nnuc
-C
-C Local variables
-C
-      REAL*8 :: a23, ac, damp, defexc, dt, esys1, esys2, ewsrs, t, tgscr
-      REAL*8, DIMENSION(2) :: e, g, s
-C
-C*** End of declarations rewritten by SPAG
-C
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:PPU*
@@ -235,6 +204,25 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C COMMON variables
+C
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Exc
+      INTEGER Jcn, Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION a23, ac, damp, defexc, dt, e(2), esys1, esys2, 
+     &                 ewsrs, g(2), s(2), t, tgscr
       a23 = A(Nnuc)**0.66667
       ac = 0.073*A(Nnuc) + 0.115*a23
       dt = 0.1
@@ -244,52 +232,52 @@ Ccc
       defexc = DEF(Jcn,Nnuc) - DEF(1,Nnuc)*(1. - damp)
 C-----GDR parameters according to Messina systematics
       esys2 = 50.0*A(Nnuc)**( - 0.232)
-      IF(ABS(defexc).GE.0.064D0)THEN
-        e(2) = esys2 + GDResh
-        esys1 = esys2*EXP(( - SIGN(1.D0,defexc)*0.946*defexc))
-        e(1) = esys1 + GDResh
-        g(1) = esys1*(0.283 - 0.263*defexc) + GDRwa1
-        g(2) = esys2*(0.35 - 0.14*defexc) + GDRwa2
-        s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
-        s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
+      IF (ABS(defexc).GE.0.064D0) THEN
+         e(2) = esys2 + GDResh
+         esys1 = esys2*EXP(( - SIGN(1.D0,defexc)*0.946*defexc))
+         e(1) = esys1 + GDResh
+         g(1) = esys1*(0.283 - 0.263*defexc) + GDRwa1
+         g(2) = esys2*(0.35 - 0.14*defexc) + GDRwa2
+         s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
+         s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
       ELSE
-        IF(EWSr1.NE.EWSr2)THEN
-          esys1 = esys2*EXP(( - SIGN(1.,0.065)*0.946*0.065))
-          g(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
-          g(2) = esys2*(0.35 - 0.14*0.065) + GDRwa2
-          s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
-          s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
-          ewsrs = (EWSr1*s(1)*g(1) + EWSr2*s(2)*g(2))
-     &            /(s(1)*g(1) + s(2)*g(2))
-        ELSE
-          ewsrs = EWSr1
-        ENDIF
-        esys1 = (49.336 + 7.34*defexc)*A(Nnuc)**( - 0.2409)
-        e(1) = esys1 + GDResh
-        g(1) = esys1*0.3 + GDRwa1
-        s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
-        s(2) = 0.
-        g(2) = 1.
+         IF (EWSr1.NE.EWSr2) THEN
+            esys1 = esys2*EXP(( - SIGN(1.,0.065)*0.946*0.065))
+            g(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
+            g(2) = esys2*(0.35 - 0.14*0.065) + GDRwa2
+            s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
+            s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
+            ewsrs = (EWSr1*s(1)*g(1) + EWSr2*s(2)*g(2))
+     &              /(s(1)*g(1) + s(2)*g(2))
+         ELSE
+            ewsrs = EWSr1
+         ENDIF
+         esys1 = (49.336 + 7.34*defexc)*A(Nnuc)**( - 0.2409)
+         e(1) = esys1 + GDResh
+         g(1) = esys1*0.3 + GDRwa1
+         s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
+         s(2) = 0.
+         g(2) = 1.
       ENDIF
-      IF(ABS(defexc).GT.0.064D0)THEN
-        IF(e(1) - e(2).LT.GDRspl)THEN
-          e(1) = e(1) - GDRspl
-        ELSE
-          e(2) = e(1)
-        ENDIF
+      IF (ABS(defexc).GT.0.064D0) THEN
+         IF (e(1) - e(2).LT.GDRspl) THEN
+            e(1) = e(1) - GDRspl
+         ELSE
+            e(2) = e(1)
+         ENDIF
       ENDIF
-      IF(e(1).LE.0.D0)THEN
-        WRITE(8,*)' GDR FIRST PEAK NEGATIVE!'
-        WRITE(8,*)' EXECUTION STOPPED!'
-        WRITE(8,*)'def=', defexc, ' esys2', esys2
-        STOP
+      IF (e(1).LE.0.D0) THEN
+         WRITE (8,*) ' GDR FIRST PEAK NEGATIVE!'
+         WRITE (8,*) ' EXECUTION STOPPED!'
+         WRITE (8,*) 'def=', defexc, ' esys2', esys2
+         STOP
       ENDIF
-      IF(Exc.LT.130.0D0)THEN
-        g(1) = g(1) + DIToro*Exc**1.6
-        g(2) = g(2) + DIToro*Exc**1.6
-      ELSEIF(DIToro.NE.0.0D0)THEN
-        g(1) = 11.0
-        g(2) = 11.0
+      IF (Exc.LT.130.0D0) THEN
+         g(1) = g(1) + DIToro*Exc**1.6
+         g(2) = g(2) + DIToro*Exc**1.6
+      ELSEIF (DIToro.NE.0.0D0) THEN
+         g(1) = 11.0
+         g(2) = 11.0
       ENDIF
       D1 = 5.46E-7*s(1)*g(1)**2
       D2 = 5.46E-7*s(2)*g(2)**2
@@ -297,109 +285,67 @@ C-----GDR parameters according to Messina systematics
       W2L = g(2)**2
       ED1 = e(1)**2
       ED2 = e(2)**2
-      IF(Nnuc.EQ.1.AND.Jcn.EQ.1)WRITE(8,*)
+      IF (Nnuc.EQ.1 .AND. Jcn.EQ.1) WRITE (8,*) 
      &'  J      DEF       E1        G1       S1         E2           G2 
      &       S2'
-      IF(Nnuc.EQ.1)WRITE(8,1010)Jcn, defexc, e(1), g(1), s(1), e(2), 
-     &                          g(2), s(2)
- 1010 FORMAT(1X,I3,7F10.4)
-      END SUBROUTINE ULMDYN
+      IF (Nnuc.EQ.1) WRITE (8,99005) Jcn, defexc, e(1), g(1), s(1), 
+     &                               e(2), g(2), s(2)
+99005 FORMAT (1X,I3,7F10.4)
+      END
  
-!---------------------------------------------------------------------------
  
-      FUNCTION E2(Eg)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8 :: A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, ED2, EE2, 
-     &          EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
-     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-C
-C Dummy arguments
-C
-      REAL*8 :: Eg
-      REAL*8 :: E2
-C
-C Local variables
-C
-      REAL*8 :: ed, gqr
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION FUNCTION E2(Eg)
 C
 C-----calculates transmission coefficients for E2 gammas /Eqs. 17,18,19/
 C
-      ed = Eg*Eg
-      gqr = 0.D0
-      IF(TE2.NE.0.D0)gqr = DE2*ed*ed/((ed - EE2)**2 + WE2*ed)
-      E2 = (1 - TE2)*CE2*3.54E-13*A4*ed*ed*Eg + TE2*gqr
-      END FUNCTION E2
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION XM1(Eg)
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, ED2, EE2, 
-     &          EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 C
 C Dummy arguments
 C
-      REAL*8 :: Eg
-      REAL*8 :: XM1
+      DOUBLE PRECISION Eg
 C
 C Local variables
 C
-      REAL*8 :: ed, gmr
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION ed, gqr
+      ed = Eg*Eg
+      gqr = 0.d0
+      IF (TE2.NE.0.D0) gqr = DE2*ed*ed/((ed - EE2)**2 + WE2*ed)
+      E2 = (1 - TE2)*CE2*3.54E-13*A4*ed*ed*Eg + TE2*gqr
+      END
+ 
+ 
+      DOUBLE PRECISION FUNCTION XM1(Eg)
 C
 C-----calculates transmission coefficients for M1 gammas /Eqs. 17,18,19/
-      ed = Eg*Eg
-      gmr = 0.D0
-      IF(TM1.NE.0.D0)gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)
-      XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
-      END FUNCTION XM1
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION E1(Nnuc,Z,A,Eg,T,Uex)
-      INCLUDE 'dimension.h'
-C
-C*** Start of declarations rewritten by SPAG
 C
 C COMMON variables
 C
-      REAL*8 :: A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, ED2, EE2, 
-     &          EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      INTEGER :: KEY_gdrgfl, KEY_shape
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-      COMMON /GSA   / KEY_shape, KEY_gdrgfl
 C
 C Dummy arguments
 C
-      REAL*8 :: Eg, T, Uex
-      INTEGER :: Nnuc
-      REAL*8, DIMENSION(0:NDNuc) :: A, Z
-      REAL*8 :: E1
+      DOUBLE PRECISION Eg
 C
 C Local variables
 C
-      REAL*8 :: ed, eexcitf, gdr, gred, pi, temperf
-      REAL*8 :: GAMMA_STRENGTH
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION ed, gmr
+      ed = Eg*Eg
+      gmr = 0.d0
+      IF (TM1.NE.0.D0) gmr = DM1*ed*ed/((ed - EM1)**2 + WM1*ed)
+      XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
+      END
+ 
+ 
+      DOUBLE PRECISION FUNCTION E1(Nnuc,Z,A,Eg,T,Uex)
 Ccc
 Ccc ********************************************************************
 Ccc *                                                         class:PPU*
@@ -437,6 +383,27 @@ Ccc *                                                                  *
 Ccc *                                                                  *
 Ccc ********************************************************************
 Ccc
+      INCLUDE 'dimension.h'
+C
+C COMMON variables
+C
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
+      INTEGER KEY_gdrgfl, KEY_shape
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
+     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+      COMMON /GSA   / KEY_shape, KEY_gdrgfl
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Eg, T, Uex
+      INTEGER Nnuc
+      DOUBLE PRECISION A(0:NDNUC), Z(0:NDNUC)
+C
+C Local variables
+C
+      DOUBLE PRECISION ed, eexcitf, gdr, gred, pi, temperf
+      DOUBLE PRECISION GAMMA_STRENGTH
       DATA pi/3.1415926D0/
 C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
@@ -448,53 +415,36 @@ C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
       gred = (ed + 39.478351*T**2)/ED1
 C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
 C     GRED = 1.
-      gdr = 0.D0
+      gdr = 0.d0
  
-      IF(KEY_shape.NE.0)THEN
-        temperf = T
-        eexcitf = Uex
+      IF (KEY_shape.NE.0) THEN
+         temperf = T
+         eexcitf = Uex
  
 C        init GDRGFL parametrs
-        CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
-        E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),eexcitf,temperf,
-     &       Eg,KEY_shape)
-        RETURN
+         CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
+         E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),eexcitf,temperf,
+     &        Eg,KEY_shape)
+         RETURN
       ENDIF
- 
-      IF(TE1.NE.0.0D0)THEN
-        gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
-     &        + 0.7*D1*39.478351*T**2*ed*Eg/ED1/ED1/SQRT(ED1)
+
+      IF (TE1.NE.0.0D0) THEN
+         gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
+     &         + 0.7*D1*39.478351*T**2*ed*Eg/ED1/ED1/SQRT(ED1)
 C-----setting GRED=1 removes energy dependence of the width
 C-----for the second hump of gener. Lorenzian
 C        GRED = 1.
-        IF(D2.NE.0.0D0)gdr = gdr + 
-     &                       D2*ed*ed*gred/((ed - ED2)**2 + W2*gred**2*
-     &                       ed) + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/
-     &                       SQRT(ED2)
+         IF (D2.NE.0.0D0) gdr = gdr + 
+     &                          D2*ed*ed*gred/((ed - ED2)**2 + W2*gred**
+     &                          2*ed)
+     &                          + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/
+     &                          SQRT(ED2)
       ENDIF
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
-      END FUNCTION E1
+      END
  
-!---------------------------------------------------------------------------
  
-      FUNCTION SIGQD(Ztar,Atar,Eg,Lqdfac)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: Atar, Eg, Lqdfac, Ztar
-      REAL*8 :: SIGQD
-C
-C Local variables
-C
-      REAL*8 :: bndeut, dfhi, dflo, efhi, eflo, fermifac, lqd0, sigmad, 
-     &          sigmad0
-      REAL*8, DIMENSION(5) :: fermicof
-      INTEGER :: i
-C
-C*** End of declarations rewritten by SPAG
-C
+      DOUBLE PRECISION FUNCTION SIGQD(Ztar,Atar,Eg,Lqdfac)
  
 Ccc
 Ccc ********************************************************************
@@ -523,31 +473,41 @@ Ccc *                                                                  *
 Ccc *                                                                  *
 Ccc ********************************************************************
 Ccc
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Atar, Eg, Lqdfac, Ztar
+C
+C Local variables
+C
+      DOUBLE PRECISION bndeut, dfhi, dflo, efhi, eflo, fermicof(5), 
+     &                 fermifac, lqd0, sigmad, sigmad0
+      INTEGER i
       DATA fermicof/9.3537E-9, -3.4762E-6, 4.1222E-4, -9.8343E-3, 
      &     8.3714E-2/
       DATA eflo/20.0/, dflo/ - 73.3/, efhi/140.0/, dfhi/ - 24.2/
       DATA sigmad0/61.2/, bndeut/2.224/, lqd0/6.5/
 C   First calculate the blocking factor
-      IF(Eg.LT.bndeut)THEN
-        fermifac = 0.0
-      ELSEIF(Eg.LT.eflo)THEN
-        fermifac = EXP(dflo/Eg)
-      ELSEIF(Eg.LT.efhi)THEN
-        fermifac = fermicof(1)
-        DO i = 2, 5
-          fermifac = fermicof(i) + fermifac*Eg
-        ENDDO
+      IF (Eg.LT.bndeut) THEN
+         fermifac = 0.0
+      ELSEIF (Eg.LT.eflo) THEN
+         fermifac = EXP(dflo/Eg)
+      ELSEIF (Eg.LT.efhi) THEN
+         fermifac = fermicof(1)
+         DO i = 2, 5
+            fermifac = fermicof(i) + fermifac*Eg
+         ENDDO
       ELSE
-        fermifac = EXP(dfhi/Eg)
+         fermifac = EXP(dfhi/Eg)
       ENDIF
 C  Then calculate the photoabsorption cross section
-      IF(Eg.LT.bndeut)THEN
-        SIGQD = 0.0
+      IF (Eg.LT.bndeut) THEN
+         SIGQD = 0.0
       ELSE
-        sigmad = sigmad0*(SQRT(Eg - bndeut)/Eg)**3
-        SIGQD = Lqdfac*lqd0*Ztar*(Atar - Ztar)*sigmad*fermifac/Atar
+         sigmad = sigmad0*(SQRT(Eg - bndeut)/Eg)**3
+         SIGQD = Lqdfac*lqd0*Ztar*(Atar - Ztar)*sigmad*fermifac/Atar
       ENDIF
-      END FUNCTION SIGQD
- 
- 
- 
+      END
+
+
+

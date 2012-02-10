@@ -1,45 +1,25 @@
-Ccc   * $Rev: 2526 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
- 
-      SUBROUTINE KUMAR_OMP(Amass,Az,Ex,Elab,Rcc,Vlib,Rlib,Alib)
-      IMPLICIT REAL*8(A - H,O - Z)
+Ccc   * $Rev: 2537 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+
+      SUBROUTINE KUMAR_OMP(AMASS,AZ,EX,ELAB,RCC,Vlib,Rlib,Alib)
+      IMPLICIT REAL*8 (A-H,O-Z)
 C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: Amass, Az, Elab, Ex, Rcc
-      REAL*8, DIMENSION(6) :: Alib, Rlib, Vlib
-C
-C Local variables
-C
-      REAL*8 :: ai, ajie, ajii, ajiref, ajre, ajref, ajrref, an1, an2, 
-     &          anr1, anr2, ar, at13, bar, beta, con, const, const1, 
-     &          const2, del, diff, dj, dve, dvef, dver, dverf, ebar, ec, 
-     &          ecm, ee, eref, erefc, esq, pi, r24i, r24ic, r24r, r24rc, 
-     &          ri, roi, ror, rr, v0, voi, vor
-      REAL*8, DIMENSION(200) :: aji, e
-      INTEGER :: i, j, n, no
-C
-C*** End of declarations rewritten by SPAG
-C
-C
-C     CALCULATION OF REAL AND IMAGINARY PARTS OF WOODS - SAXON FORM
+C     CALCULATION OF REAL AND IMAGINARY PARTS OF WOODS - SAXON FORM  
 C     OF POTENTIAL PARAMETERS FOR ALPHA-NUCLEUS  SYSTEMS -
 C     Ashok Kumar, S. Kailas, S. Rathi and K. Mahata, Nucl. Phys. A776 (2006) 105.
 C
 C     PLEASE SEND YOUR COMMENTS TO
 C     ashokum@barc.gov.in or kailas@barc.gov.in
 C
-C     REAL AND IMAGINARY POTENTIALS STARTING FROM SYSTEMATICS OF
+C     REAL AND IMAGINARY POTENTIALS STARTING FROM SYSTEMATICS OF 
 C     VOLUME INTEGRALS, RADIUS AND SLOPE OF POTENTIAL AT
 C     RADIUS CLOSE TO STRONG ABSORPTION RADIUS (2.4).
 C
 C     Mahaux, Ngo & Satchler; Nucl.,Phys. A446 (1986) 354
 C     FOR DISPERSION CORRECTION.
 C
-C     INPUT
+C     INPUT  
 C      AMASS : MASS OF TARGET NUCLEUS
 C      AZ : ATOMIC NO. OF TARGET NUCLEUS
 C      EX : 1ST EXCITED STATE ENERGY IN MeV OF TARGET NUCLEUS
@@ -47,142 +27,146 @@ C      ELAB : ALPHA ENERGY IN LAB. SYSTEM (MeV) (1 IN EACH CARD)
 C
 C     Dummy arguments
 C
- 
- 
-      pi = 4.*ATAN(1.)
- 
-      DO i = 1, 6
-        Alib(i) = 0.D0
-        Rlib(i) = 0.D0
-        Vlib(i) = 0.D0
-      ENDDO
- 
-      at13 = Amass**(1./3.)
+        REAL*8 EX, ELAB, RCC, AMASS, AZ
+        REAL*8 Alib(6), Rlib(6), Vlib(6)
+
+        DIMENSION AJI(200), E(200)
+
+        PI = 4. * ATAN(1.)
+
+        DO i=1,6
+          Alib(i)=0.d0
+          Rlib(i)=0.d0
+          Vlib(i)=0.d0
+        ENDDO
+
+        AT13 = AMASS ** (1./3.)
 C       BAR IS THE COULOMB BARRIER ENERGY
-      bar = 1.44*2.*Az/1.5/(4.**(1./3.) + at13)
+        BAR = 1.44 * 2. * AZ / 1.5 / (4.**(1./3.) + AT13)
 C       R2.4 SYSTEMATICS FOR REAL AND IMAGINARY PARTS OF POTENTIAL,
-C       AR AND AI ARE THE DIFFUSENESS PARAMETERS FOR
+C       AR AND AI ARE THE DIFFUSENESS PARAMETERS FOR 
 C       REAL AND IMAGINARY PARTS OF THE POTENTIAL
-      r24r = 1.35*at13 + 2.55
-      r24i = 1.35*at13 + 2.14
-      ar = 0.76
-      ai = 0.60
+        R24R = 1.35 * AT13 + 2.55
+        R24I = 1.35 * AT13 + 2.14
+        AR = 0.76
+        AI = 0.60
 C       EREF IS THE REFERENCE ENERGY FOR NORMALISATION IN MAKING
 C       DISPERSION RELATION CALCULATION
-      eref = 140.0
-      erefc = eref*Amass/(Amass + 4.)
+        EREF  = 140.0
+        EREFC = EREF*AMASS / (AMASS + 4.)
 C       AJREF IS THE VOLUME INTEGRAL AT THE REFERENCE ENERGY AND
 C       IS CALCULATED USING THE EMPIRICAL RELATION GIVEN  BELOW
-      ajref = (224. - 0.98*erefc/Amass**0.184 + 2.57*Az/at13)
-     &        *(1. + (2.05/at13))
-      ajref = -ajref
-C       IMAGINARY PART SYSTEMATICS
+        AJREF = (224. - 0.98*EREFC/AMASS**0.184 + 2.57 * AZ/AT13)
+     1             * (1. + (2.05 / AT13))
+        AJREF = - AJREF
+C       IMAGINARY PART SYSTEMATICS 
 C       (REF: A. Shridahar et al.; Phys. Rev. C30 (1984) 1760.)
-      ajii = 34.4*(1. + 7.1/at13)
+        AJII = 34.4 * (1. + 7.1 / AT13)
 C       CALCULATION OF RADIUS PARAMETERS FOR REAL AND IMAGINARY
 C       POTENTIALS BY FITTING R2.4 AND VOLUME INTEGRAL VALUES
 C       AT E = 90 MEV
-      const = pi/(3.*Amass)
-      const1 = pi*ar
-      const2 = pi*ai
-      ec = 90.*Amass/(Amass + 4.)
-      beta = 0.1
-      ebar = bar + Ex
-      ajrref = (224. - 0.98*ec/Amass**0.184 + 2.57*Az/at13)
-     &         *(1. + (2.05/at13))
-      ajiref = ajii*(1. - EXP( - (ec-ebar)*beta))
- 
-      ror = 1.0
-      j = 0
-   10 rr = ror*at13
-      vor = ajrref/const/rr**3./(1 + (const1/rr)**2.)
-      r24rc = rr + ar*LOG((vor - 2.4)/2.4)
-      diff = r24rc - r24r
-      IF(j.LE.200)THEN
-        IF(ABS(diff).GT.0.05)THEN
-          j = j + 1
-          ror = ror + 0.005
-          GOTO 10
+        CONST = PI / (3. * AMASS)
+        CONST1 = PI*AR
+        CONST2 = PI*AI
+        EC = 90.*AMASS/(AMASS+4.)
+        BETA = 0.1
+        EBAR = BAR + EX
+        AJRREF =  (224. - 0.98*EC / AMASS**0.184 + 2.57 * AZ / AT13)
+     1          * (1. + (2.05 / AT13))
+        AJIREF = AJII * (1. - EXP( - (EC - EBAR) * BETA))
+
+        ROR = 1.0
+        J = 0
+ 551    RR = ROR * AT13
+        VOR = AJRREF / CONST / RR**3. / (1 + (CONST1 / RR)**2.)
+        R24RC = RR + AR * LOG ((VOR - 2.4) / 2.4)
+        DIFF = R24RC - R24R
+        IF (J .GT. 200) GO TO 552
+        IF (ABS(DIFF) .LE. 0.05) GO TO 552
+        J = J + 1
+        ROR = ROR + 0.005
+        GO TO 551
+ 552    CONTINUE
+
+        ROI = 1.2
+        J = 0
+ 557    RI = ROI * AT13
+        VOI = AJIREF / CONST/RI**3. / (1. + (CONST2 / RI)**2.)
+        R24IC = RI + AI * LOG ((VOI - 2.4)/2.4)
+        DIFF = R24IC - R24I
+        IF (J .GT. 200) GO TO 558
+        IF (ABS(DIFF) .LE. 0.05) GO TO 558
+        J = J + 1
+        ROI = ROI + 0.005
+        GO TO 557
+ 558    CONTINUE
+
+        CON = 35.5 - 6. *  AT13
+        DEL = CON + BAR
+        ECM = ELAB * AMASS / (AMASS + 4.)
+        IF (ECM .LT. EX) ECM = EX
+        ESQ = (ECM - EX) * (ECM - EX)
+        AJIE = AJII * ESQ / (ESQ + (DEL * DEL))
+        IF (ELAB .GT. 140.0) THEN
+         AJRE = (224. - 0.98*ECM / AMASS**0.184 + 2.57 * AZ / AT13)*
+     1          (1. + (2.05 / AT13))
+         GO TO 820
         ENDIF
-      ENDIF
- 
-      roi = 1.2
-      j = 0
-   20 ri = roi*at13
-      voi = ajiref/const/ri**3./(1. + (const2/ri)**2.)
-      r24ic = ri + ai*LOG((voi - 2.4)/2.4)
-      diff = r24ic - r24i
-      IF(j.LE.200)THEN
-        IF(ABS(diff).GT.0.05)THEN
-          j = j + 1
-          roi = roi + 0.005
-          GOTO 20
-        ENDIF
-      ENDIF
- 
-      con = 35.5 - 6.*at13
-      del = con + bar
-      ecm = Elab*Amass/(Amass + 4.)
-      IF(ecm.LT.Ex)ecm = Ex
-      esq = (ecm - Ex)*(ecm - Ex)
-      ajie = ajii*esq/(esq + (del*del))
-      IF(Elab.GT.140.0)THEN
-        ajre = (224. - 0.98*ecm/Amass**0.184 + 2.57*Az/at13)
-     &         *(1. + (2.05/at13))
-        GOTO 30
-      ENDIF
- 
-      n = 0
-      ee = Ex
-      DO i = 1, 50
-        n = n + 1
-        e(i) = ee
+
+        N = 0
+        EE = EX
+        DO  I = 1 , 50
+          N = N + 1
+          E(I) = EE
 C         ASSUME THE DISPERSION CORRECTION TO VANISH AT EREF.
-        IF(e(i).GT.140.0)EXIT
-        esq = (e(i) - Ex)*(e(i) - Ex)
-        aji(i) = ajii*esq/(esq + (del*del))
-        ee = ee + 3.00001
-      ENDDO
-      no = n
- 
-      dvef = 0.
-      dverf = 0.
-      DO j = 1, no - 3
-        dj = e(j + 1) - e(j)
-        an1 = (Elab - e(j))*LOG(ABS((Elab-e(j))/dj))
-        an2 = (Elab - e(j + 1))*LOG(ABS((Elab-e(j+1))/dj))
-        dve = ((aji(j+1) - aji(j))/dj)*(an1 - an2)/pi
-        anr1 = (eref - e(j))*LOG(ABS((eref-e(j))/dj))
-        anr2 = (eref - e(j + 1))*LOG(ABS((eref-e(j+1))/dj))
-        dver = ((aji(j+1) - aji(j))/dj)*(anr1 - anr2)/pi
-        dvef = dvef + dve
-        dverf = dverf + dver
-      ENDDO
-      v0 = ajref - dverf
-      ajre = dvef + v0
-      ajre = -ajre
-   30 ror = rr/at13
-      roi = ri/at13
-      vor = ajre/const/rr**3./(1 + (const1/rr)**2.)
-      voi = ajie/const/ri**3./(1. + (const2/ri)**2.)
- 
-      WRITE(102,1010)Elab, vor, ror, ar, voi, roi, ai, ajre, ajie, Az, 
-     &               Amass, Ex
+          IF ( E(I) .GT. 140.0) GO TO 155
+          ESQ = (E(I) - EX) * (E(I) - EX)
+          AJI(I) = AJII* ESQ / (ESQ + (DEL * DEL))
+          EE = EE + 3.00001
+        END DO
+ 155    CONTINUE
+        NO= N
+
+        DVEF = 0.
+        DVERF = 0.
+        DO J = 1 , NO - 3
+         DJ = E(J+1) - E(J)
+         AN1 = (ELAB - E(J)) * LOG(ABS((ELAB - E(J)) / DJ))
+         AN2 = (ELAB - E(J+1)) * LOG(ABS((ELAB - E(J+1)) / DJ))
+         DVE = ((AJI(J+1) - AJI(J)) / DJ) * (AN1 - AN2) / PI
+         ANR1 = (EREF - E(J)) * LOG(ABS((EREF - E(J)) / DJ))
+         ANR2 = (EREF - E(J+1)) * LOG(ABS((EREF - E(J+1)) / DJ))
+         DVER = ((AJI(J+1) - AJI(J)) / DJ) * (ANR1 - ANR2) / PI
+         DVEF = DVEF + DVE
+         DVERF = DVERF + DVER
+        END DO
+        V0 = AJREF - DVERF
+        AJRE = DVEF + V0
+        AJRE = -AJRE
+ 820    CONTINUE
+        ROR = RR / AT13
+        ROI = RI / AT13
+        VOR = AJRE / CONST / RR**3. / (1 + (CONST1 / RR)**2.)
+ 2543   CONTINUE
+        VOI = AJIE / CONST / RI**3. / ( 1. + (CONST2 / RI)**2.)
+
+        WRITE (102,75) ELAB, VOR, ROR, AR, VOI, ROI, AI, AJRE, AJIE,
+     1               AZ, AMASS, EX
 C       OUTPUTS: VOR, ROR, AR, VOI, ROI, AI
-C
-      Vlib(1) = vor
-      Alib(1) = ar
-      Rlib(1) = ror
-      Vlib(2) = voi
-      Alib(2) = ai
-      Rlib(2) = roi
- 
-      Rcc = 1.3D0
- 
- 1010 FORMAT(2x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,7x,
-     &       f9.3,1x,f9.3,7x,f9.3,1x,f9.3,5x,F9.3)
+C       
+        vlib(1) = VOR
+        alib(1) = AR
+        rlib(1) = ROR
+        vlib(2) = VOI
+        alib(2) = AI
+        rlib(2) = ROI
+
+        RCC = 1.3d0
+
+  75    FORMAT (2x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,1x,f9.3,
+     1          7x,f9.3,1x,f9.3,7x,f9.3,1x,f9.3,5x,F9.3)
       RETURN
-      END SUBROUTINE KUMAR_OMP
- 
- 
- 
+      END
+
+
+

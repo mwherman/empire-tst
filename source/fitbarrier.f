@@ -1,371 +1,370 @@
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-09 21:34:11 +0100 (Do, 09 Feb 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
- 
-      SUBROUTINE WKBFIS(Ee,Nnuc,Tfdd,Tdirp,Tabsp)
+
+      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
+C
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(2*NFParab) :: EINters
-      REAL*8, DIMENSION(NFIsbarpnt) :: EPS_1d, VDEf_1d
-      REAL*8 :: FAZa2
-      REAL*8, DIMENSION(NFParab) :: HO, VBArex
-      INTEGER, DIMENSION(0:2*NFParab) :: IIExtr
-      INTEGER :: K, NEXtr, NPOints
-      REAL*8 :: SMIu, UEXc
-      REAL*8, DIMENSION(NFParab) :: VHEigth, VWIdth
-      REAL*8, DIMENSION(NFParab + 1) :: VPOs
-      COMMON /INTER / EINters
-      COMMON /NUMBAR/ EPS_1d, VDEf_1d, NPOints, IIExtr, NEXtr
-      COMMON /NUMBAR1/ VHEigth, VWIdth, VPOs
-      COMMON /VARGS / UEXc, SMIu, K
-      COMMON /VBAR  / VBArex, HO, FAZa2
-C
-C Dummy arguments
-C
-      REAL*8 :: Ee
-      INTEGER :: Nnuc
-      REAL*8, DIMENSION(NFParab,NFParab) :: Tabsp, Tdirp
-      REAL*8, DIMENSION(NFParab) :: Tfdd
-C
-C Local variables
-C
-      REAL*8 :: abserr, epsa, epsb, phase_sub
-      REAL*8 :: DCOS, DEXP, DSQRT
-      REAL*8, DIMENSION(NFParab) :: delt, deltt, exm2del, exp2del, 
-     &                              phasep, phase_h
-      LOGICAL :: discrete
-      REAL*8 :: dmom, dnum, rmiu, tdr, w
-      REAL*8, EXTERNAL :: FMOMENT1, GAUSSLEGENDRE41
-      INTEGER :: ih, ih1, iphas_opt, iw, iw1, j, kh, kw
-      INTEGER :: INT
-      REAL*8, DIMENSION(2*NFParab) :: phase
-      REAL :: SNGL
-C
-C*** End of declarations rewritten by SPAG
-C
-C
-      rmiu = 0.054D0*A(Nnuc)**(5.D0/3.D0)
-      SMIu = DSQRT(0.5D0*rmiu)
-      UEXc = Ee
+
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
+      COMMON /VARGS/ Uexc, Smiu, K
+
+
+      COMMON /VBAR  / vbarex, ho,faza2
+      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
+
+      COMMON/INTER/  einters
+      REAL*8 Einters(2*NFPARAB)
+
+      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
+      DOUBLE PRECISION ee,uexc
+      DOUBLE PRECISION phase(2*NFPARAB),phase_h(NFPARAB)
+
+      DOUBLE PRECISION dmom,dnum, rmiu, Smiu, W
+
+      DOUBLE PRECISION exp2del(NFPARAB), exm2del(NFPARAB)
+      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
+      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),deltt(NFPARAB),
+     &                 tfdd(NFPARAB), tdr
+
+      INTEGER j,k,kh,kw,iphas_opt
+
+ 
+      REAL*8  abserr, epsa, epsb, phase_sub, faza2
+      LOGICAL discrete
+
+C     FUNCTIONS
+      REAL*8   Fmoment1,  GaussLegendre41
+      EXTERNAL Fmoment1
+
+      rmiu = 0.054d0 * A(Nnuc) * * (5.d0/3.d0)
+      smiu = DSQRT(0.5d0 * rmiu)
+      uexc = Ee
       discrete = .TRUE.
- 
-      DO K = 1, 2*NRBar
-        phase(K) = 0.D0
+
+      DO k = 1, 2 * NRBar
+        phase(k) = 0.d0
       ENDDO
-C-----reasigning humps and wells
-      DO kh = 1, NRBar, 2
-        VHEigth(kh) = VBArex(INT(kh/2) + 1)
-        VWIdth(kh) = H(1,INT(kh/2) + 1)
+c-----reasigning humps and wells
+      DO kh = 1, NRBar,2
+         Vheigth(kh) = VBArex(int(kh/2)+1)
+         Vwidth(kh) = h(1,int(kh/2)+1)
       ENDDO
- 
-      DO kw = 2, NRBar, 2
-        VHEigth(kw) = VBArex(NRHump + INT(kw/2))
-        VWIdth(kw) = H(1,NRHump + INT(kw/2))
+
+      DO kw = 2, NRBar,2
+         Vheigth(kw) = VBArex(NRHump+int(kw/2))
+         Vwidth(kw) = h(1,NRHump+int(kw/2))
       ENDDO
- 
+     
       IF(FISbar(Nnuc).EQ.3.)THEN
-        DO j = 1, NEXtr
-          VPOs(j) = DEFfis(j)
-        ENDDO
-        VPOs(NEXtr + 1) = 100.D0
+         DO j = 1, nextr
+            Vpos(j) = DEFfis(j)
+         ENDDO
+         Vpos(nextr+1) = 100.d0 
       ENDIF
- 
+      
 C---- Momentum integrals are calculated
-      iphas_opt = 0
-                   ! phases calculated on decoupled parabolas
- 
-      IF(FISbar(Nnuc).EQ.3.OR.FISopt(Nnuc).GT.0)iphas_opt = 1
+      iphas_opt=0  ! phases calculated on decoupled parabolas
+
+      IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) iphas_opt=1
       IF(FISbar(Nnuc).EQ.3)THEN
-        CALL PHASES(Ee,phase,phase_h,Nnuc,iphas_opt,discrete)
+        CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
       ELSE
-        CALL PHASES_PARAB(Ee,Nnuc,phase,discrete)
+        CALL PHASES_Parab(ee, nnuc, phase, discrete)
       ENDIF
- 
+
 C-----Calculating transmission from phases
-      DO ih = 1, NRBar, 2
-        Tfdd(ih/2 + 1) = 1.D0/(1.D0 + DEXP(2.D0*phase(ih)))
+      DO ih = 1, nrbar, 2
+         TFDd(ih/2 + 1) = 1.d0/
+     &                    (1.d0 + DEXP(2.d0 *  phase(ih)))
       ENDDO
- 
-      IF(FISopt(Nnuc).EQ.0)RETURN
- 
+
+      IF(FISopt(Nnuc).EQ.0)RETURN  
+
 C-------Imaginary potential strengths
-      w = 0.D0
-      DO iw = 2, NRBar, 2
-        phasep(iw/2 + 1) = phase(iw)
+      w = 0.d0
+      DO iw = 2, nrbar, 2
+         phasep(iw/2 + 1) = phase(iw)
       ENDDO
- 
-      DO iw = 2, NRBar, 2
-        deltt(iw) = 0.D0
-        dmom = MAX(VHEigth(iw - 1),VHEigth(iw + 1))
- 
-        w = WIMag(iw/2,1) + WIMag(iw/2,2)*(Ee - VHEigth(iw))
-     &      + WIMag(iw/2,3)*DEXP(Ee - dmom)
- 
-        IF(Ee.LE.VHEigth(iw))w = 0.D0
-        IF(Ee.GT.dmom.AND.w.LT.1.D0)w = w + (Ee - dmom)*(1.D0 - w)/0.1
-        IF(Ee.LT.VHEigth(iw))phase(iw) = 0.D0
-        deltt(iw) = w*phase(iw)
+
+      DO iw = 2, nrbar,2
+         deltt(iw) = 0.d0
+         dmom = max(Vheigth(iw-1),Vheigth(iw+1))
+
+         w = wimag(iw/2,1)+wimag(iw/2,2)*(Ee - Vheigth(iw))+
+     &             wimag(iw/2,3)* dexp(Ee - dmom)
+
+         if(Ee.le. Vheigth(iw)) W = 0.d0 
+         if(Ee.gt. dmom.and.w.lt.1.d0) W = w+(Ee-dmom)*(1.d0-w)/0.1   
+         if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
+         deltt(iw) = W * phase(iw)
       ENDDO
- 
-      DO iw = 2, NRBar, 2
-        delt(iw/2 + 1) = (1.D0)*deltt(iw)
+
+      DO iw = 2, nrbar, 2
+         delt(iw/2 + 1) =(1.d0)* deltt(iw)
       ENDDO
       DO iw = 2, NRWel + 1
-        IF(2.D0*delt(iw).GT.EXPmax)delt(iw) = EXPmax/2.D0
-        exp2del(iw) = DEXP(2.D0*delt(iw))
-        exm2del(iw) = DEXP( - 2.D0*delt(iw))
-        IF(delt(iw).EQ.0.D0)exp2del(iw) = 1.D0
-        IF(delt(iw).EQ.0.D0)exm2del(iw) = 1.D0
+         IF(2.d0*delt(iw).GT.EXPmax)delt(iw)=EXPmax/2.d0
+         exp2del(iw) = dexp( 2.d0*delt(iw))
+         exm2del(iw) = dexp(-2.d0*delt(iw))
+         if (delt(iw).eq.0.d0) exp2del(iw) = 1.d0
+         if (delt(iw).eq.0.d0) exm2del(iw) = 1.d0
+      ENDDO   
+c-----Direct transmission coefficients
+      DO ih = 1, nrhump
+         DO ih1 = 1, nrhump
+            tdirp(ih, ih1) = 0.d0
+            tdirp(ih1, ih) = 0.d0
+            IF(ih.EQ.ih1) tdirp(ih, ih1) = tfdd(ih)
+         ENDDO
       ENDDO
-C-----Direct transmission coefficients
-      DO ih = 1, NRHump
-        DO ih1 = 1, NRHump
-          Tdirp(ih,ih1) = 0.D0
-          Tdirp(ih1,ih) = 0.D0
-          IF(ih.EQ.ih1)Tdirp(ih,ih1) = Tfdd(ih)
-        ENDDO
-      ENDDO
-C-----subwell excitation energy
-      IF(NRWel.EQ.1.AND.Ee.LT.VHEigth(2))THEN
-        Tabsp(1,2) = 0.D0
-        IF(FISbar(Nnuc).EQ.3)THEN
-          epsa = VPOs(1) - SQRT(VHEigth(1) - Ee)/(SMIu*VWIdth(1))
-          epsb = VPOs(3) + SQRT(VHEigth(3) - Ee)/(SMIu*VWIdth(3))
-        ELSE
-          epsa = EINters(1)
-          epsb = EINters(6)
-        ENDIF
-        dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-        IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.03)THEN
-          WRITE(*,*)' WARNING: For extremum ', K, 
-     &              ' phase integral is not accurate (', 
-     &              SNGL(abserr/dmom*100.D0), ' %)'
-        ENDIF
-        phase_sub = MIN(dmom,50.D0)
-        Tdirp(1,2) = 1.D0/(1.D0 + DEXP(2.D0*phase_sub))
+C-----subwell excitation energy      
+      IF(NRWel.EQ.1.AND.Ee.LT.Vheigth(2)) THEN
+         tabsp(1,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(6)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,2) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
       ENDIF
-      IF(NRWel.EQ.2.AND.Ee.LT.VHEigth(2).AND.Ee.LT.VHEigth(4))THEN
-        Tabsp(1,2) = 0.D0
-        Tabsp(1,3) = 0.D0
-        Tabsp(2,3) = 0.D0
-        Tabsp(3,2) = 0.D0
-        Tdirp(1,2) = 0.D0
-        Tdirp(2,1) = 0.D0
-        Tdirp(2,3) = 0.D0
-        Tdirp(3,2) = 0.D0
-        IF(FISbar(Nnuc).EQ.3)THEN
-          epsa = VPOs(1) - SQRT(VHEigth(1) - Ee)/(SMIu*VWIdth(1))
-          epsb = VPOs(5) + SQRT(VHEigth(5) - Ee)/(SMIu*VWIdth(5))
-        ELSE
-          epsa = EINters(1)
-          epsb = EINters(10)
-        ENDIF
-        dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-        IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.03)THEN
-          WRITE(*,*)' WARNING: For extremum ', K, 
-     &              ' phase integral is not accurate (', 
-     &              SNGL(abserr/dmom*100.D0), ' %)'
-        ENDIF
-        phase_sub = MIN(dmom,50.D0)
-        Tdirp(1,3) = 1.D0/(1.D0 + DEXP(2.D0*phase_sub))
-        RETURN
+      IF(NRWel.EQ.2.AND.Ee.LT.Vheigth(2).AND.Ee.LT.Vheigth(4)) THEN
+         tabsp(1,2)=0.d0
+         tabsp(1,3)=0.d0
+         tabsp(2,3)=0.d0
+         tabsp(3,2)=0.d0
+         tdirp(1,2)=0.d0
+         tdirp(2,1)=0.d0
+         tdirp(2,3)=0.d0
+         tdirp(3,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(10)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         RETURN
       ENDIF
-      IF(NRWel.EQ.2.AND.Ee.GT.VHEigth(2).AND.Ee.LT.VHEigth(4))THEN
-        Tabsp(1,3) = 0.D0
-        Tabsp(3,2) = 0.D0
-        Tabsp(2,3) = 0.D0
-        Tdirp(1,2) = 0.D0
-        IF(FISbar(Nnuc).EQ.3)THEN
-          epsa = VPOs(3) - SQRT(VHEigth(3) - Ee)/(SMIu*VWIdth(3))
-          epsb = VPOs(5) + SQRT(VHEigth(5) - Ee)/(SMIu*VWIdth(5))
-        ELSE
-          epsa = EINters(5)
-          epsb = EINters(10)
-        ENDIF
-        dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-        IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.03)THEN
-          WRITE(*,*)' WARNING: For extremum ', K, 
-     &              ' phase integral is not accurate (', 
-     &              SNGL(abserr/dmom*100.D0), ' %)'
-        ENDIF
-        phase_sub = MIN(dmom,50.D0)
-        Tdirp(2,3) = 1.D0/(1.D0 + DEXP(2.D0*phase_sub))
-        Tdirp(3,2) = Tdirp(2,3)
-        dmom = (1.D0 - Tdirp(1,1))*(1.D0 - Tdirp(2,3))
-        Tdirp(1,3) = Tdirp(1,1)*Tdirp(2,3)
-     &               /(exp2del(2) + 2.D0*DSQRT(dmom)
-     &               *DCOS(2.D0*phasep(2)) + dmom*exm2del(2))
-        Tabsp(1,2) = Tdirp(1,3)
-     &               *(exp2del(2) - (1.D0 - Tdirp(2,3))*exm2del(2)
-     &               - Tdirp(2,3))/Tdirp(2,3)
-        RETURN
+      IF(NRWel.EQ.2.AND.Ee.GT.Vheigth(2).AND.Ee.LT.Vheigth(4)) THEN
+         tabsp(1,3)=0.d0
+         tabsp(3,2)=0.d0
+         tabsp(2,3)=0.d0
+         tdirp(1,2)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3))
+            epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
+         ELSE
+            epsa=einters(5)
+            epsb=einters(10)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(2,3) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         tdirp(3,2)=tdirp(2,3)
+         dmom = (1.d0 - tdirp(1,1)) * (1.d0 - tdirp(2,3))
+         tdirp(1,3) = tdirp(1,1) *  tdirp(2,3)/
+     &                (exp2del(2) + 2.d0 * dSQRT(dmom) *
+     &                dCOS(2.d0 * phasep(2)) +
+     &                dmom * exm2del(2))
+         tabsp(1,2) = tdirp(1,3) * (exp2del(2)
+     &                           - (1.d0 - tdirp(2,3)) *
+     &                           exm2del(2) -
+     &                           tdirp(2,3)) /tdirp(2,3) 
+         RETURN
       ENDIF
-      IF(NRWel.EQ.2.AND.Ee.LT.VHEigth(2).AND.Ee.GT.VHEigth(4))THEN
-        Tabsp(1,2) = 0.D0
-        Tabsp(3,2) = 0.D0
-        Tabsp(2,3) = 0.D0
-        Tdirp(2,3) = 0.D0
-        IF(FISbar(Nnuc).EQ.3)THEN
-          epsa = VPOs(1) - SQRT(VHEigth(1) - Ee)/(SMIu*VWIdth(1))
-          epsb = VPOs(3) + SQRT(VHEigth(3) - Ee)/(SMIu*VWIdth(3))
-        ELSE
-          epsa = EINters(1)
-          epsb = EINters(6)
-        ENDIF
-        dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-        IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.03)THEN
-          WRITE(*,*)' WARNING: For extremum ', K, 
-     &              ' phase integral is not accurate (', 
-     &              SNGL(abserr/dmom*100.D0), ' %)'
-        ENDIF
-        phase_sub = MIN(dmom,50.D0)
-        Tdirp(1,2) = 1.D0/(1.D0 + DEXP(2.D0*phase_sub))
-        Tdirp(2,1) = Tdirp(1,2)
- 
-        dmom = (1.D0 - Tdirp(1,2))*(1.D0 - Tdirp(3,3))
-        Tdirp(1,3) = Tdirp(1,2)*Tdirp(3,3)
-     &               /(exp2del(3) + 2.D0*DSQRT(dmom)
-     &               *DCOS(2.D0*phasep(3)) + dmom*exm2del(3))
-        Tabsp(1,3) = Tdirp(1,3)
-     &               *(exp2del(3) - (1.D0 - Tdirp(3,3))*exm2del(3)
-     &               - Tdirp(3,3))/Tdirp(3,3)
-        RETURN
+      IF(NRWel.EQ.2.AND.Ee.LT.Vheigth(2).AND.Ee.GT.Vheigth(4)) THEN
+         tabsp(1,2)=0.d0
+         tabsp(3,2)=0.d0
+         tabsp(2,3)=0.d0
+         tdirp(2,3)=0.d0
+         IF(FISbar(Nnuc).EQ.3)THEN
+            epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
+            epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
+         ELSE
+            epsa=einters(1)
+            epsb=einters(6)
+         ENDIF
+         dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+         IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
+            write(*,*) ' WARNING: For extremum ',k,
+     &           ' phase integral is not accurate (',
+     &           sngl(abserr/dmom*100.d0),' %)'
+         ENDIF
+         phase_sub = min(dmom,50.d0)
+         tdirp(1,2) = 1.d0/(1.d0 + DEXP(2.d0 *  phase_sub))
+         tdirp(2,1)=tdirp(1,2)
+
+         dmom = (1.d0 - tdirp(1,2)) * (1.d0 - tdirp(3,3))
+         tdirp(1,3) = tdirp(1,2) *  tdirp(3,3)/
+     &                (exp2del(3) + 2.d0 * dSQRT(dmom) *
+     &                dCOS(2.d0 * phasep(3)) +
+     &                dmom * exm2del(3))
+         tabsp(1,3) = tdirp(1,3) * (exp2del(3)
+     &                           - (1.d0 - tdirp(3,3)) *
+     &                           exm2del(3) -
+     &                           tdirp(3,3)) /tdirp(3,3)       
+         RETURN
       ENDIF
- 
-C-----direct forward
-      DO ih1 = NRHump, 2, -1
-        DO ih = ih1 - 1, 1, -1
-          dmom = (1.D0 - Tdirp(ih,ih))*(1.D0 - Tdirp(ih + 1,ih1))
-          dnum = exp2del(ih + 1) + 2.D0*DSQRT(dmom)
-     &           *DCOS(2.D0*phasep(ih + 1)) + dmom*exm2del(ih + 1)
- 
-          IF(dnum.EQ.0.D0)THEN
-            Tdirp(ih,ih1) = 0.D0
-          ELSE
-            Tdirp(ih,ih1) = Tdirp(ih,ih)*Tdirp(ih + 1,ih1)/dnum
-          ENDIF
-        ENDDO
+
+c-----direct forward
+      DO ih1 = nrhump, 2, -1
+         DO ih = ih1 - 1, 1, -1
+            dmom = (1.d0 - tdirp(ih, ih)) *
+     &             (1.d0 - tdirp(ih+1, ih1))
+            dnum= exp2del(ih + 1) + 2.d0*  dSQRT(dmom) *
+     &           dCOS(2.d0 * phasep(ih + 1)) +
+     &           dmom* exm2del(ih + 1)
+            
+            IF(dnum.eq.0.d0)THEN
+               tdirp(ih, ih1) = 0.d0
+            ELSE
+               tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                          dnum
+            ENDIF   
+         ENDDO
       ENDDO
- 
-C-----direct backward
-      DO ih1 = 1, NRHump - 1
-        DO ih = ih1 + 1, NRHump - 1
-          dmom = (1.D0 - Tdirp(ih,ih))*(1.D0 - Tdirp(ih + 1,ih1))
-          Tdirp(ih,ih1) = Tdirp(ih,ih)*Tdirp(ih + 1,ih1)
-     &                    /(exp2del(ih + 1) + 2.D0*DSQRT(dmom)
-     &                    *DCOS(2.D0*phasep(ih+1))
-     &                    + dmom*exm2del(ih + 1))
-        ENDDO
+
+c-----direct backward   
+      DO ih1 = 1, nrhump - 1
+         DO ih = ih1 + 1, nrhump - 1
+                 dmom = (1.d0 - tdirp(ih, ih)) *
+     &                  (1.d0 - tdirp(ih+1, ih1))
+                 tdirp(ih, ih1) = tdirp(ih, ih) *  tdirp(ih+1, ih1)/
+     &                         (exp2del(ih + 1) + 2.d0 * dSQRT(dmom) *
+     &                          dCOS(2.d0 * phasep(ih + 1)) +
+     &                          dmom * exm2del(ih + 1))
+         ENDDO
       ENDDO
- 
-C--------Absorption coefficients
-C--------forward
-      DO iw = 1, NRWel
-        DO iw1 = iw + 1, NRWel + 1
-          IF(delt(iw1).GT.0.D0)THEN
-            dmom = (1.D0 - Tdirp(iw,iw1 - 1))*(1.D0 - Tdirp(iw1,NRHump))
-            tdr = Tdirp(iw,iw1 - 1)*Tdirp(iw1,NRHump)
-     &            /(exp2del(iw1) + 2.D0*DSQRT(dmom)
-     &            *DCOS(2.D0*phasep(iw1)) + dmom*exm2del(iw1))
- 
-            Tabsp(iw,iw1) = tdr*(exp2del(iw1) - (1.D0 - Tdirp(iw1,NRHump
-     &                      ))*exm2del(iw1) - Tdirp(iw1,NRHump))
-     &                      /Tdirp(iw1,NRHump)
-          ELSE
-            Tabsp(iw,iw1) = 0.D0
-          ENDIF
-        ENDDO
-      ENDDO
-C------backward
-      DO iw = NRWel + 1, 3, -1
-        DO iw1 = iw - 1, 2, -1
-          IF(delt(iw1).GT.0.D0)THEN
-            dmom = (1.D0 - Tdirp(iw - 1,iw1))*(1.D0 - Tdirp(iw1 - 1,1))
-            tdr = Tdirp(iw - 1,iw1)*Tdirp(iw1 - 1,1)
-     &            /(exp2del(iw1) + 2.D0*DSQRT(dmom)
-     &            *DCOS(2.D0*phasep(iw1)) + dmom*exm2del(iw1))
-            Tabsp(iw,iw1) = tdr*(exp2del(iw1) - (1.D0 - Tdirp(iw1-1,1))
-     &                      *exm2del(iw1) - Tdirp(iw1 - 1,1))
-     &                      /Tdirp(iw1 - 1,1)
-          ELSE
-            Tabsp(iw,iw1) = 0.D0
-          ENDIF
-        ENDDO
-      ENDDO
- 
+
+c--------Absorption coefficients
+c--------forward
+       DO iw = 1, nrwel
+          DO iw1 = iw + 1, nrwel + 1
+             IF(delt( iw1).GT.0.D0) THEN
+                dmom = (1.d0 - tdirp(iw, iw1 - 1)) *
+     &                 (1.d0 - tdirp(iw1, nrhump))
+                tdr  = tdirp(iw, iw1 - 1) *  tdirp(iw1, nrhump)/
+     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(2.d0 * phasep(iw1)) +
+     &                  dmom * exm2del(iw1))
+
+                tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                           - (1.d0 - tdirp(iw1, nrhump)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1, nrhump)) /tdirp(iw1, nrhump)
+             ELSE
+                tabsp(iw, iw1) = 0.D0
+             ENDIF
+          ENDDO
+       ENDDO
+c------backward
+       DO iw = nrwel + 1, 3, -1
+          DO iw1 = iw -1, 2, -1
+             IF(delt( iw1).GT.0.D0) THEN
+                dmom = (1.d0 - tdirp(iw - 1, iw1)) *
+     &                 (1.d0 - tdirp(iw1-1, 1))
+                tdr  = tdirp(iw-1, iw1) *  tdirp(iw1-1, 1)/
+     &                 (exp2del(iw1) + 2.d0 * dSQRT(dmom) *
+     &                  dCOS(2.d0 * phasep(iw1)) +
+     &                  dmom * exm2del(iw1))
+                tabsp(iw, iw1) = tdr * (exp2del(iw1)
+     &                          - (1.d0-  tdirp(iw1-1, 1)) *
+     &                           exm2del(iw1) -
+     &                           tdirp(iw1-1, 1)) /tdirp(iw1-1, 1)
+             ELSE
+                tabsp(iw, iw1) = 0.D0
+             ENDIF
+          ENDDO
+       ENDDO
+  
       RETURN
-      END SUBROUTINE WKBFIS
- 
-!---------------------------------------------------------------------------
- 
-      SUBROUTINE PHASES_PARAB(Ee,Nnuc,Phase,Discrete)
+      END
+
+c================================================================
+      SUBROUTINE PHASES_Parab(ee, nnuc, phase, discrete)
+C================================================================
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(2*NFParab) :: EINters, EJOin
-      REAL*8, DIMENSION(NFParab) :: EPSil, HO, HO_p, VBArex, VJJ
-      REAL*8 :: FAZa2, SMIu, SMIu_p, UEXc
-      INTEGER :: KBArr
-      COMMON /INTER / EINters
-      COMMON /PARAB / SMIu, EPSil, EJOin, VJJ, HO_p
-      COMMON /VARGS / UEXc, SMIu_p, KBArr
-      COMMON /VBAR  / VBArex, HO, FAZa2
-C
-C Dummy arguments
-C
-      LOGICAL :: Discrete
-      REAL*8 :: Ee
-      INTEGER :: Nnuc
-      REAL*8, DIMENSION(NFParab) :: Phase
-C
-C Local variables
-C
-      REAL*8 :: abserr, dmom, es, ftmp, rmiu
-      REAL*8 :: DSQRT
-      REAL*8, EXTERNAL :: FMOMENTPARAB, GAUSSLEGENDRE41
-      INTEGER :: INT
-      INTEGER :: j, k
-C
-C*** End of declarations rewritten by SPAG
-C
+
+
+      COMMON /VBAR  / vbarex, ho,faza2
+      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
+      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
+       COMMON/INTER/  einters
+
+      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
+      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
+     &       HO_p(NFPARAB)
+ 
+
+      REAL*8 uexc,smiu_p
+      REAL*8 rmiu
+      REAL*8 Einters(2*NFPARAB)
+      REAL*8 phase(NFPARAB)
+
+      LOGICAL discrete
+      REAL*8 ftmp, es, ee, dmom, faza2, abserr
+      REAL*8  FmomentParab, GaussLegendre41
+      EXTERNAL FmomentParab
+
+      INTEGER kbarr
 C     INTEGER iphas_opt
- 
-      rmiu = 0.054D0*A(Nnuc)**(5.D0/3.D0)        !mu in the formula
-      SMIu = DSQRT(0.5D0*rmiu)
-      SMIu_p = SMIu
-      UEXc = Ee
- 
-      DO k = 1, NRBar, 2
-        VJJ(k) = VBArex(INT(k/2) + 1)
+
+      rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)        !mu in the formula
+      smiu = DSQRT(0.5d0*rmiu)
+      smiu_p=smiu
+      uexc=ee
+
+      DO k=1, NRBar,2
+         VJJ(k) = VBArex(int(k/2)+1)
       ENDDO
-      DO k = 2, NRBar, 2
-        VJJ(k) = VBArex(NRHump + INT(k/2))
+      DO k=2, NRBar,2
+         VJJ(k) = VBArex(NRHump+int(k/2))
       ENDDO
- 
-      DO k = 1, NRBar
-        HO_p(k) = HO(k)
+
+      DO k=1,NRBAR
+         ho_p(k)=ho(k)
       ENDDO
- 
-      IF(.NOT.Discrete)THEN
-        DO k = 1, NRBar, 2
-          VJJ(k) = EFB(INT(k/2) + 1)
-          HO(k) = HCOnt(INT(k/2) + 1)
-        ENDDO
-        DO k = 2, NRBar, 2
-          VJJ(k) = EFB(NRHump + INT(k/2))
-          HO(k) = HCOnt(NRHump + INT(k/2))
-        ENDDO
+
+      IF(.NOT.discrete)THEN
+         DO k=1, NRBar,2
+            VJJ(k) = EFB(int(k/2)+1)
+            ho(k)  = hcont(int(k/2)+1)  
+         ENDDO
+         DO k=2, NRBar,2
+            VJJ(k) = EFB(NRHump+int(k/2))
+            ho(k)  = hcont(NRHump+int(k/2))
+         ENDDO
       ENDIF
- 
+
 C-----deformations at saddles and wells and matching points-----------
 C     Fission barriers are modelled by NRBar parabolas
 C     EPSil(i) are the parabolas vortex
@@ -374,472 +373,352 @@ C     EJOin(i) are the corresponding deformation at which parabolas join
       EJOin(2) = EPSil(1)
      &           + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
      &           /(SMIu*HO(1))
-      EJOin(1) = 0.D0
-                     !2*EPSil(1) - EJOin(2)
+      EJOin(1) = 0.d0!2*EPSil(1) - EJOin(2)
       DO k = 2, NRBar
-        EJOin(2*k - 1) = EJOin(2*(k - 1))
-        EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
-     &             **2*(EJOin(2*(k-1)) - EPSil(k - 1))
-        IF(k.LT.NRBar)EJOin(2*k) = EPSil(k)
-     &                             + SQRT(( - 1)**k*(VJJ(k+1) - VJJ(k))
-     &                             /(1.D0 + (HO(k)/HO(k+1))**2))
-     &                             /(SMIu*HO(k))
+         EJOin(2*k - 1) = EJOin(2*(k - 1))
+         EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
+     &              **2*(EJOin(2*(k-1)) - EPSil(k - 1))
+         IF (k.LT.NRBar) EJOin(2*k) = EPSil(k)
+     &        + SQRT(( - 1)**k*(VJJ(k+1)- VJJ(k))
+     &        /(1.D0 + (HO(k)/HO(k+1))**2))/(SMIu*HO(k))
       ENDDO
       EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
-      EJOin(2*NRBar) = EPSil(NRBar) + SQRT(VJJ(NRBar))/(SMIu*HO(NRBar))
- 
+      EJOin(2*NRBar) = EPSil(NRBar) +SQRT(VJJ(NRBar))/(SMIu*HO(NRBar))
+
       DO j = 1, 2*NRBar
-        EINters(j) = -1.
+         einters(j) = -1.
       ENDDO
- 
+
       DO j = 1, NRBar
-        ftmp = ( - 1)**j*(Ee - VJJ(j))
-        IF(ftmp.GE.0.D0)THEN
-          IF(Ee.EQ.VJJ(j))THEN
-            EINters(2*j - 1) = EPSil(j)   !Ee
-            EINters(2*j) = EPSil(j)   !Ee
-            CYCLE
-          ENDIF
-          es = SQRT(ftmp)/(SMIu*HO(j))
-          EINters(2*j - 1) = EPSil(j) - es
-          EINters(2*j) = EPSil(j) + es
-        ENDIF
-      ENDDO
- 
+         ftmp = ( - 1)**j*(Ee - VJJ(j))
+         IF (ftmp.GE.0.D0) THEN
+            IF (Ee.EQ.VJJ(j)) THEN
+               einters(2*j - 1) = epsil(j)!Ee
+               einters(2*j) = epsil(j)!Ee
+               cycle
+            ENDIF
+            es = SQRT(ftmp)/(SMIu*HO(j))
+            einters(2*j - 1) = EPSil(j) - es
+            einters(2*j) = EPSil(j) + es
+         ENDIF
+      ENDDO    
+
 C     IF(iphas_opt.NE.0)THEN
-      DO j = 2, 2*NRBar - 1, 2
-        IF(EINters(j).LT.EJOin(j))THEN
-          EINters(j + 1) = EINters(j)
-        ELSE
-          EINters(j) = EINters(j + 1)
-        ENDIF
-      ENDDO
+         DO j=2,2*NRBar-1,2
+            IF(einters(j).LT.ejoin(j))THEN
+               einters(j+1)=einters(j)
+            ELSE   
+               einters(j)=einters(j+1)
+            ENDIF
+         ENDDO 
 C     ENDIF
- 
-C     Momentum integrals
-      UEXc = Ee
+
+C     Momentum integrals 
+      UEXc = ee
       DO k = 1, NRBar
-        Phase(k) = 0.D0
-        IF(EINters(2*k).GE.0..AND.EINters(2*k - 1).GE.0.)THEN
-          dmom = GAUSSLEGENDRE41(FMOMENTPARAB,EINters(2*k - 1),
-     &           EINters(2*k),abserr)
-        ELSE
-          dmom = ( - 1)**(k + 1)*PI*(VJJ(k) - Ee)/HO(k)
-        ENDIF
-        Phase(k) = MIN(dmom,50.D0)
-      ENDDO
- 
+         phase(k) = 0.D0
+         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
+            dmom = GaussLegendre41(FmomentParab,
+     &             einters(2*k - 1),einters(2*k),abserr) 
+         ELSE
+            dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
+         ENDIF
+         phase(k)   = min(dmom,50.d0)  
+      ENDDO              
+
       RETURN
-      END SUBROUTINE PHASES_PARAB
- 
-!---------------------------------------------------------------------------
+      END
 C========================================================================
-      FUNCTION FMOMENTPARAB(Eps)
+      REAL*8 function FmomentParab(Eps)
 C
 C     Integrand (To be called from Gauss-Legendre integration routine)
 C     To be defined as external function
 C
       IMPLICIT NONE
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      INTEGER :: KBArr
-      REAL*8 :: SMIu, UEXc
-      COMMON /VARGS / UEXc, SMIu, KBArr
-C
-C Dummy arguments
-C
-      REAL*8 :: Eps
-      REAL*8 :: FMOMENTPARAB
-C
-C Local variables
-C
-      REAL*8 :: DABS, DSQRT
-      REAL*8 :: VDEF
-C
-C*** End of declarations rewritten by SPAG
-C
- 
-      FMOMENTPARAB = 2.D0*SMIu*DSQRT(DABS(UEXc - VDEF(Eps)))
+      REAL*8 Eps, Vdef,Uexc, Smiu
+      INTEGER Kbarr
+      COMMON /VARGS/ Uexc, Smiu, Kbarr
+   
+      FmomentParab = 2.d0*Smiu* DSQRT( DABS (Uexc - Vdef(Eps)) )
       RETURN
-      END FUNCTION FMOMENTPARAB
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION VDEF(Eps)
+      END
+
+
+      REAL*8 FUNCTION VDEF(Eps)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
 C COMMON variables
-C
-      REAL*8, DIMENSION(2*NFParab) :: EJOin
-      REAL*8, DIMENSION(NFParab) :: EPSil, HO, VJJ
-      REAL*8 :: SMIu
-      COMMON /PARAB / SMIu, EPSil, EJOin, VJJ, HO
-C
-C Dummy arguments
-C
-      REAL*8 :: Eps
-      REAL*8 :: VDEF
-C
-C Local variables
-C
-      INTEGER :: j
-C
-C*** End of declarations rewritten by SPAG
-C
-C COMMON variables
+
+      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho
+      COMMON /VARGS/ Uexc, Smiu_p, Kbarr
  
- 
+      REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
+     &       HO(NFPARAB), uexc,smiu_p,eps
 C
 C     , Einters(2*NFPARAB)
+      INTEGER j
 C
 C     calculation of the deformation potential energy
       VDEF = 0.D0
 C
 C      Commented by MS, to be adressed in the bright future (post 3.1 Rivoli :-)
 C
-C      IF (Eps.LE.EJOin(2)) THEN
-C         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
-C         RETURN
-C      ENDIF
-C      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
-C         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
-C         RETURN
-C      ENDIF
-C
-C      DO j = 2, NRBar - 1
+c      IF (Eps.LE.EJOin(2)) THEN
+c         VDEF = VJJ(1) - (SMIu*HO(1)*(Eps - EPSil(1)))**2
+c         RETURN
+c      ENDIF
+c      IF (Eps.GE.EJOin(2*NRBar - 1)) THEN
+c         VDEF = VJJ(NRBar) - (SMIu*HO(NRBar)*(Eps - EPSil(NRBar)))**2
+c         RETURN
+c      ENDIF
+c
+c      DO j = 2, NRBar - 1
       DO j = 1, NRBar
-        IF(Eps.GE.EJOin(2*j - 1).AND.Eps.LE.EJOin(2*j))THEN
-          VDEF = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))**2
-          RETURN
-        ENDIF
+         IF (Eps.GE.EJOin(2*j - 1) .AND. Eps.LE.EJOin(2*j)) THEN
+            VDEF = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*(Eps - EPSil(j)))
+     &                **2
+            RETURN
+         ENDIF
       ENDDO
       RETURN
-      END FUNCTION VDEF
- 
-!---------------------------------------------------------------------------
- 
+      END
+
 C============NUMERICAL BARRIERS=================================
- 
-      SUBROUTINE NUMBARR(Nnuc,Vbarex,Ho)
+
+      SUBROUTINE NUMBARR(Nnuc,Vbarex,ho)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(NFIsbarpnt) :: EPS_1d, VDEf_1d
-      INTEGER, DIMENSION(0:2*NFParab) :: IIExtr
-      INTEGER :: NEXtr, NPOints
-      REAL*8, DIMENSION(NFParab) :: VHEigth, VWIdth
-      REAL*8, DIMENSION(NFParab + 1) :: VPOs
-      COMMON /NUMBAR/ EPS_1d, VDEf_1d, NPOints, IIExtr, NEXtr
-      COMMON /NUMBAR1/ VHEigth, VWIdth, VPOs
-C
-C Dummy arguments
-C
-      INTEGER :: Nnuc
-      REAL*8, DIMENSION(NFParab) :: Ho, Vbarex
-C
-C Local variables
-C
-      REAL*8 :: centr, heigth, rmiu, smiu, ucentr, uheigth, uwidth, 
-     &          width
-      REAL :: defstep
-      REAL*8 :: DSQRT
-      REAL*8, DIMENSION(2*NFParab) :: ejoin
-      REAL*8, DIMENSION(NFParab) :: epsil, vjj
-      INTEGER :: FIND_EXTREM
-      INTEGER :: id, j, k, nrsm
-      INTEGER :: INT
-C
-C*** End of declarations rewritten by SPAG
-C
- 
- 
- 
- 
- 
+
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
+    
+
+      DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
+      DOUBLE PRECISION centr, heigth, width, ucentr, uheigth, uwidth
+      DOUBLE PRECISION rmiu,smiu
+
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+
+      DOUBLE PRECISION VBArex(NFPARAB), VJJ(NFPARAB), HO(NFPARAB)
+      DOUBLE PRECISION EJOin(2*NFPARAB), EPSil(NFPARAB)
 C     Functions
- 
-      rmiu = 0.054D0*A(Nnuc)**(5.D0/3.D0)
-      smiu = DSQRT(0.5D0*rmiu)
+      INTEGER Find_Extrem
+
+      rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
+      smiu = DSQRT(0.5d0*rmiu)
       nrsm = NRSmooth(Nnuc)
- 
-C-----Generating numerical barrier starting from parabolas' parameters
+
+c-----Generating numerical barrier starting from parabolas' parameters
       IF(FISbar(Nnuc).LE.2.)THEN
-        DO k = 1, NRBar, 2
-          vjj(k) = Vbarex(INT(k/2) + 1)
-        ENDDO
-        DO k = 2, NRBar, 2
-          vjj(k) = Vbarex(NRHump + INT(k/2))
-        ENDDO
- 
+         DO k=1, NRBar,2
+            VJJ(k) = VBArex(int(k/2)+1)
+         ENDDO
+         DO k=2, NRBar,2
+            VJJ(k) = VBArex(NRHump+int(k/2))
+         ENDDO
+
 C--------deformations at saddles and wells and matching points-----------
 C        Fission barriers are modelled by NRBar parabolas
 C        EPSil(i) are the parabolas vortex
 C        EJOin(i) are the corresponding deformation at which parabolas join
-        epsil(1) = SQRT(vjj(1))/(smiu*Ho(1))
-        ejoin(2) = epsil(1)
-     &             + SQRT((vjj(1) - vjj(2))/(1.D0 + (Ho(1)/Ho(2))**2))
-     &             /(smiu*Ho(1))
-        ejoin(1) = 2*epsil(1) - ejoin(2)
-        DO k = 2, NRBar
-          ejoin(2*k - 1) = ejoin(2*(k - 1))
-          epsil(k) = ejoin(2*(k - 1)) + (Ho(k - 1)/Ho(k))
-     &               **2*(ejoin(2*(k-1)) - epsil(k - 1))
-          IF(k.LT.NRBar)ejoin(2*k) = epsil(k)
-     &                               + SQRT(( - 1)**k*(vjj(k+1) - vjj(k)
-     &                               )/(1.D0 + (Ho(k)/Ho(k+1))**2))
-     &                               /(smiu*Ho(k))
-        ENDDO
-        ejoin(2*NRBar) = 2*epsil(NRBar) - ejoin(2*NRBar - 1)
-        defstep = 0.01D0
-        NPOints = INT((epsil(NRBar) + SQRT(vjj(NRBar))/(smiu*Ho(NRBar)))
-     &            /defstep)
- 
-        DO id = 1, NPOints
-          EPS_1d(id) = defstep*id
-          IF(EPS_1d(id).LE.ejoin(2))VDEf_1d(id) = vjj(1)
-     &       - (smiu*Ho(1)*(EPS_1d(id) - epsil(1)))**2
-          IF(EPS_1d(id).GE.ejoin(2*NRBar - 1))VDEf_1d(id) = vjj(NRBar)
-     &       - (smiu*Ho(NRBar)*(EPS_1d(id) - epsil(NRBar)))**2
-          DO j = 2, NRBar - 1
-            IF(EPS_1d(id).GE.ejoin(2*j - 1).AND.EPS_1d(id).LE.ejoin(2*j)
-     &         )VDEf_1d(id) = vjj(j) + ( - 1)
-     &                        **j*(smiu*Ho(j)*(EPS_1d(id) - epsil(j)))
-     &                        **2
-          ENDDO
-        ENDDO
-      ENDIF
- 
+         EPSil(1) = SQRT(VJJ(1))/(SMIu*HO(1))
+         EJOin(2) = EPSil(1)
+     &              + SQRT((VJJ(1) - VJJ(2))/(1.D0 + (HO(1)/HO(2))**2))
+     &              /(SMIu*HO(1))
+         EJOin(1) = 2*EPSil(1) - EJOin(2)
+         DO k = 2, NRBar
+            EJOin(2*k - 1) = EJOin(2*(k - 1))
+            EPSil(k) = EJOin(2*(k - 1)) + (HO(k - 1)/HO(k))
+     &                 **2*(EJOin(2*(k-1)) - EPSil(k - 1))
+            IF (k.LT.NRBar) EJOin(2*k) = EPSil(k)
+     &                                   + SQRT(( - 1)**k*(VJJ(k+1)
+     &                                   - VJJ(k))
+     &                                   /(1.D0 + (HO(k)/HO(k+1))**2))
+     &                                   /(SMIu*HO(k))
+         ENDDO
+         EJOin(2*NRBar) = 2*EPSil(NRBar) - EJOin(2*NRBar - 1)
+         defstep = 0.01d0
+         npoints= int((EPSil(NRBar)+ SQRT(VJJ(NRBar))/(SMIu*HO(NRBar)))/
+     &            defstep)
+
+         DO id=1,  npoints
+            eps_1d(id) = defstep*id
+            IF (eps_1d(id).LE.EJOin(2)) vdef_1d(id) =
+     &      VJJ(1) - (SMIu*HO(1)*(eps_1d(id) - EPSil(1)))**2
+            IF (eps_1d(id).GE.EJOin(2*NRBar - 1)) vdef_1d(id) =
+     &      VJJ(NRBar) - (SMIu*HO(NRBar)*(eps_1d(id) - EPSil(NRBar)))**2
+            DO j = 2, NRBar - 1
+               IF (eps_1d(id).GE.EJOin(2*j - 1) .AND.
+     &             eps_1d(id).LE.EJOin(2*j))
+     &             vdef_1d(id) = VJJ(j) + ( - 1)**j*(SMIu*HO(j)*
+     &                           (eps_1d(id) - EPSil(j)))**2
+            ENDDO
+         ENDDO
+       ENDIF
+
 C-----Finding maxima and minima of the deformation energy curve
 C                   initializes iiextr() and nextr
-      NEXtr = FIND_EXTREM(Nnuc)
-      DO j = 1, NEXtr
-        VPOs(j) = DEFfis(j)
+ 100  nextr = Find_Extrem(Nnuc)
+      DO j = 1, nextr
+         Vpos(j) = DEFfis(j)
       ENDDO
-      VPOs(NEXtr + 1) = 100.D0
+      Vpos(nextr + 1) = 100.d0
 C==================================================================
 C     Fitting parabola
-      DO j = 1, NEXtr
-        CALL PARABFIT(IIExtr(j),nrsm,rmiu,EPS_1d,VDEf_1d,centr,heigth,
-     &                width,ucentr,uheigth,uwidth)
-        IF(width.LT.0.05D0)CYCLE       ! Skipping very narrow peaks
-C       write(*,*) ' Def: ',sngl(EPS_1d(iiextr(j))),
-C     &         ' (',sngl(centr),' +/- ',sngl(ucentr),')'
-C       write(*,*) ' Heigth :',sngl(Vdef_1d(iiextr(j))),
-C     &         ' (',sngl(heigth),' +/- ',sngl(uheigth),')'
-C       write(*,*) ' Width :', sngl(width), ' +/- ', sngl(uwidth)
+      DO j = 1, nextr
+        CALL ParabFit(iiextr(j), nrsm, rmiu, eps_1d, vdef_1d,
+     &        centr,  heigth,  width, ucentr, uheigth, uwidth)
+        IF(width.LT.0.05d0) CYCLE      ! Skipping very narrow peaks
+c       write(*,*) ' Def: ',sngl(EPS_1d(iiextr(j))),
+c     &         ' (',sngl(centr),' +/- ',sngl(ucentr),')'
+c       write(*,*) ' Heigth :',sngl(Vdef_1d(iiextr(j))),
+c     &         ' (',sngl(heigth),' +/- ',sngl(uheigth),')'
+c       write(*,*) ' Width :', sngl(width), ' +/- ', sngl(uwidth)
 C--------------------------------------------------
 C       Initializes parabola's parameters
 C
 C       The real height and position of the barrier are used
-C       (not the fitted parabola height or center)
- 
-        NEXtr = NRBar
-        VHEigth(j) = VDEf_1d(IIExtr(j))
-        VWIdth(j) = width
-        VPOs(j) = EPS_1d(IIExtr(j))
+c       (not the fitted parabola height or center)
+
+        nextr = nrbar
+        Vheigth(j) = Vdef_1d(iiextr(j))
+        Vwidth(j) = width
+        Vpos(j) = EPS_1d(iiextr(j))
       ENDDO
 C     Vpos(0) = 0.d0
-      VPOs(NEXtr + 1) = 100.D0
- 
+      Vpos(nextr+1) = 100.d0
+
       RETURN
-      END SUBROUTINE NUMBARR
- 
-!---------------------------------------------------------------------------
- 
+      END
+
+
+c================================================================
+      SUBROUTINE PHASES(uexcit1,phase,phase_h,nnuc,iphas_opt,discrete)
 C================================================================
-      SUBROUTINE PHASES(Uexcit1,Phase,Phase_h,Nnuc,Iphas_opt,Discrete)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(NFIsbarpnt) :: EPS_1d, VDEf_1d
-      INTEGER, DIMENSION(0:2*NFParab) :: IIExtr
-      INTEGER :: K, NEXtr, NPOints
-      REAL*8 :: SMIu, UEXc
-      REAL*8, DIMENSION(NFParab) :: VHEigth, VWIdth
-      REAL*8, DIMENSION(NFParab + 1) :: VPOs
-      COMMON /NUMBAR/ EPS_1d, VDEf_1d, NPOints, IIExtr, NEXtr
-      COMMON /NUMBAR1/ VHEigth, VWIdth, VPOs
-      COMMON /VARGS / UEXc, SMIu, K
-C
-C Dummy arguments
-C
-      LOGICAL :: Discrete
-      INTEGER :: Iphas_opt, Nnuc
-      REAL*8 :: Uexcit1
-      REAL*8, DIMENSION(2*NFParab) :: Phase
-      REAL*8, DIMENSION(NFParab) :: Phase_h
-C
-C Local variables
-C
-      REAL*8 :: abserr, dmom, epsa, epsb, rmiu
-      REAL*8 :: DSQRT
-      REAL*8 :: FINDINTERSECT, FMOMENT1, GAUSSLEGENDRE41
-      INTEGER :: i
-      INTEGER :: INT
-      ! REAL*8, DIMENSION(NFParab) :: phase_w
-      REAL :: SNGL
-C
-C*** End of declarations rewritten by SPAG
-C
-C================================================================
- 
- 
- 
+
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+
+      COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
+      COMMON /VARGS/ Uexc, Smiu, K
+
+      REAL*8 Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
+      REAL*8 uexcit1, phase(2*NFPARAB),phase_h(NFPARAB),
+     &                phase_w(NFPARAB)
 C-------------------------------------------------------------------
+      REAL*8 Uexc, Smiu
+      REAL*8 dmom, abserr, rmiu, epsa, epsb
+      INTEGER K,iphas_opt
+      LOGICAL discrete
 C     FUNCTIONS
- 
-      rmiu = 0.054D0*A(Nnuc)**(5.D0/3.D0)
-      UEXc = Uexcit1
-      SMIu = DSQRT(0.5D0*rmiu)
-C
-      DO K = 1, 2*NRBar
-        Phase(K) = 0.D0
+      REAL*8   Fmoment1, FmomentParab, GaussLegendre41, FindIntersect
+      EXTERNAL FmomentParab, Fmoment1
+
+      rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)
+      Uexc   = uexcit1
+      smiu = DSQRT(0.5d0 * rmiu)
+c
+      DO k = 1, 2 * NRBar
+         phase(k) = 0.d0
       ENDDO
- 
-      IF(.NOT.Discrete)THEN
-        i = 0
-        DO K = 1, NRHump
-          VHEigth(K + i) = EFB(K)
-          VWIdth(K + i) = HCOnt(K)
-          i = i + 1
-        ENDDO
-        i = 1
-        DO K = NRHump + 1, NRBar
-          VHEigth(K - NRHump + i) = EFB(K)
-          VWIdth(K - NRHump + i) = HCOnt(K)
-          i = i + 1
-        ENDDO
+     
+      IF(.NOT.discrete)THEN
+         i=0
+         DO k=1, NRHump     
+            Vheigth(k + i) = EFB(k)
+            Vwidth (k + i) = hcont(k)
+            i=i+1
+         ENDDO
+         i=1
+         DO k= NRHump + 1, NRBar     
+            Vheigth(k -nrhump + i) = EFB(k)
+            Vwidth (k -nrhump + i) = hcont(k)
+            i=i+1
+         ENDDO
       ENDIF
- 
+
 C---- Momentum integrals are calculated
-      IF(Iphas_opt.EQ.1)THEN
-        DO K = 1, NEXtr                                   ! humps and wells
-          IF(MOD(K,2).EQ.1)THEN                           ! humps
-            IF(Uexcit1.GE.VHEigth(K))THEN                 ! Hill-Wheeler formula
-              dmom = PI*(VHEigth(K) - Uexcit1)/VWIdth(K)
-              Phase(K) = MIN(dmom,50.D0)
-            ELSE                                          !WKB
-              epsa = FINDINTERSECT(Uexcit1,IIExtr(K - 1),IIExtr(K),
-     &               .FALSE.)
-              epsb = FINDINTERSECT(Uexcit1,IIExtr(K),IIExtr(K + 1),
-     &               .FALSE.)
-              dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-              IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.053)THEN
-                WRITE(*,*)' WARNING: For extremum ', K, 
-     &                    ' phase integral is not accurate (', 
-     &                    SNGL(abserr/dmom*100.D0), ' %)', Uexcit1, 
-     &                    VHEigth(K), VWIdth(K), Discrete
-              ENDIF
-              Phase(K) = MIN(dmom,50.D0)
+      IF(iphas_opt.eq.1) THEN
+         DO k = 1, nextr                                  ! humps and wells
+            IF(mod(k, 2).eq.1) then                       ! humps
+               IF(uexcit1.ge.Vheigth(k)) THEN             ! Hill-Wheeler formula
+                  dmom = pi * (Vheigth(k) - uexcit1)/Vwidth(k)
+                  phase(k)   = min(dmom,50.d0)
+                ELSE                                      !WKB         
+                   epsa = FindIntersect(uexcit1,iiextr(k-1),iiextr(k),
+     &                   .false.)
+                   epsb = FindIntersect(uexcit1,iiextr(k),iiextr(k+1),
+     &                    .false.)
+                   dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+                   IF(dmom.gt.0.d0 .and. abserr.gt.dmom*0.053) THEN
+                        write(*,*) ' WARNING: For extremum ',k,
+     &                       ' phase integral is not accurate (',
+     &                        sngl(abserr/dmom*100.d0),' %)',uexcit1,
+     &                  vheigth(k),vwidth(k),discrete
+                   ENDIF
+                   phase(k) = min(dmom,50.d0)
+                ENDIF
+            ELSE                                          ! WELLS
+               IF(uexcit1.LE.Vheigth(k)) THEN
+                  phase(k) = 0.d0
+               ELSE                                       ! WKB
+                  epsa = FindIntersect(uexcit1,iiextr(k-1),iiextr(k),
+     &                   .true.)
+                  epsb = FindIntersect(uexcit1,iiextr(k),iiextr(k+1),
+     &                   .true.)
+                  dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
+                  IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.053) THEN
+                     write(*,*) ' WARNING: For extremum ',k,
+     &                       ' phase integral is not accurate (',
+     &                  sngl(abserr/dmom*100.d0),' %)',uexcit1,
+     &                  vheigth(k),vwidth(k),discrete
+                  ENDIF
+                  phase(k) = min(dmom,50.d0)
+               ENDIF
             ENDIF
-          ELSEIF(Uexcit1.LE.VHEigth(K))THEN
-            Phase(K) = 0.D0
-          ELSE                                            ! WKB
-            epsa = FINDINTERSECT(Uexcit1,IIExtr(K - 1),IIExtr(K),.TRUE.)
-            epsb = FINDINTERSECT(Uexcit1,IIExtr(K),IIExtr(K + 1),.TRUE.)
-            dmom = GAUSSLEGENDRE41(FMOMENT1,epsa,epsb,abserr)
-            IF(dmom.GT.0.D0.AND.abserr.GT.dmom*0.053)THEN
-              WRITE(*,*)' WARNING: For extremum ', K, 
-     &                  ' phase integral is not accurate (', 
-     &                  SNGL(abserr/dmom*100.D0), ' %)', Uexcit1, 
-     &                  VHEigth(K), VWIdth(K), Discrete
-            ENDIF
-            Phase(K) = MIN(dmom,50.D0)
-          ENDIF
-        ENDDO
+         ENDDO
       ELSE
-        DO K = 1, NEXtr                              ! only parabolic barriers
-          dmom = PI*(VHEigth(K) - Uexcit1)/VWIdth(K) !Hill-Wheeler
-          Phase(K) = MIN(dmom,50.D0)
+        DO k=1, nextr                                ! only parabolic barriers
+          dmom = pi*(Vheigth(k) - uexcit1)/Vwidth(k) !Hill-Wheeler
+          phase(k)   = min(dmom,50.d0)
         ENDDO
       ENDIF
 C
-      DO K = 1, NEXtr
-        IF(MOD(K,2).EQ.1)THEN
-          Phase_h(K - INT(K/2)) = Phase(K)
-        !ELSE
-        !  phase_w(K - INT(K/2)) = Phase(K)
-        ENDIF
+      DO k=1, nextr  
+         IF(mod(k, 2).eq.1) then   
+            phase_h(k-int(k/2))=phase(k)
+         ELSE
+            phase_w(k-int(k/2))=phase(k)
+         ENDIF     
       ENDDO
- 
+
       RETURN
-      END SUBROUTINE PHASES
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION FMOMENT1(Eps)
+      END
+
+
+      REAL*8 function Fmoment1(Eps)
 C
 C     Integrand (To be called from Gauss-Legendre integration routine)
 C
 C     To be defined as external function
 C
       IMPLICIT NONE
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      INTEGER :: KBArr
-      REAL*8 :: SMIu, UEXc
-      COMMON /VARGS / UEXc, SMIu, KBArr
-C
-C Dummy arguments
-C
-      REAL*8 :: Eps
-      REAL*8 :: FMOMENT1
-C
-C Local variables
-C
-      REAL*8 :: DABS, DSQRT
-      REAL*8 :: VDEF1
-C
-C*** End of declarations rewritten by SPAG
-C
-      FMOMENT1 = 2.D0*SMIu*DSQRT(DABS(UEXc - VDEF1(Eps)))
-      RETURN
-      END FUNCTION FMOMENT1
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION VDEF1(Eps)
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(NFIsbarpnt) :: EPS_1d, VDEf_1d
-      INTEGER, DIMENSION(0:2*NFParab) :: IIExtr
-      INTEGER :: NEXtr, NPOints
-      COMMON /NUMBAR/ EPS_1d, VDEf_1d, NPOints, IIExtr, NEXtr
-C
-C Dummy arguments
-C
-      REAL*8 :: Eps
-      REAL*8 :: VDEF1
-C
-C Local variables
-C
-      REAL*8 :: ei, eip, vi, vip
-      INTEGER :: idef
-C
-C*** End of declarations rewritten by SPAG
-C
+      REAL*8 Eps, Vdef1
+      REAL*8 Uexc, Smiu
+      INTEGER Kbarr
+      COMMON /VARGS/ Uexc, Smiu, Kbarr
+      Fmoment1 = 2.d0*SMIU* DSQRT( DABS (UEXC - Vdef1(Eps)) )
+      return
+      end
+
+
+      
+      REAL*8 function Vdef1(EPS)
+      REAL*8 EPS
 C
 C     This function calculates real shape of the deformation energy
 C     by linear interpolation to obtain the value of the barrier Vdef
@@ -847,75 +726,66 @@ C     at deformation EPS (needed to integrte this function)
 C
 C     Called by gaussian integration
 C
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 C
 C     Local variables
+      INTEGER idef
+      REAL*8 vi, vip, ei, eip
 C
 C     The four lines below is a very simple (and unefficient) search
 C     Should be replaced by efficient search routine to locate the element idef of the array EPS_1D()
-      idef = 1
-      DO WHILE (Eps.GT.EPS_1d(idef).AND.idef.LE.NPOints)
+      idef=1
+      do while (EPS.GT.EPS_1D(idef) .and. idef.LE.npoints)
         idef = idef + 1
-      ENDDO
-      IF(idef.NE.1)idef = idef - 1
- 
-      vi = VDEf_1d(idef)
-      vip = VDEf_1d(idef + 1)
-      ei = EPS_1d(idef)
-      eip = EPS_1d(idef + 1)
- 
-      IF(ei.EQ.eip)THEN
+      enddo
+      if (idef.ne.1) idef = idef - 1
+
+      vi  = Vdef_1d(idef)
+      vip = Vdef_1d(idef+1)
+      ei  = EPS_1d(idef)
+      eip = EPS_1d(idef+1)
+
+      if(ei.eq.eip) then
 C       Special case treated here to avoid division by zero
 C       We assume that in this case vi = vip
-        VDEF1 = vi
-        RETURN
-      ENDIF
- 
-      VDEF1 = vi + (Eps - ei)/(eip - ei)*(vip - vi)
-      RETURN
-      END FUNCTION VDEF1
- 
-!---------------------------------------------------------------------------
- 
-C===================================================
-      SUBROUTINE PARABFIT(Imax,Npfit,Rmiu,Epss,Vdeff,Centr,Heigth,Width,
-     &                    Ucentr,Uheigth,Uwidth)
+        Vdef1 = vi
+        return
+      endif
+
+      Vdef1 = vi + (EPS-ei)/(eip-ei)*(vip-vi)
+      return
+      end
+
+c===================================================
+      SUBROUTINE ParabFit(Imax,Npfit,RMIU,EPSs,VDEFf,
+     &                     CENTR,  HEIGTH,  WIDTH,
+     &                    uCENTR, uHEIGTH, uWIDTH)
       IMPLICIT NONE
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: Centr, Heigth, Rmiu, Ucentr, Uheigth, Uwidth, Width
-      INTEGER :: Imax, Npfit
-      REAL*8, DIMENSION(*) :: Epss, Vdeff
-C
-C Local variables
-C
-      REAL*8, DIMENSION(3) :: aa, siga
-      REAL*8 :: chisqr
-      INTEGER :: i, ierr, npts
-      REAL*8, DIMENSION(1024) :: x, y
-C
-C*** End of declarations rewritten by SPAG
-C
-                    ! Position of the maximum
-                    ! Number of points to fit
-                    ! MIU = 0.054d0*ANUC**(5.d0/3.d0)
-                     ! Deformation Array        (X)
-                     ! Deformation Energy Array (Y)
-                                     ! BARRIER'S PARAMETER
- 
+      INTEGER Imax  ! Position of the maximum
+      INTEGER Npfit ! Number of points to fit
+      REAL*8 RMIU   ! MIU = 0.054d0*ANUC**(5.d0/3.d0)
+      REAL*8 EPSs(*) ! Deformation Array        (X)
+      REAL*8 VDEFf(*)! Deformation Energy Array (Y)
+      REAL*8  CENTR,  HEIGTH,  WIDTH ! BARRIER'S PARAMETER
+      REAL*8 uCENTR, uHEIGTH, uWIDTH ! BARRIER'S PARAMETER UNCERTAINTIES
+
 C     Local variables
- 
-      npts = 0                       ! BARRIER'S PARAMETER UNCERTAINTIES
- 
-      DO i = Imax - Npfit, Imax + Npfit
+      integer i,npts,ierr
+      real*8 x(1024),y(1024),aa(3),siga(3),chisqr
+
+      npts = 0
+
+      do i = Imax - Npfit, Imax + Npfit
         npts = npts + 1
-        x(npts) = Epss(i) - Epss(Imax)
-        y(npts) = Vdeff(i)
-      ENDDO
- 
- 
+        x(npts) = EPSs(i) - EPSs(imax)
+        y(npts) = VDEFf(i)
+      enddo
+
+
 C
 C FITS A POLYNOMIAL OF THE FORM:
 C   Y=A(1)+A(2)*X+A(3)*X**2+...+A(NTERMS)*X**(NTERMS-1)
@@ -932,50 +802,22 @@ C     enddo
 C     write(*,*) a(1),a(2),a(3)
 C     write(*,*) sigmaa(1),sigmaa(2),sigmaa(3)
 C
-C      write(*,*) ' PARABOLIC FITTING CHISQR = ',sngl(CHISQR)
- 
-      Heigth = aa(1)
-      Uheigth = siga(1)
-      Width = SQRT(2.D0*ABS(aa(3))/Rmiu)
-      Uwidth = SQRT(2.D0*ABS(siga(3))/Rmiu)
-      Centr = Epss(Imax)
-      IF(aa(3).NE.0.D0)Centr = 0.5D0*aa(2)/aa(3)
-      Ucentr = ABS(Centr)*SQRT((siga(2)/aa(2))**2 + (siga(3)/aa(3))**2)
-      Centr = Epss(Imax) + Centr
-      RETURN
-      END SUBROUTINE PARABFIT
- 
-!---------------------------------------------------------------------------
- 
-      SUBROUTINE WPLFT(Npts,Nterms,Ierr,Mode,X,Y,Aa,Sigmaa,Chisqr)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C PARAMETER definitions
-C
-      INTEGER, PARAMETER :: MAXdeg = 3, WEIght = 0
-C
-C Dummy arguments
-C
-      REAL*8 :: Chisqr
-      INTEGER :: Ierr, Mode, Npts, Nterms
-      REAL*8, DIMENSION(Nterms) :: Aa, Sigmaa
-      REAL*8, DIMENSION(Npts) :: X, Y
-C
-C Local variables
-C
-      REAL*8, DIMENSION(MAXdeg,MAXdeg) :: array
-      REAL*8 :: chisq, det, fnpts, free1, sigma, sumx, varnce, wmean, 
-     &          ymean
-      REAL*8 :: DBLE, DSQRT
-      INTEGER :: deg, i, j, k
-      REAL :: freen, yfit
-      REAL*8, DIMENSION(MAXdeg) :: r, sigmax, xmean
-      REAL*8, DIMENSION(Npts) :: w
-C
-C*** End of declarations rewritten by SPAG
-C
- 
+c      write(*,*) ' PARABOLIC FITTING CHISQR = ',sngl(CHISQR)
+
+       HEIGTH = aa(1)
+      uHEIGTH = siga(1)
+       WIDTH  =  SQRT(2.d0*abs(  aa(3))/RMIU)
+      uWIDTH  =  SQRT(2.d0*abs(siga(3))/RMIU)
+       CENTR  = EPSs(imax)
+      IF(aa(3).ne.0.d0) CENTR = 0.5d0 * aa(2) / aa(3)
+      uCENTR  = ABS(CENTR) * SQRT((siga(2)/aa(2))**2 +
+     &          (siga(3)/aa(3))**2)
+      CENTR = EPSs(imax) + CENTR
+      return
+      end
+
+      SUBROUTINE WPLFT(NPTS,NTERMS,IERR,MODE,X,Y,AA,SIGMAA,CHISQR)
+
 C FITS A POLYNOMIAL OF THE FORM:
 C   Y=A(1)+A(2)*X+A(3)*X**2+...+A(NTERMS)*X**(NTERMS-1)
 C THOUGH THE NTPS POINTS (X,Y)
@@ -987,292 +829,221 @@ C REQUIREMENTS ARE:
 C        MAX NUM TERMS = 12
 C        MIN NUM TERMS = 2
 C        NTPS >= NTERMS
- 
- 
- 
-      Ierr = 0
-      deg = Nterms - 1
-      IF(deg.LT.1.OR.deg.GT.MAXdeg.OR.Npts.LT.Nterms)THEN
-        Ierr = 3
-        RETURN
-      ENDIF
- 
-C       INITIALIZE SUMS AND ARRAYS
+        INTEGER MAXDEG
+        PARAMETER (MAXDEG=3)
 
-      sumx = 0.D0
-      ymean = 0.D0
-      sigma = 0.D0
-      chisq = 0.D0
-      Aa(1) = 0.
-      Sigmaa(1) = 0.
-      DO j = 1, deg
-        xmean(j) = 0.D0
-        sigmax(j) = 0.D0
-        r(j) = 0.D0
-        Aa(1 + j) = 0.
-        Sigmaa(1 + j) = 0.
-C       DO 28 K=1,DEG
-C28      ARRAY(J,K)=0.D0
-        DO k = 1, Nterms
-          array(j,k) = 0.D0
-        ENDDO
-      ENDDO
- 
- 
-C       ACCUMULATE WEIGHTED SUMS
- 
-      DO i = 1, Npts
-        w(i) = ABS(Y(i))
-        IF(Mode.NE.WEIght)w(i) = 1.
-        sumx = sumx + DBLE(w(i))
-C       YMEAN = Sy
-        ymean = ymean + DBLE(w(i)*Y(i))
-C       XMEAN(1)=Sx, XMEAN(2)=Sxx
-C       S=NPTS*(NPTS+1)/2
-        DO j = 1, deg
-          xmean(j) = xmean(j) + DBLE(w(i)*X(i)**j)
-        ENDDO
-      ENDDO
-      ymean = ymean/sumx
-      DO j = 1, deg
-        xmean(j) = xmean(j)/sumx
-      ENDDO
-      fnpts = Npts
-      wmean = sumx/fnpts
-      DO i = 1, Npts
-        w(i) = w(i)/wmean
-      ENDDO
- 
-      DO i = 1, Npts
-        sigma = sigma + DBLE(w(i)*(Y(i) - ymean)**2)
-        DO j = 1, deg
-          sigmax(j) = sigmax(j) + DBLE(w(i)*(X(i)**j - xmean(j))**2)
-          r(j) = r(j) + DBLE(w(i)*(X(i)**j - xmean(j))*(Y(i) - ymean))
-          DO k = 1, j
-            array(j,k) = array(j,k)
-     &                   + DBLE(w(i)*(X(i)**j - xmean(j))*(X(i)
-     &                   **k - xmean(k)))
-          ENDDO
-        ENDDO
-      ENDDO
-      free1 = Npts - 1
-      sigma = DSQRT(sigma/free1)
-      DO j = 1, deg
-        sigmax(j) = DSQRT(sigmax(j)/free1)
-        r(j) = r(j)/(free1*sigmax(j)*sigma)
-        DO k = 1, j
-          array(j,k) = array(j,k)/(free1*sigmax(j)*sigmax(k))
-          array(k,j) = array(j,k)
-        ENDDO
-      ENDDO
- 
-C       INVERT SYMMETRIC MATRIX
- 
-      CALL MATINVM(deg,det,array)
-      IF(det.EQ.0.D0)THEN
-        Ierr = 2
-        RETURN
-      ENDIF
- 
-C       CALCULATE COEFFICIENTS
- 
-      Aa(1) = ymean
-      DO j = 1, deg
-        DO k = 1, deg
-          Aa(j + 1) = Aa(j + 1) + r(k)*array(j,k)
-        ENDDO
-        Aa(j + 1) = Aa(j + 1)*sigma/sigmax(j)
-        Aa(1) = Aa(1) - Aa(j + 1)*xmean(j)
-      ENDDO
- 
-      DO i = 1, Npts
-        yfit = Aa(1)
-        DO j = 1, deg
-          yfit = yfit + Aa(j + 1)*X(i)**j
-        ENDDO
-        chisq = chisq + w(i)*(Y(i) - yfit)**2
-      ENDDO
-      freen = Npts - Nterms
-      IF(freen.EQ.0)freen = 1.
-      Chisqr = chisq*wmean/freen
- 
-C       CALCULATE UNCERTAINTIES
- 
-      IF(Mode.EQ.WEIght)THEN
-        varnce = 1./wmean
-      ELSE
-        varnce = Chisqr
-      ENDIF
-      DO j = 1, deg
-        Sigmaa(1 + j) = array(j,j)*varnce/(free1*sigmax(j)**2)
-        Sigmaa(1 + j) = SQRT(Sigmaa(1 + j))
-      ENDDO
-      Sigmaa(1) = varnce/fnpts
-      DO j = 1, deg
-        DO k = 1, deg
-          Sigmaa(1) = Sigmaa(1) + varnce*xmean(j)*xmean(k)*array(j,k)
-     &                /(free1*sigmax(j)*sigmax(k))
-        ENDDO
-      ENDDO
- 
-      Sigmaa(1) = SQRT(Sigmaa(1))
-      DO j = 1, deg
-        DO k = 1, deg
-          array(j,k) = array(j,k)*varnce/(free1*sigmax(j)*sigmax(k))
-        ENDDO
-      ENDDO
- 
-      RETURN
-      END SUBROUTINE WPLFT
- 
-!---------------------------------------------------------------------------
-C++++++++++++++++++++++++++++
- 
-      SUBROUTINE MATINVM(Norder,Det,Array)
-C
-C*** Start of declarations rewritten by SPAG
-C
-C PARAMETER definitions
-C
-      INTEGER, PARAMETER :: MAXdeg = 3
-C
-C Dummy arguments
-C
-      REAL*8 :: Det
-      INTEGER :: Norder
-      REAL*8, DIMENSION(MAXdeg,MAXdeg) :: Array
-C
-C Local variables
-C
-      REAL*8 :: amax, savx
-      REAL*8 :: DABS
-      INTEGER :: i, j, k, l
-      INTEGER, DIMENSION(MAXdeg) :: ik, jk
-C
-C*** End of declarations rewritten by SPAG
-C
- 
-      Det = 1.D0
-      DO k = 1, Norder
- 
-C       FIND LARGEST ELEMENT ARRAY(I,J) IN REST OF MATRIX
- 
-        amax = 0.D0
-    5   DO i = k, Norder
-          DO j = k, Norder
-            IF(DABS(amax).LE.DABS(Array(i,j)))THEN
-              amax = Array(i,j)
-              ik(k) = i
-              jk(k) = j
-            ENDIF
-          ENDDO
-        ENDDO
- 
-C       INTERCHANGE ROWS AND COLUMNS TO PUT AMAX IN ARRAY(K,K)
- 
-        IF(amax.NE.0.D0)THEN
-          i = ik(k)
-          IF(i.LT.k)GOTO 5
-          IF(i.NE.k)THEN
-            DO j = 1, Norder
-              savx = Array(k,j)
-              Array(k,j) = Array(i,j)
-              Array(i,j) = -savx
-            ENDDO
-          ENDIF
-          j = jk(k)
-          IF(j.LT.k)GOTO 5
-          IF(j.NE.k)THEN
-            DO i = 1, Norder
-              savx = Array(i,k)
-              Array(i,k) = Array(i,j)
-              Array(i,j) = -savx
-            ENDDO
-          ENDIF
- 
-C       ACCUMULATE ELEMENTS OF INVERSE MATRIX
- 
-          DO i = 1, Norder
-            IF(i.NE.k)THEN
-              Array(i,k) = -Array(i,k)/amax
-            ENDIF
-          ENDDO
-          DO i = 1, Norder
-            DO j = 1, Norder
-              IF(i.NE.k)THEN
-                IF(j.NE.k)THEN
-                  Array(i,j) = Array(i,j) + Array(i,k)*Array(k,j)
-                ENDIF
-              ENDIF
-            ENDDO
-          ENDDO
-          DO j = 1, Norder
-            IF(j.NE.k)THEN
-              Array(k,j) = Array(k,j)/amax
-            ENDIF
-          ENDDO
-          Array(k,k) = 1./amax
-          Det = Det*amax
-        ELSE
-          Det = 0.D0
+        INTEGER NPTS, NTERMS, IERR, MODE
+        REAL*8 X(NPTS), Y(NPTS), W(NPTS)
+        REAL*8 AA(NTERMS), SIGMAA(NTERMS), CHISQR
+        DOUBLE PRECISION ARRAY(MAXDEG,MAXDEG)
+
+        DOUBLE PRECISION XMEAN(MAXDEG)
+        DOUBLE PRECISION SIGMAX(MAXDEG), WMEAN, FNPTS
+        DOUBLE PRECISION SUM,YMEAN,DET,FREE1,SIGMA,VARNCE,CHISQ
+        DOUBLE PRECISION R(MAXDEG)
+        INTEGER WEIGHT
+        PARAMETER (WEIGHT=0)
+        INTEGER DEG,I,J,K
+
+        IERR = 0
+        DEG=NTERMS-1
+        IF(DEG.LT.1.OR.DEG.GT.MAXDEG.OR.NPTS.LT.NTERMS) THEN
+          IERR=3
           RETURN
         ENDIF
-      ENDDO
- 
-C       RESTORE ORDENING OF MATRIX
- 
-      DO l = 1, Norder
-        k = Norder - l + 1
-        j = ik(k)
-        IF(j.GT.k)THEN
-          DO i = 1, Norder
-            savx = Array(i,k)
-            Array(i,k) = -Array(i,j)
-            Array(i,j) = savx
-          ENDDO
-        ENDIF
-        i = jk(k)
-        IF(i.GT.k)THEN
-          DO j = 1, Norder
-            savx = Array(k,j)
-            Array(k,j) = -Array(i,j)
-            Array(i,j) = savx
-          ENDDO
-        ENDIF
-      ENDDO
 
-      RETURN
-      END SUBROUTINE MATINVM
- 
-!---------------------------------------------------------------------------
- 
-      FUNCTION FINDINTERSECT(Uexc,Ja,Jb,Iswell)
-      INCLUDE 'dimension.h'
-      ! INCLUDE 'global.h'
-C
-C*** Start of declarations rewritten by SPAG
-C
-C COMMON variables
-C
-      REAL*8, DIMENSION(NFIsbarpnt) :: EPS_1d, VDEf_1d
-      INTEGER, DIMENSION(0:2*NFParab) :: IIExtr
-      INTEGER :: NEXtr, NPOints
-      COMMON /NUMBAR/ EPS_1d, VDEf_1d, NPOints, IIExtr, NEXtr
-C
-C Dummy arguments
-C
-      LOGICAL :: Iswell
-      INTEGER :: Ja, Jb
-      REAL*8 :: Uexc
-      REAL*8 :: FINDINTERSECT
-C
-C Local variables
-C
-      INTEGER :: is0, is1, j
-      REAL*8 :: slope
-C
-C*** End of declarations rewritten by SPAG
-C
+C       INITIALIZE SUMS AND ARRAYS
+        SUM = 0.D0
+        YMEAN=0.D0
+        SIGMA = 0.D0
+        CHISQ = 0.D0
+        AA(1) = 0.
+        SIGMAA(1) = 0.
+        DO 28 J=1,DEG
+        XMEAN(J)=0.D0
+        SIGMAX(J)=0.D0
+        R(J)=0.D0
+        AA(1+J) = 0.
+        SIGMAA(1+J) = 0.
+C       DO 28 K=1,DEG
+C28      ARRAY(J,K)=0.D0
+        DO 28 K=1,NTERMS
+28      ARRAY(J,K)=0.D0
+
+
+C       ACCUMULATE WEIGHTED SUMS
+
+        DO 50 I = 1, NPTS
+        W(I) = ABS(Y(I))
+        IF( MODE.NE.WEIGHT ) W(I) = 1.
+        SUM = SUM + DBLE(W(I))
+C       YMEAN = Sy
+        YMEAN = YMEAN + DBLE(W(I)*Y(I))
+C       XMEAN(1)=Sx, XMEAN(2)=Sxx
+C       S=NPTS*(NPTS+1)/2
+        DO 50 J = 1, DEG
+50      XMEAN(J) = XMEAN(J) + DBLE(W(I)*X(I)**J)
+        YMEAN = YMEAN / SUM
+        DO 53 J = 1, DEG
+53      XMEAN(J) = XMEAN(J) / SUM
+        FNPTS = NPTS
+        WMEAN = SUM / FNPTS
+        DO 57 I = 1, NPTS
+57      W(I) = W(I) / WMEAN
+
+        DO 67 I=1,NPTS
+        SIGMA=SIGMA+DBLE(W(I)*(Y(I)-YMEAN)**2)
+        DO 67 J=1,DEG
+        SIGMAX(J)=SIGMAX(J)+DBLE(W(I)*(X(I)**J-XMEAN(J))**2)
+        R(J)=R(J)+DBLE(W(I)*(X(I)**J-XMEAN(J))*(Y(I)-YMEAN))
+        DO 67 K=1,J
+67      ARRAY(J,K)=ARRAY(J,K)+
+     1             DBLE(W(I)*(X(I)**J-XMEAN(J))*(X(I)**K-XMEAN(K)))
+        FREE1 = NPTS-1
+        SIGMA=DSQRT(SIGMA/FREE1)
+        DO 78 J=1,DEG
+        SIGMAX(J)=DSQRT(SIGMAX(J)/FREE1)
+        R(J)=R(J)/(FREE1*SIGMAX(J)*SIGMA)
+        DO 78 K=1,J
+        ARRAY(J,K)=ARRAY(J,K)/(FREE1*SIGMAX(J)*SIGMAX(K))
+78      ARRAY(K,J)=ARRAY(J,K)
+
+C       INVERT SYMMETRIC MATRIX
+
+        CALL MATINVM( DEG, DET, ARRAY )
+        IF(DET.NE.0.D0) GO TO 101
+        IERR = 2
+        RETURN
+
+C       CALCULATE COEFFICIENTS
+
+101     AA(1)=YMEAN
+        DO J=1,DEG
+          DO K=1,DEG
+            AA(J+1)=AA(J+1)+R(K)*ARRAY(J,K)
+          ENDDO
+          AA(J+1)=AA(J+1)*SIGMA/SIGMAX(J)
+          AA(1)=AA(1)-AA(J+1)*XMEAN(J)
+        ENDDO
+
+        DO 113 I = 1, NPTS
+        YFIT = AA(1)
+        DO 112 J = 1, DEG
+112     YFIT = YFIT + AA(J+1)*X(I)**J
+113     CHISQ = CHISQ + W(I)*(Y(I)-YFIT)**2
+        FREEN = NPTS - NTERMS
+        IF( FREEN.EQ.0 ) FREEN = 1.
+        CHISQR = CHISQ*WMEAN/FREEN
+
+C       CALCULATE UNCERTAINTIES
+
+        IF( MODE.EQ.WEIGHT ) THEN
+          VARNCE = 1./WMEAN
+        ELSE
+          VARNCE = CHISQR
+        ENDIF
+        DO 133 J = 1, DEG
+        SIGMAA(1+J) = ARRAY(J,J)*VARNCE/(FREE1*SIGMAX(J)**2)
+133     SIGMAA(1+J) = SQRT(SIGMAA(1+J))
+        SIGMAA(1) = VARNCE / FNPTS
+        DO 145 J = 1, DEG
+        DO 145 K = 1, DEG
+145     SIGMAA(1) = SIGMAA(1) + VARNCE*XMEAN(J)*XMEAN(K)*ARRAY(J,K) /
+     1              (FREE1*SIGMAX(J)*SIGMAX(K))
+
+        SIGMAA(1) = SQRT(SIGMAA(1))
+        DO 160 J = 1, DEG
+        DO 160 K = 1, DEG
+160     ARRAY(J,K) = ARRAY(J,K)*VARNCE/(FREE1*SIGMAX(J)*SIGMAX(K))
+
+        RETURN
+        END
+C++++++++++++++++++++++++++++
+
+        SUBROUTINE MATINVM( NORDER, DET, ARRAY )
+
+        INTEGER MAXDEG
+        PARAMETER (MAXDEG=3)
+        INTEGER NORDER,IK(MAXDEG),JK(MAXDEG)
+        DOUBLE PRECISION DET
+        DOUBLE PRECISION ARRAY(MAXDEG,MAXDEG)
+
+        INTEGER I,J,K,L
+        DOUBLE PRECISION AMAX,SAVE
+
+        DET=1.D0
+        DO 100 K=1,NORDER
+
+C       FIND LARGEST ELEMENT ARRAY(I,J) IN REST OF MATRIX
+
+        AMAX=0.D0
+21      DO 30 I=K,NORDER
+        DO 30 J=K,NORDER
+        IF(DABS(AMAX).GT.DABS(ARRAY(I,J))) GO TO 30
+        AMAX=ARRAY(I,J)
+        IK(K)=I
+        JK(K)=J
+30      CONTINUE
+
+C       INTERCHANGE ROWS AND COLUMNS TO PUT AMAX IN ARRAY(K,K)
+
+        IF(AMAX.NE.0.D0) GO TO 41
+        DET=0.D0
+        RETURN
+41      I=IK(K)
+        IF(I-K)21,51,43
+43      DO 50 J=1,NORDER
+        SAVE=ARRAY(K,J)
+        ARRAY(K,J)=ARRAY(I,J)
+50      ARRAY(I,J)=-SAVE
+51      J=JK(K)
+        IF(J-K)21,61,53
+53      DO 60 I=1,NORDER
+        SAVE=ARRAY(I,K)
+        ARRAY(I,K)=ARRAY(I,J)
+60      ARRAY(I,J)=-SAVE
+
+C       ACCUMULATE ELEMENTS OF INVERSE MATRIX
+
+61      DO 70 I=1,NORDER
+        IF(I-K)63,70,63
+63      ARRAY(I,K)=-ARRAY(I,K)/AMAX
+70      CONTINUE
+        DO 80 I=1,NORDER
+        DO 80 J=1,NORDER
+        IF(I-K)74,80,74
+74      IF (J-K)75,80,75
+75      ARRAY(I,J)=ARRAY(I,J)+ARRAY(I,K)*ARRAY(K,J)
+80      CONTINUE
+        DO 90 J=1,NORDER
+        IF(J-K)83,90,83
+83      ARRAY(K,J)=ARRAY(K,J)/AMAX
+90      CONTINUE
+        ARRAY(K,K)=1./AMAX
+100     DET=DET*AMAX
+
+C       RESTORE ORDENING OF MATRIX
+
+        DO 130 L=1,NORDER
+        K= NORDER-L+1
+        J=IK(K)
+        IF(J-K)111,111,105
+105     DO 110 I=1,NORDER
+        SAVE=ARRAY(I,K)
+        ARRAY(I,K)=-ARRAY(I,J)
+110     ARRAY(I,J)=SAVE
+111     I=JK(K)
+        IF(I-K)130,130,113
+113     DO 120 J=1,NORDER
+        SAVE=ARRAY(K,J)
+        ARRAY(K,J)=-ARRAY(I,J)
+120     ARRAY(I,J)=SAVE
+130     CONTINUE
+        RETURN
+        END
+
+
+      REAL*8 FUNCTION FindIntersect(uexc,ja,jb,iswell)
 C
 C     Calculates solutions (beta2(i)) of the equation
 C         V(beta2) = Excitation Energy
@@ -1280,63 +1051,66 @@ C
 C     If solution not found, then assign first or last point
 C     of the interval depending on whether we are solving the equation
 C     in the rigth(left) side of the barrier(well) case
- 
+C
+C     IMPLICIT NONE
+      COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      INTEGER ja, jb, npoints, iiextr(0:2*NFPARAB), nextr
+      REAL*8 uexc
+      REAL*8 vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
+      LOGICAL iswell
+C
+C     Local variables
+      INTEGER j, is0, is1
+      REAL*8 slope
+
       is0 = -1
-      IF(ABS(Uexc - VDEf_1d(Ja)).EQ.Uexc - VDEf_1d(Ja)) is0 = 1
-      DO j = Ja, Jb
+      IF(ABS(uexc-Vdef_1d(ja)).EQ.uexc-Vdef_1d(ja)) is0 = 1
+      DO j=ja,jb
 C      checking for a sign change in Uexc-Vdef
-        is1 = -1
-        IF(ABS(Uexc - VDEf_1d(j)).EQ.Uexc - VDEf_1d(j)) is1 = 1
-        IF(is1.EQ.is0)CYCLE
+       is1 = -1
+       IF(ABS(uexc-Vdef_1d(j)).EQ.uexc-Vdef_1d(j)) is1 = 1
+       IF(is1.EQ.is0) CYCLE
 C      Sign of (Uexc-Vdef_1d(j)) changed, calculating the precise value
 C      of the deformation EPS at which Uexc = Vdef
-        FINDINTERSECT = EPS_1d(j - 1) + (EPS_1d(j) - EPS_1d(j - 1))
-     &                  *(Uexc - VDEf_1d(j - 1))
-     &                  /(VDEf_1d(j) - VDEf_1d(j - 1))
-        RETURN
+       FindIntersect = EPS_1d(j-1) + (EPS_1d(j)-EPS_1d(j-1))*
+     >       (uexc-Vdef_1d(j-1))/(Vdef_1d(j)-Vdef_1d(j-1))
+       RETURN
       ENDDO
 C
 C     Below is the analysis if intersection not found in [ja,jb]
 C
-      slope = VDEf_1d(Jb) - VDEf_1d(Ja)
-      IF(Iswell)THEN
+      slope = Vdef_1d(jb) - Vdef_1d(ja)
+      IF(iswell) then
 C       WELLS
-        IF(slope.GE.0)THEN
-          FINDINTERSECT = EPS_1d(Jb) ! ascending
+        IF(slope . ge. 0) then
+          FindIntersect = EPS_1d(jb) ! ascending
         ELSE
-          FINDINTERSECT = EPS_1d(Ja) ! descending
+          FindIntersect = EPS_1d(ja) ! descending
         ENDIF
-C       BARRIERS
-      ELSEIF(slope.GE.0)THEN
-        FINDINTERSECT = EPS_1d(Ja)   ! ascending
       ELSE
-        FINDINTERSECT = EPS_1d(Jb)   ! descending
+C       BARRIERS
+        IF(slope . ge. 0) then
+          FindIntersect = EPS_1d(ja) ! ascending
+        ELSE
+          FindIntersect = EPS_1d(jb) ! descending
+        ENDIF
       ENDIF
-
       RETURN
-      END FUNCTION FINDINTERSECT
- 
-!---------------------------------------------------------------------------
- 
-      REAL*8 FUNCTION GAUSSLEGENDRE41(F,Ea,Eb,Abserr)
+      END
+
+      REAL*8 FUNCTION GaussLegendre41(F,Ea,Eb,ABSERR)
       IMPLICIT NONE
-C
-C*** Start of declarations rewritten by SPAG
-C
-C Dummy arguments
-C
-      REAL*8 :: Abserr, Ea, Eb
-      REAL*8, EXTERNAL :: F
-C
-C Local variables
-C
-      REAL*8 :: absc, abscm1, centr1, fsum, hlgth1, resg1, resk1
-      INTEGER :: j, jtw, jtwm1
-      REAL*8, DIMENSION(10) :: wg
-      REAL*8, DIMENSION(21) :: wgk, xgk
-C
-C*** End of declarations rewritten by SPAG
-C
+      REAL*8 F
+      REAL*8 Eb,Ea,ABSERR
+      REAL*8 wg(10),xgk(21),wgk(21)
+      REAL*8 CENTR1,HLGTH1,RESG1,RESK1
+      INTEGER J,JTW,JTWM1
+      REAL*8 ABSC,FSUM,ABSCM1
+      EXTERNAL F
+      SAVE WG, XGK, WGK
 C
 C     THE ABSCISSAE AND WEIGHTS ARE GIVEN FOR THE INTERVAL (-1,1).
 C     BECAUSE OF SYMMETRY ONLY THE POSITIVE ABSCISSAE AND THEIR
@@ -1349,82 +1123,85 @@ C GAUSS QUADRATURE WEIGHTS AND KRONROD QUADRATURE ABSCISSAE AND WEIGHTS
 C AS EVALUATED WITH 80 DECIMAL DIGIT ARITHMETIC BY L. W. FULLERTON,
 C BELL LABS, NOV. 1981.
 C
-      DATA wg(1)/0.017614007139152118311861962351853D0/
-      DATA wg(2)/0.040601429800386941331039952274932D0/
-      DATA wg(3)/0.062672048334109063569506535187042D0/
-      DATA wg(4)/0.083276741576704748724758143222046D0/
-      DATA wg(5)/0.101930119817240435036750135480350D0/
-      DATA wg(6)/0.118194531961518417312377377711382D0/
-      DATA wg(7)/0.131688638449176626898494499748163D0/
-      DATA wg(8)/0.142096109318382051329298325067165D0/
-      DATA wg(9)/0.149172986472603746787828737001969D0/
-      DATA wg(10)/0.152753387130725850698084331955098D0/
+      DATA WG  (  1) / 0.0176140071 3915211831 1861962351 853 D0 /
+      DATA WG  (  2) / 0.0406014298 0038694133 1039952274 932 D0 /
+      DATA WG  (  3) / 0.0626720483 3410906356 9506535187 042 D0 /
+      DATA WG  (  4) / 0.0832767415 7670474872 4758143222 046 D0 /
+      DATA WG  (  5) / 0.1019301198 1724043503 6750135480 350 D0 /
+      DATA WG  (  6) / 0.1181945319 6151841731 2377377711 382 D0 /
+      DATA WG  (  7) / 0.1316886384 4917662689 8494499748 163 D0 /
+      DATA WG  (  8) / 0.1420961093 1838205132 9298325067 165 D0 /
+      DATA WG  (  9) / 0.1491729864 7260374678 7828737001 969 D0 /
+      DATA WG  ( 10) / 0.1527533871 3072585069 8084331955 098 D0 /
 C
-      DATA xgk(1)/0.998859031588277663838315576545863D0/
-      DATA xgk(2)/0.993128599185094924786122388471320D0/
-      DATA xgk(3)/0.981507877450250259193342994720217D0/
-      DATA xgk(4)/0.963971927277913791267666131197277D0/
-      DATA xgk(5)/0.940822633831754753519982722212443D0/
-      DATA xgk(6)/0.912234428251325905867752441203298D0/
-      DATA xgk(7)/0.878276811252281976077442995113078D0/
-      DATA xgk(8)/0.839116971822218823394529061701521D0/
-      DATA xgk(9)/0.795041428837551198350638833272788D0/
-      DATA xgk(10)/0.746331906460150792614305070355642D0/
-      DATA xgk(11)/0.693237656334751384805490711845932D0/
-      DATA xgk(12)/0.636053680726515025452836696226286D0/
-      DATA xgk(13)/0.575140446819710315342946036586425D0/
-      DATA xgk(14)/0.510867001950827098004364050955251D0/
-      DATA xgk(15)/0.443593175238725103199992213492640D0/
-      DATA xgk(16)/0.373706088715419560672548177024927D0/
-      DATA xgk(17)/0.301627868114913004320555356858592D0/
-      DATA xgk(18)/0.227785851141645078080496195368575D0/
-      DATA xgk(19)/0.152605465240922675505220241022678D0/
-      DATA xgk(20)/0.076526521133497333754640409398838D0/
-      DATA xgk(21)/0.000000000000000000000000000000000D0/
+      DATA XGK (  1) / 0.9988590315 8827766383 8315576545 863 D0 /
+      DATA XGK (  2) / 0.9931285991 8509492478 6122388471 320 D0 /
+      DATA XGK (  3) / 0.9815078774 5025025919 3342994720 217 D0 /
+      DATA XGK (  4) / 0.9639719272 7791379126 7666131197 277 D0 /
+      DATA XGK (  5) / 0.9408226338 3175475351 9982722212 443 D0 /
+      DATA XGK (  6) / 0.9122344282 5132590586 7752441203 298 D0 /
+      DATA XGK (  7) / 0.8782768112 5228197607 7442995113 078 D0 /
+      DATA XGK (  8) / 0.8391169718 2221882339 4529061701 521 D0 /
+      DATA XGK (  9) / 0.7950414288 3755119835 0638833272 788 D0 /
+      DATA XGK ( 10) / 0.7463319064 6015079261 4305070355 642 D0 /
+      DATA XGK ( 11) / 0.6932376563 3475138480 5490711845 932 D0 /
+      DATA XGK ( 12) / 0.6360536807 2651502545 2836696226 286 D0 /
+      DATA XGK ( 13) / 0.5751404468 1971031534 2946036586 425 D0 /
+      DATA XGK ( 14) / 0.5108670019 5082709800 4364050955 251 D0 /
+      DATA XGK ( 15) / 0.4435931752 3872510319 9992213492 640 D0 /
+      DATA XGK ( 16) / 0.3737060887 1541956067 2548177024 927 D0 /
+      DATA XGK ( 17) / 0.3016278681 1491300432 0555356858 592 D0 /
+      DATA XGK ( 18) / 0.2277858511 4164507808 0496195368 575 D0 /
+      DATA XGK ( 19) / 0.1526054652 4092267550 5220241022 678 D0 /
+      DATA XGK ( 20) / 0.0765265211 3349733375 4640409398 838 D0 /
+      DATA XGK ( 21) / 0.0000000000 0000000000 0000000000 000 D0 /
 C
-      DATA wgk(1)/0.003073583718520531501218293246031D0/
-      DATA wgk(2)/0.008600269855642942198661787950102D0/
-      DATA wgk(3)/0.014626169256971252983787960308868D0/
-      DATA wgk(4)/0.020388373461266523598010231432755D0/
-      DATA wgk(5)/0.025882133604951158834505067096153D0/
-      DATA wgk(6)/0.031287306777032798958543119323801D0/
-      DATA wgk(7)/0.036600169758200798030557240707211D0/
-      DATA wgk(8)/0.041668873327973686263788305936895D0/
-      DATA wgk(9)/0.046434821867497674720231880926108D0/
-      DATA wgk(10)/0.050944573923728691932707670050345D0/
-      DATA wgk(11)/0.055195105348285994744832372419777D0/
-      DATA wgk(12)/0.059111400880639572374967220648594D0/
-      DATA wgk(13)/0.062653237554781168025870122174255D0/
-      DATA wgk(14)/0.065834597133618422111563556969398D0/
-      DATA wgk(15)/0.068648672928521619345623411885368D0/
-      DATA wgk(16)/0.071054423553444068305790361723210D0/
-      DATA wgk(17)/0.073030690332786667495189417658913D0/
-      DATA wgk(18)/0.074582875400499188986581418362488D0/
-      DATA wgk(19)/0.075704497684556674659542775376617D0/
-      DATA wgk(20)/0.076377867672080736705502835038061D0/
-      DATA wgk(21)/0.076600711917999656445049901530102D0/
+      DATA WGK (  1) / 0.0030735837 1852053150 1218293246 031 D0 /
+      DATA WGK (  2) / 0.0086002698 5564294219 8661787950 102 D0 /
+      DATA WGK (  3) / 0.0146261692 5697125298 3787960308 868 D0 /
+      DATA WGK (  4) / 0.0203883734 6126652359 8010231432 755 D0 /
+      DATA WGK (  5) / 0.0258821336 0495115883 4505067096 153 D0 /
+      DATA WGK (  6) / 0.0312873067 7703279895 8543119323 801 D0 /
+      DATA WGK (  7) / 0.0366001697 5820079803 0557240707 211 D0 /
+      DATA WGK (  8) / 0.0416688733 2797368626 3788305936 895 D0 /
+      DATA WGK (  9) / 0.0464348218 6749767472 0231880926 108 D0 /
+      DATA WGK ( 10) / 0.0509445739 2372869193 2707670050 345 D0 /
+      DATA WGK ( 11) / 0.0551951053 4828599474 4832372419 777 D0 /
+      DATA WGK ( 12) / 0.0591114008 8063957237 4967220648 594 D0 /
+      DATA WGK ( 13) / 0.0626532375 5478116802 5870122174 255 D0 /
+      DATA WGK ( 14) / 0.0658345971 3361842211 1563556969 398 D0 /
+      DATA WGK ( 15) / 0.0686486729 2852161934 5623411885 368 D0 /
+      DATA WGK ( 16) / 0.0710544235 5344406830 5790361723 210 D0 /
+      DATA WGK ( 17) / 0.0730306903 3278666749 5189417658 913 D0 /
+      DATA WGK ( 18) / 0.0745828754 0049918898 6581418362 488 D0 /
+      DATA WGK ( 19) / 0.0757044976 8455667465 9542775376 617 D0 /
+      DATA WGK ( 20) / 0.0763778676 7208073670 5502835038 061 D0 /
+      DATA WGK ( 21) / 0.0766007119 1799965644 5049901530 102 D0 /
 C     Integrating from Ea to Eb, converting to symmetric grid from -1 to +1
-      centr1 = 0.5D+00*(Ea + Eb)
-      hlgth1 = 0.5D+00*(Eb - Ea)
+      CENTR1 = 0.5D+00*(Ea+Eb)
+      HLGTH1 = 0.5D+00*(Eb-Ea)
 C
 C     COMPUTE THE 41-POINT GAUSS-KRONROD APPROXIMATION TO
 C     THE INTEGRAL, AND ESTIMATE THE ABSOLUTE ERROR USING ONLY 21 points
 C
-      resg1 = 0.0D+00
-      resk1 = wgk(21)*F(centr1)
-      DO j = 1, 10
-        jtw = j*2
-        jtwm1 = jtw - 1
-        absc = hlgth1*xgk(jtw)
-        fsum = F(centr1 - absc) + F(centr1 + absc)
-        abscm1 = hlgth1*xgk(jtwm1)
-        resg1 = resg1 + wg(j)*fsum
-        resk1 = resk1 + wgk(jtw)*fsum + wgk(jtwm1)
-     &          *(F(centr1 - abscm1) + F(centr1 + abscm1))
+      RESG1 = 0.0D+00
+      RESK1 = WGK(21)*F(CENTR1)
+      DO J=1,10
+        JTW = J*2
+        JTWM1 = JTW-1
+        ABSC = HLGTH1*XGK(JTW)
+        FSUM = F(CENTR1-ABSC) + F(CENTR1+ABSC)
+        ABSCM1 = HLGTH1*XGK(JTWM1)
+        RESG1 = RESG1+WG(J)*FSUM
+        RESK1 = RESK1+WGK(JTW)*FSUM+WGK(JTWM1)*
+     &            (F(CENTR1-ABSCM1)+F(CENTR1+ABSCM1))
       ENDDO
- 
-      GAUSSLEGENDRE41 = resk1*hlgth1
-      Abserr = ABS((resk1 - resg1)*hlgth1)
- 
+
+      GaussLegendre41 = RESK1*HLGTH1
+      ABSERR = ABS((RESK1-RESG1)*HLGTH1)
+
       RETURN
-      END FUNCTION GAUSSLEGENDRE41
+      END
+
+
+
