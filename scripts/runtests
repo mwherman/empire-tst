@@ -7,4 +7,5 @@ $EMPIREDIR/scripts/runE a-ni58-pcross
 $EMPIREDIR/scripts/runE HI-pcross-ccfus
 $EMPIREDIR/scripts/run  pd105            
 $EMPIREDIR/scripts/run  pu240            
+$EMPIREDIR/scripts/run  u238-photo-fiss            
 rm -r *-tl  *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-log.* *fiss.out angdis.p92 *-e.endf *-endres.endf >& /dev/null
