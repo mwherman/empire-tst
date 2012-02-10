@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2553 $
+Ccc   * $Rev: 2555 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:35:01 +0100 (Fr, 10 Feb 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -134,12 +134,6 @@ C
                 CALL FISSION(nnuc,ke,jcn,sumfis)
               ELSE
                 CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-              ENDIF
-              IF (FISmod(nnuc).GT.0.) THEN
-                DO m = 1, INT(FISmod(nnuc)) + 1
-                  sumfis = sumfis + sumfism(m)
-                ENDDO
-                sumfis = sumfis/(INT(FISmod(nnuc)) + 1)
               ENDIF
               H_Sumtl = H_Sumtl + sumfis
               H_Sweak = H_Sweak + sumfis

@@ -1,6 +1,6 @@
-cc   * $Rev: 2553 $
+cc   * $Rev: 2555 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-10 22:35:01 +0100 (Fr, 10 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3901,7 +3901,9 @@ C
            ENDDO
          ENDIF
 
-         DENhf = DENhf + TF(1)*TFB/(TF(1) + TFB)
+	   Sumfis = TF(1)*TFB/(TF(1) + TFB)
+         
+         DENhf = DENhf + Sumfis
  
       ENDIF
 C
