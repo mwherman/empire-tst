@@ -12,12 +12,13 @@ OBJ2 = zv1_str.$(O) d_alloc.$(O)
 
 OBJS = $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3)
 
-CC     = cl
-CC     = cc
+#CC     = cl
+CC     = gcc
 CFLAGS = -c
 
-LINK   = link
-LINK   = cc
+#LINK   = link
+#LINK   = cc
+LINK   = gcc
 OPT    =
 LIBS   =
 LFLAGS = /out:$(NAMEEXE)
