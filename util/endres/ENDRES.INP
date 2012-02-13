@@ -1,6 +1,6 @@
-empire.end
-ENDRES.DAT
-endf.dat
+
+
+
 0
 
 ============================
@@ -9,3 +9,9 @@ Line 4 above:
      1 - URR used for selfshielding only
 ../../data/resonances.endf
 /home/herman/Said/38-Sr-84.endf
+
+These lines were used, now assumed as default inside the code
+to avoid issues with the spaces in names.
+empire.end
+ENDRES.DAT
+endf.dat

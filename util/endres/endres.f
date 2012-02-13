@@ -46,20 +46,23 @@ C-External routines from DXSEND.F
 C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
 C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
-      PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
+C     PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
+C                             RCN, Feb. 2012
+      PARAMETER    (MXRW=10000, MXNB=100, MXMT=100)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
       CHARACTER*40  BLNK,FLNM,FLEM,FLRR,FLOU,FLLG,FLSC,FLS1
       CHARACTER*11  CHZA,CHAW
 C*
-      DOUBLE PRECISION Q
+C     DOUBLE PRECISION Q
 C*
       DIMENSION     NBT(MXNB),INR(MXNB),MTLS(MXMT),ELOW(MXMT)
       DIMENSION     RWO(MXRW)
 C*
       DATA BLNK/'                                        '/
-     1     FLEM/'empire.end                              '/
-     2     FLRR/'mughrr.end                              '/
+     1     FLEM/'empire.end'/
+C    2     FLRR/'mughrr.end'/
+     2     FLRR/'ENDRES.DAT'/
      3     FLOU/'endf.dat'/
      4     FLLG/'endres.lst'/
      7     FLSC/'endres.scr'/
@@ -972,7 +975,7 @@ C-
       CHARACTER*40 FLS1
       CHARACTER*66 CH66,BL66
       DIMENSION    RWO(MXRW)
-      DIMENSION    NBT(20),INR(20)
+      DIMENSION    NBT(100),INR(100)
       BL66="                                 "//
      &     "                                 "
 C* Define "small" cross section
@@ -1344,9 +1347,14 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
-      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      IER = 0
+      READ (LEF,92,ERR=20,END=10) C1,C2,L1,L2,N1,N2,MAT,MF,MT
       RETURN
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
+   10 IER = 1
+      RETURN
+   20 IER = 2
+      RETURN
       END
       SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
 C-Title  : Subroutine RDTAB1
@@ -1377,13 +1385,17 @@ C*
 C-Title  : Subroutine RDTAB2
 C-Purpose: Read an ENDF TAB2 record
       DIMENSION    NBT(100),INR(100)
+      IER = 0
 C*
-      READ (LEF,902) C1,C2,L1,L2,N1,N2
-      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      READ (LEF,902,END=10,ERR=20) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=10,ERR=20) (NBT(J),INR(J),J=1,N1)
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
   903 FORMAT(6I11)
+   10 IER = 1
+      RETURN
+   20 IER = 2
       END
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
