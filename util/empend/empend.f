@@ -1426,7 +1426,9 @@ C* Loop over all residuals
         KZA=IZB(I)
         IF(KZA.EQ.IZA+IZI) THEN
 C*        -- Add binding energy brought in by the projectile
-          IF     (IZI.EQ.   1) THEN
+          IF     (IZI.EQ.   0) THEN
+C*          -- do notning for gammas
+          ELSE IF(IZI.EQ.   1) THEN
             QQ=QQ+DBLE(BEN(1,I))*1000000
           ELSE IF(IZI.EQ.1001) THEN
             QQ=QQ+DBLE(BEN(2,I))*1000000
