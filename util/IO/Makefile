@@ -6,9 +6,9 @@ CC     =  gcc
 
 # choose your fortran compiler:
 #FC     =  f90
-FC     =  gfortran
+#FC     =  gfortran
 #FC     =  f95
-#FC     =  ifort
+FC     =  ifort
 # define IPO with ifort with full cross-file optimization
 IPO = TRUE
 
@@ -43,7 +43,7 @@ ifeq ($(IPO),TRUE)
   # this generally provides the fastest executable on unix
 
   endf_io.a : endf_unx.o ipo_out.o
-	ar -csr endf_io.a *.o
+	# ar -csr endf_io.a *.o
 
   ipo_out.o: *.f90
 	ifort -x=host -O3 -real-size 64 -ipo-c endf_blklin.f90 endf_line.f90\
@@ -58,7 +58,7 @@ else
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
   endf_io.a : $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
-	#ar -csr endf_io.a $(OBJF) $(LINIO) endf_unx.o endf_line.o endf_base.o endf_cov.o endf.o
+	# ar -csr endf_io.a *.o
 
   endf_blklin.o : endf_unx.o
   endf_line.o : $(LINIO)

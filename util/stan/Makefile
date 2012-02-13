@@ -2,9 +2,9 @@
 #
 
 # choose your fortran compiler:
-FC     =  gfortran
+#FC     =  gfortran
 #FC     =  f95
-#FC     =  ifort
+FC     =  ifort
 
 # set compiler options
 ifeq ($(FC),ifort)
@@ -13,11 +13,8 @@ else
   FFLAGS = -O3 -fdefault-real-8
 endif
 
-stan: stanef.f90
+stan: stan.f90 ../IO/*.o
 	$(FC) $(FFLAGS) -I ../IO/ -o stan stan.f90 ../IO/*.o
-
-stanef.f90:
-	
 
 clean:
 	rm stan
