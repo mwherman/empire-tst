@@ -1,5 +1,5 @@
 
-                      Start time: 16:19.14 (10-02-2012)
+                      Start time: 15:55.15 (13-02-2012)
 
  cp /home/gnobre/empire/EXFOR/neutrons/094_Pu_240.c4 TMP.c4                                                                          
    Retrieving and sorting EXFOR(C4) file: /EXFOR/neutrons/094_Pu_240.c4
@@ -9,8 +9,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2553 |
-                        | empire/source  rev. 2553 |
+                        | SVN empire     rev. 2571 |
+                        | empire/source  rev. 2567 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -6120,6 +6120,6 @@ E-aver.            1.20894       0.324846        0.00000        0.00000        0
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 16:19.29 (10-02-2012)
+  End time: 15:55.31 (13-02-2012)
 
-  Calculation time:   0 min 15 s
+  Calculation time:   0 min 16 s

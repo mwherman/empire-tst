@@ -1,5 +1,5 @@
 
-                      Start time: 16:20.07 (10-02-2012)
+                      Start time: 15:56.08 (13-02-2012)
 
  cp /home/gnobre/empire/EXFOR/neutrons/042_Mo_100.c4 TMP.c4                                                                          
    Retrieving and sorting EXFOR(C4) file: /EXFOR/neutrons/042_Mo_100.c4
@@ -9,8 +9,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2553 |
-                        | empire/source  rev. 2553 |
+                        | SVN empire     rev. 2571 |
+                        | empire/source  rev. 2567 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -16938,6 +16938,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 16:20.27 (10-02-2012)
+  End time: 15:56.28 (13-02-2012)
 
   Calculation time:   0 min 20 s

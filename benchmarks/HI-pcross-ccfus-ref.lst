@@ -1,5 +1,5 @@
 
-                      Start time: 16:13.43 (10-02-2012)
+                      Start time: 15:49.49 (13-02-2012)
 
  WARNING: No EXFOR retrievals for complex projectiles
 
@@ -9,8 +9,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2553 |
-                        | empire/source  rev. 2553 |
+                        | SVN empire     rev. 2571 |
+                        | empire/source  rev. 2567 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -3356,6 +3356,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 16:14.13 (10-02-2012)
+  End time: 15:50.19 (13-02-2012)
 
-  Calculation time:   0 min 31 s
+  Calculation time:   0 min 30 s
