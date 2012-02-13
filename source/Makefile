@@ -1,6 +1,6 @@
-#$Rev: 2557 $
-#$Author: dbrown $
-#$Date: 2012-02-10 23:02:30 +0100 (Fr, 10 Feb 2012) $
+#$Rev: 2567 $
+#$Author: shoblit $
+#$Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
  
 #---------------------------------
 #----GNU gfortran FORTRAN compiler
@@ -8,8 +8,8 @@
 FC     =  gfortran
 #CC     =  gcc
 #----flags for production compilation with gfortran
-#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 # -pg shoudl be added for profiling
 #FFLAGS = -O3 -pg -std=legacy 
 #----flags for debuging using gfortran compiler
@@ -37,7 +37,7 @@ FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
 #FC     =  ifort
 #----flags for production compilation using ifort
 #FFLAGS = -arch pn4 -O3 -ipo
-#FFLAGS = -O3 -x=host
+#FFLAGS = -O3 -x=host -ipo
 #FFLAGS = -arch pn4 -O3 -axPW -ipo
 #----flags for debuging using ifort compiler
 #FFLAGS =  -C -ftrapuv -g -debug all
@@ -113,7 +113,7 @@ optmand:	optmand.o
 #empire:   $(OBJF) $(OBJE)
 #     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
-../util/IO/endf_io.a : ../util/IO/endf_io.mod
+#../util/IO/endf_io.a : ../util/IO/endf_io.mod
 
 ../util/IO/endf_io.mod :
 	cd ../util/IO/ ; $(MAKE) -e "FC=$(FC)" ;

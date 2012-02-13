@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -1067,6 +1067,16 @@ C     Local variables
       REAL*8 slope
 
       is0 = -1
+
+
+
+	if(ja.le.0) ja=1
+
+	if(jb.gt.NFISBARPNT) jb=NFISBARPNT
+
+	if(jb.le.0) jb=1
+
+      
       IF(ABS(uexc-Vdef_1d(ja)).EQ.uexc-Vdef_1d(ja)) is0 = 1
       DO j=ja,jb
 C      checking for a sign change in Uexc-Vdef
@@ -1202,6 +1212,5 @@ C
 
       RETURN
       END
-
 
 
