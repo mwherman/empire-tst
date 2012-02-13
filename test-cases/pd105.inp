@@ -16,8 +16,8 @@ IOUT       3.
 LEVDEN     0.                         EMPIRE NLD (EGSM RIPL-3) as default
 NEX      080.                         Number of points in the outgoing energy grid
 HRTW       3.                         Width fluctuations considered up to 3 MeV (for neutron induced)
-MSD        0.                         Quantum statistical Multi-Step-Direct model
-MSC        0.                         Quantum statistical Multi-Step-Compound model
+MSD        1.                         Quantum statistical Multi-Step-Direct model
+MSC        1.                         Quantum statistical Multi-Step-Compound model
 MSDMIN    3.1                                
 ENDF       2.                         ENDF formatting selected, with all reactions with 2 or less emitted particles being exclusive
 PCROSS    1.5                         Exciton model with default 1.5 MFP parameter  
