@@ -6,9 +6,9 @@ CC     =  gcc
 
 # choose your fortran compiler:
 #FC     =  f90
-#FC     =  gfortran
+FC     =  gfortran
 #FC     =  f95
-FC     =  ifort
+#FC     =  ifort
 # define IPO with ifort with full cross-file optimization
 IPO = TRUE
 

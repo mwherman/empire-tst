@@ -2,9 +2,9 @@
 #
 
 # choose your fortran compiler:
-#FC     =  gfortran
+FC     =  gfortran
 #FC     =  f95
-FC     =  ifort
+#FC     =  ifort
 
 # set compiler options
 ifeq ($(FC),ifort)
