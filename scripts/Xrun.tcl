@@ -1,6 +1,6 @@
-# $Rev: 2502 $
-# $Author: rcapote $
-# $Date: 2012-02-08 19:30:08 +0100 (Mi, 08 Feb 2012) $
+# $Rev: 2569 $
+# $Author: shoblit $
+# $Date: 2012-02-13 21:37:44 +0100 (Mo, 13 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5687,7 +5687,7 @@ set eres 0.02
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list empire_ctl.f main.f input.f fusion.f tl.f ccfus.f MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f fitbarrier.f plot-zvv.f degas.f  ddhms.f  pcross.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.f systematics.f pfns.f dtrans.f kailas07emp.f dimension.h global.h io.h ddhms.cmb Makefile]
+set modules [list Makefile dimension.h main.f input.f fusion.f tl.f empire_ctl.f ccfus.f readMSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f fitbarrier.f plot-zvv.f ddhms.f  pcross.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f read_nubar.f90 ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.f systematics.f pfns.f dtrans.f optmand.f kailas07emp.f global.h io.h ddhms.cmb]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
@@ -6202,7 +6202,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_11_0.but93" "Button42" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but93 "$site_11_0.but93 Button $top all _vTclBalloon"
     bind $site_11_0.but93 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Edit collective levels used for direct calculations with ECIS}
+        set ::vTcl::balloon::%W {Edit collective levels used for direct calculations with ECIS/OPTMAN}
     }
     button $site_11_0.but101 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6246,7 +6246,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_11_0.but101" "Button54" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.but101 "$site_11_0.but101 Button $top all _vTclBalloon"
     bind $site_11_0.but101 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Edit optical model parameters used for direct calculations with ECIS}
+        set ::vTcl::balloon::%W {Edit optical model parameters used for direct calculations with ECIS/OPTMAN}
     }
     button $site_11_0.cpd67 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6295,7 +6295,7 @@ close $rcfl
 exit} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {EXIT} -width 13 -wraplength 80 
+        -pady 2m -relief raised -text {EXIT / SAVE SETTINGS} -width 14 -wraplength 70 
     vTcl:DefineAlias "$site_9_0.cpd73" "Button58" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd73 "$site_9_0.cpd73 Button $top all _vTclBalloon"
     bind $site_9_0.cpd73 <<SetBalloon>> {
@@ -6304,7 +6304,7 @@ exit} \
     pack $site_9_0.fra76 \
         -in $site_9_0 -anchor center -expand 0 -fill none -side top 
     pack $site_9_0.cpd73 \
-        -in $site_9_0 -anchor center -expand 0 -fill none -pady 10 -side top 
+        -in $site_9_0 -anchor center -expand 0 -fill none -pady 40 -side top 
     pack $site_8_0.lab69 \
         -in $site_8_0 -anchor center -expand 0 -fill none -side left 
     pack $site_8_0.lab100 \
@@ -6433,7 +6433,7 @@ adjourn .top75} \
     button $site_10_0.cpd81 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #d9d9d9 \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/x4interface $file &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/EXFOR-web &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
@@ -6441,7 +6441,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.cpd81" "Button40" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd81 "$site_10_0.cpd81 Button $top all _vTclBalloon"
     bind $site_10_0.cpd81 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Fire up EXFOR retrieval interface}
+        set ::vTcl::balloon::%W {Fire up internet browser and go to the EXFOR website}
     }
     button $site_10_0.cpd82 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -8198,7 +8198,9 @@ exit} \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_4_0.menu97 add radiobutton \
-        -value gvim -variable editor -command {} -label gvim 
+        -value gedit -variable editor -command {} -label gedit 
+    $site_4_0.menu97 add radiobutton \
+        -value vim -variable editor -command {} -label vim 
     $site_4_0.menu97 add radiobutton \
         -value emacs -variable editor -command {} -label emacs 
     $site_4_0.menu97 add radiobutton \
@@ -8209,8 +8211,6 @@ exit} \
         -value kate -variable editor -command {} -label kate 
     $site_4_0.menu97 add radiobutton \
         -value nedit -variable editor -command {} -label nedit 
-    $site_4_0.menu97 add radiobutton \
-        -value gedit -variable editor -command {} -label gedit 
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
         -command {
@@ -8223,11 +8223,11 @@ set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
         -tearoff 0 
 
     $site_4_0.men87 add radiobutton \
+        -value evince -variable psviewer -command {} -label evince 
+    $site_4_0.men87 add radiobutton \
         -value kpdf -variable psviewer -command {} -label kpdf 
     $site_4_0.men87 add radiobutton \
         -value kghostview -variable psviewer -command {} -label kghostview 
-    $site_4_0.men87 add radiobutton \
-        -value evince -variable psviewer -command {} -label evince 
     $site_4_0.men87 add radiobutton \
         -value kghostview -variable psviewer -command {} -label kghostview 
     $site_4_0.men87 add radiobutton \
@@ -8517,6 +8517,10 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         
     $site_3_0.menu94 add command \
         -command { editFile $file-ecis.out } -label {ECIS } 
+    $site_3_0.menu94 add separator \
+
+    $site_3_0.menu94 add command \
+        -command { editFile $file-optman.out } -label {OPTMAN } 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \

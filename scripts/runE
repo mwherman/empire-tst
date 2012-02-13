@@ -21,6 +21,11 @@ from glob import glob
 PACKAGEDIR = os.sep.join( os.path.dirname( os.path.abspath( __file__ ) ).split( os.sep )[:-1] )
 
 def get_version( ):
+    if (not os.path.exists(PACKAGEDIR + os.sep + 'version')):
+        VERSIONNUMBER = '3.1'  # setting default for the case that the version file is not found 
+        VERSIONNAME = 'RIVOLI' # setting default for the case that the version file is not found 
+        return ( VERSIONNAME, VERSIONNUMBER )
+
     for line in open( PACKAGEDIR + os.sep + 'version' ).readlines(): 
         if line.startswith( 'VERSIONNUMBER' ): VERSIONNUMBER = line.split( )[-1]
         if line.startswith( 'VERSIONNAME' ): VERSIONNAME = line.split( )[-1]
@@ -167,14 +172,12 @@ def runE(proj):
             mv('TARGET_COLL.DAT',proj+'-lev.col')
             tfile = open(proj+'-lev.col','a')   # append mode
             tfile.write('\n\n\n')
-            tfile.write('NOTE: this line and those below will not\
-                    be used by Empire. \n')
-	    tfile.write('      The collective levels and ground state band\
-                    deformation \n')
-            tfile.write('      printed below are retrieved from RIPL optical\
-                    model database\n')
-            tfile.write('      and provided for comparison with selected collective levels\
-                    above.\n')
+            tfile.write('-------------------------------------------------------------- \n')
+            tfile.write('NOTE: this line and those below will not be used by EMPIRE. \n')
+            tfile.write('      The collective levels and ground state band deformation \n')
+            tfile.write('      printed below are retrieved from RIPL optical model data \n')
+            tfile.write('      and provided as a reference. \n')
+            tfile.write('-------------------------------------------------------------- \n')
             tfile.write('\n\n')
             if not isEmpty('TARGET_COLL_RIPL.DAT'):
                 tfile1 = open('TARGET_COLL_RIPL.DAT','r').readlines()
@@ -269,7 +272,7 @@ def runE(proj):
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ddhms.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT')
-    rm( glob('TARGET-*.tl'))
+    rm( glob('TARGET-*.tl'), glob('ecis06.*'))
     rm('TARGET.LEV','OMP_A.DAT','NUBAR-EVAL.ENDF')
     rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
@@ -347,13 +350,13 @@ def runE(proj):
 def splashscreen():
     splash = [
     ' ',\
-    ' EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333   11 ',\
-    ' E      MM  MM  P   P  I  R   R  E             33   11 ',\
-    ' EEE    M MM M  PPPP   I  RRRR   EEE    =   33333   11 ',\
-    ' E      M    M  P      I  R  R   E              3   11 ',\
-    ' EEEEE  M    M  P      I  R   R  EEEEE      33333 O 11 ',\
+    ' EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 ',\
+    ' E      MM  MM  P   P  I  R   R  E             33 ',\
+    ' EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 ',\
+    ' E      M    M  P      I  R  R   E              3 ',\
+    ' EEEEE  M    M  P      I  R   R  EEEEE      33333 ',\
     ' ',\
-    ' '.join( get_version()[0] ) + '  ( version ' + get_version()[1] +' )',\
+    ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
     ' ',\
     ' Sao Jose dos Campos, Brazil, May 2011 ',\
     ' Upton, New York, USA, January 2012 ',\

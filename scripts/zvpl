@@ -32,13 +32,13 @@ while [ "$repeat" != "n" ]
         fi            
         if [ "$file" != "$filem" ]
            then
-           gvim $file.lst  
+           vi $file.lst  
         fi            
         echo ' '
         echo -n 'Paste search pattern as second line in the'
         echo 'editor window that just have opened, then close editor, '
         echo '(saving the file), return to THIS window and hit return.'
-        gvim PATTERN
+        gedit PATTERN
         read spattern
 #       echo $spattern >>PATTERN
         echo -n 'Label this curve:'
@@ -98,9 +98,8 @@ echo 'dot: 0'>>PLOT.zvd
 echo 'bot: 0'>>PLOT.zvd
 echo 'thick: 2'>>PLOT.zvd
 echo '#end control.tit/c'>>PLOT.zvd
-
-ln -s ../util/c4zvd/ps01.tit ps01.tit
-../util/c4zvd/zvview.exe -p:$file PLOT.zvd  ps01.tit/c
+ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+$EMPIREDIR/util/c4zvd/zvview.exe -p:$file PLOT.zvd  ps01.tit/c
 rm ps01.tit
 
 # store PostScript

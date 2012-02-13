@@ -17,7 +17,7 @@ list=""
 for file in $*
 do
 list=$list$file$blank
-ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 done
 $EMPIREDIR/util/c4zvd/zvview.exe -p:$file $list ps01.tit/c
 rm ps01.tit

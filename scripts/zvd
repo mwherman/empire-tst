@@ -61,7 +61,7 @@ $c4zvd_dir/c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
 $c4zvd_dir/datzvdl.exe tmp.dat c4.zvd
 $c4zvd_dir/endzvdl.exe A $MT Present end.zvd
 $c4zvd33_dir/endf33zvd_l.exe -mt:$MT -c:$file-$MT-cov.zvd -u:$file-$MT-unc.zvd Present
-echo #!zvview.exe >$file-$MT.zvd
+echo '#!zvview.exe' >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
 $c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
