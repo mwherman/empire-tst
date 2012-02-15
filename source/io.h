@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $ 
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 2576 $
+Ccc   * $Author: gnobre $ 
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
 Ccc   * $Id$
             
 c     NOTE UNITS OPENED IN MODULES
@@ -148,6 +148,7 @@ C     Added to check if file is not empty
       OPEN (26,FILE=trim(empiredir)//'/RIPL/optical/om-data'
      * //'/om-parameter-u.dat',STATUS='OLD')
 C     OPEN (UNIT = 30,FILE='GAMMA.DAT')
+      OPEN (95,FILE='COVAR-PAR.DAT')
 
 
 

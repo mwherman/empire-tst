@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1669,7 +1669,6 @@ C
       REAL*8 DLOG10
       CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
-      INTEGER*4 PIPE
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1784,8 +1783,6 @@ cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       ENDIF
       iugrid = i - 1
       defit=0.d0
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)
-     &     call  PLOT_ZVV_NumCumul(Nnuc, defit,nplot,jmaxl)
       DO kk = 1, NEX(Nnuc)
          u = EX(kk,Nnuc) - ROHfbp(nnuc)
          UEXcit(kk,Nnuc) = EX(kk,Nnuc)
@@ -1847,6 +1844,8 @@ C
 C-----plot of the l.d. formula
       IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) CALL PLOT_ZVV_GSLD(Nnuc)
 
+      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)
+     &     call  PLOT_ZVV_NumCumul(Nnuc, defit,nplot,jmaxl)
 C--------cumulative plot of levels along with the l.d. formula
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) THEN
          WRITE (8,99009) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
@@ -1893,10 +1892,7 @@ C              rocumul = rocumul + 0.5d0*defit
          ENDDO
          CLOSE (36)
          CLOSE (34)
-         IF (IOPsys.EQ.0) THEN
-            iwin = PIPE('gnuplot fort.35')
-            CLOSE (35)
-         ENDIF
+         CLOSE (35)
       ENDIF
 
       RETURN

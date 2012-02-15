@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2576 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)

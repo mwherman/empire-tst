@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2576 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3407,7 +3407,8 @@ C
         GOTO 100  ! next line
       ENDIF
 
-      READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name, val, i1, i2, i3, i4
+	name = '      '
+      READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
 C-----------Print some final input options
@@ -7694,27 +7695,6 @@ C
 C-----------Set up normalization factors for level density parameter 'a'
 C-----------for all level density models except HFB
 C
-
-C-----------Gilbert-Cameron (no explicit collective effects)
-            IF (ADIv.EQ.2.D0) THEN
-              ! for the time being, G&C not refitted !
-              del = 0.0
-              delp = 12.0/SQRT(A(nnuc))
-              IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
-              IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
-              uexc = qn - del                  
-C-------------Mebel's  parametrization (taken from the INC code for the case
-C-------------of no collective enhancements) normalized to existing exp. data
-              IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
-                atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
-                gamma = -0.051d0
-                asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
-                atiln =  arogc/asys
-              ELSE
-                atiln = 1.0   
-              ENDIF                  
-            ENDIF 
-                 
 C-----------EMPIRE specific (EGSM) with RIPL shell corrections
             IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -7733,6 +7713,64 @@ C-----------EMPIRE specific (EGSM) with RIPL shell corrections
               atiln =  aroc/asys
             ENDIF
 
+C-----------GSM (Ignatyuk) with RIPL shell corrections
+            IF (ADIv.EQ.1) THEN
+              CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+              atil = ap1*A(nnuc) + ap2*a23
+              tcrt = 0.567*delp
+              ar = atil*(1.0 + SHC(nnuc)*gamma)
+              DO ix = 1, 20
+                 xr = ar*tcrt**2
+                 acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
+                 IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
+                 ar = acrt
+              ENDDO
+              econd = 1.5*acrt*delp**2/pi2
+              uexc = qn + del - econd
+              asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
+              atiln =  asys_gsm/asys
+            ENDIF
+
+
+C-----------Gilbert-Cameron (no explicit collective effects)
+            IF (ADIv.EQ.2.D0) THEN
+              ! for the time being, G&C not refitted !
+	        ! arogc below should be replaced by the new one
+              CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+              atil = ap1*A(nnuc) + ap2*a23
+              tcrt = 0.567*delp
+              ar = atil*(1.0 + SHC(nnuc)*gamma)
+              DO ix = 1, 20
+                 xr = ar*tcrt**2
+                 acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
+                 IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
+                 ar = acrt
+              ENDDO
+              econd = 1.5*acrt*delp**2/pi2
+              uexc = qn + del - econd
+              asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
+              atiln =  arogc/asys
+            ENDIF 
+
+            IF (ADIv.EQ.4.D0) THEN
+              ! for the time being, G&C not refitted !
+              del = 0.0
+              delp = 12.0/SQRT(A(nnuc))
+              IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
+              IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
+              uexc = qn - del                  
+C-------------Mebel's  parametrization (taken from the INC code for the case
+C-------------of no collective enhancements) normalized to existing exp. data
+              IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
+                atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
+                gamma = -0.051d0
+                asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
+                atiln =  arogc/asys
+              ELSE
+                atiln = 1.0   
+              ENDIF                  
+            ENDIF 
+                 
             IF(ATIlnor(nnuc).EQ.0) THEN
               ATIlnor(nnuc) = atiln
             ELSE
@@ -7758,13 +7796,7 @@ C-----------Print resulting level density parameters
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
                WRITE(8,*)
-               IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.2.0D0) then 
-                  WRITE (8,*)
-     &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
-                  WRITE (8,*) 
-     &              ' DELTA=', sngl(del),' Dobs=',sngl(dob)
-               ENDIF
-               IF (ADIv.EQ.2.0D0) then
+               IF (ADIv.NE.3) then 
                   WRITE (8,*)
      &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
                   WRITE (8,*) 
@@ -7776,7 +7808,15 @@ C-----------Print resulting level density parameters
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-               IF (ADIv.EQ.2.0D0)
+               IF (ADIv.EQ.1.0D0)
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         asys_gsm, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+               IF (ADIv.EQ.2.0D0)   ! to be updated once G&C is refitted
+     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+               IF (ADIv.EQ.4.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
@@ -7798,7 +7838,6 @@ C-----------Print resulting level density parameters
      &     INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &     ATIlnor(nnuc)
          ENDIF
-
       ENDDO
       RETURN
       END

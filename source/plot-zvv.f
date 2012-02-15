@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2576 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -446,9 +446,6 @@ C Local variables
 C
       INTEGER ij, il, kk
       INTEGER INT
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
-
  
       WRITE (8,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                   ATIlnor(Nnuc), ATIl, NLV(Nnuc)
@@ -491,11 +488,8 @@ C
          WRITE (34,*) defit*(kk - 1), rocumul
       ENDDO
       CLOSE (36)
+      CLOSE (35)
       CLOSE (34)
-      IF (IOPsys.EQ.0) THEN
-         iwin = PIPE('gnuplot fort.35')
-         CLOSE (35)
-      ENDIF
 
       RETURN
       END
@@ -508,11 +502,7 @@ c==============================================================
 
       REAL*8 am,ux,t,eo
       COMMON /CT/ am,ux,eo,T
- 
       INTEGER Nnuc
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
-
 
       WRITE (8,*) ' A=', A(Nnuc), 'Z=', Z(Nnuc), ' Ncut=', NLV(Nnuc)
       WRITE (8,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
@@ -543,10 +533,7 @@ c==============================================================
       ENDDO
       CLOSE (36)
       CLOSE (34)
-      IF (IOPsys.EQ.0) THEN
-         iwin = PIPE('gnuplot fort.35')
-         CLOSE (35)
-      ENDIF
+      CLOSE (35)
 
       RETURN
       END

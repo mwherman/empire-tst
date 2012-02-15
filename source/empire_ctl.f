@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 2576 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -2071,7 +2071,7 @@ C-----Read one line of the sensitivity input
   100 READ (17,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 100
-C      READ (inprecord,'(A6,G10.5,4I5)',ERR = 200) name,val,i1,i2, i3, i4
+      name = '      ' 
       READ (inprecord,'(A6,G10.5,4I5)',ERR = 200)name,val,i1p,i2p,i3, i4
       i2=int(atarget)-i1p-i2p+int(aprojec)-int(zprojec)
       i1=int(ztarget)-i1p
