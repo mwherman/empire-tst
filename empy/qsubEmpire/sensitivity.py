@@ -26,7 +26,7 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', 'GRANGN', 'GRANGP', 
         'GTILNO', 'PCROSS', 'QFIS', 'RESNOR', 'SHELNO', 'TOTRED', 
         'TUNE', 'TUNEFI', 'TUNEPE', 'UOMPAS', 'UOMPAV', 'UOMPRS', 
-        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV')
+        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF','FCCRED')
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'CSGDR2', 'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 
         'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', 'EXPUSH', 'FCC', 
@@ -37,7 +37,7 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 
 # these global parameters don't need Z,A of isotope specified
-Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR')
+Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED')
 # not a complete list yet!
 
 
@@ -51,7 +51,7 @@ def parseInput(proj):
     opts = []
     while True:
         line = fin.next()
-        if line[0] in ('#','!','*'):
+        if line[0] in ('#','!','*','@'):
             continue    # ignore full-line comments
         line = line.split('!')[0]   # eliminate end-of-line comments
         line = line.rstrip() + "\n"
@@ -141,7 +141,7 @@ def init(proj):
     
     # main loop: vary each parameter in the sensitivity input:
     for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*'):
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
         tmp = readOption(line)
@@ -263,7 +263,7 @@ def copyTLs(proj):
     """
     sens = open(proj+"-inp.sen", "r")
     for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*'):
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         if line.startswith("UOM") or line.startswith("DEFNUC"):
             # don't copy tls when we vary the optical model parameters
@@ -301,7 +301,7 @@ def run(proj):
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
     for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*'):
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
         tmp = line.split('!')[0]
@@ -362,7 +362,7 @@ def analyze(proj):
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
     for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*'):
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
         tmp = line.split('!')[0]

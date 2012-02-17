@@ -39,12 +39,12 @@ def parseInput(inputFile):
     # every file should have 10 lines of header
     for i in range(10):
         header.append(fin.next())
-    assert 'NUMBER OF L.I. TO BE EMITTED' in header[-1],\
+    assert 'NUMBER OF L.I. TO BE EMITTED' or ' reserved' in header[-1],\
             "Must use new-style input!"
     
     # read in options:
     for line in fin:
-        if line[:1] in ('*','!','#'):
+        if line[:1] in ('*','!','#','@'):
             # skip comments
             continue
         if line[:2] == "GO":
@@ -60,7 +60,7 @@ def parseInput(inputFile):
         if line[:2] == '-1':
             # done with energies
             break
-        elif line[:1] in ('*','!','#'):
+        elif line[:1] in ('*','!','#','@'):
             # skip comments
             continue
         elif line[:1] == '$':
