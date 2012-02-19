@@ -1,6 +1,6 @@
-# $Rev: 2569 $
-# $Author: shoblit $
-# $Date: 2012-02-13 21:37:44 +0100 (Mo, 13 Feb 2012) $
+# $Rev: 2578 $
+# $Author: mherman $
+# $Date: 2012-02-19 09:03:57 +0100 (So, 19 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5254,6 +5254,7 @@ proc vTcl:project:info {} {
         set procs {
             editFile
             pspdfView
+            RepWriter
             refreshsvndirectory
             init
             main
@@ -5326,6 +5327,31 @@ proc ::pspdfView {filename} {
                 # most likely windows, I don't know how to handle this yet
                 # need a windows machine to test with
                 exec $::psviewer $filename &
+        }
+}
+#############################################################################
+## Procedure:  RepWriter
+
+proc ::RepWriter {filename} {
+        ## make empire flexible enough to handle opening files
+        ## on various platforms. C.Mattoon, Nov 13 2008
+        if {$::RepWriter == ""} {
+                set ::RepWriter [tk_getOpenFile  -parent .top75 -title "Select Report Editor"]
+        }
+
+        if {$::tcl_platform(os)=="Darwin"} {
+                if [regexp {\.app} $::RepWriter] {
+                        exec open -a $::RepWriter $filename      
+                } else {
+                        # hopefully command is recognized:
+                        exec $::RepWriter $filename &
+                }
+        } elseif {$::tcl_platform(os)=="Linux"} {
+                exec $::RepWriter $filename &
+        } else {
+                # most likely windows, I don't know how to handle this yet
+                # need a windows machine to test with
+                exec $::RepWriter $filename &
         }
 }
 #############################################################################
@@ -5663,6 +5689,7 @@ if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    gets $rcfl compeval
    gets $rcfl mat
    gets $rcfl EXPDAT
+   gets $rcfl RepWriter
 close $rcfl
       } else {
 #  set rcfl [open $::env(EMPIREDIR)/.Xrunrc a+]
@@ -5674,6 +5701,7 @@ close $rcfl
    set compeval ""
    set mat 1111
    set EXPDAT 1
+   set RepWriter ""
 
    }
 
@@ -6031,7 +6059,7 @@ adjourn .top75}} \
     set site_8_0 [lindex [$top.tab88 childsite] 0]
     ::iwidgets::labeledframe $site_8_0.lab69 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Execute 
+        -background #d9d9d9 -labeltext Execute 
     vTcl:DefineAlias "$site_8_0.lab69" "Labeledframe15" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab69 childsite]
     frame $site_10_0.fra70 \
@@ -6064,7 +6092,7 @@ editFile $file.inp } \
         set ::vTcl::balloon::%W {Edit input file}
     }
     ::iwidgets::entryfield $site_11_0.cpd78 \
-        -labelfont {Helvetica -12} -labeltext MAT -textvariable mat -width 4 
+        -labelfont {Helvetica -12} -background #d9d9d9 -labeltext MAT -textvariable mat -width 4 
     vTcl:DefineAlias "$site_11_0.cpd78" "Entryfield9" vTcl:WidgetProc "Toplevel1" 1
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -6082,7 +6110,7 @@ ddlist
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -relief raised -text {Run selected ->} 
+        -relief raised -text {Run selected:} 
     vTcl:DefineAlias "$site_11_0.cpd75" "Button32" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_11_0.cpd75 "$site_11_0.cpd75 Button $top all _vTclBalloon"
     bind $site_11_0.cpd75 <<SetBalloon>> {
@@ -6105,23 +6133,23 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.che77" "Checkbox5" vTcl:WidgetProc "Toplevel1" 1
     $site_10_0.che77 add chk0 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text EMPIRE -textvariable {} \
+        -justify left -selectcolor #00ff00 -text { EMPIRE} -textvariable {} \
         -variable cempire 
     $site_10_0.che77 add chk1 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text {Formatting (EMPEND)} \
+        -justify left -selectcolor #00ff00 -text { Formatting (EMPEND)} \
         -textvariable {} -variable cformat 
     $site_10_0.che77 add chk2 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text Verification \
+        -justify left -selectcolor #00ff00 -text { Verification} \
         -textvariable {} -variable cverify 
     $site_10_0.che77 add chk3 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text {Preparing ZVD-Plots}\
+        -justify left -selectcolor #00ff00 -text { Preparing for plotting}\
         -textvariable {} -variable cprepro 
     $site_10_0.che77 add chk4 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text {Adding resonances} \
+        -justify left -selectcolor #00ff00 -text { Adding resonances} \
         -textvariable {} -variable cplot 
     pack $site_10_0.fra70 \
         -in $site_10_0 -anchor center -expand 1 -fill both -side left 
@@ -6130,7 +6158,7 @@ adjourn .top75} \
     ::iwidgets::labeledframe $site_8_0.lab100 \
         -ipadx 5 -ipady 5 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext Output 
+        -labelpos nw -background #d9d9d9 -labeltext Output 
     vTcl:DefineAlias "$site_8_0.lab100" "Labeledframe3" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab100 childsite]
     button $site_10_0.but92 \
@@ -6174,7 +6202,7 @@ adjourn .top75} \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     ::iwidgets::labeledframe $site_8_0.lab70 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Output/Input 
+        -background #d9d9d9 -labeltext Output/Input 
     vTcl:DefineAlias "$site_8_0.lab70" "Labeledframe1" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_0.lab70 childsite]
     frame $site_10_0.cpd71 \
@@ -6319,7 +6347,7 @@ exit} \
     ::iwidgets::labeledframe $site_8_1.lab105 \
         -ipadx 5 -ipady 5 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {OMP fit} 
+        -background #d9d9d9 -labelpos nw -labeltext {OMP fit} 
     vTcl:DefineAlias "$site_8_1.lab105" "Labeledframe7" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab105 childsite]
     button $site_10_0.but74 \
@@ -6427,12 +6455,13 @@ adjourn .top75} \
         -in $site_10_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     ::iwidgets::labeledframe $site_8_1.lab71 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext EXFOR 
+        -background #d9d9d9 -labeltext EXFOR 
     vTcl:DefineAlias "$site_8_1.lab71" "Labeledframe6" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab71 childsite]
     button $site_10_0.cpd81 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #d9d9d9 \
+        -state disabled \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/EXFOR-web &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
@@ -6503,7 +6532,7 @@ adjourn .top75} \
         -in $site_10_0 -column 1 -row 2 -columnspan 1 -rowspan 1 -pady 5 
     ::iwidgets::labeledframe $site_8_1.lab75 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext ECIS 
+        -background #d9d9d9 -labeltext ECIS 
     vTcl:DefineAlias "$site_8_1.lab75" "Labeledframe11" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_1.lab75 childsite]
     button $site_10_0.but81 \
@@ -6548,7 +6577,7 @@ adjourn .top75} \
         -activebackground #dcdcdc \
         -dblclickcommand {exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb $file [selection get] &} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Available ZVV plots} -listvariable zvvplots \
+        -background #d9d9d9 -labeltext {Available ZVV plots} -listvariable zvvplots \
         -selectioncommand {set seleczvvlist [selection get]} \
         -selectmode extended -textbackground #ffffff \
         -textfont {Helvetica -12 } -vscrollmode dynamic -width 250 
@@ -6558,7 +6587,7 @@ adjourn .top75} \
     set site_9_0 $site_8_2.fra84
     ::iwidgets::entryfield $site_9_0.ent85 \
         -command {set zvvplots [glob -nocomplain *$zvfilter*.zvd]} \
-        -labelfont {Helvetica -12 } -labeltext Filter: -textbackground white \
+        -labelfont {Helvetica -12 } -background #d9d9d9 -labeltext Filter: -textbackground white \
         -textvariable zvfilter -width 15 
     vTcl:DefineAlias "$site_9_0.ent85" "Entryfield1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra90 \
@@ -6786,15 +6815,15 @@ lappend dd} \
     ::iwidgets::entryfield $site_9_0.ent80 \
         -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List of selected } -textbackground #ffffff \
-        -textvariable ddx -width 0 
+        -background #d9d9d9 -textvariable ddx -width 0 
     vTcl:DefineAlias "$site_9_0.ent80" "Entryfield3" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_9_0.ent82 \
         -justify right -labelfont {Helvetica -12 } -labeltext {Shift 10**} \
-        -textbackground #ffffff -textvariable nsh 
+        -background #d9d9d9 -textbackground #ffffff -textvariable nsh 
     vTcl:DefineAlias "$site_9_0.ent82" "Entryfield4" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::entryfield $site_9_0.ent83 \
         -justify right -labelfont {Helvetica -12 } -labeltext {Eres (rel)} \
-        -textbackground #ffffff -textvariable eres 
+        -background #d9d9d9 -textbackground #ffffff -textvariable eres 
     vTcl:DefineAlias "$site_9_0.ent83" "Entryfield5" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6847,7 +6876,7 @@ exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
         -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page3.cs.fra79.com77 _addToList}} \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name} -selectioncommand {set ddx $memlist($multi)} \
-        -textbackground #ffffff -textvariable multi -unique 1 -width 37 
+        -background #d9d9d9 -textbackground #ffffff -textvariable multi -unique 1 -width 37 
     vTcl:DefineAlias "$site_9_0.com77" "Combobox1" vTcl:WidgetProc "Toplevel1" 1
     frame $site_9_0.fra69 \
         -borderwidth 2 -relief groove -background #d9d9d9 -height 85 \
@@ -6877,7 +6906,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     }
     ::iwidgets::entryfield $site_10_0.cpd71 \
         -labelfont {Helvetica -12 } -labelpos nw -labeltext {Compare to:} \
-        -textbackground #ffffff -textvariable compeval -width 0 
+        -background #d9d9d9 -textbackground #ffffff -textvariable compeval -width 0 
     vTcl:DefineAlias "$site_10_0.cpd71" "Entryfield7" vTcl:WidgetProc "Toplevel1" 1
     pack $site_10_0.cpd70 \
         -in $site_10_0 -anchor center -expand 0 -fill none -side left 
@@ -6924,63 +6953,63 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .lst -selectcolor green \
-        -text {full output} -variable cklo 
+        -text { full output} -variable cklo 
     $site_8_4.che119 add chk1 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .out -selectcolor green \
-        -text {short output} -variable cksh 
+        -text { short output} -variable cksh 
     $site_8_4.che119 add chk2 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -log* -selectcolor green \
-        -text {log files} -variable cklog 
+        -text { log files} -variable cklog 
     $site_8_4.che119 add chk3 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue *.endf -selectcolor green \
-        -text ENDF -variable ckendf 
+        -text { ENDF} -variable ckendf 
     $site_8_4.che119 add chk4 \
         -activebackground #f7fbf7 -activeforeground #009900 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .ps -selectcolor green \
-        -text {PLOTC4 plots} -variable ckplots 
+        -text { PLOTC4 plots} -variable ckplots 
     $site_8_4.che119 add chk5 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .exf -selectcolor orange \
-        -text EXFOR -variable ckx4 
+        -text { EXFOR} -variable ckx4 
     $site_8_4.che119 add chk6 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .c4 -selectcolor orange \
-        -text {C4 file} -variable ckc4 
+        -text { C4 file} -variable ckc4 
     $site_8_4.che119 add chk7 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue n -onvalue 000001_ -selectcolor green \
-        -text {neutron Tls} -variable ctln 
+        -text { neutron Tls} -variable ctln 
     $site_8_4.che119 add chk8 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue n -onvalue 001001_ -selectcolor green \
-        -text {proton Tls} -variable ctlp 
+        -text { proton Tls} -variable ctlp 
     ::iwidgets::checkbox $site_8_4.che120 \
         -background #d9d9d9 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -6992,63 +7021,63 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -omp.ripl -padx 1 -relief flat \
-        -selectcolor orange -text {OM parameters} -variable ckriplomp 
+        -selectcolor orange -text { OM parameters} -variable ckriplomp 
     $site_8_4.che120 add chk1 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -omp.dir -padx 1 -relief flat \
-        -selectcolor orange -text {OMP for direct} -variable ckdiromp 
+        -selectcolor orange -text { OMP for direct} -variable ckdiromp 
     $site_8_4.che120 add chk2 \
         -activebackground #f7fbf7 -activeforeground #dfff8ac119c2 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue *.zvd -padx 1 -relief flat \
-        -selectcolor orange -text {ZVV plots} -variable ckzvv 
+        -selectcolor orange -text { ZVV plots} -variable ckzvv 
     $site_8_4.che120 add chk3 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .lev -padx 1 -relief flat \
-        -selectcolor red -text levels -variable cklev 
+        -selectcolor red -text { levels} -variable cklev 
     $site_8_4.che120 add chk4 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -lev.col -padx 1 -relief flat \
-        -selectcolor red -text {collective levels} -variable ckcollev 
+        -selectcolor red -text { collective levels} -variable ckcollev 
     $site_8_4.che120 add chk5 \
         -activebackground #f7fbf7 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue { } -onvalue .inp -padx 1 -relief flat \
-        -selectcolor red -text {EMPIRE input} -variable ckinp 
+        -selectcolor red -text { EMPIRE input} -variable ckinp 
     $site_8_4.che120 add chk6 \
         -activebackground #f6f7f6 -activeforeground #ff0000 -anchor w \
         -disabledforeground #a1a1a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue { } -onvalue -inp.fis -padx 1 -relief flat \
-        -selectcolor red -text {fission input} -variable ckfisinp 
+        -selectcolor red -text { fission input} -variable ckfisinp 
     $site_8_4.che120 add chk7 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue n -onvalue 002004_ -padx 1 -relief flat \
-        -selectcolor green -text {alpha Tls} -variable ctla 
+        -selectcolor green -text { alpha Tls} -variable ctla 
     $site_8_4.che120 add chk8 \
         -activebackground #f9f9f9 -activeforeground #009900 -anchor w \
         -disabledforeground #a3a3a3 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor black -highlightthickness 0 \
         -justify left -offvalue 0 -onvalue 1 -padx 1 -relief flat \
-        -selectcolor green -text {Tl directory} -variable ctldir 
+        -selectcolor green -text { Tl directory} -variable ctldir 
     frame $site_8_4.fra122 \
         -background #d9d9d9 -height 75 -highlightbackground #dcdcdc \
         -width 125 
@@ -7121,7 +7150,7 @@ if {$exten == ".ps"} {
   editFile $selecfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Available files:} -listvariable filelist \
+        -background #d9d9d9 -labeltext {Available files:} -listvariable filelist \
         -selectioncommand {set selecfilelist [selection get]
 set selecfile [lindex $selecfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
@@ -7132,11 +7161,11 @@ set selecfile [lindex $selecfilelist 0]} \
         -command {#set filelist [glob -nocomplain *$profilter*]
 adjourn .top75} \
         -labelfont {Helvetica -12 } -labeltext Filter: -textbackground white \
-        -textvariable profilter -width 14 
+        -background #d9d9d9 -textvariable profilter -width 14 
     vTcl:DefineAlias "$site_8_4.ent78" "Entryfield2" vTcl:WidgetProc "Toplevel1" 1
     ::iwidgets::labeledframe $site_8_4.lab81 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Selected file} 
+        -background #d9d9d9 -labelpos nw -labeltext {Selected file} 
     vTcl:DefineAlias "$site_8_4.lab81" "Labeledframe10" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 [$site_8_4.lab81 childsite]
     entry $site_10_0.ent82 \
@@ -7217,7 +7246,7 @@ adjourn .top75 }} \
     ::iwidgets::scrolledlistbox $site_8_5.cpd67 \
         -activebackground #d9d9d9 -highlightthickness 5 -hscrollmode dynamic \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Files in local directory:} \
+        -background #d9d9d9 -labelpos nw -labeltext {Files in local directory:} \
         -listvariable svnfilelist -relief groove \
         -selectioncommand {set selsvnfilelist [selection get]} \
         -selectmode extended -textbackground #ffffff \
@@ -7478,7 +7507,7 @@ adjourn .top75 }} \
         -background #d9d9d9 -text Repository: 
     vTcl:DefineAlias "$site_9_0.lab65" "Label5" vTcl:WidgetProc "Toplevel1" 1
     entry $site_9_0.ent66 \
-        -background #d9d9d9 -disabledbackground white \
+        -disabledbackground white \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -highlightbackground #d9d9d9 -insertbackground black \
         -textvariable repository 
@@ -7489,7 +7518,7 @@ adjourn .top75 }} \
     }
     labelframe $site_9_0.lab66 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -foreground black -text Output -height 185 -width 260 
+        -background #d9d9d9 -foreground black -text Output -height 185 -width 260 
     vTcl:DefineAlias "$site_9_0.lab66" "Labelframe1" vTcl:WidgetProc "Toplevel1" 1
     set site_10_0 $site_9_0.lab66
     ::iwidgets::scrolledlistbox $site_10_0.scr67 \
@@ -7554,7 +7583,7 @@ adjourn .top75 }} \
     ::iwidgets::scrolledlistbox $site_8_5.scr66 \
         -highlightthickness 5 -hscrollmode dynamic \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {       Local directory commit history:} \
+        -background #d9d9d9 -labelpos nw -labeltext {Local directory commit history:} \
         -listvariable svnlog -textbackground #ffffff \
         -textfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -vscrollmode dynamic 
@@ -7569,7 +7598,7 @@ adjourn .top75 }} \
     ::iwidgets::scrolledlistbox $site_8_6.scr77 \
         -activebackground #dcdcdc -hscrollmode dynamic \
         -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Other working folders:} -listvariable archdirlist \
+        -background #d9d9d9 -labeltext {Other working folders:} -listvariable archdirlist \
         -selectioncommand {set archdir [selection get]
 set  archfiletmp [glob -nocomplain $archdir/*$archfilter*]
 set archfilelist ""
@@ -7596,7 +7625,7 @@ if {$archexten == ".ps"} {
   editFile $archdir/$archfile
 }} \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Available files:} -listvariable archfilelist \
+        -background #d9d9d9 -labeltext {Available files:} -listvariable archfilelist \
         -selectioncommand {set selarchfilelist [selection get]
 set archfile [lindex $selarchfilelist 0]} \
         -selectmode extended -textbackground #ffffff \
@@ -7608,14 +7637,14 @@ set archfile [lindex $selarchfilelist 0]} \
     ::iwidgets::entryfield $site_9_0.ent79 \
         -command {adjourn .top75} -labelfont {Helvetica -12 } \
         -labeltext Folder: -textbackground white -textvariable archdir \
-        -width 14 
+        -background #d9d9d9 -width 14 
     ::iwidgets::entryfield $site_9_0.ent80 \
         -command {adjourn .top75} -labelfont {Helvetica -12 } \
         -labeltext Filter: -textbackground white -textvariable archfilter \
-        -width 14 
+        -background #d9d9d9 -width 14 
     ::iwidgets::labeledframe $site_9_0.lab81 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
-        -labelpos nw -labeltext {Selected file} 
+        -background #d9d9d9 -labelpos nw -labeltext {Selected file} 
     set site_11_0 [$site_9_0.lab81 childsite]
     entry $site_11_0.ent82 \
         -background white -highlightbackground #d9d9d9 \
@@ -7716,7 +7745,7 @@ set archfilelist "" }} \
     set site_9_0 $site_8_7.fra83
     ::iwidgets::labeledframe $site_9_0.lab84 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext {Multiple run} 
+        -background #d9d9d9 -labeltext {Multiple run} 
     vTcl:DefineAlias "$site_9_0.lab84" "Labeledframe12" vTcl:WidgetProc "Toplevel1" 1
     set site_11_0 [$site_9_0.lab84 childsite]
     frame $site_11_0.fra86 \
@@ -7805,7 +7834,7 @@ ddlist} \
     ::iwidgets::entryfield $site_12_0.ent77 \
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name:} -textbackground #ffffff \
-        -textvariable mulstname -width 12 
+        -background #d9d9d9 -textvariable mulstname -width 12 
     vTcl:DefineAlias "$site_12_0.ent77" "Entryfield6" vTcl:WidgetProc "Toplevel1" 1
     button $site_12_0.but78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -7859,7 +7888,7 @@ close $mulfile} \
         -in $site_12_0 -anchor center -expand 0 -fill x -side bottom 
     ::iwidgets::optionmenu $site_11_0.opt86 \
         -activeforeground limegreen -command ViewAll -font {Helvetica -12 } \
-        -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {} 
+        -background #d9d9d9 -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {} 
     vTcl:DefineAlias "$site_11_0.opt86" "Optionmenu3" vTcl:WidgetProc "Toplevel1" 1
     $site_11_0.opt86 insert 1 {View:}
     $site_11_0.opt86 insert 2 {inputs}
@@ -7876,7 +7905,6 @@ close $mulfile} \
     $site_11_0.opt86 insert 13 {ENDFs}
     $site_11_0.opt86 insert 14 {short-outputs}
     $site_11_0.opt86 insert 15 {full-outputs}
-    $site_11_0.opt86 insert 16 {PLOTC4-plots}
     $site_11_0.opt86 insert 17 {PLOTC4-plots}
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #d9d9d9 \
@@ -7889,49 +7917,49 @@ close $mulfile} \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .lst -onvalue {} -selectcolor #00ff00 \
-        -text {full output} -variable ckmlo 
+        -text { full output} -variable ckmlo 
     $site_11_0.che79 add chk1 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .out -onvalue {} -selectcolor #00ff00 \
-        -text {short output} -variable ckmsh 
+        -text { short output} -variable ckmsh 
     $site_11_0.che79 add chk2 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -log* -onvalue {} -selectcolor #ffff00 \
-        -text {log files} -variable ckmlog 
+        -text { log files} -variable ckmlog 
     $site_11_0.che79 add chk3 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue *.endf -onvalue {} -selectcolor #00ff00 \
-        -text ENDF -variable ckmendf 
+        -text { ENDF} -variable ckmendf 
     $site_11_0.che79 add chk4 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .ps -onvalue {} -selectcolor #00ff00 \
-        -text {PLOTC4 plots} -variable ckmplots 
+        -text { PLOTC4 plots} -variable ckmplots 
     $site_11_0.che79 add chk5 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .exf -onvalue {} -selectcolor #ffff00 \
-        -text EXFOR -variable ckmx4 
+        -text { EXFOR} -variable ckmx4 
     $site_11_0.che79 add chk6 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .c4 -onvalue {} -selectcolor #ffff00 \
-        -text {C4 file} -variable ckmc4 
+        -text { C4 file} -variable ckmc4 
     ::iwidgets::checkbox $site_11_0.che76 \
         -background #d9d9d9 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -7943,38 +7971,38 @@ close $mulfile} \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.ripl -onvalue {} -selectcolor #ffff00 \
-        -text {RIPL omp} -variable ckmriplomp 
+        -text { RIPL omp} -variable ckmriplomp 
     $site_11_0.che76 add chk1 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -omp.dir -onvalue {} -selectcolor #ffff00 \
-        -text {direct omp} -variable ckmdiromp 
+        -text { direct omp} -variable ckmdiromp 
     $site_11_0.che76 add chk2 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .lev -onvalue {} -selectcolor #ffff00 \
-        -text levels -variable ckmlev 
+        -text { levels} -variable ckmlev 
     $site_11_0.che76 add chk3 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue -lev.col -onvalue {} -selectcolor #ffff00 \
-        -text {coll. levels} -variable ckmcollev 
+        -text { coll. levels} -variable ckmcollev 
     $site_11_0.che76 add chk4 \
         -activebackground #f7fbf7 -activeforeground #000000 -anchor w \
         -disabledforeground #a1a4a1 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
         -foreground black -highlightcolor #000000 -highlightthickness 0 \
         -justify left -offvalue .inp -onvalue {} -selectcolor #ffff00 \
-        -text input -variable ckminp 
+        -text { input} -variable ckminp 
     ::iwidgets::labeledframe $site_11_0.lab76 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext {Selected item} 
+        -background #d9d9d9 -labeltext {Selected item} 
     vTcl:DefineAlias "$site_11_0.lab76" "Labeledframe13" vTcl:WidgetProc "Toplevel1" 1
     set site_13_0 [$site_11_0.lab76 childsite]
     entry $site_13_0.ent77 \
@@ -8004,7 +8032,7 @@ ddlist} \
         -in $site_13_0 -anchor center -expand 0 -fill x -padx 5 -side top 
     ::iwidgets::labeledframe $site_11_0.lab79 \
         -labelfont -Adobe-Helvetica--R-Normal--*-120-*-*-*-*-*-* -labelpos nw \
-        -labeltext Folder 
+        -background #d9d9d9 -labeltext Folder 
     vTcl:DefineAlias "$site_11_0.lab79" "Labeledframe14" vTcl:WidgetProc "Toplevel1" 1
     set site_13_0 [$site_11_0.lab79 childsite]
     entry $site_13_0.ent77 \
@@ -8065,7 +8093,7 @@ adjourn .top75} \
         -activebackground #dcdcdc -cursor {} \
         -dblclickcommand { editFile $::env(EMPIREDIR)/source/[selection get] } \
         -hscrollmode dynamic -labelfont {Helvetica -12 } -labelpos nw \
-        -labeltext {Double click to edit} -listvariable modules \
+        -background #d9d9d9 -labeltext {Doubleclick to edit} -listvariable modules \
         -textbackground White -textfont {Helvetica -12 } -width 180 
     frame $site_9_0.fra79 \
         -borderwidth 2 -background #d9d9d9 -height 75 \
@@ -8510,9 +8538,6 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command { editFile $file.sys } -label {x-sec systematics} 
     $site_3_0.menu94 add command \
         -command { editFile $file-ompfit.lst } -label {OMP fit output} 
-    $site_3_0.menu94 add command \
-        -command {exec kompare OMPAR.DIR zr90-omp.dir &} \
-        -label {Compare OMPs} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
@@ -8542,6 +8567,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu94 add command \
         -command { editFile $file-out.kal } -label {KALMAN output} 
     $site_3_0.menu94 add command \
+        -command { editFile $file-par.kal } -label {KALMAN adj. parameters} 
+    $site_3_0.menu94 add command \
         -command { editFile $file-xsc.kal } -label {KALMAN x-sections} 
     $site_3_0.menu94 add command \
         -command { editFile $file-cov.kal } -label {Covariance matrices} 
@@ -8564,7 +8591,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     menu $site_3_0.men70 \
         -tearoff 0 
     $site_3_0.men70 add command \
-        -command {exec lyx $file.lyx &} -font {} -label Report 
+        -command { RepWriter $file.lyx } -font {} -label Report 
     $site_3_0.men70 add command \
         \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
