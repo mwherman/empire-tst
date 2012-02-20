@@ -64,6 +64,7 @@ $c4zvd33_dir/endf33zvd_l.exe -mt:$MT -c:$file-$MT-cov.zvd -u:$file-$MT-unc.zvd P
 echo '#!zvview.exe' >$file-$MT.zvd
 cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
+ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 $c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
 
 if [ -f zv00.ps ]; then
@@ -71,6 +72,9 @@ if [ -f zv00.ps ]; then
 fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $work/$file-$MT.eps
+fi
+if [ -f zv00.zvd ]; then
+   mv zv00.zvd $work/$file-$MT.zvd
 fi
 rm c4.zvd end.zvd tmp.dat 2>/dev/null
 exit
