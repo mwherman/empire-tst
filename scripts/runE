@@ -342,6 +342,11 @@ def runE(proj):
     if not isEmpty(proj+'.xsc'):
         cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','cs2zvd')
         os.system('"%s" %s' % (cmd, proj))
+
+    # Produce ZVD files from fission cross-section tables:
+    #if not isEmpty(proj+'-fiss.xsc'):
+    #    cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','fiss2zvd')
+    #    os.system('"%s" %s' % (cmd, proj))
     
     return 0
 
