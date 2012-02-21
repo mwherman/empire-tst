@@ -16,20 +16,16 @@ set -x
 echo $1 $2
 rm zv0*.ps zv0*.eps 2>/dev/null
 file=$2
+if [ "$file" = "" ]; then
+    echo 'Plots available for merging:'
+    echo ' '
+    ls *\.zvd
+    echo ' '
+    echo -n 'List files to be merged separating them by a space (include .zvd extention): '
+    read file
+fi
 ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
-command="$EMPIREDIR/util/c4zvd/zvview.exe  ps01.tit/c"
-        if [ "$file" = "" ]
-           then
-            echo 'Plots available for merging:'
-            echo ' '
-            ls *\.zvd
-            echo ' '
-            echo -n 'List files to be merged separating them by a space (include .zvd extention): '
-            read file
-        fi
-        command=$command" "$file
-ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
-$command ps01.tit/c
+$EMPIREDIR/util/c4zvd/zvview.exe ps01.tit/c $file
 rm ps01.tit
 if [ -f zv00.ps ]; then
    mv zv00.ps $file.ps
@@ -39,5 +35,4 @@ if [ -f zv00.eps ]; then
 fi
 rename 'zvd.ps' ps $file*
 rename 'zvd.eps' eps $file*
-rm ps01.tit
 exit

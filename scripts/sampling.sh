@@ -1,5 +1,5 @@
-#! /bin/sh -
-#script to produce ZVView plots from the *.xsc files
+#!/bin/bash
+#script to run MC sampling 
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -25,15 +25,68 @@ if [ "$ns" = "" ]
    ns=100
 fi                          
 
-sweep=0
-while [ $sweep -lt $ns ]; do
-echo $sweep
+sweep=1
+while [ $sweep -le $ns  ]; do
+#
+if    [ $sweep -ge 1000 ]
+  then
+      fnum=$sweep
+elif  [ $sweep -ge  100 ]
+  then
+      fnum=0$sweep
+elif  [ $sweep -ge   10 ]
+  then
+      fnum=00$sweep
+elif  [ $sweep -ge    0 ]
+  then
+      fnum=000$sweep
+else
+  echo ERRORR - invalid sequence number $sweep
+  exit
+fi
+echo Sequence $fnum
+
+#
 $EMPIREDIR/scripts/runE $file
-rm -rf $file-tl
-#cat $file.xsc >> XSALL-script
-mv $file.xsc XS$sweep.xsc
+#
+# Removing all TLs
+rm -rf $file-tl 
+#     or 
+# Removing TLs for the incident channel
+#rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
+# Removing TLs for the outgoing neutron channel
+#rm -f $file-tl/000001_025055*.BIN
+# Removing TLs for the outgoing proton channel
+#rm -f $file-tl/001001_024055*.BIN
+# Removing TLs for the outgoing alpha  channel
+#rm -f $file-tl/002004_023052*.BIN
+# Removing TLs for the outgoing deut   channel
+#rm -f $file-tl/001002_024054*.BIN
+#
+# If formatting if needed on the flight
+# run EMPEND to format EMPIRE output into ENDF
+# EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
+cat >EMPEND.INP <<EOF
+$file.out
+$file.endf
+1 
+-1.0
+1111
+EOF
+$EMPIREDIR/util/empend/empend <EMPEND.INP
+rm EMPEND.INP empmf1.tmp empend.log
+mv $file.xsc  XS$fnum
+mv $file.lst  LST$fnum
+mv $file.out  OUT$fnum
+mv $file.endf OUT$fnum.endf
 let sweep=sweep+1
 done
+# Calculating and plotting covariances
 $EMPIREDIR/util/Calc_Cov/Calc_Cov.exe
 mv MC_covar.out $file-MC-cov.out
+
+$EMPIREDIR/util/Calc_Cov/kalend2.sh $file 
+
+rm fort.16 fort.14
+
 exit
