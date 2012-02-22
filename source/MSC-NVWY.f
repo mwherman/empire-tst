@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2587 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-02-23 00:11:34 +0100 (Do, 23 Feb 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -1583,12 +1583,12 @@ C-----
       WRITE (8,99100) NDMSCS
 99100 FORMAT (1X,//,30X,'H e i d e l b e r g  M. S. C.  d e c a y  (',
      &        I2,' stages)',//)
-C     IF(GST.NE.0)CALL AUERST(1, 0, 0)
-C     CALL AUERST(1, 1, 0)
+      IF(GST.NE.0)CALL AUERST(1, 0, 0)
+      CALL AUERST(1, 1, 0)
       IF (IOUt.GT.0) WRITE (8,
      &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
      &           ) SYMbe(1), CSMsc(1)
-C     CALL AUERST(1, 2, 0)
+      CALL AUERST(1, 2, 0)
       IF (IOUt.GT.0) WRITE (8,
      &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
      &           ) SYMbe(2), CSMsc(2)

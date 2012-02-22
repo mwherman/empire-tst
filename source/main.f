@@ -1,6 +1,6 @@
-cc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+cc   * $Rev: 2587 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-23 00:11:34 +0100 (Do, 23 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -798,10 +798,10 @@ C        xsinl is calculated by MSD
          CALL PCROSS(ftmp,totemis,xsinl)
       ENDIF          ! PCRoss done
 
-      IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. nejcec.gt.0
-     &    .AND. NREs(nejcec).GE.0 ) THEN
+      IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. NPRoject.gt.0
+     &    .AND. NREs(NPRoject).GE.0 ) THEN
 C--------Print inelastic PE double differential cross sections
-         nejc = nejcec
+         nejc = NPRoject
          nnur = NREs(nejc)
          IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
@@ -859,15 +859,17 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
      &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
          WRITE (8,*) ' '
 C--------Correct CN population for PE continuum emission in PCROSS and MSD/MSC
-	   ftmp = 0.d0
-         do i=1,NDEJC
-	     ftmp = ftmp + CSMsd(i)
-	   enddo
+C        ftmp = 0.d0
+C        do i=1,NDEJC
+C          ftmp = ftmp + CSMsd(i)
+C	   enddo
 
-         corrmsd = (CSFus - ftmp)/CSFus
-C        corrmsd = (CSFus - (xsinl + totemis))/CSFus
-C        write(*,*) ' CSFus=',sngl(CSFus)
-C    &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+C        corrmsd = (CSFus - ftmp)/CSFus
+         corrmsd = (CSFus - (xsinl + totemis))/CSFus
+         write(8,*) ' CSFus=',sngl(CSFus)
+     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+         write(*,*) ' CSFus=',sngl(CSFus)
+     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
 
          IF (corrmsd.LT.0.0D0) THEN
             write(8,*) ' CSFus=',sngl(CSFus)
