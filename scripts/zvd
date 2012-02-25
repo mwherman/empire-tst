@@ -66,6 +66,7 @@ cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
 ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 $c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
+rm ps01.tit 2>/dev/null
 
 if [ -f zv00.ps ]; then
    mv zv00.ps $work/$file-$MT.ps
