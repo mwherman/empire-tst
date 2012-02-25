@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2591 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-23 23:11:14 +0100 (Do, 23 Feb 2012) $
+Ccc   * $Rev: 2593 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-25 16:19:07 +0100 (Sa, 25 Feb 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -448,7 +448,6 @@ C
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
-
  
       WRITE (8,99005) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                   ATIlnor(Nnuc), ATIl, NLV(Nnuc)
@@ -465,12 +464,12 @@ C
      &           '   Ushift = ',F6.3,' Ucrt = ',F5.2,' Def = ',F6.2,
      &           ' atil=',F4.1,' Ncut=',I3,'"')
       WRITE (35,*) 'set logscale y'
-      WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
-      WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+      WRITE (35,*) 'set xlabel '' Excitation energy U [MeV]'' '
+      WRITE (35,*) 'set ylabel '' Cumulative number of levels'' '
       WRITE (35,*) 'set style line 1 lt 1 lw 2'
       WRITE (35,*) 'set style line 2 lt 5 lw 2'
-      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
-     &els", "fort.34" w l ls 1 t "Level density" '')')
+      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Experimental di
+     &screte levels", "fort.34" w l ls 1 t "Integral of RHO(U)" '')')
       CLOSE (35)
       OPEN (34,FILE = 'fort.34')
       OPEN (36,FILE = 'fort.36')
@@ -491,11 +490,9 @@ C
          WRITE (34,*) defit*(kk - 1), rocumul
       ENDDO
       CLOSE (36)
+      CLOSE (35)
       CLOSE (34)
-      IF (IOPsys.EQ.0) THEN
-         iwin = PIPE('gnuplot fort.35')
-         CLOSE (35)
-      ENDIF
+      IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
 
       RETURN
       END
@@ -508,11 +505,9 @@ c==============================================================
 
       REAL*8 am,ux,t,eo
       COMMON /CT/ am,ux,eo,T
- 
       INTEGER Nnuc
       INTEGER*4 iwin
       INTEGER*4 PIPE
-
 
       WRITE (8,*) ' A=', A(Nnuc), 'Z=', Z(Nnuc), ' Ncut=', NLV(Nnuc)
       WRITE (8,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
@@ -525,12 +520,12 @@ c==============================================================
 99010 FORMAT ('set title "',I3,'-',A2,'-',I3,': a=',
      &           F4.1,' T=',F4.1,' E0=',F4.1,' Ncut=',I3,'"')
       WRITE (35,*) 'set logscale y'
-      WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
-      WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+      WRITE (35,*) 'set xlabel '' Excitation energy U [MeV]'' '
+      WRITE (35,*) 'set ylabel '' Cumulative number of levels'' '
       WRITE (35,*) 'set style line 1 lt 1 lw 2'
       WRITE (35,*) 'set style line 2 lt 5 lw 2'
-      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
-     &els", "fort.34" w l ls 1 t "Level density" '')')
+      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Experimental di
+     &screte levels", "fort.34" w l ls 1 t "Integral of RHO(U)" '')')
       CLOSE (35)
       OPEN (34,FILE = 'fort.34')
       OPEN (36,FILE = 'fort.36')
@@ -543,10 +538,8 @@ c==============================================================
       ENDDO
       CLOSE (36)
       CLOSE (34)
-      IF (IOPsys.EQ.0) THEN
-         iwin = PIPE('gnuplot fort.35')
-         CLOSE (35)
-      ENDIF
+      CLOSE (35)
+      IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
 
       RETURN
       END

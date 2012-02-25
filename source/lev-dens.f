@@ -1,5 +1,5 @@
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-02-25 16:19:07 +0100 (Sa, 25 Feb 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1490,7 +1490,7 @@ C-----plot fit of the levels with the low energy l.d. formula
      &           /(NEXreq-1) 
       nplot = (ELV(NLV(Nnuc),Nnuc)+2.d0)/defit
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.5) 
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
      &  CALL PLOT_GNU_NumCumul_GC(Nnuc) 
      
  500  ROPar(1,Nnuc) = am
@@ -1669,6 +1669,8 @@ C
       REAL*8 DLOG10
       CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
+      INTEGER*4 iwin
+      INTEGER*4 PIPE
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1861,12 +1863,12 @@ C--------cumulative plot of levels along with the l.d. formula
  9909    FORMAT ('set title "',I3,'-',A2,'-',I3,
      &           '   Microscopic LD,  Ncut=',I3,'"')
          WRITE (35,*) 'set logscale y'
-         WRITE (35,*) 'set xlabel "Excitation energy (MeV)" 0,0'
-         WRITE (35,*) 'set ylabel "Cumulative number of levels" 0,0'
+         WRITE (35,*) 'set xlabel '' Excitation energy U [MeV]'' '
+         WRITE (35,*) 'set ylabel '' Cumulative number of levels'' '
          WRITE (35,*) 'set style line 1 lt 1 lw 2'
          WRITE (35,*) 'set style line 2 lt 5 lw 2'
-         WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Discrete lev
-     &els", "fort.34" w l ls 1 t "Level density" '')')
+      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Experimental di
+     &screte levels", "fort.34" w l ls 1 t "Integral of RHO(U)" '')')
          CLOSE (35)
          OPEN (34,FILE = 'fort.34')
          OPEN (36,FILE = 'fort.36')
@@ -1893,6 +1895,7 @@ C              rocumul = rocumul + 0.5d0*defit
          CLOSE (36)
          CLOSE (34)
          CLOSE (35)
+         IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
       ENDIF
 
       RETURN
