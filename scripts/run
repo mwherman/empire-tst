@@ -89,6 +89,8 @@ def main():
     if not 'STANEF - Completed successfully' in e.readlines()[-1]:
         print ("STANEF did *not* finish successfully.")
         if opt.waitOnError:
+            if close_term > 0:
+               sys.exit(1)
             print ("Press return to exit")
             raw_input()
         return 1
@@ -115,6 +117,8 @@ def main():
     if not 'PLTLST Completed' in e.readlines()[-1]:
         print ("Trouble preprocessing files for plotting. Is c4 file present?")
         if opt.waitOnError:
+            if close_term > 0:
+               sys.exit(1)
             print ("Press return to exit")
             raw_input()
         return 1
