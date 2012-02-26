@@ -31,9 +31,14 @@ def main():
     elif len(args)<2:
         project = args[0]
         mat = '1111'
+        close_term = 0
+    elif len(args)<3:
+        project, mat = args[:2]
+        close_term = 0
     else:
         project, mat = args[:2]
-    
+        close_term = args[2]
+
     if (not os.environ.has_key('EMPIREDIR')) or (os.environ['EMPIREDIR']==''):
         import time
         print ("Please set environment variable EMPIREDIR in your bashrc:\n")
@@ -59,6 +64,8 @@ def main():
     except ValueError:
         print ("Empire did not finish successfully! Check the log.")
         if opt.waitOnError:
+            if close_term > 0:
+               sys.exit(1)
             print ("Press return to exit")
             raw_input()
         return 1

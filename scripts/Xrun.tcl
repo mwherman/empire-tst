@@ -1,6 +1,6 @@
-# $Rev: 2578 $
+# $Rev: 2598 $
 # $Author: mherman $
-# $Date: 2012-02-19 09:03:57 +0100 (So, 19 Feb 2012) $
+# $Date: 2012-02-26 04:04:29 +0100 (So, 26 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5633,7 +5633,7 @@ foreach el $stablist {
    if {$cplot == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $mulinputn}
    #if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
-   exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111
+   exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111 1
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
@@ -6724,7 +6724,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
-        -text {ZVV plot from EMPIRE} -wraplength 72 
+        -text {ZVV plot from EMPIRE} -wraplength 90
     vTcl:DefineAlias "$site_9_0.but89" "Button130" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but89 "$site_9_0.but89 Button $top all _vTclBalloon"
     bind $site_9_0.but89 <<SetBalloon>> {
