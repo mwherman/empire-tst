@@ -110,6 +110,21 @@ Manual Installation
         $ make
         $ cd ~/empire-tmp/
 
+        The make command with no options defaults to the gfortran compiler.
+        Specify another compiler with "make FC=comp" on the command line,
+        where 'comp' is name of the  compiler. At the moment, the compile
+        flags are set correctly for both gfortran and ifort (intel fortran).
+        A few other compilers are marginally supported in the empire/source Makefile.
+        If using other non-supported compilers, the compiler options can also be
+        specified on the command line with "FFLAGS= opts", with 'opts' being replaced
+        with the appropriate options for your compiler. This may or may not work,
+        depending on various dependencies in the code.
+        
+        For empire developers, a debug target is also supplied for the Makefile
+        in the source directory, and the compiler can also be specified. For
+        example, to compile debug using ifort the "make FC=ifort debug" command
+        would be used. The default compiler is gfortran.
+
 4)  [Optional] Untar the HFB level-density distribution file 
     level-densities-hfb.tgz to the corresponding subdirectory 
     RIPL/densities/total/level-densities-hfb (if you plan to use 
