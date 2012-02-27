@@ -1,6 +1,6 @@
-# $Rev: 2598 $
-# $Author: mherman $
-# $Date: 2012-02-26 04:04:29 +0100 (So, 26 Feb 2012) $
+# $Rev: 2605 $
+# $Author: gnobre $
+# $Date: 2012-02-27 22:22:02 +0100 (Mo, 27 Feb 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8228,7 +8228,7 @@ exit} \
     $site_4_0.menu97 add radiobutton \
         -value gedit -variable editor -command {} -label gedit 
     $site_4_0.menu97 add radiobutton \
-        -value vim -variable editor -command {} -label vim 
+        -value gvim -variable editor -command {} -label gvim 
     $site_4_0.menu97 add radiobutton \
         -value emacs -variable editor -command {} -label emacs 
     $site_4_0.menu97 add radiobutton \
