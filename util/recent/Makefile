@@ -1,40 +1,57 @@
-#----GNU FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
-FFLAGS = -std=legacy -O3
-#----GNU g77 FORTRAN compiler
-#FC     = g77
-#----flags for production compilation with g77
-#FFLAGS = -O3
-#----flags for debuging using g77 compiler
-#FFLAGS =  -fno-underscoring  -g
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
-#----standard f77 FORTRAN compiler
-#FC   = f77
-#----Absoft f90 FORTRAN compiler
-#FC   = f90
-#FFLAGS = -g -Rb
-#FFLAGS = -O -g
-#----Fujitsu f90 FORTRAN compiler
-#FC   = frt
-#----flags for Fujitsu f90 FORTRAN compiler
-#FFLAGS = -KPENTIUM_PRO -ls -u  -f s -Qa
-#FFLAGS = -H asu -KPENTIUM_PRO -ls -u  -f s -Qa -g
-#FC     =  ifort
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -w -ipo -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel
+# set default compiler
+
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
+
+# FFLAGS are based on compiler setting
+
+ifeq ($(FC),gfortran)
+
+  #-------------------------
+  #----GNU FORTRAN compiler
+  #-------------------------
+  #----flags for production compilation
+  FFLAGS = -std=legacy -O3
+  #----flags for debuging
+  #FFLAGS =  -g --bounds-check -std=legacy
+
+else ifeq ($(FC),ifort)
+
+  #-----------------------
+  #----INTEL f95 compiler
+  #-----------------------
+  FFLAGS =  -O3 -x=host -ipo
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel
+
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJF =	LINUX.o  endfio.o  recent.o  scratchb.o  timer.o
 
-
 recent:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
-
 
 clean:
 	rm *.o

@@ -1,36 +1,57 @@
-#----GNU FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
-FFLAGS = -std=legacy -O3
-#----GNU FORTRAN95 compiler
-#FC     = g95
-#....Intel FORTRAN compiler
-#FC     =  ifort
-#----Lahey/Fujitsu FORTRAN95 compiler
-#FC     = lf95
-#----standard f90 FORTRAN compiler
-#FC   = f90
-#----INTEL f95 compiler
-#FC     =  ifort
-#----flags for optimalization using ifort
-#FFLAGS = -arch pn4 -O3 -axPW  -ipo
-#FFLAGS = -arch pn4 -O3 -ipo
-#FFLAGS = -arch pn4 -O3 -ipo -parallel
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =   -w -ipo -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+# set default compiler
 
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
+
+# FFLAGS are based on compiler setting
+
+ifeq ($(FC),gfortran)
+
+  #-------------------------
+  #----GNU FORTRAN compiler
+  #-------------------------
+  #----flags for production compilation
+  FFLAGS = -std=legacy -O3
+  #----flags for debuging
+  #FFLAGS =  -g --bounds-check -std=legacy
+
+else ifeq ($(FC),ifort)
+
+  #-----------------------
+  #----INTEL f95 compiler
+  #-----------------------
+  FFLAGS =  -O3 -x=host -ipo
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJF =	psyche.o
-
 
 psyche:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
 clean:
-	rm *.o
-
+	rm -f *.o

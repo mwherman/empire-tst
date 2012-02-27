@@ -1,46 +1,46 @@
-#----GNU FORTRAN compiler
-#FC     =  gfortran
-#----flags for production compilation with gfortran
-#FFLAGS = -std=legacy -O3
+# set default compiler
 
-#---- pfg90 compiler
-#FC     =  pgf90
-#----GNU g77 FORTRAN compiler
-#FC     =  g77
-#----flags for production compilation with g77
-#FFLAGS = -O
-#----flags for debuging using gfortran compiler
-#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
-FC      = gfortran
-FFLAGS  = -O3 --std=legacy
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
 
-#----GNU g95 FORTRAN compiler
-#FC     =  g95
-#----flags for detailed warnings
-#FFLAGS = -Wall
+# set FFLAGS based on compiler setting
 
-#----INTEL f95 compiler
-#FC     =  ifort
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel
+ifeq ($(FC),gfortran)
 
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
+  #----GNU FORTRAN compiler
+  #----flags for production compilation with gfortran
+  FFLAGS = -std=legacy -O3
 
-#----standard f77 FORTRAN compiler
-#FC   = f77
+else ifeq ($(FC),ifort)
 
-#----Lahey/Fujitsu f95 FORTRAN compiler
-#FC    = lf95
-#----flag for Lahey/Fujitsu to optimize
-#FFLAGS = --o3
-#----flag for Lahey/Fujitsu to check boundaries and more
-#FFLAGS = -g --chk
+  #----INTEL f95 compiler
+  FFLAGS =  -O3 -x=host
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel
 
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJP =	ptanal.o
 OBJR =	readrp.o
@@ -70,4 +70,4 @@ thermx:  $(OBJT)
 	$(FC) -o $@ $(OBJT)
 
 clean:
-	rm *.o
+	rm -f *.o

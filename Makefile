@@ -1,5 +1,5 @@
 # --------------------------------------------------------------
-# Makefile for EMPIRE.  Caleb Mattoon, $Date$.
+# Makefile for EMPIRE.  Caleb Mattoon
 # 
 # translation of 'Compile' script to a Makefile: hopefully a bit
 # shorter, easy to maintain
@@ -8,38 +8,34 @@
 # binaries in a new empire/bin directory
 # --------------------------------------------------------------
 
-compiler = "FC=gfortran"
-#flags1 = "FFLAGS=-O3 -std=legacy -m64"
-flags2 = "FFLAGS=-O3 -std=legacy -ftree-vectorize"
+# set default compiler
 
-# empire program. See also source/Makefile
-SOURCE = source
+FC=gfortran
+#FC=ifort
 
-# extra utilities:
-UTIL = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/x4toc4 util/pltsenmat
+# check for FFLAGS specified on command line
 
-# more utilities that require g77 instead of default compiler:
-OTHER = util/lsttab util/resonance util/kalman
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
 
-# make sure MAKE knows f90 extension
-%.o : %.f90
-	$(FC) $(FFLAGS) -c $<
+# utilities:
+UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
+       util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
+       util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/x4toc4 \
+       util/pltsenmat util/lsttab util/kalman
 
-# by default, compile SOURCE and UTIL with gfortran:
 all:
-	@for dir in $(UTIL); do (echo $$dir; cd $$dir; $(MAKE) $(compiler) $(flags2)); done
-	cd util/IO/ ; $(MAKE) $(compiler);
-	cd $(SOURCE); $(MAKE) $(compiler) $(flags1);
-	@for dir in $(OTHER); do (echo $$dir; cd $$dir; $(MAKE)); done
-
-
-# or make with compilers/flags specified by individual projects (type command: 'make spec'):
-spec:
-	@for dir in $(SOURCE) $(UTIL) $(OTHER); do (echo $$dir; cd $$dir; $(MAKE)); done
-
+	cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;
+	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
+	cd source ; $(MAKE) FC=$(FC) $(FLG) ;
 
 clean:
-	@for dir in $(SOURCE) $(UTIL) $(OTHER); do (cd $$dir; $(MAKE) clean); done
+	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
+	cd util/IO/ ; $(MAKE) clean ;
+	cd source   ; $(MAKE) clean ;
 
 up:
 	svn up
@@ -47,7 +43,6 @@ up:
 upall: up all 
 
 IZPACK = $(HOME)/Projects/Current/IzPack
-
 
 release: 
 #	python installer/makeTarball.py --release --full

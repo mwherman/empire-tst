@@ -1,49 +1,52 @@
-#----GNU FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
-#FFLAGS = -std=legacy -O3
-FFLAGS = -std=legacy -O0
-#----GNU g77 FORTRAN compiler
-#FC     =  g77
-#----flags for production compilation with g77
-#FFLAGS = -O
-#----flags for debuging using g77 compiler
-#FFLAGS =  -g -ffortran-bounds-check -Wuninitialized -O
-#FFLAGS =  -fno-automatic -finit-local-zero
-#FFLAGS = -finit-local-zero -fno-automatic
+# set default compiler
 
-#----GNU g95 FORTRAN compiler
-#FC     =  g95
-#----flags for detailed warnings
-#FFLAGS = -Wall
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
 
-#----INTEL f95 compiler
-#FC     =  ifort
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel
+# set FFLAGS based on compiler setting
 
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
+ifeq ($(FC),gfortran)
 
-#----standard f77 FORTRAN compiler
-#FC   = f77
+  #----GNU FORTRAN compiler
+  #----flags for production compilation with gfortran
+  #FFLAGS = -std=legacy -O3
+  FFLAGS = -std=legacy -O0
 
-#----Lahey/Fujitsu f95 FORTRAN compiler
-#FC    = lf95
-#----flag for Lahey/Fujitsu to optimize
-#FFLAGS = --o3
-#----flag for Lahey/Fujitsu to check boundaries and more
-#FFLAGS = -g --chk
+else ifeq ($(FC),ifort)
+
+  #----INTEL f95 compiler
+  FFLAGS =  -O3
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel
+
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJF =	lsttab.o dxsend.o
-
 
 lsttab:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+	rm -f *.o

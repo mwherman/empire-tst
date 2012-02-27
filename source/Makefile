@@ -1,73 +1,91 @@
-#$Rev: 2567 $
+#$Rev: 2601 $
 #$Author: shoblit $
-#$Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+#$Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+
+# set default fortran compiler:
+
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  pfg90
+#FC  =  lf95
+
+LIBS =
+
+# FFLAGS are based on compiler setting
+
+ifeq ($(FC),gfortran)
+
+  #---------------------------------
+  #----GNU gfortran FORTRAN compiler
+  #---------------------------------
+  #----flags for production compilation with gfortran
+  R_8 = -fdefault-real-8
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  #----flags for debuging
+  DFLAGS =  -g --bounds-check -std=legacy -ftrapv 
+  # -pg shoudl be added for profiling
+  #FFLAGS = -O3 -pg -std=legacy 
+  #----flags for debuging using gfortran compiler
+  #----From http://www.macresearch.org/best-fortran-compiler-leopard
+  #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
+
+else ifeq ($(FC),ifort)
  
-#---------------------------------
-#----GNU gfortran FORTRAN compiler
-#---------------------------------
-FC     =  gfortran
-#CC     =  gcc
-#----flags for production compilation with gfortran
-FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
-#FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
-# -pg shoudl be added for profiling
-#FFLAGS = -O3 -pg -std=legacy 
-#----flags for debuging using gfortran compiler
-#FFLAGS =  -g --bounds-check -std=legacy 
-#----From http://www.macresearch.org/best-fortran-compiler-leopard
-#----For Debugging under gfortran:
-#gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
+  #---------------------------
+  #----INTEL f95 compiler
+  #---------------------------
+  #----flags for production compilation using ifort
+  R_8 = -real-size 64
+  FFLAGS = -arch pn4 -O3 -ipo
+  #FFLAGS = -O3 -x=host
+  #FFLAGS = -arch pn4 -O3 -axPW -ipo
+  #----flags for debuging
+  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  #----From http://www.macresearch.org/best-fortran-compiler-leopard
+  #----For Debugging under ifort:
+  #----For optimized code under ifort
+  #ifort -m64 -fast
+  #Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
+
+else ifeq ($(FC),af90)
  
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  #----We need to include Unix and Vax libraries to add etime,
+  #    getenv, and system functions in Absoft 
+  LIBS =  -lV77  -lU77
+  #----flags for  compilation with Absoft
+  R_8 = -N113
+  FFLAGS = -march=host -O3 -s
+  #----flags for debuging
+  DFLAGS = -O0 -g
+
+else ifeq ($(FC),pfg90)
  
-#---------------------------
-#----Absoft FORTRAN compiler
-#---------------------------
-#FC     =  af90
-#----We need to include Unix and Vax libraries to add etime, getenv, and system functions in Absoft 
-#LIBS =  -lV77  -lU77
-#----flags for  compilation with Absoft
-#FFLAGS = -O3 -s
-#FFLAGS = -O0 -s
-#FFLAGS = -O0 -g
+  #---------------------------
+  #  Portland Group Fortran Compiler
+  #---------------------------
+  R_8 = -r8
+  FFLAGS =  -O3
+  #----flags for debuging
+  DFLAGS = -O0 -g
 
+else ifeq ($(FC),lf90)
  
-#---------------------------
-#----INTEL f95 compiler
-#---------------------------
-#FC     =  ifort
-#----flags for production compilation using ifort
-#FFLAGS = -arch pn4 -O3 -ipo
-#FFLAGS = -O3 -x=host -ipo
-#FFLAGS = -arch pn4 -O3 -axPW -ipo
-#----flags for debuging using ifort compiler
-#FFLAGS =  -C -ftrapuv -g -debug all
-#----flags for automatic parallelization
-#FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
-#----From http://www.macresearch.org/best-fortran-compiler-leopard
-#----For Debugging under ifort:
-#FFLAGS = -m64 -g -debug all -check all -warn unused\
-#-fp-stack-check -heap-arrays -ftrapuv -check pointers\
-#-check bounds
-#----For optimized code under ifort
-#ifort -m64 -fast
-#Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
+  #--------------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  R_8 = -Ad
+  FFLAGS = -O3
+  #----flags for debuging
+  DFLAGS = -O0 -g --chk
 
-
-#---------------------------
-#---- pfg90 compiler
-#---------------------------
-#FC     =  pgf90
-#FFLAGS =  -O2
-
-
-#--------------------------------------
-#----Lahey/Fujitsu f95 FORTRAN compiler
-#--------------------------------------
-#FC    = lf95
-#----flag for Lahey/Fujitsu for production compilation
-#FFLAGS = -O3
-#----flag for Lahey/Fujitsu for debugging
-#FFLAGS = -g --chk
+endif
 
 # make sure MAKE knows f90 extension
 %.o : %.f90
@@ -83,19 +101,21 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
             fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
             systematics.o     subecis06m.o
 
-LIBS =  ../util/IO/*.o #endf_io.a
+IOLIB =  ../util/IO/*.o
 
 all: 
 	$(MAKE) empire
 	$(MAKE) optmand
 
-empire:	$(OBJF) $(LIBS)
-	$(FC) -o $@ $(OBJF) $(LIBS)
+empire:	$(OBJF) $(IOLIB)
+	$(FC) -o $@ $(OBJF) $(IOLIB) $(LIBS)
 
 optmand:	optmand.o
 	$(FC) -o $@ optmand.o
 #	$(FC) optmand.f -o $@ 
 
+debug:
+	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 #empire:   $(OBJF) ecis
 #	$(FC) -o $@ $(OBJF) $(OBJE)
@@ -109,17 +129,17 @@ optmand:	optmand.o
 #empire:   $(OBJF) $(OBJE)
 #	$(FC) -o $@ -pg $(OBJF) $(OBJE)
 
-
 #empire:   $(OBJF) $(OBJE)
 #     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
-#../util/IO/endf_io.a : ../util/IO/endf_io.mod
-
 ../util/IO/endf_io.mod :
-	cd ../util/IO/ ; $(MAKE) -e "FC=$(FC)" ;
+	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
 
-read_nubar.o : read_nubar.f90 global.h dimension.h ../util/IO/endf_io.mod
-	$(FC) $(FFLAGS) -c -I ../util/IO/ read_nubar.f90
+$(IOLIB):
+	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
+
+read_nubar.o : read_nubar.f90 ../util/IO/endf_io.mod
+	$(FC) -O3 $(R_8) -I ../util/IO/ -c read_nubar.f90
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h read_nubar.o
@@ -128,4 +148,5 @@ ddhms.o : ddhms.cmb
 tl.o  : pre_ecis.h
 
 clean:
-	rm *.o
+	rm -f *.o
+	cd ../util/IO/ ; $(MAKE) clean ;

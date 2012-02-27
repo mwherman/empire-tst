@@ -1,39 +1,57 @@
-#----GNU FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
-FFLAGS = -std=legacy -O3
+# set default compiler
 
-#----GNU g77 FORTRAN compiler
-#FC     = g77 -O3
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
-#----standard f77 FORTRAN compiler
-#FC   = f77
-#----standard f90 FORTRAN compiler
-#FC   = f90
-#----flags for production compilation with g77
-#FFLAGS = -O3 -malign-double -funroll-loops
-#----flags for debuging using g77 compiler
-#FFLAGS =  -fno-underscoring  -ggdb
-#FC     =  ifort
-#----flags for debuging using ifort compiler
-#FFLAGS =  -g -C
-#FFLAGS =  -C -ftrapuv -g -debug all
-#FFLAGS =  -w -ipo -O3
-#----flags for automatic parallelization
-#FFLAGS =  -parallel
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
 
-#----GNU g95 FORTRAN Mac compiler
-#FC     =  /sw/bin//g95
-#FFLAGS = -fsloppy-char
+# FFLAGS are based on compiler setting
+
+ifeq ($(FC),gfortran)
+
+  #-------------------------
+  #----GNU FORTRAN compiler
+  #-------------------------
+  #----flags for production compilation
+  FFLAGS = -std=legacy -O3
+  #----flags for debuging
+  #FFLAGS =  -g --bounds-check -std=legacy
+
+else ifeq ($(FC),ifort)
+
+  #-----------------------
+  #----INTEL f95 compiler
+  #-----------------------
+  FFLAGS =  -O3 -x=host -ipo
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel
+
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJF =	sixtab.o dxsend.o
-
 
 sixtab:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
-
 clean:
-	rm *.o
-
+	rm -f *.o

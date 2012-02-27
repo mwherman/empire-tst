@@ -1,6 +1,5 @@
 #include <stdlib.h>
 //#include <malloc.h>
-/*--- выделение памяти под массивы ---*/
 
 char *my_calloc(kmem,lmem)
 unsigned  int  kmem,lmem;

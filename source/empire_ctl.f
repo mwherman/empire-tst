@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2576 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-02-15 15:27:34 +0100 (Mi, 15 Feb 2012) $
+Ccc   * $Rev: 2601 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
 
       PROGRAM EMPIRE_CTL
 C

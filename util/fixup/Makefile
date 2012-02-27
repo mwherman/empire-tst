@@ -1,28 +1,57 @@
-#----GNU FORTRAN compiler
-FC     =  gfortran
-#----flags for production compilation with gfortran
-FFLAGS = -std=legacy -O3
-#----GNU g77 FORTRAN compiler
-#FC     = g77
-#----flags for production compilation with g77
-#FFLAGS = -O3
-#----flags for debuging using g77 compiler
-#FFLAGS =  -fno-underscoring  -ggdb
-#----Linux script calling f2c converter and gcc C compiler
-#FC     = fort77
-#----standard f77 FORTRAN compiler
-#FC   = f77
-#----standard f90 FORTRAN compiler
-#FC   = f90
-#----Fujitsu  f90 FORTRAN compiler
-#FC   = frt
-#FC      = ifort
+# set default compiler
+
+FC   =  gfortran
+#FC  =  ifort
+#FC  =  af90
+#FC  =  lf95
+
+# FFLAGS are based on compiler setting
+
+ifeq ($(FC),gfortran)
+
+  #-------------------------
+  #----GNU FORTRAN compiler
+  #-------------------------
+  #----flags for production compilation
+  FFLAGS = -std=legacy -O3
+  #----flags for debuging
+  #FFLAGS =  -g --bounds-check -std=legacy
+
+else ifeq ($(FC),ifort)
+
+  #-----------------------
+  #----INTEL f95 compiler
+  #-----------------------
+  FFLAGS =  -O3 -x=host
+  #----flags for debuging using ifort compiler
+  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for automatic parallelization
+  #FFLAGS =  -parallel
+
+else ifeq ($(FC),af90)
+
+  #---------------------------
+  #----Absoft FORTRAN compiler
+  #---------------------------
+  FFLAGS = -O3 -s
+  #FFLAGS = -O0 -g
+
+else ifeq ($(FC),lf90)
+
+  #--------------------------------
+  #----Lahey/Fujitsu f95 compiler
+  #--------------------------------
+  #----flag for Lahey/Fujitsu for production compilation
+  FFLAGS = -O3
+  #----flag for Lahey/Fujitsu for debugging
+  #FFLAGS = -g --chk
+
+endif
 
 OBJF =	fixup.o endfio.o  LINUX.o scratchb.o timer.o
-
 
 fixup:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 clean:
-	rm *.o
+	rm -f *.o

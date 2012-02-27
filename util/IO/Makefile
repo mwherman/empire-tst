@@ -4,21 +4,13 @@
 CC     =  gcc
 #CFLAGS = -O3
 
-# choose your fortran compiler:
-#FC     =  f90
+# set default fortran compiler:
 FC     =  gfortran
-#FC     =  f95
 #FC     =  ifort
-# define IPO with ifort with full cross-file optimization
-IPO = TRUE
 
 # define MODE = BLK if using unix block-mode I/O
 # not supported yet on windows
 MODE = BLK
-
-# make sure MAKE knows f90 extension
-%.o : %.f90
-	$(FC) $(FFLAGS) -c $<
 
 # set routines for line I/O
 ifeq ($(MODE),BLK)
@@ -27,13 +19,30 @@ else
    LINIO = endf_lr.o
 endif
 
-# set compiler options
+IPO = FALSE
+# set compiler options based on compiler
 ifeq ($(FC),ifort)
-  FFLAGS = -x=host -O3 -real-size 64
-else
-  FFLAGS = -O3 -fdefault-real-8
-  IPO = FALSE
+  R_8 = -real-size 64
+  FFLAGS = -O3 -x=host
+  # set IPO TRUE for full cross-file optimization
+  IPO = TRUE
+else ifeq ($(FC),gfortran)
+  R_8 = -fdefault-real-8
+  FFLAGS = -O3
+else ifeq ($(FC),af90)
+  R_8 = -N113
+  FFLAGS = -march=host -O3
+else ifeq ($(FC),pfg90)
+  R_8 = -r8
+  FFLAGS =  -O3
+else ifeq ($(FC),lf90)
+  R_8 = -Ad
+  FFLAGS = -O3
 endif
+
+# make sure MAKE knows f90 extension
+%.o : %.f90
+	$(FC) $(FFLAGS) $(R_8) -c $<
 
 # build library
 
