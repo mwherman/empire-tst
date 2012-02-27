@@ -1,6 +1,6 @@
-#$Rev: 2601 $
+#$Rev: 2604 $
 #$Author: shoblit $
-#$Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+#$Date: 2012-02-27 22:19:40 +0100 (Mo, 27 Feb 2012) $
 
 # set default fortran compiler:
 
@@ -115,6 +115,11 @@ optmand:	optmand.o
 #	$(FC) optmand.f -o $@ 
 
 debug:
+	# don't compile ecis with debug
+	$(FC) $(FFLAGS) -c subecis06m.f
+	# don't include IO into debug here
+	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
+	# build rest with debug flags
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 #empire:   $(OBJF) ecis
