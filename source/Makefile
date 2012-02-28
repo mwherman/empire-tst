@@ -1,6 +1,6 @@
-#$Rev: 2604 $
+#$Rev: 2608 $
 #$Author: shoblit $
-#$Date: 2012-02-27 22:19:40 +0100 (Mo, 27 Feb 2012) $
+#$Date: 2012-02-28 17:10:52 +0100 (Di, 28 Feb 2012) $
 
 # set default fortran compiler:
 
@@ -12,7 +12,10 @@ FC   =  gfortran
 
 LIBS =
 
-# FFLAGS are based on compiler setting
+# various flags are set based on compiler FC:
+# R_8 is the compiler option to set size of default REAL -> REAL*8
+# FFLAGS are the normal complier options for production code
+# DFLAGS are the options used when debugging (except for ECIS)
 
 ifeq ($(FC),gfortran)
 
@@ -107,35 +110,20 @@ all:
 	$(MAKE) empire
 	$(MAKE) optmand
 
-empire:	$(OBJF) $(IOLIB)
+empire: $(OBJF) $(IOLIB)
 	$(FC) -o $@ $(OBJF) $(IOLIB) $(LIBS)
 
-optmand:	optmand.o
+optmand: optmand.o
 	$(FC) -o $@ optmand.o
 #	$(FC) optmand.f -o $@ 
 
+# When making a debug image, don't compile either ECIS or
+# the IO library with debug. ECIS won't work and IO should
+# be debugged separately, if needed.
 debug:
-	# don't compile ecis with debug
-	$(FC) $(FFLAGS) -c subecis06m.f
-	# don't include IO into debug here
+	$(MAKE) subecis06m.o
 	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
-	# build rest with debug flags
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
-
-#empire:   $(OBJF) ecis
-#	$(FC) -o $@ $(OBJF) $(OBJE)
-
-#ecis:	
-#	$(FC) -O3 -std=legacy -c subecis06m.f
-#        -pg should be included for profiling
-#	$(FC) -O0 -pg -std=legacy -c subecis06m.f
-
-#for profiling (also turn on -pg option for each -o file above):
-#empire:   $(OBJF) $(OBJE)
-#	$(FC) -o $@ -pg $(OBJF) $(OBJE)
-
-#empire:   $(OBJF) $(OBJE)
-#     $(FC) --parallel -o $@ $(OBJF) $(OBJE)
 
 ../util/IO/endf_io.mod :
 	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
