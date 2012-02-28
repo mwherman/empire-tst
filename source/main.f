@@ -1,6 +1,6 @@
-cc   * $Rev: 2601 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+cc   * $Rev: 2607 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-02-28 05:59:15 +0100 (Di, 28 Feb 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -888,20 +888,27 @@ C        corrmsd = (CSFus - ftmp)/CSFus
             endif
 
             WRITE (8,*) ' '
-            WRITE (8,*) 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+            WRITE (8,*) 'ERROR: PE emission larger then fusion xsc'
+            WRITE (8,*) 'ERROR: see bottom of the .lst for details'
             IF (MSD+MSC.GT.0 .AND. ICOmpff.GT.0) THEN
                WRITE (8,*) 'TRY TO TURN OFF COMPRESSIONAL FORM FACTOR '
                WRITE (8,*) 'SETTING COMPFF TO 0 IN THE OPTIONAL INPUT.'
-C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.GT.0 .AND. ICOmpff.EQ.0) THEN
                WRITE (8,*) 'THIS MAY HAPPEN IF RESPONSE FUNCTIONS ARE '
                WRITE (8,*) 'RENORMALIZED IN INPUT OR FITTED TO WRONG '
                WRITE (8,*) 'DISCRETE LEVELS. CHECK `EFIT` AND `RESNOR` '
                WRITE (8,*) 'IN OPTIONAL INPUT.    '
+               WRITE (8,*) 'IF COLLECTIVE LEVELS ARE CHOSEN INTERNALLY '
+               WRITE (8,*) 'IT MAY HAPPEN THAT THE FIRST 2+ LEVEL IS   '
+               WRITE (8,*) 'NOT THE COLLECTIVE ONE. IN SUCH A CASE THE '
+               WRITE (8,*) 'PROPER ENERGY OF THE COLLECTIVE LEVEL      '
+               WRITE (8,*) 'SHOULD BE ENTERED IN OPTIONAL INPUT THROUGH'
+               WRITE (8,*) 'THE EFIT KEYWORD.                          '
                WRITE (8,*)
      &                    'IF THESE ARE FINE TRY ANOTHER OPTICAL MODEL.'
-C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
             IF (MSD+MSC.EQ.0) THEN
                WRITE (8,*) 'THIS MAY HAPPEN IF TOO MANY DISCRETE LEVELS'
@@ -910,7 +917,7 @@ C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
                WRITE (8,*) 'COLLECTIVE LEVEL FILE.'
                WRITE (8,*)
      &                  'TRY TO REDUCE THE NUMBER OF COLLECTIVE LEVELS.'
-C              STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
+               STOP 'PE EMISSION LARGER THEN FUSION CROSS SECTION'
             ENDIF
          ENDIF
          ftmp = 0.d0
