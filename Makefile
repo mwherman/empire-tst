@@ -50,7 +50,7 @@ release-tarball:
 	python installer/makeTarball.py --release
 #	python installer/makeTarball.py --release --riplOnly
 
-txt-installer: release-tarball installer/install.sh.template
+txt-installer: installer/install.sh.template release-tarball
 	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
 
 IZPACK = $(HOME)/Projects/Current/IzPack
