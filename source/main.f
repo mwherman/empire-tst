@@ -1,6 +1,6 @@
-cc   * $Rev: 2607 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-28 05:59:15 +0100 (Di, 28 Feb 2012) $
+cc   * $Rev: 2613 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-01 22:28:10 +0100 (Do, 01 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -164,8 +164,9 @@ C-----
       IF (FIRst_ein) THEN
         OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
 C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
-        OPEN (41, FILE='XSECTIONS.OUT', STATUS='unknown')
-
+        OPEN (41, FILE='XSECTIONS.OUT' , STATUS='unknown')
+        OPEN (104, FILE='GAMMA_INT.DAT', STATUS='unknown')
+        OPEN (107, FILE='EL_INEL.DAT'  , STATUS='unknown')
         i = 0
         DO nnuc=1,NNUcd
             i = i + 1
@@ -176,6 +177,14 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
      &       '  Elastic   ','  Reaction  ','  Fission   ',
      &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
+
+        WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+4,
+     &      int(Z(0)), SYMb(0), int(A(0))
+        WRITE(107,'(''#'',A10,1X,(9A12))') '   Einc   ',
+     &      '  Shape el  ','  CN el     ', ' Coup.Chan',
+     &      '  DWBA disc ','  DWBA cont ','    MSD     ',
+     &      '    MSC     ','   PCROSS   ','  CN form   '
+
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
@@ -2188,6 +2197,15 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
+      WRITE(107,'(G10.5,1P,(9E12.5))') EINl, 
+     &     ELAcs*ELAred, 4.*PI*ELCncs,             !shape_el,CN_el
+     &     SINlcc*FCCred, SINl*FCCred, SINlcont,   !CC_inl,DWBA_dis,DWBA_cont  
+C    &     SINlcc*FCCred, SINl*FCCred, xsinlcont,  !CC_inl,DWBA_dis,DWBA_cont  
+     &     xsinl,CSMsc(1),totemis,                 !MSD,MSC,PCROSS
+     &     csinel- ( SINlcc*FCCred + SINl*FCCred + SINlcont +
+     &               xsinl + CSMsc(NPRoject) + totemis )
+
+
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
      &  WRITE(98,'(G10.5,2X,1P,(95E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
@@ -3574,6 +3592,8 @@ C
          CLOSE (33)
          CLOSE (40)
          CLOSE (41)
+         CLOSE (104)
+         CLOSE (107)
          IF(DEGa.GT.0) THEN
            CLOSE (42)
          ELSE
