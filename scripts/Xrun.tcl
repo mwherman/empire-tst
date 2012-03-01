@@ -1,6 +1,6 @@
-# $Rev: 2605 $
-# $Author: gnobre $
-# $Date: 2012-02-27 22:22:02 +0100 (Mo, 27 Feb 2012) $
+# $Rev: 2616 $
+# $Author: rcapote $
+# $Date: 2012-03-01 22:33:32 +0100 (Do, 01 Mär 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8496,7 +8496,10 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/sampling.sh $file &} \
-        -label {Monte Carlo sampling} 
+        -label {Monte Carlo sampling (repeated calls to runE} 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/calc_cov.sh $file &} \
+        -label {Processing Monte Carlo samples} 
     $site_3_0.menu93 add separator \
        
     $site_3_0.menu93 add command \
