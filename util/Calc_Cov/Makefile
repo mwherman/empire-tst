@@ -49,15 +49,11 @@ else ifeq ($(FC),lf90)
 endif
 
 OBJP =	Calc_Cov.o
-OBJR =	kalend2.o
 
-all: Calc_Cov.exe kalend2.exe
+all: Calc_Cov.exe 
 
 Calc_Cov.exe:   $(OBJP)
 	$(FC) -o $@ $(OBJP)
 
-kalend2.exe:   $(OBJR)
-	$(FC) -o $@ $(OBJR)
-       
 clean:
 	rm -f *.o
