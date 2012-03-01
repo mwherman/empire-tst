@@ -61,10 +61,10 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP')
-    rm('SENSITIVITY.MATRIX','NUBAR-EVAL.ENDF')
+    rm('SENSITIVITY.MATRIX','NUBAR-EVAL.ENDF','GAMMA_INT.DAT','EL_INEL.DAT')
+
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
         glob('*.LEG') + glob('TARGET-*.tl') )
-  
     
     if (not os.path.exists(proj+'.inp')):
         print("Input file : %s does not exist" % proj+'.inp')
@@ -149,9 +149,11 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
-    mv('XSECTIONS.OUT',proj+'.xsc')
-    mv('FISS_XS.OUT',proj+'-fiss.xsc',0) # no message if not present
-    mv('FISSION.INP',proj+'-inp.fis',0)  # no message if not present
+    mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
+    mv('EL_INEL.DAT',proj+'-preq.xsc',0)      # no message if not present    
+    mv('XSECTIONS.OUT',proj+'.xsc',0)         # no message if not present
+    mv('FISS_XS.OUT',proj+'-fiss.xsc',0)      # no message if not present
+    mv('FISSION.INP',proj+'-inp.fis',0)       # no message if not present
 
     if not (os.path.isdir(proj+'-tl')):
         mv('TL',proj+'-tl')
