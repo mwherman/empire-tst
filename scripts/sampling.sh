@@ -83,10 +83,6 @@ let sweep=sweep+1
 done
 # Calculating and plotting covariances
 $EMPIREDIR/util/Calc_Cov/Calc_Cov.exe
-mv MC_covar.out $file-MC-cov.out
-
-$EMPIREDIR/util/Calc_Cov/kalend2.sh $file 
-
-rm fort.16 fort.14
-
+mv MC_covar.out  $file-MC-cov.out
+mv MC_file33.out $file-MC-cov.endf
 exit
