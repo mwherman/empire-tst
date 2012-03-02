@@ -193,8 +193,9 @@ def runE(proj):
     
     # beware, these commands make assumptions about the system:
     if not isEmpty('CUMULPLOT.PS'):
+	    mv('CUMULPLOT.PS',proj+'-cum.ps',0) # no message if not present     
         # no exception if ps2ps not found, just a message:
-        os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
+        # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
         if os.path.exists(proj+'-cum.ps'):
             # read preferences from .Xrunrc:
             prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
