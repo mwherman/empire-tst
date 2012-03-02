@@ -1,6 +1,6 @@
-# $Rev: 2616 $
-# $Author: rcapote $
-# $Date: 2012-03-01 22:33:32 +0100 (Do, 01 Mär 2012) $
+# $Rev: 2623 $
+# $Author: mherman $
+# $Date: 2012-03-02 08:32:26 +0100 (Fr, 02 Mär 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5797,13 +5797,13 @@ proc vTclWindow.top75 {base} {
         -menu "$top.m88" -background #ffffff -highlightbackground #d9d9d9 \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 957x415+155+363; update
+    wm geometry $top 957x465+155+363; update
     wm maxsize $top 1265 994
     wm minsize $top 72 15
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.1 (Rivoli), February 2012, Graphical User Interface (GUI) "
+    wm title $top "EMPIRE-3.1.1 (Rivoli), March 2012, Graphical User Interface (GUI) "
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -6890,7 +6890,7 @@ exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
     #
     #---------------------------------------------------------
     set types {
-       {"Input Files"              {.endf}              }
+       {"ENDF Files"              {.endf}              }
        {"All   Files"              {*}           }
     }
 
@@ -7514,7 +7514,7 @@ adjourn .top75 }} \
     vTcl:DefineAlias "$site_9_0.ent66" "Entry11" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.ent66 "$site_9_0.ent66 Entry $top all _vTclBalloon"
     bind $site_9_0.ent66 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {repository }
+        set ::vTcl::balloon::%W {Enter here link to the SVN repository for the project}
     }
     labelframe $site_9_0.lab66 \
         -font -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
