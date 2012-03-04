@@ -23,6 +23,7 @@ C-V        - Fix copying of MF33 (no adjustment to energy boundaries)
 C-V  08/04 - Fix conversion MF10/MT102 to MF9/MT102 when MF8 present.
 C-V  11/06 Take temperature from the source and not the resonance file.
 C-V  11/12 Add MT 19 to the list of adjusted reactions, if present.
+C-V  12/02 Fix NBT,INR array declarations for consistency (R. Capote)
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -46,22 +47,17 @@ C-External routines from DXSEND.F
 C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
 C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
-C     PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
-C                             RCN, Feb. 2012
-      PARAMETER    (MXRW=10000, MXNB=100, MXMT=100)
+      PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
       CHARACTER*40  BLNK,FLNM,FLEM,FLRR,FLOU,FLLG,FLSC,FLS1
       CHARACTER*11  CHZA,CHAW
-C*
-C     DOUBLE PRECISION Q
 C*
       DIMENSION     NBT(MXNB),INR(MXNB),MTLS(MXMT),ELOW(MXMT)
       DIMENSION     RWO(MXRW)
 C*
       DATA BLNK/'                                        '/
      1     FLEM/'empire.end'/
-C    2     FLRR/'mughrr.end'/
      2     FLRR/'ENDRES.DAT'/
      3     FLOU/'endf.dat'/
      4     FLLG/'endres.lst'/
@@ -975,7 +971,7 @@ C-
       CHARACTER*40 FLS1
       CHARACTER*66 CH66,BL66
       DIMENSION    RWO(MXRW)
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(20),INR(20)
       BL66="                                 "//
      &     "                                 "
 C* Define "small" cross section
@@ -1017,11 +1013,11 @@ C* Read FM10/MF102 and write MF9/MT102 to scratch file
       CALL WRTEXT(LS1,MAT,MF,MT,NS,CH66)
       READ (CH66(45:55),*) NK
 c...
-      print *,'nk',nk
+c...  print *,'nk',nk
 c...
       DO I=1,NK
 c...
-        print *,'reading tab1',i
+c...    print *,'reading tab1',i
 c...
         CALL RDTAB1(LEM,QM,QI,LL,LR,NR,NP,NBT,INR
      &             ,RWO(LE1),RWO(LX1),NMX,IER)
@@ -1030,7 +1026,7 @@ c...
           STOP 'ENDRES ERROR - MXRW limit exceeded'
         END IF
 c...
-        print *,'writing tab1',i
+c...    print *,'writing tab1',i
 c...
 C*      -- Interpolate accumulated total to the isomer grid
         CALL FITGRD(NP2,RWO(LE2),RWO(LX2),NP,RWO(LE1),RWO(LX3))
@@ -1053,7 +1049,7 @@ C* Adjust the lower energy range
         END IF
         RWO(LE1)=ETH
 C...
-        print *,'            ',i
+C...    print *,'            ',i
 C...
 C* Write the data set to scratch
         CALL WRTAB1(LS1,MAT,MF,MT,NS,QM,QI,LL,LR
@@ -1350,11 +1346,11 @@ C-
       IER = 0
       READ (LEF,92,ERR=20,END=10) C1,C2,L1,L2,N1,N2,MAT,MF,MT
       RETURN
-   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
    10 IER = 1
       RETURN
    20 IER = 2
       RETURN
+   92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
       SUBROUTINE RDTAB1(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,EN,XS,NMX,IER)
 C-Title  : Subroutine RDTAB1
@@ -1364,7 +1360,7 @@ C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
 C-D    IER=9 on exit if available field length NMX is exceeded.
 C-
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(20),INR(20)
       DIMENSION    EN(NMX), XS(NMX)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
@@ -1384,18 +1380,19 @@ C*
       SUBROUTINE RDTAB2(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,IER)
 C-Title  : Subroutine RDTAB2
 C-Purpose: Read an ENDF TAB2 record
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(20),INR(20)
       IER = 0
 C*
       READ (LEF,902,END=10,ERR=20) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=10,ERR=20) (NBT(J),INR(J),J=1,N1)
       RETURN
 C*
-  902 FORMAT(2F11.0,4I11)
-  903 FORMAT(6I11)
    10 IER = 1
       RETURN
    20 IER = 2
+C*
+  902 FORMAT(2F11.0,4I11)
+  903 FORMAT(6I11)
       END
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
