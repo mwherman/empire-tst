@@ -11,22 +11,23 @@ C
       implicit none
       integer*4 Nenergies, Nreact
       parameter (Nenergies=150, Nreact=100)
-      real*8 e(Nenergies),dtmp,ftmp
+      real*8 e(Nenergies),dtmp,ftmp,ex(Nenergies),ey(Nenergies)
       real*8 avermod(Nreact,Nenergies)
       real*8 sigmod(Nreact,Nenergies)
       real*8 rndvec(Nreact,Nenergies)
       real*8 covmod(Nreact,Nreact,Nenergies,Nenergies)
-      integer*4 i,j,ir,ix,ie,ic,iz,ia,nstrlen,nmax
+      integer*4 i,j,ir,ix,ie,ic,iz,ia,nstrlenx,nstrleny,ndimx,ndimy
       integer*4 nt(Nreact)
       integer*4 Nstart,Nruns,Ncalc,Nnucd 
       character*4 crun
       character*2 symb
       character*21 caz
+      character*34 caxy
       character*12 reaction(Nreact)
       logical lcovar(Nreact,Nreact)
 
 C-Title  : Program eigenv_cov
-C-Purpose: Calculate eigenvalues of the covaraince matrix
+C-Purpose: Calculate eigenvalues of the covariance matrix
       REAL*8 Cov(Nenergies,Nenergies)
 	REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
 
@@ -61,15 +62,15 @@ C         read(10,'(12x,(90A12))') (REAction(ir),ir=1,NNUcd)
           read(10,'(13X,(3A12),(A10),(90A12))')(REAction(ir),ir=1,NNUcd)
 
           do ir= 7,NNUcd
-            nstrlen=len(trim(REAction(ir)))
-	      if(nstrlen.gt.7) then
+            nstrlenx=len(trim(REAction(ir)))
+	      if(nstrlenx.gt.7) then
               do ix=1,NNUcd
                 lcovar(ix,ir)=.false.
                 lcovar(ir,ix)=.false.
               enddo 
               cycle
             endif
-            if(nstrlen.eq.7 .and. REAction(ir)(6:6).ne.'n') then 
+            if(nstrlenx.eq.7 .and. REAction(ir)(6:6).ne.'n') then 
               do ix=1,NNUcd
                 lcovar(ix,ir)=.false.
                 lcovar(ir,ix)=.false.
@@ -182,8 +183,8 @@ C     Getting covariance matrix
   	  enddo
         write(16,*) 
 
-        nstrlen=len(trim(REAction(ir)))
-        open(20,file='XS_'//reaction(ir)(2:nstrlen)//'.zvd')
+        nstrlenx=len(trim(REAction(ir)))
+        open(20,file='XS_'//reaction(ir)(2:nstrlenx)//'.zvd')
         write(caz,'(I2.2,1h-,A2,1h-,I3.3,A12)') 
      >        iz,symb,ia,TRIM(reaction(ir))       
    
@@ -246,59 +247,41 @@ C    >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir)+1,ie)
         write(16,640) (j,j=nt(ir),ie) 
 
 
-        nstrlen=len(trim(REAction(ir)))
-        open(20,file='COV_'//reaction(ir)(2:nstrlen)//'.zvd')
-        write(caz,'(I2.2,1h-,A2,1h-,I3.3,A)') 
+	  cov = 0.d0
+	  ex =0.d0
+        ey =0.d0
+	  ndimx = ie - nt(ir) + 1
+        ndimy = ie - nt(ir) + 1
+
+	  if(ndimx.gt.3 .and. ndimy.gt.3) then
+         do i=nt(ir),ie
+          ex(i-nt(ir)+1) = e(i) 
+	    do j=nt(ir),ie
+            ey(j-nt(ir)+1) = e(j) 
+            cov(i-nt(ir)+1,j-nt(ir)+1) = 
+     >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
+	    enddo 
+         enddo
+
+         nstrlenx=len(trim(REAction(ir)))
+         open(21,file='COV_'//reaction(ir)(2:nstrlenx)//'.zvd')
+
+         write(caz,'(I2.2,1h-,A2,1h-,I3.3,A)') 
      &        iz,symb,ia,TRIM(reaction(ir))       
-   
-C
-C       To consult Viktor before getting ZVView plots
-C
-        CALL OPEN_ZVV3d(20,caz,' Covariance matrix ',ie-nt(ir)+1)
-	  
-        write(20,'(4H$xx:)')
-        write(20,'(6(1x,G9.3,3x))') (1d6*e(i),i=nt(ir),ie)
- 	  write(20,'(4Hend )')
- 	  write(20,'(4H$yy:)')
-        write(20,'(6(1x,G9.3,3x))') (1d6*e(i),i=nt(ir),ie)
- 	  write(20,'(4Hend )')
 
- 	  write(20,'(4H$zz:)')
-        do i=nt(ir),ie
-	    if(i.lt.10) write(20,'(1H!,I1)') i - nt(ir) + 1 
-	    if(i.GE.10 .and. i.LT.100) write(20,'(1H!,I2)') 
-     >                               i - nt(ir) + 1
-	    if(i.GE.100 .and. i.LT.1000) write(20,'(1H!,I3)') 
-     >                               i - nt(ir) + 1
-	    if(i.GE.1000 .and. i.LT. 9999) write(20,'(1H!,I4)') 
-     >                               i - nt(ir) + 1
-          write(20,'(6(1x,G9.3,3x))') ( covmod(ir,ir,i,j)/
-     >      (sigmod(ir,i)*sigmod(ir,j)),j=nt(ir),ie)
-        enddo
-        write(20,'(4Hend )')
-        CALL CLOSE_ZVV3D(20,' ',' ')
-        CLOSE(20)
+         CALL CALL plot3D_to_ZVD 
+     >    (21, ex, ey, cov, ndimx, ndimy, Nenergies, 
+     >     caz, ' Relative covariance matrix for '//reaction(ir) )
 
-	  Cov = 0.d0
+         close(21)
+	  endif
+
   	  EigenVect = 0.d0
 	  EigenVal = 0.d0
-	  do i=nt(ir),ie
-         do j=nt(ir),ie
-C          Approximation corresponding to printed covariances with 3 digits
-C          It leads to negative eigenvalues !
-C 
-C          ftmp = nint(1000.d0*covmod(ir,ir,i,j)/
-C    >      (sigmod(ir,i)*sigmod(ir,j)))/1000.d0
-C          Cov(i,j)= ftmp*sigmod(ir,i)*sigmod(ir,j)
-           Cov(i-nt(ir)+1,j-nt(ir)+1)= covmod(ir,ir,i,j)
-         enddo
-        enddo
 
- 	  nmax = ie-nt(ir)+1
-        call JCB_DAG
-     >       (Cov,EigenVect,EigenVal,nmax,Nenergies,1.d-10)
+        call JCB_DAG (Cov,EigenVect,EigenVal,ndimx,Nenergies,1.d-10)
 
-        DO i=1,nmax
+        DO i=1,ndimx
 	   DO j=1,i 
 	    if(EigenVal(j).lt.EigenVal(i)) then
 		  ftmp=EigenVal(i)	    
@@ -311,13 +294,13 @@ C          Cov(i,j)= ftmp*sigmod(ir,i)*sigmod(ir,j)
         write(16,*) 
         write(16,*)
      >    ' Eigen Values (Abs. Covar.) for reaction:',reaction(ir),
-     >    ' N=',nmax
-        write(16,'(1p4e13.5)') (EigenVal(i),i=1,nmax)
+     >    ' N=',ndimx
+        write(16,'(1p4e13.5)') (EigenVal(i),i=1,ndimx)
         write(*,*)
         write(*,*)
      >    ' Eigen Values (Abs. Covar.) for reaction:',reaction(ir),
-     >    ' N=',nmax
-        write(*,'(1p4e13.5)') (EigenVal(i),i=1,nmax)
+     >    ' N=',ndimx
+        write(*,'(1p4e13.5)') (EigenVal(i),i=1,ndimx)
         write(*,*) 
      >     '....................................................'
 
@@ -358,6 +341,39 @@ C         WRITE(14,550) (avermod(ir,i),i=nt(ir),ie)
           do i=nt(ix),ie
             WRITE(14,550) (covmod(ix,ir,i,j),j=nt(ir),ie)
           enddo
+
+  	    cov = 0.d0
+	    ex =0.d0
+          ey =0.d0
+	    ndimx = ie - nt(ix) + 1
+          ndimy = ie - nt(ir) + 1
+
+	    if(ndimx.gt.3 .and. ndimy.gt.3) then
+           do i=nt(ix),ie
+            ex(i-nt(ix)+1) = e(i) 
+	      do j=nt(ir),ie
+              ey(j-nt(ir)+1) = e(j) 
+              cov(i-nt(ix)+1,j-nt(ir)+1) = 
+     >          covmod(ix,ir,i,j)/(sigmod(ix,i)*sigmod(ir,j))
+	      enddo 
+           enddo
+
+           nstrlenx=len(trim(REAction(ix)))
+	     nstrleny=len(trim(REAction(ir)))
+           open(21,file='COV_'//
+     >	 reaction(ix)(2:nstrlenx)//'_'//reaction(ir)(2:nstrleny)//
+     >     '.zvd')
+
+           write(caxy,'(I2.2,1h-,A2,1h-,I3.3,A)') 
+     >        iz,symb,ia,TRIM(reaction(ix))//' '//TRIM(reaction(ir))       
+
+           CALL CALL plot3D_to_ZVD 
+     >      (21, ex, ey, cov, ndimx, ndimy, Nenergies, 
+     >       caxy, ' Relative covariance matrix for '
+     >            //trim(reaction(ix))//' x '//trim(reaction(ir)) )
+
+           close(21)
+	    endif
 
 c         Printing cross-reaction correlation matrix
           write(16,618) 
@@ -570,28 +586,59 @@ c	  return eigenvalues in $\bfE$ and eigenvectors in $\bfV$.
       return
       end   
 
-      SUBROUTINE OPEN_ZVV3D(iout,tfunct,title,mdim)
+      SUBROUTINE CALL plot3D_to_ZVD
+     >  (iounit, ex, ey, covar, ndimx, ndimy, ndecl_dim,
+     >   cfunctname, ctitle)
+C
+	implicit none
+      character*(*) ctitle, cfunctname
+      integer*4 iounit, ndimx, ndimy, ndecl_dim
+      real*8 covar(ndecl_dim,ndecl_dim), ex(ndecl_dim), ey(ndecl_dim)
+      integer*4 i,j
+
+      CALL OPEN_ZVV3d(iounit,cfunctname,ctitle,ndimx,ndimy)
+	  
+      write(iounit,'(4H$xx:)')
+      write(iounit,'(6(1x,G11.3,1x))') (1d6*ex(i),i=1,ndimx)
+      write(iounit,'(4Hend )')
+      write(iounit,'(4H$yy:)')
+      write(iounit,'(6(1x,G11.3,1x))') (1d6*ey(i),i=1,ndimy)
+      write(iounit,'(4Hend )')
+
+      write(iounit,'(4H$zz:)')
+      do i=1,ndimx
+        write(iounit,'(6(1x,G12.6,1x))')(covar(i,j), j=1, ndimy)
+      enddo
+      write(iounit,'(4Hend )')
+
+      CALL CLOSE_ZVV3D(iounit)
+
+      return
+      end
+
+      SUBROUTINE OPEN_ZVV3D(iout,tfunct,title,ndimx,ndimy)
+	implicit none
       character*(*) title, tfunct
-      integer iout,mdim
+      integer*4 iout,ndimx,ndimy
+C
       write(iout,'(A19)') '#begin LSTTAB.CUR/2'
-      if(title(1:1).ne.' ') write(iout,'(A)') trim(title)      
+      if(title(1:3).ne.'   ') write(iout,'(A5,A)') 'tit: ',trim(title)      
       write(iout,'(A5,A)') 'fun: ',trim(tfunct)
-C     write(iout,'(A10)')   'thick: 2  '
+      write(iout,'(A10)')   'thick: 3  '
       write(iout,'(A10)')   'con: 2    '
-      write(iout,'(A5,I3)') 'lx2: ',mdim
-      write(iout,'(A5,I3)') 'ly2: ',mdim
+      write(iout,'(A5,I3)') 'lx2: ',ndimx
+      write(iout,'(A5,I3)') 'ly2: ',ndimy
       write(iout,'(A2)') '//'
       return
       end
 
-      SUBROUTINE CLOSE_ZVV3D(iout,titlex,titley)
-      character*(*) titlex,titley
-      integer iout
+      SUBROUTINE CLOSE_ZVV3D(iout)
+	implicit none
+      integer*4 iout
+C
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/2'
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
-      if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',trim(titlex)
-      if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',trim(titley)
       write(iout,'(A17)') 'lx-win: 1016     '
       write(iout,'(A17)') 'ly-win: 1016     '
 
@@ -619,15 +666,15 @@ C     write(iout,'(A17)') 'y-range: 0. 20   '
       write(iout,'(A17)') 'noStat: 1        '
       write(iout,'(A17)') 'x-grid: 0        '
       write(iout,'(A17)') 'y-grid: 0        '
-      write(iout,'(A17)') 'buttons: 1       '
+      write(iout,'(A17)') 'buttons: 0       '
       write(iout,'(A17)') 'planki: 0        '
       write(iout,'(A17)') 'showTxtPoints: 0 '
       write(iout,'(A18)') 'showTxtPointBox: 0'
       write(iout,'(A17)') 'legendxy0: 0 0   '
       write(iout,'(A17)') 'mode: fixsym     '
-      write(iout,'(A21)') 'typeExtendedLegend: 0'
-      write(iout,'(A17)') 'ViewD2: 0        '
-      write(iout,'(A17)') 'LEVELS: 10       '
+      write(iout,'(A21)') 'typeExtendedLegend: 1'
+      write(iout,'(A17)') 'ViewD2: Default  '
+      write(iout,'(A17)') 'LEVELS: 1        '
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/c'
       return
