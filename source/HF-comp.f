@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2633 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-04 21:56:03 +0100 (So, 04 Mär 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -812,6 +812,9 @@ C-----------------NOTE: internal conversion taken into account
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
+C
+                  write(104,*) Nnuc,l,j1,egd, EINl,gacs
+C
                ENDDO
             ENDIF
          ENDIF
