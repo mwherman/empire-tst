@@ -3871,6 +3871,7 @@ C-V  07/11 Add EMIN parameter (minimum energy)
 C-V        ELO defined internally as EMIN or ELO and exported
 C-V        (adjustment of lower energy limit done in WRMF6).
 C-V  08/02 Set LCT=3 (CM-light particles, LAB-recoils).
+C-V  12/02 Set LCT=2 after careful review of Empire methods.
 C-Description:
 C-D  Error trap flags:
 C-D  IER = -1  Corrupted work array?
@@ -3922,9 +3923,9 @@ C* NE6 counts the Number of energy points
       JT6=ABS(MT6)
       MTC=JT6
 C*    -- Preset coordinate system flag: CM-all particles
-c...  LCT=2
+      LCT=2
 C*    -- Preset coordinate system flag: CM-light particles, LAB-recoils
-      LCT=3
+C...  LCT=3
       NE6=0
       LBL=1
       IK =0
@@ -4254,8 +4255,8 @@ C* Check if particle is to be processed
       PTST=REC(15:22)
       IF(PTST.EQ.'recoils ') IRCOIL=1
       IF(PTST.NE.POUT(IK)) GO TO 210
-      READ (REC(35:58),808) KZAK
       IF(PTST.EQ.'recoils ') THEN
+        READ (REC(35:58),808) KZAK
 c...
 c...    print *,rec(15:41),pout(ik),izak(ik)
 c...
