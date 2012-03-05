@@ -1,6 +1,6 @@
-cc   * $Rev: 2637 $
+cc   * $Rev: 2639 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-05 19:09:39 +0100 (Mo, 05 Mär 2012) $
+Ccc   * $Date: 2012-03-05 23:12:37 +0100 (Mo, 05 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2543,19 +2543,22 @@ C             Calculating unique energy grid
 C
 C             Assumed maximum energy of neutrons from fragments will be 25 MeV
 
-              deltae_pfns = 0.1d0 
-              nepfns = min( NINT(25.d0/deltae_pfns) + 1, NDEPFN)
+C             deltae_pfns = 0.1d0 
+C             nepfns = min( NINT(25.d0/deltae_pfns) + 1, NDEPFN)
 
-              enepfns(1) = 0.00075d0
+	        deltae_pfns = dexp(log(25.d11)/(NDEPFN-1))
 
-              DO ie = 1, nepfns 
-                enepfns(ie) = FLOAT(ie - 1)*deltae_pfns
+              enepfns(1) = 1.d-11 ! Setting the lowest limit
+
+              DO ie = 1, nepfns-1
+C               enepfns(ie) = FLOAT(ie - 1)*deltae_pfns 
+                enepfns(ie+1) = enepfns(ie)*deltae_pfns
+	          if(enepfns(ie+1).gt.25.d0) exit
               ENDDO
-              enepfns(1) = 0.00075d0 ! Setting the lowest limit to 0.75 keV 0
+              nepfns = ie
 
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
-
 C
 C             fniu_nubar_eval(eincid) is defined differently in 
 C             the source file read_nubar_windows.f (only used in Windows)
