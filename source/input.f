@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2601 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+Ccc   * $Rev: 2636 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-05 19:05:10 +0100 (Mo, 05 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3894,6 +3894,8 @@ C-----
               WRITE (8,
      & '('' ERROR: LEVDEN must be 0,1,2,3,4; default EGSM = 0 used '')')
               GOTO 100
+	      ELSE
+              ADIv = val
             ENDIF
             IF (ADIv.EQ.0.0D0) WRITE (8,
      & '('' EMPIRE-specific level densities (J>>K aprox.) selected '')')
@@ -3935,7 +3937,6 @@ C    &           '('' Gilbert-Cameron level densities '')')
      &     '('' Microscopic parity dependent HFB level densities '')')
             IF (ADIv.EQ.4.0D0) WRITE (12,
      &     '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
-            ADIv = val
             GOTO 100
          ENDIF
 C-----
