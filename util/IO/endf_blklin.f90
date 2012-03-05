@@ -93,7 +93,9 @@ module endf_line_io
 
     endif
 
-     return
+    open_endf_file = 0
+
+    return
     end function open_endf_file
 
 !------------------------------------------------------------------------------

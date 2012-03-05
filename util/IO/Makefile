@@ -24,6 +24,8 @@ IPO = FALSE
 ifeq ($(FC),ifort)
   R_8 = -real-size 64
   FFLAGS = -O3 -x=host
+  # flags for debug
+  # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
   # set IPO TRUE for full cross-file optimization
   IPO = TRUE
 else ifeq ($(FC),gfortran)

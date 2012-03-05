@@ -656,7 +656,6 @@ module ENDF_MF1_IO
     integer i
 
     r1 => mf1
-    r1%mt = get_mt()
     do while(associated(r1))
 
         if(associated(r1%mt451)) then

@@ -567,6 +567,8 @@ module ENDF_MF32_IO
 
     type (MF32_RM_block), pointer :: blk
 
+    nullify(rm%gen, rm%cmp, rm%dap)
+
     call read_endf(rm%spi, rm%ap, rm%lad, rm%lcomp, rm%nls, rm%isr)
     if(rm%isr .gt. 0) then
         call read_endf(n, n, rm%mls, n)
@@ -585,8 +587,6 @@ module ENDF_MF32_IO
             call endf_error(erlin)
         end if
     end if
-
-    nullify(rm%gen, rm%cmp)
 
     select case(rm%lcomp)
     case(1)
@@ -1221,7 +1221,7 @@ module ENDF_MF32_IO
 
     type (mf32_ur_subsection), intent(in) :: ur
 
-    integer l,m,snj
+    integer l,snj
 
     type (mf32_ur_lprm),  pointer :: pm
 
@@ -1372,7 +1372,7 @@ module ENDF_MF32_IO
     type (mf_32), target :: mf32
     type (mf_32), pointer :: r32
 
-    integer i,j,k,n,l,mp,ii,kk
+    integer i,j,k,n,l,mp
 
     type (MF32_isotope), pointer :: iso
     type (MF32_range), pointer :: rng

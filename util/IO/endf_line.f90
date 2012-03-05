@@ -374,6 +374,8 @@ module endf_lines
 
     integer i
 
+    get_mt = 0
+
     if(.not.qopen) return
 
     if(qwrt) call endf_error('Attempt to read MT from output file')
