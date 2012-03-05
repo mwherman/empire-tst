@@ -98,6 +98,7 @@ C-V  12/02 - Output changed - fix search string.
 C-V        - Fix processing of ENDF=0 option, recognised by lack of
 C-V          spectrum data - except (z,x) (left in by mistake?)
 C-V        - Allow incident deuterons, tritons, He-3
+C-V  12/03 - Minor corrections to restore fission spectrum formatting.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -1682,8 +1683,10 @@ C* Elastic contribution when ejectile=projectile
       END IF
       IF     (KZAP.EQ.   1) THEN
 C* Outgoing neutrons - arbitrary number of neutrons
-        IF(MT.EQ. 3 .OR. MT.EQ. 5 .OR.
-     &    (MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=0
+        IF(MT.EQ. 3 .OR. MT.EQ. 5) YI=0
+C*      -- Yield for fission is set to 1 because nu-bar is 
+C*         processed separately
+        IF((MT.GE.18.AND. MT.LE.21).OR. MT.EQ.38) YI=1
 C*      -- single neutron emission
         IF(MT.EQ. 2 .OR. MT.EQ. 4 .OR. MT.EQ.22 .OR. MT.EQ.23 .OR.
      &    (MT.GE.28.AND. MT.LE.29).OR.
@@ -4336,8 +4339,11 @@ c...
       Y1 =YL0
       E2 =EE
       Y2 =YL0
-      LEP=2
+C* Define the interpolation law for the particle emission spectra
 C     LEP=1
+      LEP=2
+C* Use log-log interpolation for fission spectra
+      IF((MT.GE.18 .AND. MT.LE.21) .OR. MT.EQ.38) LEP=5
       LANG=1
       NRA=1
 C* Unit base linear interpolation between incident neutron energies
