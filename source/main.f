@@ -1,6 +1,6 @@
-cc   * $Rev: 2613 $
+cc   * $Rev: 2637 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-01 22:28:10 +0100 (Do, 01 Mär 2012) $
+Ccc   * $Date: 2012-03-05 19:09:39 +0100 (Mo, 05 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2534,7 +2534,6 @@ C
             nejc = 1 ! neutron emission only
             post_fisn  = 0.d0
             ratio2maxw =  0.d0
-            cejectile = 'neutrons '
 
             IF(nfission.eq.0) THEN
 C
@@ -2677,7 +2676,7 @@ C
      &       '(''  Equivalent Tmaxwell '',G12.5,'' MeV'')') tequiv
               WRITE (12,*) ' '
 
-              WRITE (12,*) ' Spectrum of ', cejectile,
+              WRITE (12,*) ' Spectrum of ', 'neutrons ',
      &             '(z,partfis) from CN ', ' ZAP= ', IZA(Nnuc)
               WRITE (12,*) ' '
               WRITE (12,
@@ -2711,12 +2710,10 @@ C-----PRINTING TOTAL PFNS and PFNM quantities
 C-----
       IF (FISspe.gt.0 .and. TOTcsfis.gt.0.d0) THEN
 
-
         fnorm = 0.D0
         do ie =1, nepfns
           fnorm = fnorm + csepfns(ie)
         enddo
-
         if(fnorm.LE.1.d-7) GOTO 4536  ! No PFNS calculated 
 
 C       Correcting normalization        
@@ -2749,9 +2746,8 @@ C       Correcting normalization
         WRITE(8,*) ' ***'
         WRITE(8,*)
         WRITE
-     & ( 8,'(''  Total PFNS from CN '',I3,''-'',A2,''-'',I3,''  Elab='',
-     &  F8.4,'' MeV,  Norm='',F10.8)') 
-     &  INT(Z(1)), SYMb(1), INT(A(1)), EINl, ftmp
+     & ( 8,'(''  Total PFNS         '',3x,'' '',2x,'' '',3x,''  Elab='',
+     &  F8.4,'' MeV   Norm='',F10.8)') EINl, ftmp
         WRITE(8,*)
 
         WRITE ( 8,'(''  Number of fissioning nuclei '',I3)') nfission
@@ -2770,9 +2766,8 @@ C       Correcting normalization
         WRITE(12,*) ' ***'
         WRITE(12,*)
         WRITE
-     & (12,'(''  Total PFNS from CN '',I3,''-'',A2,''-'',I3,''  Elab='',
-     &  F8.4,'' MeV   Norm='',F10.8)') 
-     &  INT(Z(1)), SYMb(1), INT(A(1)), EINl, ftmp
+     & (12,'(''  Total PFNS         '',3x,'' '',2x,'' '',3x,''  Elab='',
+     &  F8.4,'' MeV   Norm='',F10.8)') EINl, ftmp
 
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
@@ -2787,14 +2782,12 @@ C       Correcting normalization
      &        WRITE (12,'(''  Nubar scaled by '',f6.4)') PFNniu
         WRITE(12,*)
 
-        WRITE ( 8,*) ' Spectrum of ', cejectile, '(z,fission) from CN '
-     &              ,' ZAP= ', IZA(1)
+        WRITE ( 8,*) ' Spectrum of ','neutrons ', '(z,fission) '
         WRITE ( 8,*) ' '
         WRITE ( 8,'(''    Energy    mb/MeV       Ratio to Maxw'')')
         WRITE ( 8,*) ' '
 
-        WRITE (12,*) ' Spectrum of ', cejectile, '(z,fission) from CN '
-     &              ,' ZAP= ', IZA(1)
+        WRITE (12,*) ' Spectrum of ','neutrons ', '(z,fission) '
         WRITE (12,*) ' '
         WRITE (12,'(''    Energy    mb/MeV       Ratio to Maxw'')')
         WRITE (12,*) ' '
