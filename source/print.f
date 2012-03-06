@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2641 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-03-06 09:41:13 +0100 (Di, 06 Mär 2012) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -117,6 +117,7 @@ C
 
       totspec = 0.0
       DO i = 1, kmax
+         if(CSEt(i,Nejc).le.0.d0) cycle
          totspec  = totspec  + CSEt(i,Nejc)
          e = FLOAT(i - 1)*DE
          IF (CSEt(i,Nejc).GE.s0) THEN
@@ -261,6 +262,7 @@ C
 
       totspec = 0.0
       DO i = 1, kmax
+         if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN

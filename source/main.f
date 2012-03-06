@@ -1,6 +1,6 @@
-cc   * $Rev: 2640 $
+cc   * $Rev: 2641 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-06 03:43:55 +0100 (Di, 06 Mär 2012) $
+Ccc   * $Date: 2012-03-06 09:41:13 +0100 (Di, 06 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2474,6 +2474,8 @@ C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
                         ENDDO
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
+	                     if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) 
+     &                          cycle
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                        *DE/recorp,
      &                        max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))
@@ -2487,6 +2489,8 @@ C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
      &                            0.d0
                   ELSE  !all other emissions (continuum and levels together)
                         DO ie = 1, nspec - 1
+	                     if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) 
+     &                          cycle
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                     *DE/recorp,
      &                     max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))
@@ -2852,10 +2856,12 @@ C     ENDDO
 
          DO nejc = 0, NEJcm
             csemax = 0.d0
+	      ftmp = 0.d0
             DO i = 1, NDEX
               csemax = DMAX1(CSE(i,nejc,0),csemax)
+	        ftmp   = ftmp + CSE(i,nejc,0)
             ENDDO
-            if(csemax.le.0.01d0) cycle 
+            if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
  
             CALL AUERST(0,nejc,1)
          ENDDO
@@ -2867,10 +2873,12 @@ C     ENDDO
             WRITE (8,'(11x,''**********************'')')
             DO nejc = 0, NEJcm
               csemax = 0.d0
+	        ftmp = 0.d0
               DO i = 1, NDEX
                 csemax = DMAX1(CSEt(i,nejc),csemax)
+	          ftmp   = ftmp + CSEt(i,nejc)
               ENDDO
-              if(csemax.le.0.01d0) cycle 
+              if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
 
               CALL Print_Total(nejc)
               CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
@@ -3017,6 +3025,7 @@ C--------Print inclusive gamma spectrum
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, nspec - 1
+            if(CSE(ie,0,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,0,0))
          ENDDO
@@ -3071,6 +3080,7 @@ C             Subtract HMS contribution to CM emission spectrum
           WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
+            if(CSE(ie,1,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,1,0))
           ENDDO
@@ -3147,6 +3157,7 @@ C             Subtract HMS contribution to CM emission spectrum
           WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
+            if(CSE(ie,2,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,2,0))
           ENDDO
@@ -3207,6 +3218,7 @@ C--------alphas
           WRITE (12,*) ' '
 
           DO ie = 1, nspec - 1
+            if(CSE(ie,3,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,3,0))
           ENDDO
@@ -3240,6 +3252,7 @@ C--------deuterons
           WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
+            if(CSE(ie,4,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,4,0))
           ENDDO
@@ -3273,6 +3286,7 @@ C--------tritons
           WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
+            if(CSE(ie,5,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,5,0))
           ENDDO
@@ -3306,6 +3320,7 @@ C--------helium-3
           WRITE (12,'(''    Energy    mb/MeV'')')
           WRITE (12,*) ' '
           DO ie = 1, nspec - 1
+            if(CSE(ie,6,0).le.0.d0) cycle
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &         max(0.d0,CSE(ie,6,0))
           ENDDO
@@ -3341,6 +3356,7 @@ C--------light ions
              WRITE (12,'(''    Energy    mb/MeV'')')
              WRITE (12,*) ' '
              DO ie = 1, nspec - 1
+               if(CSE(ie,NDEJC,0).le.0.d0) cycle
                WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
      &                                   max(0.d0,CSE(ie,NDEJC,0))
              ENDDO
