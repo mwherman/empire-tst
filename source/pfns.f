@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2640 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-03-06 03:43:55 +0100 (Di, 06 Mär 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -198,7 +198,7 @@ C     LA model (eq.11 CPC)
       do i =1,nen_emis
         e = emiss_en(i)
 
-        if (e.lt.0.00001d0) cycle
+        if (e.lt.1.d-12) cycle
 
         eplus = (DSQRT(e) + DSQRT(EniuL))**2
         emin  = (DSQRT(e) - DSQRT(EniuL))**2
@@ -371,8 +371,8 @@ C     Itkis
       real*8 E,T,pi,Eniu,b
       data pi/3.1415926d0/
       fwatt = 0.d0
-      if(E.le.0.1d-5) E=0.1d-5
-      if(T.le.0.1d-5) return
+      if(E.le.0.1d-11) E=0.1d-11
+      if(T.le.0.1d-11) return
       if((E+Eniu).GT.50.d0*T) return
       b = 4*Eniu/T/T
       fwatt = 2.d0/T*DSQRT(E/(pi*T))*DEXP(-(E+Eniu)/T)*
@@ -384,8 +384,8 @@ C     Itkis
       real*8 E,T,pi
       data pi/3.1415926d0/
       fmaxw = 0.d0
-      if(E.le.0.1d-5) E=0.1d-5
-      if(T.le.0.1d-5) return
+      if(E.le.0.1d-11) E=0.1d-11
+      if(T.le.0.1d-11) return
       if(E.GT.50.d0*T) return
       fmaxw = 2.d0/T*DSQRT(E/(pi*T))*DEXP(-E/T)
       return
@@ -394,8 +394,8 @@ C     Itkis
       real*8 FUNCTION fscn(E,T)
       real*8 E,T
       fscn = 0.d0
-      if(E.le.0.1d-5) E=0.1d-5
-      if(T.le.0.1d-5) return
+      if(E.le.0.1d-11) E=0.1d-11
+      if(T.le.0.1d-11) return
       if(E.GT.50.d0*T) return
       fscn = 1.d0/T*(E/T)*DEXP(-E/T)
       return

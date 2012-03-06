@@ -1,6 +1,6 @@
-cc   * $Rev: 2639 $
+cc   * $Rev: 2640 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-05 23:12:37 +0100 (Mo, 05 Mär 2012) $
+Ccc   * $Date: 2012-03-06 03:43:55 +0100 (Di, 06 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2234,14 +2234,6 @@ C     emission and first CN.
       fniuEVAL = 1.d0 
       fnubar   = 1.d0
 
-      IF (FISspe.GT.0) THEN
-        WRITE (12,*) ' '
-        WRITE (8,*) ' '
-        WRITE (12,*) ' ****************************************** '
-        WRITE ( 8,*) ' *******************************************'
-        WRITE ( 8,*) ' PROMPT FISSION NEUTRON SPECTRA calculations'
-        WRITE (12,*) ' PROMPT FISSION NEUTRON SPECTRA calculations'
-      ENDIF
 c fisspec===============
 C     For Kalbach parameterization
       do i=1,NDAng
@@ -2464,7 +2456,8 @@ C-----------------double the first bin x-sec to preserve integral in EMPEND
                   POPcse(0,nejc,1,INExc(nnuc)) =
      &                  POPcse(0,nejc,1,INExc(nnuc))*2
                   WRITE (12,*) ' '
-                  WRITE (12,'('' Energy    mb/MeV'')')
+                  WRITE (12,'(''    Energy    mb/MeV'')')
+C                 WRITE (12,'('' Energy    mb/MeV'')')
                   WRITE (12,*) ' '
                   IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                (nnuc.EQ.mt649 .AND. nejc.EQ.2).OR.
@@ -2543,19 +2536,27 @@ C             Calculating unique energy grid
 C
 C             Assumed maximum energy of neutrons from fragments will be 25 MeV
 
-C             deltae_pfns = 0.1d0 
-C             nepfns = min( NINT(25.d0/deltae_pfns) + 1, NDEPFN)
+              deltae_pfns = 0.1d0 
+              nepfns = min( NINT(25.d0/deltae_pfns) + 4, NDEPFN)
+ 
+              enepfns(1) = 1.d-11
+              enepfns(2) = 1.d-9
+              enepfns(3) = 1.d-7
+              enepfns(4) = 1.d-5
+              enepfns(5) = 1.d-3
 
-	        deltae_pfns = dexp(log(25.d11)/(NDEPFN-1))
-
-              enepfns(1) = 1.d-11 ! Setting the lowest limit
-
-              DO ie = 1, nepfns-1
-C               enepfns(ie) = FLOAT(ie - 1)*deltae_pfns 
-                enepfns(ie+1) = enepfns(ie)*deltae_pfns
-	          if(enepfns(ie+1).gt.25.d0) exit
+              DO ie = 5, nepfns  
+                enepfns(ie+1) = FLOAT(ie - 4)*deltae_pfns
               ENDDO
-              nepfns = ie
+              nepfns = min(nepfns+1, NDEPFN)  
+
+C	        deltae_pfns = dexp(log(25.d6)/(NDEPFN-1))
+C             enepfns(1) = 1.d-6 ! Setting the lowest limit
+C             nepfns = NDEPFN-1
+C             DO ie = 1, nepfns
+C               enepfns(ie+1) = enepfns(ie)*deltae_pfns
+C             ENDDO
+C             nepfns = min(ie	+ 1,NDEPFN)
 
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
@@ -2608,14 +2609,18 @@ C
 C           If no more excitation energy available, then PFN emission stopped
             if(eincid.LT.0.d0) CYCLE
 
-            WRITE (12,*)
-            WRITE (8,*) 
+            WRITE (12,*)' '
+            WRITE (12,*)' *******************************************'
+            WRITE (12,*)' PROMPT FISSION NEUTRON SPECTRA calculations'
+
+            WRITE ( 8,*) ' '
+            WRITE ( 8,*)' *******************************************'
+            WRITE ( 8,*)' PROMPT FISSION NEUTRON SPECTRA calculations'
             
             WRITE(8,'(1x,a11,i2,a7,f8.3,A18,1x,i3,A1,A2,A1,i3)')  
      &      ' Fiss. Nucl ',nfission + 1, ', Uexc=',eincid + Q(1,nnuc), 
      &      ' MeV, for nucleus:',izf,'-',SYMb(nnuc),'-',iaf
 
-            WRITE (12,*) ' '
             WRITE
      &        (12,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
@@ -2629,7 +2634,6 @@ C           If no more excitation energy available, then PFN emission stopped
      &     (12,'(''  Binding energy of fissioning nucleus '',
      &            G12.5,'' MeV'')') Q(1,nnuc)
 
-            WRITE (8,*) ' '
             WRITE
      &        (8,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
@@ -2686,12 +2690,12 @@ C
      &       '(''    Energy    mb/MeV       Ratio to Maxw'')')
               WRITE (12,*) ' '
               DO ie = 1, nepfns 
-                WRITE (12,'(F10.5,E14.5,2x,E14.5)')
+                WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &               enepfns(ie), post_fisn(ie), ratio2maxw(ie)
-C               WRITE (73,'(F10.5,E14.5,4(2x,E14.5))')
+C               WRITE (73,'(E10.4,E14.5,4(2x,E14.5))')
 C    &               enepfns(ie), post_fisn(ie), ratio2maxw(ie)
               ENDDO
-              WRITE (12,'(F10.5,E14.5,2x,E14.5)')
+              WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &             enepfns(nepfns), 0.d0, 0.d0
             else
 
@@ -2748,9 +2752,8 @@ C       Correcting normalization
         WRITE(8,*)
         WRITE(8,*) ' ***'
         WRITE(8,*)
-        WRITE
-     & ( 8,'(''  Total PFNS         '',3x,'' '',2x,'' '',3x,''  Elab='',
-     &  F8.4,'' MeV   Norm='',F10.8)') EINl, ftmp
+        WRITE ( 8,'(''  Total PFNS  for  Elab='',
+     &  F8.4,'' MeV,   Norm='',F10.8)') EINl, ftmp
         WRITE(8,*)
 
         WRITE ( 8,'(''  Number of fissioning nuclei '',I3)') nfission
@@ -2768,9 +2771,8 @@ C       Correcting normalization
         WRITE(12,*)
         WRITE(12,*) ' ***'
         WRITE(12,*)
-        WRITE
-     & (12,'(''  Total PFNS         '',3x,'' '',2x,'' '',3x,''  Elab='',
-     &  F8.4,'' MeV   Norm='',F10.8)') EINl, ftmp
+        WRITE (12,'(''  Total PFNS  for  Elab='',
+     &  F8.4,'' MeV,   Norm='',F10.8)') EINl, ftmp
 
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
@@ -2801,15 +2803,15 @@ C       Correcting normalization
           ftmp1 = 1.d0
           if (ftmp.gt.0) ftmp1 = csepfns(ie)/ftmp
 
-          WRITE (12,'(F10.5,E14.5,2x,E14.5)')
-     &      enepfns(ie), csepfns(ie)
-          WRITE (73,'(F10.5,E14.5,4(2x,E14.5))')
+          WRITE (12,'(E10.4,E14.5,2x,E14.5)')
+     &      enepfns(ie), csepfns(ie), ftmp1
+          WRITE (73,'(E10.4,E14.5,4(2x,E14.5))')
      &      enepfns(ie), csepfns(ie), ftmp1
           IF(enepfns(ie).GT.7.d0) cycle
-          WRITE ( 8,'(F10.5,E14.5,2x,E14.5)')
+          WRITE ( 8,'(E10.4,E14.5,2x,E14.5)')
      &      enepfns(ie), csepfns(ie), ftmp1
         ENDDO
-        WRITE (12,'(F10.5,E14.5,2x,E14.5)')
+        WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &     enepfns(nepfns), 0.d0, 0.d0
         WRITE(8,*) '...   PFNS Output supressed for Epfns > 7 MeV '
       ENDIF
@@ -3839,7 +3841,8 @@ C        WRITE(8,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
          WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
      &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
          WRITE (12,*) ' '
-         WRITE (12,'('' Energy    mb/MeV'')')
+         WRITE (12,'(''    Energy    mb/MeV'')')
+C        WRITE (12,'('' Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, ilast
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DERec,
