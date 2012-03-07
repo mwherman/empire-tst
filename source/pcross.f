@@ -1,9 +1,9 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2644 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
 
 C
-      SUBROUTINE PCROSS(Sigr,Totemis,Xsinl)
+      SUBROUTINE PCROSS(Sigr,Totemis)
       INCLUDE 'dimension.h' 
       INCLUDE 'global.h'
 C
@@ -44,7 +44,7 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 Sigr, Totemis, Xsinl
+      REAL*8 Sigr, Totemis
 C
 C Local variables
 C
@@ -508,23 +508,7 @@ C         ENDDO
 C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
-      if(MSD+MSC.eq.0) then
-        fr = totemis/Sigr
-        WRITE (8,99015) totemis, fr
-      ENDIF
-      if(MSD+MSC.GT.0) then
-        fr = (totemis+Xsinl)/Sigr
-        WRITE (8,99014) Xsinl, totemis, fr
-      ENDIF
-C
-C     write(*,*) 'Middle of PCROSS :',
-C    >            sngl(totemis),sngl(xsinl),sngl(SIGr)
-C
-99014 FORMAT (/1X,'MSD+MSC preequilibrium total cross section   =',F8.2,
-     &        /1X,'PCROSS  preequilibrium total cross section   =',F8.2,
-     &   ' mb'/1X,'total   preequilibrium fraction              =',F8.2)
-99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
-     &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
+
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
             WRITE (8,99016)
 99016 FORMAT (/1x,'Kalbach parameterization for pick-up and stripping',

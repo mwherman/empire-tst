@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2644 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3011,7 +3011,7 @@ C-----if ECIS active use only continuum part of the MSD spectrum
             csfit(na) = CSEa(ne,nangle - na + 1,nej,1)
          ENDDO
          CALL LSQLEG(CANgler,csfit,nangle,qq,5,adum,ier)
-         piece = 4.0*3.14159*qq(1)
+         piece = 4.0*pi*qq(1)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
          Xsinl = Xsinl + piece*DE
@@ -3086,7 +3086,15 @@ C-----
 C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = MIN(INT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C-----total number of bins
-      next = INT(excnq/DE + 1.0001)
+      next  = INT(excnq/DE + 1.0001)
+C
+C     We need statements below as long as discrete data are calculated in MSD
+C
+      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
+     & nexrt = next
+      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
+     & nexrt = next
+
 C-----calculate spin distribution for 1p-1h states
       SIG = 2*0.26*A(Nnur)**0.66666667
       somj = 0.0
@@ -3187,8 +3195,10 @@ C
       IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.0 ) return
       IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.0 ) return
 
-      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 ) return
-      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 ) return
+C     IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 ) return
+C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 ) return
+      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(1,3).EQ.0 ) return
+      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.0 ) return
 C     IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 ) return ! 
 
       IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 ) return
@@ -3386,9 +3396,9 @@ C--------Store ang. dist.
        write(8,*) 'WARNING: PE discrete levels for nejc=',nejc
        write(8,*) 'WARNING: Difference in in/out flux =',
      &             sngl(csm2-csmtot)
-      ELSE
-       write(8,*) ' PE XS to discrete levels   ',sngl(csmtot),
-     >              ' for nejc =',nejc
+C     ELSE
+C      write(8,*) ' PE XS to discrete levels   ',sngl(csmtot),
+C    >              ' for nejc =',nejc
       ENDIF
       RETURN
       END

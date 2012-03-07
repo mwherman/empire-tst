@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2644 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 2537 $
+C CVS Version Management $Revision: 2644 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 2537 $')
+99005 FORMAT ('  xddhms version: $Revision: 2644 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -6096,7 +6096,10 @@ C
           IF(iloc .EQ. 0 .AND. XSNx(jz,jn) .GT. 1.0d-6) THEN
            CSHms(1,nnuc) =  XSNx(jz,jn)
            CSEmis(1,nnuc) = CSEmis(1,nnuc) + XSNx(jz,jn)
-           IF (ENDf(nnur).EQ.1) THEN
+
+C          IF (ENDf(nnur).EQ.1) THEN
+C          Changed by RCN, should be optimized for the case ENDF()=0
+           IF (ENDf(nnur).LE.1) THEN
              ecres = ecn-Q(1,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
@@ -6268,7 +6271,10 @@ C
           IF(iloc .EQ. 0 .AND. XSPx(jz,jn) .GT. 1.0d-6) THEN
            CSHms(2,nnuc) =  XSPx(jz,jn)
            CSEmis(2,nnuc) = CSEmis(2,nnuc) + XSPx(jz,jn)
-           IF (ENDf(nnur).EQ.1) THEN
+
+C          IF (ENDf(nnur).EQ.1) THEN
+C          Changed by RCN, should be optimized for the case ENDF()=0
+           IF (ENDf(nnur).LE.1) THEN
              ecres = ecn-Q(2,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)

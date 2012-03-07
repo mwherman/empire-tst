@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2636 $
+Ccc   * $Rev: 2644 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-05 19:05:10 +0100 (Mo, 05 Mär 2012) $
+Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1241,6 +1241,14 @@ C
             WRITE (8,*) ' '
          ENDIF
 C--------------------------------------------------------------------------
+C        IF (MSD.NE.0 .AND. MSC.NE.0.D0 .AND. LHMs.NE.0) THEN
+C           LHMs = 0
+C           WRITE (8,*) ' '
+C           WRITE (8,*) ' WARNING: HMS calculations suppressed'
+C           WRITE (8,*) ' WARNING: MSD/MSC active             '
+C           WRITE (8,*) ' '
+C        ENDIF
+
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
             WRITE (8,*) 'WARNING: NDAng reset to ',NDAnghmx, 
@@ -1380,8 +1388,8 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IF (DIRect.EQ.0) IDNa(1,2) = 1
                  IDNa(2,2) = 1
                ELSE ! (NPRoject.EQ.2) 
-                  IF (DIRect.EQ.0) IDNa(3,2) = 1
-                  IDNa(4,2) = 1
+                 IF (DIRect.EQ.0) IDNa(3,2) = 1
+                 IDNa(4,2) = 1
                ENDIF
             ENDIF
 	   ENDIF
@@ -1402,7 +1410,8 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IF (NPRoject.EQ.1) THEN
                  IDNa(1,2) = 1
                  IDNa(2,2) = 1
-               ELSE ! (NPRoject.EQ.2) 
+	         ENDIF 
+               IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
                  IDNa(4,2) = 1
                ENDIF
@@ -1427,22 +1436,27 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                IDNa(4,3) = 1
                IF (GST.GT.0) IDNa(5,3) = 1
 C--------------stop MSC charge-exchange if DDHMS or PCROSS active
-               IF (LHMs.GT.0 .OR. (PEQc.GT.0. .AND. MSD.EQ.0)) THEN
-                 IF (NPRoject.EQ.1) THEN
-                   IDNa(4,3) = 0
-                 ELSE ! (NPRoject.EQ.2) 
-                   IDNa(2,3) = 0
-                 ENDIF 
+               IF (PEQc.GT.0 .or. LHMs.GT.0) THEN
+                 IF (NPRoject.EQ.1)  IDNa(4,3) = 0
+                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0
                ENDIF
             ENDIF
 	   ENDIF
 C
-C--------set HMS  (.,5)
-         IF (LHMs.GT.0 .AND. (NPRoject.EQ.1 .OR. NPRoject.EQ.2) ) THEN
+C--------set HMS  (.,5) for incident N and P, assuming that MSC+MSD not used
+         IF (LHMs.GT.0) THEN
             IDNa(1,5) = 1  ! neutron discrete levels
-            IDNa(2,5) = 1
+            IDNa(2,5) = 1  ! neutron cont 
             IDNa(3,5) = 1  ! proton  discrete levels
-            IDNa(4,5) = 1
+            IDNa(4,5) = 1  ! proton  cont 
+            IF(NPRoject.EQ.1 .and. MSD+MSC.GT.0) THEN
+              IDNa(1,5) = 0  ! neutron discrete levels
+              IDNa(2,5) = 0  ! neutron cont 
+            ENDIF 
+            IF(NPRoject.EQ.2 .and. MSD+MSC.GT.0) THEN
+              IDNa(3,5) = 0  ! neutron discrete levels
+              IDNa(4,5) = 0  ! neutron cont 
+            ENDIF 
          ENDIF
 C
 C--------check if PCROSS active
@@ -1455,10 +1469,11 @@ C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
 C             WRITE (12,
 C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
          ENDIF
+
 C--------set PCROSS  (.,6) cluster emission
          IF (PEQc.GT.0.d0) THEN
-            IDNa(2,6) = 1
-            IDNa(4,6) = 1
+            IDNa(2,6) = 1  ! cont n
+            IDNa(4,6) = 1  ! cont p
             IDNa(5,6) = 1  ! gammas
             IDNa(6,6) = 1  ! cont A 
             IDNa(7,6) = 1  ! cont D 
@@ -1477,51 +1492,57 @@ C             Discrete levels calculated in PCROSS if ECIS is not active in the 
               IF(IDNa(13,1).LE.0) IDNa(13,6) = 1 ! trit  discrete
               IF(IDNa(14,1).LE.0) IDNa(14,6) = 1 ! He-3  discrete
             ENDIF
+
 C-----------stop PCROSS gammas if calculated within MSC
             IF (GST.GT.0 .AND. MSC.GT.0) IDNa(5,6) = 0
+C
 C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
             IF (MSC.GT.0 .OR. MSD.GT.0) THEN
               IF (NPRoject.EQ.2) THEN
-                  IDNa(3,6) = 0
-                  IDNa(4,6) = 0
-              ELSEIF (NPRoject.EQ.1) THEN
-                  IDNa(1,6) = 0
-                  IDNa(2,6) = 0
+                IDNa(3,6) = 0
+                IDNa(4,6) = 0
+	        ENDIF
+              IF (NPRoject.EQ.1) THEN
+                IDNa(1,6) = 0
+                IDNa(2,6) = 0
               ELSE
               ENDIF
             ENDIF
 C
 C-----------stop PCROSS nucleon channels if HMS active
-            IF (LHMs.GT.0) THEN
-               IDNa(2,6) = 0
-               IDNa(4,6) = 0
+            IF ( LHMs.GT.0 ) THEN
+              IDNa(1,6) = 0 
+              IDNa(2,6) = 0
+              IDNa(3,6) = 0 
+              IDNa(4,6) = 0
             ENDIF
 
-            IF (MSC.GT.0 .AND. MSD.GT.0) THEN
+C           IF (MSC.GT.0 .AND. MSD.GT.0) THEN
 C-------------stop PCROSS if MSC/MSD are active
-              WRITE (8,*)
-     &     'WARNING: PCROSS DISABLED AS MSC/MSD ARE BOTH ACTIVE '
-              WRITE (8,*)
-     &     'WARNING: MSD/MSC + PCROSS not compatible in this version'
-              PEQcont = 0.d0
-	        PEQc = 0.d0
-              IDNa(2,6) = 0
-              IDNa(4,6) = 0
-              IDNa(5,6) = 0  ! gammas
-              IDNa(6,6) = 0  ! cont A 
-              IDNa(7,6) = 0  ! cont D 
-              IDNa(8,6) = 0  ! cont T 
-              IDNa(9,6) = 0  ! cont H 
-              IDNa(10,6) = 0 ! cont LI
+C             WRITE (8,*)
+C    &     'WARNING: PCROSS DISABLED AS MSC/MSD ARE BOTH ACTIVE '
+C             WRITE (8,*)
+C    &     'WARNING: MSD/MSC + PCROSS not compatible in this version'
+C             PEQcont = 0.d0
+C             PEQc = 0.d0
+C             IDNa(2,6) = 0
+C             IDNa(4,6) = 0
+C             IDNa(5,6) = 0  ! gammas
+C             IDNa(6,6) = 0  ! cont A 
+C             IDNa(7,6) = 0  ! cont D 
+C             IDNa(8,6) = 0  ! cont T 
+C             IDNa(9,6) = 0  ! cont H 
+C             IDNa(10,6) = 0 ! cont LI
 C             Discrete levels calculated in PCROSS if ECIS is not active in the inelastic channel 
-              IDNa(1 ,6) = 0 ! neut  discrete
-              IDNa(3 ,6) = 0 ! prot  discrete
-              IDNa(11,6) = 0 ! alpha discrete
-              IDNa(12,6) = 0 ! deut  discrete
-              IDNa(13,6) = 0 ! trit  discrete
-              IDNa(14,6) = 0 ! He-3  discrete
-            ENDIF
+C             IDNa(1 ,6) = 0 ! neut  discrete
+C             IDNa(3 ,6) = 0 ! prot  discrete
+C             IDNa(11,6) = 0 ! alpha discrete
+C             IDNa(12,6) = 0 ! deut  discrete
+C             IDNa(13,6) = 0 ! trit  discrete
+C             IDNa(14,6) = 0 ! He-3  discrete
+C           ENDIF
          ENDIF
+C
 C--------print IDNa matrix
  1256    WRITE (8,*) ' '
          WRITE (8,*)
@@ -5116,7 +5137,7 @@ C-----
 C-----
          IF (name.EQ.'FHMS  ') THEN
             IF (val.LT.1.0D0) THEN
-               FHMs = 0
+               FHMS = 0
                WRITE (8,
      &             '('' Exciton densities are used in DDHMS '')')
                WRITE (12,

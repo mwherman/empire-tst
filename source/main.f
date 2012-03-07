@@ -1,6 +1,6 @@
-cc   * $Rev: 2641 $
+cc   * $Rev: 2644 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-06 09:41:13 +0100 (Di, 06 Mär 2012) $
+Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -73,7 +73,7 @@ C                      -----------------------------------------------
      &                 csprnt(ndnuc), csetmp(ndecse),
      &                 fisxse, csinel, eps, checkprd,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
-     &                 xnorm(2,NDExclus)
+     &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs, csmax
@@ -178,13 +178,15 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
      &       '  Elastic   ','  Reaction  ','  Fission   ',
      &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
 
-        WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+4,
+        WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') 15,
      &      int(Z(0)), SYMb(0), int(A(0))
-        WRITE(107,'(''#'',A10,1X,(9A12))') '   Einc   ',
-     &      '  Shape el  ','  CN el     ', ' Coup.Chan',
-     &      '  DWBA disc ','  DWBA cont ','    MSD     ',
-     &      '    MSC     ','   PCROSS   ','  CN form   '
-
+        WRITE(107,'(''#'',A10,1X,(20A12))') '   Einc   ',
+     &      '  Total     ',' Reaction   ',
+     &      '  Shape-el  ','   CN-el    ','  CN-form   ',
+     &      '  Direct    ','Pre-equil   ','Coup-Chan   ',
+     &      ' DWBA-disc  ','DWBA-cont   ','   MSD      ',
+     &      '    MSC     ','  PCROSS    ','   HMS      '
+C	&      '  csinel    '
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
@@ -737,7 +739,7 @@ C-----Calculate MSD contribution
 C-----
       corrmsd = 1.0
 	xsinl   = 0.d0
-      IF (MSD.NE.0 .AND. EIN.GE.EMInmsd) THEN
+      IF (MSD.NE.0 .AND. EINl.GE.EMInmsd) THEN
 C
 C--------call ORION
 C
@@ -804,7 +806,7 @@ C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission
 C        so it should not used for normalization
 C        xsinl is calculated by MSD
          ftmp = CSFus
-         CALL PCROSS(ftmp,totemis,xsinl)
+         CALL PCROSS(ftmp,totemis)
       ENDIF          ! PCRoss done
 
       IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. NPRoject.gt.0
@@ -850,41 +852,14 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
             SINlcont =  0.d0
          endif
          WRITE (8,*)
-         if(CSMsd(0).gt.0.) WRITE (8,*)
-     &       ' g PE emission cross section ', CSMsd(0), ' mb'
-         if(CSMsd(1).gt.0.) WRITE (8,*)
-     &       ' n PE emission cross section ', CSMsd(1), ' mb'
-         if(CSMsd(2).gt.0.) WRITE (8,*)
-     &       ' p PE emission cross section ', CSMsd(2), ' mb'
-         if(CSMsd(3).gt.0.) WRITE (8,*)
-     &       ' a PE emission cross section ', CSMsd(3), ' mb'
-         if(CSMsd(4).gt.0.) WRITE (8,*)
-     &       ' d PE emission cross section ', CSMsd(4), ' mb'
-         if(CSMsd(5).gt.0.) WRITE (8,*)
-     &       ' t PE emission cross section ', CSMsd(5), ' mb'
-         if(CSMsd(6).gt.0.) WRITE (8,*)
-     &       ' h PE emission cross section ', CSMsd(6), ' mb'
-         if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (8,*)
-     &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
-         WRITE (8,*) ' '
-C--------Correct CN population for PE continuum emission in PCROSS and MSD/MSC
-C        ftmp = 0.d0
-C        do i=1,NDEJC
-C          ftmp = ftmp + CSMsd(i)
-C	   enddo
 
-C        corrmsd = (CSFus - ftmp)/CSFus
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
-         write(8,*) ' CSFus=',sngl(CSFus)
-     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
-         write(*,*) ' CSFus=',sngl(CSFus)
-     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
-
          IF (corrmsd.LT.0.0D0) THEN
             write(8,*) ' CSFus=',sngl(CSFus)
-     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
-            write(*,*) ' CSFus=',sngl(CSFus)
-     &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+     &       ,' xsinl=',sngl(xsinl),
+     &        ' PCROSS=',sngl(totemis)
+C           write(*,*) ' CSFus=',sngl(CSFus)
+C    &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
             totemis = CSFus - xsinl
             corrmsd = 0.d0
 
@@ -936,24 +911,6 @@ C        corrmsd = (CSFus - ftmp)/CSFus
             ftmp = ftmp + POP(NEX(1),i,1,1) + POP(NEX(1),i,2,1)
          ENDDO
          WRITE (8,*) ' '
-         WRITE (8,'(1x,A32,F9.2,A3)') 
-     &     ' Absorption cross section       ', sngl(CSFus),' mb'
-         WRITE (8,'(1x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     ' PE + Direct contribution       ',
-     &                               sngl((1.d0-corrmsd)*CSFus),' mb',
-     &                               sngl((1.d0-corrmsd)*100),' %'
-         WRITE (8,'(1x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     ' MSD contribution               ',
-     &                               sngl(xsinl),' mb',
-     &                               sngl(xsinl/CSFus*100),' %'
-         WRITE (8,'(1x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     ' PCROSS contribution            ',
-     &                               sngl(totemis),' mb',
-     &                               sngl(totemis/CSFus*100),' %'
-         WRITE (8,'(1x,A32,F9.2,A3)') 
-     &     ' Total CN population            ',
-     &                               sngl(ftmp),' mb'
-         WRITE (8,*) ' '
 C--------TRISTAN *** done ***
 C--------Add MSD contribution to the residual nucleus population
 C--------Locate residual nucleus after MSD emission
@@ -978,7 +935,7 @@ C----------Add PE contribution to the total NEJC emission
 C-----
 C-----HMS Monte Carlo preequilibrium emission
 C-----        
-      IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0) THEN
+      IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0 .AND. MSD+MSC.EQ.0) THEN
          xizat = IZA(0)
          CALL DDHMS(IZAejc(0),xizat,XJLv(LEVtarg,0),EINl,
      &             CSFus*corrmsd,CHMs,DE,DERec,FHMs,NHMs,QDFrac,
@@ -998,6 +955,188 @@ C-----
 C-----PE + DWBA cont. *** done ***
 C-----
       ia = INT(A(1))
+
+C--------
+C--------Heidelberg Multistep Compound calculations
+C--------
+      xsmsc = 0.d0 
+      IF (MSC.NE.0) THEN
+         IF (MSD.EQ.0) CALL ULM(1)
+         CALL HMSC(nvwful)
+         CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)                  
+         CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
+         CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
+         xsmsc = xsmsc + CSMsc(0) + CSMsc(1) + CSMsc(2)
+C        if(nvwful) goto 1500	      
+C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
+      ENDIF
+
+      IF (IOUt.GT.0) THEN
+         WRITE (8,*) ' '
+         WRITE (8,*) '*** Summary of PE and direct emission  '
+         IF (DIRect.EQ.0) THEN
+            WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
+     &     'Non-elastic cross section      ',
+     &     sngl(CSFus),' mb'
+         WRITE (8,*) ' '
+         ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
+            WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
+     &     'Non-elastic cross section      ',
+     &     sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont),' mb'
+            WRITE (8,*) ' '
+  
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'CC inelastic to discrete levels',
+     &                        sngl(SINlcc*FCCred),' mb',
+     &                        sngl(SINlcc*FCCred/CSFus*100),' %'
+
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'DWBA inel to discrete levels   ',
+     &                        sngl(SINl*FCCred),' mb',
+     &                        sngl(SINl*FCCred/CSFus*100),' %'
+C           WRITE (8,
+C    &'(''   Spin distribution calculated using '',
+C    &  ''CC transmission coefficients'')')
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'DWBA to continuum              ',
+     &                        sngl(xsinlcont),' mb',
+     &                        sngl(xsinlcont/CSFus*100),' %'
+         ELSEIF (DIRect.EQ.3) THEN
+            WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
+     &     'Non-elastic cross section      ',
+     &     sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont),' mb'
+            WRITE (8,*) ' '
+C           WRITE (8,
+C    &'(''   Spin distribution does NOT contain'',
+C    &  '' DWBA inelastic contribution '')')
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'DWBA inel to discrete levels   ',
+     &                        sngl(SINl*FCCred),' mb',
+     &                        sngl(SINl*FCCred/CSFus*100),' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'DWBA to continuum              ',
+     &                        sngl(xsinlcont),' mb',
+     &                        sngl(xsinlcont/CSFus*100),' %'
+         ENDIF
+C        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+C    &     'PE + Direct contribution       ',
+C    &                               sngl((1.d0-corrmsd)*CSFus),' mb',
+C    &                               sngl((1.d0-corrmsd)*100),' %'
+	   ftmp = xsinl + totemis + tothms + xsmsc
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'Total pre-equilibrium          ',
+     &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
+
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'MSD contribution               ',
+     &                               sngl(xsinl),' mb',
+     &                               sngl(xsinl/CSFus*100),' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'MSC contribution               ',
+     &                     sngl(xsmsc),' mb',
+     &                     sngl(xsmsc/CSFus*100),' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'PCROSS contribution            ',
+     &                               sngl(totemis),' mb',
+     &                               sngl(totemis/CSFus*100),' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'HMS contribution               ',
+     &                               sngl(tothms),' mb',
+     &                               sngl(tothms/CSFus*100),' %'
+         WRITE (8,'(2x,A44)')
+     &     '----------------------------------------------'
+         WRITE (8,'(2x,A32,F9.2,A3)') 
+     &     'CN formation cross section     ',
+     &      sngl(CSFus*corrmsd - tothms - xsmsc),' mb'
+
+         WRITE (8,*) ' '
+C        WRITE (8,*) '*** Summary of particle PE emission  '
+C        if(CSMsd(0)+CSMsc(0).gt.0.) WRITE (8,*)
+C    &       ' g PE emission cross section ', CSMsd(0)+CSMsc(0), ' mb'
+C        if(CSMsd(1)+CSMsc(1)+CSHms(1,1).gt.0.) WRITE (8,*)
+C    &       ' n PE emission cross section ', CSMsd(1)+CSMsc(1), ' mb'
+C        if(CSMsd(2)+CSMsc(2)+CSHms(2,1).gt.0.) WRITE (8,*)
+C    &       ' p PE emission cross section ', CSMsd(2)+CSMsc(2), ' mb'
+C        if(CSMsd(3).gt.0.) WRITE (8,*)
+C    &       ' a PE emission cross section ', CSMsd(3), ' mb'
+C        if(CSMsd(4).gt.0.) WRITE (8,*)
+C    &       ' d PE emission cross section ', CSMsd(4), ' mb'
+C         if(CSMsd(5).gt.0.) WRITE (8,*)
+C    &       ' t PE emission cross section ', CSMsd(5), ' mb'
+C        if(CSMsd(6).gt.0.) WRITE (8,*)
+C    &       ' h PE emission cross section ', CSMsd(6), ' mb'
+C        if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (8,*)
+C    &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
+C        WRITE (8,*) ' '
+      ENDIF
+
+C     IF (nnuc.EQ.1 .AND. IOUt.GE.3 
+      IF (                IOUt.GE.3 
+C    &    .AND. (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
+C    &                       + CSEmis(3,1) + CSEmis(4,1)
+C    &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
+     &    ) THEN
+          WRITE (8,*) ' '
+          WRITE (8,*)
+     &        ' Preequilibrium + Direct spectra (sum of all models):'
+          IF(CSEmis(0,1).GT.0) THEN
+            CALL AUERST(1,0,0)
+            WRITE (8,
+     &       '(2x,'' g PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(0,1)
+          ENDIF
+          IF(CSEmis(1,1).GT.0) THEN
+            CALL AUERST(1,1,0)
+            WRITE (8,
+     &       '(2x,'' n PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(1,1)
+          ENDIF
+          IF(CSEmis(2,1).GT.0) THEN
+            CALL AUERST(1,2,0)
+            WRITE (8,
+     &       '(2x,'' p PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(2,1)
+          ENDIF
+          IF(CSEmis(3,1).GT.0) THEN
+            CALL AUERST(1,3,0)
+            WRITE (8,
+     &       '(2x,'' a PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(3,1)
+          ENDIF
+            IF(CSEmis(4,1).GT.0) THEN
+            CALL AUERST(1,4,0)
+            WRITE (8,
+     &       '(2x,'' d PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(4,1)
+          ENDIF
+          IF(CSEmis(5,1).GT.0) THEN
+            CALL AUERST(1,5,0)
+            WRITE (8,
+     &       '(2x,'' t PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(5,1)
+          ENDIF
+          IF(CSEmis(6,1).GT.0) THEN
+            CALL AUERST(1,6,0)
+            WRITE (8,
+     &       '(2x,'' h PE emiss cross sect   '',G12.5,'' mb'')')
+     &       CSEmis(6,1)
+          ENDIF
+          WRITE (8,*) 
+          WRITE (8,*) 
+         ENDIF
+
+C        WRITE (8,*)
+C        WRITE (8,*) '*** Summary of PE and direct emission  '
+C        write(8,*) 'CSFus  =',sngl(CSFus)
+C        write(8,*) 'MSD    =',sngl(xsinl)
+C        write(8,*) 'MSC    =',sngl(xsmsc)
+C        write(8,*) 'PCROSS =',sngl(totemis)
+C        write(8,*) 'HMS    =',sngl(tothms)
+C        write(8,*) 'CN-form=',
+C    &      sngl(CSFus*corrmsd - tothms - xsmsc) 
+C        WRITE (8,*) '*** Summary of PE and direct emission  '
+C        WRITE (8,*)
+
       IF (IOUt.GT.1) THEN
          WRITE (8,*) ' '
          WRITE (8,*) ' '
@@ -1017,46 +1156,6 @@ C-----
             ENDIF
          ENDDO
          WRITE (8,*) ' '
-      ENDIF
-      IF (IOUt.GT.0) THEN
-         IF (DIRect.EQ.0) THEN
-            WRITE (8,
-     &'(''   Non-elastic cross section = '',G13.6,
-     &  '' mb including'')') CSFus
-            WRITE (8,'(''   PE (not DWBA) = '',
-     &  G13.6,'' mb'')') xsinl + totemis
-         ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
-            WRITE (8,
-     &'(''   Non-elastic cross section = '',G13.6,
-     &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
-            WRITE (8,
-     &'(''   DWBA inelastic to uncoupled discrete levels = '',
-     &  G13.6,'' mb'')') SINl*FCCred
-            WRITE (8,
-     &'(''   CC inelastic to coupled discrete levels = '',
-     &  G13.6,'' mb'')') SINlcc*FCCred
-            WRITE (8,'(''   DWBA to continuum = '',
-     &  G13.6,'' mb'')') xsinlcont
-            WRITE (8,'(''   PE (not DWBA) = '',
-     &  G13.6,'' mb'')') xsinl + totemis
-            WRITE (8,
-     &'(''   Spin distribution calculated using '',
-     &  ''CC transmission coefficients'')')
-         ELSEIF (DIRect.EQ.3) THEN
-            WRITE (8,
-     &'(''   Non-elastic cross section = '',G13.6,
-     &  '' mb including'')') CSFus + (SINl + SINlcc)*FCCred + SINlcont
-            WRITE (8,
-     &'(''   DWBA inelastic to discrete levels = '',
-     &  G13.6,'' mb'')') (SINl  + SINlcc)*FCCred
-            WRITE (8,'(''   DWBA to continuum = '',
-     &  G13.6,'' mb'')') xsinlcont
-            WRITE (8,'(''   PE (not DWBA)  = '',
-     &  G13.6,'' mb'')') xsinl + totemis
-            WRITE (8,
-     &'(''   Spin distribution does NOT contain'',
-     &  '' DWBA inelastic contribution '')')
-         ENDIF
       ENDIF
 C
       WRITE (12,*) ' '
@@ -1314,71 +1413,6 @@ C--------Calculate compound nucleus level density at saddle point
             ENDIF
          ENDIF
 C--------
-C--------Heidelberg Multistep Compound calculations
-C--------
-         IF (nnuc.EQ.1 .AND. MSC.NE.0) THEN
-            CALL HMSC(nvwful)
-            CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)                  
-            CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
-            CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
-C           WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
-            IF (nvwful) GOTO 1500
-         ENDIF
-
-         IF (nnuc.EQ.1 .AND. IOUt.GE.3 .AND.
-     &     (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
-     &                  + CSEmis(3,1) + CSEmis(4,1)
-     &                  + CSEmis(5,1) + CSEmis(6,1))
-     &       .NE.0) THEN
-          WRITE (8,*) ' '
-          WRITE (8,*)
-     &        ' Preequilibrium + Direct spectra (sum of all models):'
-          IF(CSEmis(0,1).GT.0) THEN
-            CALL AUERST(1,0,0)
-            WRITE (8,
-     &       '(2x,'' g PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(0,1)
-          ENDIF
-          IF(CSEmis(1,1).GT.0) THEN
-            CALL AUERST(1,1,0)
-            WRITE (8,
-     &       '(2x,'' n PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(1,1)
-          ENDIF
-          IF(CSEmis(2,1).GT.0) THEN
-            CALL AUERST(1,2,0)
-            WRITE (8,
-     &       '(2x,'' p PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(2,1)
-          ENDIF
-          IF(CSEmis(3,1).GT.0) THEN
-            CALL AUERST(1,3,0)
-            WRITE (8,
-     &       '(2x,'' a PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(3,1)
-          ENDIF
-            IF(CSEmis(4,1).GT.0) THEN
-            CALL AUERST(1,4,0)
-            WRITE (8,
-     &       '(2x,'' d PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(4,1)
-          ENDIF
-          IF(CSEmis(5,1).GT.0) THEN
-            CALL AUERST(1,5,0)
-            WRITE (8,
-     &       '(2x,'' t PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(5,1)
-          ENDIF
-          IF(CSEmis(6,1).GT.0) THEN
-            CALL AUERST(1,6,0)
-            WRITE (8,
-     &       '(2x,'' h PE emiss cross sect   '',G12.5,'' mb'')')
-     &       CSEmis(6,1)
-          ENDIF
-          WRITE (8,*) 
-          WRITE (8,*) 
-         ENDIF
-C--------
 C--------Start Hauser-Feshbach nnuc nucleus decay
 C--------
          popleft = 0.d0
@@ -1390,7 +1424,7 @@ C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
 C--------Account for widths fluctuations (HRTW)
-         IF (LHRtw.EQ.1 .AND. EIN.GT.EHRtw) LHRtw = 0
+         IF (LHRtw.EQ.1 .AND. EINl.GT.EHRtw) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
 C
 C           Renormalizing transmission coefficients to consider PE emission
@@ -2197,14 +2231,17 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
-      WRITE(107,'(G10.5,1P,(9E12.5))') EINl, 
-     &     ELAcs*ELAred, 4.*PI*ELCncs,             !shape_el,CN_el
-     &     SINlcc*FCCred, SINl*FCCred, SINlcont,   !CC_inl,DWBA_dis,DWBA_cont  
-C    &     SINlcc*FCCred, SINl*FCCred, xsinlcont,  !CC_inl,DWBA_dis,DWBA_cont  
-     &     xsinl,CSMsc(1),totemis,                 !MSD,MSC,PCROSS
-     &     csinel- ( SINlcc*FCCred + SINl*FCCred + SINlcont +
-     &               xsinl + CSMsc(NPRoject) + totemis )
+	xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont
+	xspreequ = xsinl + xsmsc + totemis + tothms
 
+      WRITE(107,'(G10.5,1P,(20E12.5))') EINl, 
+     &     TOTcs*TOTred*TOTcorr,					  !total = reaction + shape-el
+     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont, !reaction
+     &     ELAcs*ELAred,  4.*PI*ELCncs,             !shape_el,CN_el
+     &     CSFus*corrmsd - tothms - xsmsc,          !CN-formation 
+     &     xsdirect, xspreequ, 					  !direct, preequil
+     &     SINlcc*FCCred, SINl*FCCred, SINlcont,    !CC_inl,DWBA_dis,DWBA_cont  
+     &     xsinl,xsmsc,totemis, tothms              !MSD,MSC,PCROSS,HMS
 
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
      &  WRITE(98,'(G10.5,2X,1P,(95E12.5))') EINl,
