@@ -2582,6 +2582,9 @@ C* Test for elastic angular distributions of neutral particles
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C* Identify the reaction and assign the MT number
       CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
+C...
+C...      print *,'emtchr',mt,rec(1:50)
+C...
       IF(MT .LE.0 .OR. MT.GT.999) THEN
 C*      -- Unknown reaction encountered
         IF(KUN.GT.0) THEN
@@ -2611,12 +2614,12 @@ C*      -- Unknown reaction encountered
         GO TO 110
       END IF
 C* Check that the printed spectrum is not all zero
-      READ (LIN,891,END=200) REC
-      READ (LIN,891,END=200) REC
-      READ (LIN,891,END=200) REC
-C*    - Skip the test if angle-dependent cross sections
-C*      (Problems were noted only with (n,x) in some cases)
-      IF(REC(1:10).EQ.' Energy   ') GO TO 120
+      DO I=1,3
+        READ (LIN,891,END=200) REC
+C*      - Skip the test if angle-dependent cross sections
+C*        (Problems were noted only with (n,x) in some cases)
+        IF(REC(1:10).EQ.' Energy   ') GO TO 120
+      END DO
 C*    - Spectrum energy and value
       READ (LIN,891,END=200) REC
       READ (REC,892,ERR=200) E2,X2
@@ -2659,7 +2662,7 @@ C* File processed - sort MT numbers in ascending order
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   891 FORMAT(A136)
-  892 FORMAT(F9.0,F15.0)
+  892 FORMAT(F10.0,F14.0)
       END
       SUBROUTINE RDANGF(LIN,NEN,NAN,RWO,MXR,ANG,MXA,MT,ZAP,LTT,LER)
 C-Title  : Subroutine RDANGF
@@ -2905,7 +2908,7 @@ C* Error trap reading input record
       STOP 'EMPEND ERROR - reading file'
 C*
   806 FORMAT(6X,8(5X,F10.4))
-  807 FORMAT(BN,F10.5,F14.4,7F15.4)
+  807 FORMAT(BN,F12.5,F12.4,7F15.4)
   809 FORMAT(9X,8F15.4)
   891 FORMAT(A136)
   906 FORMAT(' EMPEND WARNING - MT',I4,' IZA',I5
@@ -4269,7 +4272,7 @@ C* Identify reaction and check if it matches the required given by JT6
       MEQ=0
   612 CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 C...
-c...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
+C...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
 C...
       IF(MT.EQ.  0) GO TO 210
       IF(MT.NE.JT6) THEN
