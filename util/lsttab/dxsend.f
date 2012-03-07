@@ -4,13 +4,14 @@ C-Title  : Subroutine DXSELM
 C-Purpose: Extract double differential cross sections from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
 C-Version: 15-Dec-2003 (Original code).
-C-V  09/12 PLNLEG Legendre summation done in double precision
+C-V  06/02 Add UXS parameter for uncertainty of DXS
+C-V  07/04 Assign relative uncertainty of lumped reactions to all comp.
 C-V  09/02 IMPORTANT CHANGE OF CONVENTION!!!!!
 C-V        Lumped reactions are represented by MT0=9000
 C-V        For backward compatibility MT0=5 on input is set to 9000
 C-V        but this aliasing will be removed in future.
-C-V  07/04 Assign relative uncertainty of lumped reactions to all comp.
-C-V  06/02 Add UXS parameter for uncertainty of DXS
+C-V  09/12 PLNLEG Legendre summation done in double precision
+C-V  11/11 Add charged particle x.s. at fixed angle for like particles
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -850,8 +851,8 @@ C*
 C* Do not include particle multiplicities for cross sections
       IF(KEA.EQ.0 .AND. MT0/10000.NE.4) ZAP =-1
 c...
-C...  print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS'
-C...  print *,         ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
+      print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS'
+      print *,         ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
 c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
@@ -937,7 +938,7 @@ C...
 C*
 C* Check if reaction summation is required (request MT=9000)
 c...  IF(MT0.NE.9000) GO TO 60
-      IF(MT0.NE.9000 .AND. MF0.NE.10) GO TO 60
+      IF(MT0.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
 C* Find particle emission reactions
       REWIND LEF
       CALL SKIPSC(LEF)
@@ -1484,6 +1485,7 @@ C-V  08/01 Fix charged particle cross sections at fixed angle
 C-V        (account for CM to Lab conversion).
 C-V  10/02 Fix projectile mass and mass ratios for CM/Lab conversion
 C-V  11/01 Implement LAW 3 in MF6.
+C-V  11/11 Add charged particle x.s. at fixed angle for like particles
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -1559,6 +1561,7 @@ C-E        FYTG2D,UNIGRD,FITGRD,VECLIN,FINEND
 C-
 c...
       double precision  sre,sim,are,aim,aa
+     &                  arem,arep,aimm,aimp,xre,yre,xim,yim
 c...
       PARAMETER   (MIW=100, MXLEG=100)
       DIMENSION    IWO(MIW)
@@ -1748,8 +1751,8 @@ C* Suppress searching for covariance data unless MF0=3
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-C...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
-C...  print *,'ier',ier
+      print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+      print *,'ier',ier
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -1969,8 +1972,9 @@ C*          -- More constatns
             RWO(LE-1+IE)=EE
             RWO(LX-1+IE)=SIGC
             IF     (LTP.EQ.1) THEN
-C* Case: Nuclear amplitude expansion (Eq.6.11,6.12 of ENDF-102 manual)
+C* Case: Nuclear amplitude expansion
               IF(LIDP.EQ.0) THEN
+C*              -- Distinguishable particles (Eq.6.11 of ENDF-102 manual)
 C*              -- Nuclear interference term
                 ATH=AET*ALOG((1-ACM)/2)
                 ARE=COS(ATH)
@@ -2012,8 +2016,57 @@ C...            write(83,'(f11.2,1p,e11.4)') EE/1000,AAS*1000
                 write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
 C...            PRINT *,EE/1000,RWO(LX-1+IE),AA,ARE,SRE,AIM,SIM
 C...            
+              ELSE IF(LIDP.EQ.1) THEN
+C*              -- Indistinguishable particles (Eq.6.12 of ENDF manual)
+                ATHM=AET*ALOG((1-ACM)/2)
+                ATHP=AET*ALOG((1+ACM)/2)
+                AREM=COS(dble(ATHM))
+                AREP=COS(dble(ATHP))
+                AIMM=SIN(dble(ATHM))
+                AIMP=SIN(dble(ATHP))
+C*              -- Evaluate Legendre polynomials
+                NL2=NL*2
+                IF(NL2.GE.MXLEG)
+     &            STOP 'DXSEND ERROR - MXLEG limit exceeded'
+                CALL PLNLEG(ACM,PLEG,NL2)
+C*              -- Prepare legendre coefficients
+                NL1=NL+1
+                SRE=0
+                ILL=1
+                DO L=1,NL1
+C*                -- Real part of interference term
+                  XRE=dble(RWO(LXX+2*NL+2*L-1)*PLEG(L))*(2*L-1)/2
+                  YRE=(1+dble(ACM))*AREM + ILL*(1-dble(ACM))*AREP
+C*                -- Imaginary part of interference term
+                  XIM=dble(RWO(LXX+2*NL+2*L  )*PLEG(L))*(2*L-1)/2
+                  YIM=(1+dble(ACM))*AIMM + ILL*(1-dble(ACM))*AIMP
+C*                -- Combiner real part of the interference term
+                  SRE=SRE + XRE*YRE - XIM*YIM
+                  ILL=-ILL
+                END DO
+C*              -- Nuclear scattering term (order 2*NL, odd terms)
+                AAS =0
+                DO L=1,NL1
+                  AAS=AAS+dble(RWO(LXX-1+L)*PLEG(2*L-1))*(4*L-3)/2
+                END DO
+c...
+c...            print *,'deg,ain,acm',deg,ain,acm
+c...            print *,'leg',(pleg(l),l=1,nl21)
+c...            print *,'cob',(rwo(lxx-1+l),l=1,nl21)
+c...            if(ie.eq.2) stop
+c...
+C*              -- Add the terms and apply the Jacobian (CM to Lab)
+                AAI=SRE*2*dble(AET)/(1-(dble(ACM))**2)
+                RWO(LX-1+IE)=(RWO(LX-1+IE)-AAI+AAS)/TJAC
+C...
+C...            write(81,'(f11.2,1p,e11.4)') EE/1000,RWO(LX-1+IE)*1000
+C...            write(82,'(f11.2,1p,e11.4)') EE/1000,-AAI*1000
+C...            write(83,'(f11.2,1p,e11.4)') EE/1000,AAS*1000
+C...            write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
+C...            PRINT *,EE/1000,RWO(LX-1+IE),AA,ARE,SRE,AIM,SIM
+C...            
               ELSE
-                PRINT *,'Programming incomplete for LTP/LIDP',LTP,LIDP
+                PRINT *,'Invalid LIDP in MF/MT/LTP/LIDP',MF,MT,LTP,LIDP
                 STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP/LIDP'
               END IF
             ELSE IF(LTP.GE.12 .AND. LTP.LE.15) THEN
@@ -3095,7 +3148,7 @@ C*
 C* Search the ENDF file for section MT in file MF3
       CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
+      print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*      
@@ -3118,7 +3171,7 @@ C* If MF10, search over metastable state
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
         IF(MF .NE. 10) GO TO 12
 c...
-c...    PRINT *,'mf,mt,lfs,mst',mf,mt,lfs,mst
+        PRINT *,'mf,mt,lfs,mst',mf,mt,lfs,mst
 c...
         IF(LFS.EQ.MST) GO TO 12
       END DO

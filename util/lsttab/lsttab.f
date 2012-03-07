@@ -27,6 +27,12 @@ C-V         is given, switch MF=10.
 C-V  08/03  Fix format for printing small uncertainties.
 C-V  08/04  Increase MXR from 1200000 to 4000000 (A.Trkov)
 C-V         Increase MXP from  300000 to  800000 (A.Trkov)
+C-V  09/02  - Change convention MT=5 to MT=9000
+C-V         - Allow lumped discrete levels.
+C-V  12/03  Implement special treatment of the fission spectrum
+C-V         printout, normalising the experimental data to match
+C-V         the integral of the last function over the range of
+C-V         the data.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -61,20 +67,22 @@ C-M   FLC4 LC4=3  EXFOR source file in computational format.
 C-M   FLPN LPN=7  Selected experimental points (PLOTTAB points fmt).
 C-M   FLCU LCU=8  Selected curve from ENDF file (PLOTTAB points fmt).
 C-M   FLLG LLG=9  Log-file for error messages and warnings.
+C-M   FLTM LTM=11 Temporary file for storing pointwise data.
 C-M
 C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=1000,MXP=800000,MXR=4000000,MXEN=10,MXIS=10)
+      PARAMETER   (MPT=5000,MXP=800000,MXR=4000000,MXEN=10,MXIS=10)
       CHARACTER*1  CM
-      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG
+      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG,FLTM
      1            ,FLEF(MXEN),COM(MXEN)
       CHARACTER*84 COM1,COM2
       CHARACTER*84 C84,RFX(MPT)
       DIMENSION    ES(MXP),SG(MXP),UG(MXP)
+     &            ,EP(MPT),DA(MPT),DB(MPT),FP(MPT),FA(MPT),FB(MPT)
      &            ,RWO(MXR),ZEL(MXIS),FRC(MXIS)
 C* Default logical file units
-      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG
-     1    /  1,  2,  3,  5,  6, 7, 8, 9 /
+      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG,LTM
+     1    /  1,  2,  3,  5,  6, 7, 8, 9, 10 /
       DATA BLNK/'                                        '/
      1     FLLS/'PLOTC4.LST'/
      3     FLC4/'C4.DAT'/
@@ -82,9 +90,12 @@ C* Default logical file units
      8     FLCU/'LSTTAB.CUR'/
      9     FLLG/'LSTTAB.LST'/
      2     FLEF(1)/'ENDF.DAT'/
+     3     FLTM/'LSTTAB.TMP'/
 C*
       DATA PI/3.14159265/
       DATA EP6/0.03/
+C* Maxwellian fission spectrum temperature
+      EKTNRM=1.382E6
 C*
 C* Write banner
       WRITE(LTT,91) ' LSTTAB - Extract Data from ENDF / C4   '
@@ -187,7 +198,13 @@ C*
 C* Process the index entry
       C84=RFX(IDX)
       READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
-      ZAI=IZI
+C*
+C* If fission spectrum is requested, enter kT for ratio to Maxwellian
+C* or zero to plot the spectrum
+   55 WRITE(LTT,91) '$Enter kT [eV] to plot ratio to Mxw.  : '
+      READ (LKB,98,ERR=55,END=56) EKTNRM
+C*
+   56 ZAI=IZI
 C*
       COM2=C84(1:11)//C84(19:21)//C84(22:26)//' '
       IF(MF.EQ.3) THEN
@@ -220,6 +237,11 @@ C* Log the start of request
       WRITE(LLG,93) ' Scaling factor                       : ',SCL
       WRITE(LLG,95) ' Emitted particle ZA                  : ',IZP
       WRITE(LLG,96) COM2
+      WRITE(LTT,91)
+      WRITE(LTT,95) ' Processing list index                : ',IDX
+      WRITE(LTT,93) ' Scaling factor                       : ',SCL
+      WRITE(LTT,95) ' Emitted particle ZA                  : ',IZP
+      WRITE(LTT,96) COM2
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
@@ -229,15 +251,16 @@ C*
       ZAP=IZP
       PAR=-2
       MF0=MF
-
+c...
 c...   print *,'mf,mt,kea,eou,par',mf,mt,kea,eou,par
-
+c...
       IF     (MF0.EQ.3) THEN
         KEA=0
         PAR=0
-C*        Discrete energy level (if applicable)
+C*      Discrete energy level (if applicable)
         IF(C84(63:72).NE.'          ') THEN
           ELV=EOU
+          IF(DEG.GE.0) PAR=DEG
           IF(MT.NE.51 .AND. MT.NE.600 .AND. MT.NE.800) MF =10
         END IF
       ELSE IF(MF0.EQ.4) THEN
@@ -250,6 +273,7 @@ C* Angular distributions (outg. particle energy-integrated)
           KEA=1
 C*        Discrete energy level (if applicable)
           IF(EOU.GT.0) ELV=EOU
+          IF(DEG.GE.0) PAR=DEG
         END IF
       ELSE IF(MF0.EQ.5) THEN
 C* Energy distributions (outg. particle angle-integrated)
@@ -272,18 +296,22 @@ C*          Request energy spectra
       END IF
 C*
 C* Extract the data from the ENDF file
-      DO 86 M=1,NEN
+      DO 66 M=1,NEN
+      ICUR=0
       ZA =ZA0
       MTE=MT
-      IF(MT.EQ.9000) MTE=5
-      IF(NEN.GT.1) 
-     &WRITE(LLG,91) ' ------------------------------ File  : ',FLEF(M)
-      OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD')
+c... Redefinition no longer needed
+c...  IF(MT.EQ.9000) MTE=5
+      IF(NEN.GT.1) THEN
+        WRITE(LLG,91) ' ------------------------------ File  : ',FLEF(M)
+        WRITE(LTT,91) ' ------------------------------ File  : ',FLEF(M)
+      END IF
+      OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD',ERR=80)
       NUC=0
       EL1=ELV
       ZEL(1)=ZA
-      PRINT *,'DXSELM: ZA,MF,MT,KEA,EIN,PAR'
-     1          ,nint(ZA),MF,MT,KEA,EIN,PAR
+      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,PAR,ELM'
+     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,PAR,EL1
       CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PAR,EP6
      1           ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
       IF(NP.LE.0) THEN
@@ -307,13 +335,18 @@ C* Prepare the ENDF comment header for the PLOTTAB curves file
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,99) COM1,COM2
       IUF=0
-      DO 82 I=1,NP
+      DO 62 I=1,NP
 C* Suppress printing negative or zero points
       EE=ES(I)
       IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
       IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
       FF=SG(I)*SCL
       UF=UG(I)*SCL
+      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+        FC=SQRT(EE)*EXP(-EE/EKTNRM)*2/EKTNRM
+        FF=SG(I)/FC
+        UF=UG(I)/FC
+      END IF
       IF(UF.GT.0) IUF=1
       IF(SG(I).GT.0) THEN
         IF(IUF.NE.0) THEN
@@ -322,14 +355,28 @@ C* Suppress printing negative or zero points
           WRITE(LCU,94) EE,FF
         END IF
       END IF
-   82 CONTINUE
+   62 CONTINUE
       WRITE(LCU,94)
-   86 CONTINUE
+      IF(NP.GT.0) ICUR=1
+   66 CONTINUE
 C*
 C* Extract the data from the C4 file
+   80 CONTINUE
+C* Check if fission spectra are to be processed
+      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. ICUR.GT.0) THEN
+        LLL=LTM
+        OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
+      ELSE
+        LLL=LPN
+        ICUR=0
+      END IF
       IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) THEN
-        PAR=ELV
-        WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') ELV
+        IF(PAR.GT.0) THEN
+          PAR=MIN(PAR,ELV)
+        ELSE
+          PAR=ELV
+        END IF
+        WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') PAR
       END IF
       IF(MF.EQ.4 .AND. MT/10000 .EQ.4) THEN
         PAR=DEG
@@ -337,11 +384,56 @@ C* Extract the data from the C4 file
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
      1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
-      CALL DXSEXF(LC4,LPN,ZAI,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NP,NS,SCL,COM2)
-      IF(NP.LE.0) THEN
+      CALL DXSEXF(LC4,LLL,ZAI,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NPP,NS,SCL,COM2)
+      IF(NPP.LE.0) THEN
         PRINT *,'DXSEXF ERROR: No matching points'
       ELSE
-        PRINT *,'DXSEXF No.of points',NP
+        PRINT *,'DXSEXF No.of points',NPP
+        IF(LLL.EQ.LTM) THEN
+C*      -- Special processing of the fission spectra:
+C*         Renormalise each set of points to the average of the
+C*         last curve, if present
+          REWIND LLL
+   82     READ (LLL,96,END=86) COM1
+          READ (LLL,96,END=84) COM2
+          KP=0
+          DO WHILE(COM2(1:20).NE.'                    ')
+            KP=KP+1
+            IF(KP.GT.MPT) STOP 'LSTTAB ERROR - MPT limit exceeded'
+            READ (COM2,94) EP(KP),DA(KP),DB(KP),FP(KP),FA(KP),FB(KP)
+            READ (LLL,96,END=84) COM2
+          END DO
+C* Write the header of the experimental data
+   84     WRITE(LPN,96) COM1
+          IF(KP.GT.0) THEN
+C*        -- Integrate the function in the range of experimental data
+            EA=EP(1)
+            EB=EP(KP)
+            SC=YTGPNT(NP,ES,SG,EA,EB)
+C*        -- Integrate the experimental data
+            SP=YTGPNT(KP,EP,FP,EA,EB)
+
+            print *,'POINTS',ea,eb,sc,sp,np,kp
+C            do i=1,20
+C              print *,i,es(i),sg(i)
+C            end do
+C            print *,np,es(np),sg(np)
+
+C*        -- Normalise and print the experimental data
+            FF=1
+            DO I=1,KP
+              EE=EP(I)
+              IF(EKTNRM.GT.0) FF=SQRT(EE)*EXP(-EE/EKTNRM)*2/EKTNRM
+              FP(I)=FP(I)*SC/SP /FF
+              FA(I)=FA(I)*SC/SP /FF
+              FB(I)=FB(I)*SC/SP /FF
+              WRITE(LPN,94) EP(I),DA(I),DB(I),FP(I),FA(I),FB(I)
+            END DO
+          END IF
+          WRITE(LPN,91) BLNK
+          GO TO 82
+   86     CLOSE(UNIT=LLL)
+        END IF
       END IF
 C*
 C* Try another set of points
@@ -353,12 +445,47 @@ C*
    91 FORMAT(2A40)
    92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,F10.3,F8.2,F10.3,6X,I8)
    93 FORMAT(A40,F10.3)
-   94 FORMAT(1P,E11.5E1,2E11.4)
+   94 FORMAT(1P,E11.5E1,2E11.4,E11.5E1,2E11.4)
    95 FORMAT(A40,I6)
    96 FORMAT(A84)
    97 FORMAT(BN,I10)
    98 FORMAT(BN,F10.0)
    99 FORMAT(A40,A84)
+      END
+      FUNCTION YTGPNT(NP,XX,YY,XA,XB)
+C-Title  : Function YTGPNT
+C-Purpose: Integrate a tabulated function
+C-Description:
+C-D  Given a function tabulated at NP points XX(i) with values YY(i),
+C-D  integrate the function in the interval [XA:XB] using trapezoidal
+C-D  rule (linear interpolation). The argument of the function in XX
+C-D  must be monotonic ascending.
+C-
+      DIMENSION XX(NP),YY(NP)
+C
+      YTGPNT=0
+      X2=XX(1)
+      Y2=YY(1)
+      DO I=2,NP
+        X1=X2
+        Y1=Y2
+        X2=XX(I)
+        Y2=YY(I)
+        IF(X2.LE.XA) CYCLE
+        IF(X1.LT.XA) THEN
+          IF(X2.NE.X1) Y1=Y1+(XA-X1)*(Y2-Y1)/(X2-X1)
+          X1=XA
+        END IF
+        IF(X2.LE.XB) THEN
+          YTGPNT=YTGPNT+(X2-X1)*(Y2+Y1)/2
+        ELSE
+          IF(X2.NE.X1) Y2=Y1+(XB-X1)*(Y2-Y1)/(X2-X1)
+          X2=XB
+          YTGPNT=YTGPNT+(X2-X1)*(Y2+Y1)/2
+          EXIT
+        END IF
+      END DO
+      RETURN
       END
       SUBROUTINE RDC4LS(LLS,NID,RFX)
 C-Title  : Subroutine RDC4LS
@@ -456,6 +583,8 @@ c...        DEG=ACOS(PAR)*180/PI
      1                 ,NPP,NS,SCL,COM2)
 C-Title  : Subroutine DXSEXF
 C-Purpose: Extract data from EXFOR computational format file
+C-Version:
+C-V  09/03 Make angular tolerance 1 deg. (consistent with PLTLST).
 C-Description:
 C-D  Numeric data are extracted from the C4 file (EXFOR computational
 C-D  format)
@@ -499,7 +628,7 @@ C*   ETOL  fractional tolerance on energy
 C*   ATOL  tolerance on angle for double-differential data [deg]
 C*   AANG  tolerance on angle for double-differential data [deg]
 C*   E2TOL fractional tolerance on discrete level energy
-      DATA ETOL,ATOL,AANG,E2TOL/0.015, 5.0, 1.0, 0.003/
+      DATA ETOL,ATOL,AANG,E2TOL/0.015, 1.0, 1.0, 0.003/
 C*
       DATA PI/3.14159265/
 C*
@@ -547,7 +676,9 @@ C* Test for supported MTs in MF 1
         IF(MT.NE.452 .AND. MT.NE.455 .AND. MT.NE.456) GO TO 20
       ELSE IF(MF.EQ.3) THEN
 C* Test outgoing particle and discrete level energy
-        IF(PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
+        EL=F7
+        IF(F8.GT.0) EL=MIN(F7,F8)
+        IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
           IF6=F6
         IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
       ELSE IF(MF.GE.4 .AND. MF.LE.6) THEN
@@ -557,7 +688,7 @@ C* Test outgoing particle
 c...      IF(F6.EQ.0) IF6=1
           IF(IZAP0.NE.IF6) GO TO 20
 c...
-C...      print *,'Found mf,mt,izap0,if6',mf,mt,izap0,if6
+c...      print *,'Found mf,mt,izap0,if6',mf,mt,izap0,if6
 c...
         END IF
         IF(MF.EQ.4) THEN
@@ -569,7 +700,9 @@ c...        IF(ABS( COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
 C* Test incident and level energy for double differential data
             IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test level energy for angular distribution data
-            IF(PR0.GE.0 .AND. ABS(PR0-F7).GT.E2TOL*F7) GO TO 20
+            EL=F7
+            IF(F8.GT.0) EL=MIN(F7,F8)
+            IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
           END IF
         ELSE
 C* Test incident and level energy for double differential data
@@ -656,24 +789,42 @@ C* Simple cross sections and cross sections at fixed angle
         END IF
 C* Angular distributions
       ELSE IF(MF0.EQ.4 .OR.(MF0.EQ.6 .AND. KEA.EQ.1) ) THEN
-C* Convert elastic ang.distrib. from CM to Lab if necessary
-        IF((MF0.EQ.4 .AND. MT0.EQ.2) .AND. C3.NE.' ') THEN
+C* Convert angular distributions from CM to Lab if necessary
+C...    IF((MF0.EQ.4 .AND. MT0.EQ.2) .AND. C3.NE.' ') THEN
+        IF( MF0.EQ.4 .AND. C3.NE.' ') THEN
+C*        -- Determine outgoing particle from MT
+          IZP0=1
+          IF(MT0.EQ.   2) IZP0=IZAI
+          IF(MT0.EQ. 102) IZP0=   0
+          IF(MT0.EQ. 103) IZP0=1001
+          IF(MT0.EQ. 104) IZP0=1002
+          IF(MT0.EQ. 105) IZP0=1003
+          IF(MT0.EQ. 106) IZP0=2003
+          IF(MT0.EQ. 107) IZP0=2004
+          IF(MT0.EQ.9000) IZP0=F6
+C* Retrieve the masses of the target, ejectile and projectile
+          AWR=GETAWT(IZA*10)
+          AWP=PROJWT(IZP0)
+          AWI=PROJWT(IZAI)
+C* Calculate the Q-value
+          IZA10=10*IZA
+          KZA10=10*(IZAI+IZA-IZP0)
+          CALL CALCQ(IZAI,IZP0,IZA10,KZA10,QI)
+          EIN=F1
+          XCM=F5
 C* Definitions:
 C*  XCM - cosine os scattering angle in CM system
 C*  XLB - cosine os scattering angle in Lab system
-C*  AWR - mass ratio of target and projectile (=A)
-C*  AWP - mass ratio of ejectile and projectile (=A-dash)
+C*  AWR - mass ratio of target and neutron
+C*  AWP - mass ratio of ejectile and neutron
+C*  AWI - mass ratio of projectile and neutron
+C*  AAA - mass ratio of target and projectile (=A)
+C*  AAD - mass ratio of ejectile and projectile (=A-dash)
 C* Kinematics equations for 2-body problem form ENDF-102 Appendix E
 C* Equation (E.3)
-C* Use approximate target mass
-          AWR=IZA-1000*(IZA/1000)
-          IF(AWR.LT.0.1) AWR=2.1*(IZA/1000)
-          AWP=1
-          QI =0
-          EIN=F1
-          XCM=F5
-C*
-          BET=(AWR*(AWR+1-AWP)/AWP)*( 1+(1+AWR)*QI/(AWR*EIN) )
+          AAA=AWR/AWI
+          AAD=AWP/AWI
+          BET=(AAA*(AAA+1-AAD)/AAD)*( 1+(1+AAA)*QI/(AAA*EIN) )
           BET=SQRT(BET)
 C*          Lab cosine of scattering: equation (E.11)
           SBT= BET*BET + 1 + 2*XCM*BET
@@ -681,14 +832,30 @@ C*          Lab cosine of scattering: equation (E.11)
           XLB=(1+BET*XCM)/QBT
 C*          Jacobian of the transformation dXCM/dXLB (derivative of E.11)
           DCM=(SBT*QBT)/(BET*BET*(BET+XCM))
+          EO =EIN*SBT*AAD/((AAA+1)*(AAA+1))
+C*        Outgoing particle energy: equation (E.10)
           F3=F3*DCM
           F5=XLB
+C...
+c...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,f3
+C...
+C...
+c...  print *,'XCM - cosine of scattering angle in CM system   ',XCM
+c...  print *,'XLB - cosine of scattering angle in Lab system  ',XLB
+c...  print *,'AWR - mass ratio of target and neutron          ',AWR
+c...  print *,'AWP - mass ratio of ejectile and neutron        ',AWP
+c...  print *,'AAA - mass ratio of target to projectile (=A)   ',AAA
+c...  print *,'AAD - mass ratio of ejectile to projectile (=A")',AAD
+c...  print *,'QI  - reaction Q-value                          ',QI
+C...
+
         END IF
 C* Convert cosine (and uncertainty) to degrees
         A6=F5+F6
         IF(A6.GT.1) A6=F5-F6
         F5=ACOS(F5)*180/PI
         WRITE(REC(1),911) F5
+C*      -- Uncertainty is not given for general emission (MT=9000)
         IF(MT.LT.9000) THEN
           A6=ABS(ACOS(A6)*180/PI-F5)
           WRITE(REC(2),912) A6
@@ -770,4 +937,3277 @@ C*
   911 FORMAT(1P,E11.4E1)
   912 FORMAT(1P,E11.3)
   920 FORMAT(6A11)
+      END
+      DOUBLE PRECISION FUNCTION PROJWT(IZA)
+C-Title  : Function PROJWT (double precision)
+C-Purpose: Define projectile mass from its ZA designation
+C-
+      DOUBLE PRECISION AMS
+C* AMDC Audi-Wapstra mass tables 2003 "http://www-nds.iaea.org/amdc/"
+C* Subtract electron mass and add ionisation energy defect
+      IF(IZA.EQ.   1) THEN
+        AMS = 1.008664916D0
+      ELSE IF(IZA.EQ.1001) THEN
+        AMS = 1.007825032D0 -   0.00054857991D0 + 0.000000015D0
+      ELSE IF(IZA.EQ.1002) THEN
+        AMS = 2.014101778D0 -   0.00054857991D0 + 0.000000015D0
+      ELSE IF(IZA.EQ.1003) THEN
+        AMS = 3.016049278D0 -   0.00054857991D0 + 0.000000015D0
+      ELSE IF(IZA.EQ.2003) THEN
+        AMS = 3.016029319D0 - 2*0.00054857991D0 + 0.000000085D0
+      ELSE IF(IZA.EQ.2004) THEN
+        AMS = 4.002603254D0 - 2*0.00054857991D0 + 0.000000085D0
+      ELSE
+        AMS=0
+      END IF
+      PROJWT=AMS
+      RETURN
+      END
+      DOUBLE PRECISION FUNCTION GETAWT(IZA10)
+C-Title  : Function GETAWT (double precision)
+C-Purpose: Retrieve the atomic mass
+C-Description:
+C-D The masses are from the file published in:
+C-D "The Ame2003 atomic mass evaluation (II)"
+C-D by G.Audi, A.H.Wapstra and C.Thibault
+C-D Nuclear Physics A729 p. 337-676, December 22, 2003.
+C-D File : mass.mas03  atomic masses
+C-
+      PARAMETER (MXNUC=3179)
+      DOUBLE PRECISION AWR,AWGT
+      DIMENSION  MZA10(MXNUC),AWGT(MXNUC)
+      DATA MZA10(   1),AWGT(   1)/      10, 1.00866491574D+00/
+      DATA MZA10(   2),AWGT(   2)/   10010, 1.00782503207D+00/
+      DATA MZA10(   3),AWGT(   3)/   10020, 2.01410177785D+00/
+      DATA MZA10(   4),AWGT(   4)/   10030, 3.01604927767D+00/
+      DATA MZA10(   5),AWGT(   5)/   20030, 3.01602931914D+00/
+      DATA MZA10(   6),AWGT(   6)/   30030, 3.03077500000D+00/
+      DATA MZA10(   7),AWGT(   7)/   10040, 4.02780600424D+00/
+      DATA MZA10(   8),AWGT(   8)/   20040, 4.00260325415D+00/
+      DATA MZA10(   9),AWGT(   9)/   30040, 4.02718500558D+00/
+      DATA MZA10(  10),AWGT(  10)/   10050, 5.03531100488D+00/
+      DATA MZA10(  11),AWGT(  11)/   20050, 5.01222300624D+00/
+      DATA MZA10(  12),AWGT(  12)/   30050, 5.01253700800D+00/
+      DATA MZA10(  13),AWGT(  13)/   40050, 5.04079000000D+00/
+      DATA MZA10(  14),AWGT(  14)/   10060, 6.04494200594D+00/
+      DATA MZA10(  15),AWGT(  15)/   20060, 6.01888900124D+00/
+      DATA MZA10(  16),AWGT(  16)/   30060, 6.01512200794D+00/
+      DATA MZA10(  17),AWGT(  17)/   40060, 6.01972600317D+00/
+      DATA MZA10(  18),AWGT(  18)/   50060, 6.04681000000D+00/
+      DATA MZA10(  19),AWGT(  19)/   10070, 7.05274900000D+00/
+      DATA MZA10(  20),AWGT(  20)/   20070, 7.02802000618D+00/
+      DATA MZA10(  21),AWGT(  21)/   30070, 7.01600400548D+00/
+      DATA MZA10(  22),AWGT(  22)/   40070, 7.01692900828D+00/
+      DATA MZA10(  23),AWGT(  23)/   50070, 7.02991700901D+00/
+      DATA MZA10(  24),AWGT(  24)/   20080, 8.03392100897D+00/
+      DATA MZA10(  25),AWGT(  25)/   30080, 8.02248700362D+00/
+      DATA MZA10(  26),AWGT(  26)/   40080, 8.00530500103D+00/
+      DATA MZA10(  27),AWGT(  27)/   50080, 8.02460700233D+00/
+      DATA MZA10(  28),AWGT(  28)/   60080, 8.03767500025D+00/
+      DATA MZA10(  29),AWGT(  29)/   20090, 9.04395000286D+00/
+      DATA MZA10(  30),AWGT(  30)/   30090, 9.02678900505D+00/
+      DATA MZA10(  31),AWGT(  31)/   40090, 9.01218200201D+00/
+      DATA MZA10(  32),AWGT(  32)/   50090, 9.01332800782D+00/
+      DATA MZA10(  33),AWGT(  33)/   60090, 9.03103600689D+00/
+      DATA MZA10(  34),AWGT(  34)/   20100, 1.00523980084D+01/
+      DATA MZA10(  35),AWGT(  35)/   30100, 1.00354810026D+01/
+      DATA MZA10(  36),AWGT(  36)/   40100, 1.00135330082D+01/
+      DATA MZA10(  37),AWGT(  37)/   50100, 1.00129360099D+01/
+      DATA MZA10(  38),AWGT(  38)/   60100, 1.00168530023D+01/
+      DATA MZA10(  39),AWGT(  39)/   70100, 1.00416530067D+01/
+      DATA MZA10(  40),AWGT(  40)/   30110, 1.10437970071D+01/
+      DATA MZA10(  41),AWGT(  41)/   40110, 1.10216570075D+01/
+      DATA MZA10(  42),AWGT(  42)/   50110, 1.10093050041D+01/
+      DATA MZA10(  43),AWGT(  43)/   60110, 1.10114330061D+01/
+      DATA MZA10(  44),AWGT(  44)/   70110, 1.10260900096D+01/
+      DATA MZA10(  45),AWGT(  45)/   30120, 1.20537800000D+01/
+      DATA MZA10(  46),AWGT(  46)/   40120, 1.20269200074D+01/
+      DATA MZA10(  47),AWGT(  47)/   50120, 1.20143520010D+01/
+      DATA MZA10(  48),AWGT(  48)/   60120, 1.20000000000D+01/
+      DATA MZA10(  49),AWGT(  49)/   70120, 1.20186130020D+01/
+      DATA MZA10(  50),AWGT(  50)/   80120, 1.20344040090D+01/
+      DATA MZA10(  51),AWGT(  51)/   40130, 1.30356930001D+01/
+      DATA MZA10(  52),AWGT(  52)/   50130, 1.30177800022D+01/
+      DATA MZA10(  53),AWGT(  53)/   60130, 1.30033548378D+01/
+      DATA MZA10(  54),AWGT(  54)/   70130, 1.30057380061D+01/
+      DATA MZA10(  55),AWGT(  55)/   80130, 1.30248120021D+01/
+      DATA MZA10(  56),AWGT(  56)/   40140, 1.40428920092D+01/
+      DATA MZA10(  57),AWGT(  57)/   50140, 1.40254040001D+01/
+      DATA MZA10(  58),AWGT(  58)/   60140, 1.40032419887D+01/
+      DATA MZA10(  59),AWGT(  59)/   70140, 1.40030740048D+01/
+      DATA MZA10(  60),AWGT(  60)/   80140, 1.40085960025D+01/
+      DATA MZA10(  61),AWGT(  61)/   90140, 1.40350600000D+01/
+      DATA MZA10(  62),AWGT(  62)/   40150, 1.50534600000D+01/
+      DATA MZA10(  63),AWGT(  63)/   50150, 1.50311030002D+01/
+      DATA MZA10(  64),AWGT(  64)/   60150, 1.50105990026D+01/
+      DATA MZA10(  65),AWGT(  65)/   70150, 1.50001088982D+01/
+      DATA MZA10(  66),AWGT(  66)/   80150, 1.50030650062D+01/
+      DATA MZA10(  67),AWGT(  67)/   90150, 1.50180090010D+01/
+      DATA MZA10(  68),AWGT(  68)/   40160, 1.60619200000D+01/
+      DATA MZA10(  69),AWGT(  69)/   50160, 1.60398080083D+01/
+      DATA MZA10(  70),AWGT(  70)/   60160, 1.60147010025D+01/
+      DATA MZA10(  71),AWGT(  71)/   70160, 1.60061010066D+01/
+      DATA MZA10(  72),AWGT(  72)/   80160, 1.59949146196D+01/
+      DATA MZA10(  73),AWGT(  73)/   90160, 1.60114650072D+01/
+      DATA MZA10(  74),AWGT(  74)/  100160, 1.60257610026D+01/
+      DATA MZA10(  75),AWGT(  75)/   50170, 1.70469890091D+01/
+      DATA MZA10(  76),AWGT(  76)/   60170, 1.70225860012D+01/
+      DATA MZA10(  77),AWGT(  77)/   70170, 1.70084500026D+01/
+      DATA MZA10(  78),AWGT(  78)/   80170, 1.69991310070D+01/
+      DATA MZA10(  79),AWGT(  79)/   90170, 1.70020950024D+01/
+      DATA MZA10(  80),AWGT(  80)/  100170, 1.70176710050D+01/
+      DATA MZA10(  81),AWGT(  81)/   50180, 1.80561700000D+01/
+      DATA MZA10(  82),AWGT(  82)/   60180, 1.80267590035D+01/
+      DATA MZA10(  83),AWGT(  83)/   70180, 1.80140780096D+01/
+      DATA MZA10(  84),AWGT(  84)/   80180, 1.79991610000D+01/
+      DATA MZA10(  85),AWGT(  85)/   90180, 1.80009370096D+01/
+      DATA MZA10(  86),AWGT(  86)/  100180, 1.80057080021D+01/
+      DATA MZA10(  87),AWGT(  87)/  110180, 1.80259690000D+01/
+      DATA MZA10(  88),AWGT(  88)/   50190, 1.90637300000D+01/
+      DATA MZA10(  89),AWGT(  89)/   60190, 1.90348050002D+01/
+      DATA MZA10(  90),AWGT(  90)/   70190, 1.90170280070D+01/
+      DATA MZA10(  91),AWGT(  91)/   80190, 1.90035800013D+01/
+      DATA MZA10(  92),AWGT(  92)/   90190, 1.89984030022D+01/
+      DATA MZA10(  93),AWGT(  93)/  100190, 1.90018800025D+01/
+      DATA MZA10(  94),AWGT(  94)/  110190, 1.90138770050D+01/
+      DATA MZA10(  95),AWGT(  95)/  120190, 1.90354700000D+01/
+      DATA MZA10(  96),AWGT(  96)/   60200, 2.00403190075D+01/
+      DATA MZA10(  97),AWGT(  97)/   70200, 2.00233650081D+01/
+      DATA MZA10(  98),AWGT(  98)/   80200, 2.00040760074D+01/
+      DATA MZA10(  99),AWGT(  99)/   90200, 1.99999810031D+01/
+      DATA MZA10( 100),AWGT( 100)/  100200, 1.99924401754D+01/
+      DATA MZA10( 101),AWGT( 101)/  110200, 2.00073510033D+01/
+      DATA MZA10( 102),AWGT( 102)/  120200, 2.00188620054D+01/
+      DATA MZA10( 103),AWGT( 103)/   60210, 2.10493400000D+01/
+      DATA MZA10( 104),AWGT( 104)/   70210, 2.10271080024D+01/
+      DATA MZA10( 105),AWGT( 105)/   80210, 2.10086550089D+01/
+      DATA MZA10( 106),AWGT( 106)/   90210, 2.09999480095D+01/
+      DATA MZA10( 107),AWGT( 107)/  100210, 2.09938460068D+01/
+      DATA MZA10( 108),AWGT( 108)/  110210, 2.09976550021D+01/
+      DATA MZA10( 109),AWGT( 109)/  120210, 2.10117120091D+01/
+      DATA MZA10( 110),AWGT( 110)/  130210, 2.10280400000D+01/
+      DATA MZA10( 111),AWGT( 111)/   60220, 2.20572000000D+01/
+      DATA MZA10( 112),AWGT( 112)/   70220, 2.20343940093D+01/
+      DATA MZA10( 113),AWGT( 113)/   80220, 2.20099660095D+01/
+      DATA MZA10( 114),AWGT( 114)/   90220, 2.20029980082D+01/
+      DATA MZA10( 115),AWGT( 115)/  100220, 2.19913850011D+01/
+      DATA MZA10( 116),AWGT( 116)/  110220, 2.19944360043D+01/
+      DATA MZA10( 117),AWGT( 117)/  120220, 2.19995730084D+01/
+      DATA MZA10( 118),AWGT( 118)/  130220, 2.20195200000D+01/
+      DATA MZA10( 119),AWGT( 119)/  140220, 2.20345300000D+01/
+      DATA MZA10( 120),AWGT( 120)/   70230, 2.30412200000D+01/
+      DATA MZA10( 121),AWGT( 121)/   80230, 2.30156870066D+01/
+      DATA MZA10( 122),AWGT( 122)/   90230, 2.30035740063D+01/
+      DATA MZA10( 123),AWGT( 123)/  100230, 2.29944660090D+01/
+      DATA MZA10( 124),AWGT( 124)/  110230, 2.29897692809D+01/
+      DATA MZA10( 125),AWGT( 125)/  120230, 2.29941230067D+01/
+      DATA MZA10( 126),AWGT( 126)/  130230, 2.30072670043D+01/
+      DATA MZA10( 127),AWGT( 127)/  140230, 2.30255200000D+01/
+      DATA MZA10( 128),AWGT( 128)/   70240, 2.40510400000D+01/
+      DATA MZA10( 129),AWGT( 129)/   80240, 2.40204720092D+01/
+      DATA MZA10( 130),AWGT( 130)/   90240, 2.40081150049D+01/
+      DATA MZA10( 131),AWGT( 131)/  100240, 2.39936100078D+01/
+      DATA MZA10( 132),AWGT( 132)/  110240, 2.39909620078D+01/
+      DATA MZA10( 133),AWGT( 133)/  120240, 2.39850410070D+01/
+      DATA MZA10( 134),AWGT( 134)/  130240, 2.39999380087D+01/
+      DATA MZA10( 135),AWGT( 135)/  140240, 2.40115450062D+01/
+      DATA MZA10( 136),AWGT( 136)/  150240, 2.40343500000D+01/
+      DATA MZA10( 137),AWGT( 137)/   70250, 2.50606600000D+01/
+      DATA MZA10( 138),AWGT( 138)/   80250, 2.50294600000D+01/
+      DATA MZA10( 139),AWGT( 139)/   90250, 2.50121010075D+01/
+      DATA MZA10( 140),AWGT( 140)/  100250, 2.49977360089D+01/
+      DATA MZA10( 141),AWGT( 141)/  110250, 2.49899530097D+01/
+      DATA MZA10( 142),AWGT( 142)/  120250, 2.49858360092D+01/
+      DATA MZA10( 143),AWGT( 143)/  130250, 2.49904280010D+01/
+      DATA MZA10( 144),AWGT( 144)/  140250, 2.50041050057D+01/
+      DATA MZA10( 145),AWGT( 145)/  150250, 2.50202600000D+01/
+      DATA MZA10( 146),AWGT( 146)/   80260, 2.60383400000D+01/
+      DATA MZA10( 147),AWGT( 147)/   90260, 2.60196150056D+01/
+      DATA MZA10( 148),AWGT( 148)/  100260, 2.60004610021D+01/
+      DATA MZA10( 149),AWGT( 149)/  110260, 2.59926330000D+01/
+      DATA MZA10( 150),AWGT( 150)/  120260, 2.59825920093D+01/
+      DATA MZA10( 151),AWGT( 151)/  130260, 2.59868910069D+01/
+      DATA MZA10( 152),AWGT( 152)/  140260, 2.59923290092D+01/
+      DATA MZA10( 153),AWGT( 153)/  150260, 2.60117800000D+01/
+      DATA MZA10( 154),AWGT( 154)/  160260, 2.60278800000D+01/
+      DATA MZA10( 155),AWGT( 155)/   80270, 2.70482600000D+01/
+      DATA MZA10( 156),AWGT( 156)/   90270, 2.70267600009D+01/
+      DATA MZA10( 157),AWGT( 157)/  100270, 2.70075890090D+01/
+      DATA MZA10( 158),AWGT( 158)/  110270, 2.69940760079D+01/
+      DATA MZA10( 159),AWGT( 159)/  120270, 2.69843400059D+01/
+      DATA MZA10( 160),AWGT( 160)/  130270, 2.69815380063D+01/
+      DATA MZA10( 161),AWGT( 161)/  140270, 2.69867040091D+01/
+      DATA MZA10( 162),AWGT( 162)/  150270, 2.69992300024D+01/
+      DATA MZA10( 163),AWGT( 163)/  160270, 2.70188330000D+01/
+      DATA MZA10( 164),AWGT( 164)/   80280, 2.80578100000D+01/
+      DATA MZA10( 165),AWGT( 165)/   90280, 2.80356700000D+01/
+      DATA MZA10( 166),AWGT( 166)/  100280, 2.80120710057D+01/
+      DATA MZA10( 167),AWGT( 167)/  110280, 2.79989380000D+01/
+      DATA MZA10( 168),AWGT( 168)/  120280, 2.79838760083D+01/
+      DATA MZA10( 169),AWGT( 169)/  130280, 2.79819100031D+01/
+      DATA MZA10( 170),AWGT( 170)/  140280, 2.79769265325D+01/
+      DATA MZA10( 171),AWGT( 171)/  150280, 2.79923140076D+01/
+      DATA MZA10( 172),AWGT( 172)/  160280, 2.80043720076D+01/
+      DATA MZA10( 173),AWGT( 173)/  170280, 2.80285100000D+01/
+      DATA MZA10( 174),AWGT( 174)/   90290, 2.90432600000D+01/
+      DATA MZA10( 175),AWGT( 175)/  100290, 2.90193850093D+01/
+      DATA MZA10( 176),AWGT( 176)/  110290, 2.90028610000D+01/
+      DATA MZA10( 177),AWGT( 177)/  120290, 2.89886000000D+01/
+      DATA MZA10( 178),AWGT( 178)/  130290, 2.89804450005D+01/
+      DATA MZA10( 179),AWGT( 179)/  140290, 2.89764940070D+01/
+      DATA MZA10( 180),AWGT( 180)/  150290, 2.89818000061D+01/
+      DATA MZA10( 181),AWGT( 181)/  160290, 2.89966080005D+01/
+      DATA MZA10( 182),AWGT( 182)/  170290, 2.90141100000D+01/
+      DATA MZA10( 183),AWGT( 183)/   90300, 3.00525000000D+01/
+      DATA MZA10( 184),AWGT( 184)/  100300, 3.00248010005D+01/
+      DATA MZA10( 185),AWGT( 185)/  110300, 3.00089760000D+01/
+      DATA MZA10( 186),AWGT( 186)/  120300, 2.99904340000D+01/
+      DATA MZA10( 187),AWGT( 187)/  130300, 2.99829600026D+01/
+      DATA MZA10( 188),AWGT( 188)/  140300, 2.99737700017D+01/
+      DATA MZA10( 189),AWGT( 189)/  150300, 2.99783130079D+01/
+      DATA MZA10( 190),AWGT( 190)/  160300, 2.99849030025D+01/
+      DATA MZA10( 191),AWGT( 191)/  170300, 3.00047700000D+01/
+      DATA MZA10( 192),AWGT( 192)/  180300, 3.00215600000D+01/
+      DATA MZA10( 193),AWGT( 193)/   90310, 3.10604290000D+01/
+      DATA MZA10( 194),AWGT( 194)/  100310, 3.10331100000D+01/
+      DATA MZA10( 195),AWGT( 195)/  110310, 3.10135850045D+01/
+      DATA MZA10( 196),AWGT( 196)/  120310, 3.09965460000D+01/
+      DATA MZA10( 197),AWGT( 197)/  130310, 3.09839460062D+01/
+      DATA MZA10( 198),AWGT( 198)/  140310, 3.09753630023D+01/
+      DATA MZA10( 199),AWGT( 199)/  150310, 3.09737610063D+01/
+      DATA MZA10( 200),AWGT( 200)/  160310, 3.09795540073D+01/
+      DATA MZA10( 201),AWGT( 201)/  170310, 3.09924130009D+01/
+      DATA MZA10( 202),AWGT( 202)/  180310, 3.10121230000D+01/
+      DATA MZA10( 203),AWGT( 203)/  100320, 3.20400200000D+01/
+      DATA MZA10( 204),AWGT( 204)/  110320, 3.20204660056D+01/
+      DATA MZA10( 205),AWGT( 205)/  120320, 3.19989750000D+01/
+      DATA MZA10( 206),AWGT( 206)/  130320, 3.19881240049D+01/
+      DATA MZA10( 207),AWGT( 207)/  140320, 3.19741480008D+01/
+      DATA MZA10( 208),AWGT( 208)/  150320, 3.19739070027D+01/
+      DATA MZA10( 209),AWGT( 209)/  160320, 3.19720700100D+01/
+      DATA MZA10( 210),AWGT( 210)/  170320, 3.19856890090D+01/
+      DATA MZA10( 211),AWGT( 211)/  180320, 3.19976370098D+01/
+      DATA MZA10( 212),AWGT( 212)/  190320, 3.20219200000D+01/
+      DATA MZA10( 213),AWGT( 213)/  100330, 3.30493800000D+01/
+      DATA MZA10( 214),AWGT( 214)/  110330, 3.30267190076D+01/
+      DATA MZA10( 215),AWGT( 215)/  120330, 3.30052540000D+01/
+      DATA MZA10( 216),AWGT( 216)/  130330, 3.29908430034D+01/
+      DATA MZA10( 217),AWGT( 217)/  140330, 3.29780000022D+01/
+      DATA MZA10( 218),AWGT( 218)/  150330, 3.29717250054D+01/
+      DATA MZA10( 219),AWGT( 219)/  160330, 3.29714580076D+01/
+      DATA MZA10( 220),AWGT( 220)/  170330, 3.29774510089D+01/
+      DATA MZA10( 221),AWGT( 221)/  180330, 3.29899250071D+01/
+      DATA MZA10( 222),AWGT( 222)/  190330, 3.30072600000D+01/
+      DATA MZA10( 223),AWGT( 223)/  100340, 3.40570280000D+01/
+      DATA MZA10( 224),AWGT( 224)/  110340, 3.40351700000D+01/
+      DATA MZA10( 225),AWGT( 225)/  120340, 3.40094560042D+01/
+      DATA MZA10( 226),AWGT( 226)/  130340, 3.39968510084D+01/
+      DATA MZA10( 227),AWGT( 227)/  140340, 3.39785750052D+01/
+      DATA MZA10( 228),AWGT( 228)/  150340, 3.39736360026D+01/
+      DATA MZA10( 229),AWGT( 229)/  160340, 3.39678660090D+01/
+      DATA MZA10( 230),AWGT( 230)/  170340, 3.39737620082D+01/
+      DATA MZA10( 231),AWGT( 231)/  180340, 3.39802710024D+01/
+      DATA MZA10( 232),AWGT( 232)/  190340, 3.39984100000D+01/
+      DATA MZA10( 233),AWGT( 233)/  200340, 3.40141200000D+01/
+      DATA MZA10( 234),AWGT( 234)/  110350, 3.50424930000D+01/
+      DATA MZA10( 235),AWGT( 235)/  120350, 3.50173400000D+01/
+      DATA MZA10( 236),AWGT( 236)/  130350, 3.49998600023D+01/
+      DATA MZA10( 237),AWGT( 237)/  140350, 3.49845830058D+01/
+      DATA MZA10( 238),AWGT( 238)/  150350, 3.49733140012D+01/
+      DATA MZA10( 239),AWGT( 239)/  160350, 3.49690320016D+01/
+      DATA MZA10( 240),AWGT( 240)/  170350, 3.49688520068D+01/
+      DATA MZA10( 241),AWGT( 241)/  180350, 3.49752570058D+01/
+      DATA MZA10( 242),AWGT( 242)/  190350, 3.49880090069D+01/
+      DATA MZA10( 243),AWGT( 243)/  200350, 3.50049400000D+01/
+      DATA MZA10( 244),AWGT( 244)/  110360, 3.60514800000D+01/
+      DATA MZA10( 245),AWGT( 245)/  120360, 3.60230000000D+01/
+      DATA MZA10( 246),AWGT( 246)/  130360, 3.60062070020D+01/
+      DATA MZA10( 247),AWGT( 247)/  140360, 3.59865990048D+01/
+      DATA MZA10( 248),AWGT( 248)/  150360, 3.59782590068D+01/
+      DATA MZA10( 249),AWGT( 249)/  160360, 3.59670800076D+01/
+      DATA MZA10( 250),AWGT( 250)/  170360, 3.59683060098D+01/
+      DATA MZA10( 251),AWGT( 251)/  180360, 3.59675450010D+01/
+      DATA MZA10( 252),AWGT( 252)/  190360, 3.59812920024D+01/
+      DATA MZA10( 253),AWGT( 253)/  200360, 3.59930870006D+01/
+      DATA MZA10( 254),AWGT( 254)/  210360, 3.60149200000D+01/
+      DATA MZA10( 255),AWGT( 255)/  110370, 3.70593400000D+01/
+      DATA MZA10( 256),AWGT( 256)/  120370, 3.70314000000D+01/
+      DATA MZA10( 257),AWGT( 257)/  130370, 3.70106770082D+01/
+      DATA MZA10( 258),AWGT( 258)/  140370, 3.69929360008D+01/
+      DATA MZA10( 259),AWGT( 259)/  150370, 3.69796080095D+01/
+      DATA MZA10( 260),AWGT( 260)/  160370, 3.69711250057D+01/
+      DATA MZA10( 261),AWGT( 261)/  170370, 3.69659020059D+01/
+      DATA MZA10( 262),AWGT( 262)/  180370, 3.69667760032D+01/
+      DATA MZA10( 263),AWGT( 263)/  190370, 3.69733750089D+01/
+      DATA MZA10( 264),AWGT( 264)/  200370, 3.69858700027D+01/
+      DATA MZA10( 265),AWGT( 265)/  210370, 3.70030500000D+01/
+      DATA MZA10( 266),AWGT( 266)/  120380, 3.80375700000D+01/
+      DATA MZA10( 267),AWGT( 267)/  130380, 3.80172310002D+01/
+      DATA MZA10( 268),AWGT( 268)/  140380, 3.79956330060D+01/
+      DATA MZA10( 269),AWGT( 269)/  150380, 3.79841560083D+01/
+      DATA MZA10( 270),AWGT( 270)/  160380, 3.79711630032D+01/
+      DATA MZA10( 271),AWGT( 271)/  170380, 3.79680100042D+01/
+      DATA MZA10( 272),AWGT( 272)/  180380, 3.79627320039D+01/
+      DATA MZA10( 273),AWGT( 273)/  190380, 3.79690810018D+01/
+      DATA MZA10( 274),AWGT( 274)/  200380, 3.79763180045D+01/
+      DATA MZA10( 275),AWGT( 275)/  210380, 3.79947000000D+01/
+      DATA MZA10( 276),AWGT( 276)/  220380, 3.80097700000D+01/
+      DATA MZA10( 277),AWGT( 277)/  120390, 3.90467720000D+01/
+      DATA MZA10( 278),AWGT( 278)/  130390, 3.90229700000D+01/
+      DATA MZA10( 279),AWGT( 279)/  140390, 3.90020700001D+01/
+      DATA MZA10( 280),AWGT( 280)/  150390, 3.89861790047D+01/
+      DATA MZA10( 281),AWGT( 281)/  160390, 3.89751340031D+01/
+      DATA MZA10( 282),AWGT( 282)/  170390, 3.89680080016D+01/
+      DATA MZA10( 283),AWGT( 283)/  180390, 3.89643130023D+01/
+      DATA MZA10( 284),AWGT( 284)/  190390, 3.89637060068D+01/
+      DATA MZA10( 285),AWGT( 285)/  200390, 3.89707190073D+01/
+      DATA MZA10( 286),AWGT( 286)/  210390, 3.89847900000D+01/
+      DATA MZA10( 287),AWGT( 287)/  220390, 3.90016100000D+01/
+      DATA MZA10( 288),AWGT( 288)/  120400, 4.00539300000D+01/
+      DATA MZA10( 289),AWGT( 289)/  130400, 4.00314500000D+01/
+      DATA MZA10( 290),AWGT( 290)/  140400, 4.00058690012D+01/
+      DATA MZA10( 291),AWGT( 291)/  150400, 3.99912960095D+01/
+      DATA MZA10( 292),AWGT( 292)/  160400, 3.99754510073D+01/
+      DATA MZA10( 293),AWGT( 293)/  170400, 3.99704150047D+01/
+      DATA MZA10( 294),AWGT( 294)/  180400, 3.99623831225D+01/
+      DATA MZA10( 295),AWGT( 295)/  190400, 3.99639980047D+01/
+      DATA MZA10( 296),AWGT( 296)/  200400, 3.99625900098D+01/
+      DATA MZA10( 297),AWGT( 297)/  210400, 3.99779670041D+01/
+      DATA MZA10( 298),AWGT( 298)/  220400, 3.99904980084D+01/
+      DATA MZA10( 299),AWGT( 299)/  230400, 4.00110900000D+01/
+      DATA MZA10( 300),AWGT( 300)/  130410, 4.10383300000D+01/
+      DATA MZA10( 301),AWGT( 301)/  140410, 4.10145600000D+01/
+      DATA MZA10( 302),AWGT( 302)/  150410, 4.09943350043D+01/
+      DATA MZA10( 303),AWGT( 303)/  160410, 4.09795820015D+01/
+      DATA MZA10( 304),AWGT( 304)/  170410, 4.09706840052D+01/
+      DATA MZA10( 305),AWGT( 305)/  180410, 4.09645000061D+01/
+      DATA MZA10( 306),AWGT( 306)/  190410, 4.09618250076D+01/
+      DATA MZA10( 307),AWGT( 307)/  200410, 4.09622780006D+01/
+      DATA MZA10( 308),AWGT( 308)/  210410, 4.09692510013D+01/
+      DATA MZA10( 309),AWGT( 309)/  220410, 4.09831450000D+01/
+      DATA MZA10( 310),AWGT( 310)/  230410, 4.09997800000D+01/
+      DATA MZA10( 311),AWGT( 311)/  130420, 4.20468900000D+01/
+      DATA MZA10( 312),AWGT( 312)/  140420, 4.20197900000D+01/
+      DATA MZA10( 313),AWGT( 313)/  150420, 4.20010070091D+01/
+      DATA MZA10( 314),AWGT( 314)/  160420, 4.19810220042D+01/
+      DATA MZA10( 315),AWGT( 315)/  170420, 4.19732540080D+01/
+      DATA MZA10( 316),AWGT( 316)/  180420, 4.19630450074D+01/
+      DATA MZA10( 317),AWGT( 317)/  190420, 4.19624020081D+01/
+      DATA MZA10( 318),AWGT( 318)/  200420, 4.19586180001D+01/
+      DATA MZA10( 319),AWGT( 319)/  210420, 4.19655160043D+01/
+      DATA MZA10( 320),AWGT( 320)/  220420, 4.19730300090D+01/
+      DATA MZA10( 321),AWGT( 321)/  230420, 4.19912300000D+01/
+      DATA MZA10( 322),AWGT( 322)/  240420, 4.20064300000D+01/
+      DATA MZA10( 323),AWGT( 323)/  140430, 4.30286600000D+01/
+      DATA MZA10( 324),AWGT( 324)/  150430, 4.30061900000D+01/
+      DATA MZA10( 325),AWGT( 325)/  160430, 4.29871540079D+01/
+      DATA MZA10( 326),AWGT( 326)/  170430, 4.29740540040D+01/
+      DATA MZA10( 327),AWGT( 327)/  180430, 4.29656360006D+01/
+      DATA MZA10( 328),AWGT( 328)/  190430, 4.29607150054D+01/
+      DATA MZA10( 329),AWGT( 329)/  200430, 4.29587660063D+01/
+      DATA MZA10( 330),AWGT( 330)/  210430, 4.29611500066D+01/
+      DATA MZA10( 331),AWGT( 331)/  220430, 4.29685220050D+01/
+      DATA MZA10( 332),AWGT( 332)/  230430, 4.29806500000D+01/
+      DATA MZA10( 333),AWGT( 333)/  240430, 4.29977100000D+01/
+      DATA MZA10( 334),AWGT( 334)/  140440, 4.40352600000D+01/
+      DATA MZA10( 335),AWGT( 335)/  150440, 4.40129900000D+01/
+      DATA MZA10( 336),AWGT( 336)/  160440, 4.39902130039D+01/
+      DATA MZA10( 337),AWGT( 337)/  170440, 4.39782810007D+01/
+      DATA MZA10( 338),AWGT( 338)/  180440, 4.39649240003D+01/
+      DATA MZA10( 339),AWGT( 339)/  190440, 4.39615560080D+01/
+      DATA MZA10( 340),AWGT( 340)/  200440, 4.39554810075D+01/
+      DATA MZA10( 341),AWGT( 341)/  210440, 4.39594020075D+01/
+      DATA MZA10( 342),AWGT( 342)/  220440, 4.39596900007D+01/
+      DATA MZA10( 343),AWGT( 343)/  230440, 4.39741100000D+01/
+      DATA MZA10( 344),AWGT( 344)/  240440, 4.39855490000D+01/
+      DATA MZA10( 345),AWGT( 345)/  250440, 4.40068700000D+01/
+      DATA MZA10( 346),AWGT( 346)/  150450, 4.50192200000D+01/
+      DATA MZA10( 347),AWGT( 347)/  160450, 4.49965080011D+01/
+      DATA MZA10( 348),AWGT( 348)/  170450, 4.49802860089D+01/
+      DATA MZA10( 349),AWGT( 349)/  180450, 4.49680390096D+01/
+      DATA MZA10( 350),AWGT( 350)/  190450, 4.49606990049D+01/
+      DATA MZA10( 351),AWGT( 351)/  200450, 4.49561860057D+01/
+      DATA MZA10( 352),AWGT( 352)/  210450, 4.49559110091D+01/
+      DATA MZA10( 353),AWGT( 353)/  220450, 4.49581250062D+01/
+      DATA MZA10( 354),AWGT( 354)/  230450, 4.49657750081D+01/
+      DATA MZA10( 355),AWGT( 355)/  240450, 4.49796400000D+01/
+      DATA MZA10( 356),AWGT( 356)/  250450, 4.49945100000D+01/
+      DATA MZA10( 357),AWGT( 357)/  260450, 4.50145780000D+01/
+      DATA MZA10( 358),AWGT( 358)/  150460, 4.60273800000D+01/
+      DATA MZA10( 359),AWGT( 359)/  160460, 4.60007500000D+01/
+      DATA MZA10( 360),AWGT( 360)/  170460, 4.59842100004D+01/
+      DATA MZA10( 361),AWGT( 361)/  180460, 4.59680940013D+01/
+      DATA MZA10( 362),AWGT( 362)/  190460, 4.59619760086D+01/
+      DATA MZA10( 363),AWGT( 363)/  200460, 4.59536920059D+01/
+      DATA MZA10( 364),AWGT( 364)/  210460, 4.59551710089D+01/
+      DATA MZA10( 365),AWGT( 365)/  220460, 4.59526310055D+01/
+      DATA MZA10( 366),AWGT( 366)/  230460, 4.59602000048D+01/
+      DATA MZA10( 367),AWGT( 367)/  240460, 4.59683580064D+01/
+      DATA MZA10( 368),AWGT( 368)/  250460, 4.59867200000D+01/
+      DATA MZA10( 369),AWGT( 369)/  260460, 4.60008100000D+01/
+      DATA MZA10( 370),AWGT( 370)/  160470, 4.70085900000D+01/
+      DATA MZA10( 371),AWGT( 371)/  170470, 4.69887100000D+01/
+      DATA MZA10( 372),AWGT( 372)/  180470, 4.69721860079D+01/
+      DATA MZA10( 373),AWGT( 373)/  190470, 4.69616780047D+01/
+      DATA MZA10( 374),AWGT( 374)/  200470, 4.69545460001D+01/
+      DATA MZA10( 375),AWGT( 375)/  210470, 4.69524070051D+01/
+      DATA MZA10( 376),AWGT( 376)/  220470, 4.69517630009D+01/
+      DATA MZA10( 377),AWGT( 377)/  230470, 4.69549080094D+01/
+      DATA MZA10( 378),AWGT( 378)/  240470, 4.69629000005D+01/
+      DATA MZA10( 379),AWGT( 379)/  250470, 4.69761000000D+01/
+      DATA MZA10( 380),AWGT( 380)/  260470, 4.69928900000D+01/
+      DATA MZA10( 381),AWGT( 381)/  270470, 4.70114900000D+01/
+      DATA MZA10( 382),AWGT( 382)/  160480, 4.80141700000D+01/
+      DATA MZA10( 383),AWGT( 383)/  170480, 4.79949500000D+01/
+      DATA MZA10( 384),AWGT( 384)/  180480, 4.79745400000D+01/
+      DATA MZA10( 385),AWGT( 385)/  190480, 4.79655130054D+01/
+      DATA MZA10( 386),AWGT( 386)/  200480, 4.79525340018D+01/
+      DATA MZA10( 387),AWGT( 387)/  210480, 4.79522310047D+01/
+      DATA MZA10( 388),AWGT( 388)/  220480, 4.79479460028D+01/
+      DATA MZA10( 389),AWGT( 389)/  230480, 4.79522530071D+01/
+      DATA MZA10( 390),AWGT( 390)/  240480, 4.79540310072D+01/
+      DATA MZA10( 391),AWGT( 391)/  250480, 4.79685200000D+01/
+      DATA MZA10( 392),AWGT( 392)/  260480, 4.79805040000D+01/
+      DATA MZA10( 393),AWGT( 393)/  270480, 4.80017600000D+01/
+      DATA MZA10( 394),AWGT( 394)/  280480, 4.80197500000D+01/
+      DATA MZA10( 395),AWGT( 395)/  160490, 4.90236190000D+01/
+      DATA MZA10( 396),AWGT( 396)/  170490, 4.90003200000D+01/
+      DATA MZA10( 397),AWGT( 397)/  180490, 4.89805200000D+01/
+      DATA MZA10( 398),AWGT( 398)/  190490, 4.89674500093D+01/
+      DATA MZA10( 399),AWGT( 399)/  200490, 4.89556740015D+01/
+      DATA MZA10( 400),AWGT( 400)/  210490, 4.89500230098D+01/
+      DATA MZA10( 401),AWGT( 401)/  220490, 4.89478690098D+01/
+      DATA MZA10( 402),AWGT( 402)/  230490, 4.89485160010D+01/
+      DATA MZA10( 403),AWGT( 403)/  240490, 4.89513350072D+01/
+      DATA MZA10( 404),AWGT( 404)/  250490, 4.89596180000D+01/
+      DATA MZA10( 405),AWGT( 405)/  260490, 4.89736100000D+01/
+      DATA MZA10( 406),AWGT( 406)/  270490, 4.89897200000D+01/
+      DATA MZA10( 407),AWGT( 407)/  280490, 4.90096600000D+01/
+      DATA MZA10( 408),AWGT( 408)/  170500, 5.00078400000D+01/
+      DATA MZA10( 409),AWGT( 409)/  180500, 4.99844300000D+01/
+      DATA MZA10( 410),AWGT( 410)/  190500, 4.99727830035D+01/
+      DATA MZA10( 411),AWGT( 411)/  200500, 4.99575180096D+01/
+      DATA MZA10( 412),AWGT( 412)/  210500, 4.99521870069D+01/
+      DATA MZA10( 413),AWGT( 413)/  220500, 4.99447910019D+01/
+      DATA MZA10( 414),AWGT( 414)/  230500, 4.99471580049D+01/
+      DATA MZA10( 415),AWGT( 415)/  240500, 4.99460440021D+01/
+      DATA MZA10( 416),AWGT( 416)/  250500, 4.99542380023D+01/
+      DATA MZA10( 417),AWGT( 417)/  260500, 4.99629880098D+01/
+      DATA MZA10( 418),AWGT( 418)/  270500, 4.99815400000D+01/
+      DATA MZA10( 419),AWGT( 419)/  280500, 4.99959300000D+01/
+      DATA MZA10( 420),AWGT( 420)/  170510, 5.10144900000D+01/
+      DATA MZA10( 421),AWGT( 421)/  180510, 5.09916300000D+01/
+      DATA MZA10( 422),AWGT( 422)/  190510, 5.09763800000D+01/
+      DATA MZA10( 423),AWGT( 423)/  200510, 5.09614990021D+01/
+      DATA MZA10( 424),AWGT( 424)/  210510, 5.09536030037D+01/
+      DATA MZA10( 425),AWGT( 425)/  220510, 5.09466140095D+01/
+      DATA MZA10( 426),AWGT( 426)/  230510, 5.09439590051D+01/
+      DATA MZA10( 427),AWGT( 427)/  240510, 5.09447670043D+01/
+      DATA MZA10( 428),AWGT( 428)/  250510, 5.09482100079D+01/
+      DATA MZA10( 429),AWGT( 429)/  260510, 5.09568190054D+01/
+      DATA MZA10( 430),AWGT( 430)/  270510, 5.09707200000D+01/
+      DATA MZA10( 431),AWGT( 431)/  280510, 5.09877200000D+01/
+      DATA MZA10( 432),AWGT( 432)/  180520, 5.19967800000D+01/
+      DATA MZA10( 433),AWGT( 433)/  190520, 5.19826100000D+01/
+      DATA MZA10( 434),AWGT( 434)/  200520, 5.19651000000D+01/
+      DATA MZA10( 435),AWGT( 435)/  210520, 5.19566750047D+01/
+      DATA MZA10( 436),AWGT( 436)/  220520, 5.19468970031D+01/
+      DATA MZA10( 437),AWGT( 437)/  230520, 5.19447750048D+01/
+      DATA MZA10( 438),AWGT( 438)/  240520, 5.19405070047D+01/
+      DATA MZA10( 439),AWGT( 439)/  250520, 5.19455650046D+01/
+      DATA MZA10( 440),AWGT( 440)/  260520, 5.19481130087D+01/
+      DATA MZA10( 441),AWGT( 441)/  270520, 5.19635900000D+01/
+      DATA MZA10( 442),AWGT( 442)/  280520, 5.19756800000D+01/
+      DATA MZA10( 443),AWGT( 443)/  290520, 5.19971800000D+01/
+      DATA MZA10( 444),AWGT( 444)/  180530, 5.30049400000D+01/
+      DATA MZA10( 445),AWGT( 445)/  190530, 5.29871200000D+01/
+      DATA MZA10( 446),AWGT( 446)/  200530, 5.29700500000D+01/
+      DATA MZA10( 447),AWGT( 447)/  210530, 5.29596100000D+01/
+      DATA MZA10( 448),AWGT( 448)/  220530, 5.29497270017D+01/
+      DATA MZA10( 449),AWGT( 449)/  230530, 5.29443370098D+01/
+      DATA MZA10( 450),AWGT( 450)/  240530, 5.29406490039D+01/
+      DATA MZA10( 451),AWGT( 451)/  250530, 5.29412900012D+01/
+      DATA MZA10( 452),AWGT( 452)/  260530, 5.29453070094D+01/
+      DATA MZA10( 453),AWGT( 453)/  270530, 5.29542180090D+01/
+      DATA MZA10( 454),AWGT( 454)/  280530, 5.29684700000D+01/
+      DATA MZA10( 455),AWGT( 455)/  290530, 5.29855500000D+01/
+      DATA MZA10( 456),AWGT( 456)/  190540, 5.39942000000D+01/
+      DATA MZA10( 457),AWGT( 457)/  200540, 5.39743500000D+01/
+      DATA MZA10( 458),AWGT( 458)/  210540, 5.39632640056D+01/
+      DATA MZA10( 459),AWGT( 459)/  220540, 5.39510520040D+01/
+      DATA MZA10( 460),AWGT( 460)/  230540, 5.39464390085D+01/
+      DATA MZA10( 461),AWGT( 461)/  240540, 5.39388800039D+01/
+      DATA MZA10( 462),AWGT( 462)/  250540, 5.39403580085D+01/
+      DATA MZA10( 463),AWGT( 463)/  260540, 5.39396100050D+01/
+      DATA MZA10( 464),AWGT( 464)/  270540, 5.39484590063D+01/
+      DATA MZA10( 465),AWGT( 465)/  280540, 5.39579050049D+01/
+      DATA MZA10( 466),AWGT( 466)/  290540, 5.39767100000D+01/
+      DATA MZA10( 467),AWGT( 467)/  300540, 5.39929500000D+01/
+      DATA MZA10( 468),AWGT( 468)/  190550, 5.49997100000D+01/
+      DATA MZA10( 469),AWGT( 469)/  200550, 5.49805500000D+01/
+      DATA MZA10( 470),AWGT( 470)/  210550, 5.49682430095D+01/
+      DATA MZA10( 471),AWGT( 471)/  220550, 5.49552650006D+01/
+      DATA MZA10( 472),AWGT( 472)/  230550, 5.49472330070D+01/
+      DATA MZA10( 473),AWGT( 473)/  240550, 5.49408390067D+01/
+      DATA MZA10( 474),AWGT( 474)/  250550, 5.49380450014D+01/
+      DATA MZA10( 475),AWGT( 475)/  260550, 5.49382930036D+01/
+      DATA MZA10( 476),AWGT( 476)/  270550, 5.49419990003D+01/
+      DATA MZA10( 477),AWGT( 477)/  280550, 5.49513300025D+01/
+      DATA MZA10( 478),AWGT( 478)/  290550, 5.49660500000D+01/
+      DATA MZA10( 479),AWGT( 479)/  300550, 5.49839800000D+01/
+      DATA MZA10( 480),AWGT( 480)/  200560, 5.59855700000D+01/
+      DATA MZA10( 481),AWGT( 481)/  210560, 5.59728700000D+01/
+      DATA MZA10( 482),AWGT( 482)/  220560, 5.59581990064D+01/
+      DATA MZA10( 483),AWGT( 483)/  230560, 5.59505300097D+01/
+      DATA MZA10( 484),AWGT( 484)/  240560, 5.59406530014D+01/
+      DATA MZA10( 485),AWGT( 485)/  250560, 5.59389040091D+01/
+      DATA MZA10( 486),AWGT( 486)/  260560, 5.59349370047D+01/
+      DATA MZA10( 487),AWGT( 487)/  270560, 5.59398390028D+01/
+      DATA MZA10( 488),AWGT( 488)/  280560, 5.59421320002D+01/
+      DATA MZA10( 489),AWGT( 489)/  290560, 5.59585600000D+01/
+      DATA MZA10( 490),AWGT( 490)/  300560, 5.59723800000D+01/
+      DATA MZA10( 491),AWGT( 491)/  310560, 5.59949100000D+01/
+      DATA MZA10( 492),AWGT( 492)/  200570, 5.69923560000D+01/
+      DATA MZA10( 493),AWGT( 493)/  210570, 5.69777900000D+01/
+      DATA MZA10( 494),AWGT( 494)/  220570, 5.69639890014D+01/
+      DATA MZA10( 495),AWGT( 495)/  230570, 5.69525610043D+01/
+      DATA MZA10( 496),AWGT( 496)/  240570, 5.69436130001D+01/
+      DATA MZA10( 497),AWGT( 497)/  250570, 5.69382850038D+01/
+      DATA MZA10( 498),AWGT( 498)/  260570, 5.69353930097D+01/
+      DATA MZA10( 499),AWGT( 499)/  270570, 5.69362910037D+01/
+      DATA MZA10( 500),AWGT( 500)/  280570, 5.69397930053D+01/
+      DATA MZA10( 501),AWGT( 501)/  290570, 5.69492110008D+01/
+      DATA MZA10( 502),AWGT( 502)/  300570, 5.69647880000D+01/
+      DATA MZA10( 503),AWGT( 503)/  310570, 5.69829300000D+01/
+      DATA MZA10( 504),AWGT( 504)/  210580, 5.79837100000D+01/
+      DATA MZA10( 505),AWGT( 505)/  220580, 5.79669700000D+01/
+      DATA MZA10( 506),AWGT( 506)/  230580, 5.79568340014D+01/
+      DATA MZA10( 507),AWGT( 507)/  240580, 5.79443530013D+01/
+      DATA MZA10( 508),AWGT( 508)/  250580, 5.79399810055D+01/
+      DATA MZA10( 509),AWGT( 509)/  260580, 5.79332750056D+01/
+      DATA MZA10( 510),AWGT( 510)/  270580, 5.79357520081D+01/
+      DATA MZA10( 511),AWGT( 511)/  280580, 5.79353420091D+01/
+      DATA MZA10( 512),AWGT( 512)/  290580, 5.79445380050D+01/
+      DATA MZA10( 513),AWGT( 513)/  300580, 5.79545910056D+01/
+      DATA MZA10( 514),AWGT( 514)/  310580, 5.79742500000D+01/
+      DATA MZA10( 515),AWGT( 515)/  320580, 5.79910100000D+01/
+      DATA MZA10( 516),AWGT( 516)/  210590, 5.89892200000D+01/
+      DATA MZA10( 517),AWGT( 517)/  220590, 5.89729300000D+01/
+      DATA MZA10( 518),AWGT( 518)/  230590, 5.89602070041D+01/
+      DATA MZA10( 519),AWGT( 519)/  240590, 5.89485860037D+01/
+      DATA MZA10( 520),AWGT( 520)/  250590, 5.89404400024D+01/
+      DATA MZA10( 521),AWGT( 521)/  260590, 5.89348750046D+01/
+      DATA MZA10( 522),AWGT( 522)/  270590, 5.89331950005D+01/
+      DATA MZA10( 523),AWGT( 523)/  280590, 5.89343460070D+01/
+      DATA MZA10( 524),AWGT( 524)/  290590, 5.89394980003D+01/
+      DATA MZA10( 525),AWGT( 525)/  300590, 5.89492630076D+01/
+      DATA MZA10( 526),AWGT( 526)/  310590, 5.89633700000D+01/
+      DATA MZA10( 527),AWGT( 527)/  320590, 5.89817500000D+01/
+      DATA MZA10( 528),AWGT( 528)/  210600, 5.99957100000D+01/
+      DATA MZA10( 529),AWGT( 529)/  220600, 5.99767600000D+01/
+      DATA MZA10( 530),AWGT( 530)/  230600, 5.99650260086D+01/
+      DATA MZA10( 531),AWGT( 531)/  240600, 5.99500760003D+01/
+      DATA MZA10( 532),AWGT( 532)/  250600, 5.99429110025D+01/
+      DATA MZA10( 533),AWGT( 533)/  260600, 5.99340710068D+01/
+      DATA MZA10( 534),AWGT( 534)/  270600, 5.99338170006D+01/
+      DATA MZA10( 535),AWGT( 535)/  280600, 5.99307860037D+01/
+      DATA MZA10( 536),AWGT( 536)/  290600, 5.99373650003D+01/
+      DATA MZA10( 537),AWGT( 537)/  300600, 5.99418270004D+01/
+      DATA MZA10( 538),AWGT( 538)/  310600, 5.99570600000D+01/
+      DATA MZA10( 539),AWGT( 539)/  320600, 5.99701900000D+01/
+      DATA MZA10( 540),AWGT( 540)/  330600, 5.99931300000D+01/
+      DATA MZA10( 541),AWGT( 541)/  220610, 6.09832000000D+01/
+      DATA MZA10( 542),AWGT( 542)/  230610, 6.09684800000D+01/
+      DATA MZA10( 543),AWGT( 543)/  240610, 6.09547170020D+01/
+      DATA MZA10( 544),AWGT( 544)/  250610, 6.09446520064D+01/
+      DATA MZA10( 545),AWGT( 545)/  260610, 6.09367450028D+01/
+      DATA MZA10( 546),AWGT( 546)/  270610, 6.09324750076D+01/
+      DATA MZA10( 547),AWGT( 547)/  280610, 6.09310560003D+01/
+      DATA MZA10( 548),AWGT( 548)/  290610, 6.09334570082D+01/
+      DATA MZA10( 549),AWGT( 549)/  300610, 6.09395100063D+01/
+      DATA MZA10( 550),AWGT( 550)/  310610, 6.09494460029D+01/
+      DATA MZA10( 551),AWGT( 551)/  320610, 6.09637900000D+01/
+      DATA MZA10( 552),AWGT( 552)/  330610, 6.09806200000D+01/
+      DATA MZA10( 553),AWGT( 553)/  220620, 6.19874900000D+01/
+      DATA MZA10( 554),AWGT( 554)/  230620, 6.19737800000D+01/
+      DATA MZA10( 555),AWGT( 555)/  240620, 6.19566130019D+01/
+      DATA MZA10( 556),AWGT( 556)/  250620, 6.19484280022D+01/
+      DATA MZA10( 557),AWGT( 557)/  260620, 6.19367670044D+01/
+      DATA MZA10( 558),AWGT( 558)/  270620, 6.19340500056D+01/
+      DATA MZA10( 559),AWGT( 559)/  280620, 6.19283450011D+01/
+      DATA MZA10( 560),AWGT( 560)/  290620, 6.19325830074D+01/
+      DATA MZA10( 561),AWGT( 561)/  300620, 6.19343290076D+01/
+      DATA MZA10( 562),AWGT( 562)/  310620, 6.19441750024D+01/
+      DATA MZA10( 563),AWGT( 563)/  320620, 6.19546500000D+01/
+      DATA MZA10( 564),AWGT( 564)/  330620, 6.19732000000D+01/
+      DATA MZA10( 565),AWGT( 565)/  220630, 6.29944200000D+01/
+      DATA MZA10( 566),AWGT( 566)/  230630, 6.29775500000D+01/
+      DATA MZA10( 567),AWGT( 567)/  240630, 6.29618600000D+01/
+      DATA MZA10( 568),AWGT( 568)/  250630, 6.29502390099D+01/
+      DATA MZA10( 569),AWGT( 569)/  260630, 6.29403690009D+01/
+      DATA MZA10( 570),AWGT( 570)/  270630, 6.29336110061D+01/
+      DATA MZA10( 571),AWGT( 571)/  280630, 6.29296690037D+01/
+      DATA MZA10( 572),AWGT( 572)/  290630, 6.29295970047D+01/
+      DATA MZA10( 573),AWGT( 573)/  300630, 6.29332110057D+01/
+      DATA MZA10( 574),AWGT( 574)/  310630, 6.29392940020D+01/
+      DATA MZA10( 575),AWGT( 575)/  320630, 6.29496400000D+01/
+      DATA MZA10( 576),AWGT( 576)/  330630, 6.29636900000D+01/
+      DATA MZA10( 577),AWGT( 577)/  230640, 6.39834700000D+01/
+      DATA MZA10( 578),AWGT( 578)/  240640, 6.39644100000D+01/
+      DATA MZA10( 579),AWGT( 579)/  250640, 6.39542490009D+01/
+      DATA MZA10( 580),AWGT( 580)/  260640, 6.39412010026D+01/
+      DATA MZA10( 581),AWGT( 581)/  270640, 6.39358090091D+01/
+      DATA MZA10( 582),AWGT( 582)/  280640, 6.39279650096D+01/
+      DATA MZA10( 583),AWGT( 583)/  290640, 6.39297640018D+01/
+      DATA MZA10( 584),AWGT( 584)/  300640, 6.39291420022D+01/
+      DATA MZA10( 585),AWGT( 585)/  310640, 6.39368380075D+01/
+      DATA MZA10( 586),AWGT( 586)/  320640, 6.39416530000D+01/
+      DATA MZA10( 587),AWGT( 587)/  330640, 6.39575720000D+01/
+      DATA MZA10( 588),AWGT( 588)/  230650, 6.49879200000D+01/
+      DATA MZA10( 589),AWGT( 589)/  240650, 6.49701600000D+01/
+      DATA MZA10( 590),AWGT( 590)/  250650, 6.49563360006D+01/
+      DATA MZA10( 591),AWGT( 591)/  260650, 6.49453800027D+01/
+      DATA MZA10( 592),AWGT( 592)/  270650, 6.49364780046D+01/
+      DATA MZA10( 593),AWGT( 593)/  280650, 6.49300840030D+01/
+      DATA MZA10( 594),AWGT( 594)/  290650, 6.49277890048D+01/
+      DATA MZA10( 595),AWGT( 595)/  300650, 6.49292400098D+01/
+      DATA MZA10( 596),AWGT( 596)/  310650, 6.49327340075D+01/
+      DATA MZA10( 597),AWGT( 597)/  320650, 6.49394360041D+01/
+      DATA MZA10( 598),AWGT( 598)/  330650, 6.49495640000D+01/
+      DATA MZA10( 599),AWGT( 599)/  340650, 6.49646600000D+01/
+      DATA MZA10( 600),AWGT( 600)/  240660, 6.59733800000D+01/
+      DATA MZA10( 601),AWGT( 601)/  250660, 6.59610800000D+01/
+      DATA MZA10( 602),AWGT( 602)/  260660, 6.59467800064D+01/
+      DATA MZA10( 603),AWGT( 603)/  270660, 6.59397620000D+01/
+      DATA MZA10( 604),AWGT( 604)/  280660, 6.59291390033D+01/
+      DATA MZA10( 605),AWGT( 605)/  290660, 6.59288680081D+01/
+      DATA MZA10( 606),AWGT( 606)/  300660, 6.59260330042D+01/
+      DATA MZA10( 607),AWGT( 607)/  310660, 6.59315890001D+01/
+      DATA MZA10( 608),AWGT( 608)/  320660, 6.59338430045D+01/
+      DATA MZA10( 609),AWGT( 609)/  330660, 6.59447100000D+01/
+      DATA MZA10( 610),AWGT( 610)/  340660, 6.59552100000D+01/
+      DATA MZA10( 611),AWGT( 611)/  240670, 6.69795500000D+01/
+      DATA MZA10( 612),AWGT( 612)/  250670, 6.69641400000D+01/
+      DATA MZA10( 613),AWGT( 613)/  260670, 6.69509470024D+01/
+      DATA MZA10( 614),AWGT( 614)/  270670, 6.69408890053D+01/
+      DATA MZA10( 615),AWGT( 615)/  280670, 6.69315690041D+01/
+      DATA MZA10( 616),AWGT( 616)/  290670, 6.69277300031D+01/
+      DATA MZA10( 617),AWGT( 617)/  300670, 6.69271270034D+01/
+      DATA MZA10( 618),AWGT( 618)/  310670, 6.69282010070D+01/
+      DATA MZA10( 619),AWGT( 619)/  320670, 6.69327340007D+01/
+      DATA MZA10( 620),AWGT( 620)/  330670, 6.69391860007D+01/
+      DATA MZA10( 621),AWGT( 621)/  340670, 6.69500900000D+01/
+      DATA MZA10( 622),AWGT( 622)/  350670, 6.69647900000D+01/
+      DATA MZA10( 623),AWGT( 623)/  250680, 6.79693000000D+01/
+      DATA MZA10( 624),AWGT( 624)/  260680, 6.79537000000D+01/
+      DATA MZA10( 625),AWGT( 625)/  270680, 6.79448730006D+01/
+      DATA MZA10( 626),AWGT( 626)/  280680, 6.79318680079D+01/
+      DATA MZA10( 627),AWGT( 627)/  290680, 6.79296100089D+01/
+      DATA MZA10( 628),AWGT( 628)/  300680, 6.79248440015D+01/
+      DATA MZA10( 629),AWGT( 629)/  310680, 6.79279800008D+01/
+      DATA MZA10( 630),AWGT( 630)/  320680, 6.79280940024D+01/
+      DATA MZA10( 631),AWGT( 631)/  330680, 6.79367690007D+01/
+      DATA MZA10( 632),AWGT( 632)/  340680, 6.79417980000D+01/
+      DATA MZA10( 633),AWGT( 633)/  350680, 6.79585160000D+01/
+      DATA MZA10( 634),AWGT( 634)/  250690, 6.89728400000D+01/
+      DATA MZA10( 635),AWGT( 635)/  260690, 6.89587800000D+01/
+      DATA MZA10( 636),AWGT( 636)/  270690, 6.89463200000D+01/
+      DATA MZA10( 637),AWGT( 637)/  280690, 6.89356100027D+01/
+      DATA MZA10( 638),AWGT( 638)/  290690, 6.89294290027D+01/
+      DATA MZA10( 639),AWGT( 639)/  300690, 6.89265500028D+01/
+      DATA MZA10( 640),AWGT( 640)/  310690, 6.89255730059D+01/
+      DATA MZA10( 641),AWGT( 641)/  320690, 6.89279640053D+01/
+      DATA MZA10( 642),AWGT( 642)/  330690, 6.89322730067D+01/
+      DATA MZA10( 643),AWGT( 643)/  340690, 6.89395570082D+01/
+      DATA MZA10( 644),AWGT( 644)/  350690, 6.89501060000D+01/
+      DATA MZA10( 645),AWGT( 645)/  360690, 6.89651800000D+01/
+      DATA MZA10( 646),AWGT( 646)/  260700, 6.99614600000D+01/
+      DATA MZA10( 647),AWGT( 647)/  270700, 6.99510000000D+01/
+      DATA MZA10( 648),AWGT( 648)/  280700, 6.99365000000D+01/
+      DATA MZA10( 649),AWGT( 649)/  290700, 6.99323920034D+01/
+      DATA MZA10( 650),AWGT( 650)/  300700, 6.99253190027D+01/
+      DATA MZA10( 651),AWGT( 651)/  310700, 6.99260210097D+01/
+      DATA MZA10( 652),AWGT( 652)/  320700, 6.99242470038D+01/
+      DATA MZA10( 653),AWGT( 653)/  330700, 6.99309240083D+01/
+      DATA MZA10( 654),AWGT( 654)/  340700, 6.99333900064D+01/
+      DATA MZA10( 655),AWGT( 655)/  350700, 6.99447920000D+01/
+      DATA MZA10( 656),AWGT( 656)/  360700, 6.99552590000D+01/
+      DATA MZA10( 657),AWGT( 657)/  260710, 7.09667200000D+01/
+      DATA MZA10( 658),AWGT( 658)/  270710, 7.09529000000D+01/
+      DATA MZA10( 659),AWGT( 659)/  280710, 7.09407360028D+01/
+      DATA MZA10( 660),AWGT( 660)/  290710, 7.09326760083D+01/
+      DATA MZA10( 661),AWGT( 661)/  300710, 7.09277210060D+01/
+      DATA MZA10( 662),AWGT( 662)/  310710, 7.09247010035D+01/
+      DATA MZA10( 663),AWGT( 663)/  320710, 7.09249500095D+01/
+      DATA MZA10( 664),AWGT( 664)/  330710, 7.09271120043D+01/
+      DATA MZA10( 665),AWGT( 665)/  340710, 7.09322410082D+01/
+      DATA MZA10( 666),AWGT( 666)/  350710, 7.09387400000D+01/
+      DATA MZA10( 667),AWGT( 667)/  360710, 7.09496250074D+01/
+      DATA MZA10( 668),AWGT( 668)/  370710, 7.09653200000D+01/
+      DATA MZA10( 669),AWGT( 669)/  260720, 7.19696200000D+01/
+      DATA MZA10( 670),AWGT( 670)/  270720, 7.19578100000D+01/
+      DATA MZA10( 671),AWGT( 671)/  280720, 7.19420920068D+01/
+      DATA MZA10( 672),AWGT( 672)/  290720, 7.19358200031D+01/
+      DATA MZA10( 673),AWGT( 673)/  300720, 7.19268570095D+01/
+      DATA MZA10( 674),AWGT( 674)/  310720, 7.19263660027D+01/
+      DATA MZA10( 675),AWGT( 675)/  320720, 7.19220750082D+01/
+      DATA MZA10( 676),AWGT( 676)/  330720, 7.19267520028D+01/
+      DATA MZA10( 677),AWGT( 677)/  340720, 7.19271120035D+01/
+      DATA MZA10( 678),AWGT( 678)/  350720, 7.19366440057D+01/
+      DATA MZA10( 679),AWGT( 679)/  360720, 7.19420920004D+01/
+      DATA MZA10( 680),AWGT( 680)/  370720, 7.19590800000D+01/
+      DATA MZA10( 681),AWGT( 681)/  270730, 7.29602400000D+01/
+      DATA MZA10( 682),AWGT( 682)/  280730, 7.29464700000D+01/
+      DATA MZA10( 683),AWGT( 683)/  290730, 7.29366750028D+01/
+      DATA MZA10( 684),AWGT( 684)/  300730, 7.29297790010D+01/
+      DATA MZA10( 685),AWGT( 685)/  310730, 7.29251740068D+01/
+      DATA MZA10( 686),AWGT( 686)/  320730, 7.29234580095D+01/
+      DATA MZA10( 687),AWGT( 687)/  330730, 7.29238240084D+01/
+      DATA MZA10( 688),AWGT( 688)/  340730, 7.29267650035D+01/
+      DATA MZA10( 689),AWGT( 689)/  350730, 7.29316910052D+01/
+      DATA MZA10( 690),AWGT( 690)/  360730, 7.29392890020D+01/
+      DATA MZA10( 691),AWGT( 691)/  370730, 7.29505610000D+01/
+      DATA MZA10( 692),AWGT( 692)/  380730, 7.29659700000D+01/
+      DATA MZA10( 693),AWGT( 693)/  270740, 7.39653800000D+01/
+      DATA MZA10( 694),AWGT( 694)/  280740, 7.39480700000D+01/
+      DATA MZA10( 695),AWGT( 695)/  290740, 7.39398740086D+01/
+      DATA MZA10( 696),AWGT( 696)/  300740, 7.39294580061D+01/
+      DATA MZA10( 697),AWGT( 697)/  310740, 7.39269450076D+01/
+      DATA MZA10( 698),AWGT( 698)/  320740, 7.39211770077D+01/
+      DATA MZA10( 699),AWGT( 699)/  330740, 7.39239280069D+01/
+      DATA MZA10( 700),AWGT( 700)/  340740, 7.39224760044D+01/
+      DATA MZA10( 701),AWGT( 701)/  350740, 7.39298910003D+01/
+      DATA MZA10( 702),AWGT( 702)/  360740, 7.39330840037D+01/
+      DATA MZA10( 703),AWGT( 703)/  370740, 7.39442640075D+01/
+      DATA MZA10( 704),AWGT( 704)/  380740, 7.39563100000D+01/
+      DATA MZA10( 705),AWGT( 705)/  270750, 7.49683300000D+01/
+      DATA MZA10( 706),AWGT( 706)/  280750, 7.49528700000D+01/
+      DATA MZA10( 707),AWGT( 707)/  290750, 7.49419000000D+01/
+      DATA MZA10( 708),AWGT( 708)/  300750, 7.49329360074D+01/
+      DATA MZA10( 709),AWGT( 709)/  310750, 7.49265000025D+01/
+      DATA MZA10( 710),AWGT( 710)/  320750, 7.49228580095D+01/
+      DATA MZA10( 711),AWGT( 711)/  330750, 7.49215960048D+01/
+      DATA MZA10( 712),AWGT( 712)/  340750, 7.49225230037D+01/
+      DATA MZA10( 713),AWGT( 713)/  350750, 7.49257760021D+01/
+      DATA MZA10( 714),AWGT( 714)/  360750, 7.49309450075D+01/
+      DATA MZA10( 715),AWGT( 715)/  370750, 7.49385700000D+01/
+      DATA MZA10( 716),AWGT( 716)/  380750, 7.49499490057D+01/
+      DATA MZA10( 717),AWGT( 717)/  280760, 7.59553300000D+01/
+      DATA MZA10( 718),AWGT( 718)/  290760, 7.59452750003D+01/
+      DATA MZA10( 719),AWGT( 719)/  300760, 7.59332930057D+01/
+      DATA MZA10( 720),AWGT( 720)/  310760, 7.59288270063D+01/
+      DATA MZA10( 721),AWGT( 721)/  320760, 7.59214020056D+01/
+      DATA MZA10( 722),AWGT( 722)/  330760, 7.59223940002D+01/
+      DATA MZA10( 723),AWGT( 723)/  340760, 7.59192130060D+01/
+      DATA MZA10( 724),AWGT( 724)/  350760, 7.59245410047D+01/
+      DATA MZA10( 725),AWGT( 725)/  360760, 7.59259100008D+01/
+      DATA MZA10( 726),AWGT( 726)/  370760, 7.59350720023D+01/
+      DATA MZA10( 727),AWGT( 727)/  380760, 7.59417660078D+01/
+      DATA MZA10( 728),AWGT( 728)/  390760, 7.59584500000D+01/
+      DATA MZA10( 729),AWGT( 729)/  280770, 7.69605500000D+01/
+      DATA MZA10( 730),AWGT( 730)/  290770, 7.69478500000D+01/
+      DATA MZA10( 731),AWGT( 731)/  300770, 7.69369580097D+01/
+      DATA MZA10( 732),AWGT( 732)/  310770, 7.69291540030D+01/
+      DATA MZA10( 733),AWGT( 733)/  320770, 7.69235480059D+01/
+      DATA MZA10( 734),AWGT( 734)/  330770, 7.69206470029D+01/
+      DATA MZA10( 735),AWGT( 735)/  340770, 7.69199140004D+01/
+      DATA MZA10( 736),AWGT( 736)/  350770, 7.69213790008D+01/
+      DATA MZA10( 737),AWGT( 737)/  360770, 7.69246700000D+01/
+      DATA MZA10( 738),AWGT( 738)/  370770, 7.69304080000D+01/
+      DATA MZA10( 739),AWGT( 739)/  380770, 7.69379440078D+01/
+      DATA MZA10( 740),AWGT( 740)/  390770, 7.69496450000D+01/
+      DATA MZA10( 741),AWGT( 741)/  280780, 7.79631800000D+01/
+      DATA MZA10( 742),AWGT( 742)/  290780, 7.79519600000D+01/
+      DATA MZA10( 743),AWGT( 743)/  300780, 7.79384400022D+01/
+      DATA MZA10( 744),AWGT( 744)/  310780, 7.79316080018D+01/
+      DATA MZA10( 745),AWGT( 745)/  320780, 7.79228520074D+01/
+      DATA MZA10( 746),AWGT( 746)/  330780, 7.79218270028D+01/
+      DATA MZA10( 747),AWGT( 747)/  340780, 7.79173090009D+01/
+      DATA MZA10( 748),AWGT( 748)/  350780, 7.79211450071D+01/
+      DATA MZA10( 749),AWGT( 749)/  360780, 7.79203640078D+01/
+      DATA MZA10( 750),AWGT( 750)/  370780, 7.79281410000D+01/
+      DATA MZA10( 751),AWGT( 751)/  380780, 7.79321800000D+01/
+      DATA MZA10( 752),AWGT( 752)/  390780, 7.79436100000D+01/
+      DATA MZA10( 753),AWGT( 753)/  400780, 7.79552300000D+01/
+      DATA MZA10( 754),AWGT( 754)/  290790, 7.89545600000D+01/
+      DATA MZA10( 755),AWGT( 755)/  300790, 7.89426520000D+01/
+      DATA MZA10( 756),AWGT( 756)/  310790, 7.89328930026D+01/
+      DATA MZA10( 757),AWGT( 757)/  320790, 7.89254000099D+01/
+      DATA MZA10( 758),AWGT( 758)/  330790, 7.89209470093D+01/
+      DATA MZA10( 759),AWGT( 759)/  340790, 7.89184990010D+01/
+      DATA MZA10( 760),AWGT( 760)/  350790, 7.89183370009D+01/
+      DATA MZA10( 761),AWGT( 761)/  360790, 7.89200820043D+01/
+      DATA MZA10( 762),AWGT( 762)/  370790, 7.89239890046D+01/
+      DATA MZA10( 763),AWGT( 763)/  380790, 7.89297080000D+01/
+      DATA MZA10( 764),AWGT( 764)/  390790, 7.89373510063D+01/
+      DATA MZA10( 765),AWGT( 765)/  400790, 7.89491600000D+01/
+      DATA MZA10( 766),AWGT( 766)/  290800, 7.99608700000D+01/
+      DATA MZA10( 767),AWGT( 767)/  300800, 7.99443420035D+01/
+      DATA MZA10( 768),AWGT( 768)/  310800, 7.99365150078D+01/
+      DATA MZA10( 769),AWGT( 769)/  320800, 7.99253720039D+01/
+      DATA MZA10( 770),AWGT( 770)/  330800, 7.99225330082D+01/
+      DATA MZA10( 771),AWGT( 771)/  340800, 7.99165210027D+01/
+      DATA MZA10( 772),AWGT( 772)/  350800, 7.99185290030D+01/
+      DATA MZA10( 773),AWGT( 773)/  360800, 7.99163780096D+01/
+      DATA MZA10( 774),AWGT( 774)/  370800, 7.99225190025D+01/
+      DATA MZA10( 775),AWGT( 775)/  380800, 7.99245210001D+01/
+      DATA MZA10( 776),AWGT( 776)/  390800, 7.99342800000D+01/
+      DATA MZA10( 777),AWGT( 777)/  400800, 7.99404000000D+01/
+      DATA MZA10( 778),AWGT( 778)/  300810, 8.09504800000D+01/
+      DATA MZA10( 779),AWGT( 779)/  310810, 8.09377520036D+01/
+      DATA MZA10( 780),AWGT( 780)/  320810, 8.09288200047D+01/
+      DATA MZA10( 781),AWGT( 781)/  330810, 8.09221320029D+01/
+      DATA MZA10( 782),AWGT( 782)/  340810, 8.09179920047D+01/
+      DATA MZA10( 783),AWGT( 783)/  350810, 8.09162900056D+01/
+      DATA MZA10( 784),AWGT( 784)/  360810, 8.09165920001D+01/
+      DATA MZA10( 785),AWGT( 785)/  370810, 8.09189950091D+01/
+      DATA MZA10( 786),AWGT( 786)/  380810, 8.09232110085D+01/
+      DATA MZA10( 787),AWGT( 787)/  390810, 8.09291270047D+01/
+      DATA MZA10( 788),AWGT( 788)/  400810, 8.09372100003D+01/
+      DATA MZA10( 789),AWGT( 789)/  410810, 8.09490300000D+01/
+      DATA MZA10( 790),AWGT( 790)/  300820, 8.19544200000D+01/
+      DATA MZA10( 791),AWGT( 791)/  310820, 8.19429900000D+01/
+      DATA MZA10( 792),AWGT( 792)/  320820, 8.19295490072D+01/
+      DATA MZA10( 793),AWGT( 793)/  330820, 8.19245040007D+01/
+      DATA MZA10( 794),AWGT( 794)/  340820, 8.19166990040D+01/
+      DATA MZA10( 795),AWGT( 795)/  350820, 8.19168040012D+01/
+      DATA MZA10( 796),AWGT( 796)/  360820, 8.19134830060D+01/
+      DATA MZA10( 797),AWGT( 797)/  370820, 8.19182080060D+01/
+      DATA MZA10( 798),AWGT( 798)/  380820, 8.19184010064D+01/
+      DATA MZA10( 799),AWGT( 799)/  390820, 8.19267920045D+01/
+      DATA MZA10( 800),AWGT( 800)/  400820, 8.19310870000D+01/
+      DATA MZA10( 801),AWGT( 801)/  410820, 8.19431300000D+01/
+      DATA MZA10( 802),AWGT( 802)/  300830, 8.29610300000D+01/
+      DATA MZA10( 803),AWGT( 803)/  310830, 8.29469800000D+01/
+      DATA MZA10( 804),AWGT( 804)/  320830, 8.29346200000D+01/
+      DATA MZA10( 805),AWGT( 805)/  330830, 8.29249800002D+01/
+      DATA MZA10( 806),AWGT( 806)/  340830, 8.29191180047D+01/
+      DATA MZA10( 807),AWGT( 807)/  350830, 8.29151800042D+01/
+      DATA MZA10( 808),AWGT( 808)/  360830, 8.29141360010D+01/
+      DATA MZA10( 809),AWGT( 809)/  370830, 8.29151090070D+01/
+      DATA MZA10( 810),AWGT( 810)/  380830, 8.29175560070D+01/
+      DATA MZA10( 811),AWGT( 811)/  390830, 8.29223540024D+01/
+      DATA MZA10( 812),AWGT( 812)/  400830, 8.29286530080D+01/
+      DATA MZA10( 813),AWGT( 813)/  410830, 8.29367050038D+01/
+      DATA MZA10( 814),AWGT( 814)/  420830, 8.29487400000D+01/
+      DATA MZA10( 815),AWGT( 815)/  310840, 8.39526500000D+01/
+      DATA MZA10( 816),AWGT( 816)/  320840, 8.39374700000D+01/
+      DATA MZA10( 817),AWGT( 817)/  330840, 8.39290580000D+01/
+      DATA MZA10( 818),AWGT( 818)/  340840, 8.39184620035D+01/
+      DATA MZA10( 819),AWGT( 819)/  350840, 8.39164780097D+01/
+      DATA MZA10( 820),AWGT( 820)/  360840, 8.39115060069D+01/
+      DATA MZA10( 821),AWGT( 821)/  370840, 8.39143840082D+01/
+      DATA MZA10( 822),AWGT( 822)/  380840, 8.39134250028D+01/
+      DATA MZA10( 823),AWGT( 823)/  390840, 8.39203880026D+01/
+      DATA MZA10( 824),AWGT( 824)/  400840, 8.39232500000D+01/
+      DATA MZA10( 825),AWGT( 825)/  410840, 8.39335700000D+01/
+      DATA MZA10( 826),AWGT( 826)/  420840, 8.39400900000D+01/
+      DATA MZA10( 827),AWGT( 827)/  310850, 8.49570000000D+01/
+      DATA MZA10( 828),AWGT( 828)/  320850, 8.49430300000D+01/
+      DATA MZA10( 829),AWGT( 829)/  330850, 8.49320200000D+01/
+      DATA MZA10( 830),AWGT( 830)/  340850, 8.49222450005D+01/
+      DATA MZA10( 831),AWGT( 831)/  350850, 8.49156080040D+01/
+      DATA MZA10( 832),AWGT( 832)/  360850, 8.49125270033D+01/
+      DATA MZA10( 833),AWGT( 833)/  370850, 8.49117890074D+01/
+      DATA MZA10( 834),AWGT( 834)/  380850, 8.49129320080D+01/
+      DATA MZA10( 835),AWGT( 835)/  390850, 8.49164330004D+01/
+      DATA MZA10( 836),AWGT( 836)/  400850, 8.49214710018D+01/
+      DATA MZA10( 837),AWGT( 837)/  410850, 8.49279120045D+01/
+      DATA MZA10( 838),AWGT( 838)/  420850, 8.49365500000D+01/
+      DATA MZA10( 839),AWGT( 839)/  430850, 8.49488300000D+01/
+      DATA MZA10( 840),AWGT( 840)/  310860, 8.59631200000D+01/
+      DATA MZA10( 841),AWGT( 841)/  320860, 8.59464900000D+01/
+      DATA MZA10( 842),AWGT( 842)/  330860, 8.59365000000D+01/
+      DATA MZA10( 843),AWGT( 843)/  340860, 8.59242710058D+01/
+      DATA MZA10( 844),AWGT( 844)/  350860, 8.59187970058D+01/
+      DATA MZA10( 845),AWGT( 845)/  360860, 8.59106100073D+01/
+      DATA MZA10( 846),AWGT( 846)/  370860, 8.59111670042D+01/
+      DATA MZA10( 847),AWGT( 847)/  380860, 8.59092600020D+01/
+      DATA MZA10( 848),AWGT( 848)/  390860, 8.59148850058D+01/
+      DATA MZA10( 849),AWGT( 849)/  400860, 8.59164730059D+01/
+      DATA MZA10( 850),AWGT( 850)/  410860, 8.59250380033D+01/
+      DATA MZA10( 851),AWGT( 851)/  420860, 8.59306950090D+01/
+      DATA MZA10( 852),AWGT( 852)/  430860, 8.59428800000D+01/
+      DATA MZA10( 853),AWGT( 853)/  320870, 8.69525100000D+01/
+      DATA MZA10( 854),AWGT( 854)/  330870, 8.69399000000D+01/
+      DATA MZA10( 855),AWGT( 855)/  340870, 8.69285210036D+01/
+      DATA MZA10( 856),AWGT( 856)/  350870, 8.69207110032D+01/
+      DATA MZA10( 857),AWGT( 857)/  360870, 8.69133540086D+01/
+      DATA MZA10( 858),AWGT( 858)/  370870, 8.69091800053D+01/
+      DATA MZA10( 859),AWGT( 859)/  380870, 8.69088770012D+01/
+      DATA MZA10( 860),AWGT( 860)/  390870, 8.69108750073D+01/
+      DATA MZA10( 861),AWGT( 861)/  400870, 8.69148160025D+01/
+      DATA MZA10( 862),AWGT( 862)/  410870, 8.69203610011D+01/
+      DATA MZA10( 863),AWGT( 863)/  420870, 8.69273260050D+01/
+      DATA MZA10( 864),AWGT( 864)/  430870, 8.69365300000D+01/
+      DATA MZA10( 865),AWGT( 865)/  440870, 8.69491800000D+01/
+      DATA MZA10( 866),AWGT( 866)/  320880, 8.79569100000D+01/
+      DATA MZA10( 867),AWGT( 867)/  330880, 8.79449400000D+01/
+      DATA MZA10( 868),AWGT( 868)/  340880, 8.79314230100D+01/
+      DATA MZA10( 869),AWGT( 869)/  350880, 8.79240650093D+01/
+      DATA MZA10( 870),AWGT( 870)/  360880, 8.79144460097D+01/
+      DATA MZA10( 871),AWGT( 871)/  370880, 8.79113150059D+01/
+      DATA MZA10( 872),AWGT( 872)/  380880, 8.79056120012D+01/
+      DATA MZA10( 873),AWGT( 873)/  390880, 8.79095010015D+01/
+      DATA MZA10( 874),AWGT( 874)/  400880, 8.79102260090D+01/
+      DATA MZA10( 875),AWGT( 875)/  410880, 8.79183320016D+01/
+      DATA MZA10( 876),AWGT( 876)/  420880, 8.79219530024D+01/
+      DATA MZA10( 877),AWGT( 877)/  430880, 8.79326780000D+01/
+      DATA MZA10( 878),AWGT( 878)/  440880, 8.79402600000D+01/
+      DATA MZA10( 879),AWGT( 879)/  320890, 8.89638300000D+01/
+      DATA MZA10( 880),AWGT( 880)/  330890, 8.89493900000D+01/
+      DATA MZA10( 881),AWGT( 881)/  340890, 8.89364500000D+01/
+      DATA MZA10( 882),AWGT( 882)/  350890, 8.89263850033D+01/
+      DATA MZA10( 883),AWGT( 883)/  360890, 8.89176300058D+01/
+      DATA MZA10( 884),AWGT( 884)/  370890, 8.89122780002D+01/
+      DATA MZA10( 885),AWGT( 885)/  380890, 8.89074500067D+01/
+      DATA MZA10( 886),AWGT( 886)/  390890, 8.89058480030D+01/
+      DATA MZA10( 887),AWGT( 887)/  400890, 8.89088890050D+01/
+      DATA MZA10( 888),AWGT( 888)/  410890, 8.89134180024D+01/
+      DATA MZA10( 889),AWGT( 889)/  420890, 8.89194800001D+01/
+      DATA MZA10( 890),AWGT( 890)/  430890, 8.89271670000D+01/
+      DATA MZA10( 891),AWGT( 891)/  440890, 8.89361100000D+01/
+      DATA MZA10( 892),AWGT( 892)/  450890, 8.89488370000D+01/
+      DATA MZA10( 893),AWGT( 893)/  330900, 8.99555000000D+01/
+      DATA MZA10( 894),AWGT( 894)/  340900, 8.99399600000D+01/
+      DATA MZA10( 895),AWGT( 895)/  350900, 8.99306270074D+01/
+      DATA MZA10( 896),AWGT( 896)/  360900, 8.99195160056D+01/
+      DATA MZA10( 897),AWGT( 897)/  370900, 8.99148010069D+01/
+      DATA MZA10( 898),AWGT( 898)/  380900, 8.99077370089D+01/
+      DATA MZA10( 899),AWGT( 899)/  390900, 8.99071510089D+01/
+      DATA MZA10( 900),AWGT( 900)/  400900, 8.99047040042D+01/
+      DATA MZA10( 901),AWGT( 901)/  410900, 8.99112640085D+01/
+      DATA MZA10( 902),AWGT( 902)/  420900, 8.99139360090D+01/
+      DATA MZA10( 903),AWGT( 903)/  430900, 8.99235560056D+01/
+      DATA MZA10( 904),AWGT( 904)/  440900, 8.99298900000D+01/
+      DATA MZA10( 905),AWGT( 905)/  450900, 8.99428700000D+01/
+      DATA MZA10( 906),AWGT( 906)/  330910, 9.09604300000D+01/
+      DATA MZA10( 907),AWGT( 907)/  340910, 9.09459600000D+01/
+      DATA MZA10( 908),AWGT( 908)/  350910, 9.09339680009D+01/
+      DATA MZA10( 909),AWGT( 909)/  360910, 9.09234450022D+01/
+      DATA MZA10( 910),AWGT( 910)/  370910, 9.09165360096D+01/
+      DATA MZA10( 911),AWGT( 911)/  380910, 9.09102030009D+01/
+      DATA MZA10( 912),AWGT( 912)/  390910, 9.09073040079D+01/
+      DATA MZA10( 913),AWGT( 913)/  400910, 9.09056450077D+01/
+      DATA MZA10( 914),AWGT( 914)/  410910, 9.09069960024D+01/
+      DATA MZA10( 915),AWGT( 915)/  420910, 9.09117500019D+01/
+      DATA MZA10( 916),AWGT( 916)/  430910, 9.09184270064D+01/
+      DATA MZA10( 917),AWGT( 917)/  440910, 9.09262920000D+01/
+      DATA MZA10( 918),AWGT( 918)/  450910, 9.09365500000D+01/
+      DATA MZA10( 919),AWGT( 919)/  460910, 9.09491100000D+01/
+      DATA MZA10( 920),AWGT( 920)/  330920, 9.19668000000D+01/
+      DATA MZA10( 921),AWGT( 921)/  340920, 9.19499200000D+01/
+      DATA MZA10( 922),AWGT( 922)/  350920, 9.19392580071D+01/
+      DATA MZA10( 923),AWGT( 923)/  360920, 9.19261560021D+01/
+      DATA MZA10( 924),AWGT( 924)/  370920, 9.19197280090D+01/
+      DATA MZA10( 925),AWGT( 925)/  380920, 9.19110370086D+01/
+      DATA MZA10( 926),AWGT( 926)/  390920, 9.19089490014D+01/
+      DATA MZA10( 927),AWGT( 927)/  400920, 9.19050400085D+01/
+      DATA MZA10( 928),AWGT( 928)/  410920, 9.19071930089D+01/
+      DATA MZA10( 929),AWGT( 929)/  420920, 9.19068100099D+01/
+      DATA MZA10( 930),AWGT( 930)/  430920, 9.19152600017D+01/
+      DATA MZA10( 931),AWGT( 931)/  440920, 9.19201200000D+01/
+      DATA MZA10( 932),AWGT( 932)/  450920, 9.19319800000D+01/
+      DATA MZA10( 933),AWGT( 933)/  460920, 9.19404200000D+01/
+      DATA MZA10( 934),AWGT( 934)/  340930, 9.29562900000D+01/
+      DATA MZA10( 935),AWGT( 935)/  350930, 9.29430500000D+01/
+      DATA MZA10( 936),AWGT( 936)/  360930, 9.29312740036D+01/
+      DATA MZA10( 937),AWGT( 937)/  370930, 9.29220410088D+01/
+      DATA MZA10( 938),AWGT( 938)/  380930, 9.29140250063D+01/
+      DATA MZA10( 939),AWGT( 939)/  390930, 9.29095820071D+01/
+      DATA MZA10( 940),AWGT( 940)/  400930, 9.29064760001D+01/
+      DATA MZA10( 941),AWGT( 941)/  410930, 9.29063780006D+01/
+      DATA MZA10( 942),AWGT( 942)/  420930, 9.29068120061D+01/
+      DATA MZA10( 943),AWGT( 943)/  430930, 9.29102480098D+01/
+      DATA MZA10( 944),AWGT( 944)/  440930, 9.29170520003D+01/
+      DATA MZA10( 945),AWGT( 945)/  450930, 9.29257400000D+01/
+      DATA MZA10( 946),AWGT( 946)/  460930, 9.29359100000D+01/
+      DATA MZA10( 947),AWGT( 947)/  470930, 9.29497800000D+01/
+      DATA MZA10( 948),AWGT( 948)/  340940, 9.39604900000D+01/
+      DATA MZA10( 949),AWGT( 949)/  350940, 9.39486800000D+01/
+      DATA MZA10( 950),AWGT( 950)/  360940, 9.39343600000D+01/
+      DATA MZA10( 951),AWGT( 951)/  370940, 9.39264040095D+01/
+      DATA MZA10( 952),AWGT( 952)/  380940, 9.39153610031D+01/
+      DATA MZA10( 953),AWGT( 953)/  390940, 9.39115950024D+01/
+      DATA MZA10( 954),AWGT( 954)/  400940, 9.39063150019D+01/
+      DATA MZA10( 955),AWGT( 955)/  410940, 9.39072830089D+01/
+      DATA MZA10( 956),AWGT( 956)/  420940, 9.39050880027D+01/
+      DATA MZA10( 957),AWGT( 957)/  430940, 9.39096570000D+01/
+      DATA MZA10( 958),AWGT( 958)/  440940, 9.39113590071D+01/
+      DATA MZA10( 959),AWGT( 959)/  450940, 9.39216980000D+01/
+      DATA MZA10( 960),AWGT( 960)/  460940, 9.39287700000D+01/
+      DATA MZA10( 961),AWGT( 961)/  470940, 9.39427800000D+01/
+      DATA MZA10( 962),AWGT( 962)/  350950, 9.49528700000D+01/
+      DATA MZA10( 963),AWGT( 963)/  360950, 9.49398400000D+01/
+      DATA MZA10( 964),AWGT( 964)/  370950, 9.49293020089D+01/
+      DATA MZA10( 965),AWGT( 965)/  380950, 9.49193580077D+01/
+      DATA MZA10( 966),AWGT( 966)/  390950, 9.49128200062D+01/
+      DATA MZA10( 967),AWGT( 967)/  400950, 9.49080420060D+01/
+      DATA MZA10( 968),AWGT( 968)/  410950, 9.49068350079D+01/
+      DATA MZA10( 969),AWGT( 969)/  420950, 9.49058420013D+01/
+      DATA MZA10( 970),AWGT( 970)/  430950, 9.49076570008D+01/
+      DATA MZA10( 971),AWGT( 971)/  440950, 9.49104120093D+01/
+      DATA MZA10( 972),AWGT( 972)/  450950, 9.49158980074D+01/
+      DATA MZA10( 973),AWGT( 973)/  460950, 9.49246900000D+01/
+      DATA MZA10( 974),AWGT( 974)/  470950, 9.49354800000D+01/
+      DATA MZA10( 975),AWGT( 975)/  480950, 9.49498700000D+01/
+      DATA MZA10( 976),AWGT( 976)/  350960, 9.59585300000D+01/
+      DATA MZA10( 977),AWGT( 977)/  360960, 9.59430700000D+01/
+      DATA MZA10( 978),AWGT( 978)/  370960, 9.59342720064D+01/
+      DATA MZA10( 979),AWGT( 979)/  380960, 9.59216960080D+01/
+      DATA MZA10( 980),AWGT( 980)/  390960, 9.59158910034D+01/
+      DATA MZA10( 981),AWGT( 981)/  400960, 9.59082730039D+01/
+      DATA MZA10( 982),AWGT( 982)/  410960, 9.59081000065D+01/
+      DATA MZA10( 983),AWGT( 983)/  420960, 9.59046790048D+01/
+      DATA MZA10( 984),AWGT( 984)/  430960, 9.59078710038D+01/
+      DATA MZA10( 985),AWGT( 985)/  440960, 9.59075970083D+01/
+      DATA MZA10( 986),AWGT( 986)/  450960, 9.59144600063D+01/
+      DATA MZA10( 987),AWGT( 987)/  460960, 9.59181640036D+01/
+      DATA MZA10( 988),AWGT( 988)/  470960, 9.59306800000D+01/
+      DATA MZA10( 989),AWGT( 989)/  480960, 9.59397700000D+01/
+      DATA MZA10( 990),AWGT( 990)/  350970, 9.69628000000D+01/
+      DATA MZA10( 991),AWGT( 991)/  360970, 9.69485600000D+01/
+      DATA MZA10( 992),AWGT( 992)/  370970, 9.69373510092D+01/
+      DATA MZA10( 993),AWGT( 993)/  380970, 9.69261520092D+01/
+      DATA MZA10( 994),AWGT( 994)/  390970, 9.69181330099D+01/
+      DATA MZA10( 995),AWGT( 995)/  400970, 9.69109530011D+01/
+      DATA MZA10( 996),AWGT( 996)/  410970, 9.69080980056D+01/
+      DATA MZA10( 997),AWGT( 997)/  420970, 9.69060210047D+01/
+      DATA MZA10( 998),AWGT( 998)/  430970, 9.69063650036D+01/
+      DATA MZA10( 999),AWGT( 999)/  440970, 9.69075540070D+01/
+      DATA MZA10(1000),AWGT(1000)/  450970, 9.69113360080D+01/
+      DATA MZA10(1001),AWGT(1001)/  460970, 9.69164790007D+01/
+      DATA MZA10(1002),AWGT(1002)/  470970, 9.69239720041D+01/
+      DATA MZA10(1003),AWGT(1003)/  480970, 9.69349400000D+01/
+      DATA MZA10(1004),AWGT(1004)/  490970, 9.69495400000D+01/
+      DATA MZA10(1005),AWGT(1005)/  360980, 9.79519100000D+01/
+      DATA MZA10(1006),AWGT(1006)/  370980, 9.79417900067D+01/
+      DATA MZA10(1007),AWGT(1007)/  380980, 9.79284520093D+01/
+      DATA MZA10(1008),AWGT(1008)/  390980, 9.79222030002D+01/
+      DATA MZA10(1009),AWGT(1009)/  400980, 9.79127340089D+01/
+      DATA MZA10(1010),AWGT(1010)/  410980, 9.79103280041D+01/
+      DATA MZA10(1011),AWGT(1011)/  420980, 9.79054080017D+01/
+      DATA MZA10(1012),AWGT(1012)/  430980, 9.79072150097D+01/
+      DATA MZA10(1013),AWGT(1013)/  440980, 9.79052870013D+01/
+      DATA MZA10(1014),AWGT(1014)/  450980, 9.79107080016D+01/
+      DATA MZA10(1015),AWGT(1015)/  460980, 9.79127200090D+01/
+      DATA MZA10(1016),AWGT(1016)/  470980, 9.79215660020D+01/
+      DATA MZA10(1017),AWGT(1017)/  480980, 9.79273950055D+01/
+      DATA MZA10(1018),AWGT(1018)/  490980, 9.79421400000D+01/
+      DATA MZA10(1019),AWGT(1019)/  360990, 9.89576000000D+01/
+      DATA MZA10(1020),AWGT(1020)/  370990, 9.89453790028D+01/
+      DATA MZA10(1021),AWGT(1021)/  380990, 9.89332400093D+01/
+      DATA MZA10(1022),AWGT(1022)/  390990, 9.89246360020D+01/
+      DATA MZA10(1023),AWGT(1023)/  400990, 9.89165120011D+01/
+      DATA MZA10(1024),AWGT(1024)/  410990, 9.89116180038D+01/
+      DATA MZA10(1025),AWGT(1025)/  420990, 9.89077110087D+01/
+      DATA MZA10(1026),AWGT(1026)/  430990, 9.89062540075D+01/
+      DATA MZA10(1027),AWGT(1027)/  440990, 9.89059390030D+01/
+      DATA MZA10(1028),AWGT(1028)/  450990, 9.89081320010D+01/
+      DATA MZA10(1029),AWGT(1029)/  460990, 9.89117670083D+01/
+      DATA MZA10(1030),AWGT(1030)/  470990, 9.89175970018D+01/
+      DATA MZA10(1031),AWGT(1031)/  480990, 9.89250100000D+01/
+      DATA MZA10(1032),AWGT(1032)/  490990, 9.89342200000D+01/
+      DATA MZA10(1033),AWGT(1033)/  500990, 9.89493300000D+01/
+      DATA MZA10(1034),AWGT(1034)/  361000, 9.99611400000D+01/
+      DATA MZA10(1035),AWGT(1035)/  371000, 9.99498700000D+01/
+      DATA MZA10(1036),AWGT(1036)/  381000, 9.99353510091D+01/
+      DATA MZA10(1037),AWGT(1037)/  391000, 9.99277560059D+01/
+      DATA MZA10(1038),AWGT(1038)/  401000, 9.99177610089D+01/
+      DATA MZA10(1039),AWGT(1039)/  411000, 9.99141810062D+01/
+      DATA MZA10(1040),AWGT(1040)/  421000, 9.99074770034D+01/
+      DATA MZA10(1041),AWGT(1041)/  431000, 9.99076570078D+01/
+      DATA MZA10(1042),AWGT(1042)/  441000, 9.99042190048D+01/
+      DATA MZA10(1043),AWGT(1043)/  451000, 9.99081210055D+01/
+      DATA MZA10(1044),AWGT(1044)/  461000, 9.99085050089D+01/
+      DATA MZA10(1045),AWGT(1045)/  471000, 9.99161040026D+01/
+      DATA MZA10(1046),AWGT(1046)/  481000, 9.99202890052D+01/
+      DATA MZA10(1047),AWGT(1047)/  491000, 9.99311100085D+01/
+      DATA MZA10(1048),AWGT(1048)/  501000, 9.99390440034D+01/
+      DATA MZA10(1049),AWGT(1049)/  371010, 1.00953196004D+02/
+      DATA MZA10(1050),AWGT(1050)/  381010, 1.00940517009D+02/
+      DATA MZA10(1051),AWGT(1051)/  391010, 1.00930313008D+02/
+      DATA MZA10(1052),AWGT(1052)/  401010, 1.00921140004D+02/
+      DATA MZA10(1053),AWGT(1053)/  411010, 1.00915252000D+02/
+      DATA MZA10(1054),AWGT(1054)/  421010, 1.00910347000D+02/
+      DATA MZA10(1055),AWGT(1055)/  431010, 1.00907314007D+02/
+      DATA MZA10(1056),AWGT(1056)/  441010, 1.00905582001D+02/
+      DATA MZA10(1057),AWGT(1057)/  451010, 1.00906163006D+02/
+      DATA MZA10(1058),AWGT(1058)/  461010, 1.00908289002D+02/
+      DATA MZA10(1059),AWGT(1059)/  471010, 1.00912802002D+02/
+      DATA MZA10(1060),AWGT(1060)/  481010, 1.00918681005D+02/
+      DATA MZA10(1061),AWGT(1061)/  491010, 1.00926340000D+02/
+      DATA MZA10(1062),AWGT(1062)/  501010, 1.00936060000D+02/
+      DATA MZA10(1063),AWGT(1063)/  371020, 1.01958870000D+02/
+      DATA MZA10(1064),AWGT(1064)/  381020, 1.01943018010D+02/
+      DATA MZA10(1065),AWGT(1065)/  391020, 1.01933555007D+02/
+      DATA MZA10(1066),AWGT(1066)/  401020, 1.01922981003D+02/
+      DATA MZA10(1067),AWGT(1067)/  411020, 1.01918037006D+02/
+      DATA MZA10(1068),AWGT(1068)/  421020, 1.01910297004D+02/
+      DATA MZA10(1069),AWGT(1069)/  431020, 1.01909215000D+02/
+      DATA MZA10(1070),AWGT(1070)/  441020, 1.01904349003D+02/
+      DATA MZA10(1071),AWGT(1071)/  451020, 1.01906843002D+02/
+      DATA MZA10(1072),AWGT(1072)/  461020, 1.01905608005D+02/
+      DATA MZA10(1073),AWGT(1073)/  471020, 1.01911685000D+02/
+      DATA MZA10(1074),AWGT(1074)/  481020, 1.01914462003D+02/
+      DATA MZA10(1075),AWGT(1075)/  491020, 1.01924090002D+02/
+      DATA MZA10(1076),AWGT(1076)/  501020, 1.01930295003D+02/
+      DATA MZA10(1077),AWGT(1077)/  381030, 1.02948950000D+02/
+      DATA MZA10(1078),AWGT(1078)/  391030, 1.02936730000D+02/
+      DATA MZA10(1079),AWGT(1079)/  401030, 1.02926599006D+02/
+      DATA MZA10(1080),AWGT(1080)/  411030, 1.02919143008D+02/
+      DATA MZA10(1081),AWGT(1081)/  421030, 1.02913207001D+02/
+      DATA MZA10(1082),AWGT(1082)/  431030, 1.02909181004D+02/
+      DATA MZA10(1083),AWGT(1083)/  441030, 1.02906323008D+02/
+      DATA MZA10(1084),AWGT(1084)/  451030, 1.02905504003D+02/
+      DATA MZA10(1085),AWGT(1085)/  461030, 1.02906087003D+02/
+      DATA MZA10(1086),AWGT(1086)/  471030, 1.02908972007D+02/
+      DATA MZA10(1087),AWGT(1087)/  481030, 1.02913419002D+02/
+      DATA MZA10(1088),AWGT(1088)/  491030, 1.02919914002D+02/
+      DATA MZA10(1089),AWGT(1089)/  501030, 1.02928100000D+02/
+      DATA MZA10(1090),AWGT(1090)/  511030, 1.02939690000D+02/
+      DATA MZA10(1091),AWGT(1091)/  381040, 1.03952330000D+02/
+      DATA MZA10(1092),AWGT(1092)/  391040, 1.03941050000D+02/
+      DATA MZA10(1093),AWGT(1093)/  401040, 1.03928780000D+02/
+      DATA MZA10(1094),AWGT(1094)/  411040, 1.03922464007D+02/
+      DATA MZA10(1095),AWGT(1095)/  421040, 1.03913763006D+02/
+      DATA MZA10(1096),AWGT(1096)/  431040, 1.03911447005D+02/
+      DATA MZA10(1097),AWGT(1097)/  441040, 1.03905432007D+02/
+      DATA MZA10(1098),AWGT(1098)/  451040, 1.03906655005D+02/
+      DATA MZA10(1099),AWGT(1099)/  461040, 1.03904035008D+02/
+      DATA MZA10(1100),AWGT(1100)/  471040, 1.03908629002D+02/
+      DATA MZA10(1101),AWGT(1101)/  481040, 1.03909849005D+02/
+      DATA MZA10(1102),AWGT(1102)/  491040, 1.03918296002D+02/
+      DATA MZA10(1103),AWGT(1103)/  501040, 1.03923143002D+02/
+      DATA MZA10(1104),AWGT(1104)/  511040, 1.03936472000D+02/
+      DATA MZA10(1105),AWGT(1105)/  381050, 1.04958580000D+02/
+      DATA MZA10(1106),AWGT(1106)/  391050, 1.04944870000D+02/
+      DATA MZA10(1107),AWGT(1107)/  401050, 1.04933050000D+02/
+      DATA MZA10(1108),AWGT(1108)/  411050, 1.04923936005D+02/
+      DATA MZA10(1109),AWGT(1109)/  421050, 1.04916974006D+02/
+      DATA MZA10(1110),AWGT(1110)/  431050, 1.04911660006D+02/
+      DATA MZA10(1111),AWGT(1111)/  441050, 1.04907752009D+02/
+      DATA MZA10(1112),AWGT(1112)/  451050, 1.04905693008D+02/
+      DATA MZA10(1113),AWGT(1113)/  461050, 1.04905084009D+02/
+      DATA MZA10(1114),AWGT(1114)/  471050, 1.04906528007D+02/
+      DATA MZA10(1115),AWGT(1115)/  481050, 1.04909467009D+02/
+      DATA MZA10(1116),AWGT(1116)/  491050, 1.04914673005D+02/
+      DATA MZA10(1117),AWGT(1117)/  501050, 1.04921349004D+02/
+      DATA MZA10(1118),AWGT(1118)/  511050, 1.04931486003D+02/
+      DATA MZA10(1119),AWGT(1119)/  521050, 1.04943640000D+02/
+      DATA MZA10(1120),AWGT(1120)/  391060, 1.05949790000D+02/
+      DATA MZA10(1121),AWGT(1121)/  401060, 1.05935910000D+02/
+      DATA MZA10(1122),AWGT(1122)/  411060, 1.05927970000D+02/
+      DATA MZA10(1123),AWGT(1123)/  421060, 1.05918136008D+02/
+      DATA MZA10(1124),AWGT(1124)/  431060, 1.05914357009D+02/
+      DATA MZA10(1125),AWGT(1125)/  441060, 1.05907329004D+02/
+      DATA MZA10(1126),AWGT(1126)/  451060, 1.05907287001D+02/
+      DATA MZA10(1127),AWGT(1127)/  461060, 1.05903485007D+02/
+      DATA MZA10(1128),AWGT(1128)/  471060, 1.05906668009D+02/
+      DATA MZA10(1129),AWGT(1129)/  481060, 1.05906459004D+02/
+      DATA MZA10(1130),AWGT(1130)/  491060, 1.05913465004D+02/
+      DATA MZA10(1131),AWGT(1131)/  501060, 1.05916880006D+02/
+      DATA MZA10(1132),AWGT(1132)/  511060, 1.05928791000D+02/
+      DATA MZA10(1133),AWGT(1133)/  521060, 1.05937504002D+02/
+      DATA MZA10(1134),AWGT(1134)/  391070, 1.06954140000D+02/
+      DATA MZA10(1135),AWGT(1135)/  401070, 1.06940750000D+02/
+      DATA MZA10(1136),AWGT(1136)/  411070, 1.06930310000D+02/
+      DATA MZA10(1137),AWGT(1137)/  421070, 1.06921692006D+02/
+      DATA MZA10(1138),AWGT(1138)/  431070, 1.06915079006D+02/
+      DATA MZA10(1139),AWGT(1139)/  441070, 1.06909905001D+02/
+      DATA MZA10(1140),AWGT(1140)/  451070, 1.06906748004D+02/
+      DATA MZA10(1141),AWGT(1141)/  461070, 1.06905133005D+02/
+      DATA MZA10(1142),AWGT(1142)/  471070, 1.06905096008D+02/
+      DATA MZA10(1143),AWGT(1143)/  481070, 1.06906617009D+02/
+      DATA MZA10(1144),AWGT(1144)/  491070, 1.06910295001D+02/
+      DATA MZA10(1145),AWGT(1145)/  501070, 1.06915644003D+02/
+      DATA MZA10(1146),AWGT(1146)/  511070, 1.06924150000D+02/
+      DATA MZA10(1147),AWGT(1147)/  521070, 1.06935006000D+02/
+      DATA MZA10(1148),AWGT(1148)/  391080, 1.07959480000D+02/
+      DATA MZA10(1149),AWGT(1149)/  401080, 1.07943960000D+02/
+      DATA MZA10(1150),AWGT(1150)/  411080, 1.07934840000D+02/
+      DATA MZA10(1151),AWGT(1151)/  421080, 1.07923453000D+02/
+      DATA MZA10(1152),AWGT(1152)/  431080, 1.07918461002D+02/
+      DATA MZA10(1153),AWGT(1153)/  441080, 1.07910173005D+02/
+      DATA MZA10(1154),AWGT(1154)/  451080, 1.07908728000D+02/
+      DATA MZA10(1155),AWGT(1155)/  461080, 1.07903891007D+02/
+      DATA MZA10(1156),AWGT(1156)/  471080, 1.07905955006D+02/
+      DATA MZA10(1157),AWGT(1157)/  481080, 1.07904183007D+02/
+      DATA MZA10(1158),AWGT(1158)/  491080, 1.07909698002D+02/
+      DATA MZA10(1159),AWGT(1159)/  501080, 1.07911925004D+02/
+      DATA MZA10(1160),AWGT(1160)/  511080, 1.07922160000D+02/
+      DATA MZA10(1161),AWGT(1161)/  521080, 1.07929444006D+02/
+      DATA MZA10(1162),AWGT(1162)/  531080, 1.07943475000D+02/
+      DATA MZA10(1163),AWGT(1163)/  401090, 1.08949240000D+02/
+      DATA MZA10(1164),AWGT(1164)/  411090, 1.08937630000D+02/
+      DATA MZA10(1165),AWGT(1165)/  421090, 1.08927810000D+02/
+      DATA MZA10(1166),AWGT(1166)/  431090, 1.08919982007D+02/
+      DATA MZA10(1167),AWGT(1167)/  441090, 1.08913203002D+02/
+      DATA MZA10(1168),AWGT(1168)/  451090, 1.08908737003D+02/
+      DATA MZA10(1169),AWGT(1169)/  461090, 1.08905950005D+02/
+      DATA MZA10(1170),AWGT(1170)/  471090, 1.08904752003D+02/
+      DATA MZA10(1171),AWGT(1171)/  481090, 1.08904982003D+02/
+      DATA MZA10(1172),AWGT(1172)/  491090, 1.08907150005D+02/
+      DATA MZA10(1173),AWGT(1173)/  501090, 1.08911283002D+02/
+      DATA MZA10(1174),AWGT(1174)/  511090, 1.08918132004D+02/
+      DATA MZA10(1175),AWGT(1175)/  521090, 1.08927415005D+02/
+      DATA MZA10(1176),AWGT(1176)/  531090, 1.08938149004D+02/
+      DATA MZA10(1177),AWGT(1177)/  401100, 1.09952870000D+02/
+      DATA MZA10(1178),AWGT(1178)/  411100, 1.09942440000D+02/
+      DATA MZA10(1179),AWGT(1179)/  421100, 1.09929730000D+02/
+      DATA MZA10(1180),AWGT(1180)/  431100, 1.09923820005D+02/
+      DATA MZA10(1181),AWGT(1181)/  441100, 1.09914136000D+02/
+      DATA MZA10(1182),AWGT(1182)/  451100, 1.09911136004D+02/
+      DATA MZA10(1183),AWGT(1183)/  461100, 1.09905153003D+02/
+      DATA MZA10(1184),AWGT(1184)/  471100, 1.09906107002D+02/
+      DATA MZA10(1185),AWGT(1185)/  481100, 1.09903002001D+02/
+      DATA MZA10(1186),AWGT(1186)/  491100, 1.09907165003D+02/
+      DATA MZA10(1187),AWGT(1187)/  501100, 1.09907842008D+02/
+      DATA MZA10(1188),AWGT(1188)/  511100, 1.09916753000D+02/
+      DATA MZA10(1189),AWGT(1189)/  521100, 1.09922407003D+02/
+      DATA MZA10(1190),AWGT(1190)/  531100, 1.09935242000D+02/
+      DATA MZA10(1191),AWGT(1191)/  541100, 1.09944278001D+02/
+      DATA MZA10(1192),AWGT(1192)/  411110, 1.10945650000D+02/
+      DATA MZA10(1193),AWGT(1193)/  421110, 1.10934410000D+02/
+      DATA MZA10(1194),AWGT(1194)/  431110, 1.10925692008D+02/
+      DATA MZA10(1195),AWGT(1195)/  441110, 1.10917696000D+02/
+      DATA MZA10(1196),AWGT(1196)/  451110, 1.10911585009D+02/
+      DATA MZA10(1197),AWGT(1197)/  461110, 1.10907670007D+02/
+      DATA MZA10(1198),AWGT(1198)/  471110, 1.10905291002D+02/
+      DATA MZA10(1199),AWGT(1199)/  481110, 1.10904178001D+02/
+      DATA MZA10(1200),AWGT(1200)/  491110, 1.10905103003D+02/
+      DATA MZA10(1201),AWGT(1201)/  501110, 1.10907734005D+02/
+      DATA MZA10(1202),AWGT(1202)/  511110, 1.10913163000D+02/
+      DATA MZA10(1203),AWGT(1203)/  521110, 1.10921110007D+02/
+      DATA MZA10(1204),AWGT(1204)/  531110, 1.10930276000D+02/
+      DATA MZA10(1205),AWGT(1205)/  541110, 1.10941602000D+02/
+      DATA MZA10(1206),AWGT(1206)/  411120, 1.11950830000D+02/
+      DATA MZA10(1207),AWGT(1207)/  421120, 1.11936840000D+02/
+      DATA MZA10(1208),AWGT(1208)/  431120, 1.11929146005D+02/
+      DATA MZA10(1209),AWGT(1209)/  441120, 1.11918965000D+02/
+      DATA MZA10(1210),AWGT(1210)/  451120, 1.11914394002D+02/
+      DATA MZA10(1211),AWGT(1211)/  461120, 1.11907314001D+02/
+      DATA MZA10(1212),AWGT(1212)/  471120, 1.11907004008D+02/
+      DATA MZA10(1213),AWGT(1213)/  481120, 1.11902757008D+02/
+      DATA MZA10(1214),AWGT(1214)/  491120, 1.11905532003D+02/
+      DATA MZA10(1215),AWGT(1215)/  501120, 1.11904818002D+02/
+      DATA MZA10(1216),AWGT(1216)/  511120, 1.11912398000D+02/
+      DATA MZA10(1217),AWGT(1217)/  521120, 1.11917013007D+02/
+      DATA MZA10(1218),AWGT(1218)/  531120, 1.11927970000D+02/
+      DATA MZA10(1219),AWGT(1219)/  541120, 1.11935623001D+02/
+      DATA MZA10(1220),AWGT(1220)/  551120, 1.11950301000D+02/
+      DATA MZA10(1221),AWGT(1221)/  411130, 1.12954700000D+02/
+      DATA MZA10(1222),AWGT(1222)/  421130, 1.12941880000D+02/
+      DATA MZA10(1223),AWGT(1223)/  431130, 1.12931590000D+02/
+      DATA MZA10(1224),AWGT(1224)/  441130, 1.12922487002D+02/
+      DATA MZA10(1225),AWGT(1225)/  451130, 1.12915530006D+02/
+      DATA MZA10(1226),AWGT(1226)/  461130, 1.12910152009D+02/
+      DATA MZA10(1227),AWGT(1227)/  471130, 1.12906566006D+02/
+      DATA MZA10(1228),AWGT(1228)/  481130, 1.12904401007D+02/
+      DATA MZA10(1229),AWGT(1229)/  491130, 1.12904057008D+02/
+      DATA MZA10(1230),AWGT(1230)/  501130, 1.12905170006D+02/
+      DATA MZA10(1231),AWGT(1231)/  511130, 1.12909371007D+02/
+      DATA MZA10(1232),AWGT(1232)/  521130, 1.12915891000D+02/
+      DATA MZA10(1233),AWGT(1233)/  531130, 1.12923640006D+02/
+      DATA MZA10(1234),AWGT(1234)/  541130, 1.12933341002D+02/
+      DATA MZA10(1235),AWGT(1235)/  551130, 1.12944493003D+02/
+      DATA MZA10(1236),AWGT(1236)/  421140, 1.13944920000D+02/
+      DATA MZA10(1237),AWGT(1237)/  431140, 1.13935880000D+02/
+      DATA MZA10(1238),AWGT(1238)/  441140, 1.13924281000D+02/
+      DATA MZA10(1239),AWGT(1239)/  451140, 1.13918806000D+02/
+      DATA MZA10(1240),AWGT(1240)/  461140, 1.13910362006D+02/
+      DATA MZA10(1241),AWGT(1241)/  471140, 1.13908803007D+02/
+      DATA MZA10(1242),AWGT(1242)/  481140, 1.13903358005D+02/
+      DATA MZA10(1243),AWGT(1243)/  491140, 1.13904913009D+02/
+      DATA MZA10(1244),AWGT(1244)/  501140, 1.13902778009D+02/
+      DATA MZA10(1245),AWGT(1245)/  511140, 1.13909269000D+02/
+      DATA MZA10(1246),AWGT(1246)/  521140, 1.13912089000D+02/
+      DATA MZA10(1247),AWGT(1247)/  531140, 1.13921850000D+02/
+      DATA MZA10(1248),AWGT(1248)/  541140, 1.13927980003D+02/
+      DATA MZA10(1249),AWGT(1249)/  551140, 1.13941450000D+02/
+      DATA MZA10(1250),AWGT(1250)/  561140, 1.13950675004D+02/
+      DATA MZA10(1251),AWGT(1251)/  421150, 1.14950290000D+02/
+      DATA MZA10(1252),AWGT(1252)/  431150, 1.14938690000D+02/
+      DATA MZA10(1253),AWGT(1253)/  441150, 1.14928686002D+02/
+      DATA MZA10(1254),AWGT(1254)/  451150, 1.14920334000D+02/
+      DATA MZA10(1255),AWGT(1255)/  461150, 1.14913683008D+02/
+      DATA MZA10(1256),AWGT(1256)/  471150, 1.14908762007D+02/
+      DATA MZA10(1257),AWGT(1257)/  481150, 1.14905430010D+02/
+      DATA MZA10(1258),AWGT(1258)/  491150, 1.14903878005D+02/
+      DATA MZA10(1259),AWGT(1259)/  501150, 1.14903342004D+02/
+      DATA MZA10(1260),AWGT(1260)/  511150, 1.14906598000D+02/
+      DATA MZA10(1261),AWGT(1261)/  521150, 1.14911902000D+02/
+      DATA MZA10(1262),AWGT(1262)/  531150, 1.14918048000D+02/
+      DATA MZA10(1263),AWGT(1263)/  541150, 1.14926293009D+02/
+      DATA MZA10(1264),AWGT(1264)/  551150, 1.14935910000D+02/
+      DATA MZA10(1265),AWGT(1265)/  561150, 1.14947370000D+02/
+      DATA MZA10(1266),AWGT(1266)/  431160, 1.15943370000D+02/
+      DATA MZA10(1267),AWGT(1267)/  441160, 1.15930810000D+02/
+      DATA MZA10(1268),AWGT(1268)/  451160, 1.15924062000D+02/
+      DATA MZA10(1269),AWGT(1269)/  461160, 1.15914158007D+02/
+      DATA MZA10(1270),AWGT(1270)/  471160, 1.15911359009D+02/
+      DATA MZA10(1271),AWGT(1271)/  481160, 1.15904755008D+02/
+      DATA MZA10(1272),AWGT(1272)/  491160, 1.15905259007D+02/
+      DATA MZA10(1273),AWGT(1273)/  501160, 1.15901740005D+02/
+      DATA MZA10(1274),AWGT(1274)/  511160, 1.15906793006D+02/
+      DATA MZA10(1275),AWGT(1275)/  521160, 1.15908460000D+02/
+      DATA MZA10(1276),AWGT(1276)/  531160, 1.15916808006D+02/
+      DATA MZA10(1277),AWGT(1277)/  541160, 1.15921581001D+02/
+      DATA MZA10(1278),AWGT(1278)/  551160, 1.15933367000D+02/
+      DATA MZA10(1279),AWGT(1279)/  561160, 1.15941380000D+02/
+      DATA MZA10(1280),AWGT(1280)/  431170, 1.16946480000D+02/
+      DATA MZA10(1281),AWGT(1281)/  441170, 1.16935580000D+02/
+      DATA MZA10(1282),AWGT(1282)/  451170, 1.16925980000D+02/
+      DATA MZA10(1283),AWGT(1283)/  461170, 1.16917841003D+02/
+      DATA MZA10(1284),AWGT(1284)/  471170, 1.16911684006D+02/
+      DATA MZA10(1285),AWGT(1285)/  481170, 1.16907218006D+02/
+      DATA MZA10(1286),AWGT(1286)/  491170, 1.16904513006D+02/
+      DATA MZA10(1287),AWGT(1287)/  501170, 1.16902951007D+02/
+      DATA MZA10(1288),AWGT(1288)/  511170, 1.16904835009D+02/
+      DATA MZA10(1289),AWGT(1289)/  521170, 1.16908644007D+02/
+      DATA MZA10(1290),AWGT(1290)/  531170, 1.16913650000D+02/
+      DATA MZA10(1291),AWGT(1291)/  541170, 1.16920358007D+02/
+      DATA MZA10(1292),AWGT(1292)/  551170, 1.16928670007D+02/
+      DATA MZA10(1293),AWGT(1293)/  561170, 1.16938499000D+02/
+      DATA MZA10(1294),AWGT(1294)/  571170, 1.16950068000D+02/
+      DATA MZA10(1295),AWGT(1295)/  431180, 1.17951480000D+02/
+      DATA MZA10(1296),AWGT(1296)/  441180, 1.17937820000D+02/
+      DATA MZA10(1297),AWGT(1297)/  451180, 1.17930070000D+02/
+      DATA MZA10(1298),AWGT(1298)/  461180, 1.17918984003D+02/
+      DATA MZA10(1299),AWGT(1299)/  471180, 1.17914582008D+02/
+      DATA MZA10(1300),AWGT(1300)/  481180, 1.17906914005D+02/
+      DATA MZA10(1301),AWGT(1301)/  491180, 1.17906354004D+02/
+      DATA MZA10(1302),AWGT(1302)/  501180, 1.17901603002D+02/
+      DATA MZA10(1303),AWGT(1303)/  511180, 1.17905528007D+02/
+      DATA MZA10(1304),AWGT(1304)/  521180, 1.17905827006D+02/
+      DATA MZA10(1305),AWGT(1305)/  531180, 1.17913074000D+02/
+      DATA MZA10(1306),AWGT(1306)/  541180, 1.17916178007D+02/
+      DATA MZA10(1307),AWGT(1307)/  551180, 1.17926559005D+02/
+      DATA MZA10(1308),AWGT(1308)/  561180, 1.17933040000D+02/
+      DATA MZA10(1309),AWGT(1309)/  571180, 1.17946730000D+02/
+      DATA MZA10(1310),AWGT(1310)/  441190, 1.18942840000D+02/
+      DATA MZA10(1311),AWGT(1311)/  451190, 1.18932110000D+02/
+      DATA MZA10(1312),AWGT(1312)/  461190, 1.18923110000D+02/
+      DATA MZA10(1313),AWGT(1313)/  471190, 1.18915665001D+02/
+      DATA MZA10(1314),AWGT(1314)/  481190, 1.18909921006D+02/
+      DATA MZA10(1315),AWGT(1315)/  491190, 1.18905845004D+02/
+      DATA MZA10(1316),AWGT(1316)/  501190, 1.18903307006D+02/
+      DATA MZA10(1317),AWGT(1317)/  511190, 1.18903942000D+02/
+      DATA MZA10(1318),AWGT(1318)/  521190, 1.18906403006D+02/
+      DATA MZA10(1319),AWGT(1319)/  531190, 1.18910074000D+02/
+      DATA MZA10(1320),AWGT(1320)/  541190, 1.18915410007D+02/
+      DATA MZA10(1321),AWGT(1321)/  551190, 1.18922377003D+02/
+      DATA MZA10(1322),AWGT(1322)/  561190, 1.18930659007D+02/
+      DATA MZA10(1323),AWGT(1323)/  571190, 1.18940990000D+02/
+      DATA MZA10(1324),AWGT(1324)/  581190, 1.18952760000D+02/
+      DATA MZA10(1325),AWGT(1325)/  441200, 1.19945310000D+02/
+      DATA MZA10(1326),AWGT(1326)/  451200, 1.19936410000D+02/
+      DATA MZA10(1327),AWGT(1327)/  461200, 1.19924691009D+02/
+      DATA MZA10(1328),AWGT(1328)/  471200, 1.19918787004D+02/
+      DATA MZA10(1329),AWGT(1329)/  481200, 1.19909850001D+02/
+      DATA MZA10(1330),AWGT(1330)/  491200, 1.19907959006D+02/
+      DATA MZA10(1331),AWGT(1331)/  501200, 1.19902194007D+02/
+      DATA MZA10(1332),AWGT(1332)/  511200, 1.19905072004D+02/
+      DATA MZA10(1333),AWGT(1333)/  521200, 1.19904020002D+02/
+      DATA MZA10(1334),AWGT(1334)/  531200, 1.19910048002D+02/
+      DATA MZA10(1335),AWGT(1335)/  541200, 1.19911784002D+02/
+      DATA MZA10(1336),AWGT(1336)/  551200, 1.19920677003D+02/
+      DATA MZA10(1337),AWGT(1337)/  561200, 1.19926044010D+02/
+      DATA MZA10(1338),AWGT(1338)/  571200, 1.19938070000D+02/
+      DATA MZA10(1339),AWGT(1339)/  581200, 1.19946640000D+02/
+      DATA MZA10(1340),AWGT(1340)/  451210, 1.20938720000D+02/
+      DATA MZA10(1341),AWGT(1341)/  461210, 1.20928870000D+02/
+      DATA MZA10(1342),AWGT(1342)/  471210, 1.20919848000D+02/
+      DATA MZA10(1343),AWGT(1343)/  481210, 1.20912977004D+02/
+      DATA MZA10(1344),AWGT(1344)/  491210, 1.20907845008D+02/
+      DATA MZA10(1345),AWGT(1345)/  501210, 1.20904235005D+02/
+      DATA MZA10(1346),AWGT(1346)/  511210, 1.20903815007D+02/
+      DATA MZA10(1347),AWGT(1347)/  521210, 1.20904936004D+02/
+      DATA MZA10(1348),AWGT(1348)/  531210, 1.20907366008D+02/
+      DATA MZA10(1349),AWGT(1349)/  541210, 1.20911461008D+02/
+      DATA MZA10(1350),AWGT(1350)/  551210, 1.20917229002D+02/
+      DATA MZA10(1351),AWGT(1351)/  561210, 1.20924054005D+02/
+      DATA MZA10(1352),AWGT(1352)/  571210, 1.20933010000D+02/
+      DATA MZA10(1353),AWGT(1353)/  581210, 1.20943420000D+02/
+      DATA MZA10(1354),AWGT(1354)/  591210, 1.20955364000D+02/
+      DATA MZA10(1355),AWGT(1355)/  451220, 1.21943210000D+02/
+      DATA MZA10(1356),AWGT(1356)/  461220, 1.21930550000D+02/
+      DATA MZA10(1357),AWGT(1357)/  471220, 1.21923530000D+02/
+      DATA MZA10(1358),AWGT(1358)/  481220, 1.21913332004D+02/
+      DATA MZA10(1359),AWGT(1359)/  491220, 1.21910276000D+02/
+      DATA MZA10(1360),AWGT(1360)/  501220, 1.21903439000D+02/
+      DATA MZA10(1361),AWGT(1361)/  511220, 1.21905173007D+02/
+      DATA MZA10(1362),AWGT(1362)/  521220, 1.21903043009D+02/
+      DATA MZA10(1363),AWGT(1363)/  531220, 1.21907589003D+02/
+      DATA MZA10(1364),AWGT(1364)/  541220, 1.21908367006D+02/
+      DATA MZA10(1365),AWGT(1365)/  551220, 1.21916113004D+02/
+      DATA MZA10(1366),AWGT(1366)/  561220, 1.21919904000D+02/
+      DATA MZA10(1367),AWGT(1367)/  571220, 1.21930710000D+02/
+      DATA MZA10(1368),AWGT(1368)/  581220, 1.21937910000D+02/
+      DATA MZA10(1369),AWGT(1369)/  591220, 1.21951810000D+02/
+      DATA MZA10(1370),AWGT(1370)/  461230, 1.22934930000D+02/
+      DATA MZA10(1371),AWGT(1371)/  471230, 1.22924900000D+02/
+      DATA MZA10(1372),AWGT(1372)/  481230, 1.22917002010D+02/
+      DATA MZA10(1373),AWGT(1373)/  491230, 1.22910438003D+02/
+      DATA MZA10(1374),AWGT(1374)/  501230, 1.22905720008D+02/
+      DATA MZA10(1375),AWGT(1375)/  511230, 1.22904213010D+02/
+      DATA MZA10(1376),AWGT(1376)/  521230, 1.22904270000D+02/
+      DATA MZA10(1377),AWGT(1377)/  531230, 1.22905588010D+02/
+      DATA MZA10(1378),AWGT(1378)/  541230, 1.22908481009D+02/
+      DATA MZA10(1379),AWGT(1379)/  551230, 1.22912996000D+02/
+      DATA MZA10(1380),AWGT(1380)/  561230, 1.22918781000D+02/
+      DATA MZA10(1381),AWGT(1381)/  571230, 1.22926240000D+02/
+      DATA MZA10(1382),AWGT(1382)/  581230, 1.22935400000D+02/
+      DATA MZA10(1383),AWGT(1383)/  591230, 1.22945960000D+02/
+      DATA MZA10(1384),AWGT(1384)/  461240, 1.23936880000D+02/
+      DATA MZA10(1385),AWGT(1385)/  471240, 1.23928640000D+02/
+      DATA MZA10(1386),AWGT(1386)/  481240, 1.23917647006D+02/
+      DATA MZA10(1387),AWGT(1387)/  491240, 1.23913175002D+02/
+      DATA MZA10(1388),AWGT(1388)/  501240, 1.23905273009D+02/
+      DATA MZA10(1389),AWGT(1389)/  511240, 1.23905935007D+02/
+      DATA MZA10(1390),AWGT(1390)/  521240, 1.23902817009D+02/
+      DATA MZA10(1391),AWGT(1391)/  531240, 1.23906209009D+02/
+      DATA MZA10(1392),AWGT(1392)/  541240, 1.23905893000D+02/
+      DATA MZA10(1393),AWGT(1393)/  551240, 1.23912257008D+02/
+      DATA MZA10(1394),AWGT(1394)/  561240, 1.23915093006D+02/
+      DATA MZA10(1395),AWGT(1395)/  571240, 1.23924574003D+02/
+      DATA MZA10(1396),AWGT(1396)/  581240, 1.23930410000D+02/
+      DATA MZA10(1397),AWGT(1397)/  591240, 1.23942960000D+02/
+      DATA MZA10(1398),AWGT(1398)/  601240, 1.23952230000D+02/
+      DATA MZA10(1399),AWGT(1399)/  471250, 1.24930430000D+02/
+      DATA MZA10(1400),AWGT(1400)/  481250, 1.24921246004D+02/
+      DATA MZA10(1401),AWGT(1401)/  491250, 1.24913600006D+02/
+      DATA MZA10(1402),AWGT(1402)/  501250, 1.24907784001D+02/
+      DATA MZA10(1403),AWGT(1403)/  511250, 1.24905253008D+02/
+      DATA MZA10(1404),AWGT(1404)/  521250, 1.24904430007D+02/
+      DATA MZA10(1405),AWGT(1405)/  531250, 1.24904630002D+02/
+      DATA MZA10(1406),AWGT(1406)/  541250, 1.24906395005D+02/
+      DATA MZA10(1407),AWGT(1407)/  551250, 1.24909728003D+02/
+      DATA MZA10(1408),AWGT(1408)/  561250, 1.24914472009D+02/
+      DATA MZA10(1409),AWGT(1409)/  571250, 1.24920816000D+02/
+      DATA MZA10(1410),AWGT(1410)/  581250, 1.24928440000D+02/
+      DATA MZA10(1411),AWGT(1411)/  591250, 1.24937830000D+02/
+      DATA MZA10(1412),AWGT(1412)/  601250, 1.24948880000D+02/
+      DATA MZA10(1413),AWGT(1413)/  471260, 1.25934500000D+02/
+      DATA MZA10(1414),AWGT(1414)/  481260, 1.25922353003D+02/
+      DATA MZA10(1415),AWGT(1415)/  491260, 1.25916463009D+02/
+      DATA MZA10(1416),AWGT(1416)/  501260, 1.25907653003D+02/
+      DATA MZA10(1417),AWGT(1417)/  511260, 1.25907247005D+02/
+      DATA MZA10(1418),AWGT(1418)/  521260, 1.25903311007D+02/
+      DATA MZA10(1419),AWGT(1419)/  531260, 1.25905624002D+02/
+      DATA MZA10(1420),AWGT(1420)/  541260, 1.25904273006D+02/
+      DATA MZA10(1421),AWGT(1421)/  551260, 1.25909451010D+02/
+      DATA MZA10(1422),AWGT(1422)/  561260, 1.25911250002D+02/
+      DATA MZA10(1423),AWGT(1423)/  571260, 1.25919512007D+02/
+      DATA MZA10(1424),AWGT(1424)/  581260, 1.25923971000D+02/
+      DATA MZA10(1425),AWGT(1425)/  591260, 1.25935310000D+02/
+      DATA MZA10(1426),AWGT(1426)/  601260, 1.25943220000D+02/
+      DATA MZA10(1427),AWGT(1427)/  611260, 1.25957520000D+02/
+      DATA MZA10(1428),AWGT(1428)/  471270, 1.26936770000D+02/
+      DATA MZA10(1429),AWGT(1429)/  481270, 1.26926443009D+02/
+      DATA MZA10(1430),AWGT(1430)/  491270, 1.26917353001D+02/
+      DATA MZA10(1431),AWGT(1431)/  501270, 1.26910360000D+02/
+      DATA MZA10(1432),AWGT(1432)/  511270, 1.26906923006D+02/
+      DATA MZA10(1433),AWGT(1433)/  521270, 1.26905226003D+02/
+      DATA MZA10(1434),AWGT(1434)/  531270, 1.26904472007D+02/
+      DATA MZA10(1435),AWGT(1435)/  541270, 1.26905183007D+02/
+      DATA MZA10(1436),AWGT(1436)/  551270, 1.26907417005D+02/
+      DATA MZA10(1437),AWGT(1437)/  561270, 1.26911093008D+02/
+      DATA MZA10(1438),AWGT(1438)/  571270, 1.26916375004D+02/
+      DATA MZA10(1439),AWGT(1439)/  581270, 1.26922731000D+02/
+      DATA MZA10(1440),AWGT(1440)/  591270, 1.26930830000D+02/
+      DATA MZA10(1441),AWGT(1441)/  601270, 1.26940500000D+02/
+      DATA MZA10(1442),AWGT(1442)/  611270, 1.26951630000D+02/
+      DATA MZA10(1443),AWGT(1443)/  471280, 1.27941170000D+02/
+      DATA MZA10(1444),AWGT(1444)/  481280, 1.27927762003D+02/
+      DATA MZA10(1445),AWGT(1445)/  491280, 1.27920172003D+02/
+      DATA MZA10(1446),AWGT(1446)/  501280, 1.27910536006D+02/
+      DATA MZA10(1447),AWGT(1447)/  511280, 1.27909169000D+02/
+      DATA MZA10(1448),AWGT(1448)/  521280, 1.27904463001D+02/
+      DATA MZA10(1449),AWGT(1449)/  531280, 1.27905809004D+02/
+      DATA MZA10(1450),AWGT(1450)/  541280, 1.27903531003D+02/
+      DATA MZA10(1451),AWGT(1451)/  551280, 1.27907748009D+02/
+      DATA MZA10(1452),AWGT(1452)/  561280, 1.27908317007D+02/
+      DATA MZA10(1453),AWGT(1453)/  571280, 1.27915585002D+02/
+      DATA MZA10(1454),AWGT(1454)/  581280, 1.27918911000D+02/
+      DATA MZA10(1455),AWGT(1455)/  591280, 1.27928791000D+02/
+      DATA MZA10(1456),AWGT(1456)/  601280, 1.27935390000D+02/
+      DATA MZA10(1457),AWGT(1457)/  611280, 1.27948420000D+02/
+      DATA MZA10(1458),AWGT(1458)/  621280, 1.27958080000D+02/
+      DATA MZA10(1459),AWGT(1459)/  471290, 1.28943690000D+02/
+      DATA MZA10(1460),AWGT(1460)/  481290, 1.28932150000D+02/
+      DATA MZA10(1461),AWGT(1461)/  491290, 1.28921696010D+02/
+      DATA MZA10(1462),AWGT(1462)/  501290, 1.28913479000D+02/
+      DATA MZA10(1463),AWGT(1463)/  511290, 1.28909148004D+02/
+      DATA MZA10(1464),AWGT(1464)/  521290, 1.28906598002D+02/
+      DATA MZA10(1465),AWGT(1465)/  531290, 1.28904987007D+02/
+      DATA MZA10(1466),AWGT(1466)/  541290, 1.28904779004D+02/
+      DATA MZA10(1467),AWGT(1467)/  551290, 1.28906064004D+02/
+      DATA MZA10(1468),AWGT(1468)/  561290, 1.28908679004D+02/
+      DATA MZA10(1469),AWGT(1469)/  571290, 1.28912692008D+02/
+      DATA MZA10(1470),AWGT(1470)/  581290, 1.28918102000D+02/
+      DATA MZA10(1471),AWGT(1471)/  591290, 1.28925095000D+02/
+      DATA MZA10(1472),AWGT(1472)/  601290, 1.28933188000D+02/
+      DATA MZA10(1473),AWGT(1473)/  611290, 1.28943160000D+02/
+      DATA MZA10(1474),AWGT(1474)/  621290, 1.28954640000D+02/
+      DATA MZA10(1475),AWGT(1475)/  471300, 1.29950448000D+02/
+      DATA MZA10(1476),AWGT(1476)/  481300, 1.29933901009D+02/
+      DATA MZA10(1477),AWGT(1477)/  491300, 1.29924970000D+02/
+      DATA MZA10(1478),AWGT(1478)/  501300, 1.29913967003D+02/
+      DATA MZA10(1479),AWGT(1479)/  511300, 1.29911656003D+02/
+      DATA MZA10(1480),AWGT(1480)/  521300, 1.29906224004D+02/
+      DATA MZA10(1481),AWGT(1481)/  531300, 1.29906674002D+02/
+      DATA MZA10(1482),AWGT(1482)/  541300, 1.29903508000D+02/
+      DATA MZA10(1483),AWGT(1483)/  551300, 1.29906708006D+02/
+      DATA MZA10(1484),AWGT(1484)/  561300, 1.29906320008D+02/
+      DATA MZA10(1485),AWGT(1485)/  571300, 1.29912368007D+02/
+      DATA MZA10(1486),AWGT(1486)/  581300, 1.29914736000D+02/
+      DATA MZA10(1487),AWGT(1487)/  591300, 1.29923590000D+02/
+      DATA MZA10(1488),AWGT(1488)/  601300, 1.29928506000D+02/
+      DATA MZA10(1489),AWGT(1489)/  611300, 1.29940450000D+02/
+      DATA MZA10(1490),AWGT(1490)/  621300, 1.29948920000D+02/
+      DATA MZA10(1491),AWGT(1491)/  631300, 1.29963569000D+02/
+      DATA MZA10(1492),AWGT(1492)/  481310, 1.30940670000D+02/
+      DATA MZA10(1493),AWGT(1493)/  491310, 1.30926851008D+02/
+      DATA MZA10(1494),AWGT(1494)/  501310, 1.30916999008D+02/
+      DATA MZA10(1495),AWGT(1495)/  511310, 1.30911982003D+02/
+      DATA MZA10(1496),AWGT(1496)/  521310, 1.30908523009D+02/
+      DATA MZA10(1497),AWGT(1497)/  531310, 1.30906124006D+02/
+      DATA MZA10(1498),AWGT(1498)/  541310, 1.30905082004D+02/
+      DATA MZA10(1499),AWGT(1499)/  551310, 1.30905463009D+02/
+      DATA MZA10(1500),AWGT(1500)/  561310, 1.30906941001D+02/
+      DATA MZA10(1501),AWGT(1501)/  571310, 1.30910070000D+02/
+      DATA MZA10(1502),AWGT(1502)/  581310, 1.30914422000D+02/
+      DATA MZA10(1503),AWGT(1503)/  591310, 1.30920259000D+02/
+      DATA MZA10(1504),AWGT(1504)/  601310, 1.30927247000D+02/
+      DATA MZA10(1505),AWGT(1505)/  611310, 1.30935870000D+02/
+      DATA MZA10(1506),AWGT(1506)/  621310, 1.30946110000D+02/
+      DATA MZA10(1507),AWGT(1507)/  631310, 1.30957753000D+02/
+      DATA MZA10(1508),AWGT(1508)/  481320, 1.31945550000D+02/
+      DATA MZA10(1509),AWGT(1509)/  491320, 1.31932990003D+02/
+      DATA MZA10(1510),AWGT(1510)/  501320, 1.31917815007D+02/
+      DATA MZA10(1511),AWGT(1511)/  511320, 1.31914466009D+02/
+      DATA MZA10(1512),AWGT(1512)/  521320, 1.31908553002D+02/
+      DATA MZA10(1513),AWGT(1513)/  531320, 1.31907997004D+02/
+      DATA MZA10(1514),AWGT(1514)/  541320, 1.31904153005D+02/
+      DATA MZA10(1515),AWGT(1515)/  551320, 1.31906434003D+02/
+      DATA MZA10(1516),AWGT(1516)/  561320, 1.31905061003D+02/
+      DATA MZA10(1517),AWGT(1517)/  571320, 1.31910101001D+02/
+      DATA MZA10(1518),AWGT(1518)/  581320, 1.31911460005D+02/
+      DATA MZA10(1519),AWGT(1519)/  591320, 1.31919255000D+02/
+      DATA MZA10(1520),AWGT(1520)/  601320, 1.31923321002D+02/
+      DATA MZA10(1521),AWGT(1521)/  611320, 1.31933750000D+02/
+      DATA MZA10(1522),AWGT(1522)/  621320, 1.31940690000D+02/
+      DATA MZA10(1523),AWGT(1523)/  631320, 1.31954370000D+02/
+      DATA MZA10(1524),AWGT(1524)/  491330, 1.32937810000D+02/
+      DATA MZA10(1525),AWGT(1525)/  501330, 1.32923829002D+02/
+      DATA MZA10(1526),AWGT(1526)/  511330, 1.32915251006D+02/
+      DATA MZA10(1527),AWGT(1527)/  521330, 1.32910955003D+02/
+      DATA MZA10(1528),AWGT(1528)/  531330, 1.32907796009D+02/
+      DATA MZA10(1529),AWGT(1529)/  541330, 1.32905910007D+02/
+      DATA MZA10(1530),AWGT(1530)/  551330, 1.32905451009D+02/
+      DATA MZA10(1531),AWGT(1531)/  561330, 1.32906007005D+02/
+      DATA MZA10(1532),AWGT(1532)/  571330, 1.32908218000D+02/
+      DATA MZA10(1533),AWGT(1533)/  581330, 1.32911515000D+02/
+      DATA MZA10(1534),AWGT(1534)/  591330, 1.32916330005D+02/
+      DATA MZA10(1535),AWGT(1535)/  601330, 1.32922348000D+02/
+      DATA MZA10(1536),AWGT(1536)/  611330, 1.32929782000D+02/
+      DATA MZA10(1537),AWGT(1537)/  621330, 1.32938670000D+02/
+      DATA MZA10(1538),AWGT(1538)/  631330, 1.32949240000D+02/
+      DATA MZA10(1539),AWGT(1539)/  491340, 1.33944150000D+02/
+      DATA MZA10(1540),AWGT(1540)/  501340, 1.33928291008D+02/
+      DATA MZA10(1541),AWGT(1541)/  511340, 1.33920379007D+02/
+      DATA MZA10(1542),AWGT(1542)/  521340, 1.33911368007D+02/
+      DATA MZA10(1543),AWGT(1543)/  531340, 1.33909744005D+02/
+      DATA MZA10(1544),AWGT(1544)/  541340, 1.33905394005D+02/
+      DATA MZA10(1545),AWGT(1545)/  551340, 1.33906718005D+02/
+      DATA MZA10(1546),AWGT(1546)/  561340, 1.33904508004D+02/
+      DATA MZA10(1547),AWGT(1547)/  571340, 1.33908514000D+02/
+      DATA MZA10(1548),AWGT(1548)/  581340, 1.33908924008D+02/
+      DATA MZA10(1549),AWGT(1549)/  591340, 1.33915711007D+02/
+      DATA MZA10(1550),AWGT(1550)/  601340, 1.33918790002D+02/
+      DATA MZA10(1551),AWGT(1551)/  611340, 1.33928353000D+02/
+      DATA MZA10(1552),AWGT(1552)/  621340, 1.33933970000D+02/
+      DATA MZA10(1553),AWGT(1553)/  631340, 1.33946510000D+02/
+      DATA MZA10(1554),AWGT(1554)/  641340, 1.33955370000D+02/
+      DATA MZA10(1555),AWGT(1555)/  491350, 1.34949330000D+02/
+      DATA MZA10(1556),AWGT(1556)/  501350, 1.34934730000D+02/
+      DATA MZA10(1557),AWGT(1557)/  511350, 1.34925165008D+02/
+      DATA MZA10(1558),AWGT(1558)/  521350, 1.34916448006D+02/
+      DATA MZA10(1559),AWGT(1559)/  531350, 1.34910048001D+02/
+      DATA MZA10(1560),AWGT(1560)/  541350, 1.34907227005D+02/
+      DATA MZA10(1561),AWGT(1561)/  551350, 1.34905977000D+02/
+      DATA MZA10(1562),AWGT(1562)/  561350, 1.34905688006D+02/
+      DATA MZA10(1563),AWGT(1563)/  571350, 1.34906976008D+02/
+      DATA MZA10(1564),AWGT(1564)/  581350, 1.34909151004D+02/
+      DATA MZA10(1565),AWGT(1565)/  591350, 1.34913111007D+02/
+      DATA MZA10(1566),AWGT(1566)/  601350, 1.34918181002D+02/
+      DATA MZA10(1567),AWGT(1567)/  611350, 1.34924876000D+02/
+      DATA MZA10(1568),AWGT(1568)/  621350, 1.34932520000D+02/
+      DATA MZA10(1569),AWGT(1569)/  631350, 1.34941820000D+02/
+      DATA MZA10(1570),AWGT(1570)/  641350, 1.34952570000D+02/
+      DATA MZA10(1571),AWGT(1571)/  501360, 1.35939340000D+02/
+      DATA MZA10(1572),AWGT(1572)/  511360, 1.35930350000D+02/
+      DATA MZA10(1573),AWGT(1573)/  521360, 1.35920101002D+02/
+      DATA MZA10(1574),AWGT(1574)/  531360, 1.35914653010D+02/
+      DATA MZA10(1575),AWGT(1575)/  541360, 1.35907218008D+02/
+      DATA MZA10(1576),AWGT(1576)/  551360, 1.35907311006D+02/
+      DATA MZA10(1577),AWGT(1577)/  561360, 1.35904575009D+02/
+      DATA MZA10(1578),AWGT(1578)/  571360, 1.35907635005D+02/
+      DATA MZA10(1579),AWGT(1579)/  581360, 1.35907172004D+02/
+      DATA MZA10(1580),AWGT(1580)/  591360, 1.35912691006D+02/
+      DATA MZA10(1581),AWGT(1581)/  601360, 1.35914976000D+02/
+      DATA MZA10(1582),AWGT(1582)/  611360, 1.35923565008D+02/
+      DATA MZA10(1583),AWGT(1583)/  621360, 1.35928275005D+02/
+      DATA MZA10(1584),AWGT(1584)/  631360, 1.35939600000D+02/
+      DATA MZA10(1585),AWGT(1585)/  641360, 1.35947340000D+02/
+      DATA MZA10(1586),AWGT(1586)/  651360, 1.35961380000D+02/
+      DATA MZA10(1587),AWGT(1587)/  501370, 1.36945990000D+02/
+      DATA MZA10(1588),AWGT(1588)/  511370, 1.36935310000D+02/
+      DATA MZA10(1589),AWGT(1589)/  521370, 1.36925322010D+02/
+      DATA MZA10(1590),AWGT(1590)/  531370, 1.36917870008D+02/
+      DATA MZA10(1591),AWGT(1591)/  541370, 1.36911562001D+02/
+      DATA MZA10(1592),AWGT(1592)/  551370, 1.36907089005D+02/
+      DATA MZA10(1593),AWGT(1593)/  561370, 1.36905827004D+02/
+      DATA MZA10(1594),AWGT(1594)/  571370, 1.36906493006D+02/
+      DATA MZA10(1595),AWGT(1595)/  581370, 1.36907805006D+02/
+      DATA MZA10(1596),AWGT(1596)/  591370, 1.36910705005D+02/
+      DATA MZA10(1597),AWGT(1597)/  601370, 1.36914567001D+02/
+      DATA MZA10(1598),AWGT(1598)/  611370, 1.36920479005D+02/
+      DATA MZA10(1599),AWGT(1599)/  621370, 1.36926971007D+02/
+      DATA MZA10(1600),AWGT(1600)/  631370, 1.36935570000D+02/
+      DATA MZA10(1601),AWGT(1601)/  641370, 1.36945020000D+02/
+      DATA MZA10(1602),AWGT(1602)/  651370, 1.36955980000D+02/
+      DATA MZA10(1603),AWGT(1603)/  511380, 1.37940790000D+02/
+      DATA MZA10(1604),AWGT(1604)/  521380, 1.37929220000D+02/
+      DATA MZA10(1605),AWGT(1605)/  531380, 1.37922349006D+02/
+      DATA MZA10(1606),AWGT(1606)/  541380, 1.37913954005D+02/
+      DATA MZA10(1607),AWGT(1607)/  551380, 1.37911016007D+02/
+      DATA MZA10(1608),AWGT(1608)/  561380, 1.37905247002D+02/
+      DATA MZA10(1609),AWGT(1609)/  571380, 1.37907111009D+02/
+      DATA MZA10(1610),AWGT(1610)/  581380, 1.37905991003D+02/
+      DATA MZA10(1611),AWGT(1611)/  591380, 1.37910754006D+02/
+      DATA MZA10(1612),AWGT(1612)/  601380, 1.37911949010D+02/
+      DATA MZA10(1613),AWGT(1613)/  611380, 1.37919548003D+02/
+      DATA MZA10(1614),AWGT(1614)/  621380, 1.37923243010D+02/
+      DATA MZA10(1615),AWGT(1615)/  631380, 1.37933709000D+02/
+      DATA MZA10(1616),AWGT(1616)/  641380, 1.37940120000D+02/
+      DATA MZA10(1617),AWGT(1617)/  651380, 1.37953160000D+02/
+      DATA MZA10(1618),AWGT(1618)/  661380, 1.37962490000D+02/
+      DATA MZA10(1619),AWGT(1619)/  511390, 1.38945980000D+02/
+      DATA MZA10(1620),AWGT(1620)/  521390, 1.38934730000D+02/
+      DATA MZA10(1621),AWGT(1621)/  531390, 1.38926099005D+02/
+      DATA MZA10(1622),AWGT(1622)/  541390, 1.38918792009D+02/
+      DATA MZA10(1623),AWGT(1623)/  551390, 1.38913363010D+02/
+      DATA MZA10(1624),AWGT(1624)/  561390, 1.38908841003D+02/
+      DATA MZA10(1625),AWGT(1625)/  571390, 1.38906353003D+02/
+      DATA MZA10(1626),AWGT(1626)/  581390, 1.38906652007D+02/
+      DATA MZA10(1627),AWGT(1627)/  591390, 1.38908938004D+02/
+      DATA MZA10(1628),AWGT(1628)/  601390, 1.38911978003D+02/
+      DATA MZA10(1629),AWGT(1629)/  611390, 1.38916804001D+02/
+      DATA MZA10(1630),AWGT(1630)/  621390, 1.38922296006D+02/
+      DATA MZA10(1631),AWGT(1631)/  631390, 1.38929792003D+02/
+      DATA MZA10(1632),AWGT(1632)/  641390, 1.38938240000D+02/
+      DATA MZA10(1633),AWGT(1633)/  651390, 1.38948290000D+02/
+      DATA MZA10(1634),AWGT(1634)/  661390, 1.38959540000D+02/
+      DATA MZA10(1635),AWGT(1635)/  521400, 1.39938850000D+02/
+      DATA MZA10(1636),AWGT(1636)/  531400, 1.39931000000D+02/
+      DATA MZA10(1637),AWGT(1637)/  541400, 1.39921640009D+02/
+      DATA MZA10(1638),AWGT(1638)/  551400, 1.39917282004D+02/
+      DATA MZA10(1639),AWGT(1639)/  561400, 1.39910604005D+02/
+      DATA MZA10(1640),AWGT(1640)/  571400, 1.39909477006D+02/
+      DATA MZA10(1641),AWGT(1641)/  581400, 1.39905438007D+02/
+      DATA MZA10(1642),AWGT(1642)/  591400, 1.39909075009D+02/
+      DATA MZA10(1643),AWGT(1643)/  601400, 1.39909552000D+02/
+      DATA MZA10(1644),AWGT(1644)/  611400, 1.39916041008D+02/
+      DATA MZA10(1645),AWGT(1645)/  621400, 1.39918994007D+02/
+      DATA MZA10(1646),AWGT(1646)/  631400, 1.39928087006D+02/
+      DATA MZA10(1647),AWGT(1647)/  641400, 1.39933674000D+02/
+      DATA MZA10(1648),AWGT(1648)/  651400, 1.39945805000D+02/
+      DATA MZA10(1649),AWGT(1649)/  661400, 1.39954010000D+02/
+      DATA MZA10(1650),AWGT(1650)/  671400, 1.39968539000D+02/
+      DATA MZA10(1651),AWGT(1651)/  521410, 1.40944650000D+02/
+      DATA MZA10(1652),AWGT(1652)/  531410, 1.40935030000D+02/
+      DATA MZA10(1653),AWGT(1653)/  541410, 1.40926648000D+02/
+      DATA MZA10(1654),AWGT(1654)/  551410, 1.40920045008D+02/
+      DATA MZA10(1655),AWGT(1655)/  561410, 1.40914411000D+02/
+      DATA MZA10(1656),AWGT(1656)/  571410, 1.40910962002D+02/
+      DATA MZA10(1657),AWGT(1657)/  581410, 1.40908276003D+02/
+      DATA MZA10(1658),AWGT(1658)/  591410, 1.40907652008D+02/
+      DATA MZA10(1659),AWGT(1659)/  601410, 1.40909609009D+02/
+      DATA MZA10(1660),AWGT(1660)/  611410, 1.40913555001D+02/
+      DATA MZA10(1661),AWGT(1661)/  621410, 1.40918476005D+02/
+      DATA MZA10(1662),AWGT(1662)/  631410, 1.40924930007D+02/
+      DATA MZA10(1663),AWGT(1663)/  641410, 1.40932126000D+02/
+      DATA MZA10(1664),AWGT(1664)/  651410, 1.40941448000D+02/
+      DATA MZA10(1665),AWGT(1665)/  661410, 1.40951350000D+02/
+      DATA MZA10(1666),AWGT(1666)/  671410, 1.40963098000D+02/
+      DATA MZA10(1667),AWGT(1667)/  521420, 1.41949080000D+02/
+      DATA MZA10(1668),AWGT(1668)/  531420, 1.41940180000D+02/
+      DATA MZA10(1669),AWGT(1669)/  541420, 1.41929709006D+02/
+      DATA MZA10(1670),AWGT(1670)/  551420, 1.41924298009D+02/
+      DATA MZA10(1671),AWGT(1671)/  561420, 1.41916453004D+02/
+      DATA MZA10(1672),AWGT(1672)/  571420, 1.41914079001D+02/
+      DATA MZA10(1673),AWGT(1673)/  581420, 1.41909244002D+02/
+      DATA MZA10(1674),AWGT(1674)/  591420, 1.41910044008D+02/
+      DATA MZA10(1675),AWGT(1675)/  601420, 1.41907723003D+02/
+      DATA MZA10(1676),AWGT(1676)/  611420, 1.41912874005D+02/
+      DATA MZA10(1677),AWGT(1677)/  621420, 1.41915197006D+02/
+      DATA MZA10(1678),AWGT(1678)/  631420, 1.41923434009D+02/
+      DATA MZA10(1679),AWGT(1679)/  641420, 1.41928116000D+02/
+      DATA MZA10(1680),AWGT(1680)/  651420, 1.41938744000D+02/
+      DATA MZA10(1681),AWGT(1681)/  661420, 1.41946366000D+02/
+      DATA MZA10(1682),AWGT(1682)/  671420, 1.41959770000D+02/
+      DATA MZA10(1683),AWGT(1683)/  531430, 1.42944560000D+02/
+      DATA MZA10(1684),AWGT(1684)/  541430, 1.42935110000D+02/
+      DATA MZA10(1685),AWGT(1685)/  551430, 1.42927351007D+02/
+      DATA MZA10(1686),AWGT(1686)/  561430, 1.42920626007D+02/
+      DATA MZA10(1687),AWGT(1687)/  571430, 1.42916062007D+02/
+      DATA MZA10(1688),AWGT(1688)/  581430, 1.42912385009D+02/
+      DATA MZA10(1689),AWGT(1689)/  591430, 1.42910816009D+02/
+      DATA MZA10(1690),AWGT(1690)/  601430, 1.42909814003D+02/
+      DATA MZA10(1691),AWGT(1691)/  611430, 1.42910932006D+02/
+      DATA MZA10(1692),AWGT(1692)/  621430, 1.42914628003D+02/
+      DATA MZA10(1693),AWGT(1693)/  631430, 1.42920297005D+02/
+      DATA MZA10(1694),AWGT(1694)/  641430, 1.42926749005D+02/
+      DATA MZA10(1695),AWGT(1695)/  651430, 1.42935121000D+02/
+      DATA MZA10(1696),AWGT(1696)/  661430, 1.42943830000D+02/
+      DATA MZA10(1697),AWGT(1697)/  671430, 1.42954610000D+02/
+      DATA MZA10(1698),AWGT(1698)/  681430, 1.42966340000D+02/
+      DATA MZA10(1699),AWGT(1699)/  531440, 1.43949990000D+02/
+      DATA MZA10(1700),AWGT(1700)/  541440, 1.43938510000D+02/
+      DATA MZA10(1701),AWGT(1701)/  551440, 1.43932076009D+02/
+      DATA MZA10(1702),AWGT(1702)/  561440, 1.43922952009D+02/
+      DATA MZA10(1703),AWGT(1703)/  571440, 1.43919599006D+02/
+      DATA MZA10(1704),AWGT(1704)/  581440, 1.43913647003D+02/
+      DATA MZA10(1705),AWGT(1705)/  591440, 1.43913305002D+02/
+      DATA MZA10(1706),AWGT(1706)/  601440, 1.43910087003D+02/
+      DATA MZA10(1707),AWGT(1707)/  611440, 1.43912590008D+02/
+      DATA MZA10(1708),AWGT(1708)/  621440, 1.43911999005D+02/
+      DATA MZA10(1709),AWGT(1709)/  631440, 1.43918816008D+02/
+      DATA MZA10(1710),AWGT(1710)/  641440, 1.43922963000D+02/
+      DATA MZA10(1711),AWGT(1711)/  651440, 1.43933045000D+02/
+      DATA MZA10(1712),AWGT(1712)/  661440, 1.43939254000D+02/
+      DATA MZA10(1713),AWGT(1713)/  671440, 1.43951480000D+02/
+      DATA MZA10(1714),AWGT(1714)/  681440, 1.43960380000D+02/
+      DATA MZA10(1715),AWGT(1715)/  541450, 1.44944070000D+02/
+      DATA MZA10(1716),AWGT(1716)/  551450, 1.44935526002D+02/
+      DATA MZA10(1717),AWGT(1717)/  561450, 1.44927627000D+02/
+      DATA MZA10(1718),AWGT(1718)/  571450, 1.44921645004D+02/
+      DATA MZA10(1719),AWGT(1719)/  581450, 1.44917233001D+02/
+      DATA MZA10(1720),AWGT(1720)/  591450, 1.44914511007D+02/
+      DATA MZA10(1721),AWGT(1721)/  601450, 1.44912573006D+02/
+      DATA MZA10(1722),AWGT(1722)/  611450, 1.44912749000D+02/
+      DATA MZA10(1723),AWGT(1723)/  621450, 1.44913410004D+02/
+      DATA MZA10(1724),AWGT(1724)/  631450, 1.44916265002D+02/
+      DATA MZA10(1725),AWGT(1725)/  641450, 1.44921709003D+02/
+      DATA MZA10(1726),AWGT(1726)/  651450, 1.44929274000D+02/
+      DATA MZA10(1727),AWGT(1727)/  661450, 1.44937425000D+02/
+      DATA MZA10(1728),AWGT(1728)/  671450, 1.44947200000D+02/
+      DATA MZA10(1729),AWGT(1729)/  681450, 1.44957390000D+02/
+      DATA MZA10(1730),AWGT(1730)/  691450, 1.44970073000D+02/
+      DATA MZA10(1731),AWGT(1731)/  541460, 1.45947750000D+02/
+      DATA MZA10(1732),AWGT(1732)/  551460, 1.45940289004D+02/
+      DATA MZA10(1733),AWGT(1733)/  561460, 1.45930219006D+02/
+      DATA MZA10(1734),AWGT(1734)/  571460, 1.45925793005D+02/
+      DATA MZA10(1735),AWGT(1735)/  581460, 1.45918759000D+02/
+      DATA MZA10(1736),AWGT(1736)/  591460, 1.45917644003D+02/
+      DATA MZA10(1737),AWGT(1737)/  601460, 1.45913116009D+02/
+      DATA MZA10(1738),AWGT(1738)/  611460, 1.45914696003D+02/
+      DATA MZA10(1739),AWGT(1739)/  621460, 1.45913040009D+02/
+      DATA MZA10(1740),AWGT(1740)/  631460, 1.45917205008D+02/
+      DATA MZA10(1741),AWGT(1741)/  641460, 1.45918310006D+02/
+      DATA MZA10(1742),AWGT(1742)/  651460, 1.45927246006D+02/
+      DATA MZA10(1743),AWGT(1743)/  661460, 1.45932845004D+02/
+      DATA MZA10(1744),AWGT(1744)/  671460, 1.45944640000D+02/
+      DATA MZA10(1745),AWGT(1745)/  681460, 1.45952000000D+02/
+      DATA MZA10(1746),AWGT(1746)/  691460, 1.45966425000D+02/
+      DATA MZA10(1747),AWGT(1747)/  541470, 1.46953560000D+02/
+      DATA MZA10(1748),AWGT(1748)/  551470, 1.46944155000D+02/
+      DATA MZA10(1749),AWGT(1749)/  561470, 1.46934945000D+02/
+      DATA MZA10(1750),AWGT(1750)/  571470, 1.46928235003D+02/
+      DATA MZA10(1751),AWGT(1751)/  581470, 1.46922673010D+02/
+      DATA MZA10(1752),AWGT(1752)/  591470, 1.46918995010D+02/
+      DATA MZA10(1753),AWGT(1753)/  601470, 1.46916100004D+02/
+      DATA MZA10(1754),AWGT(1754)/  611470, 1.46915138005D+02/
+      DATA MZA10(1755),AWGT(1755)/  621470, 1.46914897009D+02/
+      DATA MZA10(1756),AWGT(1756)/  631470, 1.46916746001D+02/
+      DATA MZA10(1757),AWGT(1757)/  641470, 1.46919094004D+02/
+      DATA MZA10(1758),AWGT(1758)/  651470, 1.46924044006D+02/
+      DATA MZA10(1759),AWGT(1759)/  661470, 1.46931091005D+02/
+      DATA MZA10(1760),AWGT(1760)/  671470, 1.46940056000D+02/
+      DATA MZA10(1761),AWGT(1761)/  681470, 1.46949490000D+02/
+      DATA MZA10(1762),AWGT(1762)/  691470, 1.46960961000D+02/
+      DATA MZA10(1763),AWGT(1763)/  551480, 1.47949218002D+02/
+      DATA MZA10(1764),AWGT(1764)/  561480, 1.47937720000D+02/
+      DATA MZA10(1765),AWGT(1765)/  571480, 1.47932228009D+02/
+      DATA MZA10(1766),AWGT(1766)/  581480, 1.47924432004D+02/
+      DATA MZA10(1767),AWGT(1767)/  591480, 1.47922135000D+02/
+      DATA MZA10(1768),AWGT(1768)/  601480, 1.47916893003D+02/
+      DATA MZA10(1769),AWGT(1769)/  611480, 1.47917474006D+02/
+      DATA MZA10(1770),AWGT(1770)/  621480, 1.47914822007D+02/
+      DATA MZA10(1771),AWGT(1771)/  631480, 1.47918085009D+02/
+      DATA MZA10(1772),AWGT(1772)/  641480, 1.47918114005D+02/
+      DATA MZA10(1773),AWGT(1773)/  651480, 1.47924271007D+02/
+      DATA MZA10(1774),AWGT(1774)/  661480, 1.47927149008D+02/
+      DATA MZA10(1775),AWGT(1775)/  671480, 1.47937718000D+02/
+      DATA MZA10(1776),AWGT(1776)/  681480, 1.47944550000D+02/
+      DATA MZA10(1777),AWGT(1777)/  691480, 1.47957840000D+02/
+      DATA MZA10(1778),AWGT(1778)/  701480, 1.47967420000D+02/
+      DATA MZA10(1779),AWGT(1779)/  551490, 1.48952930000D+02/
+      DATA MZA10(1780),AWGT(1780)/  561490, 1.48942580000D+02/
+      DATA MZA10(1781),AWGT(1781)/  571490, 1.48934734000D+02/
+      DATA MZA10(1782),AWGT(1782)/  581490, 1.48928399009D+02/
+      DATA MZA10(1783),AWGT(1783)/  591490, 1.48923717007D+02/
+      DATA MZA10(1784),AWGT(1784)/  601490, 1.48920148008D+02/
+      DATA MZA10(1785),AWGT(1785)/  611490, 1.48918334002D+02/
+      DATA MZA10(1786),AWGT(1786)/  621490, 1.48917184007D+02/
+      DATA MZA10(1787),AWGT(1787)/  631490, 1.48917931002D+02/
+      DATA MZA10(1788),AWGT(1788)/  641490, 1.48919340009D+02/
+      DATA MZA10(1789),AWGT(1789)/  651490, 1.48923245009D+02/
+      DATA MZA10(1790),AWGT(1790)/  661490, 1.48927304008D+02/
+      DATA MZA10(1791),AWGT(1791)/  671490, 1.48933774008D+02/
+      DATA MZA10(1792),AWGT(1792)/  681490, 1.48942306000D+02/
+      DATA MZA10(1793),AWGT(1793)/  691490, 1.48952720000D+02/
+      DATA MZA10(1794),AWGT(1794)/  701490, 1.48964040000D+02/
+      DATA MZA10(1795),AWGT(1795)/  551500, 1.49958170000D+02/
+      DATA MZA10(1796),AWGT(1796)/  561500, 1.49945680000D+02/
+      DATA MZA10(1797),AWGT(1797)/  571500, 1.49938770000D+02/
+      DATA MZA10(1798),AWGT(1798)/  581500, 1.49930408009D+02/
+      DATA MZA10(1799),AWGT(1799)/  591500, 1.49926672010D+02/
+      DATA MZA10(1800),AWGT(1800)/  601500, 1.49920890009D+02/
+      DATA MZA10(1801),AWGT(1801)/  611500, 1.49920983006D+02/
+      DATA MZA10(1802),AWGT(1802)/  621500, 1.49917275005D+02/
+      DATA MZA10(1803),AWGT(1803)/  631500, 1.49919701008D+02/
+      DATA MZA10(1804),AWGT(1804)/  641500, 1.49918658009D+02/
+      DATA MZA10(1805),AWGT(1805)/  651500, 1.49923659007D+02/
+      DATA MZA10(1806),AWGT(1806)/  661500, 1.49925585002D+02/
+      DATA MZA10(1807),AWGT(1807)/  671500, 1.49933496002D+02/
+      DATA MZA10(1808),AWGT(1808)/  681500, 1.49937913008D+02/
+      DATA MZA10(1809),AWGT(1809)/  691500, 1.49949960000D+02/
+      DATA MZA10(1810),AWGT(1810)/  701500, 1.49958420000D+02/
+      DATA MZA10(1811),AWGT(1811)/  711500, 1.49973228000D+02/
+      DATA MZA10(1812),AWGT(1812)/  551510, 1.50962190000D+02/
+      DATA MZA10(1813),AWGT(1813)/  561510, 1.50950810000D+02/
+      DATA MZA10(1814),AWGT(1814)/  571510, 1.50941720000D+02/
+      DATA MZA10(1815),AWGT(1815)/  581510, 1.50933976002D+02/
+      DATA MZA10(1816),AWGT(1816)/  591510, 1.50928318006D+02/
+      DATA MZA10(1817),AWGT(1817)/  601510, 1.50923828009D+02/
+      DATA MZA10(1818),AWGT(1818)/  611510, 1.50921206010D+02/
+      DATA MZA10(1819),AWGT(1819)/  621510, 1.50919932004D+02/
+      DATA MZA10(1820),AWGT(1820)/  631510, 1.50919850002D+02/
+      DATA MZA10(1821),AWGT(1821)/  641510, 1.50920348005D+02/
+      DATA MZA10(1822),AWGT(1822)/  651510, 1.50923102005D+02/
+      DATA MZA10(1823),AWGT(1823)/  661510, 1.50926184006D+02/
+      DATA MZA10(1824),AWGT(1824)/  671510, 1.50931688001D+02/
+      DATA MZA10(1825),AWGT(1825)/  681510, 1.50937448009D+02/
+      DATA MZA10(1826),AWGT(1826)/  691510, 1.50945483005D+02/
+      DATA MZA10(1827),AWGT(1827)/  701510, 1.50955400008D+02/
+      DATA MZA10(1828),AWGT(1828)/  711510, 1.50967577000D+02/
+      DATA MZA10(1829),AWGT(1829)/  561520, 1.51954270000D+02/
+      DATA MZA10(1830),AWGT(1830)/  571520, 1.51946250000D+02/
+      DATA MZA10(1831),AWGT(1831)/  581520, 1.51936540000D+02/
+      DATA MZA10(1832),AWGT(1832)/  591520, 1.51931499002D+02/
+      DATA MZA10(1833),AWGT(1833)/  601520, 1.51924682002D+02/
+      DATA MZA10(1834),AWGT(1834)/  611520, 1.51923496008D+02/
+      DATA MZA10(1835),AWGT(1835)/  621520, 1.51919732004D+02/
+      DATA MZA10(1836),AWGT(1836)/  631520, 1.51921744005D+02/
+      DATA MZA10(1837),AWGT(1837)/  641520, 1.51919790010D+02/
+      DATA MZA10(1838),AWGT(1838)/  651520, 1.51924074004D+02/
+      DATA MZA10(1839),AWGT(1839)/  661520, 1.51924718003D+02/
+      DATA MZA10(1840),AWGT(1840)/  671520, 1.51931713007D+02/
+      DATA MZA10(1841),AWGT(1841)/  681520, 1.51935050004D+02/
+      DATA MZA10(1842),AWGT(1842)/  691520, 1.51944422000D+02/
+      DATA MZA10(1843),AWGT(1843)/  701520, 1.51950288009D+02/
+      DATA MZA10(1844),AWGT(1844)/  711520, 1.51964120000D+02/
+      DATA MZA10(1845),AWGT(1845)/  561530, 1.52959610000D+02/
+      DATA MZA10(1846),AWGT(1846)/  571530, 1.52949620000D+02/
+      DATA MZA10(1847),AWGT(1847)/  581530, 1.52940580000D+02/
+      DATA MZA10(1848),AWGT(1848)/  591530, 1.52933838009D+02/
+      DATA MZA10(1849),AWGT(1849)/  601530, 1.52927698002D+02/
+      DATA MZA10(1850),AWGT(1850)/  611530, 1.52924116009D+02/
+      DATA MZA10(1851),AWGT(1851)/  621530, 1.52922097004D+02/
+      DATA MZA10(1852),AWGT(1852)/  631530, 1.52921230003D+02/
+      DATA MZA10(1853),AWGT(1853)/  641530, 1.52921749005D+02/
+      DATA MZA10(1854),AWGT(1854)/  651530, 1.52923434006D+02/
+      DATA MZA10(1855),AWGT(1855)/  661530, 1.52925764007D+02/
+      DATA MZA10(1856),AWGT(1856)/  671530, 1.52930198008D+02/
+      DATA MZA10(1857),AWGT(1857)/  681530, 1.52935063005D+02/
+      DATA MZA10(1858),AWGT(1858)/  691530, 1.52942012001D+02/
+      DATA MZA10(1859),AWGT(1859)/  701530, 1.52949480000D+02/
+      DATA MZA10(1860),AWGT(1860)/  711530, 1.52958767003D+02/
+      DATA MZA10(1861),AWGT(1861)/  721530, 1.52970690000D+02/
+      DATA MZA10(1862),AWGT(1862)/  571540, 1.53954500000D+02/
+      DATA MZA10(1863),AWGT(1863)/  581540, 1.53943420000D+02/
+      DATA MZA10(1864),AWGT(1864)/  591540, 1.53937518002D+02/
+      DATA MZA10(1865),AWGT(1865)/  601540, 1.53929477003D+02/
+      DATA MZA10(1866),AWGT(1866)/  611540, 1.53926463009D+02/
+      DATA MZA10(1867),AWGT(1867)/  621540, 1.53922209003D+02/
+      DATA MZA10(1868),AWGT(1868)/  631540, 1.53922979002D+02/
+      DATA MZA10(1869),AWGT(1869)/  641540, 1.53920865006D+02/
+      DATA MZA10(1870),AWGT(1870)/  651540, 1.53924678000D+02/
+      DATA MZA10(1871),AWGT(1871)/  661540, 1.53924424005D+02/
+      DATA MZA10(1872),AWGT(1872)/  671540, 1.53930601006D+02/
+      DATA MZA10(1873),AWGT(1873)/  681540, 1.53932783001D+02/
+      DATA MZA10(1874),AWGT(1874)/  691540, 1.53941567008D+02/
+      DATA MZA10(1875),AWGT(1875)/  701540, 1.53946393009D+02/
+      DATA MZA10(1876),AWGT(1876)/  711540, 1.53957522000D+02/
+      DATA MZA10(1877),AWGT(1877)/  721540, 1.53964860000D+02/
+      DATA MZA10(1878),AWGT(1878)/  571550, 1.54958350000D+02/
+      DATA MZA10(1879),AWGT(1879)/  581550, 1.54948040000D+02/
+      DATA MZA10(1880),AWGT(1880)/  591550, 1.54940120000D+02/
+      DATA MZA10(1881),AWGT(1881)/  601550, 1.54932932000D+02/
+      DATA MZA10(1882),AWGT(1882)/  611550, 1.54928101003D+02/
+      DATA MZA10(1883),AWGT(1883)/  621550, 1.54924640002D+02/
+      DATA MZA10(1884),AWGT(1884)/  631550, 1.54922893003D+02/
+      DATA MZA10(1885),AWGT(1885)/  641550, 1.54922622000D+02/
+      DATA MZA10(1886),AWGT(1886)/  651550, 1.54923505002D+02/
+      DATA MZA10(1887),AWGT(1887)/  661550, 1.54925753008D+02/
+      DATA MZA10(1888),AWGT(1888)/  671550, 1.54929103005D+02/
+      DATA MZA10(1889),AWGT(1889)/  681550, 1.54933208009D+02/
+      DATA MZA10(1890),AWGT(1890)/  691550, 1.54939199005D+02/
+      DATA MZA10(1891),AWGT(1891)/  701550, 1.54945782003D+02/
+      DATA MZA10(1892),AWGT(1892)/  711550, 1.54954316002D+02/
+      DATA MZA10(1893),AWGT(1893)/  721550, 1.54963390000D+02/
+      DATA MZA10(1894),AWGT(1894)/  731550, 1.54974592000D+02/
+      DATA MZA10(1895),AWGT(1895)/  581560, 1.55951260000D+02/
+      DATA MZA10(1896),AWGT(1896)/  591560, 1.55944270000D+02/
+      DATA MZA10(1897),AWGT(1897)/  601560, 1.55935018001D+02/
+      DATA MZA10(1898),AWGT(1898)/  611560, 1.55931056007D+02/
+      DATA MZA10(1899),AWGT(1899)/  621560, 1.55925527009D+02/
+      DATA MZA10(1900),AWGT(1900)/  631560, 1.55924752002D+02/
+      DATA MZA10(1901),AWGT(1901)/  641560, 1.55922122007D+02/
+      DATA MZA10(1902),AWGT(1902)/  651560, 1.55924747002D+02/
+      DATA MZA10(1903),AWGT(1903)/  661560, 1.55924283001D+02/
+      DATA MZA10(1904),AWGT(1904)/  671560, 1.55929839000D+02/
+      DATA MZA10(1905),AWGT(1905)/  681560, 1.55931064007D+02/
+      DATA MZA10(1906),AWGT(1906)/  691560, 1.55938979009D+02/
+      DATA MZA10(1907),AWGT(1907)/  701560, 1.55942818002D+02/
+      DATA MZA10(1908),AWGT(1908)/  711560, 1.55953032005D+02/
+      DATA MZA10(1909),AWGT(1909)/  721560, 1.55959364000D+02/
+      DATA MZA10(1910),AWGT(1910)/  731560, 1.55972303000D+02/
+      DATA MZA10(1911),AWGT(1911)/  581570, 1.56956340000D+02/
+      DATA MZA10(1912),AWGT(1912)/  591570, 1.56947430000D+02/
+      DATA MZA10(1913),AWGT(1913)/  601570, 1.56939030000D+02/
+      DATA MZA10(1914),AWGT(1914)/  611570, 1.56933039004D+02/
+      DATA MZA10(1915),AWGT(1915)/  621570, 1.56928358007D+02/
+      DATA MZA10(1916),AWGT(1916)/  631570, 1.56925423006D+02/
+      DATA MZA10(1917),AWGT(1917)/  641570, 1.56923960001D+02/
+      DATA MZA10(1918),AWGT(1918)/  651570, 1.56924024006D+02/
+      DATA MZA10(1919),AWGT(1919)/  661570, 1.56925466001D+02/
+      DATA MZA10(1920),AWGT(1920)/  671570, 1.56928256002D+02/
+      DATA MZA10(1921),AWGT(1921)/  681570, 1.56931916000D+02/
+      DATA MZA10(1922),AWGT(1922)/  691570, 1.56936973000D+02/
+      DATA MZA10(1923),AWGT(1923)/  701570, 1.56942627008D+02/
+      DATA MZA10(1924),AWGT(1924)/  711570, 1.56950098003D+02/
+      DATA MZA10(1925),AWGT(1925)/  721570, 1.56958396000D+02/
+      DATA MZA10(1926),AWGT(1926)/  731570, 1.56968192004D+02/
+      DATA MZA10(1927),AWGT(1927)/  591580, 1.57951980000D+02/
+      DATA MZA10(1928),AWGT(1928)/  601580, 1.57941600000D+02/
+      DATA MZA10(1929),AWGT(1929)/  611580, 1.57936561004D+02/
+      DATA MZA10(1930),AWGT(1930)/  621580, 1.57929991003D+02/
+      DATA MZA10(1931),AWGT(1931)/  631580, 1.57927845003D+02/
+      DATA MZA10(1932),AWGT(1932)/  641580, 1.57924103009D+02/
+      DATA MZA10(1933),AWGT(1933)/  651580, 1.57925413001D+02/
+      DATA MZA10(1934),AWGT(1934)/  661580, 1.57924409005D+02/
+      DATA MZA10(1935),AWGT(1935)/  671580, 1.57928941000D+02/
+      DATA MZA10(1936),AWGT(1936)/  681580, 1.57929893005D+02/
+      DATA MZA10(1937),AWGT(1937)/  691580, 1.57936979005D+02/
+      DATA MZA10(1938),AWGT(1938)/  701580, 1.57939865006D+02/
+      DATA MZA10(1939),AWGT(1939)/  711580, 1.57949313003D+02/
+      DATA MZA10(1940),AWGT(1940)/  721580, 1.57954799004D+02/
+      DATA MZA10(1941),AWGT(1941)/  731580, 1.57966699000D+02/
+      DATA MZA10(1942),AWGT(1942)/  741580, 1.57974562000D+02/
+      DATA MZA10(1943),AWGT(1943)/  591590, 1.58955500000D+02/
+      DATA MZA10(1944),AWGT(1944)/  601590, 1.58946090000D+02/
+      DATA MZA10(1945),AWGT(1945)/  611590, 1.58938970000D+02/
+      DATA MZA10(1946),AWGT(1946)/  621590, 1.58933211003D+02/
+      DATA MZA10(1947),AWGT(1947)/  631590, 1.58929088009D+02/
+      DATA MZA10(1948),AWGT(1948)/  641590, 1.58926388007D+02/
+      DATA MZA10(1949),AWGT(1949)/  651590, 1.58925346008D+02/
+      DATA MZA10(1950),AWGT(1950)/  661590, 1.58925739002D+02/
+      DATA MZA10(1951),AWGT(1951)/  671590, 1.58927711010D+02/
+      DATA MZA10(1952),AWGT(1952)/  681590, 1.58930684001D+02/
+      DATA MZA10(1953),AWGT(1953)/  691590, 1.58934975000D+02/
+      DATA MZA10(1954),AWGT(1954)/  701590, 1.58940050001D+02/
+      DATA MZA10(1955),AWGT(1955)/  711590, 1.58946628008D+02/
+      DATA MZA10(1956),AWGT(1956)/  721590, 1.58953994009D+02/
+      DATA MZA10(1957),AWGT(1957)/  731590, 1.58963018002D+02/
+      DATA MZA10(1958),AWGT(1958)/  741590, 1.58972918000D+02/
+      DATA MZA10(1959),AWGT(1959)/  601600, 1.59949090000D+02/
+      DATA MZA10(1960),AWGT(1960)/  611600, 1.59942990000D+02/
+      DATA MZA10(1961),AWGT(1961)/  621600, 1.59935140000D+02/
+      DATA MZA10(1962),AWGT(1962)/  631600, 1.59931971000D+02/
+      DATA MZA10(1963),AWGT(1963)/  641600, 1.59927054001D+02/
+      DATA MZA10(1964),AWGT(1964)/  651600, 1.59927167006D+02/
+      DATA MZA10(1965),AWGT(1965)/  661600, 1.59925197005D+02/
+      DATA MZA10(1966),AWGT(1966)/  671600, 1.59928729005D+02/
+      DATA MZA10(1967),AWGT(1967)/  681600, 1.59929083003D+02/
+      DATA MZA10(1968),AWGT(1968)/  691600, 1.59935262008D+02/
+      DATA MZA10(1969),AWGT(1969)/  701600, 1.59937552003D+02/
+      DATA MZA10(1970),AWGT(1970)/  711600, 1.59946033000D+02/
+      DATA MZA10(1971),AWGT(1971)/  721600, 1.59950684004D+02/
+      DATA MZA10(1972),AWGT(1972)/  731600, 1.59961486001D+02/
+      DATA MZA10(1973),AWGT(1973)/  741600, 1.59968478008D+02/
+      DATA MZA10(1974),AWGT(1974)/  751600, 1.59982115000D+02/
+      DATA MZA10(1975),AWGT(1975)/  601610, 1.60953880000D+02/
+      DATA MZA10(1976),AWGT(1976)/  611610, 1.60945860000D+02/
+      DATA MZA10(1977),AWGT(1977)/  621610, 1.60938830000D+02/
+      DATA MZA10(1978),AWGT(1978)/  631610, 1.60933680000D+02/
+      DATA MZA10(1979),AWGT(1979)/  641610, 1.60929669002D+02/
+      DATA MZA10(1980),AWGT(1980)/  651610, 1.60927569009D+02/
+      DATA MZA10(1981),AWGT(1981)/  661610, 1.60926933004D+02/
+      DATA MZA10(1982),AWGT(1982)/  671610, 1.60927854008D+02/
+      DATA MZA10(1983),AWGT(1983)/  681610, 1.60929995003D+02/
+      DATA MZA10(1984),AWGT(1984)/  691610, 1.60933549000D+02/
+      DATA MZA10(1985),AWGT(1985)/  701610, 1.60937901007D+02/
+      DATA MZA10(1986),AWGT(1986)/  711610, 1.60943572000D+02/
+      DATA MZA10(1987),AWGT(1987)/  721610, 1.60950274008D+02/
+      DATA MZA10(1988),AWGT(1988)/  731610, 1.60958417000D+02/
+      DATA MZA10(1989),AWGT(1989)/  741610, 1.60967357000D+02/
+      DATA MZA10(1990),AWGT(1990)/  751610, 1.60977589001D+02/
+      DATA MZA10(1991),AWGT(1991)/  611620, 1.61950290000D+02/
+      DATA MZA10(1992),AWGT(1992)/  621620, 1.61941220000D+02/
+      DATA MZA10(1993),AWGT(1993)/  631620, 1.61937040000D+02/
+      DATA MZA10(1994),AWGT(1994)/  641620, 1.61930984008D+02/
+      DATA MZA10(1995),AWGT(1995)/  651620, 1.61929488002D+02/
+      DATA MZA10(1996),AWGT(1996)/  661620, 1.61926798004D+02/
+      DATA MZA10(1997),AWGT(1997)/  671620, 1.61929095005D+02/
+      DATA MZA10(1998),AWGT(1998)/  681620, 1.61928778003D+02/
+      DATA MZA10(1999),AWGT(1999)/  691620, 1.61933994007D+02/
+      DATA MZA10(2000),AWGT(2000)/  701620, 1.61935768002D+02/
+      DATA MZA10(2001),AWGT(2001)/  711620, 1.61943277003D+02/
+      DATA MZA10(2002),AWGT(2002)/  721620, 1.61947210005D+02/
+      DATA MZA10(2003),AWGT(2003)/  731620, 1.61957291009D+02/
+      DATA MZA10(2004),AWGT(2004)/  741620, 1.61963497004D+02/
+      DATA MZA10(2005),AWGT(2005)/  751620, 1.61976002000D+02/
+      DATA MZA10(2006),AWGT(2006)/  761620, 1.61984431000D+02/
+      DATA MZA10(2007),AWGT(2007)/  611630, 1.62953680000D+02/
+      DATA MZA10(2008),AWGT(2008)/  621630, 1.62945360000D+02/
+      DATA MZA10(2009),AWGT(2009)/  631630, 1.62939210000D+02/
+      DATA MZA10(2010),AWGT(2010)/  641630, 1.62933990000D+02/
+      DATA MZA10(2011),AWGT(2011)/  651630, 1.62930647005D+02/
+      DATA MZA10(2012),AWGT(2012)/  661630, 1.62928731002D+02/
+      DATA MZA10(2013),AWGT(2013)/  671630, 1.62928733009D+02/
+      DATA MZA10(2014),AWGT(2014)/  681630, 1.62930032007D+02/
+      DATA MZA10(2015),AWGT(2015)/  691630, 1.62932651001D+02/
+      DATA MZA10(2016),AWGT(2016)/  701630, 1.62936334003D+02/
+      DATA MZA10(2017),AWGT(2017)/  711630, 1.62941179000D+02/
+      DATA MZA10(2018),AWGT(2018)/  721630, 1.62947089000D+02/
+      DATA MZA10(2019),AWGT(2019)/  731630, 1.62954330003D+02/
+      DATA MZA10(2020),AWGT(2020)/  741630, 1.62962523005D+02/
+      DATA MZA10(2021),AWGT(2021)/  751630, 1.62972080005D+02/
+      DATA MZA10(2022),AWGT(2022)/  761630, 1.62982690000D+02/
+      DATA MZA10(2023),AWGT(2023)/  621640, 1.63948280000D+02/
+      DATA MZA10(2024),AWGT(2024)/  631640, 1.63942990000D+02/
+      DATA MZA10(2025),AWGT(2025)/  641640, 1.63935860000D+02/
+      DATA MZA10(2026),AWGT(2026)/  651640, 1.63933350008D+02/
+      DATA MZA10(2027),AWGT(2027)/  661640, 1.63929174008D+02/
+      DATA MZA10(2028),AWGT(2028)/  671640, 1.63930233005D+02/
+      DATA MZA10(2029),AWGT(2029)/  681640, 1.63929200002D+02/
+      DATA MZA10(2030),AWGT(2030)/  691640, 1.63933560000D+02/
+      DATA MZA10(2031),AWGT(2031)/  701640, 1.63934489004D+02/
+      DATA MZA10(2032),AWGT(2032)/  711640, 1.63941339000D+02/
+      DATA MZA10(2033),AWGT(2033)/  721640, 1.63944367003D+02/
+      DATA MZA10(2034),AWGT(2034)/  731640, 1.63953534000D+02/
+      DATA MZA10(2035),AWGT(2035)/  741640, 1.63958954004D+02/
+      DATA MZA10(2036),AWGT(2036)/  751640, 1.63970323000D+02/
+      DATA MZA10(2037),AWGT(2037)/  761640, 1.63978035006D+02/
+      DATA MZA10(2038),AWGT(2038)/  771640, 1.63992201000D+02/
+      DATA MZA10(2039),AWGT(2039)/  621650, 1.64952980000D+02/
+      DATA MZA10(2040),AWGT(2040)/  631650, 1.64945720000D+02/
+      DATA MZA10(2041),AWGT(2041)/  641650, 1.64939380000D+02/
+      DATA MZA10(2042),AWGT(2042)/  651650, 1.64934880000D+02/
+      DATA MZA10(2043),AWGT(2043)/  661650, 1.64931703003D+02/
+      DATA MZA10(2044),AWGT(2044)/  671650, 1.64930322001D+02/
+      DATA MZA10(2045),AWGT(2045)/  681650, 1.64930726000D+02/
+      DATA MZA10(2046),AWGT(2046)/  691650, 1.64932435005D+02/
+      DATA MZA10(2047),AWGT(2047)/  701650, 1.64935279000D+02/
+      DATA MZA10(2048),AWGT(2048)/  711650, 1.64939406007D+02/
+      DATA MZA10(2049),AWGT(2049)/  721650, 1.64944567000D+02/
+      DATA MZA10(2050),AWGT(2050)/  731650, 1.64950772005D+02/
+      DATA MZA10(2051),AWGT(2051)/  741650, 1.64958279009D+02/
+      DATA MZA10(2052),AWGT(2052)/  751650, 1.64967088006D+02/
+      DATA MZA10(2053),AWGT(2053)/  761650, 1.64976762000D+02/
+      DATA MZA10(2054),AWGT(2054)/  771650, 1.64987520000D+02/
+      DATA MZA10(2055),AWGT(2055)/  631660, 1.65949970000D+02/
+      DATA MZA10(2056),AWGT(2056)/  641660, 1.65941600000D+02/
+      DATA MZA10(2057),AWGT(2057)/  651660, 1.65937991010D+02/
+      DATA MZA10(2058),AWGT(2058)/  661660, 1.65932806007D+02/
+      DATA MZA10(2059),AWGT(2059)/  671660, 1.65932284002D+02/
+      DATA MZA10(2060),AWGT(2060)/  681660, 1.65930293001D+02/
+      DATA MZA10(2061),AWGT(2061)/  691660, 1.65933554001D+02/
+      DATA MZA10(2062),AWGT(2062)/  701660, 1.65933882000D+02/
+      DATA MZA10(2063),AWGT(2063)/  711660, 1.65939859000D+02/
+      DATA MZA10(2064),AWGT(2064)/  721660, 1.65942180000D+02/
+      DATA MZA10(2065),AWGT(2065)/  731660, 1.65950512000D+02/
+      DATA MZA10(2066),AWGT(2066)/  741660, 1.65955027003D+02/
+      DATA MZA10(2067),AWGT(2067)/  751660, 1.65965808000D+02/
+      DATA MZA10(2068),AWGT(2068)/  761660, 1.65972690008D+02/
+      DATA MZA10(2069),AWGT(2069)/  771660, 1.65985824000D+02/
+      DATA MZA10(2070),AWGT(2070)/  781660, 1.65994855000D+02/
+      DATA MZA10(2071),AWGT(2071)/  631670, 1.66953210000D+02/
+      DATA MZA10(2072),AWGT(2072)/  641670, 1.66945570000D+02/
+      DATA MZA10(2073),AWGT(2073)/  651670, 1.66940050000D+02/
+      DATA MZA10(2074),AWGT(2074)/  661670, 1.66935655005D+02/
+      DATA MZA10(2075),AWGT(2075)/  671670, 1.66933132006D+02/
+      DATA MZA10(2076),AWGT(2076)/  681670, 1.66932048002D+02/
+      DATA MZA10(2077),AWGT(2077)/  691670, 1.66932851006D+02/
+      DATA MZA10(2078),AWGT(2078)/  701670, 1.66934949006D+02/
+      DATA MZA10(2079),AWGT(2079)/  711670, 1.66938270000D+02/
+      DATA MZA10(2080),AWGT(2080)/  721670, 1.66942600000D+02/
+      DATA MZA10(2081),AWGT(2081)/  731670, 1.66948093000D+02/
+      DATA MZA10(2082),AWGT(2082)/  741670, 1.66954816000D+02/
+      DATA MZA10(2083),AWGT(2083)/  751670, 1.66962601000D+02/
+      DATA MZA10(2084),AWGT(2084)/  761670, 1.66971547010D+02/
+      DATA MZA10(2085),AWGT(2085)/  771670, 1.66981665002D+02/
+      DATA MZA10(2086),AWGT(2086)/  781670, 1.66992979000D+02/
+      DATA MZA10(2087),AWGT(2087)/  641680, 1.67948360000D+02/
+      DATA MZA10(2088),AWGT(2088)/  651680, 1.67943640000D+02/
+      DATA MZA10(2089),AWGT(2089)/  661680, 1.67937128008D+02/
+      DATA MZA10(2090),AWGT(2090)/  671680, 1.67935515007D+02/
+      DATA MZA10(2091),AWGT(2091)/  681680, 1.67932370002D+02/
+      DATA MZA10(2092),AWGT(2092)/  691680, 1.67934172008D+02/
+      DATA MZA10(2093),AWGT(2093)/  701680, 1.67933896009D+02/
+      DATA MZA10(2094),AWGT(2094)/  711680, 1.67938739001D+02/
+      DATA MZA10(2095),AWGT(2095)/  721680, 1.67940568000D+02/
+      DATA MZA10(2096),AWGT(2096)/  731680, 1.67948047000D+02/
+      DATA MZA10(2097),AWGT(2097)/  741680, 1.67951808004D+02/
+      DATA MZA10(2098),AWGT(2098)/  751680, 1.67961572006D+02/
+      DATA MZA10(2099),AWGT(2099)/  761680, 1.67967803007D+02/
+      DATA MZA10(2100),AWGT(2100)/  771680, 1.67979881000D+02/
+      DATA MZA10(2101),AWGT(2101)/  781680, 1.67988150007D+02/
+      DATA MZA10(2102),AWGT(2102)/  641690, 1.68952870000D+02/
+      DATA MZA10(2103),AWGT(2103)/  651690, 1.68946220000D+02/
+      DATA MZA10(2104),AWGT(2104)/  661690, 1.68940307006D+02/
+      DATA MZA10(2105),AWGT(2105)/  671690, 1.68936872003D+02/
+      DATA MZA10(2106),AWGT(2106)/  681690, 1.68934590004D+02/
+      DATA MZA10(2107),AWGT(2107)/  691690, 1.68934213003D+02/
+      DATA MZA10(2108),AWGT(2108)/  701690, 1.68935189008D+02/
+      DATA MZA10(2109),AWGT(2109)/  711690, 1.68937651004D+02/
+      DATA MZA10(2110),AWGT(2110)/  721690, 1.68941259000D+02/
+      DATA MZA10(2111),AWGT(2111)/  731690, 1.68946011000D+02/
+      DATA MZA10(2112),AWGT(2112)/  741690, 1.68951778008D+02/
+      DATA MZA10(2113),AWGT(2113)/  751690, 1.68958791001D+02/
+      DATA MZA10(2114),AWGT(2114)/  761690, 1.68967019003D+02/
+      DATA MZA10(2115),AWGT(2115)/  771690, 1.68976294009D+02/
+      DATA MZA10(2116),AWGT(2116)/  781690, 1.68986715000D+02/
+      DATA MZA10(2117),AWGT(2117)/  791690, 1.68998080000D+02/
+      DATA MZA10(2118),AWGT(2118)/  651700, 1.69950250000D+02/
+      DATA MZA10(2119),AWGT(2119)/  661700, 1.69942390000D+02/
+      DATA MZA10(2120),AWGT(2120)/  671700, 1.69939618009D+02/
+      DATA MZA10(2121),AWGT(2121)/  681700, 1.69935464003D+02/
+      DATA MZA10(2122),AWGT(2122)/  691700, 1.69935801004D+02/
+      DATA MZA10(2123),AWGT(2123)/  701700, 1.69934761008D+02/
+      DATA MZA10(2124),AWGT(2124)/  711700, 1.69938474010D+02/
+      DATA MZA10(2125),AWGT(2125)/  721700, 1.69939609000D+02/
+      DATA MZA10(2126),AWGT(2126)/  731700, 1.69946175000D+02/
+      DATA MZA10(2127),AWGT(2127)/  741700, 1.69949228005D+02/
+      DATA MZA10(2128),AWGT(2128)/  751700, 1.69958220001D+02/
+      DATA MZA10(2129),AWGT(2129)/  761700, 1.69963577000D+02/
+      DATA MZA10(2130),AWGT(2130)/  771700, 1.69974965000D+02/
+      DATA MZA10(2131),AWGT(2131)/  781700, 1.69982495003D+02/
+      DATA MZA10(2132),AWGT(2132)/  791700, 1.69996122000D+02/
+      DATA MZA10(2133),AWGT(2133)/  651710, 1.70953300000D+02/
+      DATA MZA10(2134),AWGT(2134)/  661710, 1.70946200000D+02/
+      DATA MZA10(2135),AWGT(2135)/  671710, 1.70941465002D+02/
+      DATA MZA10(2136),AWGT(2136)/  681710, 1.70938029008D+02/
+      DATA MZA10(2137),AWGT(2137)/  691710, 1.70936429004D+02/
+      DATA MZA10(2138),AWGT(2138)/  701710, 1.70936325008D+02/
+      DATA MZA10(2139),AWGT(2139)/  711710, 1.70937913001D+02/
+      DATA MZA10(2140),AWGT(2140)/  721710, 1.70940492000D+02/
+      DATA MZA10(2141),AWGT(2141)/  731710, 1.70944476000D+02/
+      DATA MZA10(2142),AWGT(2142)/  741710, 1.70949451000D+02/
+      DATA MZA10(2143),AWGT(2143)/  751710, 1.70955716000D+02/
+      DATA MZA10(2144),AWGT(2144)/  761710, 1.70963184008D+02/
+      DATA MZA10(2145),AWGT(2145)/  771710, 1.70971626000D+02/
+      DATA MZA10(2146),AWGT(2146)/  781710, 1.70981244005D+02/
+      DATA MZA10(2147),AWGT(2147)/  791710, 1.70991878009D+02/
+      DATA MZA10(2148),AWGT(2148)/  801710, 1.71003760000D+02/
+      DATA MZA10(2149),AWGT(2149)/  661720, 1.71948760000D+02/
+      DATA MZA10(2150),AWGT(2150)/  671720, 1.71944820000D+02/
+      DATA MZA10(2151),AWGT(2151)/  681720, 1.71939356001D+02/
+      DATA MZA10(2152),AWGT(2152)/  691720, 1.71938400000D+02/
+      DATA MZA10(2153),AWGT(2153)/  701720, 1.71936381005D+02/
+      DATA MZA10(2154),AWGT(2154)/  711720, 1.71939085007D+02/
+      DATA MZA10(2155),AWGT(2155)/  721720, 1.71939448003D+02/
+      DATA MZA10(2156),AWGT(2156)/  731720, 1.71944895000D+02/
+      DATA MZA10(2157),AWGT(2157)/  741720, 1.71947292000D+02/
+      DATA MZA10(2158),AWGT(2158)/  751720, 1.71955422010D+02/
+      DATA MZA10(2159),AWGT(2159)/  761720, 1.71960023003D+02/
+      DATA MZA10(2160),AWGT(2160)/  771720, 1.71970456000D+02/
+      DATA MZA10(2161),AWGT(2161)/  781720, 1.71977347001D+02/
+      DATA MZA10(2162),AWGT(2162)/  791720, 1.71990035000D+02/
+      DATA MZA10(2163),AWGT(2163)/  801720, 1.71998832007D+02/
+      DATA MZA10(2164),AWGT(2164)/  661730, 1.72953000000D+02/
+      DATA MZA10(2165),AWGT(2165)/  671730, 1.72947290000D+02/
+      DATA MZA10(2166),AWGT(2166)/  681730, 1.72942400000D+02/
+      DATA MZA10(2167),AWGT(2167)/  691730, 1.72939603006D+02/
+      DATA MZA10(2168),AWGT(2168)/  701730, 1.72938210008D+02/
+      DATA MZA10(2169),AWGT(2169)/  711730, 1.72938930006D+02/
+      DATA MZA10(2170),AWGT(2170)/  721730, 1.72940513000D+02/
+      DATA MZA10(2171),AWGT(2171)/  731730, 1.72943750000D+02/
+      DATA MZA10(2172),AWGT(2172)/  741730, 1.72947689000D+02/
+      DATA MZA10(2173),AWGT(2173)/  751730, 1.72953243000D+02/
+      DATA MZA10(2174),AWGT(2174)/  761730, 1.72959808004D+02/
+      DATA MZA10(2175),AWGT(2175)/  771730, 1.72967501007D+02/
+      DATA MZA10(2176),AWGT(2176)/  781730, 1.72976444008D+02/
+      DATA MZA10(2177),AWGT(2177)/  791730, 1.72986237004D+02/
+      DATA MZA10(2178),AWGT(2178)/  801730, 1.72997242000D+02/
+      DATA MZA10(2179),AWGT(2179)/  671740, 1.73951150000D+02/
+      DATA MZA10(2180),AWGT(2180)/  681740, 1.73944230000D+02/
+      DATA MZA10(2181),AWGT(2181)/  691740, 1.73942168006D+02/
+      DATA MZA10(2182),AWGT(2182)/  701740, 1.73938862001D+02/
+      DATA MZA10(2183),AWGT(2183)/  711740, 1.73940337005D+02/
+      DATA MZA10(2184),AWGT(2184)/  721740, 1.73940046002D+02/
+      DATA MZA10(2185),AWGT(2185)/  731740, 1.73944454000D+02/
+      DATA MZA10(2186),AWGT(2186)/  741740, 1.73946079000D+02/
+      DATA MZA10(2187),AWGT(2187)/  751740, 1.73953115000D+02/
+      DATA MZA10(2188),AWGT(2188)/  761740, 1.73957062002D+02/
+      DATA MZA10(2189),AWGT(2189)/  771740, 1.73966861000D+02/
+      DATA MZA10(2190),AWGT(2190)/  781740, 1.73972818008D+02/
+      DATA MZA10(2191),AWGT(2191)/  791740, 1.73984761000D+02/
+      DATA MZA10(2192),AWGT(2192)/  801740, 1.73992863007D+02/
+      DATA MZA10(2193),AWGT(2193)/  671750, 1.74954050000D+02/
+      DATA MZA10(2194),AWGT(2194)/  681750, 1.74947770000D+02/
+      DATA MZA10(2195),AWGT(2195)/  691750, 1.74943836009D+02/
+      DATA MZA10(2196),AWGT(2196)/  701750, 1.74941276004D+02/
+      DATA MZA10(2197),AWGT(2197)/  711750, 1.74940771008D+02/
+      DATA MZA10(2198),AWGT(2198)/  721750, 1.74941509002D+02/
+      DATA MZA10(2199),AWGT(2199)/  731750, 1.74943737000D+02/
+      DATA MZA10(2200),AWGT(2200)/  741750, 1.74946717000D+02/
+      DATA MZA10(2201),AWGT(2201)/  751750, 1.74951381000D+02/
+      DATA MZA10(2202),AWGT(2202)/  761750, 1.74956945008D+02/
+      DATA MZA10(2203),AWGT(2203)/  771750, 1.74964112009D+02/
+      DATA MZA10(2204),AWGT(2204)/  781750, 1.74972420006D+02/
+      DATA MZA10(2205),AWGT(2205)/  791750, 1.74981274001D+02/
+      DATA MZA10(2206),AWGT(2206)/  801750, 1.74991423003D+02/
+      DATA MZA10(2207),AWGT(2207)/  681760, 1.75950080000D+02/
+      DATA MZA10(2208),AWGT(2208)/  691760, 1.75946994007D+02/
+      DATA MZA10(2209),AWGT(2209)/  701760, 1.75942571007D+02/
+      DATA MZA10(2210),AWGT(2210)/  711760, 1.75942686003D+02/
+      DATA MZA10(2211),AWGT(2211)/  721760, 1.75941408006D+02/
+      DATA MZA10(2212),AWGT(2212)/  731760, 1.75944857000D+02/
+      DATA MZA10(2213),AWGT(2213)/  741760, 1.75945634000D+02/
+      DATA MZA10(2214),AWGT(2214)/  751760, 1.75951623000D+02/
+      DATA MZA10(2215),AWGT(2215)/  761760, 1.75954806000D+02/
+      DATA MZA10(2216),AWGT(2216)/  771760, 1.75963648007D+02/
+      DATA MZA10(2217),AWGT(2217)/  781760, 1.75968944006D+02/
+      DATA MZA10(2218),AWGT(2218)/  791760, 1.75980099000D+02/
+      DATA MZA10(2219),AWGT(2219)/  801760, 1.75987354006D+02/
+      DATA MZA10(2220),AWGT(2220)/  811760, 1.76000590000D+02/
+      DATA MZA10(2221),AWGT(2221)/  681770, 1.76954050000D+02/
+      DATA MZA10(2222),AWGT(2222)/  691770, 1.76949040000D+02/
+      DATA MZA10(2223),AWGT(2223)/  701770, 1.76945260008D+02/
+      DATA MZA10(2224),AWGT(2224)/  711770, 1.76943758001D+02/
+      DATA MZA10(2225),AWGT(2225)/  721770, 1.76943220007D+02/
+      DATA MZA10(2226),AWGT(2226)/  731770, 1.76944472004D+02/
+      DATA MZA10(2227),AWGT(2227)/  741770, 1.76946643000D+02/
+      DATA MZA10(2228),AWGT(2228)/  751770, 1.76950328000D+02/
+      DATA MZA10(2229),AWGT(2229)/  761770, 1.76954965003D+02/
+      DATA MZA10(2230),AWGT(2230)/  771770, 1.76961301005D+02/
+      DATA MZA10(2231),AWGT(2231)/  781770, 1.76968469005D+02/
+      DATA MZA10(2232),AWGT(2232)/  791770, 1.76976864009D+02/
+      DATA MZA10(2233),AWGT(2233)/  801770, 1.76986279002D+02/
+      DATA MZA10(2234),AWGT(2234)/  811770, 1.76996427003D+02/
+      DATA MZA10(2235),AWGT(2235)/  691780, 1.77952640000D+02/
+      DATA MZA10(2236),AWGT(2236)/  701780, 1.77946646007D+02/
+      DATA MZA10(2237),AWGT(2237)/  711780, 1.77945954006D+02/
+      DATA MZA10(2238),AWGT(2238)/  721780, 1.77943698008D+02/
+      DATA MZA10(2239),AWGT(2239)/  731780, 1.77945778002D+02/
+      DATA MZA10(2240),AWGT(2240)/  741780, 1.77945876002D+02/
+      DATA MZA10(2241),AWGT(2241)/  751780, 1.77950989000D+02/
+      DATA MZA10(2242),AWGT(2242)/  761780, 1.77953251002D+02/
+      DATA MZA10(2243),AWGT(2243)/  771780, 1.77961082000D+02/
+      DATA MZA10(2244),AWGT(2244)/  781780, 1.77965648007D+02/
+      DATA MZA10(2245),AWGT(2245)/  791780, 1.77976031009D+02/
+      DATA MZA10(2246),AWGT(2246)/  801780, 1.77982483001D+02/
+      DATA MZA10(2247),AWGT(2247)/  811780, 1.77994897000D+02/
+      DATA MZA10(2248),AWGT(2248)/  821780, 1.78003830002D+02/
+      DATA MZA10(2249),AWGT(2249)/  691790, 1.78955340000D+02/
+      DATA MZA10(2250),AWGT(2250)/  701790, 1.78950170000D+02/
+      DATA MZA10(2251),AWGT(2251)/  711790, 1.78947327004D+02/
+      DATA MZA10(2252),AWGT(2252)/  721790, 1.78945816001D+02/
+      DATA MZA10(2253),AWGT(2253)/  731790, 1.78945929005D+02/
+      DATA MZA10(2254),AWGT(2254)/  741790, 1.78947070004D+02/
+      DATA MZA10(2255),AWGT(2255)/  751790, 1.78949987006D+02/
+      DATA MZA10(2256),AWGT(2256)/  761790, 1.78953816000D+02/
+      DATA MZA10(2257),AWGT(2257)/  771790, 1.78959122003D+02/
+      DATA MZA10(2258),AWGT(2258)/  781790, 1.78965363004D+02/
+      DATA MZA10(2259),AWGT(2259)/  791790, 1.78973212008D+02/
+      DATA MZA10(2260),AWGT(2260)/  801790, 1.78981833009D+02/
+      DATA MZA10(2261),AWGT(2261)/  811790, 1.78991089001D+02/
+      DATA MZA10(2262),AWGT(2262)/  821790, 1.79002150000D+02/
+      DATA MZA10(2263),AWGT(2263)/  701800, 1.79952330000D+02/
+      DATA MZA10(2264),AWGT(2264)/  711800, 1.79949881002D+02/
+      DATA MZA10(2265),AWGT(2265)/  721800, 1.79946549010D+02/
+      DATA MZA10(2266),AWGT(2266)/  731800, 1.79947464008D+02/
+      DATA MZA10(2267),AWGT(2267)/  741800, 1.79946704005D+02/
+      DATA MZA10(2268),AWGT(2268)/  751800, 1.79950789001D+02/
+      DATA MZA10(2269),AWGT(2269)/  761800, 1.79952378008D+02/
+      DATA MZA10(2270),AWGT(2270)/  771800, 1.79959229004D+02/
+      DATA MZA10(2271),AWGT(2271)/  781800, 1.79963031005D+02/
+      DATA MZA10(2272),AWGT(2272)/  791800, 1.79972521001D+02/
+      DATA MZA10(2273),AWGT(2273)/  801800, 1.79978266004D+02/
+      DATA MZA10(2274),AWGT(2274)/  811800, 1.79989906000D+02/
+      DATA MZA10(2275),AWGT(2275)/  821800, 1.79997918002D+02/
+      DATA MZA10(2276),AWGT(2276)/  701810, 1.80956150000D+02/
+      DATA MZA10(2277),AWGT(2277)/  711810, 1.80951970000D+02/
+      DATA MZA10(2278),AWGT(2278)/  721810, 1.80949101002D+02/
+      DATA MZA10(2279),AWGT(2279)/  731810, 1.80947995008D+02/
+      DATA MZA10(2280),AWGT(2280)/  741810, 1.80948197002D+02/
+      DATA MZA10(2281),AWGT(2281)/  751810, 1.80950067009D+02/
+      DATA MZA10(2282),AWGT(2282)/  761810, 1.80953244000D+02/
+      DATA MZA10(2283),AWGT(2283)/  771810, 1.80957625003D+02/
+      DATA MZA10(2284),AWGT(2284)/  781810, 1.80963097003D+02/
+      DATA MZA10(2285),AWGT(2285)/  791810, 1.80970079000D+02/
+      DATA MZA10(2286),AWGT(2286)/  801810, 1.80977819003D+02/
+      DATA MZA10(2287),AWGT(2287)/  811810, 1.80986257004D+02/
+      DATA MZA10(2288),AWGT(2288)/  821810, 1.80996623010D+02/
+      DATA MZA10(2289),AWGT(2289)/  711820, 1.81955040000D+02/
+      DATA MZA10(2290),AWGT(2290)/  721820, 1.81950554001D+02/
+      DATA MZA10(2291),AWGT(2291)/  731820, 1.81950151008D+02/
+      DATA MZA10(2292),AWGT(2292)/  741820, 1.81948204002D+02/
+      DATA MZA10(2293),AWGT(2293)/  751820, 1.81951210001D+02/
+      DATA MZA10(2294),AWGT(2294)/  761820, 1.81952110002D+02/
+      DATA MZA10(2295),AWGT(2295)/  771820, 1.81958076003D+02/
+      DATA MZA10(2296),AWGT(2296)/  781820, 1.81961170007D+02/
+      DATA MZA10(2297),AWGT(2297)/  791820, 1.81969617009D+02/
+      DATA MZA10(2298),AWGT(2298)/  801820, 1.81974689010D+02/
+      DATA MZA10(2299),AWGT(2299)/  811820, 1.81985667001D+02/
+      DATA MZA10(2300),AWGT(2300)/  821820, 1.81992671008D+02/
+      DATA MZA10(2301),AWGT(2301)/  711830, 1.82957570000D+02/
+      DATA MZA10(2302),AWGT(2302)/  721830, 1.82953530004D+02/
+      DATA MZA10(2303),AWGT(2303)/  731830, 1.82951372006D+02/
+      DATA MZA10(2304),AWGT(2304)/  741830, 1.82950222010D+02/
+      DATA MZA10(2305),AWGT(2305)/  751830, 1.82950819008D+02/
+      DATA MZA10(2306),AWGT(2306)/  761830, 1.82953126001D+02/
+      DATA MZA10(2307),AWGT(2307)/  771830, 1.82956846005D+02/
+      DATA MZA10(2308),AWGT(2308)/  781830, 1.82961596007D+02/
+      DATA MZA10(2309),AWGT(2309)/  791830, 1.82967593000D+02/
+      DATA MZA10(2310),AWGT(2310)/  801830, 1.82974449008D+02/
+      DATA MZA10(2311),AWGT(2311)/  811830, 1.82982192008D+02/
+      DATA MZA10(2312),AWGT(2312)/  821830, 1.82991874006D+02/
+      DATA MZA10(2313),AWGT(2313)/  711840, 1.83960910000D+02/
+      DATA MZA10(2314),AWGT(2314)/  721840, 1.83955446005D+02/
+      DATA MZA10(2315),AWGT(2315)/  731840, 1.83954007010D+02/
+      DATA MZA10(2316),AWGT(2316)/  741840, 1.83950931002D+02/
+      DATA MZA10(2317),AWGT(2317)/  751840, 1.83952520008D+02/
+      DATA MZA10(2318),AWGT(2318)/  761840, 1.83952489001D+02/
+      DATA MZA10(2319),AWGT(2319)/  771840, 1.83957476000D+02/
+      DATA MZA10(2320),AWGT(2320)/  781840, 1.83959922003D+02/
+      DATA MZA10(2321),AWGT(2321)/  791840, 1.83967451005D+02/
+      DATA MZA10(2322),AWGT(2322)/  801840, 1.83971713001D+02/
+      DATA MZA10(2323),AWGT(2323)/  811840, 1.83981873001D+02/
+      DATA MZA10(2324),AWGT(2324)/  821840, 1.83988142003D+02/
+      DATA MZA10(2325),AWGT(2325)/  831840, 1.84001124000D+02/
+      DATA MZA10(2326),AWGT(2326)/  721850, 1.84958820000D+02/
+      DATA MZA10(2327),AWGT(2327)/  731850, 1.84955559004D+02/
+      DATA MZA10(2328),AWGT(2328)/  741850, 1.84953419003D+02/
+      DATA MZA10(2329),AWGT(2329)/  751850, 1.84952954010D+02/
+      DATA MZA10(2330),AWGT(2330)/  761850, 1.84954042003D+02/
+      DATA MZA10(2331),AWGT(2331)/  771850, 1.84956698000D+02/
+      DATA MZA10(2332),AWGT(2332)/  781850, 1.84960619000D+02/
+      DATA MZA10(2333),AWGT(2333)/  791850, 1.84965789004D+02/
+      DATA MZA10(2334),AWGT(2334)/  801850, 1.84971899001D+02/
+      DATA MZA10(2335),AWGT(2335)/  811850, 1.84978791003D+02/
+      DATA MZA10(2336),AWGT(2336)/  821850, 1.84987609009D+02/
+      DATA MZA10(2337),AWGT(2337)/  831850, 1.84997625000D+02/
+      DATA MZA10(2338),AWGT(2338)/  721860, 1.85960890000D+02/
+      DATA MZA10(2339),AWGT(2339)/  731860, 1.85958552000D+02/
+      DATA MZA10(2340),AWGT(2340)/  741860, 1.85954364001D+02/
+      DATA MZA10(2341),AWGT(2341)/  751860, 1.85954986001D+02/
+      DATA MZA10(2342),AWGT(2342)/  761860, 1.85953838002D+02/
+      DATA MZA10(2343),AWGT(2343)/  771860, 1.85957946001D+02/
+      DATA MZA10(2344),AWGT(2344)/  781860, 1.85959350008D+02/
+      DATA MZA10(2345),AWGT(2345)/  791860, 1.85965952007D+02/
+      DATA MZA10(2346),AWGT(2346)/  801860, 1.85969361008D+02/
+      DATA MZA10(2347),AWGT(2347)/  811860, 1.85978325000D+02/
+      DATA MZA10(2348),AWGT(2348)/  821860, 1.85984238009D+02/
+      DATA MZA10(2349),AWGT(2349)/  831860, 1.85996597006D+02/
+      DATA MZA10(2350),AWGT(2350)/  721870, 1.86964590000D+02/
+      DATA MZA10(2351),AWGT(2351)/  731870, 1.86960530000D+02/
+      DATA MZA10(2352),AWGT(2352)/  741870, 1.86957160005D+02/
+      DATA MZA10(2353),AWGT(2353)/  751870, 1.86955753001D+02/
+      DATA MZA10(2354),AWGT(2354)/  761870, 1.86955750005D+02/
+      DATA MZA10(2355),AWGT(2355)/  771870, 1.86957363004D+02/
+      DATA MZA10(2356),AWGT(2356)/  781870, 1.86960587000D+02/
+      DATA MZA10(2357),AWGT(2357)/  791870, 1.86964567005D+02/
+      DATA MZA10(2358),AWGT(2358)/  801870, 1.86969814002D+02/
+      DATA MZA10(2359),AWGT(2359)/  811870, 1.86975905009D+02/
+      DATA MZA10(2360),AWGT(2360)/  821870, 1.86983918004D+02/
+      DATA MZA10(2361),AWGT(2361)/  831870, 1.86993157008D+02/
+      DATA MZA10(2362),AWGT(2362)/  721880, 1.87966850000D+02/
+      DATA MZA10(2363),AWGT(2363)/  731880, 1.87963700000D+02/
+      DATA MZA10(2364),AWGT(2364)/  741880, 1.87958489001D+02/
+      DATA MZA10(2365),AWGT(2365)/  751880, 1.87958114004D+02/
+      DATA MZA10(2366),AWGT(2366)/  761880, 1.87955838002D+02/
+      DATA MZA10(2367),AWGT(2367)/  771880, 1.87958853001D+02/
+      DATA MZA10(2368),AWGT(2368)/  781880, 1.87959395004D+02/
+      DATA MZA10(2369),AWGT(2369)/  791880, 1.87965323007D+02/
+      DATA MZA10(2370),AWGT(2370)/  801880, 1.87967577000D+02/
+      DATA MZA10(2371),AWGT(2371)/  811880, 1.87976009008D+02/
+      DATA MZA10(2372),AWGT(2372)/  821880, 1.87980874003D+02/
+      DATA MZA10(2373),AWGT(2373)/  831880, 1.87992265002D+02/
+      DATA MZA10(2374),AWGT(2374)/  841880, 1.87999422000D+02/
+      DATA MZA10(2375),AWGT(2375)/  731890, 1.88965830000D+02/
+      DATA MZA10(2376),AWGT(2376)/  741890, 1.88961912009D+02/
+      DATA MZA10(2377),AWGT(2377)/  751890, 1.88959229000D+02/
+      DATA MZA10(2378),AWGT(2378)/  761890, 1.88958147005D+02/
+      DATA MZA10(2379),AWGT(2379)/  771890, 1.88958718009D+02/
+      DATA MZA10(2380),AWGT(2380)/  781890, 1.88960833007D+02/
+      DATA MZA10(2381),AWGT(2381)/  791890, 1.88963948003D+02/
+      DATA MZA10(2382),AWGT(2382)/  801890, 1.88968190000D+02/
+      DATA MZA10(2383),AWGT(2383)/  811890, 1.88973588004D+02/
+      DATA MZA10(2384),AWGT(2384)/  821890, 1.88980807000D+02/
+      DATA MZA10(2385),AWGT(2385)/  831890, 1.88989199000D+02/
+      DATA MZA10(2386),AWGT(2386)/  841890, 1.88998480006D+02/
+      DATA MZA10(2387),AWGT(2387)/  731900, 1.89969230000D+02/
+      DATA MZA10(2388),AWGT(2388)/  741900, 1.89963181004D+02/
+      DATA MZA10(2389),AWGT(2389)/  751900, 1.89961817010D+02/
+      DATA MZA10(2390),AWGT(2390)/  761900, 1.89958447000D+02/
+      DATA MZA10(2391),AWGT(2391)/  771900, 1.89960545010D+02/
+      DATA MZA10(2392),AWGT(2392)/  781900, 1.89959931007D+02/
+      DATA MZA10(2393),AWGT(2393)/  791900, 1.89964700003D+02/
+      DATA MZA10(2394),AWGT(2394)/  801900, 1.89966322004D+02/
+      DATA MZA10(2395),AWGT(2395)/  811900, 1.89973877001D+02/
+      DATA MZA10(2396),AWGT(2396)/  821900, 1.89978081005D+02/
+      DATA MZA10(2397),AWGT(2397)/  831900, 1.89988295001D+02/
+      DATA MZA10(2398),AWGT(2398)/  841900, 1.89995101002D+02/
+      DATA MZA10(2399),AWGT(2399)/  741910, 1.90966600000D+02/
+      DATA MZA10(2400),AWGT(2400)/  751910, 1.90963125002D+02/
+      DATA MZA10(2401),AWGT(2401)/  761910, 1.90960929007D+02/
+      DATA MZA10(2402),AWGT(2402)/  771910, 1.90960594000D+02/
+      DATA MZA10(2403),AWGT(2403)/  781910, 1.90961676007D+02/
+      DATA MZA10(2404),AWGT(2404)/  791910, 1.90963704002D+02/
+      DATA MZA10(2405),AWGT(2405)/  801910, 1.90967157001D+02/
+      DATA MZA10(2406),AWGT(2406)/  811910, 1.90971786002D+02/
+      DATA MZA10(2407),AWGT(2407)/  821910, 1.90978265000D+02/
+      DATA MZA10(2408),AWGT(2408)/  831910, 1.90985786001D+02/
+      DATA MZA10(2409),AWGT(2409)/  841910, 1.90994574005D+02/
+      DATA MZA10(2410),AWGT(2410)/  741920, 1.91968170000D+02/
+      DATA MZA10(2411),AWGT(2411)/  751920, 1.91965960000D+02/
+      DATA MZA10(2412),AWGT(2412)/  761920, 1.91961480007D+02/
+      DATA MZA10(2413),AWGT(2413)/  771920, 1.91962605000D+02/
+      DATA MZA10(2414),AWGT(2414)/  781920, 1.91961038000D+02/
+      DATA MZA10(2415),AWGT(2415)/  791920, 1.91964812010D+02/
+      DATA MZA10(2416),AWGT(2416)/  801920, 1.91965634003D+02/
+      DATA MZA10(2417),AWGT(2417)/  811920, 1.91972225000D+02/
+      DATA MZA10(2418),AWGT(2418)/  821920, 1.91975785002D+02/
+      DATA MZA10(2419),AWGT(2419)/  831920, 1.91985457010D+02/
+      DATA MZA10(2420),AWGT(2420)/  841920, 1.91991335001D+02/
+      DATA MZA10(2421),AWGT(2421)/  751930, 1.92967470000D+02/
+      DATA MZA10(2422),AWGT(2422)/  761930, 1.92964151006D+02/
+      DATA MZA10(2423),AWGT(2423)/  771930, 1.92962926004D+02/
+      DATA MZA10(2424),AWGT(2424)/  781930, 1.92962987004D+02/
+      DATA MZA10(2425),AWGT(2425)/  791930, 1.92964149007D+02/
+      DATA MZA10(2426),AWGT(2426)/  801930, 1.92966665004D+02/
+      DATA MZA10(2427),AWGT(2427)/  811930, 1.92970672000D+02/
+      DATA MZA10(2428),AWGT(2428)/  821930, 1.92976173002D+02/
+      DATA MZA10(2429),AWGT(2429)/  831930, 1.92982959008D+02/
+      DATA MZA10(2430),AWGT(2430)/  841930, 1.92991025003D+02/
+      DATA MZA10(2431),AWGT(2431)/  851930, 1.92999843001D+02/
+      DATA MZA10(2432),AWGT(2432)/  751940, 1.93970420000D+02/
+      DATA MZA10(2433),AWGT(2433)/  761940, 1.93965182001D+02/
+      DATA MZA10(2434),AWGT(2434)/  771940, 1.93965078004D+02/
+      DATA MZA10(2435),AWGT(2435)/  781940, 1.93962680003D+02/
+      DATA MZA10(2436),AWGT(2436)/  791940, 1.93965365002D+02/
+      DATA MZA10(2437),AWGT(2437)/  801940, 1.93965439004D+02/
+      DATA MZA10(2438),AWGT(2438)/  811940, 1.93971200000D+02/
+      DATA MZA10(2439),AWGT(2439)/  821940, 1.93974012001D+02/
+      DATA MZA10(2440),AWGT(2440)/  831940, 1.93982833010D+02/
+      DATA MZA10(2441),AWGT(2441)/  841940, 1.93988185006D+02/
+      DATA MZA10(2442),AWGT(2442)/  851940, 1.93998725001D+02/
+      DATA MZA10(2443),AWGT(2443)/  761950, 1.94968126007D+02/
+      DATA MZA10(2444),AWGT(2444)/  771950, 1.94965979006D+02/
+      DATA MZA10(2445),AWGT(2445)/  781950, 1.94964791001D+02/
+      DATA MZA10(2446),AWGT(2446)/  791950, 1.94965034006D+02/
+      DATA MZA10(2447),AWGT(2447)/  801950, 1.94966720001D+02/
+      DATA MZA10(2448),AWGT(2448)/  811950, 1.94969774003D+02/
+      DATA MZA10(2449),AWGT(2449)/  821950, 1.94974542001D+02/
+      DATA MZA10(2450),AWGT(2450)/  831950, 1.94980650007D+02/
+      DATA MZA10(2451),AWGT(2451)/  841950, 1.94988110007D+02/
+      DATA MZA10(2452),AWGT(2452)/  851950, 1.94996268001D+02/
+      DATA MZA10(2453),AWGT(2453)/  861950, 1.95005437007D+02/
+      DATA MZA10(2454),AWGT(2454)/  761960, 1.95969639003D+02/
+      DATA MZA10(2455),AWGT(2455)/  771960, 1.95968396005D+02/
+      DATA MZA10(2456),AWGT(2456)/  781960, 1.95964951005D+02/
+      DATA MZA10(2457),AWGT(2457)/  791960, 1.95966569008D+02/
+      DATA MZA10(2458),AWGT(2458)/  801960, 1.95965832006D+02/
+      DATA MZA10(2459),AWGT(2459)/  811960, 1.95970481002D+02/
+      DATA MZA10(2460),AWGT(2460)/  821960, 1.95972774001D+02/
+      DATA MZA10(2461),AWGT(2461)/  831960, 1.95980666005D+02/
+      DATA MZA10(2462),AWGT(2462)/  841960, 1.95985534006D+02/
+      DATA MZA10(2463),AWGT(2463)/  851960, 1.95995788001D+02/
+      DATA MZA10(2464),AWGT(2464)/  861960, 1.96002115002D+02/
+      DATA MZA10(2465),AWGT(2465)/  771970, 1.96969653003D+02/
+      DATA MZA10(2466),AWGT(2466)/  781970, 1.96967340002D+02/
+      DATA MZA10(2467),AWGT(2467)/  791970, 1.96966568007D+02/
+      DATA MZA10(2468),AWGT(2468)/  801970, 1.96967212009D+02/
+      DATA MZA10(2469),AWGT(2469)/  811970, 1.96969574005D+02/
+      DATA MZA10(2470),AWGT(2470)/  821970, 1.96973431001D+02/
+      DATA MZA10(2471),AWGT(2471)/  831970, 1.96978864005D+02/
+      DATA MZA10(2472),AWGT(2472)/  841970, 1.96985659006D+02/
+      DATA MZA10(2473),AWGT(2473)/  851970, 1.96993189002D+02/
+      DATA MZA10(2474),AWGT(2474)/  861970, 1.97001584004D+02/
+      DATA MZA10(2475),AWGT(2475)/  771980, 1.97972280000D+02/
+      DATA MZA10(2476),AWGT(2476)/  781980, 1.97967892008D+02/
+      DATA MZA10(2477),AWGT(2477)/  791980, 1.97968242003D+02/
+      DATA MZA10(2478),AWGT(2478)/  801980, 1.97966769000D+02/
+      DATA MZA10(2479),AWGT(2479)/  811980, 1.97970483005D+02/
+      DATA MZA10(2480),AWGT(2480)/  821980, 1.97972033010D+02/
+      DATA MZA10(2481),AWGT(2481)/  831980, 1.97979206000D+02/
+      DATA MZA10(2482),AWGT(2482)/  841980, 1.97983388006D+02/
+      DATA MZA10(2483),AWGT(2483)/  851980, 1.97992837002D+02/
+      DATA MZA10(2484),AWGT(2484)/  861980, 1.97998678007D+02/
+      DATA MZA10(2485),AWGT(2485)/  771990, 1.98973804006D+02/
+      DATA MZA10(2486),AWGT(2486)/  781990, 1.98970593001D+02/
+      DATA MZA10(2487),AWGT(2487)/  791990, 1.98968765002D+02/
+      DATA MZA10(2488),AWGT(2488)/  801990, 1.98968279009D+02/
+      DATA MZA10(2489),AWGT(2489)/  811990, 1.98969877000D+02/
+      DATA MZA10(2490),AWGT(2490)/  821990, 1.98972916006D+02/
+      DATA MZA10(2491),AWGT(2491)/  831990, 1.98977671010D+02/
+      DATA MZA10(2492),AWGT(2492)/  841990, 1.98983666001D+02/
+      DATA MZA10(2493),AWGT(2493)/  851990, 1.98990532003D+02/
+      DATA MZA10(2494),AWGT(2494)/  861990, 1.98998370003D+02/
+      DATA MZA10(2495),AWGT(2495)/  871990, 1.99007258001D+02/
+      DATA MZA10(2496),AWGT(2496)/  782000, 1.99971440007D+02/
+      DATA MZA10(2497),AWGT(2497)/  792000, 1.99970725006D+02/
+      DATA MZA10(2498),AWGT(2498)/  802000, 1.99968326000D+02/
+      DATA MZA10(2499),AWGT(2499)/  812000, 1.99970962007D+02/
+      DATA MZA10(2500),AWGT(2500)/  822000, 1.99971826007D+02/
+      DATA MZA10(2501),AWGT(2501)/  832000, 1.99978131008D+02/
+      DATA MZA10(2502),AWGT(2502)/  842000, 1.99981798006D+02/
+      DATA MZA10(2503),AWGT(2503)/  852000, 1.99990351003D+02/
+      DATA MZA10(2504),AWGT(2504)/  862000, 1.99995699003D+02/
+      DATA MZA10(2505),AWGT(2505)/  872000, 2.00006572005D+02/
+      DATA MZA10(2506),AWGT(2506)/  782010, 2.00974512009D+02/
+      DATA MZA10(2507),AWGT(2507)/  792010, 2.00971657002D+02/
+      DATA MZA10(2508),AWGT(2508)/  802010, 2.00970302003D+02/
+      DATA MZA10(2509),AWGT(2509)/  812010, 2.00970818009D+02/
+      DATA MZA10(2510),AWGT(2510)/  822010, 2.00972884005D+02/
+      DATA MZA10(2511),AWGT(2511)/  832010, 2.00977009000D+02/
+      DATA MZA10(2512),AWGT(2512)/  842010, 2.00982259008D+02/
+      DATA MZA10(2513),AWGT(2513)/  852010, 2.00988416010D+02/
+      DATA MZA10(2514),AWGT(2514)/  862010, 2.00995628003D+02/
+      DATA MZA10(2515),AWGT(2515)/  872010, 2.01003860009D+02/
+      DATA MZA10(2516),AWGT(2516)/  782020, 2.01975740000D+02/
+      DATA MZA10(2517),AWGT(2517)/  792020, 2.01973805008D+02/
+      DATA MZA10(2518),AWGT(2518)/  802020, 2.01970643000D+02/
+      DATA MZA10(2519),AWGT(2519)/  812020, 2.01972105008D+02/
+      DATA MZA10(2520),AWGT(2520)/  822020, 2.01972159001D+02/
+      DATA MZA10(2521),AWGT(2521)/  832020, 2.01977742003D+02/
+      DATA MZA10(2522),AWGT(2522)/  842020, 2.01980757005D+02/
+      DATA MZA10(2523),AWGT(2523)/  852020, 2.01988630002D+02/
+      DATA MZA10(2524),AWGT(2524)/  862020, 2.01993263005D+02/
+      DATA MZA10(2525),AWGT(2525)/  872020, 2.02003372008D+02/
+      DATA MZA10(2526),AWGT(2526)/  882020, 2.02009890007D+02/
+      DATA MZA10(2527),AWGT(2527)/  792030, 2.02975154005D+02/
+      DATA MZA10(2528),AWGT(2528)/  802030, 2.02972872005D+02/
+      DATA MZA10(2529),AWGT(2529)/  812030, 2.02972344002D+02/
+      DATA MZA10(2530),AWGT(2530)/  822030, 2.02973390005D+02/
+      DATA MZA10(2531),AWGT(2531)/  832030, 2.02976876000D+02/
+      DATA MZA10(2532),AWGT(2532)/  842030, 2.02981420001D+02/
+      DATA MZA10(2533),AWGT(2533)/  852030, 2.02986941010D+02/
+      DATA MZA10(2534),AWGT(2534)/  862030, 2.02993386007D+02/
+      DATA MZA10(2535),AWGT(2535)/  872030, 2.03000924006D+02/
+      DATA MZA10(2536),AWGT(2536)/  882030, 2.03009271006D+02/
+      DATA MZA10(2537),AWGT(2537)/  792040, 2.03977724000D+02/
+      DATA MZA10(2538),AWGT(2538)/  802040, 2.03973493009D+02/
+      DATA MZA10(2539),AWGT(2539)/  812040, 2.03973863005D+02/
+      DATA MZA10(2540),AWGT(2540)/  822040, 2.03973043006D+02/
+      DATA MZA10(2541),AWGT(2541)/  832040, 2.03977812007D+02/
+      DATA MZA10(2542),AWGT(2542)/  842040, 2.03980318001D+02/
+      DATA MZA10(2543),AWGT(2543)/  852040, 2.03987251003D+02/
+      DATA MZA10(2544),AWGT(2544)/  862040, 2.03991428007D+02/
+      DATA MZA10(2545),AWGT(2545)/  872040, 2.04000653002D+02/
+      DATA MZA10(2546),AWGT(2546)/  882040, 2.04006499007D+02/
+      DATA MZA10(2547),AWGT(2547)/  792050, 2.04979870000D+02/
+      DATA MZA10(2548),AWGT(2548)/  802050, 2.04976073004D+02/
+      DATA MZA10(2549),AWGT(2549)/  812050, 2.04974427005D+02/
+      DATA MZA10(2550),AWGT(2550)/  822050, 2.04974481008D+02/
+      DATA MZA10(2551),AWGT(2551)/  832050, 2.04977389004D+02/
+      DATA MZA10(2552),AWGT(2552)/  842050, 2.04981203003D+02/
+      DATA MZA10(2553),AWGT(2553)/  852050, 2.04986074005D+02/
+      DATA MZA10(2554),AWGT(2554)/  862050, 2.04991718008D+02/
+      DATA MZA10(2555),AWGT(2555)/  872050, 2.04998593010D+02/
+      DATA MZA10(2556),AWGT(2556)/  882050, 2.05006268006D+02/
+      DATA MZA10(2557),AWGT(2557)/  802060, 2.05977514001D+02/
+      DATA MZA10(2558),AWGT(2558)/  812060, 2.05976110003D+02/
+      DATA MZA10(2559),AWGT(2559)/  822060, 2.05974465003D+02/
+      DATA MZA10(2560),AWGT(2560)/  832060, 2.05978499001D+02/
+      DATA MZA10(2561),AWGT(2561)/  842060, 2.05980481001D+02/
+      DATA MZA10(2562),AWGT(2562)/  852060, 2.05986667000D+02/
+      DATA MZA10(2563),AWGT(2563)/  862060, 2.05990214001D+02/
+      DATA MZA10(2564),AWGT(2564)/  872060, 2.05998666001D+02/
+      DATA MZA10(2565),AWGT(2565)/  882060, 2.06003827003D+02/
+      DATA MZA10(2566),AWGT(2566)/  892060, 2.06014504010D+02/
+      DATA MZA10(2567),AWGT(2567)/  802070, 2.06982588005D+02/
+      DATA MZA10(2568),AWGT(2568)/  812070, 2.06977419004D+02/
+      DATA MZA10(2569),AWGT(2569)/  822070, 2.06975896009D+02/
+      DATA MZA10(2570),AWGT(2570)/  832070, 2.06978470007D+02/
+      DATA MZA10(2571),AWGT(2571)/  842070, 2.06981593002D+02/
+      DATA MZA10(2572),AWGT(2572)/  852070, 2.06985783005D+02/
+      DATA MZA10(2573),AWGT(2573)/  862070, 2.06990734002D+02/
+      DATA MZA10(2574),AWGT(2574)/  872070, 2.06996949004D+02/
+      DATA MZA10(2575),AWGT(2575)/  882070, 2.07003798001D+02/
+      DATA MZA10(2576),AWGT(2576)/  892070, 2.07011949007D+02/
+      DATA MZA10(2577),AWGT(2577)/  802080, 2.07985940000D+02/
+      DATA MZA10(2578),AWGT(2578)/  812080, 2.07982018007D+02/
+      DATA MZA10(2579),AWGT(2579)/  822080, 2.07976652001D+02/
+      DATA MZA10(2580),AWGT(2580)/  832080, 2.07979742002D+02/
+      DATA MZA10(2581),AWGT(2581)/  842080, 2.07981245007D+02/
+      DATA MZA10(2582),AWGT(2582)/  852080, 2.07986589010D+02/
+      DATA MZA10(2583),AWGT(2583)/  862080, 2.07989642005D+02/
+      DATA MZA10(2584),AWGT(2584)/  872080, 2.07997138008D+02/
+      DATA MZA10(2585),AWGT(2585)/  882080, 2.08001839009D+02/
+      DATA MZA10(2586),AWGT(2586)/  892080, 2.08011551006D+02/
+      DATA MZA10(2587),AWGT(2587)/  802090, 2.08991040000D+02/
+      DATA MZA10(2588),AWGT(2588)/  812090, 2.08985358010D+02/
+      DATA MZA10(2589),AWGT(2589)/  822090, 2.08981090001D+02/
+      DATA MZA10(2590),AWGT(2590)/  832090, 2.08980398007D+02/
+      DATA MZA10(2591),AWGT(2591)/  842090, 2.08982430004D+02/
+      DATA MZA10(2592),AWGT(2592)/  852090, 2.08986173001D+02/
+      DATA MZA10(2593),AWGT(2593)/  862090, 2.08990414007D+02/
+      DATA MZA10(2594),AWGT(2594)/  872090, 2.08995953006D+02/
+      DATA MZA10(2595),AWGT(2595)/  882090, 2.09001991004D+02/
+      DATA MZA10(2596),AWGT(2596)/  892090, 2.09009494009D+02/
+      DATA MZA10(2597),AWGT(2597)/  902090, 2.09017715007D+02/
+      DATA MZA10(2598),AWGT(2598)/  802100, 2.09994510000D+02/
+      DATA MZA10(2599),AWGT(2599)/  812100, 2.09990073007D+02/
+      DATA MZA10(2600),AWGT(2600)/  822100, 2.09984188005D+02/
+      DATA MZA10(2601),AWGT(2601)/  832100, 2.09984120004D+02/
+      DATA MZA10(2602),AWGT(2602)/  842100, 2.09982873007D+02/
+      DATA MZA10(2603),AWGT(2603)/  852100, 2.09987147007D+02/
+      DATA MZA10(2604),AWGT(2604)/  862100, 2.09989696002D+02/
+      DATA MZA10(2605),AWGT(2605)/  872100, 2.09996407007D+02/
+      DATA MZA10(2606),AWGT(2606)/  882100, 2.10000494010D+02/
+      DATA MZA10(2607),AWGT(2607)/  892100, 2.10009435010D+02/
+      DATA MZA10(2608),AWGT(2608)/  902100, 2.10015075003D+02/
+      DATA MZA10(2609),AWGT(2609)/  812110, 2.10993477000D+02/
+      DATA MZA10(2610),AWGT(2610)/  822110, 2.10988736010D+02/
+      DATA MZA10(2611),AWGT(2611)/  832110, 2.10987269005D+02/
+      DATA MZA10(2612),AWGT(2612)/  842110, 2.10986653002D+02/
+      DATA MZA10(2613),AWGT(2613)/  852110, 2.10987496003D+02/
+      DATA MZA10(2614),AWGT(2614)/  862110, 2.10990600005D+02/
+      DATA MZA10(2615),AWGT(2615)/  872110, 2.10995536005D+02/
+      DATA MZA10(2616),AWGT(2616)/  882110, 2.11000897010D+02/
+      DATA MZA10(2617),AWGT(2617)/  892110, 2.11007734008D+02/
+      DATA MZA10(2618),AWGT(2618)/  902110, 2.11014928004D+02/
+      DATA MZA10(2619),AWGT(2619)/  812120, 2.11998228000D+02/
+      DATA MZA10(2620),AWGT(2620)/  822120, 2.11991897005D+02/
+      DATA MZA10(2621),AWGT(2621)/  832120, 2.11991285007D+02/
+      DATA MZA10(2622),AWGT(2622)/  842120, 2.11988867010D+02/
+      DATA MZA10(2623),AWGT(2623)/  852120, 2.11990744008D+02/
+      DATA MZA10(2624),AWGT(2624)/  862120, 2.11990703005D+02/
+      DATA MZA10(2625),AWGT(2625)/  872120, 2.11996202002D+02/
+      DATA MZA10(2626),AWGT(2626)/  882120, 2.11999794005D+02/
+      DATA MZA10(2627),AWGT(2627)/  892120, 2.12007813008D+02/
+      DATA MZA10(2628),AWGT(2628)/  902120, 2.12012980003D+02/
+      DATA MZA10(2629),AWGT(2629)/  912120, 2.12023204001D+02/
+      DATA MZA10(2630),AWGT(2630)/  822130, 2.12996581005D+02/
+      DATA MZA10(2631),AWGT(2631)/  832130, 2.12994384007D+02/
+      DATA MZA10(2632),AWGT(2632)/  842130, 2.12992857003D+02/
+      DATA MZA10(2633),AWGT(2633)/  852130, 2.12992936006D+02/
+      DATA MZA10(2634),AWGT(2634)/  862130, 2.12993882007D+02/
+      DATA MZA10(2635),AWGT(2635)/  872130, 2.12996189001D+02/
+      DATA MZA10(2636),AWGT(2636)/  882130, 2.13000383010D+02/
+      DATA MZA10(2637),AWGT(2637)/  892130, 2.13006607006D+02/
+      DATA MZA10(2638),AWGT(2638)/  902130, 2.13013010001D+02/
+      DATA MZA10(2639),AWGT(2639)/  912130, 2.13021109003D+02/
+      DATA MZA10(2640),AWGT(2640)/  822140, 2.13999805004D+02/
+      DATA MZA10(2641),AWGT(2641)/  832140, 2.13998711005D+02/
+      DATA MZA10(2642),AWGT(2642)/  842140, 2.13995201004D+02/
+      DATA MZA10(2643),AWGT(2643)/  852140, 2.13996371007D+02/
+      DATA MZA10(2644),AWGT(2644)/  862140, 2.13995362006D+02/
+      DATA MZA10(2645),AWGT(2645)/  872140, 2.13998971001D+02/
+      DATA MZA10(2646),AWGT(2646)/  882140, 2.14000107009D+02/
+      DATA MZA10(2647),AWGT(2647)/  892140, 2.14006901008D+02/
+      DATA MZA10(2648),AWGT(2648)/  902140, 2.14011499008D+02/
+      DATA MZA10(2649),AWGT(2649)/  912140, 2.14020918004D+02/
+      DATA MZA10(2650),AWGT(2650)/  822150, 2.15004807000D+02/
+      DATA MZA10(2651),AWGT(2651)/  832150, 2.15001769008D+02/
+      DATA MZA10(2652),AWGT(2652)/  842150, 2.14999419010D+02/
+      DATA MZA10(2653),AWGT(2653)/  852150, 2.14998652006D+02/
+      DATA MZA10(2654),AWGT(2654)/  862150, 2.14998745005D+02/
+      DATA MZA10(2655),AWGT(2655)/  872150, 2.15000341005D+02/
+      DATA MZA10(2656),AWGT(2656)/  882150, 2.15002719008D+02/
+      DATA MZA10(2657),AWGT(2657)/  892150, 2.15006453006D+02/
+      DATA MZA10(2658),AWGT(2658)/  902150, 2.15011730003D+02/
+      DATA MZA10(2659),AWGT(2659)/  912150, 2.15019185009D+02/
+      DATA MZA10(2660),AWGT(2660)/  832160, 2.16006305009D+02/
+      DATA MZA10(2661),AWGT(2661)/  842160, 2.16001915000D+02/
+      DATA MZA10(2662),AWGT(2662)/  852160, 2.16002423003D+02/
+      DATA MZA10(2663),AWGT(2663)/  862160, 2.16000274004D+02/
+      DATA MZA10(2664),AWGT(2664)/  872160, 2.16003197010D+02/
+      DATA MZA10(2665),AWGT(2665)/  882160, 2.16003533000D+02/
+      DATA MZA10(2666),AWGT(2666)/  892160, 2.16008720001D+02/
+      DATA MZA10(2667),AWGT(2667)/  902160, 2.16011062001D+02/
+      DATA MZA10(2668),AWGT(2668)/  912160, 2.16019109006D+02/
+      DATA MZA10(2669),AWGT(2669)/  832170, 2.17009470000D+02/
+      DATA MZA10(2670),AWGT(2670)/  842170, 2.17006334008D+02/
+      DATA MZA10(2671),AWGT(2671)/  852170, 2.17004718008D+02/
+      DATA MZA10(2672),AWGT(2672)/  862170, 2.17003927007D+02/
+      DATA MZA10(2673),AWGT(2673)/  872170, 2.17004631010D+02/
+      DATA MZA10(2674),AWGT(2674)/  882170, 2.17006320003D+02/
+      DATA MZA10(2675),AWGT(2675)/  892170, 2.17009346009D+02/
+      DATA MZA10(2676),AWGT(2676)/  902170, 2.17013114003D+02/
+      DATA MZA10(2677),AWGT(2677)/  912170, 2.17018323010D+02/
+      DATA MZA10(2678),AWGT(2678)/  922170, 2.17024368008D+02/
+      DATA MZA10(2679),AWGT(2679)/  832180, 2.18014316000D+02/
+      DATA MZA10(2680),AWGT(2680)/  842180, 2.18008973000D+02/
+      DATA MZA10(2681),AWGT(2681)/  852180, 2.18008694003D+02/
+      DATA MZA10(2682),AWGT(2682)/  862180, 2.18005601003D+02/
+      DATA MZA10(2683),AWGT(2683)/  872180, 2.18007578003D+02/
+      DATA MZA10(2684),AWGT(2684)/  882180, 2.18007140002D+02/
+      DATA MZA10(2685),AWGT(2685)/  892180, 2.18011641005D+02/
+      DATA MZA10(2686),AWGT(2686)/  902180, 2.18013284005D+02/
+      DATA MZA10(2687),AWGT(2687)/  912180, 2.18020041009D+02/
+      DATA MZA10(2688),AWGT(2688)/  922180, 2.18023535007D+02/
+      DATA MZA10(2689),AWGT(2689)/  842190, 2.19013744000D+02/
+      DATA MZA10(2690),AWGT(2690)/  852190, 2.19011161007D+02/
+      DATA MZA10(2691),AWGT(2691)/  862190, 2.19009480002D+02/
+      DATA MZA10(2692),AWGT(2692)/  872190, 2.19009252001D+02/
+      DATA MZA10(2693),AWGT(2693)/  882190, 2.19010085001D+02/
+      DATA MZA10(2694),AWGT(2694)/  892190, 2.19012420004D+02/
+      DATA MZA10(2695),AWGT(2695)/  902190, 2.19015536009D+02/
+      DATA MZA10(2696),AWGT(2696)/  912190, 2.19019883001D+02/
+      DATA MZA10(2697),AWGT(2697)/  922190, 2.19024919002D+02/
+      DATA MZA10(2698),AWGT(2698)/  842200, 2.20016602000D+02/
+      DATA MZA10(2699),AWGT(2699)/  852200, 2.20015407007D+02/
+      DATA MZA10(2700),AWGT(2700)/  862200, 2.20011393010D+02/
+      DATA MZA10(2701),AWGT(2701)/  872200, 2.20012327004D+02/
+      DATA MZA10(2702),AWGT(2702)/  882200, 2.20011028004D+02/
+      DATA MZA10(2703),AWGT(2703)/  892200, 2.20014762010D+02/
+      DATA MZA10(2704),AWGT(2704)/  902200, 2.20015747008D+02/
+      DATA MZA10(2705),AWGT(2705)/  912200, 2.20021875003D+02/
+      DATA MZA10(2706),AWGT(2706)/  922200, 2.20024723000D+02/
+      DATA MZA10(2707),AWGT(2707)/  852210, 2.21018050000D+02/
+      DATA MZA10(2708),AWGT(2708)/  862210, 2.21015536008D+02/
+      DATA MZA10(2709),AWGT(2709)/  872210, 2.21014254008D+02/
+      DATA MZA10(2710),AWGT(2710)/  882210, 2.21013917003D+02/
+      DATA MZA10(2711),AWGT(2711)/  892210, 2.21015591002D+02/
+      DATA MZA10(2712),AWGT(2712)/  902210, 2.21018183007D+02/
+      DATA MZA10(2713),AWGT(2713)/  912210, 2.21021877010D+02/
+      DATA MZA10(2714),AWGT(2714)/  922210, 2.21026399000D+02/
+      DATA MZA10(2715),AWGT(2715)/  852220, 2.22022330000D+02/
+      DATA MZA10(2716),AWGT(2716)/  862220, 2.22017577007D+02/
+      DATA MZA10(2717),AWGT(2717)/  872220, 2.22017551007D+02/
+      DATA MZA10(2718),AWGT(2718)/  882220, 2.22015374005D+02/
+      DATA MZA10(2719),AWGT(2719)/  892220, 2.22017843009D+02/
+      DATA MZA10(2720),AWGT(2720)/  902220, 2.22018468001D+02/
+      DATA MZA10(2721),AWGT(2721)/  912220, 2.22023742000D+02/
+      DATA MZA10(2722),AWGT(2722)/  922220, 2.22026086000D+02/
+      DATA MZA10(2723),AWGT(2723)/  852230, 2.23025190000D+02/
+      DATA MZA10(2724),AWGT(2724)/  862230, 2.23021790000D+02/
+      DATA MZA10(2725),AWGT(2725)/  872230, 2.23019735009D+02/
+      DATA MZA10(2726),AWGT(2726)/  882230, 2.23018502002D+02/
+      DATA MZA10(2727),AWGT(2727)/  892230, 2.23019137005D+02/
+      DATA MZA10(2728),AWGT(2728)/  902230, 2.23020811004D+02/
+      DATA MZA10(2729),AWGT(2729)/  912230, 2.23023962003D+02/
+      DATA MZA10(2730),AWGT(2730)/  922230, 2.23027738006D+02/
+      DATA MZA10(2731),AWGT(2731)/  862240, 2.24024090000D+02/
+      DATA MZA10(2732),AWGT(2732)/  872240, 2.24023249010D+02/
+      DATA MZA10(2733),AWGT(2733)/  882240, 2.24020211008D+02/
+      DATA MZA10(2734),AWGT(2734)/  892240, 2.24021722009D+02/
+      DATA MZA10(2735),AWGT(2735)/  902240, 2.24021466009D+02/
+      DATA MZA10(2736),AWGT(2736)/  912240, 2.24025625007D+02/
+      DATA MZA10(2737),AWGT(2737)/  922240, 2.24027604008D+02/
+      DATA MZA10(2738),AWGT(2738)/  862250, 2.25028440000D+02/
+      DATA MZA10(2739),AWGT(2739)/  872250, 2.25025565004D+02/
+      DATA MZA10(2740),AWGT(2740)/  882250, 2.25023611006D+02/
+      DATA MZA10(2741),AWGT(2741)/  892250, 2.25023229006D+02/
+      DATA MZA10(2742),AWGT(2742)/  902250, 2.25023951000D+02/
+      DATA MZA10(2743),AWGT(2743)/  912250, 2.25026130007D+02/
+      DATA MZA10(2744),AWGT(2744)/  922250, 2.25029390007D+02/
+      DATA MZA10(2745),AWGT(2745)/  932250, 2.25033913009D+02/
+      DATA MZA10(2746),AWGT(2746)/  862260, 2.26030890000D+02/
+      DATA MZA10(2747),AWGT(2747)/  872260, 2.26029386002D+02/
+      DATA MZA10(2748),AWGT(2748)/  882260, 2.26025409008D+02/
+      DATA MZA10(2749),AWGT(2749)/  892260, 2.26026098001D+02/
+      DATA MZA10(2750),AWGT(2750)/  902260, 2.26024903001D+02/
+      DATA MZA10(2751),AWGT(2751)/  912260, 2.26027947008D+02/
+      DATA MZA10(2752),AWGT(2752)/  922260, 2.26029338007D+02/
+      DATA MZA10(2753),AWGT(2753)/  932260, 2.26035145000D+02/
+      DATA MZA10(2754),AWGT(2754)/  862270, 2.27035407000D+02/
+      DATA MZA10(2755),AWGT(2755)/  872270, 2.27031835009D+02/
+      DATA MZA10(2756),AWGT(2756)/  882270, 2.27029177008D+02/
+      DATA MZA10(2757),AWGT(2757)/  892270, 2.27027752001D+02/
+      DATA MZA10(2758),AWGT(2758)/  902270, 2.27027704001D+02/
+      DATA MZA10(2759),AWGT(2759)/  912270, 2.27028805001D+02/
+      DATA MZA10(2760),AWGT(2760)/  922270, 2.27031156004D+02/
+      DATA MZA10(2761),AWGT(2761)/  932270, 2.27034956008D+02/
+      DATA MZA10(2762),AWGT(2762)/  862280, 2.28037986000D+02/
+      DATA MZA10(2763),AWGT(2763)/  872280, 2.28035729000D+02/
+      DATA MZA10(2764),AWGT(2764)/  882280, 2.28031070003D+02/
+      DATA MZA10(2765),AWGT(2765)/  892280, 2.28031021001D+02/
+      DATA MZA10(2766),AWGT(2766)/  902280, 2.28028741001D+02/
+      DATA MZA10(2767),AWGT(2767)/  912280, 2.28031051004D+02/
+      DATA MZA10(2768),AWGT(2768)/  922280, 2.28031374000D+02/
+      DATA MZA10(2769),AWGT(2769)/  932280, 2.28036180000D+02/
+      DATA MZA10(2770),AWGT(2770)/  942280, 2.28038742003D+02/
+      DATA MZA10(2771),AWGT(2771)/  872290, 2.29038450002D+02/
+      DATA MZA10(2772),AWGT(2772)/  882290, 2.29034957006D+02/
+      DATA MZA10(2773),AWGT(2773)/  892290, 2.29033015002D+02/
+      DATA MZA10(2774),AWGT(2774)/  902290, 2.29031762004D+02/
+      DATA MZA10(2775),AWGT(2775)/  912290, 2.29032096008D+02/
+      DATA MZA10(2776),AWGT(2776)/  922290, 2.29033505009D+02/
+      DATA MZA10(2777),AWGT(2777)/  932290, 2.29036263008D+02/
+      DATA MZA10(2778),AWGT(2778)/  942290, 2.29040150002D+02/
+      DATA MZA10(2779),AWGT(2779)/  872300, 2.30042510000D+02/
+      DATA MZA10(2780),AWGT(2780)/  882300, 2.30037056004D+02/
+      DATA MZA10(2781),AWGT(2781)/  892300, 2.30036294002D+02/
+      DATA MZA10(2782),AWGT(2782)/  902300, 2.30033133008D+02/
+      DATA MZA10(2783),AWGT(2783)/  912300, 2.30034540008D+02/
+      DATA MZA10(2784),AWGT(2784)/  922300, 2.30033939008D+02/
+      DATA MZA10(2785),AWGT(2785)/  932300, 2.30037827006D+02/
+      DATA MZA10(2786),AWGT(2786)/  942300, 2.30039649009D+02/
+      DATA MZA10(2787),AWGT(2787)/  872310, 2.31045440000D+02/
+      DATA MZA10(2788),AWGT(2788)/  882310, 2.31041220000D+02/
+      DATA MZA10(2789),AWGT(2789)/  892310, 2.31038558008D+02/
+      DATA MZA10(2790),AWGT(2790)/  902310, 2.31036304003D+02/
+      DATA MZA10(2791),AWGT(2791)/  912310, 2.31035883010D+02/
+      DATA MZA10(2792),AWGT(2792)/  922310, 2.31036293007D+02/
+      DATA MZA10(2793),AWGT(2793)/  932310, 2.31038245001D+02/
+      DATA MZA10(2794),AWGT(2794)/  942310, 2.31041101001D+02/
+      DATA MZA10(2795),AWGT(2795)/  952310, 2.31045560000D+02/
+      DATA MZA10(2796),AWGT(2796)/  872320, 2.32049772000D+02/
+      DATA MZA10(2797),AWGT(2797)/  882320, 2.32043638000D+02/
+      DATA MZA10(2798),AWGT(2798)/  892320, 2.32042027004D+02/
+      DATA MZA10(2799),AWGT(2799)/  902320, 2.32038055003D+02/
+      DATA MZA10(2800),AWGT(2800)/  912320, 2.32038591006D+02/
+      DATA MZA10(2801),AWGT(2801)/  922320, 2.32037156002D+02/
+      DATA MZA10(2802),AWGT(2802)/  932320, 2.32040108000D+02/
+      DATA MZA10(2803),AWGT(2803)/  942320, 2.32041187001D+02/
+      DATA MZA10(2804),AWGT(2804)/  952320, 2.32046590000D+02/
+      DATA MZA10(2805),AWGT(2805)/  882330, 2.33048060000D+02/
+      DATA MZA10(2806),AWGT(2806)/  892330, 2.33044550000D+02/
+      DATA MZA10(2807),AWGT(2807)/  902330, 2.33041581008D+02/
+      DATA MZA10(2808),AWGT(2808)/  912330, 2.33040247003D+02/
+      DATA MZA10(2809),AWGT(2809)/  922330, 2.33039635002D+02/
+      DATA MZA10(2810),AWGT(2810)/  932330, 2.33040740005D+02/
+      DATA MZA10(2811),AWGT(2811)/  942330, 2.33042997004D+02/
+      DATA MZA10(2812),AWGT(2812)/  952330, 2.33046348000D+02/
+      DATA MZA10(2813),AWGT(2813)/  962330, 2.33050771002D+02/
+      DATA MZA10(2814),AWGT(2814)/  882340, 2.34050704000D+02/
+      DATA MZA10(2815),AWGT(2815)/  892340, 2.34048420000D+02/
+      DATA MZA10(2816),AWGT(2816)/  902340, 2.34043601002D+02/
+      DATA MZA10(2817),AWGT(2817)/  912340, 2.34043308001D+02/
+      DATA MZA10(2818),AWGT(2818)/  922340, 2.34040952001D+02/
+      DATA MZA10(2819),AWGT(2819)/  932340, 2.34042895000D+02/
+      DATA MZA10(2820),AWGT(2820)/  942340, 2.34043317001D+02/
+      DATA MZA10(2821),AWGT(2821)/  952340, 2.34047809000D+02/
+      DATA MZA10(2822),AWGT(2822)/  962340, 2.34050159008D+02/
+      DATA MZA10(2823),AWGT(2823)/  892350, 2.35051232000D+02/
+      DATA MZA10(2824),AWGT(2824)/  902350, 2.35047510001D+02/
+      DATA MZA10(2825),AWGT(2825)/  912350, 2.35045443006D+02/
+      DATA MZA10(2826),AWGT(2826)/  922350, 2.35043929009D+02/
+      DATA MZA10(2827),AWGT(2827)/  932350, 2.35044063003D+02/
+      DATA MZA10(2828),AWGT(2828)/  942350, 2.35045286000D+02/
+      DATA MZA10(2829),AWGT(2829)/  952350, 2.35047946000D+02/
+      DATA MZA10(2830),AWGT(2830)/  962350, 2.35051434000D+02/
+      DATA MZA10(2831),AWGT(2831)/  972350, 2.35056580000D+02/
+      DATA MZA10(2832),AWGT(2832)/  892360, 2.36055296000D+02/
+      DATA MZA10(2833),AWGT(2833)/  902360, 2.36049870000D+02/
+      DATA MZA10(2834),AWGT(2834)/  912360, 2.36048681003D+02/
+      DATA MZA10(2835),AWGT(2835)/  922360, 2.36045568000D+02/
+      DATA MZA10(2836),AWGT(2836)/  932360, 2.36046569006D+02/
+      DATA MZA10(2837),AWGT(2837)/  942360, 2.36046057010D+02/
+      DATA MZA10(2838),AWGT(2838)/  952360, 2.36049579000D+02/
+      DATA MZA10(2839),AWGT(2839)/  962360, 2.36051413000D+02/
+      DATA MZA10(2840),AWGT(2840)/  972360, 2.36057330000D+02/
+      DATA MZA10(2841),AWGT(2841)/  902370, 2.37053894000D+02/
+      DATA MZA10(2842),AWGT(2842)/  912370, 2.37051145007D+02/
+      DATA MZA10(2843),AWGT(2843)/  922370, 2.37048730002D+02/
+      DATA MZA10(2844),AWGT(2844)/  932370, 2.37048173004D+02/
+      DATA MZA10(2845),AWGT(2845)/  942370, 2.37048409007D+02/
+      DATA MZA10(2846),AWGT(2846)/  952370, 2.37049996000D+02/
+      DATA MZA10(2847),AWGT(2847)/  962370, 2.37052901000D+02/
+      DATA MZA10(2848),AWGT(2848)/  972370, 2.37057003000D+02/
+      DATA MZA10(2849),AWGT(2849)/  982370, 2.37062070000D+02/
+      DATA MZA10(2850),AWGT(2850)/  902380, 2.38056496000D+02/
+      DATA MZA10(2851),AWGT(2851)/  912380, 2.38054502007D+02/
+      DATA MZA10(2852),AWGT(2852)/  922380, 2.38050788002D+02/
+      DATA MZA10(2853),AWGT(2853)/  932380, 2.38050946004D+02/
+      DATA MZA10(2854),AWGT(2854)/  942380, 2.38049559009D+02/
+      DATA MZA10(2855),AWGT(2855)/  952380, 2.38051984003D+02/
+      DATA MZA10(2856),AWGT(2856)/  962380, 2.38053028007D+02/
+      DATA MZA10(2857),AWGT(2857)/  972380, 2.38058281000D+02/
+      DATA MZA10(2858),AWGT(2858)/  982380, 2.38061410000D+02/
+      DATA MZA10(2859),AWGT(2859)/  912390, 2.39057260000D+02/
+      DATA MZA10(2860),AWGT(2860)/  922390, 2.39054293003D+02/
+      DATA MZA10(2861),AWGT(2861)/  932390, 2.39052939000D+02/
+      DATA MZA10(2862),AWGT(2862)/  942390, 2.39052163004D+02/
+      DATA MZA10(2863),AWGT(2863)/  952390, 2.39053024005D+02/
+      DATA MZA10(2864),AWGT(2864)/  962390, 2.39054957000D+02/
+      DATA MZA10(2865),AWGT(2865)/  972390, 2.39058279000D+02/
+      DATA MZA10(2866),AWGT(2866)/  982390, 2.39062422000D+02/
+      DATA MZA10(2867),AWGT(2867)/  912400, 2.40060980000D+02/
+      DATA MZA10(2868),AWGT(2868)/  922400, 2.40056591010D+02/
+      DATA MZA10(2869),AWGT(2869)/  932400, 2.40056162002D+02/
+      DATA MZA10(2870),AWGT(2870)/  942400, 2.40053813005D+02/
+      DATA MZA10(2871),AWGT(2871)/  952400, 2.40055300002D+02/
+      DATA MZA10(2872),AWGT(2872)/  962400, 2.40055529005D+02/
+      DATA MZA10(2873),AWGT(2873)/  972400, 2.40059759000D+02/
+      DATA MZA10(2874),AWGT(2874)/  982400, 2.40062302000D+02/
+      DATA MZA10(2875),AWGT(2875)/  992400, 2.40068920000D+02/
+      DATA MZA10(2876),AWGT(2876)/  922410, 2.41060330000D+02/
+      DATA MZA10(2877),AWGT(2877)/  932410, 2.41058252004D+02/
+      DATA MZA10(2878),AWGT(2878)/  942410, 2.41056851005D+02/
+      DATA MZA10(2879),AWGT(2879)/  952410, 2.41056829001D+02/
+      DATA MZA10(2880),AWGT(2880)/  962410, 2.41057653000D+02/
+      DATA MZA10(2881),AWGT(2881)/  972410, 2.41060230000D+02/
+      DATA MZA10(2882),AWGT(2882)/  982410, 2.41063726000D+02/
+      DATA MZA10(2883),AWGT(2883)/  992410, 2.41068538000D+02/
+      DATA MZA10(2884),AWGT(2884)/  922420, 2.42062931000D+02/
+      DATA MZA10(2885),AWGT(2885)/  932420, 2.42061641002D+02/
+      DATA MZA10(2886),AWGT(2886)/  942420, 2.42058742006D+02/
+      DATA MZA10(2887),AWGT(2887)/  952420, 2.42059549002D+02/
+      DATA MZA10(2888),AWGT(2888)/  962420, 2.42058835008D+02/
+      DATA MZA10(2889),AWGT(2889)/  972420, 2.42061981000D+02/
+      DATA MZA10(2890),AWGT(2890)/  982420, 2.42063701006D+02/
+      DATA MZA10(2891),AWGT(2891)/  992420, 2.42069745000D+02/
+      DATA MZA10(2892),AWGT(2892)/ 1002420, 2.42073430000D+02/
+      DATA MZA10(2893),AWGT(2893)/  932430, 2.43064279000D+02/
+      DATA MZA10(2894),AWGT(2894)/  942430, 2.43062003001D+02/
+      DATA MZA10(2895),AWGT(2895)/  952430, 2.43061381001D+02/
+      DATA MZA10(2896),AWGT(2896)/  962430, 2.43061389001D+02/
+      DATA MZA10(2897),AWGT(2897)/  972430, 2.43063007006D+02/
+      DATA MZA10(2898),AWGT(2898)/  982430, 2.43065427000D+02/
+      DATA MZA10(2899),AWGT(2899)/  992430, 2.43069548000D+02/
+      DATA MZA10(2900),AWGT(2900)/ 1002430, 2.43074353000D+02/
+      DATA MZA10(2901),AWGT(2901)/  932440, 2.44067850000D+02/
+      DATA MZA10(2902),AWGT(2902)/  942440, 2.44064203009D+02/
+      DATA MZA10(2903),AWGT(2903)/  952440, 2.44064284008D+02/
+      DATA MZA10(2904),AWGT(2904)/  962440, 2.44062752006D+02/
+      DATA MZA10(2905),AWGT(2905)/  972440, 2.44065180008D+02/
+      DATA MZA10(2906),AWGT(2906)/  982440, 2.44066000007D+02/
+      DATA MZA10(2907),AWGT(2907)/  992440, 2.44070883000D+02/
+      DATA MZA10(2908),AWGT(2908)/ 1002440, 2.44074084000D+02/
+      DATA MZA10(2909),AWGT(2909)/  942450, 2.45067747002D+02/
+      DATA MZA10(2910),AWGT(2910)/  952450, 2.45066452001D+02/
+      DATA MZA10(2911),AWGT(2911)/  962450, 2.45065491002D+02/
+      DATA MZA10(2912),AWGT(2912)/  972450, 2.45066361006D+02/
+      DATA MZA10(2913),AWGT(2913)/  982450, 2.45068048006D+02/
+      DATA MZA10(2914),AWGT(2914)/  992450, 2.45071324000D+02/
+      DATA MZA10(2915),AWGT(2915)/ 1002450, 2.45075385000D+02/
+      DATA MZA10(2916),AWGT(2916)/ 1012450, 2.45080829000D+02/
+      DATA MZA10(2917),AWGT(2917)/  942460, 2.46070204006D+02/
+      DATA MZA10(2918),AWGT(2918)/  952460, 2.46069774006D+02/
+      DATA MZA10(2919),AWGT(2919)/  962460, 2.46067223007D+02/
+      DATA MZA10(2920),AWGT(2920)/  972460, 2.46068672009D+02/
+      DATA MZA10(2921),AWGT(2921)/  982460, 2.46068805003D+02/
+      DATA MZA10(2922),AWGT(2922)/  992460, 2.46072896000D+02/
+      DATA MZA10(2923),AWGT(2923)/ 1002460, 2.46075299000D+02/
+      DATA MZA10(2924),AWGT(2924)/ 1012460, 2.46081886000D+02/
+      DATA MZA10(2925),AWGT(2925)/  942470, 2.47074070000D+02/
+      DATA MZA10(2926),AWGT(2926)/  952470, 2.47072093000D+02/
+      DATA MZA10(2927),AWGT(2927)/  962470, 2.47070353005D+02/
+      DATA MZA10(2928),AWGT(2928)/  972470, 2.47070307001D+02/
+      DATA MZA10(2929),AWGT(2929)/  982470, 2.47071000006D+02/
+      DATA MZA10(2930),AWGT(2930)/  992470, 2.47073656000D+02/
+      DATA MZA10(2931),AWGT(2931)/ 1002470, 2.47076847000D+02/
+      DATA MZA10(2932),AWGT(2932)/ 1012470, 2.47081635000D+02/
+      DATA MZA10(2933),AWGT(2933)/  952480, 2.48075752000D+02/
+      DATA MZA10(2934),AWGT(2934)/  962480, 2.48072348005D+02/
+      DATA MZA10(2935),AWGT(2935)/  972480, 2.48073086000D+02/
+      DATA MZA10(2936),AWGT(2936)/  982480, 2.48072184009D+02/
+      DATA MZA10(2937),AWGT(2937)/  992480, 2.48075471000D+02/
+      DATA MZA10(2938),AWGT(2938)/ 1002480, 2.48077194007D+02/
+      DATA MZA10(2939),AWGT(2939)/ 1012480, 2.48082823000D+02/
+      DATA MZA10(2940),AWGT(2940)/ 1022480, 2.48086596000D+02/
+      DATA MZA10(2941),AWGT(2941)/  952490, 2.49078480000D+02/
+      DATA MZA10(2942),AWGT(2942)/  962490, 2.49075953004D+02/
+      DATA MZA10(2943),AWGT(2943)/  972490, 2.49074986007D+02/
+      DATA MZA10(2944),AWGT(2944)/  982490, 2.49074853005D+02/
+      DATA MZA10(2945),AWGT(2945)/  992490, 2.49076411000D+02/
+      DATA MZA10(2946),AWGT(2946)/ 1002490, 2.49079034000D+02/
+      DATA MZA10(2947),AWGT(2947)/ 1012490, 2.49083013000D+02/
+      DATA MZA10(2948),AWGT(2948)/ 1022490, 2.49087833000D+02/
+      DATA MZA10(2949),AWGT(2949)/  962500, 2.50078356010D+02/
+      DATA MZA10(2950),AWGT(2950)/  972500, 2.50078316005D+02/
+      DATA MZA10(2951),AWGT(2951)/  982500, 2.50076406001D+02/
+      DATA MZA10(2952),AWGT(2952)/  992500, 2.50078612000D+02/
+      DATA MZA10(2953),AWGT(2953)/ 1002500, 2.50079521003D+02/
+      DATA MZA10(2954),AWGT(2954)/ 1012500, 2.50084420000D+02/
+      DATA MZA10(2955),AWGT(2955)/ 1022500, 2.50087510000D+02/
+      DATA MZA10(2956),AWGT(2956)/  962510, 2.51082284006D+02/
+      DATA MZA10(2957),AWGT(2957)/  972510, 2.51080760002D+02/
+      DATA MZA10(2958),AWGT(2958)/  982510, 2.51079586008D+02/
+      DATA MZA10(2959),AWGT(2959)/  992510, 2.51079992001D+02/
+      DATA MZA10(2960),AWGT(2960)/ 1002510, 2.51081575000D+02/
+      DATA MZA10(2961),AWGT(2961)/ 1012510, 2.51084839000D+02/
+      DATA MZA10(2962),AWGT(2962)/ 1022510, 2.51089012000D+02/
+      DATA MZA10(2963),AWGT(2963)/ 1032510, 2.51094360000D+02/
+      DATA MZA10(2964),AWGT(2964)/  962520, 2.52084870000D+02/
+      DATA MZA10(2965),AWGT(2965)/  972520, 2.52084310000D+02/
+      DATA MZA10(2966),AWGT(2966)/  982520, 2.52081625008D+02/
+      DATA MZA10(2967),AWGT(2967)/  992520, 2.52082978005D+02/
+      DATA MZA10(2968),AWGT(2968)/ 1002520, 2.52082466009D+02/
+      DATA MZA10(2969),AWGT(2969)/ 1012520, 2.52086560000D+02/
+      DATA MZA10(2970),AWGT(2970)/ 1022520, 2.52088976005D+02/
+      DATA MZA10(2971),AWGT(2971)/ 1032520, 2.52095371000D+02/
+      DATA MZA10(2972),AWGT(2972)/  972530, 2.53086880000D+02/
+      DATA MZA10(2973),AWGT(2973)/  982530, 2.53085133001D+02/
+      DATA MZA10(2974),AWGT(2974)/  992530, 2.53084824007D+02/
+      DATA MZA10(2975),AWGT(2975)/ 1002530, 2.53085185002D+02/
+      DATA MZA10(2976),AWGT(2976)/ 1012530, 2.53087280000D+02/
+      DATA MZA10(2977),AWGT(2977)/ 1022530, 2.53090678000D+02/
+      DATA MZA10(2978),AWGT(2978)/ 1032530, 2.53095210000D+02/
+      DATA MZA10(2979),AWGT(2979)/ 1042530, 2.53100689000D+02/
+      DATA MZA10(2980),AWGT(2980)/  972540, 2.54090600000D+02/
+      DATA MZA10(2981),AWGT(2981)/  982540, 2.54087322009D+02/
+      DATA MZA10(2982),AWGT(2982)/  992540, 2.54088022000D+02/
+      DATA MZA10(2983),AWGT(2983)/ 1002540, 2.54086854002D+02/
+      DATA MZA10(2984),AWGT(2984)/ 1012540, 2.54089656000D+02/
+      DATA MZA10(2985),AWGT(2985)/ 1022540, 2.54090955003D+02/
+      DATA MZA10(2986),AWGT(2986)/ 1032540, 2.54096454000D+02/
+      DATA MZA10(2987),AWGT(2987)/ 1042540, 2.54100184000D+02/
+      DATA MZA10(2988),AWGT(2988)/  982550, 2.55091046000D+02/
+      DATA MZA10(2989),AWGT(2989)/  992550, 2.55090273001D+02/
+      DATA MZA10(2990),AWGT(2990)/ 1002550, 2.55089962002D+02/
+      DATA MZA10(2991),AWGT(2991)/ 1012550, 2.55091082007D+02/
+      DATA MZA10(2992),AWGT(2992)/ 1022550, 2.55093241001D+02/
+      DATA MZA10(2993),AWGT(2993)/ 1032550, 2.55096681000D+02/
+      DATA MZA10(2994),AWGT(2994)/ 1042550, 2.55101340000D+02/
+      DATA MZA10(2995),AWGT(2995)/ 1052550, 2.55107398000D+02/
+      DATA MZA10(2996),AWGT(2996)/  982560, 2.56093440000D+02/
+      DATA MZA10(2997),AWGT(2997)/  992560, 2.56093598000D+02/
+      DATA MZA10(2998),AWGT(2998)/ 1002560, 2.56091773001D+02/
+      DATA MZA10(2999),AWGT(2999)/ 1012560, 2.56094059000D+02/
+      DATA MZA10(3000),AWGT(3000)/ 1022560, 2.56094282007D+02/
+      DATA MZA10(3001),AWGT(3001)/ 1032560, 2.56098629000D+02/
+      DATA MZA10(3002),AWGT(3002)/ 1042560, 2.56101166002D+02/
+      DATA MZA10(3003),AWGT(3003)/ 1052560, 2.56108127000D+02/
+      DATA MZA10(3004),AWGT(3004)/  992570, 2.57095979000D+02/
+      DATA MZA10(3005),AWGT(3005)/ 1002570, 2.57095104007D+02/
+      DATA MZA10(3006),AWGT(3006)/ 1012570, 2.57095541004D+02/
+      DATA MZA10(3007),AWGT(3007)/ 1022570, 2.57096877002D+02/
+      DATA MZA10(3008),AWGT(3008)/ 1032570, 2.57099555000D+02/
+      DATA MZA10(3009),AWGT(3009)/ 1042570, 2.57102990000D+02/
+      DATA MZA10(3010),AWGT(3010)/ 1052570, 2.57107722000D+02/
+      DATA MZA10(3011),AWGT(3011)/  992580, 2.58099520000D+02/
+      DATA MZA10(3012),AWGT(3012)/ 1002580, 2.58097076000D+02/
+      DATA MZA10(3013),AWGT(3013)/ 1012580, 2.58098431003D+02/
+      DATA MZA10(3014),AWGT(3014)/ 1022580, 2.58098207000D+02/
+      DATA MZA10(3015),AWGT(3015)/ 1032580, 2.58101814000D+02/
+      DATA MZA10(3016),AWGT(3016)/ 1042580, 2.58103489000D+02/
+      DATA MZA10(3017),AWGT(3017)/ 1052580, 2.58109231000D+02/
+      DATA MZA10(3018),AWGT(3018)/ 1062580, 2.58113168000D+02/
+      DATA MZA10(3019),AWGT(3019)/ 1002590, 2.59100595000D+02/
+      DATA MZA10(3020),AWGT(3020)/ 1012590, 2.59100509000D+02/
+      DATA MZA10(3021),AWGT(3021)/ 1022590, 2.59101031000D+02/
+      DATA MZA10(3022),AWGT(3022)/ 1032590, 2.59102901000D+02/
+      DATA MZA10(3023),AWGT(3023)/ 1042590, 2.59105637000D+02/
+      DATA MZA10(3024),AWGT(3024)/ 1052590, 2.59109610000D+02/
+      DATA MZA10(3025),AWGT(3025)/ 1062590, 2.59114500000D+02/
+      DATA MZA10(3026),AWGT(3026)/ 1002600, 2.60102678000D+02/
+      DATA MZA10(3027),AWGT(3027)/ 1012600, 2.60103652000D+02/
+      DATA MZA10(3028),AWGT(3028)/ 1022600, 2.60102643000D+02/
+      DATA MZA10(3029),AWGT(3029)/ 1032600, 2.60105504000D+02/
+      DATA MZA10(3030),AWGT(3030)/ 1042600, 2.60106440000D+02/
+      DATA MZA10(3031),AWGT(3031)/ 1052600, 2.60111300000D+02/
+      DATA MZA10(3032),AWGT(3032)/ 1062600, 2.60114422001D+02/
+      DATA MZA10(3033),AWGT(3033)/ 1072600, 2.60121970000D+02/
+      DATA MZA10(3034),AWGT(3034)/ 1012610, 2.61105721000D+02/
+      DATA MZA10(3035),AWGT(3035)/ 1022610, 2.61105749000D+02/
+      DATA MZA10(3036),AWGT(3036)/ 1032610, 2.61106883000D+02/
+      DATA MZA10(3037),AWGT(3037)/ 1042610, 2.61108766006D+02/
+      DATA MZA10(3038),AWGT(3038)/ 1052610, 2.61112056000D+02/
+      DATA MZA10(3039),AWGT(3039)/ 1062610, 2.61116117000D+02/
+      DATA MZA10(3040),AWGT(3040)/ 1072610, 2.61121664000D+02/
+      DATA MZA10(3041),AWGT(3041)/ 1012620, 2.62108865000D+02/
+      DATA MZA10(3042),AWGT(3042)/ 1022620, 2.62107301000D+02/
+      DATA MZA10(3043),AWGT(3043)/ 1032620, 2.62109634000D+02/
+      DATA MZA10(3044),AWGT(3044)/ 1042620, 2.62109925000D+02/
+      DATA MZA10(3045),AWGT(3045)/ 1052620, 2.62114084000D+02/
+      DATA MZA10(3046),AWGT(3046)/ 1062620, 2.62116398000D+02/
+      DATA MZA10(3047),AWGT(3047)/ 1072620, 2.62122892000D+02/
+      DATA MZA10(3048),AWGT(3048)/ 1022630, 2.63110552000D+02/
+      DATA MZA10(3049),AWGT(3049)/ 1032630, 2.63111293000D+02/
+      DATA MZA10(3050),AWGT(3050)/ 1042630, 2.63112547000D+02/
+      DATA MZA10(3051),AWGT(3051)/ 1052630, 2.63114988000D+02/
+      DATA MZA10(3052),AWGT(3052)/ 1062630, 2.63118322000D+02/
+      DATA MZA10(3053),AWGT(3053)/ 1072630, 2.63123035000D+02/
+      DATA MZA10(3054),AWGT(3054)/ 1082630, 2.63128558000D+02/
+      DATA MZA10(3055),AWGT(3055)/ 1022640, 2.64112345000D+02/
+      DATA MZA10(3056),AWGT(3056)/ 1032640, 2.64114038000D+02/
+      DATA MZA10(3057),AWGT(3057)/ 1042640, 2.64113985000D+02/
+      DATA MZA10(3058),AWGT(3058)/ 1052640, 2.64117404000D+02/
+      DATA MZA10(3059),AWGT(3059)/ 1062640, 2.64118931000D+02/
+      DATA MZA10(3060),AWGT(3060)/ 1072640, 2.64124604000D+02/
+      DATA MZA10(3061),AWGT(3061)/ 1082640, 2.64128394009D+02/
+      DATA MZA10(3062),AWGT(3062)/ 1032650, 2.65115839000D+02/
+      DATA MZA10(3063),AWGT(3063)/ 1042650, 2.65116704000D+02/
+      DATA MZA10(3064),AWGT(3064)/ 1052650, 2.65118601000D+02/
+      DATA MZA10(3065),AWGT(3065)/ 1062650, 2.65121114007D+02/
+      DATA MZA10(3066),AWGT(3066)/ 1072650, 2.65125147000D+02/
+      DATA MZA10(3067),AWGT(3067)/ 1082650, 2.65130085000D+02/
+      DATA MZA10(3068),AWGT(3068)/ 1092650, 2.65136151000D+02/
+      DATA MZA10(3069),AWGT(3069)/ 1032660, 2.66119305000D+02/
+      DATA MZA10(3070),AWGT(3070)/ 1042660, 2.66117956000D+02/
+      DATA MZA10(3071),AWGT(3071)/ 1052660, 2.66121029000D+02/
+      DATA MZA10(3072),AWGT(3072)/ 1062660, 2.66122065000D+02/
+      DATA MZA10(3073),AWGT(3073)/ 1072660, 2.66126942000D+02/
+      DATA MZA10(3074),AWGT(3074)/ 1082660, 2.66130097000D+02/
+      DATA MZA10(3075),AWGT(3075)/ 1092660, 2.66137299000D+02/
+      DATA MZA10(3076),AWGT(3076)/ 1042670, 2.67121529000D+02/
+      DATA MZA10(3077),AWGT(3077)/ 1052670, 2.67122377000D+02/
+      DATA MZA10(3078),AWGT(3078)/ 1062670, 2.67124425000D+02/
+      DATA MZA10(3079),AWGT(3079)/ 1072670, 2.67127650000D+02/
+      DATA MZA10(3080),AWGT(3080)/ 1082670, 2.67131789000D+02/
+      DATA MZA10(3081),AWGT(3081)/ 1092670, 2.67137307000D+02/
+      DATA MZA10(3082),AWGT(3082)/ 1102670, 2.67144341000D+02/
+      DATA MZA10(3083),AWGT(3083)/ 1042680, 2.68123644000D+02/
+      DATA MZA10(3084),AWGT(3084)/ 1052680, 2.68125445000D+02/
+      DATA MZA10(3085),AWGT(3085)/ 1062680, 2.68125606000D+02/
+      DATA MZA10(3086),AWGT(3086)/ 1072680, 2.68129755000D+02/
+      DATA MZA10(3087),AWGT(3087)/ 1082680, 2.68132162000D+02/
+      DATA MZA10(3088),AWGT(3088)/ 1092680, 2.68138728000D+02/
+      DATA MZA10(3089),AWGT(3089)/ 1102680, 2.68143795000D+02/
+      DATA MZA10(3090),AWGT(3090)/ 1052690, 2.69127460000D+02/
+      DATA MZA10(3091),AWGT(3091)/ 1062690, 2.69128755000D+02/
+      DATA MZA10(3092),AWGT(3092)/ 1072690, 2.69130694000D+02/
+      DATA MZA10(3093),AWGT(3093)/ 1082690, 2.69134056000D+02/
+      DATA MZA10(3094),AWGT(3094)/ 1092690, 2.69139055000D+02/
+      DATA MZA10(3095),AWGT(3095)/ 1102690, 2.69145124000D+02/
+      DATA MZA10(3096),AWGT(3096)/ 1052700, 2.70130712000D+02/
+      DATA MZA10(3097),AWGT(3097)/ 1062700, 2.70130329000D+02/
+      DATA MZA10(3098),AWGT(3098)/ 1072700, 2.70133616000D+02/
+      DATA MZA10(3099),AWGT(3099)/ 1082700, 2.70134650000D+02/
+      DATA MZA10(3100),AWGT(3100)/ 1092700, 2.70140657000D+02/
+      DATA MZA10(3101),AWGT(3101)/ 1102700, 2.70144720000D+02/
+      DATA MZA10(3102),AWGT(3102)/ 1062710, 2.71133472000D+02/
+      DATA MZA10(3103),AWGT(3103)/ 1072710, 2.71135179000D+02/
+      DATA MZA10(3104),AWGT(3104)/ 1082710, 2.71137657000D+02/
+      DATA MZA10(3105),AWGT(3105)/ 1092710, 2.71141139000D+02/
+      DATA MZA10(3106),AWGT(3106)/ 1102710, 2.71146062000D+02/
+      DATA MZA10(3107),AWGT(3107)/ 1062720, 2.72135158000D+02/
+      DATA MZA10(3108),AWGT(3108)/ 1072720, 2.72138032000D+02/
+      DATA MZA10(3109),AWGT(3109)/ 1082720, 2.72139052000D+02/
+      DATA MZA10(3110),AWGT(3110)/ 1092720, 2.72143738000D+02/
+      DATA MZA10(3111),AWGT(3111)/ 1102720, 2.72146317000D+02/
+      DATA MZA10(3112),AWGT(3112)/ 1112720, 2.72153615000D+02/
+      DATA MZA10(3113),AWGT(3113)/ 1062730, 2.73138220000D+02/
+      DATA MZA10(3114),AWGT(3114)/ 1072730, 2.73139618000D+02/
+      DATA MZA10(3115),AWGT(3115)/ 1082730, 2.73141986000D+02/
+      DATA MZA10(3116),AWGT(3116)/ 1092730, 2.73144913000D+02/
+      DATA MZA10(3117),AWGT(3117)/ 1102730, 2.73148863000D+02/
+      DATA MZA10(3118),AWGT(3118)/ 1112730, 2.73153682000D+02/
+      DATA MZA10(3119),AWGT(3119)/ 1072740, 2.74142440000D+02/
+      DATA MZA10(3120),AWGT(3120)/ 1082740, 2.74143131000D+02/
+      DATA MZA10(3121),AWGT(3121)/ 1092740, 2.74147492000D+02/
+      DATA MZA10(3122),AWGT(3122)/ 1102740, 2.74149492000D+02/
+      DATA MZA10(3123),AWGT(3123)/ 1112740, 2.74155713000D+02/
+      DATA MZA10(3124),AWGT(3124)/ 1072750, 2.75144250000D+02/
+      DATA MZA10(3125),AWGT(3125)/ 1082750, 2.75145952000D+02/
+      DATA MZA10(3126),AWGT(3126)/ 1092750, 2.75148647000D+02/
+      DATA MZA10(3127),AWGT(3127)/ 1102750, 2.75152176000D+02/
+      DATA MZA10(3128),AWGT(3128)/ 1112750, 2.75156142000D+02/
+      DATA MZA10(3129),AWGT(3129)/ 1082760, 2.76147208000D+02/
+      DATA MZA10(3130),AWGT(3130)/ 1092760, 2.76151156000D+02/
+      DATA MZA10(3131),AWGT(3131)/ 1102760, 2.76153034000D+02/
+      DATA MZA10(3132),AWGT(3132)/ 1112760, 2.76158493000D+02/
+      DATA MZA10(3133),AWGT(3133)/ 1082770, 2.77149841000D+02/
+      DATA MZA10(3134),AWGT(3134)/ 1092770, 2.77152420000D+02/
+      DATA MZA10(3135),AWGT(3135)/ 1102770, 2.77155647000D+02/
+      DATA MZA10(3136),AWGT(3136)/ 1112770, 2.77159519000D+02/
+      DATA MZA10(3137),AWGT(3137)/ 1122770, 2.77163943000D+02/
+      DATA MZA10(3138),AWGT(3138)/ 1092780, 2.78154812000D+02/
+      DATA MZA10(3139),AWGT(3139)/ 1102780, 2.78156469000D+02/
+      DATA MZA10(3140),AWGT(3140)/ 1112780, 2.78161604000D+02/
+      DATA MZA10(3141),AWGT(3141)/ 1122780, 2.78164312000D+02/
+      DATA MZA10(3142),AWGT(3142)/ 1092790, 2.79156193000D+02/
+      DATA MZA10(3143),AWGT(3143)/ 1102790, 2.79158861000D+02/
+      DATA MZA10(3144),AWGT(3144)/ 1112790, 2.79162468000D+02/
+      DATA MZA10(3145),AWGT(3145)/ 1122790, 2.79166546000D+02/
+      DATA MZA10(3146),AWGT(3146)/ 1102800, 2.80159795000D+02/
+      DATA MZA10(3147),AWGT(3147)/ 1112800, 2.80164473000D+02/
+      DATA MZA10(3148),AWGT(3148)/ 1122800, 2.80167039000D+02/
+      DATA MZA10(3149),AWGT(3149)/ 1102810, 2.81162061000D+02/
+      DATA MZA10(3150),AWGT(3150)/ 1112810, 2.81165372000D+02/
+      DATA MZA10(3151),AWGT(3151)/ 1122810, 2.81169286000D+02/
+      DATA MZA10(3152),AWGT(3152)/ 1112820, 2.82167486000D+02/
+      DATA MZA10(3153),AWGT(3153)/ 1122820, 2.82169765000D+02/
+      DATA MZA10(3154),AWGT(3154)/ 1112830, 2.83168415000D+02/
+      DATA MZA10(3155),AWGT(3155)/ 1122830, 2.83171792000D+02/
+      DATA MZA10(3156),AWGT(3156)/ 1132830, 2.83176451000D+02/
+      DATA MZA10(3157),AWGT(3157)/ 1122840, 2.84172384000D+02/
+      DATA MZA10(3158),AWGT(3158)/ 1132840, 2.84178080000D+02/
+      DATA MZA10(3159),AWGT(3159)/ 1122850, 2.85174105000D+02/
+      DATA MZA10(3160),AWGT(3160)/ 1132850, 2.85178732000D+02/
+      DATA MZA10(3161),AWGT(3161)/ 1142850, 2.85183698000D+02/
+      DATA MZA10(3162),AWGT(3162)/ 1132860, 2.86180481000D+02/
+      DATA MZA10(3163),AWGT(3163)/ 1142860, 2.86183855000D+02/
+      DATA MZA10(3164),AWGT(3164)/ 1132870, 2.87181045000D+02/
+      DATA MZA10(3165),AWGT(3165)/ 1142870, 2.87185599000D+02/
+      DATA MZA10(3166),AWGT(3166)/ 1152870, 2.87191186000D+02/
+      DATA MZA10(3167),AWGT(3167)/ 1142880, 2.88185689000D+02/
+      DATA MZA10(3168),AWGT(3168)/ 1152880, 2.88192492000D+02/
+      DATA MZA10(3169),AWGT(3169)/ 1142890, 2.89187279000D+02/
+      DATA MZA10(3170),AWGT(3170)/ 1152890, 2.89192715000D+02/
+      DATA MZA10(3171),AWGT(3171)/ 1162890, 2.89198862000D+02/
+      DATA MZA10(3172),AWGT(3172)/ 1152900, 2.90194141000D+02/
+      DATA MZA10(3173),AWGT(3173)/ 1162900, 2.90198590000D+02/
+      DATA MZA10(3174),AWGT(3174)/ 1152910, 2.91194384000D+02/
+      DATA MZA10(3175),AWGT(3175)/ 1162910, 2.91200011000D+02/
+      DATA MZA10(3176),AWGT(3176)/ 1172910, 2.91206564000D+02/
+      DATA MZA10(3177),AWGT(3177)/ 1162920, 2.92199786000D+02/
+      DATA MZA10(3178),AWGT(3178)/ 1172920, 2.92207549000D+02/
+      DATA MZA10(3179),AWGT(3179)/ 1182930, 2.93214670000D+02/
+C*
+      DO I=1,MXNUC
+        IF(IZA10.EQ.MZA10(I)) THEN
+          AWR=AWGT(I)
+          EXIT
+        END IF
+      END DO
+C* Use crude estimate for nuclides not in the table
+      IF(AWR.LE.0) THEN
+        IZA=IZA10/10
+        IZ =IZA/1000
+        IA =IZA-1000*IA
+        IF(IA.GT.0) THEN
+          AWR=IA
+        ELSE
+          AWR=2.1*IZ
+        END IF
+        print *,'GETAWT WARNING - Crude estimate for ZA',IZA,' mass',AWR
+      END IF
+C*
+  100 GETAWT=AWR
+C...
+C...  PRINT *,'IZA,AWR',IZA,AWR
+C...
+      RETURN
+      END
+      SUBROUTINE CALCQ(IZAI,IZP0,IZA10,KZA10,QI)
+C-Title  : Subroutine CALCQ
+C-Purpose: Calculate reaction Q-value for single-particle emission
+C-Description:
+C-D  IZAI  Projectile ZA
+C-D  IZP0  Ejectile ZA
+C-D  IZA10 Target 10*ZA+LIS
+C-D  KZA10 Residual 10*ZA+LFS
+C-D  QI    Reaction Q-value (calculated from mass difference)
+C-
+      DOUBLE PRECISION AWT,AWR,AWP,AWI
+C*
+      DATA AMU/931.494013E6/
+C*
+      IZ=IZA10/10000
+      KZ=KZA10/10000
+C* Nuclear masses of target and residual (subtract electron mass)
+C* NOTE: Correction for electron binding energy is missing
+      AWT=GETAWT(IZA10)-IZ*0.00054857991D0
+      AWR=GETAWT(KZA10)-KZ*0.00054857991D0
+C* Nuclear masses of projectile and outgoing particle
+      AWP=PROJWT(IZP0)
+      AWI=PROJWT(IZAI)
+C* Mass defect Energy equivalent
+      QI =(AWI+AWT-AWR-AWP)*AMU
+C...
+C...  print *,'IZAI,IZP0,IZA,KZA,QI',IZAI,IZP0,IZA10/10,KZA10/10,QI
+C...
+      RETURN
       END
