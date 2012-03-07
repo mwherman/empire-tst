@@ -48,6 +48,8 @@ SYSTEM FLAG THE EXFOR TITLE DATA-CM HAS A 6 IN COLUMN 30).                     1
 (10) MULTIPLE FIELDS..CHOOSE LARGEST AND SMALLEST IN 2 SUCCESSIVE FIELDS,      1
                       (MULTIPLE E-LVL).                                        1
 (11) TAKE ABSOLUTE VALUE.                                                      1
+(12) HALVE THE VALUE TO CONVERT FULL-WIDTH TO HALF-WIDTH RESOLUTION.           1
+                      (EN-RSL-FW)                                              1
                                                                                1
             MF  MF   OUTPUT                                                    1
             LOW HIGH FIELD  OPERATION                                          1
@@ -56,7 +58,8 @@ INITIAL ENERGY                                                                 1
                                                                                1
 EN            1  999    1    1
 EN-MEAN       1  999    1    0
-EN-RSL-FW     1  999    2    0
+Add operation "HALVE" to change full-width to uncertainty (A.Trkov, 08/09)     1
+EN-RSL-FW     1  999    2   12
 EN-RES        1  999    1    1
 EN-DUMMY      1  999    1    0
 EN-MIN      121  399    1    9
@@ -67,6 +70,8 @@ EN-RSL        1  999    2    4
 EN-ERR        1  999    2    4
 EN-RES-ERR    1  999    2    4
 EN-NRM        1  999    0    0
+Add "approximate energy" as energy (A. Trkov, 09/10)                           1
+EN-APRX       1  999    1    0
 Add CM energy conversion table (V.Zerkin, A.Trkov, 08/09)                      1
 EN-CM         1  999    0    6
 EN-CM-MIN     1  999    1    8
@@ -127,6 +132,8 @@ E-CM-MIN      1  999    7    8   E2
 E-CM-MAX      1  999    7    8   E2
 E-LVL-MIN     1  999    7    0  DE2
 E-LVL-MAX     1  999    8    0  DE2
+                      Interpret E-RES as uncertainty (A. Trkov, 7 Mar 2012)    1
+E-RSL         1  999    8    0  DE2
 Interpret Q-VAL as (-ve) outgoing particle energy E2 (A.Trkov, 07/02           1
 Q-VAL         1  999    7   11   E2
                                                                                1
@@ -146,6 +153,7 @@ NUMBER        1  999    5    0
 NUMBER-CM     1  999    5    6
 HL1           1  999    7    0   HL
 HL1-ERR       1  999    8    0
+KT-NRM        5    5    0    0
                                                                                1
 MISCELLANEOUS (IGNORED)                                                        1
                                                                                1
@@ -170,3 +178,4 @@ ISOMER        1  999    0    0
 DECAY-FLAG    1  999    0    0
 FLAG          1  999    0    0
 N-OUT         1  999    0    0
+

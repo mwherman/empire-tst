@@ -48,6 +48,7 @@ ABSOLUTE CONVERSION THE EXFOR UNIT PER-CENT HAS A 1 IN COLUMN 55).             1
 (7) PRINT WARNING FOLLOWED BY UNITS (E.G., WARNING...UNITS=ABR-UNITS).         1
 (8) PRINT WARNING FOLLOWED BY UNITS (E.G., WARNING...UNITS=ABR-UNITS),         1
     AND CHANGE STATUS TO UNNORMALIZED (U).                                     1
+(9) CONVERT ENERGY/ATOMIC-MASS TO ENERGY                                       1
                                                                                1
 EXFOR      STANDARD                                                            1
 UNITS      UNITS       MULTIPLIER ADDER           OPERATION                    1
@@ -68,6 +69,8 @@ TEV        EV          1.00000+12 0.0                 0
 1/MEV      1/EV        1.00000- 6 0.0                 0
 1/GEV      1/EV        1.00000- 9 0.0                 0
 1/TEV      1/EV        1.00000-12 0.0                 0
+MEV/A      EV          1.00000+ 6 0.0                 9
+GEV/A      EV          1.00000+ 9 0.0                 9
                                                                                1
 RESOLUTION                                                                     1
                                                                                1
@@ -124,6 +127,8 @@ B/MILLI-EV B/EV        1.00000+ 3 0.0                 0
 B/EV       B/EV        1.0        0.0                 0
 B/KEV      B/EV        1.00000- 3 0.0                 0
 B/MEV      B/EV        1.00000- 6 0.0                 0
+                                                 Added: A. Trkov, 7 Mar 2012   1
+PT/FIS/MEV PT/FIS/EV   1.00000+ 6 0.0                 0
                                                                                1
 DOUBLE DIFFERENTIAL DISTRIBUTIONS                                              1
                                                                                1
@@ -188,3 +193,4 @@ ARB-UNITS  ARB-UNITS   1.0        0.0                 8
 SEE TEXT   SEE TEXT    1.0        0.0                 7
 MUCI/MUA   MUCI/MUA    1.0        0.0                 7
 MUCI/MUAHR MUCI/MUAHR  1.0        0.0                 7
+

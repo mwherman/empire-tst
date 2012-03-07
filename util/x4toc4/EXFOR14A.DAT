@@ -148,6 +148,7 @@ ERROR (COLUMN 4).                                                              1
 (6) DATA = DATA/(F(0)*(2*L+1)) (F(0) = ZEROTH ORDER LEGENDRE COEFFICIENT)      1
 (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)                 1
 (9) DATA = DATA*COULOMB (CONVERT RUTHERFORD RATIO TO CROSS SECTION)            1
+(10)DATA = DATA*MAXWELLIAN(E_KT-NORM)
                                                                                1
 NOTE, THESE CONVENTIONS ARE CODED INTO THE TRANSLATION PROGRAM.                1
 THE USER SHOULD NOT ADD ANY OPERATIONS TO THIS LIST UNLESS THEY ARE            1
@@ -181,6 +182,8 @@ Add fission*Sqrt(E), 8-Mar-2006, A.Trkov                                       1
 NF                                                  1  3  18  0
 (N,N+A),SIG                                         1  3  22  0
 (N,N+P),SIG                                         1  3  28  0
+Add reaction (N,4N) (A. Trkov, 07-Nov-2009)                                    1
+(N,4N),SIG                                          1  3  37  0
 Added 22 Sep 2004, A. Trkov                                                    1
 (N,INL)PAR,SIG                                      1  3  51  0
 (N,INL)PAR,DA,,4PI                                  1  3  51  0
@@ -205,6 +208,9 @@ NA                                                  1  3 107  0
 (N,A),SIG                                           1  3 107  0
 (N,2A),SIG                                          1  3 108  0
 (N,2A)PAR,SIG                                       1  31108  0
+Add reactions (N,2P), (N,P+A) (A. Trkov, 07-Nov-2009)                          1
+(N,2P),SIG                                          1  3 111  0
+(N,P+A),SIG                                         1  3 112  0
 (N,T+2A),SIG                                        1  3 113  0
 (N,T+2A)PAR,SIG                                     1  31113  0
 Change to "proton production" (A. Trkov, 06-Jun-06)                            1
@@ -212,6 +218,11 @@ Change to "proton production" (A. Trkov, 06-Jun-06)                            1
 ((N,N+P),SIG)+((N,D),SIG)                           1  31003  0
 (N,3-LI-7)PAR,SIG                                   1  31200  0
 (N,P)DI,SIG                                         1  32103  0
+Add total scattering cross section, 24-Feb-2009, A. Trkov                      1
+(N,SCT),SIG                                         1  39000  0
+... temporarily deactivated (A. Trkov)
+((N,EL),SIG)+((N,INL)PAR,SIG)                       1  39000  0                1
+                                                                               1
 Made inactive (what is TTY? A. Trkov, 06-Jun-06)                               1
 (D,N)PAR,TTY,G,,EXP                              1002  0   0  0                1
 Change to "discrete level" )A. Trkov, 06-Jun-06)                               1
@@ -270,6 +281,55 @@ Non-standard extensions (M. Herman, A.Trkov, Sep.2004)                         1
 (P,2A)PAR,SIG                                    1001  31108  0
 (P,3-LI-7)PAR,SIG                                1001  31200  0
 (P,INL)DI,SIG                                    1001  32103  0
+                                                                               1
+Add deuteron-induced reactions (A.Trkov, March 2004)                           1
+(D,EL),SIG                                       1002  3   2  0
+(D,NON),,SIG                                     1002  3   3  0
+(D,N),SIG                                        1002  3   4  0
+(D,N),SIG,,,EXP                                  1002  3   4  0
+(D,2N+D),SIG                                     1002  3  11  0
+(D,2N),SIG                                       1002  3  16  0
+(D,3N),SIG                                       1002  3  17  0
+(D,F),SIG                                        1002  3  18  0
+DF                                               1002  3  18  0
+(D,N+A),SIG                                      1002  3  22  0
+(D,N+3A),SIG                                     1002  3  23  0
+(D,2N+A),SIG                                     1002  3  24  0
+(D,3N+A),SIG                                     1002  3  25  0
+(D,N+P),SIG                                      1002  3  28  0
+(D,N+2A),SIG                                     1002  3  29  0
+(D,2N+2A),SIG                                    1002  3  30  0
+(D,N+D),SIG                                      1002  3  32  0
+(D,N+T),SIG                                      1002  3  33  0
+(D,N+HE3),SIG                                    1002  3  34  0
+(D,N+D+2A),SIG                                   1002  3  35  0
+(D,N+T+2A),SIG                                   1002  3  36  0
+(D,4N),SIG                                       1002  3  37  0
+(D,2N+P),SIG                                     1002  3  41  0
+(D,3N+P),SIG                                     1002  3  42  0
+(D,N+2P),SIG                                     1002  3  44  0
+(D,N+P+A),SIG                                    1002  3  45  0
+(D,G),SIG                                        1002  3 102  0
+(D,G),SIG,,AV                                    1002  3 102  0
+(D,G),SIG,,RAW                                   1002  3 102  0
+DG                                               1002  3 102  0
+(D,INL),SIG                                      1002  3 103  0
+(D,INL),SIG,,A                                   1002  3 103  0
+(D,D),SIG                                        1002  3 104  0
+(D,T),SIG                                        1002  3 105  0
+DT                                               1002  3 105  0
+(D,HE3),SIG                                      1002  3 106  0
+(D,A),SIG                                        1002  3 107  0
+(D,2A),SIG                                       1002  3 108  0
+(D,3A),SIG                                       1002  3 109  0
+(D,2P),SIG                                       1002  3 111  0
+(D,P+A),SIG                                      1002  3 112  0
+(D,T+2A),SIG                                     1002  3 113  0
+(D,T+2A)PAR,SIG                                  1002  31113  0
+(D,D+2A),SIG                                     1002  3 114  0
+(D,P+D),SIG                                      1002  3 115  0
+(D,P+T),SIG                                      1002  3 116  0
+(D,D+A),SIG                                      1002  3 117  0
                                                                                1
 Add alpha-induced reactions (M. Herman, A.Trkov, Sep.2004)                     1
 (A,EL),SIG                                       2004  3   2  0
@@ -450,9 +510,85 @@ Add elastic cross section ratio to coulomb, 1-Dec-2006, A. Trkov               1
 (T,EL),DA,,RTH                                   1003  4   2  9
 (HE3,EL),DA,,RTH                                 2003  4   2  9
 (A,EL),DA,,RTH                                   2004  4   2  9
+Add scattering angular distributions, 18-Feb-2009, A. Trkov                    1
+(N,SCT),DA                                          1  49000  0
+((N,EL),DA)+((N,INL)PAR,DA)                         1  49000  0
                                                                                1
 DIFFERENTIAL DATA (ENERGY SPECTRA)                                             1
                                                                                1
+Added fission neutron spectrum - various combinations (A. Trkov, 06 Mar 2012)  1
+(N,F),DE                                            1  5  18  0
+(N,F),DE,,MXW                                       1  5  18  0
+(N,F),DE,,MXD                                       1  5  18 10
+(N,F),DE,,REL                                       1  5  18  0
+(N,F),DE,,MXW/REL                                   1  5  18  0
+(N,F),DE,,REL/MXW                                   1  5  18  0
+                                                                               1
+(N,F),DE,N                                          1  5  18  0
+(N,F),DE,N,MXW                                      1  5  18  0
+(N,F),DE,N,MXD                                      1  5  18 10
+(N,F),DE,N,REL                                      1  5  18  0
+(N,F),DE,N,MXW/REL                                  1  5  18  0
+(N,F),DE,N,REL/MXW                                  1  5  18  0
+                                                                               1
+(N,F),NU/DE                                         1  5  18  0
+(N,F),NU/DE,,MXW                                    1  5  18  0
+(N,F),NU/DE,,MXD                                    1  5  18 10
+(N,F),NU/DE,,REL                                    1  5  18  0
+(N,F),NU/DE,,MXW/REL                                1  5  18  0
+(N,F),NU/DE,,REL/MXW                                1  5  18  0
+                                                                               1
+(N,F),NU/DE,N                                       1  5  18  0
+(N,F),NU/DE,N,MXW                                   1  5  18  0
+(N,F),NU/DE,N,MXD                                   1  5  18 10
+(N,F),NU/DE,N,REL                                   1  5  18  0
+(N,F),NU/DE,N,MXW/REL                               1  5  18  0
+(N,F),NU/DE,N,REL/MXW                               1  5  18  0
+                                                                               1
+(N,F)PR,DE                                          1  5  18  0
+(N,F)PR,DE,,MXW                                     1  5  18  0
+(N,F)PR,DE,,MXD                                     1  5  18 10
+(N,F)PR,DE,,REL                                     1  5  18  0
+(N,F)PR,DE,,MXW/REL                                 1  5  18  0
+(N,F)PR,DE,,REL/MXW                                 1  5  18  0
+                                                                               1
+(N,F)PR,DE,N                                        1  5  18  0
+(N,F)PR,DE,N,MXW                                    1  5  18  0
+(N,F)PR,DE,N,MXD                                    1  5  18 10
+(N,F)PR,DE,N,REL                                    1  5  18  0
+(N,F)PR,DE,N,MXW/REL                                1  5  18  0
+(N,F)PR,DE,N,REL/MXW                                1  5  18  0
+                                                                               1
+(N,F)PR,NU/DE                                       1  5  18  0
+(N,F)PR,NU/DE,,MXW                                  1  5  18  0
+(N,F)PR,NU/DE,,MXD                                  1  5  18 10
+(N,F)PR,NU/DE,,REL                                  1  5  18  0
+(N,F)PR,NU/DE,,MXW/REL                              1  5  18  0
+(N,F)PR,NU/DE,,REL/MXW                              1  5  18  0
+                                                                               1
+(N,F)PR,NU/DE,N                                     1  5  18  0
+(N,F)PR,NU/DE,N,MXW                                 1  5  18  0
+(N,F)PR,NU/DE,N,MXD                                 1  5  18 10
+(N,F)PR,NU/DE,N,REL                                 1  5  18  0
+(N,F)PR,NU/DE,N,MXW/REL                             1  5  18  0
+(N,F)PR,NU/DE,N,REL/MXW                             1  5  18  0
+                                                                               1
+(N,X),DE                                            1  59000  0
+Added (process reactions where elastic is excluded) 14 Jun 2004 by A. Trkov    1
+(N,X)EM,DE                                          1  59000  0
+Added proton induced spectra, 20 Sep 2004 (M. Herman)                          1
+(P,X),DE                                         1001  59000  0
+Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
+(P,N),DE                                         1001  5   4  0
+(P,X),DE,,AV                                     1001  59000  0
+(P,X)DE                                          1001  59000  0
+(P,X),DE,,,EXP                                   1001  59000  0
+Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
+(P,N),DE,,,EXP                                   1001  5   4  0
+(P,X)EM,DE,,,EXP                                 1001  59000  0
+Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
+(P,N)EM,DE,,,EXP                                 1001  5   4  0
+(P,X)EM,DE                                       1001  59000  0
 Added thermal scattering 20 Sep 2004 (M.Herman)                                1
 (N,SCT),DE,,RAW                                     1  59000  0
 (N,SCT),DE                                          1  59000  0
@@ -478,6 +614,8 @@ Added thermal scattering and inelastic 20 Sep 2004 (M.Herman)                  1
 (N,SCT),DAE                                         1  69001  0
 (N,INL),DAE                                         1  69001  0
 (N,INL),DA/DE                                       1  69001  0
+Added capture gamma spectra (A. Trkov, 20-Feb-2009)                            1
+(N,G),DA/DE                                         1  6 102  0
                                                                                1
 PARTICLE/ISOTOPE PRODUCTION                                                    1
                                                                                1
@@ -487,6 +625,8 @@ FIELD 6.                                                                       1
 (N,X),SIG                                           1  39000  0
 (N,X)CN,SIG                                         1  39000  0
 (P,X),SIG                                        1001  39000  0
+Independent yield for residual production (A. Trkov, 10 May 2011)              1
+(P,X),IND,SIG                                    1001  39000  0
 (D,X),SIG                                        1002  39000  0
 (T,X),SIG                                        1003  39000  0
 (HE-3,X),SIG                                     2003  39000  0
@@ -497,24 +637,6 @@ Add photon-induced reactions (M. Herman, A.Trkov, Oct.2004)                    1
 ANGULAR DISTRIBUTIONS                                                          1
 (N,X),DA                                            1  49000  0
 (N,X)PAR,DA                                         1  49000  0
-                                                                               1
-DIFFERENTIAL DATA (ENERGY SPECTRA)                                             1
-(N,X),DE                                            1  59000  0
-Added (process reactions where elastic is excluded) 14 Jun 2004 by A. Trkov    1
-(N,X)EM,DE                                          1  59000  0
-Added proton induced spectra, 20 Sep 2004 (M. Herman)                          1
-(P,X),DE                                         1001  59000  0
-Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
-(P,N),DE                                         1001  5   4  0
-(P,X),DE,,AV                                     1001  59000  0
-(P,X)DE                                          1001  59000  0
-(P,X),DE,,,EXP                                   1001  59000  0
-Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
-(P,N),DE,,,EXP                                   1001  5   4  0
-(P,X)EM,DE,,,EXP                                 1001  59000  0
-Change 9000 to 4 (A. Trkov, 06-Jun-06)                                         1
-(P,N)EM,DE,,,EXP                                 1001  5   4  0
-(P,X)EM,DE                                       1001  59000  0
                                                                                1
 DOUBLE DIFFERENTIAL DATA                                                       1
 (N,X),DA/DE                                         1  69000  0
@@ -594,6 +716,62 @@ YIELD DATA (USUALLY FISSION)                                                   1
 (N,F),DA,FF,COS/RSD                                 1  41016  0
 (G,F),DA,FF,REL,EXP                                 0  41019  0
 (N,F),DA,FF,LEG/RSD                                 11541016  4
+                                                                               1
+Proposal June-2008 by V.Zerkin, trial 2009-09-11                               1
+(P,X)CUM,SIG                                     1001  39001  0
+(N,0),EN                                            14026001  0
+                                                                               1
+Add extended MTs,10-Jan-2011, V.Zerkin     ==========================          1
+Accroding to http://www.nndc.bnl.gov/meetings/csewg2010/                       1
+Format Changes for High Energy File                                            1
+by J.-Ch. Sublet, A.J. Koning, R.A.Forrest and J.Kopecky                       1
+(N,5N),SIG                                          1  3 152  0
+(N,5N),DA                                           1  4 152  0
+(N,5N),DE                                           1  5 152  0
+(N,5N),DA/DE                                        1  6 152  0
+(N,6N),SIG                                          1  3 153  0
+(N,6N),DA                                           1  4 153  0
+(N,6N),DE                                           1  5 153  0
+(N,6N),DA/DE                                        1  6 153  0
+(N,T+A),SIG                                         1  3 155  0
+(N,4N+P),SIG                                        1  3 156  0
+(N,4N+P),DA/DE                                      1  6 156  0
+(N,3N+D),SIG                                        1  3 157  0
+(N,N+D+A),SIG                                       1  3 158  0
+(N,2N+P+A),SIG                                      1  3 159  0
+(N,7N),SIG                                          1  3 160  0
+(N,8N),SIG                                          1  3 161  0
+(N,5N+P),SIG                                        1  3 162  0
+(N,6N+P),SIG                                        1  3 163  0
+(N,7N+P),SIG                                        1  3 164  0
+(N,4N+A),SIG                                        1  3 165  0
+(N,4N+A),DA/DE                                      1  6 165  0
+(N,5N+A),SIG                                        1  3 166  0
+(N,6N+A),SIG                                        1  3 167  0
+(N,7N+A),SIG                                        1  3 168  0
+(N,4N+D),SIG                                        1  3 169  0
+(N,5N+D),SIG                                        1  3 170  0
+(N,6N+D),SIG                                        1  3 171  0
+(N,3N+T),SIG                                        1  3 172  0
+(N,4N+T),SIG                                        1  3 173  0
+(N,5N+T),SIG                                        1  3 174  0
+(N,6N+T),SIG                                        1  3 175  0
+(N,2N+HE3),SIG                                      1  3 176  0
+(N,3N+HE3),SIG                                      1  3 177  0
+(N,4N+HE3),SIG                                      1  3 178  0
+(N,3N+2P),SIG                                       1  3 179  0
+(N,3N+2A),SIG                                       1  3 180  0
+(N,3N+P+2A),SIG                                     1  3 181  0
+(N,2N+2P),SIG                                       1  3 190  0
+(N,P+HE3),SIG                                       1  3 191  0
+(N,D+HE3),SIG                                       1  3 192  0
+(N,HE3+A),SIG                                       1  3 193  0
+(N,4N+2P),SIG                                       1  3 194  0
+(N,4N+2A),SIG                                       1  3 195  0
+(N,4N+P+A),SIG                                      1  3 197  0
+(N,N+3P),SIG                                        1  3 198  0
+(N,3N+2P+A),SIG                                     1  3 199  0
+(N,5N+2P),SIG                                       1  3 200  0
                                                                                1
 LEVEL DENSITY PARAMETER                                                        1
                                                                                1

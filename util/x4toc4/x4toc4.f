@@ -1,5 +1,6 @@
       PROGRAM X4TOC4                                                    X4T00050
 C-Title  : Program X4TOC4
+C-Purpose: Translate Data from EXFOR to Computational Format
 C-Version: 86-1 (August 1986)
 C-V  01/03 (March 2001)  *Minor corrections
 C-V  02/10 Read sample thickness, convert transmission to x-sect.
@@ -12,13 +13,16 @@ C-V  06/04 Deleted SF9, V.Zerkin@iaea.org
 C-V  06/04 Extended dimensions 400->11111 (large EXFOR14A.DAT) Z.V.
 C-V  06/12 Ratio-to-rutherfors scattering for charged particles
 C-V  07/04 Trivial syntax correction (V. Zerkin)
-C-V        Interpret Q-value as -LevelEnergy for inelastic (A.Trkov)
+C-V        Interpret Q-value as Level-Energy for inelastic (A.Trkov)
 C-V  07/06 Fix uncert. when converting from ratio-to-Rutherford
 C-V  08/07 Fix unit conversion of multiple-column uncertainties.
 C-V  08/10 Overwrite energy uncertainty (if given) when EN-MIN, EN-MAX
 C-V        pair is processed (A. Trkov).
 C-V        Correct Angstrom to eV conversion (N. Otsuka, V. Zerkin).
-C-Purpose: Translate Data from EXFOR to Computational Format
+C-V  09/09 Identify resonance energy when given as data (V. Zerkin)
+C-V        Convert Energy/
+C-V  12/03 Add operation to scale fission spectrum by Maxwellian
+C-D        distribution when MXD qualifier is present (A. Trkov).
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
 C-A  -------------------------------------
@@ -1086,12 +1090,11 @@ c     call outCharArray(tmp2,ll+1)
       end
 
       function mylen(str)
-C     CHARACTER*1 str(1)
-      CHARACTER*300 str
+      CHARACTER*1 str(1)
       mylen=0
       do i=1,300
 c       call outCharArray(str(i),1)
-        if (str(i:i).eq.' ') return
+        if (str(i).eq.' ') return
         mylen=mylen+1
       end do
       return
@@ -1130,6 +1133,8 @@ C                                                                       X4T09580
      &            ,CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES
      &            ,ZANRAT,SLASH,EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
       CHARACTER*10 KEYWD1,BLANK10
+      CHARACTER*1  iResPointer
+      COMMON/iResCommon/iResFlag,iResPointer
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/BIBCRD/KEYWD1,KEYWD2,CARD1(55),CARD2(14)
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T09660
@@ -1160,6 +1165,7 @@ C-----INITIALIZE REACTION COUNT AND SAVED REACTION FLAG.                X4T09900
       KSANR=KSAN1                                                       X4T09910
       ISAVE=0                                                           X4T09920
       KSAVE=1                                                           X4T09930
+      iResFlag=0
 C                                                                       X4T09940
 C     START OF NEW REACTION. COPY ENTIRE REACTION INTO ZAR1 (REACTION   X4T09950
 C     MAY BE CONTINUED ONTO MULTIPLE CARDS).                            X4T09960
@@ -1504,6 +1510,19 @@ C                                                                       X4T13060
      1 IRFLAG(KSANP),KNOWN)                                             X4T13120
       WRITE(OUTP,6030) ENT,ISAN,INPART(KSANP),ZA1,ZARES,                X4T13130
      1 MFR(KSANP),MTR(KSANP),FLAGR(KSANP),(R1(I),I=1,KR1)               X4T13140
+c---zvv+++2009.09.09
+      if (KR1.gt.3) then
+        if ((R1(KR1-2).eq.',')
+     +       .and.(R1(KR1-1).eq.'E')
+     +       .and.(R1(KR1).eq.'N')) then
+          iResFlag=1
+          iResPointer=FLAGR(KSANP)
+        endif
+c     WRITE(*,*) 'KSANP=',KSANP,'mf=',MFR(KSANP),' mt=',MTR(KSANP)
+c    +,' pointer=',FLAGR(KSANP),' KR1=',KR1,' iResFlag=',iResFlag
+c    +,' R1=[',R1(KR1-2),R1(KR1-1),R1(KR1),']'
+      endif
+c---zvv---2009.09.09
 C-----INCREASE REACTION COUNT IF MF/MT ARE BOTH POSITIVE.               X4T13150
       IF(MFR(KSANP).LE.0.OR.MTR(KSANP).LE.0) GO TO 310                  X4T13160
       KSANR=KSANP                                                       X4T13170
@@ -1523,7 +1542,12 @@ C                                                                       X4T13290
 C-----PARENTHESIS DO NOT BALANCE.                                       X4T13300
   600 WRITE(OUTP,6000) (ZAR1(I),I=1,KZAR1)                              X4T13310
       WRITE(OUTP,6010)                                                  X4T13320
-  610 RETURN                                                            X4T13330
+C---zvv+++2009.09.09 no reac with pointers
+  610 continue
+      if (KSANR.eq.1) iResFlag=0
+c      WRITE(*,*) '---zvv:KSANR=',KSANR,' iResFlag=',iResFlag
+      RETURN
+C---zvv---
 C-----OVER 30 REACTIONS.                                                X4T13340
   620 WRITE(OUTP,6020)                                                  X4T13350
       RETURN                                                            X4T13360
@@ -2062,6 +2086,8 @@ C                                                                       X4T18470
       CHARACTER*1  CARD2,ENT,SUBENT,FLAGI,FLAGR,ZAN,AUTH1,AUTHN,AUTHK,
      1 REFER1,REFERN,LABCM,STAT1,STATN,BLANK,ZANRES,ZANRAT,DIGITS,ZANOK X4T18510
      1,ZAPO(6,8)                                                        TRKOV
+      CHARACTER*1  iResPointer
+      COMMON/iResCommon/iResFlag,iResPointer
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
       COMMON/CARDS/CARD1(6),CARD2(14)
       COMMON/CARDI/INKEY,N1,N2,ISAN,NPT                                 X4T18540
@@ -2133,6 +2159,31 @@ C                                                                       X4T19040
       IDATN=I2                                                          X4T19070
       READ(ITAPE,1010,END=500,ERR=500) (TITLE(I),FLAGI(I),I=I1,I2)                                                         X4T19090
       READ(ITAPE,1020,END=500,ERR=500) (UNIT(I),I=I1,I2)
+c---zvv+++2009.09.09
+c     write (*,*) '---zvv-',i1,i2,('[',TITLE(I),']',FLAGI(I),I=I1,I2)
+c     write (*,*) '---zvv-','iResFlag=',iResFlag,'[',iResPointer,']'
+c     iResFlag=0
+      if (iResFlag.ne.0) then
+        do i=i1,i2
+c         write (*,*) '---zvv-',i,'[',TITLE(I),']',FLAGI(I)
+          if (FLAGI(I).eq.iResPointer) then
+c           write (*,*) '---zvv=',i,iResFlag,'[',TITLE(I),']',FLAGI(I)
+            if (TITLE(I).eq.'DATA') then
+              TITLE(I)='EN-RES'
+              FLAGI(I)=' '
+            endif
+            if (TITLE(I).eq.'DATA-ERR') then
+              TITLE(I)='EN-RES-ERR'
+              FLAGI(I)=' '
+            endif
+c           write (*,*) '---zvv=',i,iResFlag,'[',TITLE(I),']',FLAGI(I)
+          endif
+        enddo
+c??     I2=ICOMN+N1
+c??     IDATN=I2
+      endif
+c     write (*,*) '---zvv-',i1,i2,('[',TITLE(I),']',FLAGI(I),I=I1,I2)
+c---zvv---2009.09.09
 C-----INITIALIZE FIELD 7-8 DEFINITION TO BLANK.                         X4T19110
       DO I=1,I2
         TITLE4(I)=BLANK4
@@ -2329,6 +2380,12 @@ C-----INITIALIZE DEFINITION OF FIELD 7-8.                               X4T21050
 C-----SKIP UNUSED FIELDS AND ZERO ERROR FIELDS.                         X4T21090
       IF(II.LE.0) GO TO 340                                             X4T21100
       OVALUE=VALUES(II)                                                 X4T21110
+C---zvv+++2009.09.09
+      if (ovalue.gt.1.e37) then
+        print *,'WARNING ovalue overflow',ovalue
+        ovalue=1.e37
+      end if
+C---zvv---2009.09.09
 C-----ON FIRST POINT PRINT WARNING MESSAGE IF L = 0 LEGENDRE COEFFICIENTX4T21120
 C-----IS NOT NORMALIZED TO UNITY.                                       X4T21130
       IF(MFR(ISANR).NE.154.OR.LEGS.GT.0.OR.I.NE.5) GO TO 320            X4T21140
@@ -3114,7 +3171,8 @@ C     SEARCH TITLE1 FOR ENDING OF -MIN OR -MAX.                         X4T28770
 C     IF FOUND, CREATE TITLE2 TO BE OTHER LIMIT.                        X4T28780
 C                                                                       X4T28790
       CHARACTER*1 TITLE1,TITLE2,MINMAX,BLANK                            X4T28800
-      DIMENSION TITLE1(10),TITLE2(10),MINMAX(4,2)                       X4T28810
+c---zvv     DIMENSION TITLE1(10),TITLE2(10),MINMAX(4,2)                       X4T28810
+      DIMENSION TITLE1(11),TITLE2(11),MINMAX(4,2)                       X4T28810
       DATA MINMAX/                                                      X4T28820
      1 '-','M','I','N',                                                 X4T28830
      2 '-','M','A','X'/                                                 X4T28840
@@ -3353,6 +3411,7 @@ C                                                                       X4T31020
       VALUES(II)=0.0                                                    X4T31070
       GO TO 120                                                         X4T31080
    70 XE=VALUES(JJ)                                                     X4T31090
+	if (XE.lt.0.) XE=0. !---zvv---2009.09.16 
       VALUES(II)=RES2EV*VALUES(II)*XE*SQRT(XE)                          X4T31100
       IF(NPT.EQ.1) WRITE(OUTP,6060)                                     X4T31110
       GO TO 120                                                         X4T31120
@@ -3375,7 +3434,7 @@ C                                                                       X4T31240
 C                                                                       X4T31290
 C     PERFORM BARNS*SQRT(E) TO BARNS CONVERSION.                        X4T31300
 C                                                                       X4T31310
-  100 IF(KUFLG1(II).NE.6) GO TO 130                                     X4T31320
+  100 IF(KUFLG1(II).NE.6) GO TO 112
       JJ=IMOUT(1,ISANR,1)                                               X4T31330
       IF(JJ.GT.0) GO TO 110                                             X4T31340
       IF(NPT.EQ.1) WRITE(OUTP,6030)                                     X4T31350
@@ -3385,6 +3444,15 @@ C                                                                       X4T31310
       IF(XE.LE.0.0) GO TO 130                                           X4T31390
       VALUES(II)=VALUES(II)/SQRT(XE)                                    X4T31400
       IF(NPT.EQ.1) WRITE(OUTP,6090)                                     X4T31410
+      GO TO 120                                                         X4T31280
+C                                               
+C                                               
+C     PERFORM ENERGY/ATOMIC-MASS TO ENERGY CONVERSION.
+C                                               
+  112 IF(KUFLG1(II).NE.9) GO TO 130
+      IF(NPT.EQ.1) WRITE(OUTP,6095)
+      VALUES(II)=VALUES(II)*MOD(INPART(ISANR),1000)
+      GO TO 120                                 
 C                                                                       X4T31420
 C     TURN OFF FLAG TO INSURE OPERATION IS ONLY PERFORMED ONCE ON EACH  X4T31430
 C     INPUT VALUE.                                                      X4T31440
@@ -3411,6 +3479,7 @@ C                                                                       X4T31450
  6070 FORMAT(10X,'OPERATION...CONVERTED ANGSTROM TO ENERGY')            X4T31630
  6080 FORMAT(10X,'OPERATION...CONVERTED LENGTH TO BARNS')               X4T31640
  6090 FORMAT(10X,'OPERATION...CONVERTED BARNS*SQRT(E) TO BARNS')        X4T31650
+ 6095 FORMAT(10X,'OPERATION...CONVERT ENERGY/ATOMIC-MASS TO ENERGY')
       END                                                               X4T31660
       SUBROUTINE TOPS2                                                  X4T31670
 C                                                                       X4T31680
@@ -3449,6 +3518,11 @@ C-----  OPERATION ABSOLUTE ON THE VALUES (IF REQUESTED)
         IF(KTFLGX(II).EQ.11) THEN
           VALUES(II)=ABS(VALUES(II))
           IF(NPT.EQ.1) WRITE(OUTP,6150) TITLE(II)
+        END IF
+C-----  OPERATION HALVE ON THE VALUES (IF REQUESTED)
+        IF(KTFLGX(II).EQ.12) THEN
+          VALUES(II)=VALUES(II)/2
+          IF(NPT.EQ.1) WRITE(OUTP,6160) TITLE(II)
         END IF
       END DO
       JMULT=10                                                          X4T32000
@@ -3647,6 +3721,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
  6130 FORMAT(10X,'OPERATION...DEFINED AVERAGE VALUE AND ERROR')         X4T33820
  6140 FORMAT(10X,'OPERATION...SELECTED SMALLEST AND LARGEST VALUES')    X4T33830
  6150 FORMAT(10X,'OPERATION...ABSOLUTE',A11)
+ 6160 FORMAT(10X,'OPERATION...HALVE',A11)
       END                                                               X4T33840
       SUBROUTINE REOPS                                                  X4T33850
 C                                                                       X4T33860
@@ -3660,6 +3735,7 @@ C                           DATA AND DATA ERROR).                       X4T33930
 C     (6) DATA = DATA/(F(0)*(2*L+1)) (DATA AND DATA ERROR)              X4T33940
 C     (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)    ***** TRKOV
 C     (9) DATA = DATA*RUTHERFORD (COULOMB) CROSS SECTION                ***** TRKOV
+C     (19)DATA = DATA*MAXWELLIAN(E_KT-NORM)                             ***** TRKOV
 C                                                                       X4T33950
       INTEGER      OUTP,OTAPE
       CHARACTER*11 TITLE,UNIT,DATUM
@@ -3683,6 +3759,8 @@ C                                                                       X4T33950
       DATA BLANK/' '/                                                   X4T34130
       DATA ETHERM/2.53E-02/                                             X4T34140
       DATA EFISS/2.0E+06/                                               X4T34150
+C*    -- Default Maxwellian spectrum temperature
+      EKTNRM=1.382E6
 C-----NOTHING TO DO IF NO OPERATION DEFINED.                            X4T34160
       IF(IRFLAG(ISANR).LE.0) GO TO 110                                  X4T34170
 C-----RESET ENERGY COUNT ON FIRST POINT.                                X4T34180
@@ -3790,14 +3868,14 @@ C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
   126 WRITE(OUTP,6082)
       IRFLAG(ISANR)=0
 C-----CONVERT RATIO-TO-RUTHERFORD INTO CROSS SECTIONS
-  130 IF(IRFLAG(ISANR).GT.9) GO TO 800
+  130 IF(IRFLAG(ISANR).GT.9) GO TO 140
 C*    -- define constants (Table 1, Appendix H, ENDF-102 manual)
       IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.9) WRITE(OUTP,6090)
       PCP=6.58211889E-16
       RAL=137.03599976
       AMUEV=9.31494013E8
       CC=299792458
-C*    -- Energy and angle
+C*    -- Location index of energy and angle
       IE=KMOUT(1,ISANR)
       IA=KMOUT(5,ISANR)
       EE=VALUES(IE)
@@ -3835,7 +3913,33 @@ C*    - Calculate Rutherford (Coulomb) scattering term
       VALUES(II)=VALUES(II)*SIGC
 C*    - Apply the same correction to the uncertainty
       II=KMOUT(4,ISANR)
+      IF(II.LE.0) GO TO 800 !---zvv---2009.09.16
       VALUES(II)=VALUES(II)*SIGC
+      GO TO 800
+C-----SCALE BY THE MAXWELLIAN DISTRIBUTION AT TEMPERATURE E_KT-NRM
+  140 IF(IRFLAG(ISANR).GT.10) GO TO 800
+C     -- Try to find the spectrum temperature in COMMON
+      IF(ICOMN .LT. 1 .OR. NPT.GT.1) GO TO 146
+      DO JCOMN=1,ICOMN
+        IF(TITLE(JCOMN).EQ.'KT-NRM     ') THEN
+          CALL FLOATF(DATUM(JCOMN),EKTNRM)
+          IF(UNIT(JCOMN).EQ.'MEV        ') EKTNRM=EKTNRM*1000000
+          IF(UNIT(JCOMN).EQ.'KEV        ') EKTNRM=EKTNRM*1000
+          VALUES(JCOMN)=EKTNRM
+          IMUSED(JCOMN)=1
+          WRITE(OUTP,6083) EKTNRM/1000000
+          GO TO 146
+        END IF
+      END DO
+  146 CONTINUE
+C*    -- Location index of energy and spectrum
+      II=KMOUT(7,ISANR)
+      EE=VALUES(II)
+      FF=SQRT(EE)*EXP(-EE/EKTNRM)/EKTNRM
+      II=KMOUT(3,ISANR)
+      IE=KMOUT(4,ISANR)
+      VALUES(II)=VALUES(II)*FF
+      VALUES(IE)=VALUES(IE)*FF
 C-----
   800 RETURN
  6000 FORMAT(10X,'OPERATION...CREATED EN          ',1PE11.4,' EV')      X4T35010
@@ -3854,6 +3958,8 @@ C-----
  6081 FORMAT(10X,'OPERATION...CONVERTED TRANSMISSION TO X.S.')
  6082 FORMAT(10X,'WARNING...SAMPLE THICKNESS FOR TRANSMISSION DATA'
      1      ,' NOT SPECIFIED')
+ 6083 FORMAT(10X,'OPERATION...SCALED FISS.SPECTRUM BY MAXWELLIAN'
+     1      ,F8.3,' MeV')
  6090 FORMAT(10X,'OPERATION...CONVERTED RUTHERFORD RATIO TO X.S.')
       END                                                               X4T35120
       SUBROUTINE INTGER(CARD,N,I)                                       X4T35130
@@ -3916,10 +4022,11 @@ C     CONVERT FROM HOLLERITH TO FLOATING POINT.                         X4T35690
 C     MUST BE BETWEEN 1.0E-40 AND 1.0E+40.                              X4T35700
 C                                                                       X4T35710
       INTEGER OUTP,OTAPE                                                X4T35720
+      REAL*8 IN
       CHARACTER*1 BLANK,DOT,EXPD,EXPE,PLUS,MINUS,STAR,MESS,DIGIT,FIELD, X4T35730
      1 IFIELD,EXPDL,EXPEL
       COMMON/UNITS/INP,OUTP,ITAPE,OTAPE,NEWX4,NMASS
-      DIMENSION FIELD(11),TEN(35),DIGIT(10),MESS(11)
+      DIMENSION FIELD(11),TEN(38),DIGIT(10),MESS(11)
       DATA BLANK/' '/                                                   X4T35770
       DATA DOT/'.'/                                                     X4T35780
       DATA EXPD/'D'/                                                    X4T35790
@@ -3939,7 +4046,8 @@ C                                                                       X4T35710
      4 1.0E+16,1.0E+17,1.0E+18,1.0E+19,1.0E+20,                         X4T35910
      5 1.0E+21,1.0E+22,1.0E+23,1.0E+24,1.0E+25,                         X4T35920
      6 1.0E+26,1.0E+27,1.0E+28,1.0E+29,1.0E+30,                         X4T35930
-     7 1.0E+31,1.0E+32,1.0E+33,1.0E+34,1.0E+35/
+     7 1.0E+31,1.0E+32,1.0E+33,1.0E+34,1.0E+35
+     8 ,1.0E+36,1.0E+37,1.0E+38/
 C                                                                       X4T35960
 C     TRANSLATE MANTISSA.                                               X4T35970
 C                                                                       X4T35980
@@ -3984,6 +4092,7 @@ C-----DIGIT FOUND. INCREMENT FIXED POINT EQUIVALENT AND DECIMAL POINT   X4T36350
 C-----OFFSET.                                                           X4T36360
    80 IN=10*IN+(K-1)                                                    X4T36370
       IPT=IPT+1                                                         X4T36380
+c	write (*,*) '...1..IN=',IN,' IPT=',IPT
    90 CONTINUE                                                          X4T36390
 C-----ENTIRE FIELD TRANSLATED (NO EXPONENT). CONVERT TO FLOATING POINT. X4T36400
       GO TO 120                                                         X4T36410
@@ -4040,6 +4149,7 @@ C-----POINT.                                                            X4T36890
       IF(IPT.GT.0) KEXP=KEXP-IPT                                        X4T36920
       IF(KEXP) 210,230,220                                              X4T36930
   210 KEXP=-KEXP                                                        X4T36940
+c	write (*,*) 'KEXP=',KEXP,' X=',X
       X=X/TEN(KEXP)                                                     X4T36950
       GO TO 230                                                         X4T36960
   220 X=X*TEN(KEXP)                                                     X4T36970
