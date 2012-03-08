@@ -343,7 +343,7 @@ C* Suppress printing negative or zero points
       FF=SG(I)*SCL
       UF=UG(I)*SCL
       IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
-        FC=SQRT(EE)*EXP(-EE/EKTNRM)*2/EKTNRM
+        FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
         FF=SG(I)/FC
         UF=UG(I)/FC
       END IF
@@ -423,7 +423,8 @@ C*        -- Normalise and print the experimental data
             FF=1
             DO I=1,KP
               EE=EP(I)
-              IF(EKTNRM.GT.0) FF=SQRT(EE)*EXP(-EE/EKTNRM)*2/EKTNRM
+              IF(EKTNRM.GT.0)
+     &        FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
               FP(I)=FP(I)*SC/SP /FF
               FA(I)=FA(I)*SC/SP /FF
               FB(I)=FB(I)*SC/SP /FF
