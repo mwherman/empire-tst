@@ -3761,6 +3761,7 @@ C                                                                       X4T33950
       DATA EFISS/2.0E+06/                                               X4T34150
 C*    -- Default Maxwellian spectrum temperature
       EKTNRM=1.382E6
+      PI=3.141592654
 C-----NOTHING TO DO IF NO OPERATION DEFINED.                            X4T34160
       IF(IRFLAG(ISANR).LE.0) GO TO 110                                  X4T34170
 C-----RESET ENERGY COUNT ON FIRST POINT.                                X4T34180
@@ -3935,7 +3936,7 @@ C     -- Try to find the spectrum temperature in COMMON
 C*    -- Location index of energy and spectrum
       II=KMOUT(7,ISANR)
       EE=VALUES(II)
-      FF=SQRT(EE)*EXP(-EE/EKTNRM)/EKTNRM
+      FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
       II=KMOUT(3,ISANR)
       IE=KMOUT(4,ISANR)
       VALUES(II)=VALUES(II)*FF
