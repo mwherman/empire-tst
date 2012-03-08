@@ -1,6 +1,6 @@
-!cc   * $Rev: 2546 $
+!cc   * $Rev: 2647 $
 !cc   * $Author: shoblit $
-!cc   * $Date: 2012-02-10 18:21:40 +0100 (Fr, 10 Feb 2012) $
+!cc   * $Date: 2012-03-08 22:28:30 +0100 (Do, 08 Mär 2012) $
 
 module endf_nubars
 
@@ -95,7 +95,7 @@ module endf_nubars
     ! convert ENDF eV to MeV for use in empire
 
     do i = 1,num
-        nu(i)%x = nu(i)%x/1.D0+06
+        nu(i)%x = nu(i)%x/1.D+06
     end do
 
     ! save slopes for later

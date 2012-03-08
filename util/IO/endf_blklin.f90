@@ -33,7 +33,7 @@ module endf_line_io
         character*1 trm
     end type
     type (endf_record), target :: erc(nrc)
-    !DEC$ ATTRIBUTES ALIGN: 2048:: erc      ! not really needed (unless DIRECT I/O)
+!   !!DEC$ ATTRIBUTES ALIGN: 2048:: erc      ! not really needed (unless DIRECT I/O)
 
 ! -----------  Public interface ---------------------------------------------
 

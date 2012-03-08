@@ -22,29 +22,38 @@ endif
 IPO = FALSE
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
-  R_8 = -real-size 64
+  # flags for default real size: 4, 8 or 16 bytes:
+  defR4  = -real-size 32
+  defR8  = -real-size 64
+  defR16 = -real-size 128
   FFLAGS = -O3 -x=host
   # flags for debug
   # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
   # set IPO TRUE for full cross-file optimization
   IPO = TRUE
 else ifeq ($(FC),gfortran)
-  R_8 = -fdefault-real-8
+  # flags for default real size: 4, 8 or 16 bytes:
+  defR4  =
+  defR8  = -fdefault-real-8
+  defR16 = -fdefault-real-16
   FFLAGS = -O3
 else ifeq ($(FC),af90)
-  R_8 = -N113
+  defR4 =
+  defR8 = -N113
   FFLAGS = -march=host -O3
 else ifeq ($(FC),pfg90)
-  R_8 = -r8
+  defR4 = -r4
+  defR8 = -r8
   FFLAGS =  -O3
 else ifeq ($(FC),lf90)
-  R_8 = -Ad
+  defR4 =
+  defR8 = -Ad
   FFLAGS = -O3
 endif
 
 # make sure MAKE knows f90 extension
 %.o : %.f90
-	$(FC) $(FFLAGS) $(R_8) -c $<
+	$(FC) $(FFLAGS) $(defR8) -c $<
 
 # build library
 

@@ -108,7 +108,7 @@ module BASE_ENDF_IO
 
     integer*4 istat
 
-    type (tab1), intent(out) :: tb
+    type (tab1) tb
 
     if(tb%nr .le. 0) then
         write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
