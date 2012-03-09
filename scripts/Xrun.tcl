@@ -1,6 +1,6 @@
-# $Rev: 2623 $
+# $Rev: 2662 $
 # $Author: mherman $
-# $Date: 2012-03-02 08:32:26 +0100 (Fr, 02 Mär 2012) $
+# $Date: 2012-03-09 16:47:35 +0100 (Fr, 09 Mär 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6384,6 +6384,7 @@ puts $lsttab "ENDF.DAT"
 puts $lsttab "-"
 puts $lsttab "Empire"
 puts $lsttab $eres
+puts $lsttab "1.382E+6"
 set i 0
 foreach el $ddx {
    puts $lsttab $el
@@ -6413,6 +6414,7 @@ puts $lsttab "ENDF.DAT"
 puts $lsttab "-"
 puts $lsttab "Empire"
 puts $lsttab $eres
+puts $lsttab "1.382E+6"
 set i 0
 foreach el $ddx {
    puts $lsttab $el
@@ -6854,6 +6856,7 @@ puts $lsttab "-"
 puts $lsttab "Empire"
 if {$compeval != ""} {puts $lsttab [file tail $compeval]}
 puts $lsttab $eres
+puts $lsttab "1.382E+6"
 set i 0
 foreach el $ddx {
    puts $lsttab $el
