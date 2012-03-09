@@ -31,6 +31,9 @@
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
+!-V         Version 8.1    February 2012     A. Trkov
+!-V                        1. Process MF 10 data
+!-V                        2. Minor improvements to improve accuracy
 !-V         Version 8.0    October 2009     A. Trkov
 !-V                        Reorganize in style with other codes
 !-V         Version 7.0    October 2004     C.L. Dunford
@@ -117,9 +120,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.00'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
 !---MDC---
 !
 !     Define variable precision
@@ -251,6 +254,8 @@
       REAL(KIND=R4) :: C1H,C2H
       INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
       INTEGER(KIND=I4) :: MATH,MFH,MTH,NSP
+!     FINAL STATE DESIGNATION
+      CHARACTER(LEN=2)  FS
 !
 !     CONTENTS OF CURRENT TEXT RECORD
 !
@@ -273,6 +278,8 @@
 !
       REAL(KIND=R4), PARAMETER :: RPI2=0.886226925   ! SQRT(PI)/2
 !
+      INTEGER(KIND=I4) :: NSECT, JSECT
+!
 !***********************************************************************
 !
 !+++MDC+++
@@ -284,10 +291,10 @@
 !
       IF(INTER_SUCCESS.EQ.0) THEN
          WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB COMPLETED SUCCESSFULLY'
+         STOP '    INTER - Tests completed successfully'
       ELSE
          WRITE(IOUT,'(/A)') '   '
-         STOP '     JOB TERMINATED'
+         STOP '    INTER - Tests terminated abnormally!'
       END IF
 !---MDC---
 !
@@ -352,6 +359,11 @@
 !     READ CONTROL RECORD FOR NEXT MATERIAL
 !
    20 CALL CONTIN
+
+      PRINT *,' '
+      print *,'Next material',math,mfh,mth,c1h
+     &       ,INTER_DATA%MATMIN,INTER_DATA%MATMAX
+
       IF(MATH.GE.INTER_DATA%MATMIN) THEN
          IF(MATH.LE.INTER_DATA%MATMAX) GO TO 30
          IF(INTER_DATA%MATMAX.GT.0) GO TO 90
@@ -369,6 +381,10 @@
       MATP = MATH
       CALL CONTIN
       LIS0 = L2H
+      FS = '  '
+
+      print *,'      New Z,A',IZ,IA
+
       IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
          IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
 !
@@ -407,13 +423,16 @@
 !
 !     POSITION MATERIAL AT FILE 3
 !
-  35  DO WHILE (MFH.NE.3)
+  35  DO WHILE (MFH.NE.3 .AND. MFH.NE.10)
          IF(MFH.EQ.0) GO TO 20
          CALL FEND
          CALL CONTIN
+
+         print *,'Reading',math,mfh,mth
+
       END DO
 !
-!     TEST IF THIS SECTION SHOULD BE PROCESSED
+!     TEST IF THIS SECTION SHOULD BE PROCESSED (SEE MTWANT LIST)
 !
   40  MTP = MTH
       DO I=1,MTMAX
@@ -422,18 +441,29 @@
             MATO = MATH
             MFO = MFH
             MTO = MTH
+            NSECT = N2
+            JSECT = 0
             CALL OUT_STATUS
-            CALL PRSEC
             GO TO 45
          END IF
       END DO
       CALL SEND
       GO TO 80
 !
+   45 JSECT = JSECT + 1
+      CALL PRSEC
+
+      print *,'read one xs set',JSECT,NSECT
+
+!
+!     READING DONE, READ SEND RECORD IF LAST SECTION
+!
+      IF(JSECT.GE.NSECT) CALL SEND
+!
 !     CHECK IF REQUESTED LIMITS WERE ACTUALLY USED IN THERMAL
 !       INTEGRATION
 !
-   45 SIGAV = 0.
+      SIGAV = 0.
       GFACT = 0.
       IF(INTER_DATA%ITHER.NE.0.AND.TIN1.NE.0.) THEN
          IF(INTER_DATA%ELT.EQ.ELO(1,2).AND.                             &       
@@ -476,6 +506,9 @@
 !
 !     CHECK FOR NEW PAGE
 !
+
+      print *,'lines,maxlin,matp,matpr',lines,maxlin,matp,matpr
+
       IF(LINES.GT.MAXLIN) THEN
          WRITE(NOUT,'(A)')  CHAR(12)
          WRITE(NOUT,'(A,I5)') 'Material number (MAT) = ',MATP
@@ -506,20 +539,33 @@
      &          'Sig(Fiss)   Sig(E14)   '
          LINES = LINES + 3
       END IF
-   50 WRITE(NOUT,55) IZ,IA,LIS0,MTP,MTDESC(IDESC),C025,CZERO,           &       
+   50 WRITE(NOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
      &     SIGAV,GFACT,RESINT,SIGFAV,C14
-   55 FORMAT(I3,1X,I4,3X,I1,6X,I4,2X,A8,2X,2(1PE12.5),1PE11.4,          &       
+
+      WRITE(  * ,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
+     &     SIGAV,GFACT,RESINT,SIGFAV,C14
+
+   55 FORMAT(I3,1X,I4,3X,I1,4X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,       &       
      &        0PF8.5,1PE13.5,2(1PE12.5))
       LINES = LINES+1
+!
+!     CHECK IF ALL SECTIONS WERE PROCESSED
+!
+      IF(JSECT.LT.NSECT) GO TO 45
 !
 !     READ HEAD RECORD OF NEXT SECTION OR FEND CARD
 !
    80 CALL CONTIN
-      IF(MFH.NE.3) THEN
+
+         print *,'Next',math,mfh,mth
+
+      IF(MATH.EQ.0) GO TO 20
+      IF(MFH.EQ. 0) GO TO 80
+      IF(MFH.GT.10) THEN
          CALL MEND
          GO TO 20
       END IF
-      GO TO 40
+      GO TO 35
 !
 !     MESSAGE IF NO MATERIALS FOUND
 !
@@ -1156,6 +1202,17 @@
 !     READ IN SECTION
 !
       CALL CONTIN
+      IF(MFH.EQ.10) THEN
+        IF     (L2H.EQ.0) THEN
+          FS = 'g'
+        ELSE IF(L2H.EQ.1) THEN
+          FS = 'm'
+        ELSE IF(L2H.EQ.2) THEN
+          FS = 'n'
+        ELSE
+          FS = '*'
+        END IF
+      END IF
       N1 = N1H
       N2 = N2H
 !*****READ INTERPOLATION TABLE
@@ -1235,10 +1292,6 @@
          N2 = N2 + 1 - ITOP
          GO TO 10
       END IF
-!
-!     DONE, READ SEND RECORD
-!
-      CALL SEND
 !
       RETURN
       END SUBROUTINE PRSEC
@@ -1444,13 +1497,13 @@
 !
       INTEGER(KIND=I4) :: JM8
       INTEGER(KIND=I4) :: J
-      REAL(KIND=R4) :: Z,FACLOG
+      REAL(KIND=R8) :: Z,FACLOG
       REAL(KIND=R8) :: Z1,Z2,STEMP,EX1,EX2,A,B,C,D,T1,T2,T3
       REAL(KIND=R8) :: RPI2,SQRZ1,SQRZ2,DSQZ,ER21
 !
-      REAL(KIND=R4), DIMENSION(8) :: AM
-      DATA AM/.9999964239,-.4998741238,.3317990258,-.2407338084,        &       
-     &           .1676540711,-.0953293897,.0360884937,-.0064535442/
+      REAL(KIND=R8), DIMENSION(8) :: AM
+      DATA AM/.9999964239D0,-.4998741238D0,.3317990258D0,-.2407338084D0,&
+     &        .1676540711D0,-.0953293897D0,.0360884937D0,-.0064535442D0/
 !
 !     INITIALIZE
 !
@@ -1501,9 +1554,11 @@
 !         1/E INTEGRATION
 !
           CASE (2)
-             Z = (X2-X1)/X1
-             IF(ABS(Z).GT.0.1) THEN
-                FACLOG = ALOG(X2/X1)
+c...         Z = (X2-X1)/X1
+             Z =  dble(X2)/dble(X1)-1
+             IF(ABS(Z).GT.0.1D0 ) THEN
+                FACLOG = DBLE(X2/X1)
+                FACLOG = LOG(FACLOG)
              ELSE
                 FACLOG = AM(8)
                 DO J=1,7
@@ -1517,12 +1572,13 @@
 !               (Y) IS CONSTANT IN (X)
 !
                 CASE (1)
-                   AAINT = Y1*FACLOG
+                   AAINT = DBLE(Y1)*FACLOG
 !
 !               (Y) IS LINEAR IN (X)
 !
                 CASE (2)
-                   AAINT = Y2 - Y1+((Y1*X2-Y2*X1)/(X2-X1))*FACLOG
+                   AAINT = DBLE(Y2) - DBLE(Y1)
+     &                   +((DBLE(Y1*X2)-DBLE(Y2*X1))/DBLE(X2-X1))*FACLOG
             END SELECT
 !
 !        MAXWELLIAN FISSION INTEGRATION -SET PARAMETERS
