@@ -787,7 +787,7 @@ C-D  For details see the description of the DXSEN1 routine.
 C-Extern.: DXSEN1
 C-
 C* Limits: Max.No.of reactions=MXL, interp.ranges=MXI
-      PARAMETER   (MXL=200,MXI=100,MXE=20)
+      PARAMETER   (MXL=200,MXI=20,MXE=20)
       CHARACTER*40 MSG(MXE)
       DIMENSION    NBT(MXI),INR(MXI),LST(MXL)
 C*
@@ -1123,9 +1123,9 @@ C* Retrieve the double differential cross section energy distribution
    60 CALL DXSEN1(LEF,ZA0,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
      1           ,RWO(LX),NE,MEN,KRW,IER)
 c...
-      M =NINT(ZA0)
-      print *,' Adding contribution from ZA/MF/MT/NE/IER'
-     &       ,m,mf0,mt,ne,ier
+C...  M =NINT(ZA0)
+C...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
+C... &       ,m,mf0,mt,ne,ier
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -1147,9 +1147,9 @@ C*         (e.g. dual representation of reaction above 20 MeV)
           IER  =0
           MT   =5
           ZAP  =ZA+IZAI-MULN
-
-          print *,'retrieve mt',mt,' ZA',nint(zap)
-
+C...
+C...      print *,'retrieve mt',mt,' ZA',nint(zap)
+C...
           REWIND LEF
         ELSE
 C*        -- Mark alternative contribution as processed
@@ -1169,10 +1169,10 @@ C*             base contribution (if present)
             GO TO 90
           END IF
         END IF
+c...
+c...    print *,'muln,mt,mt0,ier',muln,mt,mt0,ier,ier16
+c...
       END IF
-c...
-      print *,'muln,mt,mt0,ier',muln,mt,mt0,ier,ier16
-c...
 C*
    62 IF( IER.NE.0) THEN
         NEN=0
@@ -1563,10 +1563,10 @@ c...
       double precision  sre,sim,are,aim,aa
      &                  arem,arep,aimm,aimp,xre,yre,xim,yim
 c...
-      PARAMETER   (MIW=100, MXLEG=100)
+      PARAMETER   (MIW=100, MXLEG=100, MXIN=100)
       DIMENSION    IWO(MIW)
       DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN)
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(MXIN),INR(MXIN)
       DIMENSION    AMU(100),PMU(100)
       DIMENSION    PLEG(MXLEG)
 C*
@@ -2268,8 +2268,8 @@ C* Angular distribution at incident energy Ein processed
 C* Calculate  integral SS over distribution DXS at cosines ENR
    45 EA=ENR(1)
       EB=ENR(NE1)
-      INT=INR(1)
-      CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INT)
+      INA=INR(1)
+      CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INA)
 c...
 c...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
 c...
@@ -2476,8 +2476,8 @@ C* Linearise to tolerance EXS, if necessary
         END IF
         IF(KEA.EQ.2) THEN
 Case: Interpolate outgoing particle energy distributions
-          INT=INR(1)
-          CALL FINT2D(EIN,EI1,NE1 ,RWO(LE) ,RWO(LX) ,INT
+          INA=INR(1)
+          CALL FINT2D(EIN,EI1,NE1 ,RWO(LE) ,RWO(LX) ,INA
      1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
         ELSE
 Case: Interpolate distrib. to a given outgoing particle energy
@@ -2682,8 +2682,9 @@ C*        Set IER to flag error and terminate
         END IF
         GO TO 61
       END IF
-C* Particle found - extract tye yield
+C* Particle found - extract the yield
       CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
+      INR(1)=2
       YL6=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
       IF(MT.EQ.18) THEN
 C* Neutron multiplicities for fission are included in MF1
@@ -2769,9 +2770,16 @@ C* Read incident energy definitions
       CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
       NM=NR+1
       NE1=0
-      EI1=0
+      EI2=0
+      NNI=1
+      INA=INR(NNI)
       DO IE=1,NE
+        IF(IE.GT.NBT(NNI))THEN
+          NNI=NNI+1
+          INA=INR(NNI)
+        END IF
 C* Read incident cosine definitions
+        EI1=EI2
         CALL RDTAB2(LEF,C1,EI2,L1,L2,NRM,NMU,NBT(NM),INR(NM),IER)
         IF(IER.NE.0 .AND. IER.NE.11) THEN
            PRINT *,'ERROR READING TAB2 i(En) MF/MT/IER',IE,MF,MT,IER
@@ -2841,7 +2849,7 @@ C*
 C*      --Lin-interpolate between distributions for two inc.energies
         INE=2
         MX=MRW-LX
-        CALL FINT2D(EIN,EI1,NE1 ,ENR,DXS    ,INR
+        CALL FINT2D(EIN,EI1,NE1 ,ENR,DXS    ,INA
      1                 ,EI2,NEP1,RWO,RWO(LX),INE,MX)
       END DO
 c...      
@@ -2968,7 +2976,8 @@ C* Photon energy and yield
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
           STOP 'DXSEND1 ERROR - Reading MF12'
         END IF
-        YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INR,IER)
+        INA=INR(1)
+        YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INA,IER)
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
           STOP 'DXSEND1 ERROR - Reading MF12'
@@ -2995,7 +3004,8 @@ C* Only one section for tabulated distributions is allowed at present
 C* Read the fractional contribution of the section 
           CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
      1               ,RWO(LE),RWO(LX),KX,IER)
-          YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR,IER)
+          INA=INR(1)
+          YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INA,IER)
           IF(LF.NE.1) THEN
             IER=99
             PRINT *,'WARNING - No coding for MF 15, MT',MT0,' LF',LF
@@ -3005,8 +3015,14 @@ C* Read the fractional contribution of the section
           NEN=0
 C* Read interpolation data for the incident energies
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
-          NM =2
+          NM =NR+1
+          NNI=1
+          INA=INR(NNI)
           DO 134 IE=1,NE
+          IF(IE.GT.NBT(NNI)) THEN
+            NNI=NNI+1
+            INA=INR(NNI)
+          END IF
 C* For each incident energy read the outg.particle energy distribution
           CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
      1               ,RWO(LE),RWO(LX),KX,IER)
@@ -3022,9 +3038,9 @@ C* Linearise to tolerance EXS, if necessary
           EXS=0.01
           IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
      1                            ,RWO(LE),RWO(LX),KX,EXS)
-          INE=INR(NM)
+          INE=2
 C* Interpolate outgoing particle energy distributions
-          CALL FINT2D(EIN,EI1,NEN ,RWO(LXE),RWO(LXX),INR
+          CALL FINT2D(EIN,EI1,NEN ,RWO(LXE),RWO(LXX),INA
      1                   ,EI2,NF  ,RWO(LE) ,RWO(LX) ,INE,KX)
   134     CONTINUE
 C*
@@ -3130,10 +3146,10 @@ C-Title  : Subroutine LSTSTD
 C-Purpose: Get cross section and its absolute uncertainty
 C-Description:
 C-D Negative MT1 is a flag to skip processing the covariance data
-      PARAMETER (MXNB=40)
+      PARAMETER (MXNB=20)
       CHARACTER*66 C66
       DIMENSION  EN(MXNP),XS(MXNP),DX(MXNP),RWO(MXRW)
-      DIMENSION  NBT(MXNB),INT(MXNB)
+      DIMENSION  NBT(MXNB),INR(MXNB)
 C*
       REWIND LES
       DO I=1,MXNP
@@ -3158,7 +3174,7 @@ C* If MF10, search over metastable state
       JST=1
       IF(MF1.EQ.10) JST=N1
       DO J=1,JST
-        CALL RDTAB1(LES,QM,QI,L1,LFS,N1,NP,NBT,INT,EN,XS,MXNP,IER)
+        CALL RDTAB1(LES,QM,QI,L1,LFS,N1,NP,NBT,INR,EN,XS,MXNP,IER)
         IF(IER.GT.0) THEN
           IF     (IER.EQ. 8 ) THEN
             PRINT *, 'GETSTD WARNING - numerical overflow'
@@ -3179,8 +3195,8 @@ C*        Requested metastable state higher than available in MF10
           PRINT *, 'GETSTD ERROR - requested level',MST,'>',N1
           NP=0
           RETURN
-   12 IF(N1.NE.1 .OR. INT(1).NE.2) THEN
-        PRINT *,'WARNING - forced lin-lin interp. instead of',INT(1)
+   12 IF(N1.NE.1 .OR. INR(1).NE.2) THEN
+        PRINT *,'WARNING - forced lin-lin interp. instead of',INR(1)
       END IF
 c...
 c...      print *,'done mf/mt, np',mf,mt,np
@@ -3267,10 +3283,10 @@ c...            RWO(LD)=DD
 c...            RWO(LD-1+NE)=D2+(D2-D1)/2
 c...            INR=2
 C*          Interpolate variance to cross section grid
-            INR=1
+            INA=1
             DO K=1,NP
               EIN=EN(K)
-              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,INA,IER)
               DX(K)=DX(K)+DD
 c...
 c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
@@ -3294,7 +3310,7 @@ C*            Increment index to next diagonal (asymmetric/symmetric)
                 LL=LL+NE+1-K
               END IF
             END DO
-            INR=1
+            INA=1
 C*          Approximately convert variances to lin-lin form
 C...            ZR=0
 C...            DD=MAX(ZR, RWO(LD)-(RWO(LD+1)-RWO(LD))/2 )
@@ -3310,7 +3326,7 @@ C...            INR=2
 C*          Interpolate variance to cross section grid
             DO K=1,NP
               EIN=EN(K)
-              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,INA,IER)
               DX(K)=DX(K)+DD
 c...
 c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
@@ -3783,7 +3799,7 @@ C-D        8  WARNING - Numerical overflow  (>E+36)
 C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
       DOUBLE PRECISION EE(3),XX(3)
-      DIMENSION    NBT(1),INR(1)
+      DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
       IER=0
@@ -3829,7 +3845,7 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-      DIMENSION    NBT(N1),INR(N1)
+      DIMENSION    NBT(*),INR(*)
 C*
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
@@ -4337,6 +4353,7 @@ C*
         DO J=1,NEP2
           XS2(J)=0
         END DO
+        RETURN
       END IF
       J2=1
       J1=1
@@ -4567,8 +4584,8 @@ C* Check interpolation between points
       DO I=2,MP
         IF(I.GT.NBT(IIN)) IIN=IIN+1
         IF(IIN.GT.NR) STOP 'VECLIN ERROR - Illegal interpolation range'
-        INT=INR(IIN)
-        IF(INT.LE.2) GO TO 40
+        INA=INR(IIN)
+        IF(INA.LE.2) GO TO 40
         E1=ENR(I1)
         X1=XSR(I1)
         E2=ENR(I2)
@@ -4577,7 +4594,7 @@ C* Check interpolation between points
         XA=X1
 C* Check the midpoint of the remaining interval
    20   EE=(EA+E2)/2
-        XX=FINEND(INT,EE,E1,X1,E2,X2)
+        XX=FINEND(INA,EE,E1,X1,E2,X2)
         XL=FINEND(  2,EE,EA,XA,E2,X2)
         IF(ABS(XL-XX).GT.EPS*XX) THEN
 C* Interpolation tolerance not satisfied
@@ -4609,35 +4626,35 @@ C* Update the interpolation range information
       INR(1)=2
       RETURN
       END
-      FUNCTION FINEND(INT,EE,E1,X1,E2,X2)
+      FUNCTION FINEND(INA,EE,E1,X1,E2,X2)
 C-Title  : Function FINEND
 C-Purpose: Interpolate between two points according to ENDF interp.flags
       ZERO  =0
       FINEND=X1
 C* Histogram interpolation or flat function
-      IF(INT.EQ.1 .OR. X1.EQ.X2 .OR. EE.EQ.E1) RETURN
+      IF(INA.EQ.1 .OR. X1.EQ.X2 .OR. EE.EQ.E1) RETURN
 C* Other ENDF interpolation laws
-      IF     (INT.EQ.2) THEN
+      IF     (INA.EQ.2) THEN
 C* Linear
         FINEND=X1+(EE-E1)*(X2-X1)/(E2-E1)
         RETURN
-      ELSE IF(INT.EQ.3) THEN
+      ELSE IF(INA.EQ.3) THEN
 C* Linear in ln(x)
         IF(E1*E2.LE.ZERO) RETURN
         FINEND=X1+(X2-X1)*LOG(EE/E1)/LOG(E2/E1)
         RETURN
-      ELSE IF(INT.EQ.4) THEN
+      ELSE IF(INA.EQ.4) THEN
 C* Linear in ln(y)
         FINEND=X1*(X2/X1)**((EE-E1)/(E2-E1))
         RETURN
-      ELSE IF(INT.EQ.5) THEN
+      ELSE IF(INA.EQ.5) THEN
 C* Log-log
         IF (X1*X2.LE.ZERO) RETURN
         IF (E1*E2.LE.ZERO) RETURN
         FINEND=X1*(X2/X1)**(LOG(EE/E1)/LOG(E2/E1))
         RETURN
       ELSE
-        PRINT *,'FINEND ERROR - Illegal interpolation flag request',INT
+        PRINT *,'FINEND ERROR - Illegal interpolation flag request',INA
         STOP 'FINEND ERROR - Illegal interpolation flag'
       END IF
       END
