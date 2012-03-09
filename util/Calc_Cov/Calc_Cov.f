@@ -10,11 +10,11 @@ C
       program COVARIANCE
       implicit none
       integer*4 Nenergies, Nreact
-      parameter (Nenergies=150, Nreact=100)
+      parameter (Nenergies=150, Nreact=50)
       real*8 e(Nenergies),dtmp,ftmp,ex(Nenergies),ey(Nenergies)
       real*8 avermod(Nreact,Nenergies)
       real*8 sigmod(Nreact,Nenergies)
-      real*8 rndvec(Nreact,Nenergies)
+      real*8 rndvec(Nreact,Nenergies),cnorm_coef
       real*8 covmod(Nreact,Nreact,Nenergies,Nenergies)
       integer*4 i,j,ir,ix,ie,ic,iz,ia,nstrlenx,nstrleny,ndimx,ndimy
       integer*4 nt(Nreact)
@@ -31,10 +31,11 @@ C-Purpose: Calculate eigenvalues of the covariance matrix
       REAL*8 Cov(Nenergies,Nenergies)
 	REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
 
-      lcovar = .true.
+      lcovar = .false.
 C     do ir=1,Nreact
 C       lcovar(ir,ir) = .true.
 C     enddo
+      lcovar (1,1)=.true. 
 
       avermod = 0.d0 
       sigmod  = 0.d0 
@@ -230,17 +231,22 @@ C    >        (sigmod(ir,i)*sigmod(ir,j)),j=nt(ir)+1,ie)
 
         enddo
 
+	  cnorm_coef = 1.d2
+
 C       Printing model covariance matrix
         write(16,618) 
      >      reaction(ir),e(nt(ir)),reaction(ir),e(nt(ir)),Ncalc
-        write(16,627) 
+        write(16,627) nint(cnorm_coef) 
         do i=nt(ir),ie
-          write(16,635) e(i),sigmod(ir,i)/avermod(ir,i)*100,
-     >      (nint(1000.d0*covmod(ir,ir,i,j)/
-     >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir),i )
+          write(16,6359) e(i),sigmod(ir,i)/avermod(ir,i)*100,
+     >      ( nint(cnorm_coef*covmod(ir,ir,i,j)/
+     >        (sigmod(ir,i)*sigmod(ir,j)) )
+     >        ,j=nt(ir),i )
 C           To print the full matrix (symmetric)
 C    >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir)+1,ie)
         enddo
+ 6359 format(f7.3,2x,f6.2,1x,70(2x,i10,3x))
+
         write(16,*)           
         write(16,637) (sigmod(ir,j)/avermod(ir,j)*100,j=nt(ir),ie)
         write(16,639) (e(j),j=nt(ir),ie) 
@@ -258,8 +264,15 @@ C    >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir)+1,ie)
           ex(i-nt(ir)+1) = e(i) 
 	    do j=nt(ir),ie
             ey(j-nt(ir)+1) = e(j) 
-            cov(i-nt(ir)+1,j-nt(ir)+1) = 
-     >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
+
+C           Approximation corresponding to printed covarainces with 3 digits
+C           It leads to negative eigenvalues !
+C 
+            ftmp = nint(cnorm_coef*covmod(ir,ir,i,j)/
+     >      (sigmod(ir,i)*sigmod(ir,j)))/cnorm_coef
+            cov(i-nt(ir)+1,j-nt(ir)+1) = ftmp*sigmod(ir,i)*sigmod(ir,j)
+C           cov(i-nt(ir)+1,j-nt(ir)+1) = 
+C    >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
 	    enddo 
          enddo
 
@@ -378,8 +391,7 @@ C         WRITE(14,550) (avermod(ir,i),i=nt(ir),ie)
 c         Printing cross-reaction correlation matrix
           write(16,618) 
      >      reaction(ir),e(nt(ir)),reaction(ix),e(nt(ix)),Ncalc
-          write(16,627) 
-
+          write(16,627) 1000
           do i=nt(ir),ie
             write(16,635) e(i),sigmod(ir,i)/avermod(ir,i)*100,
      >        (nint(1000.d0*covmod(ir,ix,i,j)/
@@ -414,10 +426,7 @@ c         Printing cross-reaction correlation matrix
      * '   Reaction2 : ',A12,'   Energy threshold = ',f10.5,' MeV'/
      * '   Number of MC samples = ',i6/)
  621  format(3x,2e13.4,5x,F5.2,6x,f9.4,3x,i4)
- 625  format(/'   Sampled Correlation (x1000)'/
-     *        '   -------------------------------------------'/
-     *        '   E(i)  Uncert(i)')
- 627  format(/'   Sampled Correlation (x1000)'/
+ 627  format(/'   Sampled Correlation x ',i10/
      *        '   -------------------------------------------'/
      *        '  E-1(i) Uncer(i)')
  635  format(f7.3,2x,f6.2,1x,70(2x,i4,3x))
@@ -549,8 +558,8 @@ c		   message and exit.
 	    endif
 10	  format (' More than',i4,' iterations needed for acc =',1pe10.3)
       do k=1,n
-	     if(e(k).gt.acc) cycle
-  	     e(k) = 0.d0
+	     if(abs(e(k)).gt.acc) cycle
+   	     e(k) = 0.d0
 		 do j=1,n
 		   v(k,j) = 0.d0
 		 enddo
