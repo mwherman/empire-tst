@@ -1,3 +1,7 @@
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2012/03/09 18:47:57 $ 
+Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $ 
+
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
@@ -359,11 +363,6 @@
 !     READ CONTROL RECORD FOR NEXT MATERIAL
 !
    20 CALL CONTIN
-
-      PRINT *,' '
-      print *,'Next material',math,mfh,mth,c1h
-     &       ,INTER_DATA%MATMIN,INTER_DATA%MATMAX
-
       IF(MATH.GE.INTER_DATA%MATMIN) THEN
          IF(MATH.LE.INTER_DATA%MATMAX) GO TO 30
          IF(INTER_DATA%MATMAX.GT.0) GO TO 90
@@ -382,9 +381,6 @@
       CALL CONTIN
       LIS0 = L2H
       FS = '  '
-
-      print *,'      New Z,A',IZ,IA
-
       IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
          IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
 !
@@ -427,9 +423,6 @@
          IF(MFH.EQ.0) GO TO 20
          CALL FEND
          CALL CONTIN
-
-         print *,'Reading',math,mfh,mth
-
       END DO
 !
 !     TEST IF THIS SECTION SHOULD BE PROCESSED (SEE MTWANT LIST)
@@ -452,9 +445,6 @@
 !
    45 JSECT = JSECT + 1
       CALL PRSEC
-
-      print *,'read one xs set',JSECT,NSECT
-
 !
 !     READING DONE, READ SEND RECORD IF LAST SECTION
 !
@@ -506,9 +496,6 @@
 !
 !     CHECK FOR NEW PAGE
 !
-
-      print *,'lines,maxlin,matp,matpr',lines,maxlin,matp,matpr
-
       IF(LINES.GT.MAXLIN) THEN
          WRITE(NOUT,'(A)')  CHAR(12)
          WRITE(NOUT,'(A,I5)') 'Material number (MAT) = ',MATP
@@ -556,9 +543,6 @@
 !     READ HEAD RECORD OF NEXT SECTION OR FEND CARD
 !
    80 CALL CONTIN
-
-         print *,'Next',math,mfh,mth
-
       IF(MATH.EQ.0) GO TO 20
       IF(MFH.EQ. 0) GO TO 80
       IF(MFH.GT.10) THEN
