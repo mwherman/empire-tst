@@ -1,9 +1,5 @@
 #$Author: S Hoblit$
 #
-# set C compiler
-CC     =  gcc
-#CFLAGS = -O3
-
 # set default fortran compiler:
 FC     =  gfortran
 #FC     =  ifort
@@ -31,24 +27,34 @@ ifeq ($(FC),ifort)
   # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
   # set IPO TRUE for full cross-file optimization
   IPO = TRUE
+  # set C compiler
+  CC = gcc
 else ifeq ($(FC),gfortran)
   # flags for default real size: 4, 8 or 16 bytes:
   defR4  =
   defR8  = -fdefault-real-8
   defR16 = -fdefault-real-16
   FFLAGS = -O3
+  # set C compiler
+  CC = gcc
 else ifeq ($(FC),af90)
   defR4 =
   defR8 = -N113
   FFLAGS = -march=host -O3
+  # set C compiler
+  CC = af90
 else ifeq ($(FC),pfg90)
   defR4 = -r4
   defR8 = -r8
   FFLAGS =  -O3
+  # set C compiler
+  CC = gcc
 else ifeq ($(FC),lf90)
   defR4 =
   defR8 = -Ad
   FFLAGS = -O3
+  # set C compiler
+  CC = gcc
 endif
 
 # make sure MAKE knows f90 extension
