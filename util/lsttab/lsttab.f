@@ -154,6 +154,11 @@ C*
         EP6=DMY
       END IF
 C*
+C* Enter kT for fission spectrum ratios to Maxwellian
+C* or zero to plot the spectrum
+   45 WRITE(LTT,91) '$Enter kT [eV] to plot ratio to Mxw.  : '
+      READ (LKB,98,ERR=45) EKTNRM
+C*
 C* Open the output files
       OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
       OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
@@ -185,7 +190,7 @@ C* Write banner to log file
 C*
 C* Select the PLOTC4 list entry index
    50 WRITE(LTT,91) '$Enter entry index number             : '
-      READ (LKB,97,ERR=50) IDX
+      READ (LKB,97,ERR=50,END=90) IDX
       IF(IDX.LE.0) GO TO 90
       IF(IDX.GT.NID) THEN
         WRITE(LTT,91) '           ERROR - Invalid entry - redo '
@@ -199,12 +204,7 @@ C* Process the index entry
       C84=RFX(IDX)
       READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
 C*
-C* If fission spectrum is requested, enter kT for ratio to Maxwellian
-C* or zero to plot the spectrum
-   55 WRITE(LTT,91) '$Enter kT [eV] to plot ratio to Mxw.  : '
-      READ (LKB,98,ERR=55,END=56) EKTNRM
-C*
-   56 ZAI=IZI
+      ZAI=IZI
 C*
       COM2=C84(1:11)//C84(19:21)//C84(22:26)//' '
       IF(MF.EQ.3) THEN
@@ -332,30 +332,47 @@ C* Prepare the ENDF comment header for the PLOTTAB curves file
       END IF
       IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
+C* Normalise fission spectra if needed to plot ratio to Maxwellian
+      FSP=1
+      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+        SSP=0
+        E2 =ES(1)
+        F2 =SG(1)
+        DO I=2,NP
+          E1 = E2
+          F1 = F2
+          E2 = ES(I)
+          F2 = SG(I)
+          SSP=SSP + (E2-E1)*(F2+F1)/2
+        END DO
+        IF(SSP.GT.0) FSP=1/SSP
+      END IF
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,99) COM1,COM2
       IUF=0
-      DO 62 I=1,NP
+      DO I=1,NP
 C* Suppress printing negative or zero points
-      EE=ES(I)
-      IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
-      IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
-      FF=SG(I)*SCL
-      UF=UG(I)*SCL
-      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
-        FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
-        FF=SG(I)/FC
-        UF=UG(I)/FC
-      END IF
-      IF(UF.GT.0) IUF=1
-      IF(SG(I).GT.0) THEN
-        IF(IUF.NE.0) THEN
-          WRITE(LCU,94) EE,FF,UF
-        ELSE
-          WRITE(LCU,94) EE,FF
+        EE=ES(I)
+        IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
+        IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
+        SG(I)=SG(I)*FSP
+        UG(I)=UG(I)*FSP
+        FF=SG(I)*SCL
+        UF=UG(I)*SCL
+        IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+          FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+          FF=SG(I)/FC
+          UF=UG(I)/FC
         END IF
-      END IF
-   62 CONTINUE
+        IF(UF.GT.0) IUF=1
+        IF(SG(I).GT.0) THEN
+          IF(IUF.NE.0) THEN
+            WRITE(LCU,94) EE,FF,UF
+          ELSE
+            WRITE(LCU,94) EE,FF
+          END IF
+        END IF
+      END DO
       WRITE(LCU,94)
       IF(NP.GT.0) ICUR=1
    66 CONTINUE
@@ -412,13 +429,13 @@ C*        -- Integrate the function in the range of experimental data
             SC=YTGPNT(NP,ES,SG,EA,EB)
 C*        -- Integrate the experimental data
             SP=YTGPNT(KP,EP,FP,EA,EB)
-
-            print *,'POINTS',ea,eb,sc,sp,np,kp
-C            do i=1,20
-C              print *,i,es(i),sg(i)
-C            end do
-C            print *,np,es(np),sg(np)
-
+C...
+C...        print *,'POINTS',ea,eb,sc,sp,np,kp
+C...         do i=1,20
+C...           print *,i,es(i),sg(i)
+C...         end do
+C...         print *,np,es(np),sg(np)
+C...
 C*        -- Normalise and print the experimental data
             FF=1
             DO I=1,KP
@@ -616,6 +633,7 @@ C-D            be used to convert units).
 C-D   COM2  -  Comment to label the output data sets.
 C-
       PARAMETER   (MXAU=100)
+      DOUBLE PRECISION GETAWT,PROJWT
       CHARACTER*1  MM(3),CM,C1,C2,C3
       CHARACTER*9  CHX4
       CHARACTER*11 REC(6)
