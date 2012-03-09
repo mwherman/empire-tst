@@ -4211,6 +4211,7 @@ C-D  KZA10 Residual 10*ZA+LFS
 C-D  QI    Reaction Q-value (calculated from mass difference)
 C-
       DOUBLE PRECISION AWT,AWR,AWP,AWI
+      DOUBLE PRECISION GETAWT,PROJWT
 C*
       DATA AMU/931.494013E6/
 C*
