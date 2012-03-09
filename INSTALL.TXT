@@ -11,16 +11,14 @@ Cygwin environments.  EMPIRE is provided as source code that must be compiled to
 function.
 
 Required:
-    Fortran90 compiler: gfortran (version 4.4 on Linux or 4.6 on MacOSX 
-        or higher) or ifort (version 11)
+    Fortran90 compiler: gfortran (version 4.6 or higher) or ifort (version 11)
     C/C++ compiler
-    Python, Tcl/Tk
+    Python, Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
 
 Recommended:
     Tcl/Tk version 8.4 (or higher) and the [incr Tcl] extension to Tcl/Tk, 
     both are included in the ActiveTcl distributions on the empire download 
-    page.  On Mac OSX 10.6 and higher, Tcl/Tk with [incr Tcl] is preinstalled.
-
+    page. On Mac OSX 10.6 and higher, Tcl/Tk with [incr Tcl] is preinstalled.
 
 
 Graphical Installation 
@@ -51,7 +49,7 @@ To run empire you may create a working subdirectory of your empire root
 
     $ mkdir Fe56new
     $ cd Fe56new
-    $ ../scripts/Xrun.tcl & 
+    $ empire3 & 
 
 
 
@@ -87,7 +85,7 @@ To run empire you may create a working subdirectory of your empire root
 
     $ mkdir Fe56new
     $ cd Fe56new
-    $ ../scripts/Xrun.tcl & 
+    $ empire3 & 
 
 
 
@@ -182,7 +180,7 @@ To run empire you may create a working subdirectory of your empire root
 
     $ mkdir Fe56new
     $ cd Fe56new
-    $ ../scripts/Xrun.tcl & 
+    $ empire3 & 
 
 
 
