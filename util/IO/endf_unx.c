@@ -77,3 +77,11 @@ void endf_quit_(int *status)
    exit(*status);
    return ;
 }
+
+void _endf_quit_(int *status)
+/* for Absoft compiler */
+{
+   exit(*status);
+   return ;
+}
+
