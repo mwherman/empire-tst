@@ -11,7 +11,7 @@ Cygwin environments.  EMPIRE is provided as source code that must be compiled to
 function.
 
 Required:
-    Fortran90 compiler: gfortran (version 4.6 or higher) or ifort (version 11)
+    Fortran90 compiler: gfortran (recommended version 4.6 or higher) or ifort (Intel)
     C/C++ compiler
     Python, Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
 
