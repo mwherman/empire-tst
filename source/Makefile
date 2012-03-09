@@ -1,6 +1,6 @@
-#$Rev: 2647 $
+#$Rev: 2667 $
 #$Author: shoblit $
-#$Date: 2012-03-08 22:28:30 +0100 (Do, 08 Mär 2012) $
+#$Date: 2012-03-09 21:53:16 +0100 (Fr, 09 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -75,7 +75,7 @@ else ifeq ($(FC),af90)
   IOD = -p ../util/IO/
   FFLAGS = -march=host -O3 -s
   #----flags for debuging
-  DFLAGS = -O0 -g
+  DFLAGS = -O0 -g -s
 
 else ifeq ($(FC),pfg90)
  
