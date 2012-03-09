@@ -1132,6 +1132,7 @@ C                                                                       X4T09580
       CHARACTER*1  BLANK,PARENL,PARENR,ZAR1,ZAN,ZA1,R1,RN,FLAGR,CARD1
      &            ,CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES
      &            ,ZANRAT,SLASH,EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
+      CHARACTER*300 ZAR1_300
       CHARACTER*10 KEYWD1,BLANK10
       CHARACTER*1  iResPointer
       COMMON/iResCommon/iResFlag,iResPointer
@@ -1153,6 +1154,7 @@ C                                                                       X4T09580
       COMMON/RESIDI/KZARES                                              X4T09790
       COMMON/RESIDC/ZARES(7)                                            X4T09800
       DIMENSION ZARBAK(300),ZASAVE(300,10),NSAVE(10)                    X4T09810
+      EQUIVALENCE (ZAR1(1),ZAR1_300)
       DATA BLANK10/'          '/
       DATA BLANK/' '/                                                   X4T09830
       DATA PARENL/'('/                                                  X4T09840
@@ -1269,7 +1271,7 @@ C                                                                       X4T10890
   140 KZABAK=KZAR1                                                      X4T10900
 c---zvv+++
 c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
-      KZAR1=deleteSF9(ZAR1,KZAR1)
+      KZAR1=deleteSF9(ZAR1_300,KZAR1)
       KZABAK=KZAR1
 c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
 c---zvv---
