@@ -1,6 +1,6 @@
-cc   * $Rev: 2644 $
+cc   * $Rev: 2673 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
+Ccc   * $Date: 2012-03-11 04:51:29 +0100 (So, 11 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1050,33 +1050,14 @@ C    &                               sngl((1.d0-corrmsd)*100),' %'
      &      sngl(CSFus*corrmsd - tothms - xsmsc),' mb'
 
          WRITE (8,*) ' '
-C        WRITE (8,*) '*** Summary of particle PE emission  '
-C        if(CSMsd(0)+CSMsc(0).gt.0.) WRITE (8,*)
-C    &       ' g PE emission cross section ', CSMsd(0)+CSMsc(0), ' mb'
-C        if(CSMsd(1)+CSMsc(1)+CSHms(1,1).gt.0.) WRITE (8,*)
-C    &       ' n PE emission cross section ', CSMsd(1)+CSMsc(1), ' mb'
-C        if(CSMsd(2)+CSMsc(2)+CSHms(2,1).gt.0.) WRITE (8,*)
-C    &       ' p PE emission cross section ', CSMsd(2)+CSMsc(2), ' mb'
-C        if(CSMsd(3).gt.0.) WRITE (8,*)
-C    &       ' a PE emission cross section ', CSMsd(3), ' mb'
-C        if(CSMsd(4).gt.0.) WRITE (8,*)
-C    &       ' d PE emission cross section ', CSMsd(4), ' mb'
-C         if(CSMsd(5).gt.0.) WRITE (8,*)
-C    &       ' t PE emission cross section ', CSMsd(5), ' mb'
-C        if(CSMsd(6).gt.0.) WRITE (8,*)
-C    &       ' h PE emission cross section ', CSMsd(6), ' mb'
-C        if(NEMc.GT.0 .AND. CSMsd(NDEjc).gt.0.) WRITE (8,*)
-C    &   ' Cluster PE emission cross section ', CSMsd(NDEjc), ' mb'
-C        WRITE (8,*) ' '
       ENDIF
 
-C     IF (nnuc.EQ.1 .AND. IOUt.GE.3 
-      IF (                IOUt.GE.3 
-C    &    .AND. (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
-C    &                       + CSEmis(3,1) + CSEmis(4,1)
-C    &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
+      IF (IOUt.GE.3 
+     &    .AND. (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
+     &                       + CSEmis(3,1) + CSEmis(4,1)
+     &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
      &    ) THEN
-          WRITE (8,*) ' '
+          WRITE (8,*) ' ***'
           WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
           IF(CSEmis(0,1).GT.0) THEN
@@ -1125,20 +1106,9 @@ C    &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
           WRITE (8,*) 
          ENDIF
 
-C        WRITE (8,*)
-C        WRITE (8,*) '*** Summary of PE and direct emission  '
-C        write(8,*) 'CSFus  =',sngl(CSFus)
-C        write(8,*) 'MSD    =',sngl(xsinl)
-C        write(8,*) 'MSC    =',sngl(xsmsc)
-C        write(8,*) 'PCROSS =',sngl(totemis)
-C        write(8,*) 'HMS    =',sngl(tothms)
-C        write(8,*) 'CN-form=',
-C    &      sngl(CSFus*corrmsd - tothms - xsmsc) 
-C        WRITE (8,*) '*** Summary of PE and direct emission  '
-C        WRITE (8,*)
-
       IF (IOUt.GT.1) THEN
          WRITE (8,*) ' '
+         WRITE (8,*) '*** Summary of Hauser-Feshbach equilibrium decay'
          WRITE (8,*) ' '
          WRITE (8,
      &'(''  Compound nucleus '',I3,''-'',A2,
@@ -1942,7 +1912,7 @@ c                 ENDDO
              WRITE (8,*)
      &           '-------------------------------------------------'
              WRITE (8,*) 
-     &           'Population of residual nuclei (exclusive spectra)'
+     &        'Population of residual nuclei (exclusive spectra - CMS)'
              WRITE (8,
      &           '('' Energy'',14x,''gamma'',9x,''neutron'',8x,
      &             ''proton'',10x,''alpha'',10x,''deut '',10x,
@@ -2138,7 +2108,7 @@ C------------Print residual nucleus population
                 ELSE
                  poptot = poptot + CSHms(1,nnur) + CSHms(2,nnur)
                 ENDIF
-              ENDIF
+             ENDIF
 
              if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
      &                          .and. ENDF(nnuc).gt.0) then
@@ -2212,7 +2182,7 @@ C--------NNUC nucleus decay    **** done ******
 C--------
       ENDDO     !over decaying nuclei
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
-ccccccccccccccccccccccccccccccccccccccccccccccccc
+cccccccccccccccccccc ccccccccccccccccccccccccccccc
 C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       eps=1.d-8
       csinel=CSPrd(2)-4.*PI*ELCncs
@@ -2577,27 +2547,26 @@ C             Calculating unique energy grid
 C
 C             Assumed maximum energy of neutrons from fragments will be 25 MeV
 
-              deltae_pfns = 0.1d0 
-              nepfns = min( NINT(25.d0/deltae_pfns) + 4, NDEPFN)
- 
-              enepfns(1) = 1.d-11
-              enepfns(2) = 1.d-9
-              enepfns(3) = 1.d-7
-              enepfns(4) = 1.d-5
-              enepfns(5) = 1.d-3
+              deltae_pfns = 0.05d0 
 
-              DO ie = 5, nepfns  
-                enepfns(ie+1) = FLOAT(ie - 4)*deltae_pfns
-              ENDDO
-              nepfns = min(nepfns+1, NDEPFN)  
-
-C	        deltae_pfns = dexp(log(25.d6)/(NDEPFN-1))
-C             enepfns(1) = 1.d-6 ! Setting the lowest limit
-C             nepfns = NDEPFN-1
-C             DO ie = 1, nepfns
-C               enepfns(ie+1) = enepfns(ie)*deltae_pfns
+C             To use log scale at the first 5-th energies
+C
+C             nepfns = min( NINT(25.d0/deltae_pfns) + 4, NDEPFN)
+C             enepfns(1) = 1.d-11
+C             enepfns(2) = 1.d-9
+C             enepfns(3) = 1.d-7
+C             enepfns(4) = 1.d-5
+C             enepfns(5) = 1.d-3
+C             DO ie = 5, nepfns  
+C               enepfns(ie+1) = FLOAT(ie - 4)*deltae_pfns
 C             ENDDO
-C             nepfns = min(ie	+ 1,NDEPFN)
+C             nepfns = min(nepfns+1, NDEPFN)  
+C
+              nepfns = min( NINT(25.d0/deltae_pfns) + 1, NDEPFN)
+              enepfns(1) = 1.d-11
+              DO ie = 2, nepfns  
+                enepfns(ie) = FLOAT(ie - 1)*deltae_pfns
+              ENDDO
 
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
@@ -2732,7 +2701,7 @@ C
               WRITE (12,*) ' '
               DO ie = 1, nepfns 
                 WRITE (12,'(E10.4,E14.5,2x,E14.5)')
-     &               enepfns(ie), post_fisn(ie), ratio2maxw(ie)
+     &           enepfns(ie), post_fisn(ie)/deltae_pfns, ratio2maxw(ie)
 C               WRITE (73,'(E10.4,E14.5,4(2x,E14.5))')
 C    &               enepfns(ie), post_fisn(ie), ratio2maxw(ie)
               ENDDO
@@ -2758,29 +2727,30 @@ C-----PRINTING TOTAL PFNS and PFNM quantities
 C-----
       IF (FISspe.gt.0 .and. TOTcsfis.gt.0.d0) THEN
 
-        fnorm = 0.D0
-        do ie =1, nepfns
-          fnorm = fnorm + csepfns(ie)
-        enddo
-        if(fnorm.LE.1.d-7) GOTO 4536  ! No PFNS calculated 
+C       fnorm = 0.D0
+C       do ie =1, nepfns
+C         fnorm = fnorm + csepfns(ie)
+C       enddo
+C       if(fnorm.LE.1.d-7) GOTO 4536  ! No PFNS calculated 
 
 C       Correcting normalization        
-        ftmp = 0.D0
-        do ie =1, nepfns
-          csepfns(ie) = csepfns(ie)/fnorm
-          ftmp = ftmp + csepfns(ie)
-        enddo
+C       ftmp = 0.D0
+C       do ie =1, nepfns
+C         csepfns(ie) = csepfns(ie)/fnorm
+C         ftmp = ftmp + csepfns(ie)
+C       enddo
 
         ftmp = 0.D0
         eneutr = 0.d0
         do ie =2, nepfns
-          fmed = (csepfns(ie)+csepfns(ie-1))*0.5
+          fmed = 
+     &	(csepfns(ie)+csepfns(ie-1))*0.5*(enepfns(ie)-enepfns(ie-1))
           eneutr = eneutr + fmed*(enepfns(ie)+enepfns(ie-1))*0.5d0
           ftmp = ftmp + fmed
         enddo
         if(ftmp.GT.0) eneutr = eneutr/ftmp
         tequiv = 2.D0/3.D0*eneutr
-        
+
         WRITE(74,'(1X,f8.5,1x,f8.3,2(4x,f7.3))')
      &        EINl, eneutr, fnubar, tequiv 
 
@@ -2845,12 +2815,12 @@ C       Correcting normalization
           if (ftmp.gt.0) ftmp1 = csepfns(ie)/ftmp
 
           WRITE (12,'(E10.4,E14.5,2x,E14.5)')
-     &      enepfns(ie), csepfns(ie), ftmp1
+     &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
           WRITE (73,'(E10.4,E14.5,4(2x,E14.5))')
-     &      enepfns(ie), csepfns(ie), ftmp1
+     &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
           IF(enepfns(ie).GT.7.d0) cycle
           WRITE ( 8,'(E10.4,E14.5,2x,E14.5)')
-     &      enepfns(ie), csepfns(ie), ftmp1
+     &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
         ENDDO
         WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &     enepfns(nepfns), 0.d0, 0.d0

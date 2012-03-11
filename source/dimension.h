@@ -15,7 +15,7 @@ C
      *,NDEJC=6
      *,NDZMAX=110
      *,NDECSE=NDEX+30
-     *,NDEPFN=255     
+     *,NDEPFN=502     
      *,NDANGecis=91
      *,NDAnghmx=37   ! Must be equal to NDAnghms in ddhms.cmb
      *,NDNUCD=NDNUC
