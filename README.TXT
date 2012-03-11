@@ -18,11 +18,12 @@ EMPIRE is intended to be a general, flexible, and easy to use tool
 for basic research and evaluation of nuclear data. It offers a  possibility
 of combining several theoretical approaches, choosing among alternative 
 input parameters and calculating extended set of observables in a single run.
-Nuclear data evaluation is facilitated by the ENDF-6 formatting, file 
-verification and graphical comparison with experimental data.
+Nuclear data evaluation is facilitated by the ENDF-6 formatting, resonance
+module, ENDF-6 file verification and graphical comparison with experimental data.
 
 Major new features in 3.1
 -------------------------
+* Exclusive spectra and DDX's in the HMS preequilibrium emission model
 * Covariance capabilities using Kalman filter and Monte Carlo
 * Resonance module to produce MF2 and MF32 from the Atlas of Neutron Resonances
 * RIPL-3 library of input parameters
@@ -31,7 +32,7 @@ Major new features in 3.1
 * Improved treatment of fission
 * Parity dependent level densities
 * New parametrization of EGSM level densities
-* Three additional ejectiles (d, t,3He)
+* Three additional ejectiles (d, t, 3He)
 * Platform independent retrieval of EXFOR data
 * Fully operational on Mac OS X
 
@@ -46,7 +47,7 @@ To run empire you may create a working subdirectory of your empire root
 
     $ mkdir Fe56new
     $ cd Fe56new
-    $ ../scripts/Xrun.tcl & 
+    $ empire3 & 
 
 
 Good calculations !
