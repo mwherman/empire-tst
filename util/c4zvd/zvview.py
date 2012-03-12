@@ -23,6 +23,6 @@ if __name__ == "__main__":
                                     
     if os.uname()[0] in [ "Darwin", "Linux" ]:
         if not X_is_running(): raise RuntimeError( "X11 is not running, please turn it on" ) 
-        myEnv.update( {'DISPLAY':':0.0'} )
+        if os.uname()[0] == 'Darwin': myEnv.update( {'DISPLAY':':0.0'} )
     
     subprocess.call( [ zvviewExe ] + args.zvd, env=myEnv )
