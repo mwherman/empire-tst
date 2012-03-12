@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2601 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+Ccc   * $Rev: 2683 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1881,7 +1881,7 @@ Ccc
      &        ndreac, ndkeys, j
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=132)
+      parameter (ndreac=90, ndkeys=133)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1915,7 +1915,8 @@ C
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'PFNNIU',
-     &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT'/
+     &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT',
+     &  'PFNERE'/
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1941,7 +1942,8 @@ C
      &  'F'     , 'F'     , 'F'     , 'F'     , 'F'     , 'F'     ,   
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A' /
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'      /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction

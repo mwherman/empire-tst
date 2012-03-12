@@ -1,6 +1,6 @@
-cc   * $Rev: 2678 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-03-12 19:06:17 +0100 (Mo, 12 Mär 2012) $
+cc   * $Rev: 2683 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2659,11 +2659,11 @@ C-----------Calculating post-fission neutrons in the first chance
             IF (FISspe.eq.1)
      &        CALL get_fragmPFNS_LANL (post_fisn, enepfns, nepfns,
      &         eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc)
-     &          , deltae_pfns, PFNtke, PFNrat, PFNalp)
+     &          , deltae_pfns, PFNtke, PFNrat, PFNalp, PFNere)
             IF (FISspe.eq.2)
      &        CALL get_fragmPFNS      (post_fisn, enepfns, nepfns,
      &         eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc)
-     &          , deltae_pfns, PFNtke, PFNrat, PFNalp)
+     &          , deltae_pfns, PFNtke, PFNrat, PFNalp, PFNere)
 
             fnorm = CSPfis(nnuc)/TOTcsfis
             if(eneutr.gt.0) then
@@ -2747,7 +2747,8 @@ C       enddo
           ftmp = ftmp + fmed
         enddo
         if(ftmp.GT.0) eneutr = eneutr/ftmp
-        tequiv = 2.D0/3.D0*eneutr
+C       tequiv = 2.D0/3.D0*eneutr
+        tequiv = 1.32d0
 
         WRITE(74,'(1X,f8.5,1x,f8.3,2(4x,f7.3))')
      &        EINl, eneutr, fnubar, tequiv 

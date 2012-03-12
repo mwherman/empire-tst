@@ -1,6 +1,6 @@
-C $Rev: 2539 $
-C $Author: shoblit $
-C $Date: 2012-02-10 16:33:51 +0100 (Fr, 10 Feb 2012) $
+C $Rev: 2683 $
+C $Author: rcapote $
+C $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -49,7 +49,7 @@ C
      &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISn_n(NFHUMP,ndnuc),
-     &                 PFNtke,PFNalp,PFNrat,PFNniu 
+     &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere 
 
       INTEGER MT2, MT91, MT649, MT849,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -210,7 +210,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, PFNtke, PFNalp,
+     &                 rELAred, PFNtke, PFNalp, PFNere,
      &                 PFNrat, PFNniu
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,

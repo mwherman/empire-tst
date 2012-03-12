@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2678 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-03-12 19:06:17 +0100 (Mo, 12 Mär 2012) $
+Ccc   * $Rev: 2683 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -303,6 +303,7 @@ C        PFNS keywords
 C        
          FISspe = 0
          PFNtke = 1.d0
+         PFNere = 1.d0
          PFNalp = 1.d0
          PFNrat = 1.d0
          PFNniu = 1.d0
@@ -6860,13 +6861,13 @@ C--------------------------------------------------------------------------
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
                 FISspe = nint(val)
-                if(FISspe.eq.1) THEN 
-                  WRITE (8,*) 
-     &         ' WARNING: Los Alamos model will be implemented in 2012'
-                  WRITE (8,*) 
-     &         ' WARNING:      changing to Kornilov Model             '
-                 FISspe = 2
-                ENDIF                
+C               if(FISspe.eq.1) THEN 
+C                 WRITE (8,*) 
+C    &         ' WARNING: Los Alamos model will be implemented in 2012'
+C                 WRITE (8,*) 
+C    &         ' WARNING:      changing to Kornilov Model             '
+C                FISspe = 2
+C               ENDIF                
                 WRITE (8,*) 'Prompt fission neutron spectra calculated'
                 if(FISspe.eq.2) WRITE (8,*) ' using Kornilov''s model'
                 if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'
@@ -6887,6 +6888,36 @@ C        PFNTKE, PFNrat PFNALP for both Kornilov & LA models
 C
 C        PFNNIU is the nubar parameter
 C
+         IF (name.EQ.'PFNERE') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+              WRITE (8,
+     &        '('' Global Fission Erel normalization uncertainty '',
+     &        '' is equal to '',i2,''%'')') i1
+              sigma = val*i1*0.01
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
+              
+              PFNere = atilss
+
+              WRITE (8,
+     &        '('' Fission Erel norm sampled value : '',f8.3)')
+     &       atilss
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &          IPArCOV, atilss,INDexf,INDexb
+ 
+            else
+
+              PFNere = val
+              WRITE (8,'('' Fission Erel norm in all nuclei set to '',
+     & F8.3)') val
+            endif
+            GOTO 100
+         ENDIF
+C-----         
          IF (name.EQ.'PFNTKE') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
               WRITE (8,

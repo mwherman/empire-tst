@@ -1,10 +1,10 @@
-Ccc   * $Rev: 2640 $
+Ccc   * $Rev: 2683 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-06 03:43:55 +0100 (Di, 06 Mär 2012) $
+Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
-     &      PFNtke, PFNrat, PFNalp)
+     &      PFNtke, PFNrat, PFNalp, PFNere)
 C
 C     See N.V.Kornilov, A.B.Kagalenko and F.-J.Hambsch
 C     Phys. At. Nuclei 62 (1999) pp 173-185
@@ -15,7 +15,7 @@ C     Dummy parameters
       integer nen_emis
       real*8 fragmPFNS(nen_emis), emiss_en(nen_emis)
       real*8 eincid, af, zf, emed, tequiv, qval, deltae
-      real*8 PFNtke, PFNrat, PFNalp
+      real*8 PFNtke, PFNrat, PFNalp, PFNere
 
 C     Local variables
       real*8 CNdef,HFdef,LFdef,ftmp, Erel
@@ -57,7 +57,7 @@ C     Malinovskii parametrization of the heavy fragment charge
       ftmp = bind(iah-izh,izh,HFdef)
       ftmp = bind(ial-izl,izl,LFdef)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
-      Erel = CNdef - HFdef - LFdef
+      Erel = (CNdef - HFdef - LFdef)*PFNere ! PFNere is the scaling factor
 
       alpha0 = 1.d0
 C     Adjusted values (RCN, February 2006)
@@ -122,7 +122,7 @@ C       fragmPFNS(i) = wscn*fnscn + (1.d0 - wscn)*fpost
 
       SUBROUTINE get_fragmPFNS_LANL (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
-     &      PFNtke, PFNrat, PFNalp)
+     &      PFNtke, PFNrat, PFNalp, PFNere)
 C
 C     See D. Madland original paper (NSE) on LA model
 C
@@ -131,7 +131,7 @@ C     Dummy parameters
       integer nen_emis
       real*8 fragmPFNS(nen_emis), emiss_en(nen_emis)
       real*8 eincid, af, zf, emed, tequiv, qval, deltae
-      real*8 PFNtke, PFNrat, PFNalp
+      real*8 PFNtke, PFNrat, PFNalp, PFNere
 
 C     Local variables
       real*8 ftmp1, ftmp2, eplus, emin 
@@ -175,7 +175,7 @@ C     Malinovskii parametrization of the heavy fragment charge
       ftmp = bind(iah-izh,izh,HFdef)
       ftmp = bind(ial-izl,izl,LFdef)
 C     Total energy release in fission from mass excess for CN, heavy and light fragments
-      Erel = CNdef - HFdef - LFdef
+      Erel = (CNdef - HFdef - LFdef)*PFNere ! PFNere is the scaling factor
 
 C     if scission neutrons are considered 
 C     if(wscn.ne.0.d0) alpha0 = 1.d0
