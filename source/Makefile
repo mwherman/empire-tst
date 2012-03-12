@@ -1,6 +1,6 @@
-#$Rev: 2676 $
+#$Rev: 2677 $
 #$Author: shoblit $
-#$Date: 2012-03-12 18:48:29 +0100 (Mo, 12 Mär 2012) $
+#$Date: 2012-03-12 18:54:11 +0100 (Mo, 12 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -21,12 +21,7 @@ ifeq ($(FC),gfortran)
   #---------------------------------
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
-  # flags for default real size: 4, 8 or 16 bytes:
-  defR4  =
-  defR8  = -fdefault-real-8
-  defR16 = -fdefault-real-16
   #----flags for production compilation with gfortran
-  IOD = -I ../util/IO/
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for debuging
   DFLAGS =  -g --bounds-check -std=legacy -ftrapv 
@@ -41,12 +36,7 @@ else ifeq ($(FC),ifort)
   #---------------------------
   #----INTEL f95 compiler
   #---------------------------
-  # flags for default real size: 4, 8 or 16 bytes:
-  defR4  = -real-size 32
-  defR8  = -real-size 64
-  defR16 = -real-size 128
   #----flags for production compilation using ifort
-  IOD = -I ../util/IO/
   FFLAGS = -O3 -x=host -ipo
   #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
@@ -65,14 +55,10 @@ else ifeq ($(FC),af90)
   #---------------------------
   #----Absoft FORTRAN compiler
   #---------------------------
-  # flags for default real size: 4, 8 bytes:
-  defR4 =
-  defR8 = -N113
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft 
   LIBS =  -lV77  -lU77
   #----flags for production
-  IOD = -p ../util/IO/
   FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
   DFLAGS = -O0 -m64 -g -s
@@ -82,12 +68,8 @@ else ifeq ($(FC),pfg90)
   #---------------------------
   #  Portland Group Fortran Compiler
   #---------------------------
-  # flags for default real size: 4, 8 bytes:
-  defR4 = -r4
-  defR8 = -r8
   #----flags for production
   FFLAGS =  -O3 
-  IOD = -I ../util/IO/
   #----flags for debuging
   DFLAGS = -O0 -g
 
@@ -96,12 +78,8 @@ else ifeq ($(FC),lf90)
   #--------------------------------------
   #----Lahey/Fujitsu f95 compiler
   #--------------------------------------
-  # flags for default real size: 4, 8 bytes:
-  defR4 =
-  defR8 = -Ad
   #----flag for Lahey/Fujitsu production 
   FFLAGS = -O3
-  IOD = -I ../util/IO/
   #----flags for debuging
   DFLAGS = -O0 -g --chk
 
@@ -115,7 +93,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o        fusion.o\
             gamma-strgth.o    input.o           lev-dens.o     main.o\
             ph-lev-dens.o     pipe.o            print.o        tl.o\
-            HRTW-comp.o       ddhms.o           read_nubar.o   pcross.o\
+            HRTW-comp.o       ddhms.o           pcross.o\
             gamma-strength-analytic.o           thora.o        empire_ctl.o\
             pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
             plot-zvv.o    kailas07emp.o         systematics.o  subecis06m.o
@@ -126,33 +104,22 @@ all:
 	$(MAKE) empire
 	$(MAKE) optmand
 
-empire: $(OBJF) $(IOLIB)
-	$(FC) -o $@ $(OBJF) $(IOLIB) $(LIBS)
+empire: $(OBJF)
+	$(FC) -o $@ $(OBJF) $(LIBS)
 
 optmand: optmand.o
 	$(FC) -o $@ optmand.o
 #	$(FC) optmand.f -o $@ 
 
-# When making a debug image, don't compile either ECIS or
-# the IO library with debug. ECIS won't work and IO should
-# be debugged separately, if needed.
+# When making a debug image, don't compile ECIS /debug
 debug:
 	$(MAKE) subecis06m.o
-	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
-$(IOLIB):
-	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
-
-read_nubar.o : read_nubar.f90 $(IOLIB)
-	$(FC) -O3 $(IOD) -c read_nubar.f90
-
 $(OBJF) : global.h dimension.h
-main.o  : io.h read_nubar.o
-input.o : read_nubar.o
+main.o  : io.h
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 
 clean:
 	rm -f *.o
-	cd ../util/IO/ ; $(MAKE) clean ;
