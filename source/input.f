@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2644 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
+Ccc   * $Rev: 2678 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-03-12 19:06:17 +0100 (Mo, 12 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -17,8 +17,6 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
-      use endf_nubars
-
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -702,8 +700,9 @@ C            READING OF THE ENDF MF=1, MT=456 prompt nubar
 C
              IF(NUBarread) THEN 
 
-               CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
-     &                        A(0), Z(0), ierr)
+!!               CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
+!!     &                        A(0), Z(0), ierr)
+                 ierr = 1
 
                if(ierr.gt.0) NUBarread = .FALSE.
 
