@@ -1,6 +1,6 @@
-#$Rev: 2667 $
+#$Rev: 2676 $
 #$Author: shoblit $
-#$Date: 2012-03-09 21:53:16 +0100 (Fr, 09 Mär 2012) $
+#$Date: 2012-03-12 18:48:29 +0100 (Mo, 12 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -47,8 +47,8 @@ else ifeq ($(FC),ifort)
   defR16 = -real-size 128
   #----flags for production compilation using ifort
   IOD = -I ../util/IO/
-  FFLAGS = -arch pn4 -O3 -ipo
-  #FFLAGS = -O3 -x=host
+  FFLAGS = -O3 -x=host -ipo
+  #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
   DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
@@ -73,9 +73,9 @@ else ifeq ($(FC),af90)
   LIBS =  -lV77  -lU77
   #----flags for production
   IOD = -p ../util/IO/
-  FFLAGS = -march=host -O3 -s
+  FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
-  DFLAGS = -O0 -g -s
+  DFLAGS = -O0 -m64 -g -s
 
 else ifeq ($(FC),pfg90)
  
@@ -86,7 +86,7 @@ else ifeq ($(FC),pfg90)
   defR4 = -r4
   defR8 = -r8
   #----flags for production
-  FFLAGS =  -O3
+  FFLAGS =  -O3 
   IOD = -I ../util/IO/
   #----flags for debuging
   DFLAGS = -O0 -g
@@ -111,15 +111,14 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o   MSD-tristan.o\
-            auxiliary.o       bar_mom.o         ccfus.o       fusion.o\
-            gamma-strgth.o    input.o           lev-dens.o    main.o\
-            ph-lev-dens.o     pipe.o            print.o       \
-            tl.o              HRTW-comp.o   	ddhms.o       read_nubar.o\
-            pcross.o          gamma-strength-analytic.o\
-            thora.o           empire_ctl.o      pfns.o        dtrans.o\
-            fitbarrier.o      fis_io.o          plot-zvv.o    kailas07emp.o\
-            systematics.o     subecis06m.o
+OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
+            auxiliary.o       bar_mom.o         ccfus.o        fusion.o\
+            gamma-strgth.o    input.o           lev-dens.o     main.o\
+            ph-lev-dens.o     pipe.o            print.o        tl.o\
+            HRTW-comp.o       ddhms.o           read_nubar.o   pcross.o\
+            gamma-strength-analytic.o           thora.o        empire_ctl.o\
+            pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
+            plot-zvv.o    kailas07emp.o         systematics.o  subecis06m.o
 
 IOLIB =  ../util/IO/*.o
 
@@ -142,20 +141,17 @@ debug:
 	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
-../util/IO/endf_io.mod :
-	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
-
 $(IOLIB):
 	cd ../util/IO/ ; $(MAKE) "FC=$(FC)" ;
 
-read_nubar.o : read_nubar.f90 ../util/IO/endf_io.mod
+read_nubar.o : read_nubar.f90 $(IOLIB)
 	$(FC) -O3 $(IOD) -c read_nubar.f90
 
 $(OBJF) : global.h dimension.h
 main.o  : io.h read_nubar.o
 input.o : read_nubar.o
 ddhms.o : ddhms.cmb
-tl.o  : pre_ecis.h
+tl.o    : pre_ecis.h
 
 clean:
 	rm -f *.o
