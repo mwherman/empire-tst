@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2683 $
+Ccc   * $Rev: 2684 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
+Ccc   * $Date: 2012-03-13 00:56:34 +0100 (Di, 13 Mär 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -31,7 +31,10 @@ C     Mass of heavy fragment fixed following Malinovskii
       data iah/140/ 
 
 C     Kornilov model parameters
-      data ThCF/0.8868d0/,r/1.248d0/,U0Cf/32.9d0/
+C     data ThCF/0.8868d0/,r/1.248d0/
+C     Tuned model parameters 
+      data ThCF/0.9020d0/, r/1.1752d0/
+	data U0Cf/32.9d0/
 
 C     Scission neutrons for Th-232 following Lovchikova et al (Phys.At.Nuclei 67 (2004) p890)
 C     data wscn/0.10d0/ ! "wscn,tscn" fitted to get scission neutron temperature (0.38 +/- 0.04)
