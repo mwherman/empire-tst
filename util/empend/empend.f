@@ -331,6 +331,7 @@ c...  NMOD= 0
       SPI =0
       STF0=0
       GAMG=0
+      GAMF=0
       D0LV=0
       LRP =0
       I600=0
@@ -462,6 +463,12 @@ C* Check if resonance parameters need to be written (yes for neutrons)
       IF(IZI.EQ.1) THEN
         IF(STF0.GT.0 .AND. D0LV.GT.0) THEN
           LRP=1
+          IF(LFI.GT.0) THEN
+C*          -- Arbitrarily set small fission width for fissile nuclides
+            GAMF=GAMG/100
+          ELSE
+            GAMF=0
+          END IF
         ELSE
           LRP=0
         END IF
@@ -482,7 +489,7 @@ C* Write tabulated ENDF file-1 data (nu-bar)
       NS=-1
       IF(LRP.GE.0)
      &CALL WRIMF2(LOU,MXE,MXT,EIN,RWO(LXS),IWO(MTH)
-     &           ,MAT,IZA,EMIN,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,NS)
+     &           ,MAT,IZA,EMIN,AWR,SPI,STF0,GAMG,GAMF,D0LV,NEN,NXS,NS)
 C* Write the ENDF file-3 data
       MF=3
       CALL WRIMF3(LOU,MXE,MXT,LXR,MF,LRP,EMIN
@@ -4342,14 +4349,17 @@ c...
       Y1 =YL0
       E2 =EE
       Y2 =YL0
-C* Define the interpolation law for the particle emission spectra
-C     LEP=1
-      LEP=2
-C* Use log-log interpolation for fission spectra
-      IF((MT.GE.18 .AND. MT.LE.21) .OR. MT.EQ.38) LEP=5
+C* Define linear interpolation law for the particle emission spectra
+C* but log-log interpolation for fission spectra
+      IF((MT.GE.18 .AND. MT.LE.21) .OR. MT.EQ.38) THEN
+        LEP=5
+      ELSE
+C       LEP=1
+        LEP=2
+      END IF
       LANG=1
       NRA=1
-C* Unit base linear interpolation between incident neutron energies
+C* Unit base linear interpolation between incident particle energies
       INA=22
 C* Reserve space for yields in the Real array
       LXA=LBL
@@ -4929,7 +4939,7 @@ C*
    93 FORMAT(A66)
       END
       SUBROUTINE WRIMF2(LOU,MXE,MXT,EIN,XSC,MTH,MAT,IZA,EMIN
-     &                 ,AWR,SPI,STF0,GAMG,D0LV,NEN,NXS,NS)
+     &                 ,AWR,SPI,STF0,GAMG,GAMF,D0LV,NEN,NXS,NS)
 C-Title  : WRIMF2 Subroutine
 C-Purpose: Write MF2 (scattering radius) in ENDF-6 format
 C-Description:
@@ -4946,6 +4956,7 @@ C-D AWR      Atomic mass ratio of the target to neutron
 C-D SPI      Spin of the target
 C-D STF0     S0-strength function
 C-D GAMG     Average gamma width
+C-D GAMF     Average fission width
 C-D D0LV     Average level spacing
 C-D NEN      Actual number of energy points
 C-D NXS      Actual number of cross section sets
@@ -5034,7 +5045,7 @@ C...      LRF=1
             IF(AJ.LT.0) AJ=SPI+0.5
             GN=STF0*D0LV
             GG=GAMG
-            GF=0
+            GF=GAMF
             GT=GN+GG+GF
             RPAR(1,I)=ER
             RPAR(2,I)=AJ
