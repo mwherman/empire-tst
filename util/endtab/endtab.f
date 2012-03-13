@@ -361,7 +361,7 @@ c...
             WRITE(COM,926)  MAT,MFX,MTX
           END IF
           IF(MT.GT.999 .OR. FST.GT.0)
-     &           WRITE(COM(20:80),927) NINT(ZAP),NINT(FST)
+     &           WRITE(COM(20:40),927) NINT(ZAP),NINT(FST)
         ELSE
           COM=COM1
         END IF
