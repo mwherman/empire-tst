@@ -1,7 +1,3 @@
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2012/03/09 18:47:57 $ 
-Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $ 
-
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
@@ -35,7 +31,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
-!-V         Version 8.1    February 2012     A. Trkov
+!-V         Version 8.02   March 2012     R. Capote
+!-V                        1. Chaged printout to get all isotopes consecutively
+!-V         Version 8.01   February 2012     A. Trkov
 !-V                        1. Process MF 10 data
 !-V                        2. Minor improvements to improve accuracy
 !-V         Version 8.0    October 2009     A. Trkov
@@ -124,9 +122,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.01'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     Define variable precision
@@ -269,7 +267,7 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
       REAL(KIND=R4), DIMENSION(3,2) :: ELO,EHI ! INTEG PANEL LIMITS
 !
       INTEGER(KIND=I4) :: LINES,MATPR  ! CURRENT LINE COUNT, MATERIAL NUMBER    
-      INTEGER(KIND=I4), PARAMETER :: MAXLIN=60  !MAXIMUM LINES PER PAGE
+      INTEGER(KIND=I4), PARAMETER :: MAXLIN=800 !MAXIMUM LINES PER PAGE
 !
 !     CROSS SECTIONS AT THERMAL, 2200 METERS AND 14MEV
 !
@@ -321,7 +319,7 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
       INTEGER(KIND=I4) :: IDESC
       INTEGER(KIND=I4) :: MATP,MTP
       INTEGER(KIND=I4) :: MAT,MF,MT,NS
-      INTEGER(KIND=I4) :: I
+      INTEGER(KIND=I4) :: I, IPRINT
       REAL(KIND=R4) :: TZ
       REAL(KIND=R4) :: Z1,Z2
       REAL(KIND=R4) :: SIGAV,SIGFAV,GFACT,RESINT
@@ -343,6 +341,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !
 !     CHECK FOR COMMAND LINE INPUT (VMS ONLY)
 !
+
+
+      IPRINT = 1
       IONEPASS = 0
       CALL GET_FROM_CLINE
 !
@@ -363,6 +364,11 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !     READ CONTROL RECORD FOR NEXT MATERIAL
 !
    20 CALL CONTIN
+
+C     PRINT *,' '
+C     print *,'Next material',math,mfh,mth,c1h
+C    &       ,INTER_DATA%MATMIN,INTER_DATA%MATMAX
+
       IF(MATH.GE.INTER_DATA%MATMIN) THEN
          IF(MATH.LE.INTER_DATA%MATMAX) GO TO 30
          IF(INTER_DATA%MATMAX.GT.0) GO TO 90
@@ -381,6 +387,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
       CALL CONTIN
       LIS0 = L2H
       FS = '  '
+
+C     print *,'      New Z,A',IZ,IA
+
       IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
          IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
 !
@@ -423,6 +432,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
          IF(MFH.EQ.0) GO TO 20
          CALL FEND
          CALL CONTIN
+
+C        print *,'Reading',math,mfh,mth
+
       END DO
 !
 !     TEST IF THIS SECTION SHOULD BE PROCESSED (SEE MTWANT LIST)
@@ -445,6 +457,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !
    45 JSECT = JSECT + 1
       CALL PRSEC
+
+C     print *,'read one xs set',JSECT,NSECT
+
 !
 !     READING DONE, READ SEND RECORD IF LAST SECTION
 !
@@ -496,13 +511,14 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !
 !     CHECK FOR NEW PAGE
 !
+
+!     print *,'lines,maxlin,matp,matpr',lines,maxlin,matp,matpr
+
       IF(LINES.GT.MAXLIN) THEN
-         WRITE(NOUT,'(A)')  CHAR(12)
-         WRITE(NOUT,'(A,I5)') 'Material number (MAT) = ',MATP
-         WRITE(NOUT,'(3A/)')                                            &       
+        WRITE(NOUT,'(3A)')                                              &       
      &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
      &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)   Sig(E14)   '
+     &          'Sig(Fiss)   Sig(E14)   MAT'
          MATPR = MATP
          LINES = 4
          GO TO 50
@@ -513,27 +529,37 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
       IF(MATP.NE.MATPR)  THEN
          MATPR = MATP
          IF(LINES+7.GT.MAXLIN) THEN
-            WRITE(NOUT,'(A)')  CHAR(12)
+            WRITE(IOUT,'(A)')  CHAR(12)
             LINES = 1
          ELSE
-            WRITE(NOUT,'(/)')
+            WRITE(IOUT,'(/)')
             LINES = LINES + 2
          END IF
-         WRITE(NOUT,'(A,I5)') 'Material number (MAT) = ',MATP
-         WRITE(NOUT,'(3A/)')                                            &       
+         WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
+         WRITE(IOUT,'(1x,3A)')                                          &       
      &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
      &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
      &          'Sig(Fiss)   Sig(E14)   '
          LINES = LINES + 3
       END IF
-   50 WRITE(NOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
-     &     SIGAV,GFACT,RESINT,SIGFAV,C14
 
-      WRITE(  * ,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
-     &     SIGAV,GFACT,RESINT,SIGFAV,C14
+C     IF(IPRINT.EQ.1) THEN
+C       IPRINT = 0
+C       WRITE(NOUT,'(3A)')                                              &       
+C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+C    &          'Sig(Fiss)   Sig(E14)   MAT'
+C     ENDIF
+
+   50 WRITE(NOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
+     &     SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
+
+      WRITE(IOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
+     &     SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
 
    55 FORMAT(I3,1X,I4,3X,I1,4X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,       &       
-     &        0PF8.5,1PE13.5,2(1PE12.5))
+     &        0PF8.5,1PE13.5,2(1PE12.5),I5)
+
       LINES = LINES+1
 !
 !     CHECK IF ALL SECTIONS WERE PROCESSED
@@ -543,6 +569,9 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
 !     READ HEAD RECORD OF NEXT SECTION OR FEND CARD
 !
    80 CALL CONTIN
+
+C        print *,'Next',math,mfh,mth
+
       IF(MATH.EQ.0) GO TO 20
       IF(MFH.EQ. 0) GO TO 80
       IF(MFH.GT.10) THEN
@@ -966,7 +995,7 @@ Ccc   * $Id: inter.f,v 8.01 2012/03/09 18:47:57 trkov Exp $
       ITLEN = LEN_TRIM('PROGRAM INTER VERSION '//VERSION)
       WRITE(NOUT,'(29X,2A)') 'PROGRAM INTER VERSION ',VERSION
       WRITE(NOUT,'(29X,A//A)')  REPEAT('-',ITLEN),                      &       
-     &  'Selected Integrations of ENDF File 3 Cross Sections'
+     &'Selected Integrations of ENDF File 3 and File 10 Cross Sections'
 !
 !     INITIALIZE FOR OUTPUT HEADING
 !
@@ -2074,8 +2103,8 @@ c...         Z = (X2-X1)/X1
       IF(MATO.GT.0.AND.MFO.GT.0.AND.MTO.GT.0) THEN
 !+++MDC+++
 !...VMS, ANS, WIN, UNX, MOD
-         WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
-     &         'PROCESSING MAT=',MATO,', MF=',MFO,', MT=',MTO
+!        WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
+!    &         'PROCESSING MAT=',MATO,', MF=',MFO,', MT=',MTO
 !...DVF, LWI
 !/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MATO,MFO,MTO)
 !---MDC---
