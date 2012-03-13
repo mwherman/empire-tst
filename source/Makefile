@@ -1,6 +1,6 @@
-#$Rev: 2677 $
+#$Rev: 2690 $
 #$Author: shoblit $
-#$Date: 2012-03-12 18:54:11 +0100 (Mo, 12 Mär 2012) $
+#$Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -93,7 +93,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
             auxiliary.o       bar_mom.o         ccfus.o        fusion.o\
             gamma-strgth.o    input.o           lev-dens.o     main.o\
             ph-lev-dens.o     pipe.o            print.o        tl.o\
-            HRTW-comp.o       ddhms.o           pcross.o\
+            HRTW-comp.o       ddhms.o           pcross.o       nubar_reader.o\
             gamma-strength-analytic.o           thora.o        empire_ctl.o\
             pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
             plot-zvv.o    kailas07emp.o         systematics.o  subecis06m.o
@@ -117,9 +117,10 @@ debug:
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h
-main.o  : io.h
+main.o  : io.h nubar_reader.o
+input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 
 clean:
-	rm -f *.o
+	rm -f *.o *.mod

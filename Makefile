@@ -24,8 +24,8 @@ endif
 # utilities:
 UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
-       util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/x4toc4 \
-       util/pltsenmat util/lsttab util/kalman
+       util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/nubar \
+       util/x4toc4 util/pltsenmat util/lsttab util/kalman
 
 all:
 	cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;

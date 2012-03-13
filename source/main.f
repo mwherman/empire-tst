@@ -1,6 +1,6 @@
-cc   * $Rev: 2683 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
+cc   * $Rev: 2690 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -12,6 +12,8 @@ Ccc   *               Used to be main of the EMPIRE code                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+
+      use nubar_reader
 
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -2578,7 +2580,7 @@ C
 C             This allows for Windows use and testing avoiding
 C             compilation errors of IO package in Windows 
 C
-!!              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
+              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
 
 C             The total nubar is calculated for the first incident (real)
 C             energy and used for the normalization of the total PFNS

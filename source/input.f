@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2683 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
+Ccc   * $Rev: 2690 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -17,6 +17,8 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      use nubar_reader
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -49,6 +51,7 @@ C
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       INTEGER INT, ISEED, NINT
       CHARACTER*2 SMAT
+      character chra*5,chrz*5,nucmd*200
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -671,7 +674,9 @@ C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C
          IF(iz. ge. 90 .and. iz. le. 98) then ! only from Th to Cf
+
 C          retrieving NUBAR if available
+
            IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
 C            CHECKING for the presence of the file 'NUBAR-EVAL.ENDF'
@@ -687,7 +692,7 @@ C
 
             else              
 C
-C              CHECKING and READING the file data/nubar.endf      
+C              CHECKING and READING the file data/nubar.endf
 C
               nubar_filename = trim(empiredir)//'/data/nubar.endf'
               len_nubar_filename = len_trim(nubar_filename) 
@@ -696,39 +701,42 @@ C
 C
             endif
 
-C
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
 C
              IF(NUBarread) THEN 
 
-!!               CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
-!!     &                        A(0), Z(0), ierr)
-                 ierr = 1
+                 !! CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
+                 !! A(0), Z(0), ierr)
 
-               if(ierr.gt.0) NUBarread = .FALSE.
+                 ! ask get_nubar to read ENDF file and look for our A & Z.
+                 ! if found, it writes to NUBAR.DAT, which we then read in.
+                 ! if endfile, Z, A not found, NUBAR.DAT will not be there.
+
+                 write(chra,'(i5)') a(0)
+                 write(chrz,'(i5)') z(0)
+                 nucmd = trim(empiredir)//'/util/nubar/get_nubar '//
+     &              nubar_filename(1:len_nubar_filename)//chra//chrz
+                 ! type *,trim(nucmd)
+                 call system(nucmd)
+
+                 ! now read the NUBAR.DAT file
+
+                 call read_nubar_unix(ierr)
+                 if(ierr.gt.0) NUBarread = .FALSE.
 
              ENDIF  
-C
+
            ELSE                    !Windows
-C
-C             In Windows it is assumed that the NUBAR-EVAL.ENDF
-C             was found so NUBarread = .TRUE. 
-C
-C             A new Windows only source file read_nubar_windows.f is provided
-C
-C             It contains:
-C             1) An empty subroutine READNUBAR() that avoids
-C                compilation errors of IO package in Windows
-C
-C             2) A replacement function fniu_nubar_eval(eincid)
-C                that calculates the nubar from Th-232 nubar 
-C                evaluation (0-60 MeV). It is designed to test 
-C                PFNS calculations
-C
+
+C             On windows, just set the nubar spectrum to that
+C             of Th-232 (0-60 MeV) for testing purposes.
+C             No files are read.
+
+              call read_nubar_windows()
               NUBarread = .TRUE.
  
-           ENDIF 
-         
+           ENDIF
+
          ENDIF
 C
 C--------other decaying nuclei
