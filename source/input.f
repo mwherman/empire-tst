@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2690 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
+Ccc   * $Rev: 2700 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-03-14 16:58:45 +0100 (Mi, 14 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -712,8 +712,8 @@ C
                  ! if found, it writes to NUBAR.DAT, which we then read in.
                  ! if endfile, Z, A not found, NUBAR.DAT will not be there.
 
-                 write(chra,'(i5)') a(0)
-                 write(chrz,'(i5)') z(0)
+                 write(chra,'(i5)') nint(a(0))
+                 write(chrz,'(i5)') nint(z(0))
                  nucmd = trim(empiredir)//'/util/nubar/get_nubar '//
      &              nubar_filename(1:len_nubar_filename)//chra//chrz
                  ! type *,trim(nucmd)
