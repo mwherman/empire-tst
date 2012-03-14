@@ -62,8 +62,8 @@ Add operation "HALVE" to change full-width to uncertainty (A.Trkov, 08/09)     1
 EN-RSL-FW     1  999    2   12
 EN-RES        1  999    1    1
 EN-DUMMY      1  999    1    0
-EN-MIN      121  399    1    9
-EN-MAX      121  399    2    9
+EN-MIN      213  223    1    9
+EN-MAX      213  223    2    9
 EN-MIN        1  999    1    8
 EN-MAX        1  999    1    8
 EN-RSL        1  999    2    4
