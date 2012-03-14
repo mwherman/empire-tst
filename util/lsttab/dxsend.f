@@ -1572,8 +1572,8 @@ c...
 C*
       DATA PI/3.14159265/
 C...
-      PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-     1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+C... 1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -1704,6 +1704,10 @@ C* Case: Assemble nu-bar from polynomial representation
             IF(MF0.NE.1) THEN
 C* Case: Neutron yield at incident energy from pointwise representation
               YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+              IF(IER.NE.0) THEN
+                PRINT *,'FINTXS ERROR - IER=',IER
+                STOP 'FINTXS ERROR'
+              END IF
 c...
 c...          print *,'nu-bar from LNU=2 is',yl
 c...
@@ -1752,7 +1756,6 @@ C* Suppress searching for covariance data unless MF0=3
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
       print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
-      print *,'ier',ier
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -2799,8 +2802,21 @@ C*        -- For each cosine and energy read the distributions
             PRINT *,'ERROR READING TAB1 i(cos) MF/MT/IER',IM,MF,MT,IER
             STOP 'DXSEN1 ERROR reading distributions'
           END IF
-C...      IF(NRP.GT.1)
-C... 1     PRINT *,' WARNING - Multiple A interp.ranges for MF 6, MT',MT
+          IF(NEP2.NE.NBT(NO+NRP-1) .OR. INR(NO).GT.5) THEN
+C...        PRINT *,' WARNING - invalid interp. for outgoing'
+C... &             ,' particles in MF 6, MT',MT,EI2,AI2
+            NRP=1
+            NBT(NO)=NEP2
+            INR(NO)=2
+          END IF
+          IF(NRP.GT.1 .OR. INR(NO).NE.2) THEN
+C*          -- Linearise the distribution
+            EPL=0.005
+            CALL VECLIN(NRP,NEP2,NBT(NO),INR(NO)
+     &               ,RWO(LXE),RWO(LXX),KX,EPL)
+            NBT(NO)=NEP2
+            INR(NO)=2
+          END IF
 C*        --Integrate over energy for this cosine
           AMU(IM)=AI2
           EA=RWO(LXE)
@@ -2822,12 +2838,12 @@ C*           Case: Average outgoing particle energy
             NEP1=NMU
           ELSE
             IF(DEG.LT.0) THEN
-C* Case:   Integrate between distributions for two cosines
+C* Case:    --Integrate between distributions for two cosines
               CALL FYTG2D(    NEP1,RWO     ,RWO(LX)
      1                   ,AI1,NEP3,RWO(LXF),RWO(LXY),INR(NM)
      1                   ,AI2,NEP2,RWO(LXE),RWO(LXX),INR(NO),KX2)
             ELSE
-C* Case:   Interpolate between distributions for two cosines
+C* Case:    --Interpolate between distributions for two cosines
               CALL FINT2D(AIN,AI1,NEP1,RWO     ,RWO(LX) ,INR(NM)
      1                       ,AI2,NEP2,RWO(LXE),RWO(LXX),INR(NO),KX)
             END IF

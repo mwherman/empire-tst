@@ -430,11 +430,20 @@ C*        -- Integrate the function in the range of experimental data
 C*        -- Integrate the experimental data
             SP=YTGPNT(KP,EP,FP,EA,EB)
 C...
-C...        print *,'POINTS',ea,eb,sc,sp,np,kp
-C...         do i=1,20
-C...           print *,i,es(i),sg(i)
-C...         end do
-C...         print *,np,es(np),sg(np)
+C...        print *,'POINTS,ea,eb,sc,sp,np,kp',ea,eb,sc,sp,np,kp
+C...        ss=0
+C...        i =1
+C...        ee=ep(i)
+C...        FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+C...        print *,i,ee,fp(i),fp(i)*(sc/sp)/ff
+C...        do i=2,kp
+C...          ee=ep(i)
+C...          FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+C...          fi=(ep(i)-ep(i-1))*(fp(i)+fp(i-1))/2
+C...          ss=ss+fi
+C...          print *,i,ee,fp(i),fp(i)*(sc/sp)/ff,fi,ss
+C...        end do
+C...        print *,np,es(np),sg(np)
 C...
 C*        -- Normalise and print the experimental data
             FF=1
@@ -4211,7 +4220,6 @@ C-D  KZA10 Residual 10*ZA+LFS
 C-D  QI    Reaction Q-value (calculated from mass difference)
 C-
       DOUBLE PRECISION AWT,AWR,AWP,AWI
-      DOUBLE PRECISION GETAWT,PROJWT
 C*
       DATA AMU/931.494013E6/
 C*
