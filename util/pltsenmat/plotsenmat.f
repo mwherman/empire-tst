@@ -23,7 +23,7 @@ Ccc
 
         IMPLICIT REAL*8(A-H,O-Z)
          
-        PARAMETER(MAXPARAM=80,MAXREAC=50,MAXENERG=100)
+        PARAMETER(MAXPARAM=80,MAXREAC=50,MAXENERG=1000)
 
         CHARACTER*40 PROJFILE,PARAM(MAXPARAM)
         CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
@@ -42,7 +42,7 @@ C       Reading which reaction to plot
 
 C       Reading and storing the sensitivity matrices in variable SENMAT
         CALL READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +MAXPARAM)
+     +MAXPARAM,MAXENERG)
 
 
 C       Finding index of reaction to be plotted
@@ -51,7 +51,7 @@ C       Finding index of reaction to be plotted
         
 C       Creates ZVD file with the sensitivities for all parameters
         CALL ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT,MAXPARAM)
+     +PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
 
 
 
@@ -231,11 +231,11 @@ c       Reads the full sensitivity matrices from file -mat.sen and stores
 c       in variable SENMAT(parameter,energy,reaction). Reaction index=0 in 
 c       SENMAT stores energy values.
         SUBROUTINE READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +MAXPARAM)
+     +MAXPARAM,MAXENERG)
         
         IMPLICIT REAL*8(A-H,O-Z)
          
-        PARAMETER(MAXREAC=50,MAXENERG=100)
+        PARAMETER(MAXREAC=50)
 
         CHARACTER*40 PROJFILE,FILENAME,PARAM(MAXPARAM)
         CHARACTER*10 REAC(0:MAXREAC)
@@ -346,13 +346,13 @@ c       spacing.
         
 c       Creates zvd file to be plotted with zvview	
         SUBROUTINE ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT,MAXPARAM)
+     +PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
 
 
 
         IMPLICIT REAL*8(A-H,O-Z)
          
-        PARAMETER(MAXREAC=50,MAXENERG=100)
+        PARAMETER(MAXREAC=50)
 
         CHARACTER*40 PROJFILE,FILENAME,PARAM(MAXPARAM)
         CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
@@ -403,23 +403,15 @@ c          ELSE
 c           WRITE(20,12) IP
 c12         FORMAT('#begin Parameter_',I2,'/u')
 c         ENDIF   
-          WRITE(20,20) PARAM(IP)
-20        FORMAT(7X,'fun: ',A,/,'thick: 2',/,'length: 92',/,'//')
-        
+          WRITE(20,20) PARAM(IP), NENERG
+20        FORMAT(7X,'fun: ',A,/,'thick: 2',/,'length: ',I4,/,'//')
         
 c         Writing the sensitivity matrix for each parameter
           DO IE=1,NENERG
-          
 c           Writing (converting energy from MeV to eV)
             WRITE(20,50) SENMAT(IP,IE,0)*1.d6,SENMAT(IP,IE,IPLOT)
 50          FORMAT(E10.3,2X,E12.5)
-          
-          
-          
           ENDDO
-
-
-        
         
 c         Writing the ending
           WRITE(20,105)
