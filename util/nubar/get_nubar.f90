@@ -10,7 +10,6 @@
 
     logical*4 qex
     integer*4 i,n,a,z,nin,iza,ios
-    real*4, allocatable :: en(:), vn(:)
     character infile*200,cmd*100
 
     type (endf_file) :: endf
@@ -31,7 +30,7 @@
     ! see if it's specified and check that it exists
 
     qex = .false.
-    if(nin .gt. 0) inquire(file=infile(1:nin),exist=qex)
+    if(nin > 0) inquire(file=infile(1:nin),exist=qex)
     if(.not. qex) goto 100
 
     ! now try to get A & Z from command line as well
@@ -39,14 +38,14 @@
     a = 0
     call getarg(2,cmd)
     n = len_trim(cmd)
-    if(n.gt.0) read(cmd(1:n),*,iostat=ios) a
-    if(a .eq. 0) goto 100
+    if(n > 0) read(cmd(1:n),*,iostat=ios) a
+    if(a == 0) goto 100
 
     z = 0
     call getarg(3,cmd)
     n = len_trim(cmd)
-    if(n.gt.0) read(cmd(1:n),*,iostat=ios) z
-    if(z .eq. 0) goto 100
+    if(n > 0) read(cmd(1:n),*,iostat=ios) z
+    if(z == 0) goto 100
 
     iza = 1000*z + a
  

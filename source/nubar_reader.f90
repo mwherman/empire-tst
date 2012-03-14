@@ -26,7 +26,7 @@ module nubar_reader
  
     implicit none
 
-    integer*4,     intent(out) :: ierr          ! output status flag: 0=success, 1= no nubar file found
+    integer*4, intent(out) :: ierr     ! output status flag: 0=success, 1= no nubar file found
 
     integer*4 i,ios
 
