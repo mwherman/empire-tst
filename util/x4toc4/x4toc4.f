@@ -453,6 +453,8 @@ C-M  been adopted,
 C-M
 C-M  Cross section ratios  - Field 5 = MT of denominator.
 C-M  (MF = 203)              Field 6 = ZA of denominator.
+C-M  Spectra ratios        - Field 5 = MT of denominator.
+C-M  (MF = 205)              Field 6 = ZA of denominator.
 C-M  Resonance integrals   - Field 1 = lower energy limit.
 C-M  (MF = 213)              Field 2 = upper energy limit.
 C-M  Spectrum averages     - Field 1 = lower energy limit.
@@ -1132,7 +1134,6 @@ C                                                                       X4T09580
       CHARACTER*1  BLANK,PARENL,PARENR,ZAR1,ZAN,ZA1,R1,RN,FLAGR,CARD1
      &            ,CARD2,ENT,SUBENT,ZARBAK,KEYWD2,LABCM,ZARES,ZANRES
      &            ,ZANRAT,SLASH,EQUAL,MRAT,COMMA,ZASAVE                                          X4T09620
-      CHARACTER*300 ZAR1_300
       CHARACTER*10 KEYWD1,BLANK10
       CHARACTER*1  iResPointer
       COMMON/iResCommon/iResFlag,iResPointer
@@ -1154,7 +1155,6 @@ C                                                                       X4T09580
       COMMON/RESIDI/KZARES                                              X4T09790
       COMMON/RESIDC/ZARES(7)                                            X4T09800
       DIMENSION ZARBAK(300),ZASAVE(300,10),NSAVE(10)                    X4T09810
-      EQUIVALENCE (ZAR1(1),ZAR1_300)
       DATA BLANK10/'          '/
       DATA BLANK/' '/                                                   X4T09830
       DATA PARENL/'('/                                                  X4T09840
@@ -1271,7 +1271,7 @@ C                                                                       X4T10890
   140 KZABAK=KZAR1                                                      X4T10900
 c---zvv+++
 c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
-      KZAR1=deleteSF9(ZAR1_300,KZAR1)
+      KZAR1=deleteSF9(ZAR1,KZAR1)
       KZABAK=KZAR1
 c     WRITE(*,4000) ENT,ISAN,'<',(ZAR1(I),I=1,KZAR1),'>'     !---zvv-tst
 c---zvv---
@@ -1393,7 +1393,9 @@ C-----SEE IF REACTION CAN BE TRANSLATED. IF NOT, TRY TO TRANSLATE ENTIREX4T12000
 C-----REACTION.                                                         X4T12010
       IF(MFRX.LE.0.OR.MTRX.LE.0) GO TO 280                              X4T12020
 C-----ONLY ALLOW CROSS SECTION RATIOS FOR CROSS SECTIONS.               X4T12030
-      IF(MFRX.NE.3) IMRATS=0                                            X4T12040
+
+c     IF(MFRX.NE.3) IMRATS=0                                            X4T12040
+
 C-----AFTER FIRST SIMPLE REACTION INSURE ALL OTHERS HAVE SAME TARGET    X4T12050
 C-----AND RESIDUAL ZA (OTHERWISE CANNOT TRANSLATE).                     X4T12060
       IF(LOOP.EQ.0) GO TO 420                                           X4T12070
@@ -3763,7 +3765,6 @@ C                                                                       X4T33950
       DATA EFISS/2.0E+06/                                               X4T34150
 C*    -- Default Maxwellian spectrum temperature
       EKTNRM=1.382E6
-      PI=3.141592654
 C-----NOTHING TO DO IF NO OPERATION DEFINED.                            X4T34160
       IF(IRFLAG(ISANR).LE.0) GO TO 110                                  X4T34170
 C-----RESET ENERGY COUNT ON FIRST POINT.                                X4T34180
@@ -3938,7 +3939,7 @@ C     -- Try to find the spectrum temperature in COMMON
 C*    -- Location index of energy and spectrum
       II=KMOUT(7,ISANR)
       EE=VALUES(II)
-      FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+      FF=SQRT(EE)*EXP(-EE/EKTNRM)/EKTNRM
       II=KMOUT(3,ISANR)
       IE=KMOUT(4,ISANR)
       VALUES(II)=VALUES(II)*FF
