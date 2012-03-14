@@ -1,14 +1,12 @@
       PROGRAM SIXTAB
 C-Title  : SIXTAB
 C-Purpose: Convert ENDF file MF6 to Law 7 representation
-C-Author : Andrej Trkov                        e-mail: A.Trkov@iaea.org
-C-A        International Atomic Energy Agency     tel: +43 1 2600 21712
-C-A        Nuclear Data Section                   fax: +43 1 2600 7
-C-A        Wagramerstrasse 5
-C-A        P.O.Box 100
-C-A        A-1400 Vienna
-C-A        AUSTRIA
-C-Version: Original code March 2001
+C-Author : Andrej Trkov                        e-mail: A.Trkov@ijs.si
+C-A        Jozef Stefan Institute                 tel: +386 1 5885 324
+C-A        Jamova 39
+C-A        SI-1000 Ljubljana
+C-A        SLOVENIA
+C-Version: Original code March 2001 (IAEA, Vienna, Austria)
 C-V  03/01 Copy Law-7 data unchanged (A.Trkov).
 C-V  03/02 Use FINEND function for interpolation (A.Trkov).
 C-V  03/12 - Fix discrete energy (isotropic) particles in MF6 (A.Trkov).
@@ -16,6 +14,12 @@ C-V        - Generalise CM-Lab conversion for all particles
 C-V        - Convert MF6 Law 2 Legendre (LANG=2) to pointwise (LANG=12).
 C-V  05/06 Open scratch file once in the main program and rewind
 C-V        (problem with too many OPEN statements with Lahey compiler).
+C-V  09/12 - Sum Legendre components in double precision
+C-V  10/02 - Increase the default number of angular points to 65
+C-V        - Increase the number of angular points for two-body
+C-V          reactions (Law 2) from 2*L+2 to 3*L+1
+C-V        - Refine the first and last angle intervals to half-nominal
+C-V          value.
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -105,8 +109,9 @@ C-M  '   FLNINP ' Name of the source ENDF input file is given in
 C-M               columns 11-50.
 C-M  '   FLNOUT ' Name of the target ENDF output file is given in
 C-M               columns 11-50.
-C-M  '   NANGLES' Number of discrete angles for tabulation are defined
-C-M               columns 11-20.
+C-M  '   NANGLES' Maximum number of discrete angles for tabulation are
+C-M               defined columns 11-20. The actual number of angles
+C-M               depends on the Legendre order.
 C-M  '   ENDSIX ' This keyword signals the end of SIXTAB input. All
 C-M               instructions that follow are ignored.
 C-M
@@ -136,7 +141,7 @@ C* Scratch file unit number and name
       OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
 C*
 C* Default number of angles
-      NCS=33
+      NCS=65
 C*
 C* Check for the existence of the input file
       INQUIRE(FILE=FLIN,EXIST=EXST)
@@ -183,7 +188,7 @@ C* Copy the header card
    17 WRITE(LOU,901) C66,MATH,MFH,MTH,NS
 C* Edit the comment section to identify changes
       CMT(1)='**********************'//
-     1       ' SIXTAB Version 03/12 '//
+     1       ' SIXTAB Version 10/02 '//
      1       '**********************'
       WRITE(CMT(2),991) NCS
    20 CALL EDTMF1(LEN,LOU,CMT,NCM,C66,MATH,MFH,MTH,IER)
@@ -360,10 +365,10 @@ C-D A section of file 6 using legendre or tabulated angular distributions
 C-D is converted into Law 7 format with NCS angles. Intermediate results
 C-D are written to scratch file on unit LSC.
 C-
-      PARAMETER       (MXMU=50, MXPL=100, MXNB=20, MXRW=80000)
+      PARAMETER       (MXMU=80, MXPL=100, MXNB=20, MXRW=260000)
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
-      DOUBLE PRECISION PAR,CLB,P1,P2,PP
+      DOUBLE PRECISION PAR,CLB,P1,P2,PP,FMU
       DIMENSION RWO(MXRW),NBT(MXNB),INT(MXNB)
       DIMENSION AMU(MXMU),PLL(MXPL)
 C*
@@ -393,12 +398,16 @@ C*
       REWIND LSC
 C* Assume the projectile is neutron
       IZPR=1
-C* Define cosines for NCS angle intervals
+C* Define NCS cosines for NCS-1 angle intervals
       IF(NCS.GT.MXMU) STOP 'SIXTAB ERROR - MXMU limit exceeded'
-      DPI=PI/(NCS-1)
-      DO I=1,NCS
-        AMU(I)=COS(PI-(I-1)*DPI)
+      DPI= PI/(NCS-2)
+      API=-PI-DPI/2
+      DO I=3,NCS
+        API=API+DPI
+        AMU(I-1)=COS(API)
       END DO
+      AMU(1)  =-1
+      AMU(NCS)= 1
 C*
 C* Interpret the header CONT record
       READ(C66,902) ZA,AWR, L1,LCT, NK, N2
@@ -408,7 +417,6 @@ C* Co-ordinate system flag: save original and preset output
       LCT0=LCT
       LCT1=LCT
 C* Start the conversion process
-      IF(LTT.GT.0) WRITE(LTT,960) MT0
 C* Begin loop over all outgoing particles
       DO 800 IK=1,NK
       NSIG=0
@@ -420,6 +428,7 @@ C* Process the multiplicities for this particle
       CALL RDTAB1(LEN,ZAP,AWP,LIP,LAW0, NR, NP, NBT,INT
      1           ,RWO(LXE),RWO(LXS),KX,IER)
       IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
+      IF(LTT.GT.0) WRITE(LTT,950) MT0,LAW0,IK
       IZAP=NINT(ZAP)
       LAW =LAW0
 C* Set the co-ordinate system flag LCT
@@ -469,12 +478,19 @@ C* Write the multiplicities for this particle to the output file
       CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,ZAP,AWP,LIP,LAW
      1           , NR, NP, NBT,INT,RWO(LXE),RWO(LXS))
 C*
+
+      print *,'law',law0
+
       IF     (LAW0.EQ.1) THEN
 C* Proceed to process Law 1 data (continuum energy-angle distributions)
+        IF(LTT.GT.0) 
+     &  WRITE(LTT,900) '                      Converting to Law ',LAW
         GO TO 130
 C* Copy other format representations
       ELSE IF(LAW0.EQ.0 .OR. LAW0.EQ.3 .OR. LAW0.EQ.4) THEN
 C*      No action necessary for Law 0, 3, 4
+        IF(LTT.GT.0) 
+     &  WRITE(LTT,900) '                       No action needed '
         GO TO 800
       ELSE IF(LAW0.EQ.2 .OR. LAW0.EQ.5 ) THEN
 C*      Copy the data for Law 2, 5
@@ -484,6 +500,7 @@ C*      Copy the data for Law 2, 5
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
      1             ,NR,NE,NBT,INT)
         NMX=MXRW
+        ICN=0
         DO IE=1,NE
           CALL RDLIST(LEN,C1,EI,LANG,L2,NW,NL,RWO,NMX,IER)
           IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
@@ -491,9 +508,12 @@ C*      Copy the data for Law 2, 5
 C*        Convert Legendre to pointwise distribution if necessary
             CALL LEGPNT(NW,NL,RWO,MXRW)
             LANG=12
+            ICN =ICN+1
           END IF
           CALL WRLIST(LOU,MAT0,MF0,MT0,NS,C1,EI,LANG,L2,NW,NL,RWO)
         END DO
+        IF(LAW.EQ.2 .AND. LTT.GT.0)
+     &  WRITE(LTT,900) '         No. of conversions to tabular: ',ICN
         GO TO 800
       ELSE IF(LAW0.EQ.6 ) THEN
 C*      Copy the data for Law 6
@@ -504,6 +524,8 @@ C*      Copy the data for Law 6
         GO TO 800
       ELSE IF(LAW.EQ.7) THEN
 C*      Copy the data for Law 7
+        IF(LTT.GT.0) 
+     &  WRITE(LTT,900) '                       No action needed '
         CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
      1             ,NR,NE,NBT,INT)
@@ -533,6 +555,9 @@ C*      Don't know how to process - file incomplete - terminate.
 C*
 C* Read Law 1 format specifications for outgoing energies
   130 CALL RDTAB2(LEN,C1,C2,LANG ,LEP ,NR,NE,NBT,INT,IER)
+
+      print *,'lang,lep,nr,ne',lang,lep,nr,ne
+
       IF(LTT.GT.0) THEN
         IF     (LANG.EQ.1)THEN
           CLANG='Legendre'
@@ -651,7 +676,11 @@ C* Normalise the distribution
           F1=F2
           E2=RWO(LXE-1+K)
           F2=RWO(LXS-1+K)
-          YTG=YTG+(E2-E1)*(F2+F1)/2
+          IF(LEP.EQ.1) THEN
+            YTG=YTG+(E2-E1)*(   F1)
+          ELSE
+            YTG=YTG+(E2-E1)*(F2+F1)/2
+          END IF
         END DO
 C* Check the integral normalisation factor
         IF(LTT.GT.0 .AND. ABS(YTG-1).GT.5.E-3) THEN
@@ -768,9 +797,14 @@ C*
 C* Calculate the probability from Legendre polynomials
         IF(NA.GE.MXPL) STOP 'SIXTAB ERROR - MXPL limit exceeded'
         CALL PLNLEG(CSN,PLL,NA)
-        FMU=0
-        DO LL=1,NL
-          FMU=FMU+0.5*(2*LL-1)*PLL(LL)*RWO(LX1+NCYC*(IP-1)+LL)
+c...    FMU=0
+c...    DO LL=1,NL
+c...      FMU=FMU+0.5*(2*LL-1)*PLL(LL)*RWO(LX1+NCYC*(IP-1)+LL)
+c...    END DO
+        LL=LX1+NCYC*(IP-1)+1
+        FMU=DBLE(PLL(1))*DBLE(RWO(LL))
+        DO L=1,NA
+          FMU=FMU+DBLE(PLL(1+L))*DBLE(RWO(LL+L))*(2*L-1)/2
         END DO
       ELSE IF(LANG.EQ.2) THEN
 C*
@@ -793,9 +827,7 @@ C* Calculate the probability from pointwise representation
         FMU =FINEND(INT,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
       ELSE
         IF(LTT.GT.0)
-C    &  WRITE(LTT,902) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
-     &  WRITE(LTT,350) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
-  350   FORMAT(A,I3)
+     &  WRITE(LTT,900) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
         STOP 'SIXTAB ERROR - Illegal value of LANG'
       END IF
 C* Processing of distribution for one outgoing energy point completed
@@ -825,6 +857,8 @@ C* Check if single point
       L1 =0
       L2 =0
       NS0=0
+      NBT(1)=JP
+      INT(1)=LEP
 C* Write the spectrum distribution for this cosine
       CALL WRTAB1(LSC,MAT0,MF0,MT0,NS0,C1,ACOS,L1,L2
      1           , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
@@ -858,7 +892,7 @@ C* Add contribution to the integral
 C* Continue with the cosine loop
   500 CONTINUE
 C* Check the integral normalisation factor
-        IF(LTT.GT.0 .AND. ABS(SIG-1).GT.1.E-2) THEN
+        IF(ABS(SIG-1).GT.1.E-2) THEN
           NSIG=NSIG+1
           IF(ABS(SIG-1).GT.SIGMX) THEN
             SIGMX=SIG-1
@@ -902,7 +936,9 @@ C*
   901 FORMAT(A40,1P,E11.3)
   902 FORMAT(2F11.0,4I11,I4,I2,I3,I5)
   903 FORMAT(A40,F11.1)
-  960 FORMAT(/' Converting MF=6, MT=',I3,' to Law 7 format')
+  950 FORMAT(/' Converting MF=6, MT=',I3,' from Law',I3
+     &        ,' for particle',I3)
+  651 FORMAT(A40,I3)
   961 FORMAT(' SIXTAB ERROR - Can not process Law',I3,' for ZAP',I6)
   962 FORMAT(12X,A8,' Representation for particle IZAP',I6)
   964 FORMAT(' SIXTAB WARNING - Format error MT,ZAP,Ein,Ep'
@@ -911,36 +947,53 @@ C*
       SUBROUTINE LEGPNT(NW,NL,RWO,MXRW)
 C-Title  : Subroutine LEGPNT
 C-Purpose: Convert Legendre distribution to pointwise form
+C-Description:
+C-D  NW  - on input, number of words of data in RWO (NW=NL)
+C-D        on exit, length of the RWO array containing tabular data
+C-D  NL  - Legendre order
+C-D  RWO - Work array for input/output
+C-D      - On input, RWO contains the Legendre components (no P0
+C-D        component because it equals to 1 due to normalisation)
+C-D      - On exit, RWO contains NXP angle/distribution pairs.
+C-D        Currently NXP=3*NL+1.
+C-D  MXRW- maximum size of the RWO array
+C-
+      DOUBLE PRECISION FF
       DIMENSION  RWO(MXRW)
       NW0=NW
       NL0=NL
 C* NXP - number of angular points
 C* LXC - address of Legendre components
 C* LXP - address of the angle/distribution pairs
-      NXP=2*NL+2
-      LXC=NW+2
+      NXP=3*NL+1
+      LXC=NL+2
       LXP=LXC+NL+1
       IF(LXP+2*NXP.GT.MXRW) STOP 'LEGPNT ERROR - MXRW limit exceeded'
-C* Insert the implied P0 Legendre component
+C* Shift the Legendre coeff. and insert the implied P0 coefficient
       DO L=1,NL
         RWO(LXC-L)=RWO(LXC-1-L)
       END DO
       RWO(1)=0.5
 C* Angular cosine increment
       DCS=2
-      DCS=DCS/(NXP-1)
+      DCS=DCS/(NXP-2)
+      AC0=-1-DCS/2
 C* loop over output points
       DO I=1,NXP
 C*      Cosine point
-        AC=-1+(I-1)*DCS
-        IF(I.EQ.  1) AC=-1
-        IF(I.EQ.NXP) AC= 1
+        IF     (I.EQ.  1) THEN
+          AC=-1
+        ELSE IF(I.EQ.NXP) THEN
+          AC= 1
+        ELSE
+          AC=AC0+(I-1)*DCS
+        END IF
 C*      Legendre components for this cosine
         CALL PLNLEG(AC,RWO(LXC),NL)
 C*      Distribution value at this cosine
-        FF=RWO(1)*RWO(LXC)
+        FF=DBLE(RWO(1))*DBLE(RWO(LXC))
         DO L=1,NL
-          FF=FF+(2*L-1)*RWO(1+L)*RWO(LXC+L)/2
+          FF=FF+DBLE(RWO(1+L))*DBLE(RWO(LXC+L))*(2*L+1)/2
         END DO
 C*      Save the cosine and the distribution
         RWO(LXP+2*(I-1)  )=AC
@@ -969,9 +1022,9 @@ C       IZAT   Target ZA designation.
 C       E      Incident energy of the projectile.
 C       EP     Energy of the outgoing particle.
 C     ******************************************************************
-      IMPLICIT DOUBLE PRECISION (A-H,O-Z)                                          GROUPR.5410 
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*60 STRNG
-      DOUBLE PRECISION NC,NB                                                          UP4.72   
+      DOUBLE PRECISION NC,NB
       REAL   BACH,E,EP
       DATA THIRD,TWOTH,FOURTH/.333333333D0,.666666667D0,1.33333333D0/
       DATA C1,C2,C3,C4,C5,C6/15.68D0,-28.07D0,-18.56D0,33.22D0,
