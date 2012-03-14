@@ -99,6 +99,12 @@ C-V        - Fix processing of ENDF=0 option, recognised by lack of
 C-V          spectrum data - except (z,x) (left in by mistake?)
 C-V        - Allow incident deuterons, tritons, He-3
 C-V  12/03 - Minor corrections to restore fission spectrum formatting.
+C-V        - Set LCT flag to LAB for fission spectra.
+C-V        - Define proper interpolation rules for fission spectra
+C-V          (fission spectrum is interpolated well with lin-lin
+C-V           interpolation except in the tails, but only a single
+C-V           interpolation range can be defined in ENDF)
+C-V        - Reduce emission spectra thinning criterion from 1 to 0.5 %.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -2684,6 +2690,8 @@ C-D  - Zero distributions over limited range of angles are forced
 C-D    to half the value of the neighbours until all are positive.
 C-D  - If the distribution is angle-integrated, it is divided by 4*Pi
 C-D    for consistency to simplify post-processing.
+C-D  - Distributions that can be reproduced to the tolerance limit ETOL
+C-D    by linear interpolation are removed.
 C-D
 C-D Formal parameters have the following meaning:
 C-D  LIN  Logical unit number of the EMPIRE short output.
@@ -2707,7 +2715,7 @@ C* Maximum number of angles MDA, local array.
       DIMENSION      ANG(MXA)
       DIMENSION      RWO(MXR)
 C* Permissible tolerance for interpolated angular distributions (fraction)
-      DATA ETOL/ 0.010 /
+      DATA ETOL/ 0.005 /
 C*
       DATA PI/3.1415926D0/
 C*
@@ -3885,6 +3893,7 @@ C-V        ELO defined internally as EMIN or ELO and exported
 C-V        (adjustment of lower energy limit done in WRMF6).
 C-V  08/02 Set LCT=3 (CM-light particles, LAB-recoils).
 C-V  12/02 Set LCT=2 after careful review of Empire methods.
+C-V  12/01 Set LCT=1 for fission spectra
 C-Description:
 C-D  Error trap flags:
 C-D  IER = -1  Corrupted work array?
@@ -3939,6 +3948,8 @@ C*    -- Preset coordinate system flag: CM-all particles
       LCT=2
 C*    -- Preset coordinate system flag: CM-light particles, LAB-recoils
 C...  LCT=3
+C*    -- Set LCT flag to LAB for fission spectra
+      IF(MT6.EQ.18) LCT=1
       NE6=0
       LBL=1
       IK =0
@@ -4352,7 +4363,8 @@ c...
 C* Define linear interpolation law for the particle emission spectra
 C* but log-log interpolation for fission spectra
       IF((MT.GE.18 .AND. MT.LE.21) .OR. MT.EQ.38) THEN
-        LEP=5
+C...    LEP=5
+        LEP=2
       ELSE
 C       LEP=1
         LEP=2
@@ -4360,7 +4372,12 @@ C       LEP=1
       LANG=1
       NRA=1
 C* Unit base linear interpolation between incident particle energies
-      INA=22
+C* but plain linear interpolation for fission spectra
+      IF((MT.GE.18 .AND. MT.LE.21) .OR. MT.EQ.38) THEN
+        INA=2
+      ELSE
+        INA=22
+      END IF
 C* Reserve space for yields in the Real array
       LXA=LBL
       LPK=LXA+12+2*(NE3+1)
