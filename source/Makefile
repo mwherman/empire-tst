@@ -1,6 +1,6 @@
-#$Rev: 2690 $
-#$Author: shoblit $
-#$Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
+#$Rev: 2702 $
+#$Author: mherman $
+#$Date: 2012-03-14 23:14:41 +0100 (Mi, 14 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -50,16 +50,16 @@ else ifeq ($(FC),ifort)
   #ifort -m64 -fast
   #Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
 
-else ifeq ($(FC),af90)
+else ifeq ($(FC),af95)
  
   #---------------------------
   #----Absoft FORTRAN compiler
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft 
-  LIBS =  -lV77  -lU77
+  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64   
   #----flags for production
-  FFLAGS = -march=host -m64 -O3 -s
+  FFLAGS = -march=host -m64 -O3 -s 
   #----flags for debuging
   DFLAGS = -O0 -m64 -g -s
 
@@ -105,14 +105,13 @@ all:
 	$(MAKE) optmand
 
 empire: $(OBJF)
-	$(FC) -o $@ $(OBJF) $(LIBS)
+	$(FC) $(FFLAGS) -o $@ $(OBJF) $(LIBS)
 
 optmand: optmand.o
-	$(FC) -o $@ optmand.o
-#	$(FC) optmand.f -o $@ 
+	$(FC)  $(FFLAGS) -o $@ optmand.o
 
 # When making a debug image, don't compile ECIS /debug
-debug:
+dbg:  
 	$(MAKE) subecis06m.o
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
