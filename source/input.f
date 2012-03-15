@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2700 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-03-14 16:58:45 +0100 (Mi, 14 Mär 2012) $
+Ccc   * $Rev: 2705 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -310,6 +310,7 @@ C
          PFNalp = 1.d0
          PFNrat = 1.d0
          PFNniu = 1.d0
+         TMAxw  = 1.32d0
 C
          IOMwritecc = 0
          MODelecis = 0
@@ -686,11 +687,11 @@ C
              len_nubar_filename = len_trim(nubar_filename) 
              INQUIRE(FILE=nubar_filename,EXIST=fexist_nu)
 
-            IF(fexist_nu) then
+             IF(fexist_nu) then
 
               NUBarread = .TRUE.
 
-            else              
+             else              
 C
 C              CHECKING and READING the file data/nubar.endf
 C
@@ -699,7 +700,7 @@ C
               INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
      &               EXIST=NUBarread)
 C
-            endif
+             endif
 
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
 C
@@ -720,7 +721,6 @@ C
                  call system(nucmd)
 
                  ! now read the NUBAR.DAT file
-
                  call read_nubar_unix(ierr)
                  if(ierr.gt.0) NUBarread = .FALSE.
 
@@ -6892,10 +6892,25 @@ C               ENDIF
          ENDIF
 C
 C        PFNS scaling parameters below : 
-C        PFNTKE, PFNrat PFNALP for both Kornilov & LA models 
+C        PFNTKE, PFNrat PFNALP PFNERE for both Kornilov & LA models 
 C
 C        PFNNIU is the nubar parameter
+C        TMAXW  is the Maxwellian temperature used to scale PFNS plots
 C
+         IF (name(1:5).EQ.'TMAXW') THEN
+	      IF(val.ge.0.9 .and. val.le.2.0) then
+              TMAxw = val
+              WRITE (8,
+     &'('' Tmaxw for PFNS plot normalization set to '',F5.2)') val
+            else  
+              WRITE (8,
+     &'('' WARNING: Tmaxw for PFNS plot normalization out of range'')')
+              WRITE (8,
+     &'('' WARNING: Default value used, Tmaxw = 1.32 MeV '')')
+            endif
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'PFNERE') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
               WRITE (8,

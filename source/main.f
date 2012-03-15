@@ -1,6 +1,6 @@
-cc   * $Rev: 2690 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-03-13 21:24:28 +0100 (Di, 13 Mär 2012) $
+cc   * $Rev: 2705 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -12,8 +12,6 @@ Ccc   *               Used to be main of the EMPIRE code                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
-
-      use nubar_reader
 
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -70,8 +68,8 @@ C                             and assumed isotropic
      &                 post_fisn(NDEPFN),csepfns(NDEPFN), deltae_pfns,
      &                 ratio2maxw(NDEPFN),enepfns(NDEPFN),fmed, 
 C                      -----------------------------------------------
-     &                 csprnt(ndnuc), csetmp(ndecse),
-     &                 fisxse, csinel, eps, checkprd,
+     &                 csprnt(ndnuc), csetmp(ndecse),ftmpA,ftmpB,
+     &                 fisxse, csinel, eps, checkprd,ftmp_gs,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
@@ -2547,26 +2545,47 @@ C             Calculating unique energy grid
 C
 C             Assumed maximum energy of neutrons from fragments will be 25 MeV
 
-              deltae_pfns = 0.05d0 
+              deltae_pfns = 0.1d0 
 
-C             To use log scale at the first 5-th energies
-C
-C             nepfns = min( NINT(25.d0/deltae_pfns) + 4, NDEPFN)
-C             enepfns(1) = 1.d-11
-C             enepfns(2) = 1.d-9
-C             enepfns(3) = 1.d-7
-C             enepfns(4) = 1.d-5
-C             enepfns(5) = 1.d-3
-C             DO ie = 5, nepfns  
-C               enepfns(ie+1) = FLOAT(ie - 4)*deltae_pfns
-C             ENDDO
-C             nepfns = min(nepfns+1, NDEPFN)  
-C
               nepfns = min( NINT(25.d0/deltae_pfns) + 1, NDEPFN)
               enepfns(1) = 1.d-11
               DO ie = 2, nepfns  
                 enepfns(ie) = FLOAT(ie - 1)*deltae_pfns
               ENDDO
+C
+C             Special grid for printing, ONLY VALID for deltae_pfns = 0.1d0 
+C
+	        csetmp(1) = enepfns(1)
+              csetmp(2) = 4.d-11
+              csetmp(3) = 7.d-11
+              csetmp(4) = 1.d-10
+              csetmp(5) = 4.d-10
+              csetmp(6) = 7.d-10
+              csetmp(7) = 1.d-9
+              csetmp(8) = 4.d-9
+              csetmp(9) = 7.d-9
+              csetmp(10) = 1.d-8
+              csetmp(11) = 4.d-8
+              csetmp(12) = 7.d-8
+              csetmp(13) = 1.d-7
+              csetmp(14) = 4.d-7
+              csetmp(15) = 7.d-7
+              csetmp(16) = 1.d-6
+              csetmp(17) = 4.d-6
+              csetmp(18) = 7.d-6
+              csetmp(19) = 1.d-5
+              csetmp(20) = 4.d-5
+              csetmp(21) = 7.d-5
+              csetmp(22) = 1.d-4
+              csetmp(23) = 4.d-4
+              csetmp(24) = 7.d-4
+              csetmp(25) = 1.d-3
+              csetmp(26) = 4.d-3
+              csetmp(27) = 7.d-3
+              csetmp(28) = 1.d-2
+              csetmp(29) = 4.d-2
+              csetmp(30) = 7.d-2
+              csetmp(31) = enepfns(2)
 
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
@@ -2580,7 +2599,7 @@ C
 C             This allows for Windows use and testing avoiding
 C             compilation errors of IO package in Windows 
 C
-              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
+!!              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
 
 C             The total nubar is calculated for the first incident (real)
 C             energy and used for the normalization of the total PFNS
@@ -2658,10 +2677,16 @@ C           If no more excitation energy available, then PFN emission stopped
      &            G12.5,'' MeV'')') Q(1,nnuc)
 
 C-----------Calculating post-fission neutrons in the first chance
+C
+C           Los Alamos model  
+C
             IF (FISspe.eq.1)
      &        CALL get_fragmPFNS_LANL (post_fisn, enepfns, nepfns,
      &         eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc)
      &          , deltae_pfns, PFNtke, PFNrat, PFNalp, PFNere)
+C
+C           Kornilov parameterization
+C
             IF (FISspe.eq.2)
      &        CALL get_fragmPFNS      (post_fisn, enepfns, nepfns,
      &         eincid, A(Nnuc), Z(Nnuc), eneutr, tequiv, Q(1,nnuc)
@@ -2727,19 +2752,6 @@ C-----PRINTING TOTAL PFNS and PFNM quantities
 C-----
       IF (FISspe.gt.0 .and. TOTcsfis.gt.0.d0) THEN
 
-C       fnorm = 0.D0
-C       do ie =1, nepfns
-C         fnorm = fnorm + csepfns(ie)
-C       enddo
-C       if(fnorm.LE.1.d-7) GOTO 4536  ! No PFNS calculated 
-
-C       Correcting normalization        
-C       ftmp = 0.D0
-C       do ie =1, nepfns
-C         csepfns(ie) = csepfns(ie)/fnorm
-C         ftmp = ftmp + csepfns(ie)
-C       enddo
-
         ftmp = 0.D0
         eneutr = 0.d0
         do ie =2, nepfns
@@ -2749,8 +2761,11 @@ C       enddo
           ftmp = ftmp + fmed
         enddo
         if(ftmp.GT.0) eneutr = eneutr/ftmp
+C
 C       tequiv = 2.D0/3.D0*eneutr
-        tequiv = 1.32d0
+C
+        tequiv = TMAxw  ! Maxwellian temperature used to scale plots defined in input
+C                       ! Default value 1.32 MeV
 
         WRITE(74,'(1X,f8.5,1x,f8.3,2(4x,f7.3))')
      &        EINl, eneutr, fnubar, tequiv 
@@ -2771,7 +2786,7 @@ C       tequiv = 2.D0/3.D0*eneutr
         WRITE ( 8,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE ( 8,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
      &   ,'  MeV'
-        WRITE ( 8,'(''  Equivalent Tmaxwell '',G12.5,A5)') tequiv
+        WRITE ( 8,'(''  Tmaxwell for plot = '',G12.5,A5)') tequiv
      &   ,'  MeV'
         WRITE ( 8,'(''  Multiplicity (nue) '',F6.3)') fnubar
         if(fnubar.ne.1) 
@@ -2789,7 +2804,7 @@ C       tequiv = 2.D0/3.D0*eneutr
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
      &   ,'  MeV'
-        WRITE (12,'(''  Equivalent Tmaxwell '',G12.5,A5)') tequiv
+        WRITE (12,'(''  Tmaxwell for plot = '',G12.5,A5)') tequiv
      &   ,'  MeV'
         WRITE (12,'(''  Normalization '',F12.9)') ftmp
         WRITE (12,'(''  Multiplicity (nue) '',F6.3)') fnubar
@@ -2810,7 +2825,35 @@ C       tequiv = 2.D0/3.D0*eneutr
         WRITE (12,*) ' '
 
         WRITE (73,'(/,''    Energy    mb/MeV       Ratio to Maxw'')')
-        DO ie = 1, nepfns 
+
+C----------
+C       calculating the ratio for the 1st point for interpolation of the outgoing grid
+        ftmp  = fmaxw(enepfns(1),tequiv)
+        ftmpA = 1.d0
+        if (ftmp.gt.0) ftmpA = csepfns(1)/ftmp
+
+C       calculating the ratio for the 2nd point for interpolation of the outgoing grid
+        ftmp  = fmaxw(enepfns(2),tequiv)
+        ftmpB = 1.d0
+        if (ftmp.gt.0) ftmpB = csepfns(2)/ftmp
+
+C       Interpolating and printing between the frist and the second point of the 
+C             outgoing energy grid enepfns(1) and enepfns(2)
+        DO ie = 1, 31
+          ftmp1 = ftmpA +  (ftmpB - ftmpA) *
+     &     (csetmp(ie) - csetmp(1))/(csetmp(31) - csetmp(1))
+         
+          ftmp = ftmp1*fmaxw(csetmp(ie),tequiv)
+
+          WRITE (12,'(E10.4,E14.5,2x,E14.5)')
+     &      csetmp(ie), ftmp/deltae_pfns, ftmp1
+          WRITE (73,'(E10.4,E14.5,4(2x,E14.5))')
+     &      csetmp(ie), ftmp/deltae_pfns, ftmp1
+          WRITE ( 8,'(E10.4,E14.5,2x,E14.5)')
+     &      csetmp(ie), ftmp/deltae_pfns, ftmp1
+        ENDDO
+
+        DO ie = 3, nepfns 
           ftmp  = fmaxw(enepfns(ie),tequiv)
           ftmp1 = 1.d0
           if (ftmp.gt.0) ftmp1 = csepfns(ie)/ftmp
