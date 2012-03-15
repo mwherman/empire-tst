@@ -1,6 +1,6 @@
-cc   * $Rev: 2706 $
+cc   * $Rev: 2707 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-15 03:29:06 +0100 (Do, 15 Mär 2012) $
+Ccc   * $Date: 2012-03-15 03:35:10 +0100 (Do, 15 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2593,19 +2593,10 @@ C
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
 C
+C             The total nubar is calculated for the incident energy and 
+C                used for the normalization of the total PFNS
               if(NUBarread) fniuEVAL = fniu_nubar_eval(EINl)
-
-C             The total nubar is calculated for the first incident (real)
-C             energy and used for the normalization of the total PFNS
-              if(fniuEVAL.LE.0.d0) then
-               fniuEVAL = 1.d0
-               WRITE (12,'('' WARNING: Nubar taken as 1'')')
-               WRITE (8 ,'('' WARNING: Nubar taken as 1'')')
-               WRITE (8 ,'('' WARNING: MF=1,MT=456 should be copied'')')
-               WRITE (8 ,'('' WARNING:  from desired evaluation to '')')
-               WRITE (8 ,'('' WARNING:  to file -nubar.endf        '')')
-              endif
-
+C
 C             Models could be used for NUBAR calculations,
 C             however, we prefer to normalize our PFNS to the 
 C             evaluated NUBAR
