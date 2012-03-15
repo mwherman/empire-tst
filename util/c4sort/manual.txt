@@ -1,21 +1,41 @@
-
 Title  : Program C4SORT
 Purpose: Sort EXFOR file in C4 format
-Author : Andrej Trkov                        e-mail: A.Trkov@iaea.org
-         International Atomic Energy Agency     tel: +43 1 2600 21712
-         Nuclear Data Section                   fax: +43 1 2600 7
-         Wagramerstrasse 5
-         P.O.Box 100
-         A-1400 Vienna
-         AUSTRIA
+Author : Andrej Trkov, IAEA
+        Present address:                       e-mail: Andrej.Trkov@ijs.si
+        "Jozef Stefan" Institute               tel: +386 1 5885 324
+        Jamova 39
+        1000 Ljubljana
+        Slovenia
 Version: Original code March 2001
-   01/05 Increase MXEN from 2000 to 5000 (A.Trkov)
+  01/05 Increase MXEN from 2000 to 5000 (A.Trkov)
+  03/07 Implement ALIASLV to modify level energies (A.Trkov)
+  03/08 Sort differential data in ascending energy (A.Trkov)
+  03/10 Minor fix for eof on C4 file (A.Trkov)
+  04/01 Increase MXEN from 5000 to 40000 (A.Trkov)
+  04/06 - Resequence DDX ang.distrib. at Eo into spectra at Ang.
+        - Paging buffer for sorting to increase efficiency
+        - Sort by outgoing particles. (A.Trkov)
+  04/07 Fix format reading metastable targets (A.Trkov)
+  04/09 Sort discrete level angular distributions by level E (A.Trkov)
+  05/07 - Major reorganisation of coding, blocking separately the coding
+          for discrete level processing and for sorting the double
+          differential data.
+        - Match discrete level energies to RIPL database (A.Trkov).
+  05/11 - Fix bugs.
+  05/12 - Increase MXIR from 12000 to 80000 (A.Trkov)
+        - Increase MXEN from 40000 to 80000 (A.Trkov)
+  06/12 Another fix to format reading metastable targets (A.Trkov)
+  07/04 Convert E2 to LVL for MT51 if Elo=Ehi (A.Trkov)
+  08/01 Correct ZA of residual nucleus when searching level energies.
+  08/02 Sort also by metastable products (A. Trkov).
+  12/03 - Process fission spectrum ratios to Cf-252 sf spectrum.
 
   Program C4SORT Users' Guide
   ===========================
 
-  The C4SORT program belongs to a group of codes, which form
-  a supplement to the IAEA sequence of ENDF Pre-Processing codes
+  The C4SORT program belongs to the ENDVER group of codes in
+  support of nuclear data evaluation. The ENDVER package
+  requires the the IAEA sequence of ENDF Pre-Processing codes
   (PrePro) by D.E.Cullen [1], which are designed to perform
   various operations on the basic ENDF-formatted evaluated nuclear
   data files. They provide basic tools to the user for simple,
@@ -29,6 +49,21 @@ Version: Original code March 2001
   data in computational file are sorted by MAT/MF/MT numbers
   and the incident particle energy. The C4SORT code performs
   this task.
+
+  The raw EXFOR file may contain ratio data, where the monitor
+  reaction is a standard. By providing the Standards ENDF file,
+  the C4SORT code converts such ratio data into cross sections
+  or normalised spectra, as applicable; for example, fission
+  spectra are sometimes given as ratios to the Cf-252 spontaneous
+  fission spectrum (MF 205 in C4 format). C4SORT will convert
+  such data into "spectrum" representation
+
+  Note:
+  The entries in a C4 file may appear in any order and the file
+  size may be large. Depending on the actual ordering of the data
+  on a C4 file, the sorting sequence may become complex, requiring
+  the file to be rewound and processed again. For this reason the
+  sorting process may take a considerable amount of time.
 
   Instructions
   ------------
@@ -54,9 +89,11 @@ Version: Original code March 2001
                 does not exist on the default directory.
 
   Old-style input instructions format:
-  Two records are expected from input:
+  Three records are expected from input:
   - Name of the source EXFOR file in C4 format.
   - Name of the sorted EXFOR file to be written.
+  - Full path to the nuclide level files, including the directory
+    delimiter at the end (\ on Windows, / on Linux, etc).
 
   Keyword-oriented input instructions:
   The format follows a few simple rules, which are worth noting
@@ -77,22 +114,46 @@ Version: Original code March 2001
   Keyword
   '$* C4SORT ' The main keyword of the C4SORT program. All
                preceeding input is ignored.
-  '   FLC4IN ' Name of the source ENDF input file is given in
+  '   FLC4IN ' Name of the source C4 input file is given in
                columns 11-50.
-  '   FLC4OU ' Name of the target ENDF output file is given in
+  '   FLC4OU ' Name of the output C4 output file is given in
                columns 11-50.
+  '   FLESTD ' Filename of the Standards ENDF file to convert
+               ratio data into cross sections (or spectra).
+  '   DPATH  ' Full path to the RIPL nuclide level files,
+               including the directory delimiter at the end
+               (\ on Windows, / on Linux, etc).
+               The (slightly modified "read_levels_RIPL" routine
+               from the IAEA RIPL project is to read the level
+               data. The exact filename is constructed internally.
   '   ALIAS  ' Equivalent ZA/MF/MT identifiers can be defined;
                for example, to force experimental data measured
                for a natural element to apply to an isotope.
                Additional information is read from columns:
-                11-20  ZA designation on the source file.
-                21-25  MF designation on the source file.
-                26-30  MT designation on the source file.
-                41-50  ZA designation on the sorted file.
-                51-55  MF designation on the sorted file.
-                56-60  MT designation on the sorted file.
+                11-20  ZA1 designation on the source file.
+                21-25  MF1 designation on the source file.
+                26-30  MT1 designation on the source file.
+                31-40  ZA2 designation on the sorted file.
+                41-45  MF2 designation on the sorted file.
+                46-50  MT2 designation on the sorted file.
+               WARNING: Material substitution for comparison
+                        is strictly incorrect and potentially
+                        misleading. For this reason the use of
+                        ALIAS has been restricted in the sense
+                        that the user requires to define
+                        explicitly the ZA/MF/MT numbers to be
+                        equivalenced (i.e. no implicit assumptions
+                        are allowed, all entries ZA1,MF1,MT1 and
+                        ZA2,MF2,MT2 must be specified for the
+                        conversion to take place).
                NOTE: This option is available only in the
                      keyword-oriented input.
+  '   ALIASLV' Equivalent ZA/E-LVL can be defined to correct
+               level energies that appear in an EXFOR file.
+                11-20  ZA1 designation on the source file.
+                21-30  Level energy in the source file.
+                31-40  ZA2 designation on the sorted file.
+                41-50  Level energy in the sorted file.
   '   ENDC4S ' This keyword signals the end of C4SORT input. All
                instructions that follow are ignored.
 
@@ -102,6 +163,9 @@ Version: Original code March 2001
     LC4  2  Source EXFOR data file in C4 format, if not read from
             the default input.
     LOU  3  Sorted EXFOR data file in C4 format (output).
-    LSC  4  C4SORT.TMP scratch file.
+    LES  4  Standards file in ENDF format.
     LKB  5  Default input.
     LTT  6  Default output.
+    LSC  7  C4SORT.TMP scratch file.
+    LSC  8  C4SORT.TM2 second scratch file.
+
