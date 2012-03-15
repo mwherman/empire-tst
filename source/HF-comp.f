@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2633 $
+Ccc   * $Rev: 2704 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-04 21:56:03 +0100 (So, 04 Mär 2012) $
+Ccc   * $Date: 2012-03-15 03:01:43 +0100 (Do, 15 Mär 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1313,7 +1313,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ee, tdircont(NfHump),
-     &                 exfis, sfmin, snc,
+     &                 exfis, sfmin, snc, exfis1, 
      &                 tfcon(NfHump), tfdis(NfPARAB),
      &                 vbarmax(NFPARAB),faza2,enh_asym(NFPARAB),enh
       REAL FLOAT
@@ -1387,10 +1387,11 @@ CCC Discrete transition states contribution
                ENDDO
                snc = FLOAT(jnc) + HIS(Nnuc)
                DO ibar = 1, NRBar
-                  exfis = EFDis(nr,ibar) + HJ(Nnuc,ibar)
-     &                    *(snc*(snc + 1) - SFDis(nr,ibar)*
-     &                    *(SFDis(nr,ibar) + 1))
-c    
+
+                  exfis1 = snc*(snc + 1.d0)- 
+     &            SFDis(nr,ibar)*(SFDis(nr,ibar) + 1.d0)
+                  exfis = EFDis(nr,ibar) + exfis1* HJ(Nnuc,ibar)
+          
                   VBArex(ibar) = EFB(ibar) + exfis
 
                   IF(nr.eq.1) vbarmax(ibar) = exfis
