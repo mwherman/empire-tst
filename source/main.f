@@ -1,6 +1,6 @@
-cc   * $Rev: 2705 $
+cc   * $Rev: 2706 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
+Ccc   * $Date: 2012-03-15 03:29:06 +0100 (Do, 15 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -12,6 +12,8 @@ Ccc   *               Used to be main of the EMPIRE code                 *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+
+      use nubar_reader
 
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -83,6 +85,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       CHARACTER*72 rtitle
       CHARACTER*72 inprecord
       DOUBLE PRECISION DMAX1, val
+
       REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
      &        icsh, icsl, ie, iizaejc, il, iloc, ilv, imaxt,
@@ -2590,16 +2593,7 @@ C
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
 C
-C             fniu_nubar_eval(eincid) is defined differently in 
-C             the source file read_nubar_windows.f (only used in Windows)
-C
-C             Th-232 nubar as a function of E is used, i.e.
-C             fniu_nubar_eval(eincid) = fniuTH232(eincid)
-C
-C             This allows for Windows use and testing avoiding
-C             compilation errors of IO package in Windows 
-C
-!!              if(NUBarread) fniuEVAL = fniu_nubar_eval(eincid)
+              if(NUBarread) fniuEVAL = fniu_nubar_eval(EINl)
 
 C             The total nubar is calculated for the first incident (real)
 C             energy and used for the normalization of the total PFNS
