@@ -10068,7 +10068,7 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The TKE enters the energy balance equation defining the total excitation
                  energy of the fissioning system $U_{exc} = E_{rel} - TKE + E_{incid} + B_n$.
                  This parameter could be interpreted as the uncertainty of the measured
-                 fission energy release (or measured TKE).\\
+                 fission kinetic energy.\\
                  The relative uncertainty of the scaling factor in \% could be given by I1.
                 
 \item [{PFNALP}] Used in prompt fission neutron (PFN) calculations.
@@ -10089,7 +10089,14 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  Recent evidence strongly supports ~20\% higher temperature of the light fragment.\\
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
                 
+\item [{PFNERE}] Used in prompt fission neutron (PFN) calculations.
+                 The total fission energy release ($E_{rel}$) will be multiplied by VAL (default: 1.).
+                 The $E_{rel}$ enters the energy balance equation defining the total excitation
+                 energy of the fissioning system $U_{exc} = E_{rel} - TKE + E_{incid} + B_n$.
+                 The relative uncertainty of the scaling factor in \% could be given by I1.
 
+\item [{TMAXW}]  Used in prompt fission neutron (PFN) calculations.
+		     PFNS plots are scaled by a Maxwellian function with T = VAL (default: 1.32) MeV.
 
 \item [{DEFSTA}] The static deformation needed in rigid-rotor CC calculations
                  will be multiplied by VAL (default: 1.).\\
