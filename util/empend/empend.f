@@ -2715,7 +2715,7 @@ C* Maximum number of angles MDA, local array.
       DIMENSION      ANG(MXA)
       DIMENSION      RWO(MXR)
 C* Permissible tolerance for interpolated angular distributions (fraction)
-      DATA ETOL/ 0.005 /
+      DATA ETOL0/ 0.005 /
 C*
       DATA PI/3.1415926D0/
 C*
@@ -2724,6 +2724,9 @@ C*
       LD =1
       NZZ=0
       EOO=-1.E12
+      ETOL=ETOL0
+C*    -- Use a tighter interpolation criterion for fission spectra
+      IF(MT.EQ.18) ETOL=ETOL0/2
 C-F Check if angles are given (No. of angles NAN=1 if isotropic)
       READ (LIN,891) REC
       IF(REC(1:40).EQ.'                                        ') THEN
