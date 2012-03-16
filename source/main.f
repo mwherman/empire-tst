@@ -1,6 +1,6 @@
-cc   * $Rev: 2714 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
+cc   * $Rev: 2715 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-16 16:48:15 +0100 (Fr, 16 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -962,7 +962,6 @@ C--------Heidelberg Multistep Compound calculations
 C--------
       xsmsc = 0.d0 
       IF (MSC.NE.0) THEN
-         IF (MSD.EQ.0) CALL ULM(1)
          CALL HMSC(nvwful)
          CSEmis(0,1) = CSEmis(0,1) + CSMsc(0)                  
          CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
