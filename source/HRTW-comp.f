@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2714 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -1181,6 +1181,7 @@ Ccc   *****************************************************************
       al = 4.*Tav/Sumtl*(1. + Tl/Sumtl)/(1. + 3.*Tav/Sumtl)
       a = 87.0*(Tl - Tav)**2*Tl**5/Sumtl**7
       EEF = 1.0 + 2.0/(1.0 + Tl**al) + a
+      IF(EEF.GT.3.D0) EEF = 3.D0
       END
 
 

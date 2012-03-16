@@ -1,6 +1,6 @@
-cc   * $Rev: 2707 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-15 03:35:10 +0100 (Do, 15 Mär 2012) $
+cc   * $Rev: 2714 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -205,6 +205,7 @@ C-----
 C-----Prepare Giant Resonance parameters - systematics
 C-----
       CALL ULM(0)
+      CALL ULM(1)
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -791,7 +792,6 @@ C--------Set to Q's to 0 if negative due to rounding error
          READ(15,*) qmax,qstep,ltrmax
          WRITE (8,*) ' '
          WRITE (8,*) ' '
-         CALL ULM(1)
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
          CLOSE(15)
       ENDIF

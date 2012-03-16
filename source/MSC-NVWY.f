@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2644 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
+Ccc   * $Rev: 2714 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -478,7 +478,7 @@ COBL     OMP=G**3*WOBL(2,1,EPTL,-1)/4.
          omp = WT(3,2,1,eptl)
          DO j = 1, NLW
             tx = TL(i,j,1,nresn)
-            IF (tx.GT.1.0D-7) THEN
+            IF (tx.GT.1.0D-7.and.omn.gt.1.0D-7) THEN
                WP(i,j,1) = (2.0 - tx - 2.0*SQRT(1.0 - tx))/tx/omn
             ELSE
                WP(i,j,1) = 0.0

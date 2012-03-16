@@ -1,6 +1,6 @@
-#$Rev: 2702 $
-#$Author: mherman $
-#$Date: 2012-03-14 23:14:41 +0100 (Mi, 14 Mär 2012) $
+#$Rev: 2714 $
+#$Author: gnobre $
+#$Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -38,10 +38,12 @@ else ifeq ($(FC),ifort)
   #---------------------------
   #----flags for production compilation using ifort
   FFLAGS = -O3 -x=host -ipo
+  #FFLAGS = -O3 -x=host -ipo -ftrapuv -trace
+  #FFLAGS = -O3
   #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
-  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
+  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace
   #----flags for automatic parallelization
   #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
