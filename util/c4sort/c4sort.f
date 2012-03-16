@@ -30,6 +30,7 @@ C-V  07/04 Convert E2 to LVL for MT51 if Elo=Ehi (A.Trkov)
 C-V  08/01 Correct ZA of residual nucleus when searching level energies.
 C-V  08/02 Sort also by metastable products (A. Trkov).
 C-V  12/03 - Process fission spectrum ratios to Cf-252 sf spectrum.
+C-V        - Redo marking of renormalised data sets, shift date.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -57,7 +58,8 @@ C-M  the C4SORT code converts such ratio data into cross sections
 C-M  or normalised spectra, as applicable; for example, fission
 C-M  spectra are sometimes given as ratios to the Cf-252 spontaneous
 C-M  fission spectrum (MF 205 in C4 format). C4SORT will convert
-C-M  such data into "spectrum" representation
+C-M  such data into "spectrum" representation. The reconstructed
+C-M  data sets appear with the "&" mark in the label after the author.
 C-M
 C-M  Note:
 C-M  The entries in a C4 file may appear in any order and the file
@@ -182,7 +184,7 @@ C-M           extensive re-ordering is required; e.g. high
 C-M           resolution cross section measurements at different
 C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
-C-M    MXMT - Maximum number of
+C-M    MXMT - Maximum number of reactions in the Standards file.
 C-
       PARAMETER       (MXEN=80000,MXAL=20,LCH=53,MXIR=80000,MXMT=300)
       PARAMETER       (MEL1=20,MXNP=300000,MXRW=20000)
@@ -326,14 +328,10 @@ C*              -- Sum errors from measurement and standard
                 CALL CH9PCK(DXS,POU)
                 REC(50:58)=POU
                 REC(59:76)='                  '
-C*              Label reaction as converted from ratio by inserting "R"                
-                II=122
-                DO WHILE(II.GT.98 .AND. REC(II-1:II-1).EQ.' ')
-                  II=II-1
-                END DO
-                REC(II:II)='R'
+C*              -- Label reaction converted from ratio by inserting CH
+                CALL LBLMRK(REC(98:122),25)
 C...
-c...                print *,ii,'"',rec(98:ii),'"'
+C...            print *,izar,MF,MT,'"',rec(98:122),'"'
 C...
                 REC(12:15)='   3'
                 RC1=REC
@@ -424,14 +422,10 @@ C*              -- Sum errors from measurement and standard
                 CALL CH9PCK(DXS,POU)
                 REC(50:58)=POU
                 REC(59:76)='                  '
-C*              -- Label reaction converted from ratio by inserting "R"
-                II=122
-                DO WHILE(II.GT.98 .AND. REC(II-1:II-1).EQ.' ')
-                  II=II-1
-                END DO
-                REC(II:II)='R'
+C*              -- Label reaction converted from ratio by inserting CH
+                CALL LBLMRK(REC(98:122),25)
 C...
-C...            print *,ii,'"',rec(98:ii),'"'
+C...            print *,izar,MF,MT,'"',rec(98:122),'"'
 C...
                 REC(12:15)='   5'
                 RC1=REC
@@ -443,8 +437,7 @@ C...
         END IF
 C* Suppress entry if the same is preceeded by the ratio entry
         IF(REC(1:40).NE.RC1(1:40) .OR.
-     &     REC(98:II-1).NE.RC1(98:II-1) .OR.
-     &     REC(II+1:130).NE.RC1(II+1:130)) THEN
+     &     REC(98:130).NE.RC1(98:130)) THEN
              WRITE(LS2,901) REC
         END IF
         GO TO 17
@@ -1016,6 +1009,40 @@ C*
   936 FORMAT(F9.6)
   938 FORMAT(I9)
   941 FORMAT(12X,I3,25X,F9.0)
+      END
+      SUBROUTINE LBLMRK(LABL,LNC)
+C-Title  : Subroutine LBLMRK
+C-Purpose: Label marked with sign CH before the first blank or comma
+C-
+      CHARACTER*(*)  LABL
+      CHARACTER*1    C1,C2,CH
+C* Character to mark the string
+      DATA CH/'*'/
+C-F Find the first comma or blank (assumed to be after the first author)
+      II=LNC
+      DO I=1,LNC
+        IF(LABL(I:I).EQ.',' .OR. LABL(I:I).EQ.' ') THEN
+          II=I
+C*        -- If no more blanks, place sign at the current position
+          IF(I.GE.LNC) EXIT
+          IF(LABL(LNC:LNC).NE.' ' .AND. LABL(LNC-4:LNC-4).NE.' ') EXIT
+C*        -- If blanks are available, shift the remainder of the string
+          JJ=II
+          C2=LABL(JJ:JJ)
+   10     JJ=JJ+1
+          C1=C2
+          IF(JJ.LE.LNC) THEN
+            C2=LABL(JJ:JJ)
+            LABL(JJ:JJ)=C1
+            IF(C2.NE.' ' .OR.
+     &        (JJ.LT.LNC .AND. LABL(LNC:LNC).EQ.' ')) GO TO 10
+          END IF
+          EXIT
+        END IF
+      END DO
+C* Place the label
+      LABL(II:II)=CH
+      RETURN
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine EMTIZA
