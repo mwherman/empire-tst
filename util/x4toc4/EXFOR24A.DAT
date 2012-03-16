@@ -92,6 +92,8 @@ DATA-ERR1     1  999    4    5
 DATA-ERR2     1  999    4    5
 +DATA-ERR     1  999    4    4
 -DATA-ERR     1  999    4    4
++ERR-S        1  999    4    4
+-ERR-S        1  999    4    4
 ERR-T         1  999    4    1
 ERR-S         1  999    4    3
 RATIO       200  209    3    1
