@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2705 $
+Ccc   * $Rev: 2719 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
+Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -191,15 +191,16 @@ C--------to turn off normalization to experimental Gg
             IZA(nnuc) = 0
 C-----------set level density parameters
             ROPaa(nnuc) = -2.0
-            ROPar(1,nnuc) = 0.
-            ROPar(2,nnuc) = 0.
-            ROPar(4,nnuc) = 0.
-            ROPar(5,nnuc) = 0.
-            ATIlnor(nnuc) = 0.
+            ROPar(1,nnuc) = 0.d0
+            ROPar(2,nnuc) = 0.d0
+            ROPar(3,nnuc) = 0.d0
+            ROPar(4,nnuc) = 0.d0
+            ROPar(5,nnuc) = 0.d0
+            ATIlnor(nnuc) = 0.d0
             LDShif(Nnuc) = 0.d0
             ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
             ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
-            GTIlnor(nnuc) = 1.
+            GTIlnor(nnuc) = 1.d0
             LVP(1,nnuc) = 1
 C
             om2_ig(nnuc)   = 0.d0
@@ -216,13 +217,13 @@ c-----------set Levels flag to -1 (no levels stored)
          NSTOred(0) = -1
 C--------set gamma-strength parameters
          DO nnuc = 1, NDNUC
-            GDRpar(1,nnuc) = 0.0
-            GDRpar(2,nnuc) = 0.0
-            GDRpar(3,nnuc) = 0.0
-            GDRpar(4,nnuc) = 0.0
-            GDRpar(5,nnuc) = 0.0
-            GDRpar(6,nnuc) = 0.0
-            GDRpar(7,nnuc) = 1.0
+            GDRpar(1,nnuc) = 0.d0
+            GDRpar(2,nnuc) = 0.d0
+            GDRpar(3,nnuc) = 0.d0
+            GDRpar(4,nnuc) = 0.d0
+            GDRpar(5,nnuc) = 0.d0
+            GDRpar(6,nnuc) = 0.d0
+            GDRpar(7,nnuc) = 1.d0
          ENDDO
 C
 C--------set fission normalization factors
@@ -240,10 +241,10 @@ C
          LVP(1,0) = 1
          NNUcd = 0
          NEJcm = 0
-         DEFga = 0.
-         DEFgw = 10.
-         DEFgp = 40.
-         ADIv = 0.0
+         DEFga = 0.d0
+         DEFgw = 10.d0
+         DEFgp = 40.d0
+         ADIv = 0.d0
          NEX(1) = 60
          NEXreq = 60
          FITlev = 0.0
@@ -252,17 +253,17 @@ C--------Use GCASC input parameter to turn it off
          GCAsc =  1.0
 C--------fission barrier multiplier, viscosity, and spin fade-out
          QFIs = 1.0
-         BETav = 4.0           ! viscosity parameter
-         SHRj = 24.0
-         SHRd = 2.5            ! diffuness of the shell correction damping
+         BETav = 4.d0          ! viscosity parameter
+         SHRj = 24.d0
+         SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
          CAlctl = .FALSE.
-         CSRead = -2.0
-         SIG = 0.0
-         TRUnc = 2.0
-         EXPush = 0.
-         CRL = 0.0
-         DFUs = 1.
+         CSRead = -2.d0
+         SIG = 0.d0
+         TRUnc = 2.d0
+         EXPush = 0.d0
+         CRL = 0.d0
+         DFUs = 1.d0
          FUSred = 1.d0
          FCCred = 1.d0
          TOTred = 1.d0
@@ -1525,30 +1526,6 @@ C-----------stop PCROSS nucleon channels if HMS active
               IDNa(4,6) = 0
             ENDIF
 
-C           IF (MSC.GT.0 .AND. MSD.GT.0) THEN
-C-------------stop PCROSS if MSC/MSD are active
-C             WRITE (8,*)
-C    &     'WARNING: PCROSS DISABLED AS MSC/MSD ARE BOTH ACTIVE '
-C             WRITE (8,*)
-C    &     'WARNING: MSD/MSC + PCROSS not compatible in this version'
-C             PEQcont = 0.d0
-C             PEQc = 0.d0
-C             IDNa(2,6) = 0
-C             IDNa(4,6) = 0
-C             IDNa(5,6) = 0  ! gammas
-C             IDNa(6,6) = 0  ! cont A 
-C             IDNa(7,6) = 0  ! cont D 
-C             IDNa(8,6) = 0  ! cont T 
-C             IDNa(9,6) = 0  ! cont H 
-C             IDNa(10,6) = 0 ! cont LI
-C             Discrete levels calculated in PCROSS if ECIS is not active in the inelastic channel 
-C             IDNa(1 ,6) = 0 ! neut  discrete
-C             IDNa(3 ,6) = 0 ! prot  discrete
-C             IDNa(11,6) = 0 ! alpha discrete
-C             IDNa(12,6) = 0 ! deut  discrete
-C             IDNa(13,6) = 0 ! trit  discrete
-C             IDNa(14,6) = 0 ! He-3  discrete
-C           ENDIF
          ENDIF
 C
 C--------print IDNa matrix
@@ -1896,8 +1873,8 @@ C-----WRITE heading on FILE6
          WRITE (8,*) ' '
          WRITE (8,'(60(''=''))')
          WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',G9.3,'
-     &' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',G10.5,
+     &'' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
          WRITE (8,'(60(''=''))')
          WRITE (8,*) ' '
          WRITE (8,'('' Compound nucleus energy'',F9.3,'' MeV'')') EXCn
@@ -2806,11 +2783,11 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS:                                        '
         IF(FISspe.GT.0 .and. NUBarread) THEN
-        WRITE (12,*) 'MF=1                                            '                
-        WRITE (12,*) '   MT=456 nubar adopted from evaluated libraries'
+         WRITE (12,*) 'MF=1                                            '                
+         WRITE (12,*) '   MT=456 nubar adopted from evaluated libraries'
         ENDIF
         WRITE (12,*) '                                                '
-        WRITE (12,*) 'MF=3 Neutron cross sections                     '
+        WRITE (12,*) 'MF=3 Cross sections                             '
         WRITE (12,*) '     EMPIRE calculations were adopted for:      '
         WRITE (12,*) '                                                '
         WRITE (12,*) '   MT=1 Total                                   '
@@ -2836,20 +2813,22 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '     EMPIRE calculations were adopted           '
         WRITE (12,*) '                                                '
         IF(FISspe.GT.0) THEN
-        WRITE (12,*) 'MF=5 Energy distributions                       '
-        WRITE (12,*) '   MT=18 PFNS: EMPIRE calculations using        '
-        IF(FISspe.eq.1) 
-     >  WRITE (12,*) '           Madland-Nix (Los Alamos) model  [MN] '
-        IF(FISspe.eq.2)
-     >  WRITE (12,*) '           Kornilov et al parameterization [KO] '
+         WRITE (12,*) 'MF=5 Energy distributions                       '
+         WRITE (12,*) '   MT=18 PFNS: EMPIRE calculations using        '
+         IF(FISspe.eq.1) 
+     >   WRITE (12,*) '           Madland-Nix (Los Alamos) model  [MN] '
+         IF(FISspe.eq.2)
+     >   WRITE (12,*) '           Kornilov et al parameterization [KO] '
         ENDIF
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
-        WRITE (12,*) '     Primary capture gammas are entered as      '
-        WRITE (12,*) '     discrete lines                             '
-        WRITE (12,*) '                                                '
+	  IF(NPRIm_g.gt.0) then
+         WRITE (12,*) '     Primary capture gammas are entered as      '
+         WRITE (12,*) '     discrete lines                             '
+         WRITE (12,*) '                                                '
+        ENDIF
         WRITE (12,*) 'MF=12 Transition probability arrays for photon  '
         WRITE (12,*) '      production; taken from the RIPL library   '
         WRITE (12,*) '                                                '
@@ -2992,18 +2971,19 @@ C-----WRITE heading on FILE12
       IF(LEVtarg.GT.1) THEN
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,''m INCIDENT ENERGY''                                ,F10.5,''
+     &I3,''m INCIDENT ENERGY''                                ,G10.5,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,'' INCIDENT ENERGY ''                                ,F10.5,''
+     &I3,'' INCIDENT ENERGY ''                                ,G10.5,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ENDIF
       WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
       WRITE (12,*)
 
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
+      RETURN
       END
 C
 C
@@ -7711,17 +7691,17 @@ C-----Set EGSM normalization factors for each Z
    90    READ (31,'(I5,F8.3)',END = 95) iz,atiln
          ATIlnoz(iz) = atiln
          GOTO 90
-   95    CONTINUE
-         CLOSE(31)
+   95    CLOSE(31)
       ENDIF
 
-      IF (ADIv.EQ.3.0D0 .and. FITLEV.LE.0.1) THEN
-         WRITE(8,'(1X)')
-         WRITE(8,'(1X)')
-         WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  n
-     & o r m a l i z a t i o n'')')
-         WRITE(8,'(4X,54(''-''))')
-      ENDIF
+C     IF (ADIv.EQ.3.0D0 .and. FITLEV.LE.0.1) THEN
+C        WRITE(8,'(1X)')
+C        WRITE(8,'(1X)')
+C        WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  n
+C    & o r m a l i z a t i o n'')')
+C        WRITE(8,'(4X,54(''-''))')
+C     ENDIF
+
       IF (ADIv.NE.3.0D0 .and. FITLEV.LE.0.1) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
@@ -7733,7 +7713,8 @@ C-----Set EGSM normalization factors for each Z
      &               ''ext. nor. a_final'')')
          WRITE(8,'(1X)')
       ENDIF
-      IF (FITLEV.GT.0) THEN
+
+      IF (FITLEV.GT.0 .and. ADIv.NE.3.0D0) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
          WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  f
@@ -7767,11 +7748,13 @@ C
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
 
+            IF (ADIv.EQ.3) GOTO 100       
+
 C-----------Set up normalization factors for level density parameter 'a'
 C-----------for all level density models except HFB
 C
 C-----------EMPIRE specific (EGSM) with RIPL shell corrections
-            IF (ADIv.EQ.0 .OR. ADIv.EQ.1) THEN
+            IF (ADIv.EQ.0) THEN
               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
               atil = ap1*A(nnuc) + ap2*a23
               tcrt = 0.567*delp
@@ -7789,7 +7772,9 @@ C-----------EMPIRE specific (EGSM) with RIPL shell corrections
             ENDIF
 
 C-----------GSM (Ignatyuk) with RIPL shell corrections
-            IF (ADIv.EQ.1) THEN
+            IF (ADIv.EQ.1) THEN 
+C
+C             Should be replaced once GSM is refitted
               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
               atil = ap1*A(nnuc) + ap2*a23
               tcrt = 0.567*delp
@@ -7827,6 +7812,7 @@ C-----------Gilbert-Cameron (no explicit collective effects)
               atiln =  arogc/asys
             ENDIF 
 
+C-----------Gilbert-Cameron (EMPIRE 2.19)
             IF (ADIv.EQ.4.D0) THEN
               ! for the time being, G&C not refitted !
               del = 0.0
@@ -7851,55 +7837,77 @@ C-------------of no collective enhancements) normalized to existing exp. data
             ELSE
               ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
             ENDIF
-C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for GC and PCROSS)
-            ROPar(1,nnuc) = asys*ATIlnor(nnuc)
-            ROPar(3,nnuc) = del
+
+C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for all models but HFB)
+            ROPar(1,nnuc) = asys*ATIlnor(nnuc)  ! small-a
+            ROPar(3,nnuc) = del                 ! pairing
 
 C-----------Print resulting level density parameters
             IF (FITlev.GT.0.0D0) THEN
-               WRITE (8,*) ' '
-               WRITE(8,'(1X)')
-               WRITE(8,
+              WRITE (8,*) ' '
+              WRITE (8,*) ' '
+              WRITE(8,
      &           '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
      &           ''ext. nor. a_final'')')
-               IF (ADIv.EQ.0.0D0)
-     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-               IF (ADIv.EQ.2.0D0)
-     &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
-     &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-               WRITE(8,*)
-               IF (ADIv.NE.3) then 
-                  WRITE (8,*)
+
+              IF (ADIv.EQ.0.0D0)
+     &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &          aroc,     asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
+
+              IF (ADIv.EQ.1.0D0)
+     &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &          asys_gsm, asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
+
+              IF (ADIv.EQ.2.0D0)
+     &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &          arogc,    asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
+
+              IF (ADIv.EQ.4.0D0)
+     &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+     &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &          arogc,    asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
+
+               WRITE (8,*)
      &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
-                  WRITE (8,*) 
+               WRITE (8,*) 
      &              ' DELTA=', sngl(del),' Dobs=',sngl(dob)
-               ENDIF
-               WRITE(8,*) '========================'
+
+               WRITE (8,*)
+               WRITE (8,*) '========================'
+
             ELSE
+
                IF (ADIv.EQ.0.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+
                IF (ADIv.EQ.1.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         asys_gsm, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+
                IF (ADIv.EQ.2.0D0)   ! to be updated once G&C is refitted
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+
                IF (ADIv.EQ.4.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
+
             ENDIF
          ENDIF
       ENDIF
       GOTO 100
-  200 WRITE(8,'(1X)')
+
+  200 IF(ADIv.eq.3) RETURN
+
+      WRITE(8,'(1X)')
       WRITE(8,'(3X,''Nucleus                   final  norm.'')')
       WRITE(8,'(1X)')
       DO nnuc = 1, NNUct
@@ -10217,6 +10225,7 @@ C-----------Selecting only 2+ states
             HENergygfl(NUMram) = etmp
             HBEtagfl(NUMram) = btmp
   350    ENDDO
+         WRITE (8,*) 
          WRITE (8,*) ' RIPL GDR parameters used'
          GOTO 700
   400    CLOSE (84)

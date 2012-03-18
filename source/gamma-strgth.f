@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2719 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -152,21 +152,24 @@ C
 C-----printout of gamma transition parameters
 C
       IF (IOUt.GT.1) THEN
-         WRITE (8,99005)
-99005    FORMAT (1X,' Gamma transitions parameters',//10X,'E1 ',11X,
-     &           'E2 ',11X,'M1 '/)
+         WRITE (8,*) ' -----------------------------------------'
+         WRITE (8,99005) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
+99005    FORMAT (1X,' Gamma transitions parameters of ',
+     &   i2,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
          WRITE (8,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
      &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
-99010    FORMAT (1X,'TE',7X,F4.2,2(9X,F4.2),/,1X,'CE ',4X,F7.3,
-     &           2(6X,F7.3),/,1X,'E1 ',4X,F6.2,2(7X,F6.2))
+99010    FORMAT (2X,'TE',7X,F4.2,2(9X,F4.2),/,2X,'CE ',4X,F7.3,
+     &           2(6X,F7.3),/,2X,'E1 ',4X,F6.2,2(7X,F6.2))
          WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
      &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
-99015    FORMAT (1X,'W1 ',4X,F6.2,2(7X,F6.2),/,1X,'D1',1X,F10.2,
+99015    FORMAT (2X,'W1 ',4X,F6.2,2(7X,F6.2),/,2X,'D1',1X,F10.2,
      &           2(3X,F10.2))
          WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
-99020    FORMAT (1X,'E2 ',4X,F6.2,/,1X,'W2 ',4X,F6.2,/,1X,'D2 ',F10.2)
+99020    FORMAT (2X,'E2 ',4X,F6.2,/,2X,'W2 ',4X,F6.2,/,2X,'D2 ',F10.2)
          WRITE (8,99025)
-99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR',//)
+99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR')
+         WRITE (8,*) ' -----------------------------------------'
+         WRITE (8,*) 
       ENDIF
       W1 = GDRpar(2,Nnuc)**2
       W2L = GDRpar(5,Nnuc)**2
@@ -176,6 +179,7 @@ C
       ED2 = GDRpar(4,Nnuc)**2
       EE2 = GQRpar(1,Nnuc)**2
       EM1 = GMRpar(1,Nnuc)**2
+	RETURN
       END
  
  

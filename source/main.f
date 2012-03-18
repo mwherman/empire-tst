@@ -1,6 +1,6 @@
-cc   * $Rev: 2715 $
+cc   * $Rev: 2719 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-16 16:48:15 +0100 (Fr, 16 Mär 2012) $
+Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -204,8 +204,7 @@ C	&      '  csinel    '
 C-----
 C-----Prepare Giant Resonance parameters - systematics
 C-----
-      CALL ULM(0)
-      CALL ULM(1)
+      CALL ULM(0) ! target
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -218,11 +217,13 @@ C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
-C 
-C---- Calculate compound nucleus (CN) level density
 C
       nnuc = 1
-
+C-----
+C-----Prepare Giant Resonance parameters - systematics
+C-----
+      CALL ULM(1) ! compound
+C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
 
@@ -320,6 +321,7 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
            elada(iang) = ftmp
         ENDDO
       ENDIF
+C
       IF (DIRect.NE.0) THEN
          ggmr = 3.
          ggqr=85.*A(0)**(-2./3.)
@@ -1259,7 +1261,8 @@ C-----------------Check for the number of branching ratios
                   ENDDO
  1455             IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
      &                (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
-     &                nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0) WRITE (8,*)
+     &                nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0
+     &                .AND. FIRst_ein) WRITE (8,*)
      &                 ' WARNING: Branching ratios for level ', il,
      &                ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                ' are missing'
@@ -1366,7 +1369,7 @@ C--------Jump to end of loop after elastic when fitting
             GOTO 1500
          ENDIF
 C--------Prepare gamma transition parameters
-         CALL ULM(nnuc)
+         IF (nnuc.gt.1) CALL ULM(nnuc)
 C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
@@ -2630,10 +2633,6 @@ C           If no more excitation energy available, then PFN emission stopped
             WRITE ( 8,*)' *******************************************'
             WRITE ( 8,*)' PROMPT FISSION NEUTRON SPECTRA calculations'
             
-            WRITE(8,'(1x,a11,i2,a7,f8.3,A18,1x,i3,A1,A2,A1,i3)')  
-     &      ' Fiss. Nucl ',nfission + 1, ', Uexc=',eincid + Q(1,nnuc), 
-     &      ' MeV, for nucleus:',izf,'-',SYMb(nnuc),'-',iaf
-
             WRITE
      &        (12,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
@@ -2650,6 +2649,9 @@ C           If no more excitation energy available, then PFN emission stopped
             WRITE
      &        (8,'(''  Fiss. nucleus '',I3,''-'',A2,''-'',I3)')
      &            INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
+            WRITE(8,'(1x,a11,i2,a7,f8.3,A4)')  
+     &      ' Fiss. Nucl ',nfission + 1, ', Uexc=',eincid + Q(1,nnuc), 
+     &      ' MeV'
             WRITE
      &     (8,'(''  Partial fission cross section '',G12.5,'' mb'')')
      &            CSPfis(Nnuc)
@@ -2751,12 +2753,12 @@ C
         tequiv = TMAxw  ! Maxwellian temperature used to scale plots defined in input
 C                       ! Default value 1.32 MeV
 
-        WRITE(74,'(1X,f8.5,1x,f8.3,2(4x,f7.3))')
+        WRITE(74,'(1X,g10.5,1x,g10.5,2(4x,f7.3))')
      &        EINl, eneutr, fnubar, tequiv 
 
         WRITE
      & (73,'(''  Total PFNS from '',I3,''-'',A2,''-'',I3,'': Elab='',
-     &  F8.4,''MeV, <Epfns>='',f8.4,'' MeV, Tmaxw='',f8.4,
+     &  G10.5,'' MeV, <Epfns>='',G10.5,'' MeV, Tmaxw='',f8.4,
      & '' MeV, Norm='',F10.8)') INT(Z(1)), SYMb(1), INT(A(1)), 
      & EINl,eneutr,tequiv,ftmp
 
@@ -2764,7 +2766,7 @@ C                       ! Default value 1.32 MeV
         WRITE(8,*) ' ***'
         WRITE(8,*)
         WRITE ( 8,'(''  Total PFNS  for  Elab='',
-     &  F8.4,'' MeV,   Norm='',F10.8)') EINl, ftmp
+     &  G10.5,'' MeV,   Norm='',F10.8)') EINl, ftmp
         WRITE(8,*)
 
         WRITE ( 8,'(''  Number of fissioning nuclei '',I3)') nfission
@@ -2783,7 +2785,7 @@ C                       ! Default value 1.32 MeV
         WRITE(12,*) ' ***'
         WRITE(12,*)
         WRITE (12,'(''  Total PFNS  for  Elab='',
-     &  F8.4,'' MeV,   Norm='',F10.8)') EINl, ftmp
+     &  G10.5,'' MeV, Norm='',F10.8)') EINl, ftmp
 
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr

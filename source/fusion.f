@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2719 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -104,7 +104,7 @@ C--------Here the old calculated files are read
          READ (45,END = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
-         IF (ABS(ener - EINl).LT.0.0001D0 .AND. FITomp.EQ.0) THEN
+         IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
                READ (45,END = 50) stl(l + 1)

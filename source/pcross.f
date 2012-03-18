@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2644 $
+Ccc   * $Rev: 2719 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
+Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -114,7 +114,6 @@ C
       if(GDIV.eq.0) ggg=13.d0
       gc = FLOAT(ac)/ggg*GTIlnor(1)
       pc = 0.d0
-c     pc = ROPar(3,1)
       IF(pc.eq.0.d0) then
         ftmp = 0.
         IF (ac.GT.0.D0) ftmp = 12./SQRT(DBLE(FLOAT(ac)))
