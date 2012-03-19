@@ -9,7 +9,7 @@ A When modifying omp in one of  the *.omp files be aware that the
   appears twice. To be on the safe side change BOTH.   
 
 
-Q WHY USING 'Create ZVV' I GET NONSENS?
+Q WHY USING 'Create ZVV' I GET NONSENSE?
 
 A When using 'Create ZVV' procedure avoid specifying long strings with
   multiple blanks  inside. These will  be converted to a  single blank
@@ -68,7 +68,7 @@ A Check whether you have the bash shell installed (e.g., type 'bash' at
   but scripts will NOT!
 
 
-Q GUI SHOWS UP BUT 'RUN' BUTTON DOES NOTHIG?
+Q GUI SHOWS UP BUT 'RUN' BUTTON DOES NOTHING?
 
 A Most likely these are scripts that are not running properly. See above.
 
