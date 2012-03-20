@@ -148,7 +148,7 @@ ERROR (COLUMN 4).                                                              1
 (6) DATA = DATA/(F(0)*(2*L+1)) (F(0) = ZEROTH ORDER LEGENDRE COEFFICIENT)      1
 (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)                 1
 (9) DATA = DATA*COULOMB (CONVERT RUTHERFORD RATIO TO CROSS SECTION)            1
-(10)DATA = DATA*MAXWELLIAN(E_KT-NORM)
+(10)DATA = DATA*MAXWELLIAN(E_KT-NORM)                                          1
                                                                                1
 NOTE, THESE CONVENTIONS ARE CODED INTO THE TRANSLATION PROGRAM.                1
 THE USER SHOULD NOT ADD ANY OPERATIONS TO THIS LIST UNLESS THEY ARE            1
@@ -165,6 +165,8 @@ NU-BAR                                                                         1
 Various representations for nu-bar (13-Mar-2012, A. Trkov)                     1
 (N,F)PR,NU                                          1  1 456  0
 (N,F)PR,NU,,MXW                                     1  1 456  0
+Spontaneous fission nu-nar (16-Mar-2012, A. Trkov)                             1
+(0,F)PR,NU                                          0  1 456  0
                                                                                1
 CROSS SECTIONS                                                                 1
                                                                                1
@@ -181,9 +183,11 @@ Corrected (remove one comma) 14 Jun 2004, A. Trkov                             1
 Added 13 Sep 2004                                                              1
 (N,3N),SIG                                          1  3  17  0
 Add fission*Sqrt(E), 8-Mar-2006, A.Trkov                                       1
+(Converted to barns by unit-conversion module)                                 1
 (N,F),SIG,,RTE                                      1  3  18  0
 (N,F),SIG                                           1  3  18  0
 NF                                                  1  3  18  0
+(N,F),SIG,,AV                                       1  3  18  0
 (N,N+A),SIG                                         1  3  22  0
 (N,N+P),SIG                                         1  3  28  0
 Add reaction (N,4N) (A. Trkov, 07-Nov-2009)                                    1
@@ -199,6 +203,9 @@ NG                                                  1  3 102  0
 Include bin-averaged values as average                                         1
 cross sections (2 Aug. 2004)                                                   1
 (N,G),SIG,,AV                                       1  3 102  0
+Capture cross section multiplied by Sqrt(E) (A. Trkov, 19 March 2012)          1
+(Converted to barns by unit-conversion module)                                 1
+(N,G),SIG,,RTE                                      1  3 102  0
                                                                                1
 Include raw measured values (M.Herman, 20-Sep-04)                              1
 (N,G),SIG,,RAW                                      1  3 102  0
@@ -541,6 +548,7 @@ Added fission neutron spectrum - various combinations (A. Trkov, 06 Mar 2012)  1
 (N,F),NU/DE,,REL                                    1  5  18  0
 (N,F),NU/DE,,MXW/REL                                1  5  18  0
 (N,F),NU/DE,,REL/MXW                                1  5  18  0
+(N,F),NU/DE,,AV/REL                                 1  5  18  0
                                                                                1
 (N,F),NU/DE,N                                       1  5  18  0
 (N,F),NU/DE,N,MXW                                   1  5  18  0
@@ -682,6 +690,9 @@ BY OUTPUTTING MT IN FIELD 5 AND ZA IN FIELD 6. THE FOLLOWING LIST SHOULD       1
 ONLY BE USED TO DEFINE COMPLEX RATIOS.                                         1
                                                                                1
 (N,P),SIG/RAT                                       1203 103  0
+Capture to fission ratio (A. Trkov, 19 March 2012)                             1
+(N,ABS),ALF                                         1203 102 12
+(N,ABS),ALF,,AV                                     1203 102 12
                                                                                1
 RESONANCE INTEGRALS                                                            1
                                                                                1
