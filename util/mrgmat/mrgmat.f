@@ -7,6 +7,13 @@ C-V  01/04 Increase MXMT from 800 to 2000 (A.Trkov)
 C-V  01/11 Improve diagnostics for duplicate materials (A.Trkov)
 C-V  02/05 Process Windows-NT directory listing (A.Trkov)
 C-V  03/01 Fix bug in interactive input (A.Trkov)
+C-V  03/11 Extend path length
+C-V        Update ENDF file numbering (col.75-80)
+C-V  05/09 Support for Windows-XP directory format (A.Trkov)
+C-V  06/12 Increase MXMT from 2000 to 4000 (A.Trkov)
+C-V  07/11 Test for empty files (A. Trkov)
+C-V  08/10 Trap attempts to open non-existent ENDF files (A. Trkov)
+C-V  11/04 Fix case of merging a file with a single material (A. Trkov)
 C-M
 C-M  Manual for Program MRGMAT
 C-M  =========================
@@ -24,10 +31,10 @@ C-M  list file. The list file format from the DIR command of
 C-M  Windows-DOS (95,98,NT) is recognised automatically and can
 C-M  be used instead.
 C-
-      PARAMETER    (MXMT=2000)
-      CHARACTER*80  RECI
+      PARAMETER    (MXMT=4000)
+      CHARACTER*80  RECI,FLNM
       CHARACTER*66  CH66,HH66
-      CHARACTER*40  BLNK,PATH,FLTM,FLNM,FLOU,FLER
+      CHARACTER*40  BLNK,PATH,FLTM,FLOU,FLER
       DIMENSION     MTLS(MXMT),IZLS(MXMT)
 C*
       DATA BLNK/'                                        '/
@@ -57,7 +64,8 @@ C*
 C* Read the directory listing
    20 WRITE(LTT,91) '$Enter the source ENDF file           : '
    21 READ (LIN,93,END=60) RECI
-      IF(RECI(1:1).EQ.'-') GO TO 60
+c...  IF(RECI(1:40).EQ.BLNK) GO TO 60
+      IF(RECI(1: 1).EQ.'-' ) GO TO 60
 C* Allow piping DIR listing of Dos (Windows 95,98,NT):
 C* Skip header records in the DIR list of DOS
       IF(RECI(1:20).EQ.BLNK(1:20)) GO TO 21
@@ -69,15 +77,21 @@ C* End of directory record in the DIR list of DOS
 C* Identify directory path in the DIR list of DOS
       IF(RECI(1:8).EQ.' Directo') THEN
         WRITE(LOU,95) ' MRGMAT files on  '//RECI, 0, 0, 0
-        PATH=RECI(15:40)
+        PATH=RECI(15:54)
    22   IF(PATH(LPTH+1:LPTH+1).NE.' ') THEN
           LPTH=LPTH+1
           GO TO 22
         END IF
         IF(PATH(LPTH:LPTH).NE.'\') THEN
           LPTH=LPTH+1
+          IF(LPTH.GT.40) THEN
+            WRITE(LTT,91) ' MRGMAT ERROR - Path length exceeded    '
+            WRITE(LTT,93) RECI
+            STOP 'MRGMAT ERROR - Pathlength too long'
+          END IF
           PATH(LPTH:LPTH)='\'
         END IF
+        WRITE(LTT,91) ' Process Windows directory listing      '
         IDOS=1
         GO TO 20
       END IF
@@ -85,10 +99,17 @@ C* Extract the filenames but skip directories
       IF(IDOS.NE.0) THEN
         IF(RECI(25:29).EQ.'<DIR>') THEN
 C*        Windows-NT directory listing
+          WRITE(LTT,91) ' Identified Windows-NT directory listing'
           IDOS=2
           GO TO 21
+        ELSE IF(RECI(22:26).EQ.'<DIR>') THEN
+C*        Windows-XP directory listing
+          WRITE(LTT,91) ' Identified Windows-XP directory listing'
+          IDOS=3
+          GO TO 21
         END IF
-        IF(RECI(15:15).EQ.':') IDOS=2
+        IF(IDOS.LT.2 .AND. RECI(15:15).EQ.':') IDOS=2
+        IF(IDOS.EQ.2 .AND. RECI(39:39).NE.' ') IDOS=3
         IF(RECI(16:20).EQ.'<DIR>') GO TO 21
         IF(IDOS.EQ.1) THEN
           RECI(9:9)='.'
@@ -101,21 +122,30 @@ C*        Windows-NT directory listing
             RECI(I:I)=' '
    24     CONTINUE
           FLNM=PATH(1:LPTH)//RECI(1:LNAM)
-        ELSE
+        ELSE IF(IDOS.EQ.2) THEN
 C* Case: Windows-NT directory listing
           FLNM=PATH(1:LPTH)//RECI(40:80)
+        ELSE
+C* Case: Windows-XP directory listing
+          FLNM=PATH(1:LPTH)//RECI(37:80)
         END IF
       ELSE
 C* Simple ASCII file list
-        FLNM=RECI(1:40)
+        FLNM=RECI
       END IF
 C* Open the file
       WRITE(LTT,91) ' Processing ENDF file                 : ',FLNM
       WRITE(LER,91) ' Processing ENDF file                 : ',FLNM
-      OPEN (UNIT=LEN,FILE=FLNM,STATUS='OLD')
-      IFL =IFL+1
+      OPEN (UNIT=LEN,FILE=FLNM,STATUS='OLD',ERR=25)
+      GO TO 26
+C*    Trap non-existent files
+   25 WRITE(LTT,91) '            ERRORR - File does not exist'
+      WRITE(LER,91) '            ERRORR - File does not exist'
+      GO TO 20
+C*    Process the file
+   26 IFL =IFL+1
 C* Header card
-      READ (LEN,95) CH66,MAT,MF,MT,IS
+      READ (LEN,95,ERR=43,END=43) CH66,MAT,MF,MT,IS
       WRITE(LTT,95) ' '//CH66(1:65)
       WRITE(LTT,95)
       WRITE(LER,95) ' '//CH66(1:65)
@@ -125,7 +155,7 @@ C* Fix case when header record is missing
         READ (CH66,94,ERR=40) ZA0,AWR,IDM,IDM,IDM,IDM
         GO TO 42
       END IF
-C* Merge files to a scrathc file recording MAT and ZA numbers
+C* Merge files to a scratch file recording MAT and ZA numbers
    40 READ (LEN,95,END=43) CH66,MAT,MF,MT,IS
    42 IF(MAT.LT. 0) GO TO 44
       WRITE(LTM,95) CH66,MAT,MF,MT
@@ -145,9 +175,9 @@ C* Merge files to a scrathc file recording MAT and ZA numbers
         IZLS(NMT)=IZ0
       END IF
       GO TO 40
-C* Trap incomplete files
-   43 WRITE(LTT,91) ' WARNING - Incomplete file (No MEND)  : ',FLNM
-      WRITE(LER,91) ' WARNING - Incomplete file (No MEND)  : ',FLNM
+C* Trap incomplete or empty files
+   43 WRITE(LTT,91) ' WARNING - Incomplete file (No TEND)  : ',FLNM
+      WRITE(LER,91) ' WARNING - Incomplete file (No TEND)  : ',FLNM
 C* One ENDF file processed - try next one
    44 CLOSE(UNIT=LEN)
       GO TO 20
@@ -155,6 +185,7 @@ C* All files written to temporary file
    60 KM1 =KMT
       KMT =0
       JMT =10000
+      IZ0 =-1
       IF(IDOS.EQ.0)
      1WRITE(LOU,99) 0, 0, 0
       IDOS=1
@@ -185,13 +216,24 @@ C* Find the next material to be written
         IZ0=IZLS(I)
    62 CONTINUE
       IF(KMT.LE.0) GO TO 80
-      IF(KMT.LT.KM1) REWIND(UNIT=LTM)
+      IF(KMT.LT.KM1) THEN
+C... lahey compiler has problems with rewinding very long files
+C...    REWIND(UNIT=LTM)
+        CLOSE(UNIT=LTM)
+        OPEN (UNIT=LTM,FILE=FLTM,STATUS='OLD')
+      END IF
       MTLS(KMT)=-JMT
 C* Copy the file to output
    70 READ (LTM,95) CH66,MAT,MF,MT,IS
+      IF(MAT.LT.0) THEN
+        WRITE(LTT,98) FLOAT(JMT)
+        WRITE(LER,98) FLOAT(JMT)
+        GO TO 60
+      END IF
       IF(MAT.NE.JMT) GO TO 70
    72 JS  =JS+1
       IF(JS.GT.99999) JS=0
+      IF(MT.EQ.0 .AND. MF.GT.0) JS=99999
       WRITE(LOU,95) CH66,MAT,MF,MT,JS
       READ (LTM,95,END=60) CH66,MAT,MF,MT,IS
       IF(MAT.GT. 0) GO TO 72
@@ -213,7 +255,7 @@ C*
       CLOSE(UNIT=LER)
       STOP 'MRGMAT Completed'
 C*
-   91 FORMAT(2A40)
+   91 FORMAT(A40,A80)
    92 FORMAT(A40,I5)
    93 FORMAT(A80)
    94 FORMAT(2F11.0,4I11)
