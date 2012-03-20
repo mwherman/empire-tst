@@ -31,6 +31,7 @@ C-V  08/01 Correct ZA of residual nucleus when searching level energies.
 C-V  08/02 Sort also by metastable products (A. Trkov).
 C-V  12/03 - Process fission spectrum ratios to Cf-252 sf spectrum.
 C-V        - Redo marking of renormalised data sets, shift date.
+C-V        - Skip comments (processing of C5 files).
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -278,6 +279,7 @@ C* Convert ratios to cross sections when possible - write to scratch
         IZA1=-1
         MT1 =-1
    17   READ (LC4,901,END=18) REC
+        IF(REC(1:1).EQ.'#') GO TO 17
         READ (REC(13:15),*) MF
         IF(MF.EQ.203) THEN
           READ(REC(59:76),*) RMT,RZA
