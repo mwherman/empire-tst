@@ -3739,7 +3739,9 @@ C                           DATA AND DATA ERROR).                       X4T33930
 C     (6) DATA = DATA/(F(0)*(2*L+1)) (DATA AND DATA ERROR)              X4T33940
 C     (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)    ***** TRKOV
 C     (9) DATA = DATA*RUTHERFORD (COULOMB) CROSS SECTION                ***** TRKOV
-C     (19)DATA = DATA*MAXWELLIAN(E_KT-NORM)                             ***** TRKOV
+C     (10)DATA = DATA*MAXWELLIAN(E_KT-NORM)                             ***** TRKOV
+C     (11)Not used                                                      ***** TRKOV
+C     (12)REACTION IN THE DENOMINATOR OF THE RATIO IS FISSION           ***** TRKOV
 C                                                                       X4T33950
       INTEGER      OUTP,OTAPE
       CHARACTER*11 TITLE,UNIT,DATUM
@@ -3871,6 +3873,7 @@ C-----CONVERT TRANSMISSION DATA TO CROSS SECTION (USING SAMPLE THICKNESS)
       GO TO 800
   126 WRITE(OUTP,6082)
       IRFLAG(ISANR)=0
+      GO TO 800
 C-----CONVERT RATIO-TO-RUTHERFORD INTO CROSS SECTIONS
   130 IF(IRFLAG(ISANR).GT.9) GO TO 140
 C*    -- define constants (Table 1, Appendix H, ENDF-102 manual)
@@ -3921,7 +3924,7 @@ C*    - Apply the same correction to the uncertainty
       VALUES(II)=VALUES(II)*SIGC
       GO TO 800
 C-----SCALE BY THE MAXWELLIAN DISTRIBUTION AT TEMPERATURE E_KT-NRM
-  140 IF(IRFLAG(ISANR).GT.10) GO TO 800
+  140 IF(IRFLAG(ISANR).GT.10) GO TO 150
 C     -- Try to find the spectrum temperature in COMMON
       IF(ICOMN .LT. 1 .OR. NPT.GT.1) GO TO 146
       DO JCOMN=1,ICOMN
@@ -3944,6 +3947,13 @@ C*    -- Location index of energy and spectrum
       IE=KMOUT(4,ISANR)
       VALUES(II)=VALUES(II)*FF
       VALUES(IE)=VALUES(IE)*FF
+      GO TO 800
+C-----Not used
+  150 CONTINUE
+C-----DEFINE DENOMINATOR REACTION RATIO AS FISSION (ALPHA)
+  160 IF(IRFLAG(ISANR).GT.12) GO TO 800
+C     -- Define the denominator MT number
+      MTRAT(ISANR)=18
 C-----
   800 RETURN
  6000 FORMAT(10X,'OPERATION...CREATED EN          ',1PE11.4,' EV')      X4T35010
