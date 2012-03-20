@@ -17,10 +17,10 @@ C-V  04/06 - Resequence DDX ang.distrib. at Eo into spectra at Ang.
 C-V        - Paging buffer for sorting to increase efficiency
 C-V        - Sort by outgoing particles. (A.Trkov)
 C-V  04/07 Fix format reading metastable targets (A.Trkov)
-C-V  04/09 Sort discrete level angular distributions by level E (A.Trkov)
-C-V  05/07 - Major reorganisation of coding, blocking separately the coding
-C-V          for discrete level processing and for sorting the double
-C-V          differential data.
+C-V  04/09 Sort discrete level angular distrib. by level E (A.Trkov)
+C-V  05/07 - Major reorganisation of coding, blocking separately the
+C-V          coding for discrete level processing and for sorting the
+C-V          double differential data.
 C-V        - Match discrete level energies to RIPL database (A.Trkov).
 C-V  05/11 - Fix bugs.
 C-V  05/12 - Increase MXIR from 12000 to 80000 (A.Trkov)
@@ -32,6 +32,8 @@ C-V  08/02 Sort also by metastable products (A. Trkov).
 C-V  12/03 - Process fission spectrum ratios to Cf-252 sf spectrum.
 C-V        - Redo marking of renormalised data sets, shift date.
 C-V        - Skip comments (processing of C5 files).
+C-V        - Improve stability (denominator ZA/MT is missing in some
+C-V          C5 file entries (A. Trkov)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -280,9 +282,18 @@ C* Convert ratios to cross sections when possible - write to scratch
         MT1 =-1
    17   READ (LC4,901,END=18) REC
         IF(REC(1:1).EQ.'#') GO TO 17
-        READ (REC(13:15),*) MF
+        READ (REC(13:15),'(I4)') MF
         IF(MF.EQ.203) THEN
-          READ(REC(59:76),*) RMT,RZA
+          READ(REC(59:76),'(2F9.0)') RMT,RZA
+C*        -- If ratio denominator undefined, assume same as numerator
+          IF(RMT.LE.0) THEN
+            READ(REC(16:19),'(I4)') MT
+            RMT=MT+0.9
+          END IF
+          IF(RZA.LE.0) THEN
+            READ(REC(6:11),'(I6)') IZAR
+            RZA=IZAR+0.9
+          END IF
           IZAR=10*IFIX(RZA)
           MFR =3
           MTR =IFIX(RMT)
