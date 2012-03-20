@@ -806,6 +806,9 @@ C***** COMPUTER DEPENDENT CODING ******
       COMMON/WHERE/ENT(5),SUBENT(3)                                     X4T07330
       COMMON/POINTR/MPOINT(9)                                           X4T07340
       DIMENSION KEYTAB(5)
+C-----Code version designation (5 characters)
+      DATA VERS/'12/03'/
+C-----
       DATA KEYTAB/
      & 'SUBENT     ','NOSUBENT   ','BIB        ','COMMON     ',                                             X4T07400
      & 'DATA       '/
@@ -864,7 +867,7 @@ C-----INITIALIZE COUNTS.                                                X4T07520
         MPOINT(I)=0
       END DO
 C-----PRINT TITLE FOR OUTPUT.                                           X4T07550
-      WRITE(OUTP,6000)                                                  X4T07560
+      WRITE(OUTP,6000) VERS                                                 X4T07560
 C-----READ REACTION VS. MF/MT TABLE                                     X4T07570
       CALL MFMTIN(NTAPE1)                                               X4T07580
 C-----READ COLUMN HEADINGS VS. MF/FIELDS.                               X4T07590
@@ -911,7 +914,7 @@ C-----END OF RUN. PRINT SUMMARY OF TRANSLATION.                         X4T08000
       STOP                                                              X4T08040
  1000 FORMAT(6A11,14A1)
  6000 FORMAT(' TRANSLATE DATA FROM EXFOR TO COMPUTATION FORMAT',
-     1 ' (X4TOC4 VERSION 05/07)'/1X,70('=')/
+     1 ' (X4TOC4 VERSION ',A,')'/1X,70('=')/
      2 ' READING TRANSLATION TABLES'/1X,70('='))
  6010 FORMAT(1X,70('=')/' TRANSLATION SUMMARY'/1X,70('=')/              X4T08090
      1 ' SUBENTRIES TRANSLATED--------',I7/                             X4T08100
