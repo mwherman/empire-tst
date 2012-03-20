@@ -28,9 +28,9 @@ def X_is_running():
 if __name__ == "__main__":
     
     # Get correct version of ZVView for this machine
-    if os.uname()[0] == "Linux":    zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'utils', 'c4zvd', "zvv2-1.005-lin.exe" ] )
-    elif os.uname()[0] == "Darwin": zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'utils', 'c4zvd', "zvv2-1.005-mac.exe" ] )
-    else:                           zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'utils', 'c4zvd', "zvv2-1.005-win.exe" ] )
+    if os.uname()[0] == "Linux":    zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'util', 'c4zvd', "zvv2-1.005-lin.exe" ] )
+    elif os.uname()[0] == "Darwin": zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'util', 'c4zvd', "zvv2-1.005-mac.exe" ] )
+    else:                           zvviewExe = os.sep.join( [ zvviewEnv[ 'EMPIREDIR' ], 'util', 'c4zvd', "zvv2-1.005-win.exe" ] )
                                     
     # Make any adjustments to the run-time environment & make sure X11 is running
     if os.uname()[0] in [ "Darwin", "Linux" ]:
