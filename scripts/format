@@ -28,6 +28,8 @@ $file-e.endf
 1 
 -1.0
 $2
+-1
+LABLABLABL EVAL-`date "+%b%y"` AUTHORAUTHORAUTHORAUTHORAUTHORAUT
 EOF
 $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
