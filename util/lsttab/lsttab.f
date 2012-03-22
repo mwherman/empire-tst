@@ -29,10 +29,12 @@ C-V  08/04  Increase MXR from 1200000 to 4000000 (A.Trkov)
 C-V         Increase MXP from  300000 to  800000 (A.Trkov)
 C-V  09/02  - Change convention MT=5 to MT=9000
 C-V         - Allow lumped discrete levels.
-C-V  12/03  Implement special treatment of the fission spectrum
-C-V         printout, normalising the experimental data to match
-C-V         the integral of the last function over the range of
-C-V         the data.
+C-V  12/03  - Implement special treatment of the fission spectrum
+C-V           printout, normalising the experimental data to match
+C-V           the integral of the last function over the range of
+C-V           the data.
+C-V         - Differentiate between entries for the same author if
+C-V           the EXFOR ID changes.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -644,7 +646,7 @@ C-
       PARAMETER   (MXAU=100)
       DOUBLE PRECISION GETAWT,PROJWT
       CHARACTER*1  MM(3),CM,C1,C2,C3
-      CHARACTER*9  CHX4
+      CHARACTER*9  CHX4,CHX0,CHXR,CHXU(MXAU)
       CHARACTER*11 REC(6)
       CHARACTER*25 REF,RF0,RF4,RFAU(MXAU)
       CHARACTER*84 COM2
@@ -660,7 +662,8 @@ C*   E2TOL fractional tolerance on discrete level energy
 C*
       DATA PI/3.14159265/
 C*
-      RF0='                         '
+      RF0 ='                         '
+      CHX0='         '
       IZAI=ZAI
       IZA0=ZA0
       IZAP0=ZAP0
@@ -766,12 +769,12 @@ C* Ignore other MF cases
         GO TO 20
       END IF
 C* Identify next set of points if author changes
-      IF(REF.NE.RF0) THEN
+      IF(REF.NE.RF0 .OR. CHX4.NE.CHX0) THEN
 C* Special treatment for cross sections at fixed outgoing angle
         IF(MF.EQ.4 .AND. MT0/10000.EQ.4) THEN
 C*        -- Check if the author was already processed
           DO I=1,NAU
-            IF(RFAU(I).EQ.REF) GO TO 20
+            IF(RFAU(I).EQ.REF .AND. CHXU(I).EQ.CHX4) GO TO 20
           END DO
           IF(NP.GT.0) THEN
 C* Remember the index record of next author and skip the data
@@ -789,6 +792,8 @@ c...
         WRITE(LPN,902) REF,COM2
         RF0=REF
         RF4=REF
+        CHX0=CHX4
+        CHXR=CHX4
       END IF
 C*
       IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
@@ -943,12 +948,14 @@ C...
         NAU=NAU+1
         IF(NAU.GT.MXAU) STOP 'DXSEXF ERROR - MXAU limit exceeded'
         RFAU(NAU)=RF4
+        CHXU(NAU)=CHXR
         IF(LAU.GT.0) THEN
 C* If cross sections at fixed angle, rewind and skip to the next author
           REWIND LC4
           DO I=2,LAU
             READ (LC4,901)
           END DO
+          CHX0=CHXR
           RF0=RF4
           IC4=LAU-1
           LAU=0
