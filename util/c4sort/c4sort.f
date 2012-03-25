@@ -34,6 +34,7 @@ C-V        - Redo marking of renormalised data sets, shift date.
 C-V        - Skip comments (processing of C5 files).
 C-V        - Improve stability (denominator ZA/MT is missing in some
 C-V          C5 file entries (A. Trkov)
+C-V        - Special treatment for correct positioning of mu-bar.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -201,7 +202,7 @@ C-
       CHARACTER*(LCH)  ENT(MXEN),ENTI
       CHARACTER*9      AOU,POU,ELV,ELW
       CHARACTER*3      LB3
-      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR),CHAR1,CHAR2
+      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR),CHAR1,CHAR2,CH
       LOGICAL          EXST
       DIMENSION        IDX(MXEN),LNE(MXEN),ID1(MXEN),ID2(MXEN)
      &                ,NSE(MXEN),ID3(MXIR),ID4(MXIR)
@@ -222,6 +223,8 @@ C* Files and logical file unit numbers
      7     FLSC/'C4SORT.TMP'/
      7     FLS2/'C4SORT.TM2'/
       DATA LIN,LC4,LOU,LES,LKB,LTT,LSC,LS2/ 1, 2, 3,-4, 5, 6, 7, 8 /
+C* Character to mark the modified string
+      DATA CH/'*'/
       NSET=0
       MPG =20000
       FLV =-1
@@ -342,7 +345,7 @@ C*              -- Sum errors from measurement and standard
                 REC(50:58)=POU
                 REC(59:76)='                  '
 C*              -- Label reaction converted from ratio by inserting CH
-                CALL LBLMRK(REC(98:122),25)
+                CALL LBLMRK(REC(98:122),25,CH)
 C...
 C...            print *,izar,MF,MT,'"',rec(98:122),'"'
 C...
@@ -436,7 +439,7 @@ C*              -- Sum errors from measurement and standard
                 REC(50:58)=POU
                 REC(59:76)='                  '
 C*              -- Label reaction converted from ratio by inserting CH
-                CALL LBLMRK(REC(98:122),25)
+                CALL LBLMRK(REC(98:122),25,CH)
 C...
 C...            print *,izar,MF,MT,'"',rec(98:122),'"'
 C...
@@ -601,6 +604,9 @@ C* Identify outgoing particle (if relevant)
       IF(ENTI(20:20).EQ.'1') ENTI(20:20)='M'
       IF(ENTI(20:20).EQ.'2') ENTI(20:20)='N'
       IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
+C*    -- Special treatment for correct positioning of mu-bar
+      IF(ENTI(12:19).EQ.' 154   2') ENTI(12:19)='   3 251'
+C* Save the label for sorting
       ENT(NEN)=ENTI
       REF =REC(98:132)
       ZAMT=REC(1:20)
@@ -608,6 +614,7 @@ C* Identify outgoing particle (if relevant)
       IFLV=NINT(FLV)
 c...
 c...  print '(i5,3a)',nen,ent(nen),' ',ref//' in30'
+c...  print '( a,3a)','"',ent(nen),' ',ref(1:12)
 c...
       NSET=0
 C* Proceed to next record
@@ -969,7 +976,7 @@ c...
 c...          print *,'i1,i2,jln',i1,i2,jln,JJ
 c...
           REC=RC6(JJ)
-CMH Move year to adjucent to the accession number
+CMH Move year to adjacent to the accession number
           DO ichar=98,122
              IF(REC(ichar:ichar) .EQ.'(' ) THEN
                 CHAR1=REC(ichar+1:ichar+1)
@@ -1023,14 +1030,12 @@ C*
   938 FORMAT(I9)
   941 FORMAT(12X,I3,25X,F9.0)
       END
-      SUBROUTINE LBLMRK(LABL,LNC)
+      SUBROUTINE LBLMRK(LABL,LNC,CH)
 C-Title  : Subroutine LBLMRK
 C-Purpose: Label marked with sign CH before the first blank or comma
 C-
       CHARACTER*(*)  LABL
       CHARACTER*1    C1,C2,CH
-C* Character to mark the string
-      DATA CH/'*'/
 C-F Find the first comma or blank (assumed to be after the first author)
       II=LNC
       DO I=1,LNC
