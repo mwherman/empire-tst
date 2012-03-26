@@ -18,7 +18,8 @@ C-V  2009/01 Add option to force major cross sections and/or
 C-V          double-differential spectra to the list (A. Trkov).
 C-V  2009/02 Fix small bug in sequencing the forced entries.
 C-V  2011/11 Fix ZA of projectile for added reactions.
-C-V  2012/03 Guard cosines>1 in C4 - interpret as degrees
+C-V  2012/03 - Guard cosines>1 in C4 - interpret as degrees
+C-V          - Add mu-bar to the list of reactions (MF3/MT251),
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -204,6 +205,13 @@ C*      -- Define level energy or range (if applicable)
       IF(CHA0.EQ.'1') CHA0='M'
       IF(CHA0.EQ.'2') CHA0='N'
       IF(CHA0.EQ.'3') CHA0='O'
+C*    -- mu-bar
+      IF(MF0.EQ.154) THEN
+        IF(MT0.EQ.2 .AND. NINT(PRA0).EQ.1) THEN
+          MF0=3
+          MT0=251
+        END IF
+      END IF
 C*
 C* Process all C4 records and check for changes
    20 CONTINUE
@@ -246,8 +254,22 @@ C*      -- Define level energy or range (if applicable)
       IF(CHA1.EQ.'1') CHA1='M'
       IF(CHA1.EQ.'2') CHA1='N'
       IF(CHA1.EQ.'3') CHA1='O'
+C*    -- mu-bar
+      IF(MF1.EQ.154) THEN
+        IF(MT1.EQ.2 .AND. NINT(PRA1).EQ.1) THEN
+          MF1=3
+          MT1=251
+c...
+c...      print *,'mf0,mt0,pra0,mf1,mt1,pra1',mf0,mt0,pra0,mf1,mt1,pra1
+c...
+        ELSE
+          GO TO 20
+        END IF
+      END IF
 C* Ignore MT 51 without specified level energies
-      IF(MT1.EQ.51 .AND. ELV1.EQ.0) GO TO 20
+      IF(MT1.EQ.51 .AND. ELV1.EQ.0) THEN
+        GO TO 20
+      END IF
 C* Mark for printout if any of the parameters change
 c...
 C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'mf1,mt1,m0,m1'
@@ -333,10 +355,11 @@ C* - MT out of range
 C* - Insufficient number of points (this also excludes distributions
 C*   which are not suitably sorted and would result in excessive output)
 c...
-C...  print *,'iex,mf0',iex,mf0
+c...  print *,'iex,mf0,mt0',iex,mf0,mt0
 c...
 c...  IF(IEX.LE.2) GO TO 60
-      IF(IEX.LE.2 .AND. (MF0.GT.3 .AND. MF0.NE.10)) GO TO 50
+      IF(IEX.LE.2 .AND.
+     &  (MF0.GT.3 .AND. MF0.NE.10)) GO TO 50
 C*
 C* Printout conditions satisfied - prepare output record
       IZ=IZA0/1000
