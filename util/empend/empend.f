@@ -6316,8 +6316,12 @@ C*      Section end
 C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
       CHARACTER*66  REC
-      NS=NS+1
+   12 NS=NS+1
+      IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) REC,MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
       RETURN
    40 FORMAT(A66,I4,I2,I3,I5)
       END
@@ -6343,6 +6347,7 @@ C-Purpose: Write a CONT record to an ENDF file
       IF(MT.EQ.0)     NS=99999
       IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
       RETURN
    20 FORMAT(I11)
    40 FORMAT(6A11,I4,I2,I3,I5)
@@ -6739,7 +6744,8 @@ C-D  order of Legendre polynomials used is contained in LMX.
 C-D  On exit, ERR contains the actual maximum difference between
 C-D  the input and the fitted data relative to the average. If the
 C-D  fitted distribution is negative, ERR contains the most negative
-C-D  value.
+C-D  value. The zize of the QQ array must be sufficient to store LMX+1
+C-D  coefficients.
 C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
 C-
       PARAMETER (MXEH=120)
@@ -6778,7 +6784,7 @@ C* Limit the order based on statistics
       LMX=NINT(LMX*MIN(1.0, 4*SS2/SS1))
       LMX=MAX(1,LMX)
 C* Clear the coefficients field
-      DO L=1,LM1
+      DO L=1,LMX
         QQ(L+1)=0.
       END DO
 C* Save the input points, allow for quadrupling the mesh
