@@ -35,6 +35,8 @@ C-V           the integral of the last function over the range of
 C-V           the data.
 C-V         - Differentiate between entries for the same author if
 C-V           the EXFOR ID changes.
+C-V         - Implement plotting of mu-bar from Legendre moment given
+C-V           in the C4 file.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -686,6 +688,11 @@ C*
 C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
+C* Test for Legendre coefficients of elastic scattering
+      IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
+        MF=3
+        MT=251
+      END IF
       IC4=IC4+1
       IF(CM.EQ.'T' .OR. CM.EQ.'+') CM=' '
       IF(CM.EQ.'1') CM='M'
