@@ -1,6 +1,6 @@
-# $Rev: 2662 $
+# $Rev: 2750 $
 # $Author: mherman $
-# $Date: 2012-03-09 16:47:35 +0100 (Fr, 09 Mär 2012) $
+# $Date: 2012-03-27 00:09:36 +0200 (Di, 27 Mär 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -4820,6 +4820,9 @@ proc vTcl:project:info {} {
     namespace eval ::widgets::$site_9_0.ent83 {
         array set save {-justify 1 -labelfont 1 -labeltext 1 -textbackground 1 -textvariable 1}
     }
+    namespace eval ::widgets::$site_9_0.ent84 {
+        array set save {-justify 1 -labelfont 1 -labeltext 1 -textbackground 1 -textvariable 1}
+    }
     namespace eval ::widgets::$site_9_0.but81 {
         array set save {-_tooltip 1 -activebackground 1 -activeforeground 1 -background 1 -command 1 -cursor 1 -font 1 -foreground 1 -highlightbackground 1 -text 1}
     }
@@ -5677,7 +5680,7 @@ global widget file profilter zvfilter archfilter
 
 proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer wwwviewer compeval mat EXPDAT
-global svnfilelist selsvnfilelist svnlog repository
+global svnfilelist selsvnfilelist svnlog repository maxwelltemp
 
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
@@ -5712,6 +5715,7 @@ set zvfilter $file
 set archfilter $file
 set nsh 1
 set eres 0.02
+set maxwelltemp 1.382E+6
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
@@ -6384,7 +6388,7 @@ puts $lsttab "ENDF.DAT"
 puts $lsttab "-"
 puts $lsttab "Empire"
 puts $lsttab $eres
-puts $lsttab "1.382E+6"
+puts $lsttab $maxwelltemp
 set i 0
 foreach el $ddx {
    puts $lsttab $el
@@ -6414,7 +6418,7 @@ puts $lsttab "ENDF.DAT"
 puts $lsttab "-"
 puts $lsttab "Empire"
 puts $lsttab $eres
-puts $lsttab "1.382E+6"
+puts $lsttab $maxwelltemp
 set i 0
 foreach el $ddx {
    puts $lsttab $el
@@ -6827,6 +6831,9 @@ lappend dd} \
         -justify right -labelfont {Helvetica -12 } -labeltext {Eres (rel)} \
         -background #d9d9d9 -textbackground #ffffff -textvariable eres 
     vTcl:DefineAlias "$site_9_0.ent83" "Entryfield5" vTcl:WidgetProc "Toplevel1" 1
+    ::iwidgets::entryfield $site_9_0.ent84 \
+        -justify right -labelfont {Helvetica -12 } -labeltext {Maxwellian Temp.} \
+        -background #d9d9d9 -textbackground #ffffff -textvariable maxwelltemp 
     button $site_9_0.but81 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #e6e6e6 \
@@ -6856,7 +6863,7 @@ puts $lsttab "-"
 puts $lsttab "Empire"
 if {$compeval != ""} {puts $lsttab [file tail $compeval]}
 puts $lsttab $eres
-puts $lsttab "1.382E+6"
+puts $lsttab $maxwelltemp
 set i 0
 foreach el $ddx {
    puts $lsttab $el
@@ -6920,6 +6927,8 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
     pack $site_9_0.ent82 \
         -in $site_9_0 -anchor center -expand 0 -fill none -side top 
     pack $site_9_0.ent83 \
+        -in $site_9_0 -anchor center -expand 0 -fill none -side top 
+    pack $site_9_0.ent84 \
         -in $site_9_0 -anchor center -expand 0 -fill none -side top 
     pack $site_9_0.but81 \
         -in $site_9_0 -anchor center -expand 0 -fill x -side top 
