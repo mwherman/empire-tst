@@ -17,21 +17,31 @@ if [ "$1" = "" ]
     echo -n 'Choose one of the above (without .c4 extention!): '
     read file
 fi                          
-if [ -f $file.c4 ]; then
-   echo 'Using existing C4 file:'  $file.c4
+if [ -f $file-raw.c4 ]; then
+   echo 'Using existing C4 file:'  $file-raw.c4
    else
-   echo 'Input file :' $file.c4 ' does not exist'
+   echo 'Input file :' $file-raw.c4 ' does not exist'
    exit
 fi
 
-# SORT C4 FILE
+ln  -sf $file-raw.c4 C4.DAT
 
-ln  -sf $file.c4 C4.DAT
+# ADD MU-BAR DATA TO THE C4 FILE
+cat >MU_BAR.INP<<EOF
+C4.DAT
+C4.TMP
+EOF
+
+# RUN ang_mu
+$EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
+rm C4.DAT
+
+# SORT C4 FILE
 
 cat >C4SORT.INP<<EOF
 \$* C4SORT
           Sort the EXFOR file in C4 format NOT overwriting the original file
-   FLC4IN C4.DAT
+   FLC4IN C4.TMP
    FLC4OU C4.SRT
    DPATH  $EMPIREDIR/RIPL/levels/
 
@@ -57,7 +67,7 @@ EOF
 # RUN c4sort TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
 mv C4.SRT $file.c4
-rm C4.DAT
+rm C4.TMP
 
 if [ -s $file.c4 ]; then
   echo 'EXFOR data in computational format are stored in :'$file.c4
@@ -65,6 +75,7 @@ if [ -s $file.c4 ]; then
     echo 'File with EXFOR data in computational format is EMPTY'
   fi
 
+rm MU_BAR.INP
 rm C4SORT.INP
 rm C4SORT.TMP
 exit
