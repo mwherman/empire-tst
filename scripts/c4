@@ -25,7 +25,8 @@ mv NEWX4.DAT $file.x42c4_errs
 mv X4TOC4.LST $file.x42c4_lst
 mv C4.DAT $file.c4
 if [ -s $file.c4 ]; then
-   echo 'EXFOR data in computational format are stored in: '$file.c4
+   echo 'EXFOR data in computational format are stored in: '$file-raw.c4
+   cp $file-raw.c4 $file.c4
    else
    echo 'File with EXFOR data in computational format is EMPTY'
 fi
