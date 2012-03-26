@@ -27,7 +27,7 @@ fi
 ln  -sf $file-raw.c4 C4.DAT
 
 # ADD MU-BAR DATA TO THE C4 FILE
-cat >MU_BAR.INP<<EOF
+cat >ANG_MU.INP<<EOF
 C4.DAT
 C4.TMP
 EOF
@@ -43,6 +43,7 @@ cat >C4SORT.INP<<EOF
           Sort the EXFOR file in C4 format NOT overwriting the original file
    FLC4IN C4.TMP
    FLC4OU C4.SRT
+   FLESTD iaea-std.dat
    DPATH  $EMPIREDIR/RIPL/levels/
 
    ALIAS       14000    3    1     14028    3    1
@@ -75,7 +76,7 @@ if [ -s $file.c4 ]; then
     echo 'File with EXFOR data in computational format is EMPTY'
   fi
 
-rm MU_BAR.INP
+rm ANG_MU.INP
 rm C4SORT.INP
 rm C4SORT.TMP
 exit
