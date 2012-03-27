@@ -11,25 +11,23 @@ ifeq ($(FC),gfortran)
 
   #----GNU FORTRAN compiler
   #----flags for production compilation with gfortran
-  FFLAGS = -std=legacy -O3
-  #FFLAGS = -std=legacy -O0
+  FFLAGS = -std=legacy -O3 -c
+  #FFLAGS = -std=legacy -O0 -c
 
 else ifeq ($(FC),ifort)
 
   #----INTEL f95 compiler
-  FFLAGS =  -O3 -x=host -ipo
+  FFLAGS =  -O3 -x=host -ipo-c -o $@
   #----flags for debuging using ifort compiler
-  #FFLAGS =  -C -ftrapuv -g -debug all
-  #----flags for automatic parallelization
-  #FFLAGS =  -parallel
+  #FFLAGS =  -C -ftrapuv -g -debug all -c
 
 else ifeq ($(FC),af90)
 
   #---------------------------
   #----Absoft FORTRAN compiler
   #---------------------------
-  FFLAGS = -O3 -s
-  #FFLAGS = -O0 -g
+  FFLAGS = -O3 -s -c
+  #FFLAGS = -O0 -g -c
 
 else ifeq ($(FC),lf90)
 
@@ -37,14 +35,14 @@ else ifeq ($(FC),lf90)
   #----Lahey/Fujitsu f95 compiler
   #--------------------------------------
   #----flag for Lahey/Fujitsu for production compilation
-  FFLAGS = -O3
+  FFLAGS = -O3 -c
   #----flag for Lahey/Fujitsu for debugging
-  #FFLAGS = -g --chk
+  #FFLAGS = -g --chk -c
 
 endif
 
-plotc4: plotc4.f starplot.f
-	$(FC) $(FFLAGS) -o $@ plotc4.f starplot.f ../dxsend/dxsend.o
+dxsend.o: dxsend.f
+	$(FC) $(FFLAGS) dxsend.f
 
 clean:
-	rm -f plotc4
+	rm -f *.o

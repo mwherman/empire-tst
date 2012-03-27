@@ -11,13 +11,13 @@ ifeq ($(FC),gfortran)
 
   #----GNU FORTRAN compiler
   #----flags for production compilation with gfortran
-  #FFLAGS = -std=legacy -O3
-  FFLAGS = -std=legacy -O0
+  FFLAGS = -std=legacy -O3
+  #FFLAGS = -std=legacy -O0
 
 else ifeq ($(FC),ifort)
 
   #----INTEL f95 compiler
-  FFLAGS =  -O3
+  FFLAGS =  -O3 -x=host -ipo
   #----flags for debuging using ifort compiler
   #FFLAGS =  -C -ftrapuv -g -debug all
   #----flags for automatic parallelization
@@ -43,10 +43,8 @@ else ifeq ($(FC),lf90)
 
 endif
 
-OBJF =	endtab.o dxsend.o
-
-endtab:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+endtab: endtab.f
+	$(FC) $(FFLAGS) -o $@ endtab.f ../dxsend/dxsend.o
 
 clean:
-	rm -f *.o
+	rm -f endtab

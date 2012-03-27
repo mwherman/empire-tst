@@ -25,15 +25,17 @@ endif
 UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
        util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/nubar \
-       util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar
+       util/endtab util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar
 
 all:
 	cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;
+	cd util/dxsend/ ; $(MAKE) FC=$(FC) $(FLG) ;
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source ; $(MAKE) FC=$(FC) $(FLG) ;
 
 clean:
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
+	cd util/dxsend/ ; $(MAKE) clean ;
 	cd util/IO/ ; $(MAKE) clean ;
 	cd source   ; $(MAKE) clean ;
 

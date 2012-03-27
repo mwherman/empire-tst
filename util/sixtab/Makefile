@@ -5,23 +5,18 @@ FC   =  gfortran
 #FC  =  af90
 #FC  =  lf95
 
-# FFLAGS are based on compiler setting
+# set FFLAGS based on compiler setting
 
 ifeq ($(FC),gfortran)
 
-  #-------------------------
   #----GNU FORTRAN compiler
-  #-------------------------
-  #----flags for production compilation
+  #----flags for production compilation with gfortran
   FFLAGS = -std=legacy -O3
-  #----flags for debuging
-  #FFLAGS =  -g --bounds-check -std=legacy
+  #FFLAGS = -std=legacy -O0
 
 else ifeq ($(FC),ifort)
 
-  #-----------------------
   #----INTEL f95 compiler
-  #-----------------------
   FFLAGS =  -O3 -x=host -ipo
   #----flags for debuging using ifort compiler
   #FFLAGS =  -C -ftrapuv -g -debug all
@@ -38,9 +33,9 @@ else ifeq ($(FC),af90)
 
 else ifeq ($(FC),lf90)
 
-  #--------------------------------
+  #--------------------------------------
   #----Lahey/Fujitsu f95 compiler
-  #--------------------------------
+  #--------------------------------------
   #----flag for Lahey/Fujitsu for production compilation
   FFLAGS = -O3
   #----flag for Lahey/Fujitsu for debugging
@@ -48,10 +43,8 @@ else ifeq ($(FC),lf90)
 
 endif
 
-OBJF =	sixtab.o dxsend.o
-
-sixtab:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+sixtab: sixtab.f
+	$(FC) $(FFLAGS) -o $@ sixtab.f ../dxsend/dxsend.o
 
 clean:
-	rm -f *.o
+	rm -f sixtab
