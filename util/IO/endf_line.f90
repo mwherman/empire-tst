@@ -38,7 +38,7 @@ module endf_lines
     integer, public :: ipos               ! current position on line
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
-    public open_endfile, get_endline, put_endline, close_endfile, endf_error
+    public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal
 
 !------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ module endf_lines
 
     integer*4 status
 
-    if(qopen) call endf_error('Attempting to open an ENDF file when another already open')
+    if(qopen) call endf_error('Attempting to open an ENDF file when another already open',-1)
 
     status = open_endf_file(efil,qwrite)
     if(status .lt. 0) then
@@ -92,7 +92,7 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
-    subroutine endf_error(errline)
+    subroutine endf_error(errline, errstat)
 
     implicit none
 
@@ -102,27 +102,47 @@ module endf_lines
     ! is printed out along with the line number, and then the program exits.
 
     character*(*), intent(in) :: errline
+    integer*4, intent(in), optional :: errstat
+
+    integer*4 ios,mft,i,j,k
 
     write(6,*) ' ****** ERROR ******',char(7)
     write(6,*)
     write(6,*) '    ',errline(1:len_trim(errline))
 
-    if(.not.qopen) then
-        write(6,*) '    No ENDF file open'
-        write(6,*) '    ENDF-IO aborted'
-    else if(qwrt) then
+    ! check to see if we were reading/writing a file
+
+    if(.not.qopen) call endf_unwind(-1)
+
+    if(present(errstat)) then
+        if(errstat .ne. 0) then
+            call close_endfile
+            call endf_unwind(errstat)
+        endif
+    endif
+
+    ! try to form a return value with current MAT, MF & MT
+
+    i = 0
+    j = 0
+    k = 0
+    read(cmft(1:4),'(i4)',iostat=ios) i
+    read(cmft(5:6),'(i2)',iostat=ios) j
+    read(cmft(7:9),'(i3)',iostat=ios) k
+    mft = 100000*i + 1000*j + k
+    if(mft .eq. 0) mft = -1
+
+    if(qwrt) then
         write(6,*) '    Last line written line number:',filin
         write(6,'(4x,a80)') endline
         call close_endfile
-        write(6,*) '    WRITE_ENDF aborted'
     else
         write(6,*) '    Last line read line number:',filin
         write(6,'(4x,a80)') endline
         call close_endfile
-        write(6,*) '    READ_ENDF aborted'
     endif
 
-    call endf_quit(1)
+    call endf_unwind(mft)
 
     end subroutine endf_error
 
@@ -141,6 +161,53 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
+    subroutine find_mat(nat)
+
+    ! use this routine to skip through an ENDF input file
+    ! looking for a specific MAT number. If it finds the
+    ! MAT, it will return with the current line pointing
+    ! to the first line with the specified MAT. If not, it
+    ! will hit the EOF and unwind out.
+
+    implicit none
+
+    integer, intent(in) :: nat
+
+    integer*4 status,ios
+    character*4 cmat
+
+    if(.not.qopen) return
+    if(qwrt) call endf_error('Attempt to read from ENDF output file')
+
+    if((nat .le. 0) .or. (nat .gt. 9999)) then
+        write(erlin,*) 'Request to find illegal MAT # :',nat
+        call endf_error(erlin,-1)
+    endif
+
+    write(cmat,'(i4)',iostat=ios) nat
+    if(ios .ne. 0) then
+        write(erlin,*) 'Error searching for MAT # :',nat
+        call endf_error(erlin,-1)
+    endif
+
+    do while(endline(67:70) .ne. cmat)
+        status = get_endf_line()
+        if(status .lt. 0) then
+            if(status .eq. -1) then
+                write(erlin,*) 'Hit end-of-file looking for MAT # :',nat
+                call endf_error(erlin,-1)
+            else
+                write(erlin,*) 'Read returned error code :',status
+                call endf_error(erlin)
+            endif
+        endif
+    end do
+
+    return
+    end subroutine find_mat
+
+!------------------------------------------------------------------------------
+
     subroutine get_endline(stat)
 
     implicit none
@@ -151,7 +218,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) call endf_error('Attempt to read from ENDF output file')
+    if(qwrt) call endf_error('Attempt to read from ENDF output file',-1)
 
     status = get_endf_line()
     if(present(stat)) stat = status
@@ -159,10 +226,11 @@ module endf_lines
         if(present(stat)) return
         if(status .eq. -1) then
             write(erlin,*) 'Hit end-of-file during read'
+            call endf_error(erlin,-1)
         else
             write(erlin,*) 'Read returned error code :',status
+            call endf_error(erlin)
         endif
-        call endf_error(erlin)
     endif
 
     ipos = 0
@@ -343,7 +411,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(.not.qwrt) call endf_error('Attempt to write to ENDF input file')
+    if(.not.qwrt) call endf_error('Attempt to write to ENDF input file',-1)
 
     endline(67:75) = cmft
 
@@ -378,7 +446,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) call endf_error('Attempt to read MT from output file')
+    if(qwrt) call endf_error('Attempt to read MT from output file',-1)
 
     read(endline(73:75),'(i3)',err=10) i
     get_mt = i
@@ -401,7 +469,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) call endf_error('Attempt to read MF from output file')
+    if(qwrt) call endf_error('Attempt to read MF from output file',-1)
 
     read(endline(71:72),'(i2)',err=10) i
     get_mf = i
@@ -424,7 +492,7 @@ module endf_lines
 
     if(.not.qopen) return
 
-    if(qwrt) call endf_error('Attempt to read MAT from output file')
+    if(qwrt) call endf_error('Attempt to read MAT from output file',-1)
 
     read(endline(67:70),'(i4)',err=10) i
     get_mat = i

@@ -7,7 +7,7 @@
     ! author: Sam Hoblit, NNDC, BNL
     ! routine to check format of ENDF-6 files
 
-    integer*4 nout,nin
+    integer*4 nout,nin,status
     character*200 outfile, infile
 
     type (endf_file) endf
@@ -15,10 +15,20 @@
     call parse_cmd_line(outfile,nout,infile,nin)
 
     write(6,'(a)') ' Reading '//infile(1:nin)
-    call read_endf_file(infile(1:nin),endf)
+    status = read_endf_file(infile(1:nin),endf)
+    if(status .ne. 0) then
+        write(6,*) ' Error reading '//infile(1:nin)
+        write(6,*) ' No output file written'
+        stop '  STAN aborted'
+    endif
 
     write(6,'(a)') ' Writing '//outfile(1:nout)
-    call write_endf_file(outfile(1:nout),endf)
+    status = write_endf_file(outfile(1:nout),endf)
+    if(status .ne. 0) then
+        write(6,*) ' Error writing '//outfile(1:nout)
+        write(6,*) ' Output file may be incomplete'
+        stop '  STAN aborted'
+    endif
 
     end
 

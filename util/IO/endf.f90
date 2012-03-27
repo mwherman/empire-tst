@@ -1,22 +1,38 @@
 module ENDF_IO
 
     ! author: Sam Hoblit, NNDC, BNL
-    ! this module provides the interface for I/O to ENDF
-    ! files. It collects the basic I/O for all MF and
-    ! assembles the endf_mat and endf_file data types.
+    ! this module provides the interface for I/O to ENDF files.
+    ! Here, the basic I/O for all MF files are collected and
+    ! the endf_mat and endf_file data types are defined.
     ! As all arrays are dynamically allocated there are
     ! no preset limits on any arrays - any number of materials
-    ! may be in an endf file which may contain any MF/MT.
-    ! Once a file is read in the endf_file type contains the
-    ! information contained in the entire file and is available
-    ! for further processing and/or writing out to a new file.
-    ! The main public interface for this module is just the
-    ! routines read_endf_file and write_endf_file. All the
-    ! type definitions for the various MF files are made available.
-    ! del_endf is used to deconstruct an endf file structure that
-    ! is no longer needed, and set_mf1_directory supplied to
-    ! re-create the section directory for a material. This is
-    ! done automatically when an endf file is written.
+    ! may be in an endf file which may contain any allowed
+    ! combination of MF/MTs. Once a file is read in the endf_file 
+    ! data type contains all the information contained in the 
+    ! entire file and is available for further processing and/or
+    ! writing out to a new ENDF file.
+    !
+    ! the main public interface to the ENDF IO package are the 3 routines
+    ! in this module: read_endf_file, write_endf_file, and del_endf.
+    !
+    ! read_end_file accepts an ENDF filename to read in, the endf
+    ! structure to store the data into, and an optional argument MAT,
+    ! where, if specified, indicates that only the material with the
+    ! specified MAT number is read into the endf structure.
+    !
+    ! write_endf_file accepts an output filename and an endf data type
+    ! which contains the ENDF data to write out to the file. The MF1
+    ! directory information is re-generated based on the input endf structure.
+    !
+    ! del_endf is provided to release all allocated data in an endf data
+    ! type. After calling this routine the endf structure has been "deflated"
+    ! and is ready for further use, if needed.
+    !
+    ! all 3 routines are functions that return an integer*4 status value.
+    ! a value of 0 indicated success. A positive number should contain
+    ! the MAT, MF and MT where the problem occurred, coded as to contain
+    ! 100000*MAT + 1000*MF + MT. If the file was not open or other errors
+    ! occurred, then the return value can be -1.
 
     use base_endf_io
     use endf_cov_io
@@ -195,6 +211,14 @@ module ENDF_IO
         module procedure lc_mf40
     end interface lc_mf
 
+    ! local variables to store input parameters
+
+    integer*4, private :: inmat,nfil
+    character*500, private :: endfil
+    type (endf_file), pointer, private :: endf
+
+    ! hide these routines from end user
+
     private read_mf1,read_mf2,read_mf3,read_mf4,read_mf5,read_mf6,read_mf7,read_mf8,read_nc,read_ni
     private read_mf9,read_mf10,read_mf12,read_mf13,read_mf14,read_mf15,read_mf23,read_mf26,read_cmpt
     private read_mf27,read_mf28,read_mf31,read_mf32,read_mf33,read_mf34,read_mf35,read_mf40
@@ -210,25 +234,55 @@ module ENDF_IO
     private get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, erlin
     private read_endf, get_endf, write_endf, put_endf, get_endline, put_endline, endline, ipos
     private open_endfile, close_endfile, mtmod, process_material
+    private endf_file_reader, endf_file_writer, endf_deleter, set_mf1_directory
 
 !------------------------------------------------------------------------------
     contains
 !------------------------------------------------------------------------------
 
-    subroutine read_endf_file(filename,endf)
+    integer*4 function read_endf_file(filename,usend,mat)
+
+    implicit none
+
+    character*(*), intent(in), target :: filename      ! ENDF file to read
+    type (endf_file), intent(out), target :: usend     ! endf output structure
+    integer*4, intent(in), optional :: mat             ! mat # to read in
+
+    integer*4, external :: endf_try
+
+    nfil = len_trim(filename)
+    if(nfil > 500) then
+        write(6,*) ' Filename too long:',filename
+        read_endf_file = -1
+        return
+    endif
+    endfil = filename
+    endf => usend
+
+    if(present(mat)) then
+        inmat = mat           ! read ONLY this mat
+    else
+        inmat = 0             ! read in whole file (default)
+    endif
+
+    read_endf_file = endf_try(endf_file_reader)
+
+    return
+    end function read_endf_file
+
+!------------------------------------------------------------------------------
+
+    subroutine endf_file_reader
 
     implicit none
 
     ! read an entire ENDF file, which may contain multiple materials.
     ! each material is scanned, and all MF files encountered are read in.
 
-    character*(*), intent(in) :: filename
-    type (endf_file), intent(out), target :: endf
-
     integer mat,status
     type (endf_mat), pointer :: mx
 
-    call open_endfile(filename,.false.)
+    call open_endfile(endfil(1:nfil),.false.)
 
     ! first line, or "header" line, usually contains SVN tags
     ! and ends with MAT,MF,MT all 0. Look for this and if found,
@@ -241,14 +295,16 @@ module ENDF_IO
         endf%hdline(67:80) = hdlin(67:80)    ! reset these fields
         call get_endline
     else
-        write(6,*) ' No header line found in ',filename
+        write(6,*) ' No header line found in ',endfil(1:nfil)
         write(6,*) ' Header will be set to standard header line with SVN tags'
         endf%hdline = hdlin
     endif
 
+    if(inmat > 0) call find_mat(inmat)
+
     mat = get_mat()
     if(mat .lt. 0) then
-        write(6,*) ' No materials found in ',filename
+        write(6,*) ' No materials found in ',endfil(1:nfil)
         call close_endfile
         return
     endif
@@ -262,6 +318,11 @@ module ENDF_IO
         call set_mat(mat)
 
         call process_material(mx)
+
+        if(inmat > 0) then
+            call close_endfile
+            return
+        endif
 
         call get_endline(status)
         if(status .ne. 0) then
@@ -289,7 +350,7 @@ module ENDF_IO
         endif
     end do
 
-    end subroutine read_endf_file
+    end subroutine endf_file_reader
 
 !------------------------------------------------------------------------------
 
@@ -406,15 +467,38 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine write_endf_file(filename,endf)
+    integer*4 function write_endf_file(filename,usend)
 
     implicit none
 
-    character*(*), intent(in) :: filename
-    type (endf_file), intent(in), target :: endf
+    character*(*), intent(in), target :: filename
+    type (endf_file), intent(in), target :: usend
+
+    integer*4, external :: endf_try
+
+    nfil = len_trim(filename)
+    if(nfil > 500) then
+        write(6,*) ' Filename too long:',filename
+        write_endf_file = -1
+        return
+    endif
+    endfil = filename
+    endf => usend
+
+    write_endf_file = endf_try(endf_file_writer)
+
+    return
+    end function write_endf_file
+
+!------------------------------------------------------------------------------
+
+    subroutine endf_file_writer
+
+    implicit none
+
     type (endf_mat), pointer :: mx
 
-    call open_endfile(filename,.true.)
+    call open_endfile(endfil(1:nfil),.true.)
 
     endline = endf%hdline
     call put_endline
@@ -464,18 +548,34 @@ module ENDF_IO
     call close_endfile
 
     return
-    end subroutine write_endf_file
+    end subroutine endf_file_writer
 
 !------------------------------------------------------------------------------
 
-    subroutine del_endf(endf)
+    integer*4 function del_endf(usend)
 
     implicit none
 
-    ! deconstruct an endf file. Here we deflate the structure,
+    type (endf_file), target :: usend
+
+    integer*4, external :: endf_try
+
+    endf => usend
+
+    del_endf = endf_try(endf_deleter)
+
+    return
+    end function del_endf
+
+!------------------------------------------------------------------------------
+
+    subroutine endf_deleter
+
+    implicit none
+
+    ! deconstruct an endf data type. Here we deflate the structure,
     ! deallocating all data stored in the endf file.
 
-    type (endf_file), target :: endf
     type (endf_mat), pointer :: mx,nx
 
     endf%hdline = hdlin
@@ -511,7 +611,7 @@ module ENDF_IO
     end do
 
     return
-    end subroutine del_endf
+    end subroutine endf_deleter
 
 !------------------------------------------------------------------------------
 
@@ -875,346 +975,5 @@ module ENDF_IO
 
     return
     end function mtmod
-
-!------------------------------------------------------------------------------
-
-    subroutine find_mf(endfile,mat)
-
-    implicit none
-
-    ! look through the endf file supplied and only read
-    ! MF files that are allocated in the MAT supplied.
-    ! The first instance of a particular MF is the one
-    ! read in, so if the ENDF file contains multiple materials,
-    ! then this routine may return MF's from ANY of them,
-    ! depending on what MF's are in which materials, and the
-    ! ordering. 
-
-    integer*4 stat,mn
-    character*(*) endfile
-
-    type (endf_mat) mat
-
-    call open_endfile(endfile,.false.)
-    call get_endline
-    mn = get_mat()
-    if(mn .le. 1) call get_endline
-    mat%mat = get_mat()
-
-    if(associated(mat%mf1)) then
-        mat%mf1%mt = 0
-        do while(endline(71:72) .ne. ' 1')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(1)
-        call read_mf(mat%mf1)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf2)) then
-        mat%mf2%mt = 0
-        do while(endline(71:72) .ne. ' 2')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(2)
-        call read_mf(mat%mf2)
-        call set_mat(0)
-    endif
-    if(associated(mat%mf3)) then
-        mat%mf3%mt = 0
-        do while(endline(71:72) .ne. ' 3')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(3)
-        call read_mf(mat%mf3)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf4)) then
-        mat%mf4%mt = 0
-        do while(endline(71:72) .ne. ' 4')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(4)
-        call read_mf(mat%mf4)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf5)) then
-        mat%mf5%mt = 0
-        do while(endline(71:72) .ne. ' 5')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(5)
-        call read_mf(mat%mf5)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf6)) then
-        mat%mf6%mt = 0
-        do while(endline(71:72) .ne. ' 6')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(6)
-        call read_mf(mat%mf6)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf7)) then
-        mat%mf7%mt = 0
-        do while(endline(71:72) .ne. ' 7')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(7)
-        call read_mf(mat%mf7)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf8)) then
-        mat%mf8%mt = 0
-        do while(endline(71:72) .ne. ' 8')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(8)
-        call read_mf(mat%mf8)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf9)) then
-        mat%mf9%mt = 0
-        do while(endline(71:72) .ne. ' 9')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(9)
-        call read_mf(mat%mf9)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf10)) then
-        mat%mf10%mt = 0
-        do while(endline(71:72) .ne. '10')
-            call get_endline(stat)
-            if(stat .ne. 0) return
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(10)
-        call read_mf(mat%mf10)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf12)) then
-        mat%mf12%mt = 0
-        do while(endline(71:72) .ne. '12')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(12)
-        call read_mf(mat%mf12)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf13)) then
-        mat%mf13%mt = 0
-        do while(endline(71:72) .ne. '13')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(13)
-        call read_mf(mat%mf13)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf14)) then
-        mat%mf14%mt = 0
-        do while(endline(71:72) .ne. '14')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(14)
-        call read_mf(mat%mf14)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf15)) then
-        mat%mf15%mt = 0
-        do while(endline(71:72) .ne. '15')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(15)
-        call read_mf(mat%mf15)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf23)) then
-        mat%mf23%mt = 0
-        do while(endline(71:72) .ne. '23')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(23)
-        call read_mf(mat%mf23)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf26)) then
-        mat%mf26%mt = 0
-        do while(endline(71:72) .ne. '26')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(26)
-        call read_mf(mat%mf26)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf27)) then
-        mat%mf27%mt = 0
-        do while(endline(71:72) .ne. '27')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(27)
-        call read_mf(mat%mf27)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf28)) then
-        mat%mf28%mt = 0
-        do while(endline(71:72) .ne. '28')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(28)
-        call read_mf(mat%mf28)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf31)) then
-        mat%mf31%mt = 0
-        do while(endline(71:72) .ne. '31')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(31)
-        call read_mf(mat%mf31)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf32)) then
-        mat%mf32%mt = 0
-        do while(endline(71:72) .ne. '32')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(32)
-        call read_mf(mat%mf32)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf33)) then
-        mat%mf33%mt = 0
-        do while(endline(71:72) .ne. '33')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(33)
-        call read_mf(mat%mf33)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf34)) then
-        mat%mf34%mt = 0
-        do while(endline(71:72) .ne. '34')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(34)
-        call read_mf(mat%mf34)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf35)) then
-        mat%mf35%mt = 0
-        do while(endline(71:72) .ne. '35')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(35)
-        call read_mf(mat%mf35)
-        call set_mat(0)
-    endif
-
-    if(associated(mat%mf40)) then
-        mat%mf40%mt = 0
-        do while(endline(71:72) .ne. '40')
-            call get_endline(stat)
-            if(stat .ne. 0) goto 100
-        end do
-        mn = get_mat()
-        call set_mat(mn)
-        call set_mf(40)
-        call read_mf(mat%mf40)
-        call set_mat(0)
-    endif
-
-100 call close_endfile
-
-    return
-    end subroutine find_mf
 
 end module ENDF_IO

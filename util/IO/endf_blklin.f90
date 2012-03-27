@@ -131,7 +131,7 @@ module endf_line_io
         endline => erc(inx+1)%chr
         get_endf_line = 0
     else
-        nullify(endline)
+        ! nullify(endline) ! leave pointing to last line
         get_endf_line = -1
     endif
 

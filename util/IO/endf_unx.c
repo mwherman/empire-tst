@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <setjmp.h>
 
 /*
   author: Sam Hoblit, NNDC, BNL
@@ -16,6 +17,7 @@
 */
 
 static struct stat file_stat;
+static jmp_buf savctx;
 
 int open_endf_blkfile_(char *file, int *flg, int len)
 {
@@ -77,3 +79,18 @@ void endf_quit_(int *status)
    exit(*status);
    return ;
 }
+
+int endf_try_(void (*rtn)())
+{
+   int stat;
+   stat = setjmp(savctx);
+   if(!stat) (*rtn)();
+   return stat;
+}
+
+int endf_unwind_(int *val)
+{
+   longjmp(savctx,*val);
+   return 0;
+}
+

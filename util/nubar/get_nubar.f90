@@ -9,7 +9,7 @@
     implicit none
 
     logical*4 qex
-    integer*4 i,n,a,z,nin,iza,ios
+    integer*4 i,n,a,z,nin,iza,ios,status
     character infile*200,cmd*100
 
     type (endf_file) :: endf
@@ -51,7 +51,11 @@
  
     ! try to read the endf file
 
-    call read_endf_file(infile(1:nin),endf)
+    status = read_endf_file(infile(1:nin),endf)
+    if(status .ne. 0) then
+        write(6,*)' Error reading ',infile(1:nin)
+        stop ' No NUBAR.DAT file written'
+    endif
  
     nullify(mt456)
     mat => endf%mat

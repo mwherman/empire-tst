@@ -1,6 +1,6 @@
-#$Rev: 2714 $
-#$Author: gnobre $
-#$Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
+#$Rev: 2754 $
+#$Author: shoblit $
+#$Date: 2012-03-27 15:50:58 +0200 (Di, 27 Mär 2012) $
 
 # set default fortran compiler:
 
@@ -23,10 +23,12 @@ ifeq ($(FC),gfortran)
   #---------------------------------
   #----flags for production compilation with gfortran
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
-  #FFLAGS = -O3 -pg -std=legacy 
+  #----flags for ECIS
+  EFLAGS = -O2 -std=legacy -ffast-math
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -44,6 +46,8 @@ else ifeq ($(FC),ifort)
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
   DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace
+  #----flags for ECIS
+  EFLAGS = -O2 -x=host
   #----flags for automatic parallelization
   #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
@@ -58,12 +62,14 @@ else ifeq ($(FC),af95)
   #----Absoft FORTRAN compiler
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
-  #    getenv, and system functions in Absoft 
-  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64   
+  #    getenv, and system functions in Absoft
+  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64
   #----flags for production
-  FFLAGS = -march=host -m64 -O3 -s 
+  FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
   DFLAGS = -O0 -m64 -g -s
+  #----flags for ECIS
+  EFLAGS = -O2 -march=host -s -m64
 
 else ifeq ($(FC),pfg90)
  
@@ -74,6 +80,8 @@ else ifeq ($(FC),pfg90)
   FFLAGS =  -O3 
   #----flags for debuging
   DFLAGS = -O0 -g
+  #----flags for ECIS
+  EFLAGS = -O2
 
 else ifeq ($(FC),lf90)
  
@@ -84,6 +92,8 @@ else ifeq ($(FC),lf90)
   FFLAGS = -O3
   #----flags for debuging
   DFLAGS = -O0 -g --chk
+  #----flags for ECIS
+  EFLAGS = -O2
 
 endif
 
@@ -98,7 +108,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
             HRTW-comp.o       ddhms.o           pcross.o       nubar_reader.o\
             gamma-strength-analytic.o           thora.o        empire_ctl.o\
             pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
-            plot-zvv.o    kailas07emp.o         systematics.o  subecis06m.o
+            plot-zvv.o    kailas07emp.o         systematics.o
 
 IOLIB =  ../util/IO/*.o
 
@@ -106,8 +116,8 @@ all:
 	$(MAKE) empire
 	$(MAKE) optmand
 
-empire: $(OBJF)
-	$(FC) $(FFLAGS) -o $@ $(OBJF) $(LIBS)
+empire: $(OBJF) subecis06m.o
+	$(FC) $(FFLAGS) -o $@ $(OBJF) $(LIBS) subecis06m.o
 
 optmand: optmand.o
 	$(FC)  $(FFLAGS) -o $@ optmand.o
@@ -122,6 +132,8 @@ main.o  : io.h nubar_reader.o
 input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
+subecis06m.o : subecis06m.f
+	$(FC) $(EFLAGS) -c subecis06m.f
 
 clean:
 	rm -f *.o *.mod

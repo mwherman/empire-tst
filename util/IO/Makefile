@@ -61,9 +61,9 @@ ifeq ($(IPO),TRUE)
   # use ifort with block-mode I/O and cross-file optimization.
   # this generally provides the fastest executable on unix/linux
 
-  ipo_out.o: endf_unx.o *.f90
-	ifort -x=host -O3 -real-size 64 -ipo-c endf_blklin.f90 endf_line.f90\
-              endf_base.f90 endf_cov.f90 mf*.f90 endf.f90
+  endf_io.o: endf_unx.o *.f90
+	ifort -x=host -O3 -real-size 64 -ipo-c -o endf_io.o endf_blklin.f90\
+              endf_line.f90 endf_base.f90 endf_cov.f90 mf*.f90 endf.f90
 
 else
 
