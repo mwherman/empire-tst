@@ -37,7 +37,7 @@ C-M   - Source C4 filename
 C-M   - Output C4 filename.
 C-M
 C-
-      CHARACTER*1  CH
+      CHARACTER*1  CH,ZAMH,ZAMG
       CHARACTER*5  IXEH,IXEG
       CHARACTER*30 HDR
       CHARACTER*40 BLNK
@@ -91,7 +91,7 @@ C* Define the output file
 C*
 C* Begin processing the data - search for elastic angular distributions
   100 READ (LIN,932,END=800) REC
-  110 READ (REC,902) IZIH,IZAH,MFH,MTH,EINH,EID,XSRH,XSDH,CSNH,PRB
+  110 READ (REC,902) IZIH,IZAH,ZAMH,MFH,MTH,EINH,EID,XSRH,XSDH,CSNH,PRB
      &              ,IXEH,IXSH
       IF(MFH.NE.4 .OR. MTH.NE.2) THEN
         WRITE(LOU,932) REC
@@ -117,7 +117,7 @@ C*       (no need to add to C4, conversion is done in DXSEXF if needed)
       IEF=1
       READ (LIN,932,END=600) REC
       IEF=0
-  122 READ (REC,902) IZIG,IZAG,MFG,MTG,EING,EID,XSRG,XSDG,CSNG,PRB
+  122 READ (REC,902) IZIG,IZAG,ZAMG,MFG,MTG,EING,EID,XSRG,XSDG,CSNG,PRB
      &              ,IXEG,IXSG
       IF(IZIH.EQ.IZIG .AND. IZAH.EQ.IZAG .AND. MTH.EQ.MTG .AND.
      &   EINH.EQ.EING .AND. IXEH.EQ.IXEG .AND. IXSH.EQ.IXSG) THEN
@@ -156,7 +156,7 @@ c...
 C*    --Compare fitted curve to measured
       CALL TSTPLT(NP,CSN,XSR,XSU,LMX,PLN,L92,LCU,LPT,HDR)
 C*    --Prepare the output record for mu-bar (remove CM flag, if any)
-      WRITE(RC1( 1:19),902) IZIH,IZAH,154,MTH
+      WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,154,MTH
       REC(22:22)=' '
 C*    --Arbitrarily increment subsection number by 500
       JXSH=IXSH+500
@@ -177,7 +177,7 @@ C*    -- Normalised P1 component (dividing Pl by (2l+1)/2)
       WRITE(RC1(59:67),934) 1.
       WRITE(LOU,932) RC1
 C*    -- mu-bar entered, prepare the output record for elastic
-      WRITE(RC1( 1:19),902) IZIH,IZAH,  3,MTH
+      WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,  3,MTH
 C*    --Arbitrarily increment the subsection number by 600
       JXSH=IXSH+600
       WRITE(RC1(128:130),'(I3)') JXSH
@@ -198,7 +198,7 @@ C*
   822 FORMAT(6I11,I4)
   900 FORMAT( A80)
   901 FORMAT(2A40)
-  902 FORMAT(I5,I6,2I4,3X,6F9.0,46X,A5,I3)
+  902 FORMAT(I5,I5,A1,2I4,3X,6F9.0,46X,A5,I3)
   932 FORMAT(A132)
   934 FORMAT(F9.6)
       END
