@@ -133,7 +133,7 @@ C*       (no need to add to C4, conversion is done in DXSEXF if needed)
         GO TO 120
       END IF
 C*    -- Tighten the fitting convergence criterion a bit (fraction)
-      EMMF=MAX(0.05,EMM/SQRT(2.0))
+      EMMF=MAX(0.07,EMM/SQRT(2.0))
 C*    -- Skip fitting if less than four points are given.
       IF(NP.LT.4) GO TO 600
 C*    -- One panel read - calculate mu-bar
@@ -143,10 +143,16 @@ c...
 C...  PRINT *,HDR,NP,emmF,'"',CH,'"',mxlg,mxrw,mxnp
 c...
       LMI=2
-      LMX=64
+      LMX=24
       IF(NP*4+(LMX+4)*(LMX+1).GT.MXRW)
      &STOP 'ANG_MU ERROR - MXRW limit exceeded'
       CALL LSQLGV(CSN,XSR,NP,PLN,LMI,LMX,EMMF,ERR,RWO,MXRW)
+      EEMX=MAX(EMMF,ERR)
+      IF(EEMX.GT.1 .OR. PLN(1).LT.0 .OR. PLN(2).LT.0) THEN
+        PRINT *,'WARNING - Large error fitting ang.dist',EEMX
+     &         ,PLN(1),PLN(2)
+        GO TO 600
+      END IF
 C*    --Compare fitted curve to measured
       CALL TSTPLT(NP,CSN,XSR,XSU,LMX,PLN,L92,LCU,LPT,HDR)
 C*    --Prepare the output record for mu-bar (remove CM flag, if any)
@@ -360,6 +366,9 @@ C-
       LM1=LM0+1
       LST=0
       MNS=0
+
+      icount=0
+
 C*    -- Max. number of adjustment cycles on -ve distributions
 c*       (does not work very well)
       MNSMX=0
@@ -391,9 +400,9 @@ C* Clear the coefficients field
         QQ(L+1)=0
       END DO
 C* Save the input points, allow for quadrupling the mesh
-      MXP=4*NP
+      MXP=4*(NP+1)
       NNP=NP
-      LXP=1
+      LXP=2
       LYP=LXP+MXP
       LLG=LYP+MXP
       DO I=1,NP
@@ -468,8 +477,78 @@ c...
       YNX=MIN(YNP,YNM)
       IF(YNP.LT.0) ERR=MIN(ERR,YNP)
       IF(YNM.LT.0) ERR=MIN(ERR,YNM)
+      LL1=2
 C*
 C* Take corrective action
+      IF(LO1.EQ.LL1 .AND. (KNP.GT. 0 .OR. ERR.GT.EMM)) THEN
+C* Case: Tolerance limit not satisfied and If the first point is
+C*       not on the extreme boundary, generate the point artificially
+C*       by extrapolation with the gradient of the 3-rd order
+C*       Legendre polynomial
+        XX1=RWO(LXP)
+        XX2=RWO(LXP+NNP-1)
+c...
+c...    print *,'lxp,lyp,nnp,xx1,xx2',lxp,lyp,nnp,xx1,xx2
+c...
+        ONE=1
+        TOL=1.E-3
+        IF( (ONE-ABS(XX1)).GT. TOL .OR. (ONE-ABS(XX2)).GT.TOL) THEN
+          YP1=RWO(LYP)
+          YP2=RWO(LYP+NNP-1)
+          IF(XX1.GT.0) THEN
+            XXB=1
+            IF(XXB-XX1.GT.TOL) THEN
+              YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
+              LXP=LXP-1
+              LYP=LYP-1
+              RWO(LXP)=XXB
+              RWO(LYP)=YYB
+              NNP=NNP+1
+c...          
+c...          print *,'Hi',xx1,xx2,xxb,yP1,yP2,yyb
+c...      
+            END IF
+            XXB=-1
+            IF(XX2-XXB.GT.TOL) THEN
+              YYB=YP2
+              RWO(LXP+NNP)=XXB
+              RWO(LYP+NNP)=YYB
+              NNP=NNP+1
+C...
+c...          print *,'Lo',xx1,xx2,xxb,yP1,yP2,yyb
+c...      
+            END IF
+          ELSE
+            XXB=-1
+            IF(XX1-XXB.GT.TOL) THEN
+              YYB=YP1
+              LXP=LXP-1
+              LYP=LYP-1
+              RWO(LXP)=XXB
+              RWO(LYP)=YYB
+              NNP=NNP+1
+C...
+c...          print *,'Lo',xx1,xx2,xxb,yP1,yP2,yyb
+C...
+            END IF
+            XXB= 1
+            IF(XXB-XX2.GT.TOL) THEN
+              YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
+              RWO(LXP)=XXB
+              RWO(LYP)=YYB
+              NNP=NNP+1
+C...
+C...          print *,'Hi',xx1,xx2,xxb,yP1,yP2,yyb
+C...
+            END IF
+          END IF
+C...
+C...      icount=icount+1
+C...      if(icount.gt.5) stop
+C...
+          GO TO 20
+        END IF
+      END IF
       IF(KNP.GT. 0 ) THEN
 C* Case: Distribution negative at mesh point - increase L
         IF(LO1.LT.LMM) THEN
@@ -484,6 +563,24 @@ C* Case: Distribution negative at mesh point - increase L
       IF(ERR.GT.EMM) THEN
 C* Case: Tolerance limit not satisfied
         IF(LO1.LT.LMM .AND. JER.EQ.0) THEN
+C*          -- If the first point is not on the boundary, generate the
+C*             point artificially by extrapolation
+            IF(ABS(RWO(LXP)-1).GT. 1.E-3 .AND. LO1.EQ.3) THEN
+              XX1=-1
+              IF(XP(1).GT.0) XX1=1
+              LXP=LXP-1
+              LYP=LYP-1
+              RWO(LXP)=XX1
+              RWO(LYP)=POLLG1(XX1,QQ,LO1)
+              NNP=NNP+1
+              IF(ABS(RWO(LXP+NNP-1)-1).GT. 1.E-3) THEN
+                XX1=-XX1
+                RWO(LXP+NNP)=XX1
+                RWO(LYP+NNP)=POLLG1(XX1,QQ,LO1)
+                NNP=NNP+1
+              END IF
+              GO TO 20
+            END IF
 C*          Try increasing the order of approximation
 c...
 c...        print *,'            Increase order to',LO1
