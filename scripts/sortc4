@@ -37,7 +37,7 @@ $EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
 rm C4.DAT
 
 # SORT C4 FILE
-
+ln -sf $EMPIREDIR/util/c4sort/iaea-std.dat iaea-std.dat
 cat >C4SORT.INP<<EOF
 \$* C4SORT
           Sort the EXFOR file in C4 format NOT overwriting the original file
@@ -79,4 +79,5 @@ if [ -s $file.c4 ]; then
 rm ANG_MU.INP
 rm C4SORT.INP
 rm C4SORT.TMP
+rm iaea-std.dat
 exit
