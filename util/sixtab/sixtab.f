@@ -369,7 +369,7 @@ C-
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
       DOUBLE PRECISION PAR,CLB,P1,P2,PP,FMU
-      DIMENSION RWO(MXRW),NBT(MXNB),INT(MXNB)
+      DIMENSION RWO(MXRW),NBT(MXNB),INR(MXNB)
       DIMENSION AMU(MXMU),PLL(MXPL)
 C*
       DATA PI /3.141592654/
@@ -425,7 +425,7 @@ C* Begin loop over all outgoing particles
       LXS=LXE+(MXRW-LXE)/2
       KX =MXRW-LXS
 C* Process the multiplicities for this particle
-      CALL RDTAB1(LEN,ZAP,AWP,LIP,LAW0, NR, NP, NBT,INT
+      CALL RDTAB1(LEN,ZAP,AWP,LIP,LAW0, NR, NP, NBT,INR
      1           ,RWO(LXE),RWO(LXS),KX,IER)
       IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
       IF(LTT.GT.0) WRITE(LTT,950) MT0,LAW0,IK
@@ -476,7 +476,7 @@ C* Write the header CONT record if processing the first particle
       END IF
 C* Write the multiplicities for this particle to the output file
       CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,ZAP,AWP,LIP,LAW
-     1           , NR, NP, NBT,INT,RWO(LXE),RWO(LXS))
+     1           , NR, NP, NBT,INR,RWO(LXE),RWO(LXS))
 C*
 
       print *,'law',law0
@@ -496,9 +496,9 @@ C*      No action necessary for Law 0, 3, 4
 C*      Copy the data for Law 2, 5
         IF(LAW0.EQ.5 .AND. LTT.GT.0)
      1    WRITE(LTT,900) ' WARNING - No conversion - copied Law   ',LAW0
-        CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
+        CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
-     1             ,NR,NE,NBT,INT)
+     1             ,NR,NE,NBT,INR)
         NMX=MXRW
         ICN=0
         DO IE=1,NE
@@ -526,22 +526,22 @@ C*      Copy the data for Law 6
 C*      Copy the data for Law 7
         IF(LTT.GT.0) 
      &  WRITE(LTT,900) '                       No action needed '
-        CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INT,IER)
+        CALL RDTAB2(LEN,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
-     1             ,NR,NE,NBT,INT)
+     1             ,NR,NE,NBT,INR)
         NMX=MXRW
         DO IE=1,NE
-          CALL RDTAB2(LEN,C1,C2,L1,L2,NRM,NMU,NBT,INT,IER)
+          CALL RDTAB2(LEN,C1,C2,L1,L2,NRM,NMU,NBT,INR,IER)
           CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
-     1               ,NRM,NMU,NBT,INT)
+     1               ,NRM,NMU,NBT,INR)
           KX=NMX/2
           LX=1+KX
           DO IM=1,NMU
-            CALL RDTAB1(LEN,C1,ACOS,L1,L2,NRP,NEP,NBT,INT
+            CALL RDTAB1(LEN,C1,ACOS,L1,L2,NRP,NEP,NBT,INR
      &                 ,RWO,RWO(LX),KX,IER)
             IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
             CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
-     1                 ,NRP,NEP,NBT,INT,RWO,RWO(LX))
+     1                 ,NRP,NEP,NBT,INR,RWO,RWO(LX))
           END DO
         END DO
         GO TO 800
@@ -554,7 +554,7 @@ C*      Don't know how to process - file incomplete - terminate.
       END IF
 C*
 C* Read Law 1 format specifications for outgoing energies
-  130 CALL RDTAB2(LEN,C1,C2,LANG ,LEP ,NR,NE,NBT,INT,IER)
+  130 CALL RDTAB2(LEN,C1,C2,LANG ,LEP ,NR,NE,NBT,INR,IER)
 
       print *,'lang,lep,nr,ne',lang,lep,nr,ne
 
@@ -575,7 +575,7 @@ C* Redefine konstants for Law 7
       L2=0
 C* Write the first TAB2 record for inc. energies of this section
       CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,C2,L1,L2
-     1           ,NR,NE,NBT,INT)
+     1           ,NR,NE,NBT,INR)
 C* Begin loop over incident particle energies
       LX1=1
       DO 600 I=1,NE
@@ -597,9 +597,9 @@ C* Write the TAB2 record defining incident energy and cosine list
         NRM=1
         NMU=2
         NBT(1)=2
-        INT(1)=2
+        INR(1)=2
         CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,EIN, 0, 0
-     1           ,NRM,NMU,NBT,INT)
+     1           ,NRM,NMU,NBT,INR)
         LXE=LX1+NW
         LXS=(LXE+MXRW)/2
         NXS=(LXS-LXE)/3
@@ -619,9 +619,9 @@ C* Process the continuum contribution (if present)
 C*        Linearise the continuum distribution
           NR=1
           NBT(1)=NEPP
-          INT(1)=LEP
+          INR(1)=LEP
           EPS=0.005
-          CALL VECLIN(NR,NEPP,NBT,INT,RWO(LXE),RWO(LXS),NXS,EPS)
+          CALL VECLIN(NR,NEPP,NBT,INR,RWO(LXE),RWO(LXS),NXS,EPS)
         ELSE
 C* If only discrete lines present, preset the range to zero
           NEPP=2
@@ -695,13 +695,13 @@ C* Check the integral normalisation factor
 C* Write the distribution for extreme cosines (-1, +1)
         NRP= 1
         NBT(1)=NEPP
-        INT(1)=2
+        INR(1)=2
         RMU=-1
         CALL WRTAB1(LOU,MAT0,MF0,MT0,NS, C1,RMU, 0, 0
-     1             ,NRP,NEPP,NBT,INT,RWO(LXE),RWO(LXS))
+     1             ,NRP,NEPP,NBT,INR,RWO(LXE),RWO(LXS))
         RMU= 1
         CALL WRTAB1(LOU,MAT0,MF0,MT0,NS, C1,RMU, 0, 0
-     1             ,NRP,NEPP,NBT,INT,RWO(LXE),RWO(LXS))
+     1             ,NRP,NEPP,NBT,INR,RWO(LXE),RWO(LXS))
         GO TO 600
       END IF
 C*
@@ -723,9 +723,9 @@ C* Write the TAB2 record with incident energy and the cosine grid
       L2  =0
       NRM =1
       NBT(1)=NMU
-      INT(1)=INTM
+      INR(1)=INTM
       CALL WRTAB2(LOU,MAT0,MF0,MT0,NS,C1,EIN,L1,L2
-     1           ,NRM,NMU,NBT,INT)
+     1           ,NRM,NMU,NBT,INR)
 C*
 C* Begin loop over the cosines for law 7
       SIG =0
@@ -824,7 +824,7 @@ C* Calculate the probability from pointwise representation
         FMU=0.
         GO TO 400
   303   INTI=LANG-10
-        FMU =FINEND(INT,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
+        FMU =FINEND(INTI,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
       ELSE
         IF(LTT.GT.0)
      &  WRITE(LTT,900) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
@@ -858,10 +858,10 @@ C* Check if single point
       L2 =0
       NS0=0
       NBT(1)=JP
-      INT(1)=LEP
+      INR(1)=LEP
 C* Write the spectrum distribution for this cosine
       CALL WRTAB1(LSC,MAT0,MF0,MT0,NS0,C1,ACOS,L1,L2
-     1           , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
+     1           , NRP,JP,NBT,INR,RWO(LXE),RWO(LXX))
 C* Add contribution to the integral
       SEN=0
       E1 =RWO(LXE)
@@ -907,13 +907,13 @@ C* Copy from scratch to output and normalise distributions
         SIG=1
       END IF
       DO IMU=1,NMU
-        CALL RDTAB1(LSC,C1,ACOS,L1,L2,NRP, JP, NBT,INT
+        CALL RDTAB1(LSC,C1,ACOS,L1,L2,NRP, JP, NBT,INR
      1             ,RWO(LXE),RWO(LXX),KX,IER)
         DO J=1,JP
           RWO(LXX+J-1)=RWO(LXX+J-1)/SIG
         END DO
         CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
-     1             , NRP,JP,NBT,INT,RWO(LXE),RWO(LXX))
+     1             , NRP,JP,NBT,INR,RWO(LXE),RWO(LXX))
       END DO
       REWIND LSC
 C* Continue with the incident energy loop
