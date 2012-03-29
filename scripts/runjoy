@@ -39,6 +39,8 @@ cat>njoyinput <<EOF
  -21 -24 -25 30/
  $MAT 6 0 1 0 2/
  302 303 304 402 443 444
+ viewr
+ 30 70
  purr
  -21 -25 -26
  $MAT 1 7 20 32/
@@ -74,6 +76,7 @@ mv tape31 $1-njoy.ps
 
 mv tape34 $1.ace
 mv tape35 $1.xsdir
-mv tape36  $1-acer.ps
+mv tape36 $1-acer.ps
+mv tape70 $1-heater.ps
 rm tape* njoyinput
 
