@@ -40,6 +40,7 @@ C*
 C*
 C* Initialise variables
       ZRO=0
+      IZR=0
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,940) ' MU_BAR - Average cosine of scattering  '
@@ -68,6 +69,7 @@ C* Temporay file
       OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
       H66=BLNK//BLNK
       MATH=7777
+      NS  =-1
       CALL WRTEXT(LTM,MATH,IZR,IZR,NS, H66)
 C*
 C* Log file
@@ -331,20 +333,26 @@ C* Read the first record from the data to be inserted
   210 CALL RDTEXT(LTM,MATH,MFH,MTH,H66,IER)
       IF(MATH.LT.0 .OR. IER.NE.0) GO TO 280
 c...
-c...  print *,'MATH,MFH,MTH',MATH,MFH,MTH
+C...  print *,'MATH,MFH,MTH',MATH,MFH,MTH
 c...
       IF(MTH.LE.0) GO TO 210
 C* Copy the source ENDF file up to the position for insertion
-  220 CALL RDTEXT(LIN,MAT ,MF ,MT ,C66,IER)
-      IF(MAT.LT.MATH .OR. (MF.LT.MFH .AND. MF.GT.0) .OR.
-     &   MT .LT.MTH) THEN
-        CALL WRTEXT(LOU,MAT ,MF ,MT ,NS, C66)
-        GO TO 220
-      END IF
-C* Insert the mu-bar data
+      MF =-1
+  220 MF0=MF
+      CALL RDTEXT(LIN,MAT ,MF ,MT ,C66,IER)
+      IF(MAT.EQ.MATH .AND.
+     &  ( (MF.EQ.3 .AND.  MT.GT.MTH) .OR.
+     &    (MF.EQ.0 .AND. MF0.EQ.3  )  ) ) THEN
 C...
-c...  print *,'Insert before',mat,mf,mt
+C...    print *,'Insert before',mat,mf,mt
 c...
+        GO TO 260
+      END IF
+C*    -- Write the record
+      CALL WRTEXT(LOU,MAT ,MF ,MT ,NS, C66)
+      IF(MAT.LT.0) GO TO 290
+      GO TO 220
+C* Insert the mu-bar data
   260 CALL WRTEXT(LOU,MATH,MFH,MTH,NS,H66)
       CALL RDTEXT(LTM,MATH,MFH,MTH,H66,IER)
       IF(MFH.NE.0) GO TO 260
@@ -353,7 +361,7 @@ C* Copy the rest of the ENDF
   280 CALL WRTEXT(LOU,MAT,MF,MT,NS,C66)
       CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
       IF(IER.EQ.0) GO TO 280
-      CLOSE(UNIT=LIN)
+  290 CLOSE(UNIT=LIN)
       CLOSE(UNIT=LOU)
       CLOSE(UNIT=LTM)
       WRITE(LTT,942) ' Number of materials processed        : ',NMAT
@@ -482,7 +490,7 @@ C-D    IER=1  End-of-file
 C-D        2  Read error
 C-D        9  Available field length NMX is exceeded.
 C-
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
       IER=0
@@ -510,7 +518,7 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-      DIMENSION    NBT(100),INR(100)
+      DIMENSION    NBT(*),INR(*)
 C*
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
