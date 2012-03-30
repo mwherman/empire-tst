@@ -1,6 +1,6 @@
-cc   * $Rev: 2719 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
+cc   * $Rev: 2763 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-03-30 07:34:48 +0200 (Fr, 30 Mär 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2204,8 +2204,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
-	xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont
-	xspreequ = xsinl + xsmsc + totemis + tothms
+      xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont
+      xspreequ = xsinl + xsmsc + totemis + tothms
 
       WRITE(107,'(G10.5,1P,(20E12.5))') EINl, 
      &     TOTcs*TOTred*TOTcorr,					  !total = reaction + shape-el
@@ -2515,8 +2515,11 @@ C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
                   ENDIF
                ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
  1530         ENDDO   ! over ejectiles
-              IF (nnuc.NE.1  .AND. RECoil.GT.0)
-     &          CALL PRINT_RECOIL(nnuc,REAction(nnuc))
+              IF ((A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
+                 CALL PRINT_RECOIL(nnuc,REAction(nnuc))
+              ELSEIF((A(1)-A(nnuc)).EQ.1  .AND. RECoil.GT.0) THEN
+                 CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc))
+              ENDIF
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
@@ -3812,15 +3815,15 @@ C--------Decay to discrete levels (stored with icse=0)
      &                                  *REClev(il,nejc)*(1.0 - weight)
      &                                  *SANgler(na)*coef
 c------------------------
-c                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
-c    &               .AND.na.EQ.10) THEN
-c                 WRITE(8,*) '       Parent bin', Ke
-c                 WRITE(8,*) 'Recoil bin', ire
-c                 WRITE(8,*) 'Erecoil ', erecoil, erecod, nnuc
-c                 WRITE(8,*) 'RECcse, RECcse par, REClev',
-c    &            RECcse(irec,0,nnur),RECcse(ire,Ke,Nnuc),
-c    &            REClev(il,nejc)
-c                 ENDIF
+!                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
+!     &               .AND.na.EQ.10) THEN
+!                  WRITE(8,*) '       Parent bin', Ke, 'Nnuc', Nnuc
+!                  WRITE(8,*) 'Recoil bin', ire
+!                  WRITE(8,*) 'Erecoil ', erecoil, erecod, nnuc
+!                  WRITE(8,*) 'RECcse, RECcse par, REClev',
+!     &            RECcse(irec,0,nnur),RECcse(ire,Ke,Nnuc),
+!     &            REClev(il,nejc)
+!                  ENDIF
 c------------------------
                   IF (irec + 1.GT.NDEREC) GOTO 60
                   RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
@@ -3881,7 +3884,8 @@ C-------and find last non-zero cross section for printing
          ilast = 0
          DO ie = 1, NDEREC
             corr = corr + RECcse(ie,0,Nnuc)
-            IF (RECcse(ie,0,Nnuc).NE.0) ilast = ie
+            IF (RECcse(ie,0,Nnuc).GT.0) ilast = ie
+            write(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
          ENDDO
          IF (corr.EQ.0) RETURN
 C        WRITE(8,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
@@ -3920,6 +3924,51 @@ C    &                             RECcse(ilast + 1,0,Nnuc)
       ENDIF
       END
 
+      SUBROUTINE PRINT_BIN_RECOIL(Nnuc,React)
+C-----
+C-----Prints recoil spectrum of (n,n) or (n,p) residue
+C-----
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+      CHARACTER*21 React
+C
+C Local variables
+C
+      REAL*8 recorr
+      REAL FLOAT
+      INTEGER ie, ilast, ipart
+
+       ipart = 1  !neutron
+       IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
+       
+C-----Find last non-zero cross section for printing
+      ilast = 0
+      DO ie = 1, NDEX
+         IF (POPcse(0,ipart,ie,INExc(Nnuc)). GT. 0) ilast = ie
+      ENDDO
+      IF (ilast .EQ. 0) RETURN
+      ilast = MIN(ilast + 1,NDEX)
+C-----correction factor multiplying cross sections and dividing DE is
+C-----simply A(1) since ejectile mass is here always 1 (neutron or proton) 
+         WRITE (12,*) ' '
+         WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
+     &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
+         WRITE (12,*) ' '
+         WRITE (12,'(''    Energy    mb/MeV'')')
+         WRITE (12,*) ' '
+         DO ie = 1, ilast
+            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/A(1),
+     &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
+         ENDDO
+C--------Print end point again with 0 xs for consistency with particle spectra
+C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
+C    &                             RECcse(ilast + 1,0,Nnuc)
+         WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
+      END
 
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
       INCLUDE 'dimension.h'
