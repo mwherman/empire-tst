@@ -50,7 +50,7 @@ endif
 
 
 #all: kalman3 kalend2 kalend3 c4tokal genkal
-all: kalman3.exe kalend2.exe c4tokal.exe genkal.exe
+all: kalman3.exe kalend2.exe c4tokal.exe genkal.exe pnt2kal
 
 OBJF =	kalman3.1.o
 
@@ -77,5 +77,12 @@ genkal.exe:   $(OBJI)
 #kalend3.exe:   $(OBJL)
 #	$(FC) -o $@ $(OBJL)
 
+
+OBJM =	pnt2kal.o 
+
+pnt2kal :   $(OBJM)
+	$(FC) -o $@ $(OBJM)
+
+
 clean:
-	rm -f *.o
+	rm -f *.o *.mod

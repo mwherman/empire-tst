@@ -90,6 +90,7 @@ EOF
        rm KALMAN.INP
     fi
 
+#    $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
     $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
 
 # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
