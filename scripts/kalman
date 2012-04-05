@@ -39,9 +39,16 @@ if [ ! -s $file-inp.sen ]; then
    echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
    exit 2
 fi
-if [ ! -s $file-mat.sen ]; then
-   echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
-   exit 3
+if [ ! -s $file-pfns-mat.sen ]; then
+   echo "$file-pfns-mat.sen NOT FOUND. Fitting only cross sections from $file-mat.sen."
+   PFNS=0
+   if [ ! -s $file-mat.sen ]; then
+     echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
+     exit 3
+   fi
+else
+   echo "$file-pfns-mat.sen EXISTS. Fitting only prompt fission neutron spectra."
+   PFNS=1
 fi
 if [ ! -s $file-kal.c4 ]; then
    echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
@@ -52,7 +59,6 @@ if [ ! -s $file-kal.c4 ]; then
      cp $file.c4 $file-kal.c4
    fi
 fi
-
 
 rm INPUT.D 2>/dev/null
 rm KALMAN.INP 2>/dev/null
@@ -76,10 +82,9 @@ for k in $MT; do
     fi
 
     cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT
+$file ${k} $MAT $EXPDAT $PFNS
 EOF
     $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
-
 
     if [ -s check.out ]; then
        exit
@@ -90,8 +95,14 @@ EOF
        rm KALMAN.INP
     fi
 
-#    $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
-    $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+if [ "$PFNS" -eq 0 ]
+then
+  echo  "Running c4tokal"
+  $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+else
+  echo  "Running pnt2kal"
+  $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
+fi
 
 # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
 for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
@@ -166,7 +177,12 @@ done
 
 #PLOT DATA ONLY WITH EXPERIMENTAL DATA
     if [ "$EXPDAT" != 0 ]; then
-       gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
+      if [ "$PFNS" -eq 0 ]
+      then
+        gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
+      else
+        gnuplot $EMPIREDIR/util/kalman/corr-pfns.gp >/dev/null
+      fi
     fi
 
     mv corrplot.d $file-${k}-cov.gpd

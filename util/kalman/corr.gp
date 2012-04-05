@@ -36,7 +36,6 @@ set ylabel 'Cross Section [barn]'
 ev=1.e-6
 
 b=1.e-3
-#b=1.e+0
 
 set logscale y
 set logscale x
