@@ -1,6 +1,6 @@
-cc   * $Rev: 2763 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-03-30 07:34:48 +0200 (Fr, 30 Mär 2012) $
+cc   * $Rev: 2766 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-05 11:49:34 +0200 (Do, 05 Apr 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3938,7 +3938,6 @@ C
 C
 C Local variables
 C
-      REAL*8 recorr
       REAL FLOAT
       INTEGER ie, ilast, ipart
 
