@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 2767 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-04-05 11:50:34 +0200 (Do, 05 Apr 2012) $
 
 
       SUBROUTINE DTRANS(iemin,iemax)
@@ -47,8 +47,8 @@ C-----gdel is the single-particle density for neutrons
 C     irea=NDEjc
       irea = 4 
       do ip=2,irea,2
-         IF(IOUt.GE.3 .and. ip.eq.2) write(8,*)'(d,p) break-up reaction'
-         IF(IOUt.GE.3 .and. ip.eq.4) write(8,*)'(d,t) pick-up  reaction'
+         IF(IOUt.GE.3.and.ip.eq.2) write(8,*)'(d,p) stripping reaction'
+         IF(IOUt.GE.3.and.ip.eq.4) write(8,*)'(d,t) pick-up reaction'
          ab = jno(ip)+jpo(ip)
          ares  = A(1) - ab
          zres  = Z(1) - jpo(ip)

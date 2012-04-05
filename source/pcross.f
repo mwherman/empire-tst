@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2719 $
+Ccc   * $Rev: 2767 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
+Ccc   * $Date: 2012-04-05 11:50:34 +0200 (Do, 05 Apr 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -52,7 +52,7 @@ C
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
-     &       dbreak, dpickup, step
+     &       dstrip, dbreak, dpickup, step
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
@@ -222,6 +222,7 @@ C
 Cig---Direct reaction spectra for d,p and d,t only
 C
       dbreak  = 0.d0
+	  dstrip  = 0.d0 
       dpickup = 0.d0
       scompn  = Sigr
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
@@ -237,9 +238,9 @@ C
 C
           IF(scompn.le.0.d0) THEN
             scompn  = 0.d0
-            dbreak  = Sigr/(cross(2)+cross(5))*cross(2)
+            dstrip  = Sigr/(cross(2)+cross(5))*cross(2)
             dpickup = Sigr/(cross(2)+cross(5))*cross(5)
-            cross(2)= dbreak
+            cross(2)= dstrip
             cross(5)= dpickup
             DO ienerg = 1, NDEX
               spec(2,ienerg) = Sigr/(cross(2)+cross(5))*spec(2,ienerg)
@@ -251,7 +252,7 @@ C
      &      'Warning: Direct emission exhausted reaction cross section')
           ENDIF
 c         write(8,99003) Einl,sigr,cross(2),cross(5)
-          dbreak=cross(2)
+          dstrip =cross(2)
           dpickup=cross(5)
         ENDIF
       ENDIF
@@ -508,13 +509,15 @@ C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
 
+
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
             WRITE (8,99016)
 99016 FORMAT (/1x,'Kalbach parameterization for pick-up and stripping',
      &           ' is considered')
-            WRITE (8,99017) dbreak,dpickup
-99017 FORMAT (1X,'PCROSS d,p breakup cross section   =',F8.2,
-     &  ' mb'/1X,'PCROSS d,t pickup  cross section   =',F8.2)
+            WRITE (8,99017) dbreak,dstrip,dpickup
+99017 FORMAT (1X,'PCROSS deut breakup cross section  =',F8.2,' mb',/,
+     &        1X,'PCROSS d,p stripping cross section =',F8.2,' mb',/,
+     &        1X,'PCROSS d,t pickup cross section    =',F8.2,' mb')
       ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
@@ -1307,6 +1310,5 @@ C        SGAM = GAMMA ABSORPTION CROSS SECTION in mb
          SGAM = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
       ENDIF
       END
-
 
 
