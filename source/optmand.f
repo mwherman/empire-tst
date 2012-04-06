@@ -12414,59 +12414,84 @@ C
 C
 C-----FUNCTION TO EVALUATE exp(Z)*E1(Z)
 C
-      DOUBLE COMPLEX function zfi(za)     
-C
-C Complex exponential integral function multiplied by exponential
-C
-C AUTHOR: J. Raynal
-C
-      IMPLICIT NONE
-      DOUBLE PRECISION aj
-      DOUBLE COMPLEX za,y 
-      integer m,i
-      zfi=0.d0
-      if (za.eq.0.d0) return
-c     if (ABS(dreal(za)+18.5d0).ge.25.d0) go to 3
-c     if (SQRT(625.d0-(dreal(za)+18.5d0)**2)/1.665d0.lt.ABS(dimag(za))
-      if (abs(real(za)+18.5d0).ge.25.d0) go to 3
-      if (sqrt(625.d0-(real(za)+18.5d0)**2)/1.665d0.lt.abs(imag(za))
-     1) go to 3
-C     zfi=-.57721566490153d0-cdlog(za)
-      zfi=-.57721566490153d0-log(za)
-      y=1.d0
-      do 1 m=1,2000
-      aj=m
-      y=-y*za/aj
-c     if (cABS(y).lt.1.d-15*cABS(zfi)) go to 2
-      if (abs(y).lt.1.d-15*abs(zfi)) go to 2
-    1 zfi=zfi-y/aj
-C   2 zfi=cEXP(za)*zfi
-    2 zfi=EXP(za)*zfi
-      return
-    3 do 4 i=1,20
-      aj=21-i
-      zfi=aj/(za+zfi)
-    4 zfi=aj/(1.d0+zfi)
-      zfi=1.d0/(zfi+za)
-      return
-      end
+      complex*16 function zfi(za)
 
-C
-C-----FUNCTION TO EVALUATE Ei(X)
-C
-      DOUBLE PRECISION FUNCTION EIn(X)
+      ! Complex exponential integral function multiplied by exponential
+      ! AUTHOR: J. Raynal
+
       IMPLICIT NONE
-      DOUBLE PRECISION FAC, H, X
-      INTEGER N
-      EIn = 0.57721566490153d0+LOG(ABS(X))
-      FAC = 1.0
-      DO N = 1,100
-      H = FLOAT(N)
-      FAC = FAC*H
-      EIn = EIn + X**N/(H*FAC)
-      ENDDO
-      RETURN
-      END
+
+      complex*16, intent(in) :: za
+
+      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+      real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
+      complex*16, parameter :: zer = (0.D0,0.D0)
+
+      integer*4 i
+      real*8 aj,xr
+      complex*16 y,z
+
+      if (za .eq. zer) then
+          zfi = zer
+          return
+      endif
+
+      xr = abs(dble(za) + 18.5d0)
+      if((xr .ge. 25.d0) .or. (sqrt(625.d0-xr*xr)/1.665d0 .lt.
+     +    abs(dimag(za)))) then
+          z = zer
+          do i = 1,20
+              aj = dble(21-i)
+              z = aj/(za+z)
+              z = aj/(1.d0+z)
+          end do
+          z = 1.d0/(z+za)
+      else
+          z = -emc - log(za)
+          y = (1.d0,0.D0)
+          do i = 1,2000
+             aj = dble(i)
+             y = -y*za/aj
+             if (abs(y/z) .lt. prec_lim) exit
+             z = z - y/aj
+          end do
+          z = exp(za)*z
+      endif
+
+      zfi = z
+      return
+      end function zfi
+
+      !-----------------------------------------------------------------------------
+
+      real*8 function ein(x)
+
+      ! Exponential integral function Ei for real argument
+
+      implicit none
+
+      real*8, intent(in) :: x
+
+      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+      real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
+
+      integer*4 i
+      real*8 y,z,w
+
+      y = emc + dlog(abs(x))
+
+      z = 1.D0
+      do i = 1,100
+          w = dble(i)
+          z = z*x/w
+          if(abs(z/y) .lt. prec_lim) exit
+          y = y + z/w
+      end do
+
+      ein = y
+      return
+      end function ein
+
 C     *******************************************************
 C     END of dispersive
 C     *******************************************************
