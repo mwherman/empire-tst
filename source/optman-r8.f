@@ -12423,8 +12423,8 @@ C
 
       complex*16, intent(in) :: za
 
-      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
-      real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
+      real*8, parameter :: emc = 0.5772156649015328603D0     ! Euler-Mascheroni constant
+      real*8, parameter :: prec_lim = 1.0D-15                ! required precision
       complex*16, parameter :: zer = (0.D0,0.D0)
 
       integer*4 i
@@ -12472,8 +12472,8 @@ C
 
       real*8, intent(in) :: x
 
-      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
-      real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
+      real*8, parameter :: emc = 0.5772156649015328603D0     ! Euler-Mascheroni constant
+      real*8, parameter :: prec_lim = 1.0D-15                ! required precision
 
       integer*4 i
       real*8 y,z,w
