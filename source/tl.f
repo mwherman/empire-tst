@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2770 $
+Ccc   * $Rev: 2780 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
+Ccc   * $Date: 2012-04-09 23:57:26 +0200 (Mo, 09 Apr 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -792,6 +792,11 @@ C
 C
 C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
+         IPH(1)   = SR_ntu(1,ncalc)
+         D_Klv(1) = SR_nnb(1,ncalc)
+         D_Llv(1) = SR_nng(1,ncalc)
+         D_nno(1) = SR_nno(1,ncalc)
+
          nld_cc = 1
          DO ilv=2,ND_nlv
            DO n=2,NCOll(ncalc)
@@ -808,8 +813,8 @@ C
                   D_Elv(ilv) = EXV(n,ncalc) 
 
                   IPH(ilv)   = SR_ntu(n,ncalc)
-                  D_Llv(ilv) = SR_nnb(n,ncalc)
-                  D_Klv(ilv) = SR_nng(n,ncalc)
+                  D_Klv(ilv) = SR_nnb(n,ncalc)
+                  D_Llv(ilv) = SR_nng(n,ncalc)
                   D_nno(ilv) = SR_nno(n,ncalc)
 
                   exit 
@@ -838,21 +843,21 @@ C-----------------swapping
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
                   itmp = IPH(i)
                   IPH(i) = IPH(j)
                   IPH(j) = itmp
-
-                  dtmp = D_Llv(i)
-                  D_Llv(i) = D_Llv(j)
-                  D_Llv(j) = dtmp
 
                   dtmp = D_Klv(i)
                   D_Klv(i) = D_Klv(j)
                   D_Klv(j) = dtmp
 
-                  dtmp = D_Def(i,2)
-                  D_Def(i,2) = D_Def(j,2)
-                  D_Def(j,2) = dtmp
+                  dtmp = D_Llv(i)
+                  D_Llv(i) = D_Llv(j)
+                  D_Llv(j) = dtmp
 
                   dtmp = D_nno(i)
                   D_nno(i) = D_nno(j)
@@ -1027,17 +1032,17 @@ C
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
              WRITE (96,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
            ENDDO
 
@@ -1153,6 +1158,11 @@ C
 C
 C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
+         IPH(1)   = SR_ntu(1,ncalc)
+         D_Klv(1) = SR_nnb(1,ncalc)
+         D_Llv(1) = SR_nng(1,ncalc)
+         D_nno(1) = SR_nno(1,ncalc)
+
          nld_cc = 1
          DO ilv=2,ND_nlv
            DO n=2,NCOll(ncalc)
@@ -1169,8 +1179,8 @@ C
                   D_Elv(ilv) = EXV(n,ncalc) 
                   
                   IPH(ilv)   = SR_ntu(n,ncalc)
-                  D_Llv(ilv) = SR_nnb(n,ncalc)
-                  D_Klv(ilv) = SR_nng(n,ncalc)
+                  D_Klv(ilv) = SR_nnb(n,ncalc)
+                  D_Llv(ilv) = SR_nng(n,ncalc)
                   D_nno(ilv) = SR_nno(n,ncalc)
 
                   D_Def(ilv,2) = DEFv(n,ncalc)
@@ -1190,10 +1200,6 @@ C-----------------swapping
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
-                  dtmp = D_Def(i,2)
-                  D_Def(i,2) = D_Def(j,2)
-                  D_Def(j,2) = dtmp
-
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
@@ -1206,17 +1212,21 @@ C-----------------swapping
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
                   itmp = IPH(i)
                   IPH(i) = IPH(j)
                   IPH(j) = itmp
 
-                  dtmp = D_Llv(i)
-                  D_Llv(i) = D_Llv(j)
-                  D_Llv(j) = dtmp
-
                   dtmp = D_Klv(i)
                   D_Klv(i) = D_Klv(j)
                   D_Klv(j) = dtmp
+
+                  dtmp = D_Llv(i)
+                  D_Llv(i) = D_Llv(j)
+                  D_Llv(j) = dtmp
 
                   dtmp = D_nno(i)
                   D_nno(i) = D_nno(j)
@@ -1310,17 +1320,17 @@ C           first run with default TARGET_COLL.DAT
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
              WRITE (96,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
            ENDDO
 

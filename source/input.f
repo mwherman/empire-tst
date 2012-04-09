@@ -1,7 +1,7 @@
 $DEBUG
-Ccc   * $Rev: 2770 $
+Ccc   * $Rev: 2780 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
+Ccc   * $Date: 2012-04-09 23:57:26 +0200 (Mo, 09 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -9033,23 +9033,23 @@ C----------Reading ground state information (to avoid overwriting deformation)
            READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+     &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
 	     
            WRITE(8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), 0.005, D_nno(1)
+     &           D_Klv(1), D_Llv(1), 0.005, D_nno(1)
            WRITE(12,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), 0.005, D_nno(1)
+     &           D_Klv(1), D_Llv(1), 0.005, D_nno(1)
 C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
            igreson = 0
            DO i = 2, ND_nlv
             READ (32,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), ftmp, D_nno(i), ctmp5  
+     &          D_Klv(i), D_Llv(i), ftmp, D_nno(i), ctmp5  
 C           For odd nuclides, collective states in continuum have
 C           different spin than the ground state
 C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
@@ -9066,7 +9066,7 @@ C
             WRITE (8,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
+     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
 
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
@@ -9081,7 +9081,7 @@ C           Giant Resonances flag: negative deformation
             WRITE (12,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), abs(D_Def(i,2)), D_nno(i), ctmp5
+     &          D_Klv(i), D_Llv(i), abs(D_Def(i,2)), D_nno(i), ctmp5
 C
 C           CHECKING EWSR (only for neutrons)
 C
@@ -9504,7 +9504,7 @@ C                                assigning randomly 2+,4+,3- spin
             D_Lvp(ND_nlv) = lvpr
             D_Xjlv(ND_nlv) = xjlvr
 C           RCN 0811 
-            IPH(ND_nlv) = 1
+            IPH(ND_nlv) = 0
 C
             D_Llv(ND_nlv) = 0
             D_Klv(ND_nlv) = 0
