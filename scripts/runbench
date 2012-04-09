@@ -2,36 +2,202 @@
 # Script to run Empire for all the input files in benchmarks directory, 
 # keeping only the original files and the .lst and .xsc files
 #
+option=$1
+
 cd $EMPIREDIR/benchmarks
-$EMPIREDIR/scripts/runE a-ni58-pcross          
-$EMPIREDIR/scripts/runE d-au197                    
-$EMPIREDIR/scripts/runE fe54-blind                 
-$EMPIREDIR/scripts/runE fe54-vib-CC-direct-2   
-$EMPIREDIR/scripts/runE HI-pcross-ccfus         
-$EMPIREDIR/scripts/runE n_eu153-dir-msc-msd        
-$EMPIREDIR/scripts/runE ni62-th-EGSM         
-$EMPIREDIR/scripts/runE n-na23-prim-gam        
-$EMPIREDIR/scripts/runE n-zr92-soft--dccomp         
-$EMPIREDIR/scripts/runE p-th232                           
-$EMPIREDIR/scripts/runE p-tl205                 
-$EMPIREDIR/scripts/runE test-HRTW-fis               
-$EMPIREDIR/scripts/runE test-LD-mo100            
-$EMPIREDIR/scripts/runE test-PE-models                
-$EMPIREDIR/scripts/runE th232-rot-vib                 
-$EMPIREDIR/scripts/runE u235-blind                 
-$EMPIREDIR/scripts/runE u235-pfns-nubar              
-$EMPIREDIR/scripts/runE u238-blind                 
-$EMPIREDIR/scripts/runE u238-gf                   
-$EMPIREDIR/scripts/runE u238-HFB-num-fis          
-$EMPIREDIR/scripts/runE u238-HFB-num-fis-tun         
-$EMPIREDIR/scripts/runE u238-HFB-par-fis          
-$EMPIREDIR/scripts/runE u238-rigid-soft-omp         
-$EMPIREDIR/scripts/runE u238-rot-CC-direct-2           
-mkdir TeMpOrArYdIr
-mv th232-rot-vib-lev.col TeMpOrArYdIr/
-mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
-rm *-gam-tr.xsc *-preq.xsc *-fiss.xsc *-hms.lst
-mv *.xsc *.lst TeMpOrArYdIr/
-rm -r *-tl *.out *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-hms.lst *.DAT >& /dev/null
-mv TeMpOrArYdIr/* ./
-rm -r TeMpOrArYdIr
+
+if [ -z $option ] || [ "$option" = "run" ] ; then
+   echo "Running benchmarks..."
+   $EMPIREDIR/scripts/runE a-ni58-pcross          
+   $EMPIREDIR/scripts/runE d-au197                    
+   $EMPIREDIR/scripts/runE fe54-blind                 
+   $EMPIREDIR/scripts/runE fe54-vib-CC-direct-2   
+   $EMPIREDIR/scripts/runE HI-pcross-ccfus         
+   $EMPIREDIR/scripts/runE n_eu153-dir-msc-msd        
+   $EMPIREDIR/scripts/runE ni62-th-EGSM               
+   $EMPIREDIR/scripts/runE n-na23-prim-gam        
+   $EMPIREDIR/scripts/runE n-zr92-soft--dccomp         
+   $EMPIREDIR/scripts/runE p-th232                           
+   $EMPIREDIR/scripts/runE p-tl205                 
+   $EMPIREDIR/scripts/runE test-HRTW-fis               
+   $EMPIREDIR/scripts/runE test-LD-mo100            
+   $EMPIREDIR/scripts/runE test-PE-models                
+   $EMPIREDIR/scripts/runE th232-rot-vib                 
+   $EMPIREDIR/scripts/runE u235-blind                 
+   $EMPIREDIR/scripts/runE u235-pfns-nubar              
+   $EMPIREDIR/scripts/runE u238-blind                 
+   $EMPIREDIR/scripts/runE u238-gf                   
+   $EMPIREDIR/scripts/runE u238-HFB-num-fis          
+   $EMPIREDIR/scripts/runE u238-HFB-num-fis-tun         
+   $EMPIREDIR/scripts/runE u238-HFB-par-fis          
+   $EMPIREDIR/scripts/runE u238-rigid-soft-omp         
+   $EMPIREDIR/scripts/runE u238-rot-CC-direct-2           
+   mkdir TeMpOrArYdIr
+   mv th232-rot-vib-lev.col TeMpOrArYdIr/
+   mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   rm *-gam-tr.xsc *-preq.xsc *-fiss.xsc *-hms.lst >& /dev/null
+   mv *.xsc *.lst TeMpOrArYdIr/
+   rm -r *-tl *.out *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-hms.lst *.DAT >& /dev/null
+   mv TeMpOrArYdIr/* ./
+   rm -r TeMpOrArYdIr >& /dev/null
+
+elif [ "$option" = "clean" ] ; then
+# cleans the benchmarks directory, keeping only original files
+   mkdir TeMpOrArYdIr
+   mv *-ref.* TeMpOrArYdIr/
+   mv th232-rot-vib-lev.col TeMpOrArYdIr/
+   mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   cp *.inp TeMpOrArYdIr/ 
+   $EMPIREDIR/scripts/clean a-ni58-pcross 
+   $EMPIREDIR/scripts/clean d-au197 
+   $EMPIREDIR/scripts/clean fe54-blind 
+   $EMPIREDIR/scripts/clean fe54-vib-CC-direct-2 
+   $EMPIREDIR/scripts/clean HI-pcross-ccfus 
+   $EMPIREDIR/scripts/clean n_eu153-dir-msc-msd 
+   $EMPIREDIR/scripts/clean ni62-th-EGSM 
+   $EMPIREDIR/scripts/clean n-na23-prim-gam  
+   $EMPIREDIR/scripts/clean n-zr92-soft--dccomp 
+   $EMPIREDIR/scripts/clean p-th232
+   $EMPIREDIR/scripts/clean p-tl205
+   $EMPIREDIR/scripts/clean test-HRTW-fis
+   $EMPIREDIR/scripts/clean test-LD-mo100 
+   $EMPIREDIR/scripts/clean test-PE-models 
+   $EMPIREDIR/scripts/clean th232-rot-vib 
+   $EMPIREDIR/scripts/clean u235-blind 
+   $EMPIREDIR/scripts/clean u235-pfns-nubar  
+   $EMPIREDIR/scripts/clean u238-blind 
+   $EMPIREDIR/scripts/clean u238-gf               
+   $EMPIREDIR/scripts/clean u238-HFB-num-fis 
+   $EMPIREDIR/scripts/clean u238-HFB-num-fis-tun 
+   $EMPIREDIR/scripts/clean u238-HFB-par-fis 
+   $EMPIREDIR/scripts/clean u238-rigid-soft-omp         
+   $EMPIREDIR/scripts/clean u238-rot-CC-direct-2 
+   rm *.zvd file* spec ecis* >& /dev/null
+   mv TeMpOrArYdIr/* ./
+   rm -r TeMpOrArYdIr >& /dev/null
+
+
+elif [ "$option" = "diff" ] ; then
+# use diff -y  command to compare files .lst and .xsc from benchmark runs and existing reference files
+#
+   diff -y a-ni58-pcross.xsc              a-ni58-pcross-ref.xsc           > diff.a-ni58-pcross.xsc
+   diff -y a-ni58-pcross.lst              a-ni58-pcross-ref.lst           > diff.a-ni58-pcross.lst       
+   diff -y d-au197.xsc                    d-au197-ref.xsc                 > diff.d-au197.xsc                
+   diff -y d-au197.lst                    d-au197-ref.lst                 > diff.d-au197.lst                      
+   diff -y fe54-blind.xsc                 fe54-blind-ref.xsc              > diff.fe54-blind.xsc              
+   diff -y fe54-blind.lst                 fe54-blind-ref.lst              > diff.fe54-blind.lst               
+   diff -y fe54-vib-CC-direct-2.xsc       fe54-vib-CC-direct-2-ref.xsc    > diff.fe54-vib-CC-direct-2.xsc      
+   diff -y fe54-vib-CC-direct-2.lst       fe54-vib-CC-direct-2-ref.lst    > diff.fe54-vib-CC-direct-2.lst         
+   diff -y HI-pcross-ccfus.xsc            HI-pcross-ccfus-ref.xsc         > diff.HI-pcross-ccfus.xsc              
+   diff -y HI-pcross-ccfus.lst            HI-pcross-ccfus-ref.lst         > diff.HI-pcross-ccfus.lst            
+   diff -y n_eu153-dir-msc-msd.xsc        n_eu153-dir-msc-msd-ref.xsc     > diff.n_eu153-dir-msc-msd.xsc         
+   diff -y n_eu153-dir-msc-msd.lst        n_eu153-dir-msc-msd-ref.lst     > diff.n_eu153-dir-msc-msd.lst         
+   diff -y ni62-th-EGSM.xsc               ni62-th-EGSM-ref.xsc            > diff.ni62-th-EGSM.xsc            
+   diff -y ni62-th-EGSM.lst               ni62-th-EGSM-ref.lst            > diff.ni62-th-EGSM.lst              
+   diff -y n-na23-prim-gam.xsc            n-na23-prim-gam-ref.xsc         > diff.n-na23-prim-gam.xsc           
+   diff -y n-na23-prim-gam.lst            n-na23-prim-gam-ref.lst         > diff.n-na23-prim-gam.lst         
+   diff -y n-zr92-soft--dccomp.xsc        n-zr92-soft--dccomp-ref.xsc     > diff.n-zr92-soft--dccomp.xsc 
+   diff -y n-zr92-soft--dccomp.lst        n-zr92-soft--dccomp-ref.lst     > diff.n-zr92-soft--dccomp.lst 
+   diff -y p-th232.xsc                    p-th232-ref.xsc                 > diff.p-th232.xsc                  
+   diff -y p-th232.lst                    p-th232-ref.lst                 > diff.p-th232.lst                  
+   diff -y p-tl205.xsc                    p-tl205-ref.xsc                 > diff.p-tl205.xsc                
+   diff -y p-tl205.lst                    p-tl205-ref.lst                 > diff.p-tl205.lst                
+   diff -y test-HRTW-fis.xsc              test-HRTW-fis-ref.xsc           > diff.test-HRTW-fis.xsc       
+   diff -y test-HRTW-fis.lst              test-HRTW-fis-ref.lst           > diff.test-HRTW-fis.lst       
+   diff -y test-LD-mo100.xsc              test-LD-mo100-ref.xsc           > diff.test-LD-mo100.xsc         
+   diff -y test-LD-mo100.lst              test-LD-mo100-ref.lst           > diff.test-LD-mo100.lst         
+   diff -y test-PE-models.xsc             test-PE-models-ref.xsc          > diff.test-PE-models.xsc       
+   diff -y test-PE-models.lst             test-PE-models-ref.lst          > diff.test-PE-models.lst       
+   diff -y th232-rot-vib.xsc              th232-rot-vib-ref.xsc           > diff.th232-rot-vib.xsc        
+   diff -y th232-rot-vib.lst              th232-rot-vib-ref.lst           > diff.th232-rot-vib.lst        
+   diff -y u235-blind.xsc                 u235-blind-ref.xsc              > diff.u235-blind.xsc           
+   diff -y u235-blind.lst                 u235-blind-ref.lst              > diff.u235-blind.lst           
+   diff -y u235-pfns-nubar.xsc            u235-pfns-nubar-ref.xsc         > diff.u235-pfns-nubar.xsc     
+   diff -y u235-pfns-nubar.lst            u235-pfns-nubar-ref.lst         > diff.u235-pfns-nubar.lst     
+   diff -y u238-blind.xsc                 u238-blind-ref.xsc              > diff.u238-blind.xsc           
+   diff -y u238-blind.lst                 u238-blind-ref.lst              > diff.u238-blind.lst             
+   diff -y u238-gf.xsc                    u238-gf-ref.xsc                 > diff.u238-gf.xsc                
+   diff -y u238-gf.lst                    u238-gf-ref.lst                 > diff.u238-gf.lst              
+   diff -y u238-HFB-num-fis.xsc           u238-HFB-num-fis-ref.xsc        > diff.u238-HFB-num-fis.xsc      
+   diff -y u238-HFB-num-fis.lst           u238-HFB-num-fis-ref.lst        > diff.u238-HFB-num-fis.lst     
+   diff -y u238-HFB-num-fis-tun.xsc       u238-HFB-num-fis-tun-ref.xsc    > diff.u238-HFB-num-fis-tun.xsc
+   diff -y u238-HFB-num-fis-tun.lst       u238-HFB-num-fis-tun-ref.lst    > diff.u238-HFB-num-fis-tun.lst
+   diff -y u238-HFB-par-fis.xsc           u238-HFB-par-fis-ref.xsc        > diff.u238-HFB-par-fis.xsc      
+   diff -y u238-HFB-par-fis.lst           u238-HFB-par-fis-ref.lst        > diff.u238-HFB-par-fis.lst      
+   diff -y u238-rigid-soft-omp.xsc        u238-rigid-soft-omp-ref.xsc     > diff.u238-rigid-soft-omp.xsc  
+   diff -y u238-rigid-soft-omp.lst        u238-rigid-soft-omp-ref.lst     > diff.u238-rigid-soft-omp.lst  
+   diff -y u238-rot-CC-direct-2.xsc       u238-rot-CC-direct-2-ref.xsc    > diff.u238-rot-CC-direct-2.xsc  
+   diff -y u238-rot-CC-direct-2.lst       u238-rot-CC-direct-2-ref.lst    > diff.u238-rot-CC-direct-2.lst  
+   
+elif [ "$option" = "kompare" ] ; then
+# use kompare to compare files .lst and .xsc from benchmark runs and existing reference files
+#
+   echo "Running kompare..."
+   kompare a-ni58-pcross.xsc              a-ni58-pcross-ref.xsc            
+   kompare a-ni58-pcross.lst              a-ni58-pcross-ref.lst            
+   kompare d-au197.xsc                    d-au197-ref.xsc                 
+   kompare d-au197.lst                    d-au197-ref.lst                 
+   kompare fe54-blind.xsc                 fe54-blind-ref.xsc             
+   kompare fe54-blind.lst                 fe54-blind-ref.lst             
+   kompare fe54-vib-CC-direct-2.xsc       fe54-vib-CC-direct-2-ref.xsc  
+   kompare fe54-vib-CC-direct-2.lst       fe54-vib-CC-direct-2-ref.lst  
+   kompare HI-pcross-ccfus.xsc            HI-pcross-ccfus-ref.xsc       
+   kompare HI-pcross-ccfus.lst            HI-pcross-ccfus-ref.lst       
+   kompare n_eu153-dir-msc-msd.xsc        n_eu153-dir-msc-msd-ref.xsc     
+   kompare n_eu153-dir-msc-msd.lst        n_eu153-dir-msc-msd-ref.lst     
+   kompare ni62-th-EGSM.xsc               ni62-th-EGSM-ref.xsc          
+   kompare ni62-th-EGSM.lst               ni62-th-EGSM-ref.lst          
+   kompare n-na23-prim-gam.xsc            n-na23-prim-gam-ref.xsc       
+   kompare n-na23-prim-gam.lst            n-na23-prim-gam-ref.lst       
+   kompare n-zr92-soft--dccomp.xsc        n-zr92-soft--dccomp-ref.xsc      
+   kompare n-zr92-soft--dccomp.lst        n-zr92-soft--dccomp-ref.lst      
+   kompare p-th232.xsc                    p-th232-ref.xsc                        
+   kompare p-th232.lst                    p-th232-ref.lst                        
+   kompare p-tl205.xsc                    p-tl205-ref.xsc               
+   kompare p-tl205.lst                    p-tl205-ref.lst               
+   kompare test-HRTW-fis.xsc              test-HRTW-fis-ref.xsc            
+   kompare test-HRTW-fis.lst              test-HRTW-fis-ref.lst            
+   kompare test-LD-mo100.xsc              test-LD-mo100-ref.xsc         
+   kompare test-LD-mo100.lst              test-LD-mo100-ref.lst         
+   kompare test-PE-models.xsc             test-PE-models-ref.xsc             
+   kompare test-PE-models.lst             test-PE-models-ref.lst             
+   kompare th232-rot-vib.xsc              th232-rot-vib-ref.xsc              
+   kompare th232-rot-vib.lst              th232-rot-vib-ref.lst              
+   kompare u235-blind.xsc                 u235-blind-ref.xsc              
+   kompare u235-blind.lst                 u235-blind-ref.lst              
+   kompare u235-pfns-nubar.xsc            u235-pfns-nubar-ref.xsc           
+   kompare u235-pfns-nubar.lst            u235-pfns-nubar-ref.lst           
+   kompare u238-blind.xsc                 u238-blind-ref.xsc              
+   kompare u238-blind.lst                 u238-blind-ref.lst              
+   kompare u238-gf.xsc                    u238-gf-ref.xsc                
+   kompare u238-gf.lst                    u238-gf-ref.lst                
+   kompare u238-HFB-num-fis.xsc           u238-HFB-num-fis-ref.xsc       
+   kompare u238-HFB-num-fis.lst           u238-HFB-num-fis-ref.lst       
+   kompare u238-HFB-num-fis-tun.xsc       u238-HFB-num-fis-tun-ref.xsc      
+   kompare u238-HFB-num-fis-tun.lst       u238-HFB-num-fis-tun-ref.lst      
+   kompare u238-HFB-par-fis.xsc           u238-HFB-par-fis-ref.xsc       
+   kompare u238-HFB-par-fis.lst           u238-HFB-par-fis-ref.lst       
+   kompare u238-rigid-soft-omp.xsc        u238-rigid-soft-omp-ref.xsc       
+   kompare u238-rigid-soft-omp.lst        u238-rigid-soft-omp-ref.lst       
+   kompare u238-rot-CC-direct-2.xsc       u238-rot-CC-direct-2-ref.xsc        
+   kompare u238-rot-CC-direct-2.lst       u238-rot-CC-direct-2-ref.lst        
+
+elif [ "$option" = "replace" ] ; then
+#  renames the files .xsc and .lst to -ref.xsc and -ref.lst to serve as reference
+#  using perl-based new version of linux 'rename' command
+   echo 'Renaming cross-section and .lst files for reference'
+   rm *-ref.xsc *-ref.lst >& /dev/null
+   rename 's/\.xsc$/\-ref\.xsc/'  *.xsc
+   rename 's/\.lst$/\-ref\.lst/'  *.lst
+
+else
+   echo
+   echo "Wrong option! Current options are:"
+   echo
+   echo " 'run' or (none) to run benchmarks"
+   echo " 'clean' to remove temporary files and keep only original ones"
+   echo " 'diff' to compare benchmarks output with existing reference files (using diff command)"
+   echo " 'kompare' to compare benchmarks output with existing reference files (using kompare)"
+   echo " 'replace' to replace existing reference files with benchmarks outputs (using perl-based 'rename' command)"
+   echo
+fi   
