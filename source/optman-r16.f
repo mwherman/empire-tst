@@ -12423,7 +12423,8 @@ C
 
       complex*16, intent(in) :: za
 
-      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+!     real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+      real*8, parameter :: emc = 0.57721566490153d0             ! Euler-Mascheroni constant
       real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
       complex*16, parameter :: zer = (0.D0,0.D0)
 
@@ -12464,7 +12465,7 @@ C
 
       !-----------------------------------------------------------------------------
 
-      real*8 function ein(x)
+      DOUBLE PRECISION function ein(x)
 
       ! Exponential integral function Ei for real argument
 
@@ -12472,7 +12473,8 @@ C
 
       real*8, intent(in) :: x
 
-      real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+!     real*8, parameter :: emc = 0.577215664901532860606512090  ! Euler-Mascheroni constant
+      real*8, parameter :: emc = 0.57721566490153d0             ! Euler-Mascheroni constant
       real*8, parameter :: prec_lim = 1.0D-15                   ! required precision
 
       integer*4 i
