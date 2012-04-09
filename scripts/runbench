@@ -3,9 +3,6 @@
 # keeping only the original files and the .lst and .xsc files
 #
 cd $EMPIREDIR/benchmarks
-mkdir TeMpOrArYdIr
-mv th232-rot-vib-lev.col TeMpOrArYdIr/
-mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
 $EMPIREDIR/scripts/runE a-ni58-pcross          
 $EMPIREDIR/scripts/runE d-au197                    
 $EMPIREDIR/scripts/runE fe54-blind                 
@@ -28,7 +25,13 @@ $EMPIREDIR/scripts/runE u238-gf
 $EMPIREDIR/scripts/runE u238-HFB-num-fis          
 $EMPIREDIR/scripts/runE u238-HFB-num-fis-tun         
 $EMPIREDIR/scripts/runE u238-HFB-par-fis          
+$EMPIREDIR/scripts/runE u238-rigid-soft-omp         
 $EMPIREDIR/scripts/runE u238-rot-CC-direct-2           
-rm -r *-tl *.out *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-hms.lst >& /dev/null
+mkdir TeMpOrArYdIr
+mv th232-rot-vib-lev.col TeMpOrArYdIr/
+mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+rm *-gam-tr.xsc *-preq.xsc *-fiss.xsc *-hms.lst
+mv *.xsc *.lst TeMpOrArYdIr/
+rm -r *-tl *.out *.lev *.ripl *.rng *.war *.zvd file* *.c4 *fiss.xsc *.sys *.col *omp.dir *optman* spec *omp.ripl *ecis* *-inp.fis *-hms.lst *.DAT >& /dev/null
 mv TeMpOrArYdIr/* ./
 rm -r TeMpOrArYdIr

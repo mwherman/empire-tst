@@ -6,7 +6,7 @@ mkdir TeMpOrArYdIr
 mv *-ref.* TeMpOrArYdIr/
 mv th232-rot-vib-lev.col TeMpOrArYdIr/
 mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
-cp u238-HFB-num-fis-tun.inp TeMpOrArYdIr/ 
+cp *.inp TeMpOrArYdIr/ 
 $EMPIREDIR/scripts/clean a-ni58-pcross 
 $EMPIREDIR/scripts/clean d-au197 
 $EMPIREDIR/scripts/clean fe54-blind 
@@ -29,6 +29,7 @@ $EMPIREDIR/scripts/clean u238-gf
 $EMPIREDIR/scripts/clean u238-HFB-num-fis 
 $EMPIREDIR/scripts/clean u238-HFB-num-fis-tun 
 $EMPIREDIR/scripts/clean u238-HFB-par-fis 
+$EMPIREDIR/scripts/clean u238-rigid-soft-omp         
 $EMPIREDIR/scripts/clean u238-rot-CC-direct-2 
 rm *.zvd file* spec ecis* >& /dev/null
 mv TeMpOrArYdIr/* ./
