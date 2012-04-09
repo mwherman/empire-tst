@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2683 $
+Ccc   * $Rev: 2770 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-12 23:41:39 +0100 (Mo, 12 Mär 2012) $
+Ccc   * $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1723,7 +1723,7 @@ C--- Check to see if rotational or vibrational or soft
         read(70,'(a50)') line(1:50)
         idef=0
         if(line(36:43).eq.'deformed') idef=1
-        if(line(36:43).eq.'dynamica') then
+        if(line(36:43).eq.'dynamica' .or. line(36:39).eq.'soft') then
           idef = 0
           WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
           STOP 'ERROR: OPTMAN OMP fit is not implemented' 

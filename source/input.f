@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2719 $
+$DEBUG
+Ccc   * $Rev: 2770 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
+Ccc   * $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -278,7 +279,8 @@ C--------Capote, additional input options
 C
          DIRect = -1
          KTRompcc = 0
-         SOFt = .FALSE.
+         SOFt  = .FALSE.
+	   DYNam = .FALSE.
          CCCalc = .FALSE.
          BENchm = .FALSE.
          EMPtitle(1:1)=' '
@@ -3648,7 +3650,7 @@ C
 C
 C--------ECIS input
 C
-         IF (name.EQ.'EcDWBA') THEN
+         IF (name.EQ.'EcDWBA' .or. name.EQ.'ECDWBA') THEN
 C           EcDWBA meaningless if Collective level file exists
             INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
             IF(fexist) then
@@ -8890,7 +8892,12 @@ C
       egrcoll(3,2)=115.*A(0)**(-1./3.)
       ggrcoll(3,2)=9.3-A(0)/48.
 
+      
+
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
+
+	COLfile = fexist
+
       IF (fexist) THEN
          WRITE (8,*) ' '
          WRITE (8,*) 'File with collective levels exists for the target'
@@ -8905,34 +8912,104 @@ C--------Collective levels automatically selected, pls check
 C--------2nd line
          READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
-C--------82 208    nucleus is treated as spherical
+         WRITE (12,'(a80)') comment
+C--------82 208    nucleus is treated as spherical or
+C        92 238    nucleus is treated as dynamically deformed                                              '
+C        40  90    nucleus is treated as soft
+C
          READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
-C        '  40  90    nucleus is treated as dynamically deformed                                              '
-         idefault = SCAN(comment(34:37),'sphe')                  
-         if(idefault.eq.0) then
-C
-C          Soft rotator optical model
-C
-           do i=1,5 
-             READ (32,'(a80)') comment
-             WRITE (8,'(a80)') comment
-             WRITE (12,'(a80)') comment
-           enddo
-C----------empty line
+
+         ldynamical = .false.
+         if(comment(36:39).eq.'dyna') THEN
+	     DYNam = .TRUE.
+	     SOFT  = .TRUE.
+	   endif
+         if(comment(36:39).eq.'soft') SOFT  = .TRUE.
+
+         if(SOFT .or. DYNam) then
+
+C----------empty line 
            READ (32,'(a80)') comment
            WRITE (8,'(a80)') comment
            WRITE (12,'(a80)') comment
+
+           if(.not.DYNam) then
+C
+C            soft-rotor optical model
+C
+             READ (32,'(a80)') comment
+             WRITE (8,'(a80)') comment
+             WRITE (12,'(a80)') comment
+
+             read(32,'(6(e11.5,1x))',ERR = 5432)  ! Record 3 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +         SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
+             WRITE (8,'(6E12.5)') 
+     +         SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +         SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
+             WRITE (12,'(6E12.5)') 
+     +         SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +         SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
+
+             read(32,'(6(e11.5,1x))',ERR = 5432)  ! Record 4 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +         SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
+             WRITE (8,'(6E12.5)') 
+     +         SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +         SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
+             WRITE (12,'(6E12.5)') 
+     +         SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +         SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
+
+             read(32,'(6(e11.5,1x))',ERR = 5432)  ! Record 5 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +         SR_Ham_dpar,SR_Ham_gshape
+             WRITE (8,'(6E12.5)') 
+     +         SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +         SR_Ham_dpar,SR_Ham_gshape
+             WRITE (12,'(6E12.5)') 
+     +         SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +         SR_Ham_dpar,SR_Ham_gshape
+
+             READ (32,'(a80)') comment
+             WRITE (8,'(a80)') comment
+             WRITE (12,'(a80)') comment
+
+           endif
+C
 C----------Ncoll 
            READ (32,'(a80)') comment
            WRITE (8,'(a80)') comment
            WRITE (12,'(a80)') comment
+
            DEFormed = .FALSE.
-           SOFt = .TRUE.
-           READ (32,'(3x,3I5)') ND_nlv
-           WRITE (8,'(3x,3I5)') ND_nlv
-           WRITE (12,'(3x,3I5)') ND_nlv
+ 
+           if(.not.DYNam) then
+C
+C            soft-rotor optical model
+C
+             READ (32,'(3x,3I5)') ND_nlv
+             WRITE (8,'(3x,3I5)') ND_nlv
+             WRITE (12,'(3x,3I5)') ND_nlv
+	     
+		 else
+
+C------------Number of collective levels
+             READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
+     &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
+C            For covariance calculation of static deformation
+             DO j= 2,IDEfcc,2
+                D_Def(1,j) = D_Def(1,j)*DEFsta
+             ENDDO
+C
+             WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
+     &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
+             WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
+     &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
+           endif 
+
            IF (ND_nlv.EQ.0) THEN
             WRITE (8,*) ' WARNING: ND_NLV=0 in -col.lev file'
             WRITE (8,*) ' WARNING: No collective levels considered'
@@ -8942,6 +9019,7 @@ C-----------setting DIRect to zero
             IFINDCOLL = 2
             RETURN
            ENDIF
+
 C----------empty line
            READ (32,'(a80)') comment
            WRITE (8,'(a80)') comment
@@ -8952,29 +9030,19 @@ C----------'collective levels:'
            WRITE (12,'(a80)') comment
 C----------Reading ground state information (to avoid overwriting deformation)
 
-C          From ccsoftrot
-C
-C          do k=1,ND_nlv
-C            IF(ICOllev(k).GT.LEVcc) CYCLE
-C            iparit = -1
-C            if(D_Lvp(k).gt.0.d0) iparit = +1
-C            write(1,'(e11.6,1x,6I2)') 
-C     +        D_Elv(k), nint(2*D_Xjlv(k)), iparit,
-C     +        IPH(k), D_Klv(k), D_Llv(k), D_nno(k) 
-C          enddo
-
            READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+	     
            WRITE(8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+     &           D_Llv(1), D_Klv(1), 0.005, D_nno(1)
            WRITE(12,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &           D_Llv(1), D_Klv(1), ftmp, D_nno(1)
+     &           D_Llv(1), D_Klv(1), 0.005, D_nno(1)
 C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
            igreson = 0
            DO i = 2, ND_nlv
@@ -8999,10 +9067,10 @@ C
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), D_Def(i,2), D_nno(i), ctmp5
+
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
-C           IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
 C           Giant Resonances flag: negative deformation 
             IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
               IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
@@ -9015,16 +9083,10 @@ C           Giant Resonances flag: negative deformation
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), abs(D_Def(i,2)), D_nno(i), ctmp5
 C
-C           Skipping Giant Resonances (negative deformation) 
-C           IF(D_Def(i,2).GT.0 .AND.
-C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
-C
 C           CHECKING EWSR (only for neutrons)
 C
             IF( INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               ftmp = abs(D_Def(i,2))
-              if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
-     >                            ftmp = abs(D_Def(1,2)) ! coupled levels
               betasq=ftmp*ftmp
               edis1=D_Elv(i)
               jdis1=int(D_Xjlv(i))
@@ -9038,9 +9100,16 @@ C
 
             ENDIF
            ENDDO
-       else
+
+         else
 C
 C          Rigid rotor (deformed) or vibrational (spherical) optical model
+C
+           SOFt     = .FALSE.
+           DEFormed = .FALSE.
+           DYNam    = .FALSE.
+           IF (ABS(DEF(1,0)).GT.0.1D0 .or. 
+     &            comment(36:39).eq.'defo') DEFormed = .TRUE.
 C
 C----------empty line
            READ (32,'(a80)') comment
@@ -9050,10 +9119,6 @@ C----------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
            READ (32,'(a80)') comment
            WRITE (8,'(a80)') comment
            WRITE (12,'(a80)') comment
-           DEFormed = .FALSE.
-           IF (ABS(DEF(1,0)).GT.0.1D0) DEFormed = .TRUE.
-
-           SOFt = .FALSE.
 C
 C          If odd nucleus, then rotational model is always used
 C          It could be a bad approximation for a quasispherical nucleus
@@ -9100,14 +9165,14 @@ C----------'collective levels:'
 C----------Reading ground state information (to avoid overwriting deformation)
            READ(32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &         ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &         D_Llv(1), D_Klv(1)
+     &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &          D_Llv(1), D_Klv(1)
            WRITE(8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &          D_Llv(1), D_Klv(1), 0.01
-           WRITE(12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
-     &          ) ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-     &          D_Llv(1), D_Klv(1), 0.01
+     &          D_Llv(1), D_Klv(1), 0.005
+           WRITE(12,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &          D_Llv(1), D_Klv(1), 0.005
 C
 C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
            igreson = 0
@@ -9162,8 +9227,6 @@ C           IF(D_Def(i,2).GT.0.d0 .AND.
 C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
             IF( INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               ftmp = abs(D_Def(i,2))
-              if(ftmp.le.0.01d0 .and. ICOllev(i).LE.LEVcc)
-     >                            ftmp = abs(D_Def(1,2)) ! coupled levels
               betasq=ftmp*ftmp
               edis1=D_Elv(i)
               jdis1=int(D_Xjlv(i))
@@ -9186,12 +9249,28 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
          ENDDO
          write(8,*)
          write(8,*)
-     >       '----------------------------------------------------'
+     >       '----------------------------------------------------------
+     >-------'
+	   IF(.not.SOFT) then
+	     IF(DEFORMED) then
+             write(8,*) '  Rigid rotor model assumed' 
+	     ELSE
+             write(8,*) '  Spherical model assumed' 
+	     ENDIF
+	   ELSE
+	     IF(DYNam) then
+             write(8,*) '  Rigid-soft rotor model assumed' 
+	     ELSE
+             write(8,*) '  Soft rotor model assumed' 
+	     ENDIF
+	   ENDIF
+
          write(8,*)'  States with number < ',LEVcc, 
      >             '  in the file *-lev.col coupled'
          write(8,*)'  Number of coupled states =',icoupled
          write(8,*)
-     >       '----------------------------------------------------'
+     >       '----------------------------------------------------------
+     >-------'
          write(8,*)
          if(igreson.eq.0 .and.
      &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
@@ -9200,42 +9279,53 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
            if (sheor.gt.0.) betahegor=sqrt(sheor/egrcoll(3,2))
            write(8,*)
-     >       '===================================================='
+     >       '==========================================================
+     >======='
            write(8,*)'  Energy Weighted Sum Rules for GIANT RESONANCES'
            write(8,*)
            write(8,*)
-     > ' You can add Giant Resonances wiht Beta<0 to collective levels'
-           write(8,*)
-     > '   by editing the collective level file *-lev.col '
-           write(8,*)
-     > ' If GR deformation is zero, then EWSR is exhausted'
-           write(8,*)
      > ' Negative deformation flags the Giant Resonances  '
            write(8,*)
-     >       '____________________________________________________'
-           write(8,*) '            EWSR       Uexc    Width    Beta '
+     > ' You can add Giant Resonances wiht beta<0 to collective levels '
            write(8,*)
-     >       '____________________________________________________'
+     > '  by editing the collective level file *-lev.col and placing GR'
+           write(8,*)
+     > '  at the energy Uexc with the suggested deformation beta.      '
+           write(8,*)
+     > '  Keep the negative sign to flag GRs                           '
+
+           write(8,*)
+           write(8,*)
+     > ' If the GR deformation beta is zero, then the EWSR is exhausted'
+           write(8,*)
+     >       '__________________________________________________________
+     >_______'
+           write(8,*) '            EWSR       Uexc    Width    beta '
+           write(8,*)
+     >       '__________________________________________________________
+     >_______'
            if(betagmr.LT.1.d0)
      >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GMR :',
-     >       sgmr,egrcoll(0,1),ggrcoll(0,1),-betagmr,isgmr
+     >       sgmr,egrcoll(0,1),ggrcoll(0,1),-betagmr
            if(betagqr.LT.1.d0)
      >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GQR :',
-     >       sgqr,egrcoll(2,1),ggrcoll(2,1),-betagqr,isgqr
+     >       sgqr,egrcoll(2,1),ggrcoll(2,1),-betagqr
            if(betalegor.LT.1.d0)
      >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'leGOR :',
-     >       sleor,egrcoll(3,1),ggrcoll(3,1),-betalegor, isgor
+     >       sleor,egrcoll(3,1),ggrcoll(3,1),-betalegor
            if(betahegor.LT.1.d0)
      >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'heGOR :',
-     >       sheor,egrcoll(3,2),ggrcoll(3,2),-betahegor, isgor
+     >       sheor,egrcoll(3,2),ggrcoll(3,2),-betahegor
            write(8,*)
-     >       '===================================================='
+     >       '==========================================================
+     >======='
            write(8,*)
          endif
 
          IFINDCOLL = 0
          RETURN
       ENDIF
+
       ia = A(0)
       iz = Z(0)
       DEFormed = .FALSE.
@@ -9246,8 +9336,9 @@ C
 C       If odd nucleus, then rotational model is always used
 C       It could be a bad approximation for a quasispherical nucleus
         DEFormed = .TRUE.
-        odd = .TRUE.
-        SOFt = .FALSE.
+        odd   = .TRUE.
+        SOFt  = .FALSE.
+        DYNam = .FALSE.
       ENDIF
       i20p = 0
       i21p = 0
@@ -9408,7 +9499,7 @@ C                                assigning randomly 2+,4+,3- spin
             delta_k = 2.D0
             IF (xjlvr.NE.0.D0) delta_k = 1.D0
             ND_nlv = ND_nlv + 1
-            ICOllev(ND_nlv) = ilv
+            ICOllev(ND_nlv) = 1
             D_Elv(ND_nlv) = elvr
             D_Lvp(ND_nlv) = lvpr
             D_Xjlv(ND_nlv) = xjlvr
@@ -9806,9 +9897,9 @@ C-----------------swapping
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
-                  dtmp = ICOllev(i)
+                  itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
-                  ICOllev(j) = dtmp
+                  ICOllev(j) = itmp
                   dtmp = D_Llv(i)
                   D_Llv(i) = D_Llv(j)
                   D_Llv(j) = dtmp
@@ -9840,9 +9931,9 @@ C-----------------swapping
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
-                  dtmp = ICOllev(i)
+                  itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
-                  ICOllev(j) = dtmp
+                  ICOllev(j) = itmp
                   dtmp = D_Llv(i)
                   D_Llv(i) = D_Llv(j)
                   D_Llv(j) = dtmp

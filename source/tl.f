@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2567 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-13 18:11:23 +0100 (Mo, 13 Feb 2012) $
+Ccc   * $Rev: 2770 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -151,11 +151,9 @@ C
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
-      LOGICAL coll_defined
+      LOGICAL coll_defined, ldynamical
       CHARACTER*132 ctmp
-      REAL FLOAT
-      INTEGER iainp, izinp, k, n, ncalc, nld_cc, idefault, nlev 
-      INTEGER index_e(100)
+      INTEGER iainp, izinp, k, n, ncalc, nld_cc, j
       INTEGER*4 iwin
       INTEGER*4 PIPE
 C
@@ -177,16 +175,24 @@ C     IF (IMOdel.EQ.0) model = 'spherical nucleus model'
 C     IF (IMOdel.EQ.1) model = 'coupled-channels rigid rotor model'
 C     IF (IMOdel.EQ.2) model = 'coupled-channels vibrational model'
 C     IF (IMOdel.EQ.3) model = 'coupled-channels soft rotor model'
+C     IF (IMOdel.EQ.4) model = 'coupled-channels rigid+soft rotor'
 
+C-----Imodel not used for non-inelastic channels
+      IF(IMOdel.GT.0 .and. (iainp.NE.A(0) .OR. izinp.NE.Z(0)
+     & .OR. AEJc(Nejc).NE.AEJc(0) .OR. ZEJc(Nejc).NE.ZEJc(0)) ) GOTO 300
 
-      IF (IMOdel.EQ.1 .OR. IMOdel.EQ.2 .OR. IMOdel.EQ.3) THEN
-C--------Imodel not used for non-inelastic channels
-         IF (iainp.NE.A(0) .OR. izinp.NE.Z(0) .OR. AEJc(Nejc).NE.AEJc(0)
-     &       .OR. ZEJc(Nejc).NE.ZEJc(0)) GOTO 300
-      ENDIF
       MODelcc = IMOdel
 
+C
+C     the following condition means that this is a second run
+C     as ND_nlv>0 and NISotop=0 means that the OMPAR.DIR exists
+C
       IF (ND_nlv.GT.0 .AND. NISotop.EQ.0) coll_defined = .TRUE.
+C
+C     the following condition means that the collective level file exists
+C     and was read to obtain the number of collective levels
+C
+      IF (ND_nlv.GT.0 .AND. COLfile) coll_defined = .TRUE.
 
       IF (IMOdel.EQ.1 .AND. (.NOT.coll_defined)) THEN
 C
@@ -196,8 +202,8 @@ C
          WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'WARNING: Rigid rotor CC potential selected but '
-            WRITE (8,*)'WARNING: no isotopes defined for this OMP     '
+            WRITE (8,*)'ERROR: Rigid rotor CC potential selected but '
+            WRITE (8,*)'ERROR: no isotopes defined for this OMP     '
             WRITE (8,*)'ERROR: Error in RIPL database.                '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
             WRITE (8,*)'WARNING: Default collective levels will be used'
@@ -213,15 +219,29 @@ C
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)'WARNING: RIPL CC rigid rotor NCOll(target) = 0 '
+            WRITE (8,*)'ERROR: RIPL CC rigid rotor NCOll(target) = 0 '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
+
+         nld_cc = 0
+         DO k = 1, ND_nlv
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+         ENDDO
+         IF (nld_cc.NE.NCOll(ncalc)) THEN
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'   
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
+         ENDIF
 C
 C        rigid rotor model
 C
-         OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1056)
+C	   Correcting energies of the OMP collective levels EXV 
+C
+         OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1056)
          DO n=2,NCOll(ncalc)
             elevcc = EEX(n,ncalc)
             REWIND(32)
@@ -229,55 +249,77 @@ C
             elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
               READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
-     &                  ) 
+     &              ,END=1056,ERR=1056) 
      &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if(elvr.gt.elevcc) then
-                nlev = ilv    
-                if(abs(elvr0-elevcc).lt.abs(elvr-elevcc)) nlev = ilv - 1
-                ICOllev(n) = nlev 
-                goto 103
+              if( abs(elvr-elevcc).le.0.01  .and.          ! energy
+     &     	    abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &       	    iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then    ! parity
+	            EEX(n,ncalc) = elvr
+                  EXIT
               endif 
-              elvr0 = elvr 
             ENDDO
-  103    ENDDO
+         ENDDO
  1056    CLOSE(32)  
+C
+C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C
+         nld_cc = 1
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
 
+              if( abs(D_Elv(ilv)-EEX(n,ncalc)).le.0.01     .and. 
+     &     	    abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
+
+                  nld_cc = nld_cc + 1
+
+                  IF (ICOllev(ilv).GT.LEVcc) 
+     &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
+
+                  D_Elv(ilv) = EEX(n,ncalc) 
+
+	       endif
+
+           ENDDO
+	   ENDDO
+
+C        DO k = 1, NCOll(n)
+C          READ (Ko,99045,ERR = 200) EEX(k,n), SPIn(k,n), IPAr(k,n)
+C        ENDDO
+C
+C--------Putting Coupled levels first
+         DO i = 2, ND_nlv
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).LT.ICOllev(i)) THEN
+C-----------------swapping
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+               ENDIF
+            ENDDO
+         ENDDO
+ 
 C--------Setting EMPIRE global variables
-         nld_cc = 0
-         DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
-         ENDDO
-
-         IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
-            WRITE (8,*) 
-     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
-         ENDIF
-         WRITE (8,*) 
-
-         nld_cc = 0
-         DO k = 1, ND_nlv
-            IF (k.le.NCOll(ncalc)) then
-              IF (ICOllev(k).GE.LEVcc) then 
-                ICOllev(k) = ICOllev(k) - LEVCC
-                nld_cc = nld_cc + 1
-                WRITE (8,*) 'WARNING: rotat. level ',k,' COUPLED'
-              ELSE
-                nld_cc = nld_cc + 1
-              ENDIF 
-            ELSE
-              IF (ICOllev(k).LT.LEVcc) then 
-                ICOllev(k) = ICOllev(k) + LEVCC
-                WRITE (8,*) 'WARNING: rotat. level ',k,' unCOUPLED'
-              ENDIF
-            ENDIF
-         ENDDO
-
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
          LMAxcc = LMAx(ncalc)
@@ -290,7 +332,7 @@ C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
-         OPEN (97,FILE = 'TARGET_COLL.DAT')
+         OPEN (97,FILE = 'TARGET_COLL.DAT',ERR=300)
          OPEN (96,FILE = 'COLL.DAT')
          READ (97,*)                    ! FIRST LINE
 
@@ -307,18 +349,22 @@ C
          WRITE (96,'(A80)') ch_iuf
 C
          READ (97,*)                    ! model type , ! 3ER LINE
-         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp, 
+         WRITE (8, '(1x,i3,1x,i3,1x,a35)') izinp, iainp, 
      &                                 ' nucleus is treated as deformed'
-         WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (32,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
-         WRITE (96,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (96,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                 ' nucleus is treated as deformed'
 
          READ (97,*)                    ! EMPTY LINE
          WRITE (8,*) 
          WRITE (32,*) 
          WRITE (96,*) 
+
+         SOFt     = .FALSE.
+	   DYNam    = .FALSE.
          DEFormed = .TRUE.
+
          READ (97,*) 
          WRITE (8,*) '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE (32,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
@@ -341,39 +387,68 @@ C
          WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
          WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-         k=1
-   50    READ (97,'(A80)',END = 100) ch_iuf                                      
-         WRITE (96,'(1x,I2,A77)') ICOllev(k),ch_iuf(4:80)
-         k = k + 1
-         GOTO 50
-  100    CLOSE (96)
-         CLOSE (97,STATUS = 'DELETE')
+
+	   if(FIRst_ein) then
+C           First energy with default TARGET_COLL.DAT
+C
+C-----------The deformation for excited levels is not used in the pure
+C-----------symm.rotational model but could be used for vibrational
+C-----------rotational model so we are setting it to 0.01
+
+           DO k = 1, ND_nlv
+
+             READ (97,'(A80)',END=100,ERR=100) ch_iuf        
+
+             IF (ICOllev(k).LT.LEVcc .and. k.gt.1) D_Def(k,2) = 0.005
+
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+     &          D_Def(k,2) = 0.005
+
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             0, 0, 0, D_Def(k,2)
+
+             WRITE (8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             0, 0, 0, D_Def(k,2)
+
+             WRITE (96,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             0, 0, 0, D_Def(k,2)
+
+           ENDDO
+	   
+         ELSE ! second run, coll level file exists !
+
+           DO k = 1, ND_nlv 
+             READ (97,'(A80)',END=100,ERR=100) ch_iuf      
+             WRITE (96,'(A80)') ch_iuf
+             WRITE (8 ,'(A80)') ch_iuf
+           ENDDO
+
+	   ENDIF
+
+  100    CLOSE (32)
+         CLOSE (96)
+         CLOSE (97)
+C        CLOSE (97,STATUS = 'DELETE')
+
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
          ENDIF
 C
 C--------JOIN finished
 C
-         DO k = 1, NCOll(ncalc)
-C-----------The deformation for excited levels is not used in the pure
-C-----------symm.rotational model but could be used for vibrational
-C-----------rotational model so we are setting it to 0.01
-            WRITE (32,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
-     &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
-            WRITE (8,
-     ^             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), EEX(k,ncalc), SPIn(k,ncalc), 
-     &             FLOAT(IPAr(k,ncalc)),0, 0, 0, 0.01
-         ENDDO
-         CLOSE (32)
          WRITE (8,*)
          WRITE (8,*)
       ENDIF
+
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
 C
 C--------model = 'coupled-channels vibrational model'
@@ -381,8 +456,8 @@ C
          coll_defined = .TRUE.
          WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'WARNING: Vibrat. CC potential selected but    '
-            WRITE (8,*)'WARNING: no isotopes defined for this OMP     '
+            WRITE (8,*)'ERROR: Vibrat. CC potential selected but    '
+            WRITE (8,*)'ERROR: no isotopes defined for this OMP     '
             WRITE (8,*)'ERROR: Error in RIPL database.                '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
             WRITE (8,*)'WARNING: Default collective levels will be used'
@@ -398,14 +473,14 @@ C
             GOTO 300
          ENDIF
          IF (NVIb(ncalc).EQ.0) THEN
-            WRITE (8,*)'WARNING: RIPL CC vibr. OMP NVIb(target) = 0    '
+            WRITE (8,*)'ERROR: RIPL CC vibr. OMP NVIb(target) = 0    '
             WRITE (8,*)'ERROR: Error in RIPL database.                 '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
          ENDIF
          DO k = 2, NVIb(ncalc)
-            IF (NPH(k,ncalc).EQ.3) THEN
+            IF (NPH(k,ncalc).GT.2) THEN
               IWArn = 6
               WRITE (8,*) 'WARNING: NPH(k,i)=3 !!! in RIPL OMP'
               WRITE (8,*)
@@ -413,8 +488,22 @@ C
               GOTO 300
             ENDIF
          ENDDO
+
+         nld_cc = 0
+         DO k = 1, ND_nlv
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+         ENDDO
+         IF (nld_cc.NE.NVIb(ncalc)) THEN
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
+         ENDIF
 C        
 C        vibrational model
+C
+C	   Correcting energies of the OMP collective levels EXV 
 C
          OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1057)
          DO n=2,NVIb(ncalc)
@@ -429,54 +518,83 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if(elvr.gt.elevcc) then
-                nlev = ilv    
-                if(abs(elvr0-elevcc).lt.abs(elvr-elevcc)) nlev = ilv - 1
-C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc 
-                ICOllev(n) = nlev 
-                goto 110
+              if( abs(elvr-EXV(n,ncalc)).le.0.01  .and. ! energy
+     &     	    abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &       	    iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then  ! parity
+	            EXV(n,ncalc) = elvr
+                  EXIT
               endif 
-              elvr0 = elvr 
             ENDDO
-  110    ENDDO
+         ENDDO
  1057    CLOSE(32)  
- 
-         nld_cc = 0
-         DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
-         ENDDO
-         IF (nld_cc.NE.NVIb(ncalc)) THEN
-            WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
-            WRITE (8,*) 
-     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
-         ENDIF
+C
+C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C
+         nld_cc = 1
+         DO ilv=2,ND_nlv
+		 DO n=2,NVIb(ncalc)
 
-C--------Setting EMPIRE global variables
-         nld_cc = 0
-         DO k = 1, ND_nlv
-            IF (k.le.NVIb(ncalc)) then
-              IF (ICOllev(k).GE.LEVcc) then 
-                ICOllev(k) = ICOllev(k) - LEVCC
-                nld_cc = nld_cc + 1
-                WRITE (8,*) 'WARNING: phonon level ',k,' COUPLED'
-              ELSE
-                nld_cc = nld_cc + 1
-              ENDIF 
-            ELSE
-              IF (ICOllev(k).LT.LEVcc) then 
-                ICOllev(k) = ICOllev(k) + LEVCC
-                WRITE (8,*) 'WARNING: phonon level ',k,' unCOUPLED'
-              ENDIF
-            ENDIF
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+     &     	    abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
+
+                  nld_cc = nld_cc + 1
+
+                  IF (ICOllev(ilv).GT.LEVcc) 
+     &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
+
+                  D_Elv(ilv) = EXV(n,ncalc) 
+	            IPH(ilv)   = NPH(n,ncalc)
+                  D_Def(ilv,2) = DEFv(n,ncalc)
+
+C                 READ (Ko,99045,ERR = 200) EXV(k,n), SPInv(k,n),
+C    &                IPArv(k,n), NPH(k,n), DEFv(k,n), THEtm(k,n)
+	       endif
+
+           ENDDO
+	   ENDDO
+C
+C--------Putting one phonon coupled states first for spherical
+         DO i = 2, ND_nlv
+            IF (ICOllev(i).GE.LEVcc) cycle
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).GE.LEVcc) cycle
+               IF (IPH(j).LT.IPH(i)) THEN
+C-----------------swapping
+                  itmp = IPH(i)
+                  IPH(i) = IPH(j)
+                  IPH(j) = itmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+               ENDIF
+            ENDDO
          ENDDO
+
          WRITE (8,*)
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
-         OPEN (97,FILE = 'TARGET_COLL.DAT')
+         OPEN (97,FILE = 'TARGET_COLL.DAT',ERR=300)
          OPEN (96,FILE = 'COLL.DAT')
          READ (97,'(A80)') ch_iuf   ! FIRST LINE
          WRITE (8,*)
@@ -491,72 +609,97 @@ C
          WRITE (32,'(A80)') ch_iuf
          WRITE (96,'(A80)') ch_iuf
 C
-         READ (97,'(A80)') ch_iuf     ! model type
-         WRITE (8,'(1x,i3,1x,i3,a35)') izinp, iainp, ! 3ER LINE
+         READ (97,'(A80)') ch_iuf       ! 3ER LINE
+
+         WRITE (8, '(1x,i3,1x,i3,1x,a35)') izinp, iainp, ! 3ER LINE
      &                                ' nucleus is treated as spherical'
-         WRITE (32,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (32,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
-         WRITE (96,'(1x,i3,1x,i3,a35)') izinp, iainp,
+         WRITE (96,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
 C
+         SOFt     = .FALSE.
+	   DYNam    = .FALSE.
+	   DEFormed = .FALSE.
+
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
          WRITE (96,*) 
          WRITE (8,*)
          WRITE (32,*)
-         DEFormed = .FALSE.
-         DO n = 1, NISotop
-            IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) THEN
+
+         READ (97,'(A80)') ch_iuf
+         WRITE (8 ,*) '   Ncoll'
+         WRITE (32,*) '   Ncoll'
+         WRITE (96,*) '   Ncoll'
+
+         READ (97,'(A80)') ch_iuf
+         WRITE (8,'(3x,3I5)') ND_nlv
+         WRITE (32,'(3x,3I5)') NVIb(n)
+         WRITE (96,'(3x,3I5)') ND_nlv
 C
-               READ (97,'(A80)') ch_iuf
-               WRITE (8 ,*) '   Ncoll'
-               WRITE (32,*) '   Ncoll'
-               WRITE (96,*) '   Ncoll'
-               READ (97,'(A80)') ch_iuf
-               WRITE (8,'(3x,3I5)') NVIb(n)
-               WRITE (32,'(3x,3I5)') NVIb(n)
-               WRITE (96,'(3x,3I5)') ND_nlv
+         READ (97,'(A80)') ch_iuf
+         WRITE (8,*)
+         WRITE (32,*)
+         WRITE (96,*)
 C
-               READ (97,'(A80)') ch_iuf
-               WRITE (8,*)
-               WRITE (32,*)
-               WRITE (96,*)
-C
-               READ (97,'(A80)') ch_iuf
-               WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-               WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-               WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-               itmp = 0
-  150          READ (97,'(A80)',END = 200) ch_iuf
-               itmp = itmp + 1
-               write(ch_iuf(1:3),'(1x,I2)') ICOllev(itmp)   
-               WRITE (96,'(A80)') ch_iuf
-                   GOTO 150
-            ENDIF
-         ENDDO
-  200    CLOSE (96)
-         CLOSE (97,STATUS = 'DELETE')
+         READ (97,'(A80)') ch_iuf
+         WRITE (8,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
+         WRITE (32,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
+         WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
+
+	   if(FIRst_ein) then
+C        first energy with default TARGET_COLL.DAT
+           DO k = 1, ND_nlv
+
+             READ (97,'(A80)',END=200,ERR=200) ch_iuf        
+
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+     &          D_Def(k,2) = 0.005
+
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k), 0, 0, D_Def(k,2)
+
+             WRITE (8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k), 0, 0, D_Def(k,2)
+
+             WRITE (96,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k), 0, 0, D_Def(k,2)
+
+           ENDDO
+	   
+         ELSE ! second run, coll level file exists !
+
+           DO k = 1, ND_nlv 
+             READ (97,'(A80)',END=200,ERR=200) ch_iuf      
+             WRITE (96,'(A80)') ch_iuf
+             WRITE (8 ,'(A80)') ch_iuf
+           ENDDO
+
+	   ENDIF
+
+  200    CLOSE (32)
+         CLOSE (96)
+         CLOSE (97)
+C        CLOSE (97,STATUS = 'DELETE')
+
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
             iwin = PIPE(ctmp)
          ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT')
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
          ENDIF
 C
 C--------JOIN finished 
 C                                                                   
-         DO k = 1, NVIb(ncalc)
-            WRITE (32,
-     &             '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             k, EXV(k,ncalc), SPInv(k,ncalc),FLOAT(IPArv(k,ncalc))
-     &             , NPH(k,ncalc), 0, 0, DEFv(k,ncalc)
-            WRITE (8,'(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)'
-     &             ) k, EXV(k,ncalc), SPInv(k,ncalc),
-     &               FLOAT(IPArv(k,ncalc)), NPH(k,ncalc), 0, 0,
-     &               DEFv(k,ncalc)
-         ENDDO
-         CLOSE (32)
          WRITE (8,*)
          WRITE (8,*)
+
       ENDIF
 
       IF (IMOdel.EQ.3 .AND. (.NOT.coll_defined)) THEN
@@ -572,7 +715,7 @@ C
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
             WRITE (8,*)'ERROR: Change your selected RIPL potential    '
             WRITE (8,*)'ERROR: EMPIRE stops'
-            STOP       'ERROR: See *.lst, EMPIRE stops'
+            STOP       'ERROR: See long listing *.lst, EMPIRE stops   '
          ENDIF
 
          ncalc = 0
@@ -585,51 +728,34 @@ C
             WRITE (8,*)'ERROR: No default hamiltonian is available  '
             WRITE (8,*)'ERROR: for the soft rotor model !           '
             WRITE (8,*)'ERROR: EMPIRE stops !'
-            STOP       'ERROR: See *.lst, EMPIRE stops'
+            STOP       'ERROR: See long listing *.lst, EMPIRE stops '
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
             WRITE (8,*)'ERROR: Soft rotor potential selected but zero'
-            WRITE (8,*)'ERROR: CC levels are available, error in RIPL'
+            WRITE (8,*)'ERROR: CC levels are defined, error in RIPL'
             WRITE (8,*)'ERROR: Report to r.capotenoy@iaea.org        '
             WRITE (8,*)'ERROR: Change your selected RIPL potential '
             WRITE (8,*)'ERROR: EMPIRE stops !'
-            STOP       'ERROR: See *.lst, EMPIRE stops'
+            STOP       'ERROR: See long listing *.lst, EMPIRE stops'
          ENDIF
-C
-C        Overwriting ICOllev() to rearrange coupled channels
-C
-C        soft rotor model
-C
-         OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN', ERR=1058)
-         DO n=2,NCOll(ncalc)
-          elevcc = EXV(n,ncalc)
-          REWIND(32)
-            READ (32,'(A80)',END=1058,ERR=1058) ch_iuf
-            elvr0 = 0.d0
-            DO ilv = 1, NLV(nnuc)
-              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
-     &              ,END=1058,ERR=1058) 
-     &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
-              DO nbr = 1, ndbrlin
-                READ (32,'(A1)') dum
-              ENDDO
-              if(elvr.gt.elevcc) then
-                nlev = ilv    
-                if(abs(elvr0-elevcc).lt.abs(elvr-elevcc)) nlev = ilv - 1
-C               if(SPinv(n,ncalc).gt.4.d0) nlev = nlev + LEVcc 
-                ICOllev(n) = nlev 
-                goto 210
-              endif 
-              elvr0 = elvr 
-            ENDDO
-  210    ENDDO
- 1058    CLOSE(32)  
+         IF (ND_nlv .LT. NCOll(ncalc)) THEN
+            WRITE (8,*)
+     &       'ERROR: Number of collective levels < OMP RIPL # CC    '
+            WRITE (8,*)
+     &       'ERROR: Delete ECDWBA from the input and the collective'
+            WRITE (8,*)
+     &       'ERROR: level file *-lev.col, and rerun'
+            STOP 'ERROR: see the long output (*.lst)'
+         ENDIF
 
+C
 C--------Setting EMPIRE global variables
-         nld_cc = 0
-         DO k = 1, ND_nlv
+C
+         nld_cc = 1
+         DO k = 2, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
+
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
      &  'WARNING: Default number of coupled levels ', nld_cc
@@ -637,12 +763,106 @@ C--------Setting EMPIRE global variables
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
             WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
+         WRITE (8,*) 
+C
+C        soft rotor model
+C
+C	   Correcting energies of the OMP collective levels EXV 
+C
+         OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1058)
+         DO n=2,NCOll(ncalc)
+            REWIND(32)
+            READ (32,'(A80)',END=1058,ERR=1058) ch_iuf
+            DO ilv = 1, NLV(nnuc)
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &              ,END=1058,ERR=1058) 
+     &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
+              DO nbr = 1, ndbrlin
+                READ (32,'(A1)',END=1058,ERR=1058) dum
+              ENDDO
+              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
+     &     	    abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then
+	            EXV(n,ncalc) = elvr
+                  exit 
+              endif 
+            ENDDO
+         ENDDO
+ 1058    CLOSE(32)  
+C
+C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C
+         nld_cc = 1
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
 
-         WRITE (8,*)
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+     &     	    abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
+
+                  nld_cc = nld_cc + 1
+
+                  IF (ICOllev(ilv).GT.LEVcc) 
+     &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
+	            
+                  D_Elv(ilv) = EXV(n,ncalc) 
+
+                  IPH(ilv)   = SR_ntu(n,ncalc)
+                  D_Llv(ilv) = SR_nnb(n,ncalc)
+                  D_Klv(ilv) = SR_nng(n,ncalc)
+                  D_nno(ilv) = SR_nno(n,ncalc)
+
+                  exit 
+              endif 
+            ENDDO
+         ENDDO
+C
+C--------Putting Coupled levels first
+         DO i = 2, ND_nlv
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).LT.ICOllev(i)) THEN
+C-----------------swapping
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  itmp = IPH(i)
+                  IPH(i) = IPH(j)
+                  IPH(j) = itmp
+
+                  dtmp = D_Llv(i)
+                  D_Llv(i) = D_Llv(j)
+                  D_Llv(j) = dtmp
+
+                  dtmp = D_Klv(i)
+                  D_Klv(i) = D_Klv(j)
+                  D_Klv(j) = dtmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+                  dtmp = D_nno(i)
+                  D_nno(i) = D_nno(j)
+                  D_nno(j) = dtmp
+               ENDIF
+            ENDDO
+         ENDDO
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
-
          OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
          OPEN (97,FILE = 'TARGET_COLL.DAT',ERR=300)      
          OPEN (96,FILE = 'COLL.DAT')
@@ -661,17 +881,20 @@ C
          WRITE (8 ,'(A80)') ch_iuf
 
          READ (97,'(A80)') ch_iuf       ! 3ER LINE
-         WRITE (8,'(1x,i3,1x,i3,a46)') izinp, iainp,
-     &      ' nucleus is treated as dynamically deformed'
-         WRITE (32,'(1x,i3,1x,i3,a46)') izinp, iainp,
-     &      ' nucleus is treated as dynamically deformed'
-         WRITE (96,'(1x,i3,1x,i3,a46)') izinp, iainp,
-     &      ' nucleus is treated as dynamically deformed'
+	   ldynamical = .FALSE.
+         if(ch_iuf(36:39).eq.'soft') ldynamical = .TRUE.
 
-         SOFT = .TRUE.
+         WRITE ( 8,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
+     &                                ' nucleus is treated as soft     '
+         WRITE (32,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
+     &                                ' nucleus is treated as soft     '
+         WRITE (96,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
+     &                                ' nucleus is treated as soft     '
+         SOFT     = .TRUE.
+         DYNam    = .FALSE.
          DEFormed = .FALSE.
-         idefault = SCAN(ch_iuf(34:37),'sphe')                  
-         if(idefault.gt.0) then
+
+         if(.NOT.ldynamical) then
 C           first run with default TARGET_COLL.DAT
             WRITE (8,*)
             WRITE (32,*)
@@ -710,18 +933,58 @@ C           first run with default TARGET_COLL.DAT
             write(96,'(6(e11.5,1x))')  ! Record 5 from Hamiltonian parameters)
      &                    SR_hw0(ncalc),SR_bb32(ncalc),SR_gamde(ncalc),
      &                    SR_dpar(ncalc),SR_gshape(ncalc)
+
+C           Initializing Soft Rotator Hamiltonian  
+            SR_Ham_hw	    = SR_hw(ncalc)  	 
+            SR_Ham_amb0   = SR_amb0(ncalc)	 
+	      SR_Ham_amg0   = SR_amg0(ncalc)	 
+            SR_Ham_gam0   = SR_gam0(ncalc)	 
+            SR_Ham_bet0   = SR_bet0(ncalc)	 
+	      SR_Ham_bet4   = SR_bet4(ncalc)	 
+C
+            SR_Ham_bb42   = SR_bb42(ncalc)	 
+            SR_Ham_gamg   = SR_gamg(ncalc)  
+            SR_Ham_delg   = SR_delg(ncalc)  
+            SR_Ham_bet3   = SR_bet3(ncalc)	 
+            SR_Ham_et0    = SR_et0(ncalc)   
+            SR_Ham_amu0   = SR_amu0(ncalc)  
+C
+            SR_Ham_hw0    = SR_hw0(ncalc)	 
+    	      SR_Ham_bb32   = SR_bb32(ncalc)	 
+            SR_Ham_gamde  = SR_gamde(ncalc) 
+            SR_Ham_dpar   = SR_dpar(ncalc)	 
+            SR_Ham_gshape = SR_gshape(ncalc)
+
          else
+
 C           following runs with Hamiltonian lines
+C
             READ (97,'(A80)') ch_iuf       ! EMPTY LINE
             WRITE (96,'(A80)') ch_iuf
             READ (97,'(A80)') ch_iuf       ! Soft rotator hamiltonian ...
             WRITE (96,'(A80)') ch_iuf
-            READ (97,'(A80)') ch_iuf       ! Hamiltonian parameters 
-            WRITE (96,'(A80)') ch_iuf
-            READ (97,'(A80)') ch_iuf       ! Hamiltonian parameters
-            WRITE (96,'(A80)') ch_iuf
-            READ (97,'(A80)') ch_iuf       ! Hamiltonian parameters
-            WRITE (96,'(A80)') ch_iuf
+
+            read(97,'(6(e11.5,1x))')  ! Record 3 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +         SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
+            WRITE (96,'(6E12.5)') 
+     +         SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +         SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
+
+            read(97,'(6(e11.5,1x))')  ! Record 4 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +         SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
+            WRITE (96,'(6E12.5)') 
+     +         SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +         SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
+
+            read(97,'(6(e11.5,1x))')  ! Record 5 from OPTMAN (Hamiltonian parameters)
+     +         SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +         SR_Ham_dpar,SR_Ham_gshape
+            WRITE (96,'(6E12.5)') 
+     +         SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +         SR_Ham_dpar,SR_Ham_gshape
+
          endif
 
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
@@ -747,88 +1010,37 @@ C        WRITE (96,'(A80)') ch_iuf
          WRITE (32,*)
 
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
-C        WRITE (8 ,*) ' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
-         WRITE (8 ,*) ' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def. No'
-         WRITE (32,*) ' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def. No'
-         WRITE (96,*) ' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def. No'
+         WRITE (8 ,*) ' N   E[MeV]  J   pi Ntu Nb Ng   -----   No'
+         WRITE (32,*) ' N   E[MeV]  J   pi Ntu Nb Ng   -----   No'
+         WRITE (96,*) ' N   E[MeV]  J   pi Ntu Nb Ng   -----   No'
 
-         if(idefault.gt.0) then
+         if(.NOT.ldynamical) then
+C
 C          first run with default TARGET_COLL.DAT
+C      
+           DO k = 1, ND_nlv
 
-           index_e = 0
-           nttt = 1
-           index_e(1) = 1 
-           DO k = 2, nld_cc
-             ftmp = D_Elv(k)
-             DO j = 2, NCOll(ncalc)
-C
-C              This accuracy 0.005 could be a problem, pls double check 
-C              levels' energies before compiling RIPL potentials
-C
-               IF(dabs(EXV(j,ncalc)-ftmp).gt.0.005d0) cycle
-               nttt = nttt + 1
-               index_e (nttt) = j
-               EXIT
-             ENDDO 
-           ENDDO
-       
-           if(nttt.ne.nld_cc) then
-           WRITE (8,*)
-     & 'ERROR: Soft rotor potential selected but energies of coupled'
-           WRITE (8,*)
-     & 'ERROR: levels are inconsistent with energies of RIPL discrete le
-     &vels'
-           WRITE (8,*)'ERROR: Report this error to r.capotenoy@iaea.org'
-           WRITE (8,*)'ERROR: EMPIRE stops !'
-           STOP       'ERROR: See *.lst, EMPIRE stops'
-           endif
-           DO j = 1, nld_cc
-            
-               k = index_e(j) ! reindexing
+             READ (97,'(A80)',END=290,ERR=290) ch_iuf        
 
-             if(k.eq.0) cycle
+             IF (ICOllev(k).LT.LEVcc) D_Def(k,2) = 0.005
 
-             IPH(j)   = SR_ntu(k,ncalc)
-               D_Llv(j) = SR_nnb(k,ncalc)
-               D_Klv(j) = SR_nng(k,ncalc)
-               D_nno(j) = SR_nno(k,ncalc)
-
-             WRITE (32,
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &             ICOllev(k), EXV(k,ncalc),
-     &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
-     &             SR_nno(k,ncalc)
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
 
-C    &             ICOllev(k), , D_Xjlv(k), D_Lvp(k),
-C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k) 
-
-             WRITE (8 ,
+             WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &             ICOllev(k), EXV(k,ncalc),
-     &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
-     &             SR_nno(k,ncalc)
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
 
              WRITE (96,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &             ICOllev(k), EXV(k,ncalc),
-     &             SPInv(k,ncalc), FLOAT(IPArv(k,ncalc)),
-     &             SR_ntu(k,ncalc),SR_nnb(k,ncalc),SR_nng(k,ncalc),0.01,
-     &             SR_nno(k,ncalc)
-           ENDDO
-           CLOSE(32)
-           DO k = 1, nld_cc
-             READ (97,'(A80)',END=290,ERR=290) ch_iuf        
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2), D_nno(k)
+
            ENDDO
 
-           DO k = nld_cc + 1 , ND_nlv 
-             READ (97,'(A80)',END=290,ERR=290) ch_iuf      
-             WRITE (96,'(A80)') ch_iuf
-             WRITE (8 ,'(A80)') ch_iuf
-           ENDDO
-           WRITE (8,*)
-         
          ELSE ! second run, soft rotor coll level file exists !
 
            DO k = 1, ND_nlv 
@@ -836,11 +1048,10 @@ C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k)
              WRITE (96,'(A80)') ch_iuf
              WRITE (8 ,'(A80)') ch_iuf
            ENDDO
-           WRITE (8,*)
 
          ENDIF
-
-  290    CLOSE (96)
+  290    CLOSE(32)
+         CLOSE (96)
          CLOSE (97)
 
          IF (IOPsys.EQ.0) THEN
@@ -849,9 +1060,297 @@ C    &             IPH(k), D_Klv(k), D_Llv(k), 0.01, D_nno(k)
          ELSE
             iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
          ENDIF
+C
+C--------JOIN finished
+C
+         WRITE (8,*)
+         WRITE (8,*)
 
       ENDIF
 
+      IF (IMOdel.EQ.4 .AND. (.NOT.coll_defined)) THEN
+C
+C--------model = 'coupled-channels rigid+soft rotor'
+C
+         coll_defined = .TRUE.
+         WRITE (8,*)
+
+         IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
+            WRITE (8,*)'ERROR: Rigid+soft rotor CC potential selected'
+            WRITE (8,*)'ERROR: but no isotopes defined for this OMP '
+            WRITE (8,*)'ERROR: Error in RIPL database.                '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
+            WRITE (8,*)'WARNING: Default collective levels will be used'
+            GOTO 300
+         ENDIF
+         ncalc = 0
+         DO n = 1, NISotop
+            IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
+         ENDDO
+         IF (ncalc.EQ.0) THEN
+            WRITE (8,*)'WARNING: Target nucleus not listed in RIPL OMP'
+            WRITE (8,*)'WARNING: Default collective levels will be used'
+            GOTO 300
+         ENDIF
+         IF (NCOll(ncalc).EQ.0) THEN
+            WRITE (8,*)
+     &            'ERROR: RIPL CC rigid+soft rotor NCOll(target) = 0 '
+            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+            WRITE (8,*)'WARNING: Default collective levels will be used'
+            GOTO 300
+         ENDIF
+
+         IF (ND_nlv .LT. NCOll(ncalc)) THEN
+             WRITE (8,*)
+     &       'ERROR: Number of collective levels < RIPL CC '
+            WRITE (8,*)
+     &       'ERROR: Delete ECDWBA from input and the collective'
+            WRITE (8,*)
+     &       'ERROR: level file *-lev.col, and rerun'
+            STOP 'ERROR: see the long output (*.lst)'
+         ENDIF
+
+C--------Setting EMPIRE global variables
+         nld_cc = 1
+         DO k = 2, ND_nlv
+            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+         ENDDO
+
+         IF (nld_cc.NE.NCOll(ncalc)) THEN
+            WRITE (8,*) 
+     &  'WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) 'WARNING: RIPL number of channels used'
+         ENDIF
+         WRITE (8,*) 
+C
+C        Rigid-soft rotor model
+C
+C	   Correcting energies of the OMP collective levels EXV 
+C
+         OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1061)
+         DO n=2,NCOll(ncalc)
+            REWIND(32)
+            READ (32,'(A80)',END=1061,ERR=1061) ch_iuf
+            DO ilv = 1, NLV(nnuc)
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &              ,END=1061,ERR=1061) 
+     &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
+              DO nbr = 1, ndbrlin
+                READ (32,'(A1)',END=1061,ERR=1061) dum
+              ENDDO
+              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
+     &     	    abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
+	            EXV(n,ncalc) = elvr
+                  exit 
+              endif 
+            ENDDO
+         ENDDO
+ 1061    CLOSE(32)  
+
+C
+C	   Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C
+         nld_cc = 1
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
+
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+     &     	    abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &       	    iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
+
+                  nld_cc = nld_cc + 1
+
+                  IF (ICOllev(ilv).GT.LEVcc) 
+     &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
+
+                  D_Elv(ilv) = EXV(n,ncalc) 
+                  
+                  IPH(ilv)   = SR_ntu(n,ncalc)
+                  D_Llv(ilv) = SR_nnb(n,ncalc)
+                  D_Klv(ilv) = SR_nng(n,ncalc)
+                  D_nno(ilv) = SR_nno(n,ncalc)
+
+                  D_Def(ilv,2) = DEFv(n,ncalc)
+
+                  exit 
+              endif 
+            ENDDO
+         ENDDO
+	 
+C
+C--------Putting Coupled levels first
+         DO i = 2, ND_nlv
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).LT.ICOllev(i)) THEN
+C-----------------swapping
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  itmp = IPH(i)
+                  IPH(i) = IPH(j)
+                  IPH(j) = itmp
+
+                  dtmp = D_Llv(i)
+                  D_Llv(i) = D_Llv(j)
+                  D_Llv(j) = dtmp
+
+                  dtmp = D_Klv(i)
+                  D_Klv(i) = D_Klv(j)
+                  D_Klv(j) = dtmp
+
+                  dtmp = D_nno(i)
+                  D_nno(i) = D_nno(j)
+                  D_nno(j) = dtmp
+               ENDIF
+            ENDDO
+         ENDDO
+
+         WRITE (8,*) 
+         WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+         LMAxcc = LMAx(ncalc)
+         IDEfcc = IDEf(ncalc)
+         DO k = 2, IDEfcc, 2
+            D_Def(1,k) = DDEf(ncalc,k)
+         ENDDO
+         WRITE (8,*) 
+C
+C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
+C
+         OPEN (32,FILE = 'TARGET_COLL_RIPL.DAT')
+         OPEN (97,FILE = 'TARGET_COLL.DAT')
+         OPEN (96,FILE = 'COLL.DAT')
+         READ (97,*)                    ! FIRST LINE
+
+         WRITE (8,*)
+     &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
+         WRITE (32,*)
+     &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
+         WRITE (96,*) 
+     &'Collective levels: RIPL CC OMP + default, rigid+soft rotor model'
+C
+         READ (97,'(A80)') ch_iuf       ! 2ND LINE
+         WRITE (8,'(A80)') ch_iuf
+         WRITE (32,'(A80)') ch_iuf
+         WRITE (96,'(A80)') ch_iuf
+C
+         READ (97,'(A80)') ch_iuf       ! 3ER LINE, model type  
+	   ldynamical = .FALSE.
+         if(ch_iuf(36:39).eq.'dyna') ldynamical = .TRUE.
+
+         SOFT     = .TRUE.
+	   DYNam    = .TRUE.
+         DEFormed = .FALSE.
+
+         WRITE ( 8,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+         WRITE (32,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+         WRITE (96,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+
+         READ (97,*)                    ! EMPTY LINE
+         WRITE (8,*) 
+         WRITE (32,*) 
+         WRITE (96,*) 
+C
+         READ (97,*) 
+         WRITE (8,*) '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+         WRITE (32,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+         WRITE (96,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+         READ (97,*) 
+
+         if(.NOT.ldynamical) then
+C           first run with default TARGET_COLL.DAT
+
+           WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           READ (97,*) 
+           WRITE (8,*)
+           WRITE (32,*)
+           WRITE (96,*)
+           READ (97,*) 
+           WRITE (8 ,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
+           WRITE (32,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
+           WRITE (96,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
+
+           DO k = 1, ND_nlv
+
+             READ (97,'(A80)',END=1001,ERR=1001) ch_iuf        
+
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+     &          D_Def(k,2) = 0.005
+
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+
+             WRITE (8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+
+             WRITE (96,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Llv(k),D_Klv(k),D_Def(k,2)
+
+           ENDDO
+
+         ELSE ! second run, rigid-soft rotor coll level file exists !
+
+           DO k = 1, ND_nlv 
+             READ (97,'(A80)',END=1001,ERR=1001) ch_iuf      
+             WRITE (96,'(A80)') ch_iuf
+             WRITE (8 ,'(A80)') ch_iuf
+           ENDDO
+
+         ENDIF
+ 1001    CLOSE (96)
+         CLOSE (32)
+C        CLOSE (97,STATUS = 'DELETE')
+         CLOSE (97)
+C
+         IF (IOPsys.EQ.0) THEN
+            ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
+            iwin = PIPE(ctmp)
+         ELSE
+            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
+         ENDIF
+C
+C--------JOIN finished
+C
+         WRITE (8,*)
+         WRITE (8,*)
+
+      ENDIF
 C
 C-----END OF SETTING COLLECTIVE LEVELS for DIRECT CALCULATIONS
 C
@@ -1004,7 +1503,7 @@ C--------komp = 29 OR 33
          CALL FINDPOT_OMPAR_RIPL(Komp,ieof,ipoten,Nnuc,Nejc)
          IF (ieof.EQ.0) THEN
 C-----------Reading potential parameters from OMPAR.RIPL(OMPAR.DIR) file
-            CALL READ_OMPAR_RIPL(Komp,ierr,irel,ND_nlv,D_Elv)
+            CALL READ_OMPAR_RIPL(Komp,ierr,irel)
             IRElat(Nejc,Nnuc) = irel
             IF(Komp.eq.33) IRElat(0,0) = irel
             IF (ierr.EQ.0) GOTO 100
@@ -1043,7 +1542,7 @@ C-----Here ieof must be 0 always because we checked in input.f
          STOP 'ERROR: PROBLEM with OMPAR.DIR library'
       ENDIF
 C-----Reading o.m.  potential parameters for IPOTEN catalog number
-      CALL OMIN(ki,ieof,irel,ND_nlv,D_Elv)
+      CALL OMIN(ki,ieof,irel)
       IRElat(Nejc,Nnuc) = irel
 C
 C-----Ener must be in LAB system
@@ -1218,24 +1717,19 @@ C
       WRITE (Komp,'(A8)') '++++++++'
       END
 
-      SUBROUTINE READ_OMPAR_RIPL(Ko,Ierr,Irelout,ND_nlv,D_elv)
+      SUBROUTINE READ_OMPAR_RIPL(Ko,Ierr,Irelout)
       INCLUDE 'ripl2empire.h'
 C
 C
 C Dummy arguments
 C
-      INTEGER Ierr, Irelout, Ko, ND_nlv
-      REAL*8 D_Elv(ND_nlv)
+      INTEGER Ierr, Irelout, Ko
 C
 C Local variables
 C
       CHARACTER*80 comment
       INTEGER i, j, k, krange, n
       INTEGER IABS
-C Temporal arrays     
-      INTEGER iarray_tmp(NDIM7),iarray(NDIM7)
-      REAL*8 array0(NDIM7),array1(NDIM7),array2(NDIM7)
-      REAL*8 array3(NDIM7),array4(NDIM7),array5(NDIM7)
 C
 C-----Read RIPL optical model parameters from the local OMPAR.RIPL file
 C
@@ -1298,7 +1792,9 @@ C--------------Reading depths
          ENDDO
       ENDIF
       IF (IMOdel.EQ.1) THEN
+C
 C        Reading rigid rotor model parameters    
+C
          READ (Ko,99020,ERR = 200) NISotop
          DO n = 1, NISotop
             IF (IDEf(n).LE.8) THEN
@@ -1315,7 +1811,9 @@ C        Reading rigid rotor model parameters
             ENDDO
          ENDDO
       ELSEIF (IMOdel.EQ.2) THEN
+C
 C        Reading vibrational model parameters    
+C
          READ (Ko,99020,ERR = 200) NISotop
          DO n = 1, NISotop
             READ (Ko,99020,ERR = 200) IZ(n), IA(n), NVIb(n)
@@ -1325,7 +1823,9 @@ C        Reading vibrational model parameters
             ENDDO
          ENDDO
       ELSEIF (IMOdel.EQ.3) THEN
+C
 C        Reading soft rotor model parameters    
+C
          READ (Ko,99020,ERR = 200) NISotop
          DO n = 1, NISotop
             READ (Ko,99020,ERR = 200) IZ(n), IA(n), NCOll(n)
@@ -1338,54 +1838,36 @@ C        Reading soft rotor model parameters
             read(ko,99047,ERR = 200)  ! Record 5 from OPTMAN (Hamiltonian parameters)
      &                    SR_hw0(n),SR_bb32(n),SR_gamde(n),
      &                    SR_dpar(n),SR_gshape(n)
-
             do k=1,NCOll(n)
               read(ko,99049) EXV(k,n),SPInv(k,n),IPArv(k,n),
      +               SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
             enddo
-C
-C           Reordering NCOll(n) coupled levels following TARGET_COLL.DAT order in D_Elv array
-C
-            iarray_tmp(1) = 1
-            DO i = 2, ND_nlv
-             DO j = 2, NCOll(n)  
-C              This accuracy 0.005 could be a problem, pls double check 
-C              levels' energies before compiling RIPL potentials
-C
-               IF(dabs(D_Elv(i)-EXV(j,n)).gt.0.005d0) cycle
-               iarray_tmp(i) = j
-           ENDDO
-          ENDDO
 
-C           write(*,*) 'Reordered levels'
-C           do k=1,NCOll(n)
-C             write(*,*) D_elv(k),EXV(iarray_tmp(k),n)
-C           enddo
+         ENDDO
 
-            DO i = 1, NCOll(n)
-           iarray(i) = IPArv (iarray_tmp(i),n)
-           array0(i) = EXV   (iarray_tmp(i),n)
-           array1(i) = SPInv (iarray_tmp(i),n)
-           array2(i) = SR_ntu(iarray_tmp(i),n)
-           array3(i) = SR_nnb(iarray_tmp(i),n)
-           array4(i) = SR_nng(iarray_tmp(i),n)
-           array5(i) = SR_nno(iarray_tmp(i),n)
-          ENDDO
+      ELSEIF (IMOdel.EQ.4) THEN
+C
+C        Reading rigid-soft rotor model parameters    
+C
+         READ (Ko,99020,ERR = 200) NISotop
+         DO n = 1, NISotop
+            IF (IDEf(n).LE.8) THEN
+               READ (Ko,99040,ERR = 200) IZ(n), IA(n), NCOll(n), LMAx(n)
+     &               , IDEf(n), BANdk(n), (DEF(n,k),k = 2,IDEf(n),2)
+            ELSE
+               READ (Ko,99040,ERR = 200) IZ(n), IA(n), NCOll(n), LMAx(n)
+     &               , IDEf(n), BANdk(n), (DEF(n,k),k = 2,8,2)
+            ENDIF
+            IF (IDEf(n).GE.8) READ (Ko,99010,ERR = 200)
+     &                              (DEF(n,k),k = 2,IDEf(n),2)
 
-            write(*,*) 'Reordered levels'
-            do i=1,NCOll(n)
-           IPArv (i,n) = iarray(i)
-           EXV   (i,n) = array0(i) 
-           SPInv (i,n) = array1(i)
-           SR_ntu(i,n) = array2(i)
-           SR_nnb(i,n) = array3(i) 
-           SR_nng(i,n) = array4(i)
-           SR_nno(i,n) = array5(i) 
-             write(*,99051) D_elv(i),EXV(i,n),SPInv(i,n),IPArv(i,n),
-     +               SR_ntu(i,n),SR_nnb(i,n),SR_nng(i,n),SR_nno(i,n)
+            do k=1,NCOll(n)
+              read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
+     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
             enddo
 
          ENDDO
+
       ENDIF
       READ (Ko,'(A80)',END = 100) comment
   100 RETURN
@@ -1400,12 +1882,14 @@ C           enddo
 99045 FORMAT (f12.8,f7.1,2I4,1p,2(1x,e11.4))
 99047 FORMAT (6(e11.5,1x))
 99049 FORMAT (f12.8,f7.1,I4,4I2)
+99052 FORMAT (f12.8,f7.1,I4,4I2,1x,e11.4)
 99050 FORMAT (80A1)
 99051 FORMAT (f12.8,1x,f12.8,1x,f7.1,I4,4I2)
+99053 FORMAT (f12.8,1x,f12.8,1x,f7.1,I4,4I2,1x,e11.4)
       END
 
 
-      SUBROUTINE OMIN(Ki,Ieof,Irelout,ND_nlv,D_Elv)
+      SUBROUTINE OMIN(Ki,Ieof,Irelout)
 C
 C     routine to read optical model parameters
 C
@@ -1413,18 +1897,13 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Ieof, Irelout, Ki, ND_nlv
-      REAL*8 D_Elv(ND_nlv)
+      INTEGER Ki,Ieof,Irelout
 C
 C Local variables
 C
       INTEGER i, j, k, krange, n
       INTEGER IABS
       CHARACTER*80 idum
-C Temporal arrays     
-      INTEGER iarray_tmp(NDIM7),iarray(NDIM7)
-      REAL*8 array0(NDIM7),array1(NDIM7),array2(NDIM7)
-      REAL*8 array3(NDIM7),array4(NDIM7),array5(NDIM7)
 
       Ieof = 0
       READ (Ki,*,END = 100) IREf
@@ -1490,52 +1969,20 @@ C Temporal arrays
               read(ki,*) EXV(k,n), SPInv(k,n), IPArv(k,n),
      +               SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
             enddo
+         ENDDO
+      ELSEIF (IMOdel.EQ.4) THEN
+         READ (Ki,*) NISotop
+         DO n = 1, NISotop
+            READ (Ki,*) IZ(n), IA(n), NCOll(n), LMAx(n), IDEf(n),
+     &                  BANdk(n), (DEF(n,k),k = 2,IDEf(n),2)
 
-            IF( IZ(n).ne.NINT(ZTAR) .or. IA(n).ne.NINT(ATAR) ) cycle 
-C
-C           Reordering NCOll(n) coupled levels following TARGET_COLL.DAT order in D_Elv array
-C
-            iarray_tmp(1) = 1
-            DO i = 2, ND_nlv
-             DO j = 2, NCOll(n)  
-C              This accuracy 0.005 could be a problem, pls double check 
-C              levels' energies before compiling RIPL potentials
-C
-               IF(dabs(D_Elv(i)-EXV(j,n)).gt.0.005d0) cycle
-               iarray_tmp(i) = j
-             ENDDO
-            ENDDO
-
-C           write(*,*) 'Reordered levels'
-C           do k=1,NCOll(n)
-C             write(*,*) D_elv(k),EXV(iarray_tmp(k),n)
-C           enddo
-
-            DO i = 1, NCOll(n)
-              iarray(i) = IPArv (iarray_tmp(i),n)
-              array0(i) = EXV   (iarray_tmp(i),n)
-              array1(i) = SPInv (iarray_tmp(i),n)
-              array2(i) = SR_ntu(iarray_tmp(i),n)
-              array3(i) = SR_nnb(iarray_tmp(i),n)
-              array4(i) = SR_nng(iarray_tmp(i),n)
-              array5(i) = SR_nno(iarray_tmp(i),n)
-            ENDDO
-
-C           write(*,*) 'Reordered levels'
-            do i=1,NCOll(n)
-              IPArv (i,n) = iarray(i)
-              EXV   (i,n) = array0(i) 
-              SPInv (i,n) = array1(i)
-              SR_ntu(i,n) = array2(i)
-              SR_nnb(i,n) = array3(i) 
-              SR_nng(i,n) = array4(i)
-              SR_nno(i,n) = array5(i) 
-C             write(*,99051) D_elv(i),EXV(i,n),SPInv(i,n),IPArv(i,n),
-C    +               SR_ntu(i,n),SR_nnb(i,n),SR_nng(i,n),SR_nno(i,n)
+            do k=1,NCOll(n)
+              read(ki,*) EXV(k,n), SPInv(k,n), IPArv(k,n),
+     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
             enddo
-
          ENDDO
       ENDIF
+
   90  READ (Ki,99005,END = 100) idum
       RETURN
   100 Ieof = 1
@@ -1573,6 +2020,7 @@ C
       IF (IMOdel.EQ.1) model = 'coupled-channels rigid rotor model'
       IF (IMOdel.EQ.2) model = 'coupled-channels vibrational model'
       IF (IMOdel.EQ.3) model = 'coupled-channels soft rotor model'
+      IF (IMOdel.EQ.4) model = 'coupled-channels rigid+soft rotor'
       iarea = MOD(IREf,1000)
       IF (iarea.LE.99) area = 'United States (LANL)'
       IF (iarea.GE.100 .AND. iarea.LE.199) area = 'United States'
@@ -1965,7 +2413,7 @@ C--------------In this case we need only CC calculation so INLkey=0
             ELSE
 C--------------EXACT (no DWBA) calculation
                IF (SOFt) THEN
-C----------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
+C----------------OPTMAN CC calc. (only coupled levels)
                  CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener) 
                ELSE
                  CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., - 1)
@@ -2558,7 +3006,7 @@ CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
-C     |    harmonic vibrational model                             |
+C     |    h armonic vibrational model                             |
 C     |               v1.0     S.Masetti 5/99                     |
 C     |               v2.0     R.Capote  1/2001                   |
 C     |               v3.0     R.Capote  5/2001 (DWBA added)      |
@@ -3943,7 +4391,6 @@ C     angstep = 2.5
       xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
       IF (El.LT.0.D0) THEN
-
          inc_channel = .true.
          El = DABS( - El)
          elab = El
@@ -3987,12 +4434,31 @@ C     OPTMAN 1st line
       mesho = 2
       mehao = 2
       mesha = 4
-C     mesol = 1 ! automatic selection
+C mesol > 3 - solution using iterations with exact coupled channels 
+C solution with the number of coupled states equal MESOL as zero
+C approximation, MESOL must be less than or equal to 20;
       mesol = 5 ! automatic selection
+
+      if( (SOFT .and. DYNam) .and. imodel.ne.4) imodel=4
+      if( (.not.SOFT)  .and. imodel.gt.2) imodel=1
+
+      if(imodel.eq.4) then ! rigid + soft rotor (4)
+        mepot = 1 
+        meham = 1
+C mesol > 3 - solution using iterations with exact coupled channels 
+C solution with the number of coupled states equal MESOL as zero
+C approximation, MESOL must be less than or equal to 20;
+        mesol =20 
+        mesha = 1
+        mesho = 0
+        mehao = 0
+C       exact calculation for odd and odd-odd targets
+C       if ( mod(iatar-iztar,2).ne.0 .or. mod(iztar,2).ne.0 ) mesol = 2
+      endif
+
       if(imodel.le.1) then ! rigid rotor (1) or spherical (0)
         mepot = 1 
         meham = 1
-C       mesha = 0
         mesha = 1
         mesho = 0
         mehao = 0
@@ -4000,7 +4466,8 @@ C       exact calculation for odd and odd-odd targets
         if ( mod(iatar-iztar,2).ne.0 .or. mod(iztar,2).ne.0 ) mesol = 2
       endif
       mepri = 0 ! short output
-      meapp = 0 ! 1 (No energy losses)
+      meapp = 0 ! solution with the potential dependency on level energy losses in the channel
+                ! =1 (No energy losses considered)
       mevol = 0
       merel = 0
 C-----Relativistic kinematics (y/n)
@@ -4011,25 +4478,24 @@ C        merel = 1  ! relativistic kinematic + potential dependence
          merel = 0  ! non-relativistic kinematic only
       ENDIF
 
-      mecul = 0 ! Energy dependent i.e. DVc = - Ccoul*Z/A**(1/3) * dV/dE
-C     mecul = 1 ! Energy independent Coulomb correction DVc = Ccoul*Z/A**(1/3)
+C     Coulomb correction for proton potentials 
+      mecul = 0 ! Energy dependent   : DVc = - Ccoul*Z/A**(1/3) * dV/dE
+C     mecul = 1 ! Energy independent : DVc = Ccoul*Z/A**(1/3)
 C     mecul = 2 ! E = Ep - Ccoul*Z/A**(1/3) for real and imag potentials
 C     mecul = 3 ! E = Ep - Ccoul*Z/A**(1/3) for real potential
-
       if(pot(2,1,25).ne.0.d0 .or. pot(4,1,25).ne.0.d0) mecul =2
       if(pot(1,1,25).ne.0.d0) mecul =3
 
       merzz = 1 ! Constant charge radius(0) Energy dependent(1)
       merrr = 1 ! Real potential radius is constant(0) Energy dependent(1)  
+
+C     Dispersive potentials
       medis = 0 ! No dispersion
-
-C     IF (IDRs.GT.0) THEN
-
       if (abs(idr).eq.3) medis = 1 
       if (abs(idr).eq.2) medis = 2
 C     If merip = 1 then potentials defined at every energy (loop over energies)
       merip = 0 
-      if(idr.eq.0 .and. imodel.le.2) merip = 1
+      if(idr.eq.0 .and. imodel.lt.4) merip = 1
 c------------------------------------------------------------------------------
 
 C   Defining potential depths (needs changes in OPTMAN)
@@ -4071,9 +4537,15 @@ C
 C-----Writing OPTMAN input
       OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
 C-----CARD 1 : Title
-      WRITE (1,
-     &'(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SOFT ROTOR CC'',i3)'
-     &) elab, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc))),iref
+	IF(imodel.ne.4) then
+        WRITE (1,'(f10.5,'' MeV '',
+     &   a8,'' on '',i3,a2,'': soft rotor, RIPL OMP # '',i5)')
+     &   elab, PARname(ip), NINT(A(Nnuc)), Symb(Nnuc), iref
+      ELSE
+        WRITE (1,'(f10.5,'' MeV '',
+     &   a8,'' on '',i3,a2,'': rigid+soft rotor, RIPL OMP # '',i5)')
+     &   elab, PARname(ip), NINT(A(Nnuc)), Symb(Nnuc), iref
+	ENDIF
 
       write(1,'(16i2.2)') 
      +mejob,mepot,meham,mepri,mesol,mesha,mesho,mehao,
@@ -4083,20 +4555,20 @@ C     Soft rotor hamiltonian
 C
       if(meham.gt.1) then
         write(1,'(6E12.5)') ! Record 3 from OPTMAN (Hamiltonian parameters)
-     +    SR_hw(1),SR_amb0(1),SR_amg0(1),
-     +    SR_gam0(1),SR_bet0(1),SR_bet4(1)
+     +    SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,
+     +    SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4
         write(1,'(6E12.5)') ! Record 3 from OPTMAN (Hamiltonian parameters)
-     +    SR_bb42(1),SR_gamg(1),SR_delg(1),
-     +    SR_bet3(1),SR_et0(1),SR_amu0(1)
+     +    SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,
+     +    SR_Ham_bet3,SR_Ham_et0,SR_Ham_amu0
         write(1,'(6E12.5)') ! Record 3 from OPTMAN (Hamiltonian parameters)
-     +    SR_hw0(1),SR_bb32(1),SR_gamde(1),
-     +    SR_dpar(1),SR_gshape(1)
+     +    SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     +    SR_Ham_dpar,SR_Ham_gshape
       endif
 
 C     Default values
       npd = 8     ! maximum multipole in use 
       las = 8
-      if(imodel.eq.1) then
+      if(imodel.eq.1 .or. imodel.eq.4) then
 C-------Deformation of rotational band (only ground state band is present)
 C-------IdefCC   = maximum degree of deformation
 C-------LMaxCC   = maximum L in multipole decomposition
@@ -4112,13 +4584,9 @@ C-------LMaxCC   = maximum L in multipole decomposition
 C     write(1,'(9I3)') ncol  ,ne,npd,las,mtet   ,90,200,180,0
 C     write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,1  ! KODMA = 1
 C
-
 C     KODMA 0 needed as coupled states are not ordered
-
 C
-
       write(1,'(9I3)') ncollm, 1,npd,las,NANgela,90,200,180,0  ! KODMA = 0
-
 
       write(1,'(6e12.5)') elab
       if(ZEJc(Nejc).gt.0) then
@@ -4136,39 +4604,48 @@ C    &                              SEJc(Nejc), xmas_nejc, xmas_nnuc,
 C    &                              Z(Nnuc)*ZEJc(Nejc)
 
       if(imodel.ge.1) then
-        if(meham.eq.1) then ! rigid rotor
-          do k=1,ND_nlv
-            IF(ICOllev(k).GT.LEVcc) CYCLE
-C           Normal excited states (for n,n or p,p scattering) 
-            write(1,'(e11.6,1x,4I2)') 
-     +        D_Elv(k),nint(2*D_Xjlv(k)),D_Lvp(k),nint(2*D_Xjlv(1)),0
-C
-C           if(ex(k,ntar).GT.100.d0) then
-C             Isobar analogue states (for p,n scattering) 
-C             write(1,'(e11.6,1x,4I2)') 
-C    +        ex(k,ntar)-100.d0,nint(2*spin(k,ntar)),ipar(k,ntar),
-C    +                            nint(2*spin(1,ntar)), 1
-C           endif
-          enddo
-        else                    ! soft rotor
+        if(meham.eq.1 .and. imodel.ne.4) then ! rigid rotor
           do k=1,ND_nlv
             IF(ICOllev(k).GT.LEVcc) CYCLE
             iparit = -1
             if(D_Lvp(k).gt.0.d0) iparit = +1
-            write(1,'(e11.6,1x,6I2)') 
-     +        D_Elv(k), nint(2*D_Xjlv(k)), iparit,
-     +        IPH(k), D_Klv(k), D_Llv(k), D_nno(k) 
+C           Normal excited states (for n,n or p,p scattering) 
+            write(1,'(E12.5,1x,4I2)') 
+     +        D_Elv(k),nint(2*D_Xjlv(k)),iparit,nint(2*D_Xjlv(1)),0
+C
+C           if(ex(k,ntar).GT.100.d0) then
+C             Isobar analogue states (for p,n scattering) 
+C             write(1,'(E12.5,1x,4I2)') 
+C    +        ex(k,ntar)-100.d0,nint(2*spin(k,ntar)),ipar(k,ntar),
+C    +                            nint(2*spin(1,ntar)), 1
+C           endif
           enddo
+        else                    
+          if(imodel.ne.4) then ! soft rotor
+            do k=1,ND_nlv
+              IF(ICOllev(k).GT.LEVcc) CYCLE
+              iparit = -1
+              if(D_Lvp(k).gt.0.d0) iparit = +1
+              write(1,'(E12.5,6I2)') 
+     +          D_Elv(k), nint(2*D_Xjlv(k)), iparit,
+     +          IPH(k), D_Klv(k), D_Llv(k), D_nno(k) 
+            enddo
+          else			 ! rigid-soft rotor
+            do k=1,ND_nlv
+              IF(ICOllev(k).GT.LEVcc) CYCLE
+              iparit = -1
+              if(D_Lvp(k).gt.0.d0) iparit = +1
+              write(1,'(E12.5,6I2,e11.6)') 
+     +          D_Elv(k), nint(2*D_Xjlv(k)), iparit,
+     +          IPH(k), D_Klv(k), D_Llv(k), D_nno(k), D_Def(k,2)
+            enddo
+	    endif
         endif
       endif
 
-
 C     This line is new for OPTMAN v.12 (from November 2011)
-
 C     Flags for inclusion of resonances
-
       write(1,'(I3)') 0   ! no resonances are considered
-
 
 C     Ef=dble(int(100000*efermi))/100000
       Ef=EEFermi(Nejc,Nnuc)
@@ -4188,7 +4665,9 @@ C     Dispersive deformed potentials are treated exactly.
 C     All others potentials are calculated at a fixed energy, 
 C     therefore loop over incident energies is needed. 
 C
-C     if(imodel.eq.3 .or. (idr.ne.0 .and. imodel.eq.1)) then 
+C     if(imodel.eq.3 .or. (idr.ne.0 .and. imodel.eq.1) .or.
+C    +   imodel.eq.4 ) then 
+
       write(1,'(6g12.5)')
 C               Vr0                         Vr1       
      +    pot(1,1,14)+pot(1,1,15)*iatar, -pot(1,1,3)-pot(1,1,4)*iatar, 
@@ -4241,24 +4720,24 @@ C     Modified for OPTMAN v.12
 
 
 C     This line is new for OPTMAN v.12 (from November 2011)
-
       write(1,'(6g12.5)') 0.d0, A(Nnuc)
 
-
-      if(meham.eq.1) ! rigid rotor
+      if(meham.eq.1 .or. imodel.eq.4 ) ! rigid rotor
      +  write(1,'(6g12.5)') (D_Def(1,k),k = 2,IDEfcc,2) 
-
       close(1) 
 C
 C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
-
       IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
 
-      ctmp = trim(empiredir)//'/source/optmand'
-      iwin = PIPE(ctmp)
+      IF (IOPsys.EQ.0) THEN
+        ctmp = trim(empiredir)//'/source/optmand'
+        iwin = PIPE(ctmp)
+	  ELSE
+        iwin = PIPE(' optmand')
+	  ENDIF  
 
       RETURN
       END

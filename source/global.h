@@ -1,10 +1,16 @@
-C $Rev: 2705 $
+C $Rev: 2770 $
 C $Author: rcapote $
-C $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
+C $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
 C     line to have access to the system directory, RCN, July 2009
+C
+      DOUBLE PRECISION 
+     & SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,
+     & SR_Ham_bet4,SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3,
+     & SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,
+     & SR_Ham_dpar,SR_Ham_gshape
 C
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,
@@ -72,7 +78,8 @@ C
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
-     &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl 
+     &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
+     &        DYNam, COLfile	 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -222,7 +229,11 @@ C
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
-     &                 D_nno, CSPfis, RECoil
+     &                 D_nno, CSPfis, RECoil, SR_Ham_hw, SR_Ham_amb0,
+     &	               SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4,
+     &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3,
+     &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,
+     &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape
 C
 C                      This array is only used in EXCLUSIVEL, commented 
 C    &                 , POPcselv
@@ -244,10 +255,10 @@ C
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g
-      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, 
+      COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
-     &                  NUBarread, BENchm, CALctl
+     &                  NUBarread, BENchm, CALctl, COLfile
        COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
