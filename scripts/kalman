@@ -9,7 +9,8 @@ file=$1
 MT=$2
 MAT=$3
 EXPDAT=$4
-#CRCOV=$5
+PFNS=$5
+#CRCOV=$6
 
 if [ -z $file ]; then
 echo "INPUT FILE NOT FOUND"
@@ -23,6 +24,9 @@ if [ -z $MAT ]; then
 fi
 if [ -z $EXPDAT ]; then
    EXPDAT="0"
+fi
+if [ -z $PFNS ]; then
+   PFNS=0
 fi
 #if [ -z $CRCOV ]; then
 #   CRCOV="0"
@@ -39,22 +43,27 @@ if [ ! -s $file-inp.sen ]; then
    echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
    exit 2
 fi
-if [ ! -s $file-pfns-mat.sen ]; then
-   echo "$file-pfns-mat.sen NOT FOUND. Fitting only cross sections from $file-mat.sen."
-   PFNS=0
+if [ $PFNS = 0 ]; then
+   echo "Fitting only cross sections from $file-mat.sen."
    if [ ! -s $file-mat.sen ]; then
      echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
      exit 3
    fi
+elif [ $PFNS = 1 ]; then
+   echo "Fitting only prompt fission neutron spectra from $file-pfns-mat.sen."
+   if [ ! -s $file-pfns-mat.sen ]; then
+     echo "SENSITIVITY FILE NOT FOUND ($file-pfns-mat.sen)"
+     exit 4
+   fi
 else
-   echo "$file-pfns-mat.sen EXISTS. Fitting only prompt fission neutron spectra."
-   PFNS=1
+   echo "Option PFNS = $PFNS has not been implemented yet."
+   exit 5
 fi
 if [ ! -s $file-kal.c4 ]; then
    echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
    if [ ! -s $file.c4 ]; then
      echo "C4 FILE NOT FOUND ($file.c4)"
-     exit 4
+     exit 6
    else
      cp $file.c4 $file-kal.c4
    fi
