@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 2780 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-09 23:57:26 +0200 (Mo, 09 Apr 2012) $
+Ccc   * $Rev: 2784 $
+Ccc   * $Author: dbrown $
+Ccc   * $Date: 2012-04-10 16:03:51 +0200 (Di, 10 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
