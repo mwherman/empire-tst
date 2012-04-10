@@ -1,5 +1,5 @@
 
-                      Start time: 09:55.10 (09-04-2012)
+                      Start time: 09:22.57 (10-04-2012)
 
  cp /home/gnobre/empire/EXFOR/neutrons/011_Na_023.c4 TMP.c4                     
                                                       
@@ -10,8 +10,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2773 |
-                        | empire/source  rev. 2772 |
+                        | SVN empire     rev. 2782 |
+                        | empire/source  rev. 2782 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -1148,6 +1148,6 @@ E-aver.           0.432535E-01   0.752320E-02    0.00000        0.00000        0
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 09:55.12 (09-04-2012)
+  End time: 09:22.59 (10-04-2012)
 
   Calculation time:   0 min  2 s

@@ -1,5 +1,5 @@
 
-                      Start time: 09:55.12 (09-04-2012)
+                      Start time: 09:22.59 (10-04-2012)
 
  cp /home/gnobre/empire/EXFOR/neutrons/040_Zr_092.c4 TMP.c4                     
                                                       
@@ -10,8 +10,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2773 |
-                        | empire/source  rev. 2772 |
+                        | SVN empire     rev. 2782 |
+                        | empire/source  rev. 2782 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -115,7 +115,7 @@
       18
  
   N   E[MeV]  J   pi Nph L  K   Dyn.Def.
-  1  0.0000  0.0  1.  1  0  0  0.000E+00
+  1  0.0000  0.0  1.  0  0  0  0.000E+00
   2  0.9345  2.0  1.  1  0  0  0.103E+00
   8  2.3397  3.0 -1.  1  0  0  0.174E+00
   4  1.4955  4.0  1.  2  0  0  0.500E-02
@@ -2604,6 +2604,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 09:55.28 (09-04-2012)
+  End time: 09:23.15 (10-04-2012)
 
-  Calculation time:   0 min 16 s
+  Calculation time:   0 min 15 s

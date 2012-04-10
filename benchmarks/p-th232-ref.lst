@@ -1,5 +1,5 @@
 
-                      Start time: 09:55.28 (09-04-2012)
+                      Start time: 09:23.15 (10-04-2012)
 
  cp /home/gnobre/empire/EXFOR/protons/090_Th_232.c4 TMP.c4                      
                                                       
@@ -10,8 +10,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2773 |
-                        | empire/source  rev. 2772 |
+                        | SVN empire     rev. 2782 |
+                        | empire/source  rev. 2782 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -129,7 +129,7 @@
       15    4    4   0.0  0.261E+00  0.000E+00
  
   N   E[MeV]  J   pi Nph L  K   Dyn.Def.
-  1  0.0000  0.0  1.  1  0  0  0.100E-01
+  1  0.0000  0.0  1.  0  0  0  0.100E-01
   2  0.0494  2.0  1.  0  0  0  0.100E-01
   3  0.1621  4.0  1.  0  0  0  0.100E-01
   4  0.3332  6.0  1.  0  0  0  0.100E-01
@@ -3588,6 +3588,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 09:56.32 (09-04-2012)
+  End time: 09:24.13 (10-04-2012)
 
-  Calculation time:   1 min  4 s
+  Calculation time:   0 min 58 s

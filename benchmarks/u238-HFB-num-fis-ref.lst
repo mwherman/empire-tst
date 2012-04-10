@@ -1,5 +1,5 @@
 
-                      Start time: 10:05.08 (09-04-2012)
+                      Start time: 09:32.12 (10-04-2012)
 
  cp /home/gnobre/empire/EXFOR/neutrons/092_U_238.c4 TMP.c4                      
                                                       
@@ -10,8 +10,8 @@
                         |                          |
                         |        RIVOLI            |
                         |                          |
-                        | SVN empire     rev. 2773 |
-                        | empire/source  rev. 2772 |
+                        | SVN empire     rev. 2782 |
+                        | empire/source  rev. 2782 |
                         |                          |
                         |    Sao Jose dos Campos   |
                         |     Brazil, May 2011     |
@@ -101,7 +101,7 @@
       28    4    4   0.0  0.286E+00  0.000E+00
  
   N   E[MeV]  J   pi Nph L  K   Dyn.Def.
-  1  0.0000  0.0  1.  1  0  0  0.100E-01
+  1  0.0000  0.0  1.  0  0  0  0.100E-01
   2  0.0449  2.0  1.  0  0  0  0.100E-01
   3  0.1484  4.0  1.  0  0  0  0.100E-01
   4  0.3072  6.0  1.  0  0  0  0.100E-01
@@ -5113,6 +5113,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 10:06.25 (09-04-2012)
+  End time: 09:33.28 (10-04-2012)
 
-  Calculation time:   1 min 17 s
+  Calculation time:   1 min 16 s
