@@ -93,12 +93,6 @@ for k in $MT; do
     cat >INPUT.D <<EOF
 $file ${k} $MAT $EXPDAT $PFNS
 EOF
-    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
-
-    if [ -s check.out ]; then
-       exit
-    fi
-
 
     if [ -s KALMAN.INP ]; then
        rm KALMAN.INP
@@ -112,6 +106,13 @@ else
   echo  "Running pnt2kal"
   $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
 fi
+
+
+    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
+
+    if [ -s check.out ]; then
+       exit
+    fi
 
 # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
 for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
