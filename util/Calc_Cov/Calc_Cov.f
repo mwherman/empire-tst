@@ -32,10 +32,10 @@ C-Purpose: Calculate eigenvalues of the covariance matrix
 	REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
 
       lcovar = .false.
-C     do ir=1,Nreact
-C       lcovar(ir,ir) = .true.
-C     enddo
-      lcovar (1,1)=.true. 
+      do ir=1,Nreact
+        lcovar(ir,ir) = .true.
+      enddo
+C     lcovar (1,1)=.true. 
 
       avermod = 0.d0 
       sigmod  = 0.d0 
