@@ -38,11 +38,11 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       IMPLICIT NONE
 
-
       CHARACTER*60 pntfile, proj, inpsen
       CHARACTER*6 param
       INTEGER*4 MAXEXP ! Number of experiments
       INTEGER*4 nexp,MT1,MAT,NEX, nparam, ierr,MS
+      LOGICAL fexists
       PARAMETER(MAXEXP=500)
 
       TYPE (DATASET) EXPDATA(MAXEXP)
@@ -50,8 +50,13 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       READ(5,*) proj,MT1,MAT,NEX
 
+
       pntfile=trim(proj)//'.pnt'
       inpsen=trim(proj)//'-inp.sen'
+
+c     Checking if pntfile is already present, making it unnecessary to run lsttab
+      inquire(file = pntfile, exist = fexists)
+      if(.NOT.fexists) CALL run_lsttab(proj)
 
 
 
@@ -59,6 +64,11 @@ c
 c     Reading pnt file
 c
       CALL READPNT(pntfile,EXPDATA,NEXP,MAXEXP)
+
+c
+c     Reading 'proj-pfns.out' and writing 'proj-pfns.kal'
+c
+c     CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
 
 
 
@@ -71,7 +81,7 @@ c
 c     Counting the number of parameters in sensitivity input file
       OPEN(200,FILE=inpsen,iostat=ierr)
       if(ierr.ne.0) then
-        WRITE(0,*) 'PARAMETER FILE NOT FOUND: ',inpsen
+        WRITE(*,*) 'PARAMETER FILE NOT FOUND: ',inpsen
         STOP
       endif
       ierr=0
@@ -124,7 +134,7 @@ c     Opening pnt file
 c
       OPEN(100,FILE=pntfile,iostat=ierr)
       if(ierr.ne.0) then
-        WRITE(0,*) 'PNT FILE NOT FOUND: ',pntfile
+        WRITE(*,*) 'PNT FILE NOT FOUND: ',pntfile
         STOP
       endif
 c
@@ -172,6 +182,8 @@ c       Making it an error to have exp. sets with 0 points
 150   CONTINUE
       NEXP = iexp - 1
 
+      CLOSE(100)
+
       END
 
 
@@ -191,7 +203,7 @@ c       Making it an error to have exp. sets with 0 points
 
 
       SUBROUTINE WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex)
-
+C     Writing input for Kalman
 
       use dataio
 
@@ -202,16 +214,9 @@ c       Making it an error to have exp. sets with 0 points
       
       TYPE (DATASET) EXPDATA(MAXEXP)
 
-
-
-C       Writing spectra in file fort.10, relative uncertainties in 
-C       file fort.11, and default experimental correlations in file fort.12
-C       (emitted energies will be printed in MeV)
-
-C     Writing input for Kalman
-
-
-
+C     Writing spectra in file fort.10, relative uncertainties in 
+C     file fort.11, and default experimental correlations in file fort.12
+C     (emitted energies will be printed in MeV)
       do iexp=1, NEXP
 
 c       Writing the headers
@@ -282,3 +287,202 @@ c       Writing in fort.75 for plotting of experimental data
 
 
       END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE central_spectra(proj,EXPDATA,MAXEXP,nexp)
+c
+c     Subroutine that reads the central values of the prompt fission neutron spectra from file 'proj-pfns.out',
+c     and writes them, normalized by the Maxwellian, in file 'proj-pfns.kal', but only those 
+c     that have incident energies matching existing experiments in pnt file. The format of the spectra written
+c     in 'proj-pfns.kal' is the same of the '.xsc' file for cross sections. So, 'proj-pfns.kal', should be
+c     equivalent, from the kalman point of view, to the regular cross-section file, in the case of regular 
+c     cross section fits. The correspondence should be:
+c     
+c          PFNS                X-SEC
+c                          
+c        -pfns.kal             .xsc
+c     incident energy        reaction
+c      emmited energy     incident energy
+c         spectra         cross sections
+c
+
+      use dataio
+
+      IMPLICIT NONE
+
+      CHARACTER*60 proj, pfnsout, pfnskal
+      CHARACTER*5 Echar
+      INTEGER*4 MAXEXP,ierr,nexp,iexp,i, NEinc
+      LOGICAL fexists
+      REAL*8 Einc(30) ! Incident energies in pnt file
+
+      TYPE (DATASET) EXPDATA(MAXEXP)
+
+
+      pfnsout=trim(proj)//'-pfns.out'
+      pfnskal=trim(proj)//'-pfns.kal'
+
+c
+c     Testing to see if there is already a pfnskal file present,
+c     implying there is no need to run this subroutine
+c
+      inquire(file=pfnskal,exist = fexists)
+c     if(fexists) return
+
+      i=1
+      Einc(i)=EXPDATA(i)%Einc
+      do iexp=2,nexp
+        if(DABS(EXPDATA(iexp)%Einc-EXPDATA(iexp-1)%Einc).GT.1.D-20) then
+          i = i + 1
+          Einc(i)=EXPDATA(iexp)%Einc/1.D6   ! Storing in Einc and converting from eV to MeV
+        endif
+      enddo
+      NEinc = i
+c     write(*,*) 'NEinc = ', Neinc, Einc(1)
+
+
+
+
+c
+c     Opening -pfns.out file
+c
+      OPEN(200,FILE=pfnsout,iostat=ierr)
+      if(ierr.ne.0) then
+        WRITE(*,*) 'ERROR: FILE ',pfnsout,' NOT FOUND!'
+        STOP
+      endif
+c
+c     Opening -pfns.kal file
+c
+      OPEN(300,FILE=pfnskal)
+
+
+
+
+c
+c     Comparing incident energies from pfnsout with Einc() and writing the ones 
+c     that match in pfnskal
+c
+      read(200,100) Echar
+100   format(30X,A5)
+c     if(Echar.eq.'Elab=')
+
+
+
+
+
+
+
+
+
+
+      CLOSE(200)
+      CLOSE(300)
+
+      END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE run_lsttab(proj)
+
+      IMPLICIT NONE
+
+      CHARACTER*60 proj
+      INTEGER*4 ierr,MF,MT,IDX
+      REAL*8 TMaxw
+
+c     Running plotlst script
+      call system('$EMPIREDIR/scripts/plotlst '
+     &//trim(proj)//'>output.plotlst')
+
+c     Getting the Maxwellian temperature used for normalization
+c     from file proj-pfns.out
+      OPEN(150,file=trim(proj)//'-pfns.out')
+      read(150,10) TMaxw  ! in MeV
+10    format(76X,G8.4)
+      CLOSE(150)
+
+c     Opening and writing lsttab input file
+      OPEN(160, file='input.lsttab')
+      write(160,50) trim(proj),trim(proj),trim(proj), TMaxw*1.D6
+50    format(A5,'-log.plotc4',/,A5,'.c4',/,A5,'-s.endf',/,'-',///,
+     & 1PG10.4)
+c     Reading from plotlist file the indices of fission spectra and writing them in lsttab input
+      OPEN(170, file=trim(proj)//'-log.plotc4')
+      read(170,*)
+      read(170,*)
+      read(170,*)
+      read(170,*)
+      ierr=0
+      do while(ierr.eq.0)
+        read(170,100,IOSTAT=ierr) MF,MT,IDX
+100     format(18X,I3,1X,I4,46X,I4)
+        if(MF.EQ.5.AND.MT.EQ.18) write(160,110) IDX
+110     format(I4,/)
+      enddo
+      write(160,*)
+      CLOSE(170)
+      CLOSE(160)
+
+c     Running lsttab
+      call system('$EMPIREDIR/util/lsttab/lsttab < input.lsttab
+     & > output.lsttab')
+      call system('mv LSTTAB.PNT '//trim(proj)//'.pnt')
+
+      END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
