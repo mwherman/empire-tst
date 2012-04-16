@@ -10037,6 +10037,12 @@ If you want to force the assumption of sphericity for a given nucleus
 you can use this parameter with a value less than 0.1
 this parameter also affects the deformation used in MSD calculations.        
 
+\item [{ECONT}] The energy continuum for the nucleus with Z=I1 and A=I2
+starts at energy given by VAL in MeV.\\
+This parameter overwrites the continuum cut-off energy defined in the 
+default RIPL levels for a given nucleus (or even the value given in the
+local LEVELS file). If not nucleus is given, then the value is ignored. 
+
 \end{description}
 
 \section*{Scaling parameters correcting for model deficiencies}
