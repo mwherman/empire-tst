@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2553 $
+Ccc   * $Rev: 2791 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 22:09:50 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -91,6 +91,9 @@ C
       REDmsc   = 1.d0
 
       JSTab    = 0
+
+      EMAx  = 0.d0
+      ECUt  = 0.d0
 
       return
       END

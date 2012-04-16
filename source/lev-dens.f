@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-25 16:19:07 +0100 (Sa, 25 Feb 2012) $
+Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -90,17 +90,14 @@ C-----EMPIRE-3.0-dependence
 c-----calculate crtical values
       CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
       IF (BF.EQ.0.D0 .AND. Asaf.LT.0.0D0) ACR = ACRt
+
 C-----fit of cumulative low-lying discrete levels
-      IF(BF.NE.0.d0)Call LEVFIT(Nnuc,Nplot,Dshif,Dshift, Defit)
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) 
-     &   Call PLOT_ZVV_NumCumul(Nnuc, Defit,nplot, NLwst)
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
-     &  CALL PLOT_GNU_NumCumul(Nnuc,Nplot,Defit,dshift,DEL,
-     &                         NLwst)
+      
+      IF(BF.NE.0.d0) Call LEVFIT(Nnuc,Nplot,Dshif,Dshift,Defit)
 
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
          REWIND (25)
-         CALL BNDG(1,Nnuc,Q(1,Nnuc))
+         Call BNDG(1,Nnuc,Q(1,Nnuc))
       ENDIF
 
 C     Ecrt = UCRt - DEL - dshift
@@ -146,7 +143,22 @@ C     Ecrt = UCRt - DEL - dshift
          ENDIF
       ENDDO
 
-      IF(IOUt.eq.6) CALL PLOT_ZVV_GSLD(Nnuc)
+      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
+     >    CALL PLOT_ZVV_GSLD(Nnuc)     
+
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+C
+C       Cumulative levels must be calculated for FITLEV>0
+C       as Ecut(Nnuc) is set to zero
+C	 
+C       In a normal calculation, Ecut(NNuc)>0 and therefore the
+C       cumulative integral is wrongly calculated !!!
+C       RCN, April 2012
+        Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
+        Call PLOT_ZVV_NumCumul(Nnuc)
+        CALL PLOT_ZVV_GSLD(Nnuc)     
+	ENDIF
+
       
 C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       ROPar(1,Nnuc) = ACR
@@ -790,36 +802,26 @@ C COMMON variables
       REAL*8  Momort, Mompar, U, rotemp, shcn, def2
       INTEGER ia,iz,kk,nnuc
 C Local variables
-      REAL*8 mm2,pi2,defit,ac
+      REAL*8 mm2,pi2,ac
       REAL*8 om2,om3,cga 
-
-
 
       REAL*8 FSHELL
 
-      INTEGER nplot
-     
       pi2 = PI*PI
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
       
       CALL ROGSM_sys(Nnuc,AP1,AP2,GAMma,DEL,DELp,om2,om3,cga)
 
-
-
       shcn = SHC(Nnuc) 
 
       ATIl = AP1*A(Nnuc) + AP2*A23          
-
       ATIl = ATIl*ATIlnor(Nnuc)
 
       u = Q(1,Nnuc) + DEL  
 
       ac = ATIl*FSHELL(u,shcn, GAMma)
-
       IF (ac.LE.0.0D0) RETURN
-
-
 
       CALL PRERORITO(Nnuc)
       NLWst = NLW
@@ -832,28 +834,29 @@ C Local variables
       Mompar = 0.608 * ACRt * mm2 * (1.- 0.6667 * def2)
       Momort = 0.608 * ACRt * mm2 * (1.+ 0.3330 * def2)      
 
-      defit = (ELV(NLV(Nnuc),Nnuc)+2.d0)
-     &           /(NEXreq-1) 
-      nplot = (ELV(NLV(Nnuc),Nnuc)+2.d0)/defit
-
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)THEN    
-         DO kk = 1, NEXreq     
-            u = (Kk - 1)*Defit + DEL 
-            CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2,om2,om3,
-     &                  cga,gamma,shcn)
-         ENDDO
-         Call PLOT_ZVV_NumCumul(Nnuc,Defit,nplot, NLWst)   
-      ENDIF
       DO kk = 1, NEXreq
           u = EX(Kk,Nnuc)+ DEL 
           CALL BCS_FG(Nnuc,kk,U,Mompar,Momort,Nlwst,def2,om2,om3,
      &                  cga,gamma,shcn)                    
  110  ENDDO 
-      IF(IOUt.eq.6 ) CALL PLOT_ZVV_GSLD(Nnuc)
-    
+
+      IF(IOUt.eq.6 ) call PLOT_ZVV_GSLD(Nnuc)
+
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+C
+C       Cumulative levels must be calculated for FITLEV>0
+C       as Ecut(Nnuc) is set to zero
+C	 
+C       In a normal calculation, Ecut(NNuc)>0 and therefore the
+C       cumulative integral is wrongly calculated !!!
+C       RCN, April 2012
+        Call PLOT_GNU_NumCumul(Nnuc,0.d0,DEL)
+        Call PLOT_ZVV_NumCumul(Nnuc)
+	ENDIF
+
 C      Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
-       ROPar(1,Nnuc) = ac
-       ROPar(3,Nnuc) = DEL
+      ROPar(1,Nnuc) = ac
+      ROPar(3,Nnuc) = DEL
       RETURN
       END
 
@@ -1315,8 +1318,8 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Nnuc,nplot
-      REAL*8 Scutf,defit
+      INTEGER Nnuc
+      REAL*8 Scutf
 C
 C Local variables
 C
@@ -1485,14 +1488,6 @@ C-----fit nuclear temperature (and Ux) to discrete levels
          ENDIF
       ENDIF
      
-C-----plot fit of the levels with the low energy l.d. formula
-      defit = (ELV(NLV(Nnuc),Nnuc)+2.d0)
-     &           /(NEXreq-1) 
-      nplot = (ELV(NLV(Nnuc),Nnuc)+2.d0)/defit
-
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
-     &  CALL PLOT_GNU_NumCumul_GC(Nnuc) 
-     
  500  ROPar(1,Nnuc) = am
       ROPar(2,Nnuc) = ux
       ROPar(3,Nnuc) = DEL
@@ -1554,10 +1549,21 @@ C-----------Dilg's recommendations
          ENDDO
       ENDIF
 
-      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NEX(Nnuc).GT.1) THEN
-         CALL PLOT_ZVV_GSLD(Nnuc)     
-         call PLOT_ZVV_NumCumul(Nnuc, Defit,nplot,NLwst) 
-      ENDIF
+      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
+     >    CALL PLOT_ZVV_GSLD(Nnuc)     
+
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+C
+C       Cumulative levels must be calculated for FITLEV>0
+C       as Ecut(Nnuc) is set to zero
+C	 
+C       In a normal calculation, Ecut(NNuc)>0 and therefore the
+C       cumulative integral is wrongly calculated !!!
+C       RCN, April 2012
+        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
+        Call PLOT_ZVV_NumCumul(Nnuc)
+        CALL PLOT_ZVV_GSLD(Nnuc)     
+	ENDIF
       
       ROPar(4,Nnuc) = eo
       ROPar(2,Nnuc) = ux
@@ -1652,25 +1658,22 @@ C
 C     FOLLOWS RIPL-3 DIMENSIONS
       INTEGER NLDGRID, JMAX
       PARAMETER (NLDGRID = 60,JMAX = 50)
-      COMMON /UCGRID/ uugrid, cgrid,iugrid 
+C     COMMON /UCGRID/ uugrid, cgrid,iugrid 
 C
 C Dummy arguments
 C
-      INTEGER Nnuc, nplot
+      INTEGER Nnuc
 C
 C Local variables
 C
       REAL*8 c1, c2, hhh, r1, r2, corr1,
      & rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
      & rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
-     & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u, rocumul, pcorr, acorr
-      REAL*8 defit
+     & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u, pcorr, acorr
+
       CHARACTER*2 car2
-      REAL*8 DLOG10
       CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
@@ -1681,14 +1684,14 @@ C-----initialization
 C
       jmaxl = MIN(NDLW,JMAX)
       DO i = 0, NLDGRID
-         uugrid(i) = 0.
-         tgrid(i) = 0.
+         uugrid(i) = 0.d0
+         tgrid(i) = 0.d0
          DO ipp = 1, 2
-            cgrid(i,ipp) = 0.
-            rhoogrid(i,ipp) = 1.d-20
-            rhotgrid(i,ipp) = 1.d-20
+            cgrid(i,ipp) = 0.d0
+            rhoogrid(i,ipp) = 0.d0
+            rhotgrid(i,ipp) = 0.d0
             DO j = 1, jmaxl
-               rhogrid(i,j,ipp) = 1.d-20
+               rhogrid(i,j,ipp) = 0.d0
             ENDDO
          ENDDO
       ENDDO
@@ -1784,11 +1787,15 @@ C-------printing microscopic lev. dens. corrections from the RIPL-3 file
 cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
       ENDIF
       iugrid = i - 1
-      defit=0.d0
+
       DO kk = 1, NEX(Nnuc)
+
          u = EX(kk,Nnuc) - ROHfbp(nnuc)
+
          UEXcit(kk,Nnuc) = EX(kk,Nnuc)
+
          IF (u.LT.0.) CYCLE
+
          IF (u.GT.200.0D0) THEN
             WRITE (8,*) ' '
             WRITE (8,*) 
@@ -1843,60 +1850,21 @@ C
          TNUc(kk,Nnuc) = c1*tgrid(klo) + c2*tgrid(khi)
       ENDDO
 
-C-----plot of the l.d. formula
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) CALL PLOT_ZVV_GSLD(Nnuc)
+      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
+     >    CALL PLOT_ZVV_GSLD(Nnuc)     
 
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)
-     &     call  PLOT_ZVV_NumCumul(Nnuc, defit,nplot,jmaxl)
-C--------cumulative plot of levels along with the l.d. formula
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) THEN
-         WRITE (8,99009) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                   NLV(Nnuc)
-99009    FORMAT ('Cumulative plot for ',I3,'-',A2,'-',I3,
-     &           '   Microscopic LD,  Ncut=',I3)
-         OPEN (35,FILE = 'fort.35')
-         WRITE (35,*) 'set terminal postscript enhanced color lw 2
-     & solid "Helvetica" 20'
-         WRITE (35,*) 'set output "|cat >>CUMULPLOT.PS"'
-         WRITE (35,9909) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
-     &                    NLV(Nnuc)
- 9909    FORMAT ('set title "',I3,'-',A2,'-',I3,
-     &           '   Microscopic LD,  Ncut=',I3,'"')
-         WRITE (35,*) 'set logscale y'
-         WRITE (35,*) 'set xlabel '' Excitation energy U [MeV]'' '
-         WRITE (35,*) 'set ylabel '' Cumulative number of levels'' '
-         WRITE (35,*) 'set style line 1 lt 1 lw 2'
-         WRITE (35,*) 'set style line 2 lt 5 lw 2'
-      WRITE (35,'(''plot "fort.36" w filledcu y2 ls 2 t "Experimental di
-     &screte levels", "fort.34" w l ls 1 t "Integral of RHO(U)" '')')
-         CLOSE (35)
-         OPEN (34,FILE = 'fort.34')
-         OPEN (36,FILE = 'fort.36')
-         WRITE (36,*) '0.0 1.0'
-         DO il = 2, NLV(Nnuc)
-            WRITE (36,*) ELV(il,Nnuc)*1d6, FLOAT(il - 1)
-            WRITE (36,*) ELV(il,Nnuc)*1d6, FLOAT(il)
-         ENDDO
-         rocumul = 1.0
-         WRITE (34,*) '0.0  ', rocumul
-
-         DO kk = 2, iugrid!NFIsen1
-            if(uugrid(kk).gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
-C-----------integration over energy. Parity dependence explicitly considered.
-C-----------There is a factor 1/2 steming from the trapezoid integration
-C              rocumul = rocumul + 0.5d0*defit
-            DO ij = 1, NLW
-               rocumul = rocumul +
-     &         (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
-     &          RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))      
-            ENDDO
-         WRITE (34,*)  uugrid(kk)*1d6,cgrid(kk,1)+cgrid(kk,2)
-         ENDDO
-         CLOSE (36)
-         CLOSE (34)
-         CLOSE (35)
-         IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
-      ENDIF
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+C
+C       Cumulative levels must be calculated for FITLEV>0
+C       as Ecut(Nnuc) is set to zero
+C	 
+C       In a normal calculation, Ecut(NNuc)>0 and therefore the
+C       cumulative integral is wrongly calculated !!!
+C       RCN, April 2012
+        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
+        Call PLOT_ZVV_NumCumul(Nnuc)
+        CALL PLOT_ZVV_GSLD(Nnuc)     
+	ENDIF
 
       RETURN
       END
@@ -2311,14 +2279,14 @@ C-----initialization
 C
       jmaxl = MIN(NDLW,JMAX)
       DO i = 0, NLDGRID
-         uugrid(i) = 0.
-         tgrid(i) = 0.
+         uugrid(i) = 0.d0
+         tgrid(i) = 0.d0
          DO ipp = 1, 2
-            cgrid(i,ipp) = 0.
-            rhoogrid(i,ipp) = 1.d-20
-            rhotgrid(i,ipp) = 1.d-20
+            cgrid(i,ipp) = 0.d0
+            rhoogrid(i,ipp) = 0.d0
+            rhotgrid(i,ipp) = 0.d0
             DO j = 1, jmaxl
-               rhogrid(i,j,ipp) = 1.d-20
+               rhogrid(i,j,ipp) = 0.d0
             ENDDO
          ENDDO
       ENDDO       

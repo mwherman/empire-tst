@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2784 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2012-04-10 16:03:51 +0200 (Di, 10 Apr 2012) $
+Ccc   * $Rev: 2791 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -80,10 +80,6 @@ C-----maximum argument of EXP function supported by the computer (for real*8)
 C-----maximum exponent of 10 supported by the computer (for real*8)
       EXPdec = 300.
       CALL CLEAR
-      DO nnuc = 1, NDNUC
-         EMAx(nnuc) = 0.0
-         ECUt(nnuc) = 0.0
-      ENDDO
       iccerr = 0
 C
 C-----Defining global physical and mathematical constants
@@ -159,6 +155,9 @@ C--------neutralize tuning factors and OMP normalization factors
             TUNefi(nnuc) = 1.d0
             rTUNefi(nnuc) = 1.d0
             SHLlnor(nnuc) = 1.d0
+C
+            ECOnt(nnuc) = 0.d0  ! Continuum starts at 0.0 by default
+C                               ! Used to change the default cut-off energy in LEVELS
 C
 C           This is the default number of smoothing points to process
 C           HFB numerical fission barriers. It is hardwired, not possible to change 
@@ -1888,7 +1887,7 @@ C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
       IF (FITlev.GT.0.0D0) THEN
-         ECUt(1) = 0.0
+         ECUt(1) = 0.0  
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
          Do i = 0,NDNuc
@@ -1931,7 +1930,7 @@ C-------continuum using current DE, if not adjust DE
      &   NEXreq, NDEX
 
       IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
-     & 'WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+     & ' WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEXreq     
 
       DO i = 1, NEX(1)
@@ -2209,15 +2208,33 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
+
+
+         IF(ADIv.eq.3) then 
+           WRITE (8,99003) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
+     &          NLV(nnur),DEF(1,nnur),ROHfbp(nnur),ROHfba(nnur)
+         ELSE 
+           WRITE (8,99004) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
+     &          NLV(nnur), DEF(1,nnur), ATIlnor(nnur) 
+	   ENDIF
+
          IF (ADIv.NE.3.0D0) THEN
+
+            IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
+
             IF (ADIv.GT.1.0D0) 
      &      WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
+
             WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
      &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+
             DO i = 1, NEX(nnur)
+
+ 	         IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+
                rocumul = 0.D0
                DO j = 1, NDLW
                   rocumul = rocumul + RO(i,j,1,nnur)
@@ -2229,47 +2246,67 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 c    &                     (RO(i,j,1,nnur),j = 11,21)
 c    &                     (RO(i,j,1,nnur),j = 21,31)     
            ENDDO
+	     WRITE (8,*)
 
          ELSE
 
+           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
+
            WRITE (8,'(1X,/,''  HFB LEVEL DENSITY DEPENDENCE FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
-           WRITE(8,'(/2x,A25,1x,F5.2,A46,I3//
-     &1x,''   E        RHO(E)  '')')     
-     &        'Continuum starts above E=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the corresponding discrete level # ',NLV(nnur)     
+           WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
+           WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+     &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
+     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
 
-            WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
-            DO i = 1, NEX(nnur)
-               rocumul = 0.D0
-               DO j = 1, NDLW
-                  rocumul = rocumul + RO(i,j,1,nnur)
-               ENDDO
-               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
+           DO i = 1, NEX(nnur)
+
+ 	        IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+
+              rocumul = 0.D0
+              DO j = 1, NDLW
+                 rocumul = rocumul + RO(i,j,1,nnur)
+              ENDDO
+              IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
                
-               WRITE (8,99010) EX(i,nnur), rocumul,
+              WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,1,nnur),j = 1,11)
-c     &                     (RO(i,j,1,nnur),j = 11,21)
-c     &                     (RO(i,j,1,nnur),j = 21,31)
-            ENDDO
+c     &             (RO(i,j,1,nnur),j = 11,21)
+c     &             (RO(i,j,1,nnur),j = 21,31)
+           ENDDO
 
-            WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
-            DO i = 1, NEX(nnur)
-               rocumul = 0.D0
-               DO j = 1, NDLW
-                  rocumul = rocumul + RO(i,j,2,nnur)
-               ENDDO
+           WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
+           WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+     &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
+     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+           DO i = 1, NEX(nnur)
+
+ 	        IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+
+              rocumul = 0.D0
+              DO j = 1, NDLW
+                 rocumul = rocumul + RO(i,j,2,nnur)
+              ENDDO
                
-               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
-               WRITE (8,99010) EX(i,nnur), rocumul,
+              IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
+              WRITE (8,99010) EX(i,nnur), rocumul,
      &              (RO(i,j,2,nnur),j = 1,11)
-c     &                     (RO(i,j,2,nnur),j = 11,21)
-c     &                     (RO(i,j,2,nnur),j = 21,31)
-            ENDDO
+c     &             (RO(i,j,2,nnur),j = 11,21)
+c     &             (RO(i,j,2,nnur),j = 21,31)
+           ENDDO
+
+ 	     WRITE (8,*)
+
          ENDIF
       ENDIF
-99010 FORMAT (1X,14(G10.4,1x))
       RETURN 
+99003 FORMAT (/,' Cumulative plot for ',I3,'-',A2,'-',I3,' Ncut=',I3,
+     &               ' Def = ',F6.2,' ROHFBp = ',F6.3,' ROHFBa = ',F6.3)
+99004 FORMAT (/,' Cumulative plot for ',I3,'-',A2,'-',I3,' Ncut=',I3,
+     &        ' Def = ',F6.2,' Anorm(ATILNO) = ',F6.3)
+99010 FORMAT (1X,14(G10.4,1x))
       END
  
       SUBROUTINE LEVREAD(Nnuc)
@@ -2479,6 +2516,21 @@ C---------levels for nucleus NNUC copied to file *.lev
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
+C
+            IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
+              IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
+                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
+     & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
+     &           NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
+                WRITE (8,
+     &'('' Number of discrete levels changed from RIPL default of '',I3,
+     &'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
+	          NLV(Nnuc) = max(ilv - 1,1)
+ 	          IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
+                GOTO 200
+	        ENDIF
+	      ENDIF
+C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
               NLV(Nnuc) = max(ilv - 1,1)
               WRITE (8,'('' WARNING:'')')
@@ -3947,6 +3999,39 @@ C    &           '('' Gilbert-Cameron level densities '')')
      &     '('' Microscopic parity dependent HFB level densities '')')
             IF (ADIv.EQ.4.0D0) WRITE (12,
      &     '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'ECONT ') THEN
+            izar = i1*1000 + i2
+			if(izar.eq.0) then
+               WRITE (8,'('' WARNING: ECONT should be defined for a sele
+     &cted nucleus, not globally. This value is ignored '')')
+               GOTO 100
+			endif
+C
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     &    '('' ECONT - energy at which the continuum starts ignored'')')
+               GOTO 100
+            ENDIF
+            if(val.ge.0.) then
+              ECOnt(nnuc) = val
+			  IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
+              WRITE (8,
+     &        '('' Energy continuum for nucleus '',I3,A2,
+     &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
+              WRITE (12,
+     &        '('' Energy continuum for nucleus '',I3,A2,
+     &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
+            else       
+              WRITE (8,
+     &        '('' Energy continuum for nucleus '',I3,A2,
+     &        '' is negative, ignored '',f6.2)') i2, SYMb(nnuc), val
+            endif
             GOTO 100
          ENDIF
 C-----
@@ -6325,16 +6410,16 @@ C-----
             IF (val.LE.0.d0) THEN
              DXSred = 0.d0
                WRITE ( 8,
-     &'('' Deuteron break-up/pick-up suppressed!'')')
+     &'('' Deuteron stripping/pick-up suppressed!'')')
                WRITE (12,
-     &'('' Deuteron break-up/pick-up suppressed!'')')
+     &'('' Deuteron stripping/pick-up suppressed!'')')
             ELSE
                DXSred = val
                WRITE ( 8,
-     &'('' Deuteron break-up/pick-up cross section'',
+     &'('' Deuteron stripping/pick-up cross section'',
      &  '' normalized by a factor '',F6.3)') DXSred
                WRITE (12,
-     &'('' Deuteron break-up/pick-up cross section'',
+     &'('' Deuteron stripping/pick-up cross section'',
      &  '' normalized by a factor '',F6.3)') DXSred
             ENDIF
             GOTO 100
@@ -6354,7 +6439,7 @@ C-----shift parameter used to adjust HFB LD
               ELSE
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
-              DO i = 1, NDNUC
+              DO nnuc = 1, NDNUC
                 ROHfbp(nnuc) = atilss
               ENDDO
               WRITE (8,
@@ -6363,7 +6448,7 @@ C-----shift parameter used to adjust HFB LD
               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
              else
-              DO i = 1, NDNUC
+              DO nnuc = 1, NDNUC
                 ROHfbp(nnuc) = val
               ENDDO
               WRITE (8,'('' GS HFB L.D. shift in all nuclei set to '',
@@ -6420,7 +6505,7 @@ C-----pseudo a-parameter used to adjust HFB LD
               ELSE
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
-              DO i = 1, NDNUC
+              DO nnuc = 1, NDNUC
                 ROHfba(nnuc) = atilss
               ENDDO
               WRITE (8,
@@ -6429,7 +6514,7 @@ C-----pseudo a-parameter used to adjust HFB LD
               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
              else
-              DO i = 1, NDNUC
+              DO nnuc = 1, NDNUC
                 ROHfba(nnuc) = val
               ENDDO
               WRITE (8,'('' GS HFB L.D. norm in all nuclei set to '',

@@ -1,6 +1,6 @@
-C $Rev: 2770 $
+C $Rev: 2791 $
 C $Author: rcapote $
-C $Date: 2012-04-09 04:11:42 +0200 (Mo, 09 Apr 2012) $
+C $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -23,7 +23,7 @@ C
      &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),
-     &                 CSE(ndecse,0:ndejc,0:ndnuc), 
+     &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
      &                 CSEahmslab(ndecse,ndangecis,2),
@@ -217,7 +217,7 @@ C
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, PFNtke, PFNalp, PFNere,
+     &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt,
      &                 PFNrat, PFNniu, TMAxw
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
