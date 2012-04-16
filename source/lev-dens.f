@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Date: 2012-04-16 21:05:42 +0200 (Mo, 16 Apr 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -95,6 +95,14 @@ C-----fit of cumulative low-lying discrete levels
       
       IF(BF.NE.0.d0) Call LEVFIT(Nnuc,Nplot,Dshif,Dshift,Defit)
 
+      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) THEN 
+        Call PLOT_ZVV_NumCumul(Nnuc)
+        Call PLOT_ZVV_GSLD(Nnuc)     
+	ENDIF
+
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
+     &   Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
+
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
          REWIND (25)
          Call BNDG(1,Nnuc,Q(1,Nnuc))
@@ -143,27 +151,9 @@ C     Ecrt = UCRt - DEL - dshift
          ENDIF
       ENDDO
 
-      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
-     >    CALL PLOT_ZVV_GSLD(Nnuc)     
-
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
-C
-C       Cumulative levels must be calculated for FITLEV>0
-C       as Ecut(Nnuc) is set to zero
-C	 
-C       In a normal calculation, Ecut(NNuc)>0 and therefore the
-C       cumulative integral is wrongly calculated !!!
-C       RCN, April 2012
-        Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
-        Call PLOT_ZVV_NumCumul(Nnuc)
-        CALL PLOT_ZVV_GSLD(Nnuc)     
-	ENDIF
-
-      
 C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       ROPar(1,Nnuc) = ACR
       ROPar(3,Nnuc) = del
-
       
       RETURN
       END
@@ -840,7 +830,7 @@ C Local variables
      &                  cga,gamma,shcn)                    
  110  ENDDO 
 
-      IF(IOUt.eq.6 ) call PLOT_ZVV_GSLD(Nnuc)
+      IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
 
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
 C
@@ -850,7 +840,7 @@ C
 C       In a normal calculation, Ecut(NNuc)>0 and therefore the
 C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
-        Call PLOT_GNU_NumCumul(Nnuc,0.d0,DEL)
+        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
 	ENDIF
 
@@ -1549,18 +1539,10 @@ C-----------Dilg's recommendations
          ENDDO
       ENDIF
 
-      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
-     >    CALL PLOT_ZVV_GSLD(Nnuc)     
+      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
+     >  Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
-C
-C       Cumulative levels must be calculated for FITLEV>0
-C       as Ecut(Nnuc) is set to zero
-C	 
-C       In a normal calculation, Ecut(NNuc)>0 and therefore the
-C       cumulative integral is wrongly calculated !!!
-C       RCN, April 2012
-        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
+      IF (IOUt.GE.6. .AND. NLV(Nnuc).GT.3) then
         Call PLOT_ZVV_NumCumul(Nnuc)
         CALL PLOT_ZVV_GSLD(Nnuc)     
 	ENDIF
@@ -1850,8 +1832,7 @@ C
          TNUc(kk,Nnuc) = c1*tgrid(klo) + c2*tgrid(khi)
       ENDDO
 
-      IF (IOUt.GE.6. .AND. FITlev.EQ.0.0D0 .AND. NLV(Nnuc).GT.3)   
-     >    CALL PLOT_ZVV_GSLD(Nnuc)     
+      IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
 
       IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
 C
@@ -1863,7 +1844,6 @@ C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
         Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
-        CALL PLOT_ZVV_GSLD(Nnuc)     
 	ENDIF
 
       RETURN

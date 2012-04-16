@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2791 $
+Ccc   * $Rev: 2793 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Date: 2012-04-16 21:05:42 +0200 (Mo, 16 Apr 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -51,12 +51,7 @@ C
 
       write(ctmp1,'(A17)') fname//'_'//caz//'.zvd'
 
-C     write(title,'('' Nucleus : '',
-C    &     i3,''-'',A2,''-'',I3)')
-C    &     int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
-
       OPEN (36, FILE=ctmp1, STATUS='unknown')
-
 
       CALL OPEN_ZVV(36,'Exp RHO(U)=DN/DU of '//caz,' ')
       
@@ -81,7 +76,7 @@ C    &     int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
  	    if(u.lt.0.d0) cycle
 	  endif
 
-	  if(u.lt.0.9*ELV(NLV(Nnuc),Nnuc)) cycle
+	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
 
         rolowint1 = 0.D0
         rolowint2 = 0.D0
@@ -126,7 +121,7 @@ C
  	    if(u.lt.0.d0) cycle
 	  endif
 
-	  if(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
 
         rolowint1 = 0.D0
         DO j = 1, NLW
@@ -148,7 +143,7 @@ C
  	    if(u.lt.0.d0) cycle
 	  endif
 
- 	  if(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+ 	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
 
         rolowint2 = 0.D0
         DO j = 1, NLWst
@@ -299,7 +294,7 @@ C
       CHARACTER*36 ctmp2
 
       REAL FLOAT
-      INTEGER ij, kk
+      INTEGER ij, kk, nplot
       INTEGER INT
 
       if(NLV(Nnuc).le.3) return
@@ -325,9 +320,6 @@ C
       IF(ADIv.eq.4)write(fname,'(A7)') 'NL_OGCM'
       write(ctmp1,'(A17)') fname//'_'//caz//'.zvd'
 
-C     write(title,'('' Nucleus: '',i3,''-'',A2,''-'',I3)')
-C    &  int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
-
       OPEN (36, FILE=ctmp1, STATUS='unknown')
 
       CALL OPEN_ZVV(36,'Exp Cumul Discrete Levels of '//caz,' ')
@@ -345,10 +337,40 @@ C    &  int(Z(Nnuc)), SYMb(Nnuc), int(A(Nnuc))
       rocumul = 1.D0
 C     WRITE (36,*) '0.0 1.0'
 
-      DO kk = 2, NEX(Nnuc)
+      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4) then
+        defit = (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc)+2.d0)
+     &           /(NEXreq-1) 
+        nplot = (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)+2.d0)/defit
 
+        DO kk = 2, nplot
+
+          u = defit*(kk - 1)
+
+          IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
+C---------GCM,OGCM
+            rocumul = 1.d0 + 
+     &              EXP(( - eo/t))*(EXP(u/t) - 1.)
+          ELSE
+            DO ij = 1, NLW
+              rocumul = rocumul + 0.5d0*defit*
+     &          (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+     &           RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
+            ENDDO
+          ENDIF
+
+          IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+
+          WRITE (36,*) u*1.d6, rocumul            
+ 	    ncalc = ncalc + 1
+
+        ENDDO
+
+	else
+
+        DO kk = 2, NEX(Nnuc)
         defit = EX(kk,Nnuc) - EX(kk-1,Nnuc)
         u     = EX(kk,Nnuc)  
+
         IF(u .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
 
         IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
@@ -357,27 +379,26 @@ C---------GCM,OGCM
      &              EXP(( - eo/t))*(EXP(u/t) - 1.)
         ELSE
           DO ij = 1, NLW
-C           rocumul = rocumul + defit*
-C    &          (RO(kk,ij,1,Nnuc) + RO(kk,ij,2,Nnuc))
             rocumul = rocumul + 0.5d0*defit*
      &          (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &           RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
           ENDDO
         ENDIF
 
-	  IF(ADIv.eq.3 .and. u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
-	  IF(ADIv.ne.3 .and. u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+	  IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
 
         WRITE (36,*) u*1.d6, rocumul            
  	  ncalc = ncalc + 1
 
-      ENDDO
+        ENDDO
+
+	endif
 
  14   write(ctmp2,'(A27,F5.2,A4)') 'Energy continuum starts at ',
      >  Elv(NLV(Nnuc),Nnuc),' MeV' 
  
       CALL CLOSE_ZVV_CUMUL(36,' CUMULATIVE NUMBER OF LEVELS ',ctmp2)
-      if(ncalc.le.3) then
+      if(ncalc.le.5) then
         close(36,status='DELETE')
 	else
         close(36)
@@ -490,7 +511,7 @@ C
 C
 C Local variables
 C
-      INTEGER ij, il, kk
+      INTEGER ij, il, kk, ncalc, nplot
       INTEGER INT
       INTEGER*4 iwin
       INTEGER*4 PIPE
@@ -540,34 +561,74 @@ C
       rocumul = 1.0
       WRITE (34,*) '0.0  ', rocumul
 
-      DO kk = 2, NEX(Nnuc)
+      ncalc =0
+      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4) then
+        defit = (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc)+2.d0)
+     &           /(NEXreq-1) 
+        nplot = (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)+2.d0)/defit
 
-  	    defit = EX(kk,Nnuc) - EX(kk-1,Nnuc)
-		u     = EX(kk,Nnuc) 
-		
-		IF(u .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
+        DO kk = 2, nplot
+
+          u     = defit*(kk - 1)
+
+          IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
+C---------GCM,OGCM
+            rocumul = 1.d0 + 
+     &              EXP(( - eo/t))*(EXP(u/t) - 1.)
+          ELSE
+            DO ij = 1, NLW
+              rocumul = rocumul + 0.5d0*defit*
+     &          (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
+     &           RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
+            ENDDO
+          ENDIF
+
+C         IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+
+          WRITE (34,*) u, rocumul            
+ 	    ncalc = ncalc + 1
+
+        ENDDO
+
+	else
+
+        DO kk = 2, NEX(Nnuc)
+        defit = EX(kk,Nnuc) - EX(kk-1,Nnuc)
+        u     = EX(kk,Nnuc)  
+
+        IF(u .gt. ELV(NLV(Nnuc),Nnuc) + 2.d0) exit
 
         IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
 C---------GCM,OGCM
-          rocumul = 1.d0 + EXP(( - eo/t))*(EXP(u/t) - 1.d0)
+          rocumul = 1.d0 + 
+     &              EXP(( - eo/t))*(EXP(u/t) - 1.)
         ELSE
           DO ij = 1, NLW
-C           rocumul = rocumul + defit*
-C    &          (RO(kk,ij,1,Nnuc) + RO(kk,ij,2,Nnuc))
             rocumul = rocumul + 0.5d0*defit*
      &          (RO(kk - 1,ij,1,Nnuc) + RO(kk,ij,1,Nnuc) +
      &           RO(kk - 1,ij,2,Nnuc) + RO(kk,ij,2,Nnuc))
           ENDDO
         ENDIF
 
+C       IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+
         WRITE (34,*) u, rocumul            
- 	    ncalc = ncalc + 1
+ 	  ncalc = ncalc + 1
 
-      ENDDO
+        ENDDO
 
-      CLOSE (36)
-      CLOSE (35)
-      CLOSE (34)
+	endif
+
+      if(ncalc.le.5) then
+        close(36,status='DELETE')
+        close(35,status='DELETE')
+        close(34,status='DELETE')
+	else
+        close(34)
+        close(35)
+        close(36)
+	endif
+
       IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
 
       RETURN
