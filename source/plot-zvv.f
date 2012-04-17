@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2793 $
+Ccc   * $Rev: 2794 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 21:05:42 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -24,8 +24,8 @@ C
       CHARACTER*17 ctmp1
       CHARACTER*36 title
 
-      DOUBLE PRECISION u
-	INTEGER nene
+      DOUBLE PRECISION u, frho1, frho2
+	INTEGER nene, kminex
 
       IF(NLV(Nnuc).le.3) return
 
@@ -59,24 +59,44 @@ C
       DO kk = 2, NLV(Nnuc)-1
 	   delta_energy = ELV(kk,Nnuc) - ELV(kk-1,Nnuc) 
 	   if(delta_energy.le.0.d0) cycle 
-         WRITE (36,*) 0.333333333d0*
-     >    (ELV(kk-1,Nnuc)+ELV(kk,Nnuc)+ELV(kk+1,Nnuc))*1d6,
-     >     1.d0/delta_energy
+C        f'(a) = ( f(a) - f(a-h) )/h  : backward difference
+C        f(a) - f(a-h) = Nlev(kk) - Nlev(kk-1) = 1
+         frho1 = 1.d0/delta_energy
+	   delta_energy = ELV(kk+1,Nnuc) - ELV(kk,Nnuc) 
+	   if(delta_energy.le.0.d0) cycle 
+C        f'(a) = ( f(a+h) - f(a) )/h  : forward  difference
+C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
+         frho2 = 1.d0/delta_energy
+         WRITE (36,*) ELV(kk,Nnuc)*1d6,
+     >     0.5d0 * (frho1 + frho2) ! average of forward/backward difference
       ENDDO
+      WRITE (36,*) ELV(NLV(Nnuc),Nnuc)*1d6,frho2 
       CALL CLOSE_ZVV(36,' ',' ')
 
       CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz//ldname,' ')
 
+      kminex = 1
+      DO kk = 3, NEX(Nnuc)
+        IF(ADIv.eq.0) then
+          u = EX(kk,Nnuc)
+	  ELSE
+          u = UEXcit(kk,Nnuc)
+	  ENDIF
+	  if(u.gt.ELV(NLV(Nnuc),Nnuc)) then
+          kminex = kk - 2
+          exit
+        endif
+	ENDDO
+
 	nene = 0
-      DO kk = 1, NEX(Nnuc)
-        u = EX(kk,Nnuc)
 
- 	  if(ADIv.eq.3) then
-	    u = u - ROHfbp(Nnuc)
- 	    if(u.lt.0.d0) cycle
-	  endif
+      DO kk = kminex, NEX(Nnuc)
 
-	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
+        IF(ADIv.eq.0) then
+          u = EX(kk,Nnuc)
+	  ELSE
+          u = UEXcit(kk,Nnuc)
+	  ENDIF
 
         rolowint1 = 0.D0
         rolowint2 = 0.D0
@@ -113,15 +133,10 @@ C
       CALL CLOSE_ZVV(36,' ',' ')
 
       CALL OPEN_ZVV(36,'RHO(U,+) at GS of '//caz//ldname,' ')
-      DO kk = 1, NEX(Nnuc)
-        u = EX(kk,Nnuc)
 
- 	  if(ADIv.eq.3) then
-	    u = u - ROHfbp(Nnuc)
- 	    if(u.lt.0.d0) cycle
-	  endif
+      DO kk = kminex, NEX(Nnuc)
 
-	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
+        u = UEXcit(kk,Nnuc)
 
         rolowint1 = 0.D0
         DO j = 1, NLW
@@ -135,15 +150,10 @@ C
       CALL CLOSE_ZVV(36,' ',' ')
 
       CALL OPEN_ZVV(36,'RHO(U,-) at GS of '//caz//ldname,' ')
-      DO kk = 1, NEX(Nnuc)
-        u = EX(kk,Nnuc)
 
- 	  if(ADIv.eq.3) then
-	    u = u - ROHfbp(Nnuc)
- 	    if(u.lt.0.d0) cycle
-	  endif
+      DO kk = kminex, NEX(Nnuc)
 
- 	  if(u.lt.ELV(NLV(Nnuc),Nnuc)) cycle
+        u = UEXcit(kk,Nnuc)
 
         rolowint2 = 0.D0
         DO j = 1, NLWst
@@ -338,13 +348,14 @@ C
 C     WRITE (36,*) '0.0 1.0'
 
       if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4) then
+
         defit = (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc)+2.d0)
      &           /(NEXreq-1) 
         nplot = (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)+2.d0)/defit
 
-        DO kk = 2, nplot
+	  DO kk = 2, nplot
 
-          u = defit*(kk - 1)
+          u = defit*(kk - 1) 
 
           IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
 C---------GCM,OGCM

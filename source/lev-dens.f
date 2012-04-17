@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 21:05:42 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -67,7 +67,7 @@ C
       iz = INT(Z(Nnuc))
       in = ia - iz
 
-      IF (NEX(Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) THEN
+      IF (NEX(Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) THEN
          WRITE (8,
      &   '('' EXCITATION ENERGY TABLE FOR A='',I3,'' Z='',I3,         ''
      &    HAS NOT BEEN DETERMINED BEFORE CALL OF PRERO'',//
@@ -75,7 +75,7 @@ C
          RETURN
       ENDIF
 
-      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) RETURN
+      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
       CALL PRERORITO(Nnuc)
       Nlwst=NLW     
 
@@ -95,12 +95,10 @@ C-----fit of cumulative low-lying discrete levels
       
       IF(BF.NE.0.d0) Call LEVFIT(Nnuc,Nplot,Dshif,Dshift,Defit)
 
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) THEN 
-        Call PLOT_ZVV_NumCumul(Nnuc)
-        Call PLOT_ZVV_GSLD(Nnuc)     
-	ENDIF
+      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)  
+     &  Call PLOT_ZVV_NumCumul(Nnuc)
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
+      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) 
      &   Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
 
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
@@ -125,7 +123,7 @@ C     Ecrt = UCRt - DEL - dshift
       ENDIF
 
       DO kk = 1, NEX(Nnuc)
-         IF (FITlev.LE.0.0D0 .OR. 
+         IF (FITlev.LE.0.1D0 .OR. 
      &       EX(kk,Nnuc).GE.ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc))
      &      THEN
 
@@ -150,6 +148,8 @@ C     Ecrt = UCRt - DEL - dshift
             ENDIF
          ENDIF
       ENDDO
+
+      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
 
 C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       ROPar(1,Nnuc) = ACR
@@ -617,7 +617,8 @@ C-----45.84 stands for (12/SQRT(pi))**2
       SCR = 2.*ACRt*TCRt
 
       IF(iout.EQ.6.AND.ifis.EQ.0)   THEN
-         WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY FOR '' 
+         WRITE (8,'(1X,/,
+     &        ''  TOTAL LEVEL DENSITY (TWICE THE SINGLE PARITY) FOR '' 
      &      ,I3,''-'',A2)') ia, SMAT(iz)
 
          WRITE(8, '(2X,/,''  Atil='', F6.3,
@@ -832,7 +833,7 @@ C Local variables
 
       IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) then
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
@@ -1040,7 +1041,7 @@ C-----check of the input data ---------------------------------------
      &'EXECUTION STOPPED'')') Nnuc, Nnuc
          STOP
       ENDIF
-      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) RETURN
+      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
 
 C-----set to 0 level density array
       DO i = 1, NDEX
@@ -1137,7 +1138,7 @@ C-----check of the input data ---------------------------------------
          STOP
       ENDIF
 
-      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.EQ.0) RETURN
+      IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
 C-----check of the input data ---- done -----------------------------
       IF(FISSHI(Nnuc).EQ.1.d0)THEN
 C-----check whether the nucleus is fissile
@@ -1313,7 +1314,7 @@ C
 C
 C Local variables
 C
-      REAL*8 am, amas, arg, atil, e, efort, enorm, eo,
+      REAL*8 am, amas, arg, atil, e, enorm, eo,
      &                 eom, exl, ro_u, ro_j, ro_pi,rolowint, sigh, sigl, 
      &                 t, tm, u, ux, xj
       REAL*8 FSHELL
@@ -1417,17 +1418,10 @@ C
          WRITE (8,*) 'WARNING: a=', am, ' T=', t
          WRITE (8,*) 'WARNING: I will use the last T=', tm,' for calc.'
          WRITE (8,*) 'WARNING: '
-         IF (FITlev.GE.0.0D0) THEN
-C-----------set nuclear temperature to the value from the systematics
-            t = 0.9 - 0.0024*amas
-            IF (amas.LT.100.D0) t = 60./amas + 0.06
-            tm = t
-c            GOTO 500 !????
-         ELSEIF (FITlev.LT.0.0D0) THEN
-            WRITE (8,*) ' ERROR IN DISCRETE LEVEL FITTING'
-            WRITE (8,*) ' EXECUTION STOPPED BECAUSE OF FITLEV<0 OPTION '
-            STOP 'ERROR IN DISCRETE LEVEL FITTING (GC)'
-         ENDIF
+C--------set nuclear temperature to the value from the systematics
+         t = 0.9 - 0.0024*amas
+         IF (amas.LT.100.D0) t = 60./amas + 0.06
+         tm = t
       ENDIF
 
       IF (igna.NE.0D0) THEN
@@ -1504,9 +1498,8 @@ C--------------Spin-cutoff is interpolated
                      RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi
                   ENDIF
                ENDDO
-               efort = e
-               UEXcit(i,Nnuc) = efort
-               TNUc(i,Nnuc) = SQRT(efort/am)
+               UEXcit(i,Nnuc) = e
+               TNUc(i,Nnuc) = SQRT(e/am)
             ENDIF
          ENDDO
       ENDIF
@@ -1518,8 +1511,9 @@ C--------EXL /fermi gas formula/
 C
          DO i = ig, NEX(Nnuc)
             u = EX(i,Nnuc) - DEL
+	      if(u.lt.0.d0) cycle
             IF (igna.EQ.1) am = atil*FSHELL(u,SHC(Nnuc),-GAMma)
-            UEXcit(i,Nnuc) = MAX(u,0.D0)
+            UEXcit(i,Nnuc) = u
             TNUc(i,Nnuc) = SQRT(u/am)
 C-----------Dilg's recommendations
             SIG = Scutf*0.6079*A23*SQRT(u*am)
@@ -1539,7 +1533,7 @@ C-----------Dilg's recommendations
          ENDDO
       ENDIF
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) 
+      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) 
      >  Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
 
       IF (IOUt.GE.6. .AND. NLV(Nnuc).GT.3) then
@@ -1774,7 +1768,8 @@ cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
          u = EX(kk,Nnuc) - ROHfbp(nnuc)
 
-         UEXcit(kk,Nnuc) = EX(kk,Nnuc)
+C        UEXcit(kk,Nnuc) = EX(kk,Nnuc)
+         UEXcit(kk,Nnuc) = MAX(u,0.d0)
 
          IF (u.LT.0.) CYCLE
 
@@ -1834,7 +1829,7 @@ C
 
       IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
 
-      IF (FITlev.GT.0.0D0 .AND. NLV(Nnuc).GT.3) then
+      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) then
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
@@ -1892,7 +1887,7 @@ C-----get distance between Qn and the last level
 C-----we are not going to fit discrete levels if there are not more
 C-----than three 
       IF (NLV(Nnuc).GT.3) THEN
-         IF (FITlev.GT.0.0D0) THEN
+         IF (FITlev.GT.0) THEN
             WRITE (8,*) ' '
             WRITE (8,*) ' Fitting l.d. to discrete levels'
             WRITE (8,*) NLV(Nnuc), ' levels at ', ELV(NLV(Nnuc),Nnuc),
@@ -1950,7 +1945,7 @@ C--------------There is a factor 1/2 steming from the trapezoid integration
          dshi = dshi - (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc))
          dshift = dshift + dshi
 
-         IF (FITlev.GT.0.0D0) then 
+         IF (FITlev.GT.0) then 
             Ecrt = UCRt - DEL - dshift
             write(8,*)
             WRITE (8,*) '*****   A=',nint(A(nnuc)),

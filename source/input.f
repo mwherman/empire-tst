@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2791 $
+Ccc   * $Rev: 2794 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -246,7 +246,7 @@ C
          ADIv = 0.d0
          NEX(1) = 60
          NEXreq = 60
-         FITlev = 0.0
+         FITlev = 0.d0
 C--------Full gamma cascade becomes the default setting  (Jan 2011)
 C--------Use GCASC input parameter to turn it off
          GCAsc =  1.0
@@ -1886,7 +1886,7 @@ C-----determination of excitation energy matrix in CN
 C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
-      IF (FITlev.GT.0.0D0) THEN
+      IF (FITlev.GT.0) THEN
          ECUt(1) = 0.0  
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
@@ -2016,7 +2016,7 @@ C--------------determination of giant resonance parameters for residual nuclei
             ENDIF
 C-----------determination of excitation energy matrix in res. nuclei
             ECUt(nnur) = ELV(NLV(nnur),nnur)
-            IF (FITlev.GT.0.0D0) ECUt(nnur) = 0.0
+            IF (FITlev.GT.0) ECUt(nnur) = 0.0
             IF (Q(nejc,nnuc).EQ.0.0D0 .OR. Q(nejc,nnuc).EQ.99)
      &                           CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
             emaxr = 0.0
@@ -2031,14 +2031,11 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
      &         /(1.3d0*(AEJc(Nejc)**0.3333334 + A(Nnur)**0.3333334))
 
-C           IF (NEX(nnur).GT.NEXreq) THEN
             IF (NEX(nnur).GT.NDEX) THEN
                WRITE (8,*)
 
                WRITE (8,'('' WARNING: NUMBER OF BINS '',I3,
      &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
-cC    &         '' EXCEEDS REQUESTED ENERGY STEPS '',I3,  
-cC    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
      &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
      &         '-',SYMb(nnur),NDEX
                WRITE (8,
@@ -2062,7 +2059,7 @@ cC    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
 
             IF (NEX(nnur).GT.0) THEN
                DO i = 1, NEX(nnur)
-                  IF (Z(1).EQ.Z(nnur) .AND. FITlev.EQ.0.0D0) THEN
+                  IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1) THEN
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
                   ELSE
@@ -2072,12 +2069,12 @@ cC    &          NEX(nnur), NINT(A(nnur)),'-',SYMb(nnur),NEXreq
             ENDIF
             IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) ECUt(nnur)
      &          = EX(1,nnur)
+            IF (FITlev.GT.0) ECUt(nnur) = 0.0
 
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE
 C-----------determination of Q-value for isotope production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
             IF (qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
-            IF (FITlev.GT.0.0D0) ECUt(nnur) = 0.0
 C-----------determination of etl matrix for the transmission coeff. calculation
 C-----------first 4 elements are set independently in order to get more
 C-----------precise grid at low energies. from the 5-th element on the step
@@ -2147,7 +2144,7 @@ C-----LEVEL DENSITY for residual nuclei
       DO i = 1, NDLW
          DRTl(i) = 1.0
       ENDDO
-      IF (FITlev.GT.0.D0) THEN
+      IF (FITlev.GT.0) THEN
 C--------remove potentially empty omp files
 C--------OMPAR.DIR
          CLOSE (33,STATUS = 'DELETE')
@@ -2223,7 +2220,8 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
             IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
 
             IF (ADIv.GT.1.0D0) 
-     &      WRITE (8,'(1X,/,''  LEVEL DENSITY FOR A SINGLE PARITY '' 
+     &      WRITE (8,'(1X,/,
+     &        ''  TOTAL LEVEL DENSITY (TWICE THE SINGLE PARITY) FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
 
             WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
@@ -2241,10 +2239,10 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
                ENDDO
                
                IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
-               WRITE (8,99010) EX(i,nnur), rocumul,
-     &              (RO(i,j,1,nnur),j = 1,11)
-c    &                     (RO(i,j,1,nnur),j = 11,21)
-c    &                     (RO(i,j,1,nnur),j = 21,31)     
+               WRITE (8,99010) EX(i,nnur), 2*rocumul,
+     &              (2*RO(i,j,1,nnur),j = 1,11)
+c    &              (2*RO(i,j,1,nnur),j = 11,21)
+c    &              (2*RO(i,j,1,nnur),j = 21,31)     
            ENDDO
 	     WRITE (8,*)
 
@@ -2254,6 +2252,36 @@ c    &                     (RO(i,j,1,nnur),j = 21,31)
 
            WRITE (8,'(1X,/,''  HFB LEVEL DENSITY DEPENDENCE FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
+
+           WRITE (8,'(1X,/,''  TOTAL LEVEL DENSITY'')')
+           WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+     &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
+     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+
+           DO i = 1, NEX(nnur)
+
+              IF(ADIv.eq.0) then
+                u = EX(i,nnur)
+	        ELSE
+                u = UEXcit(i,nnur)
+	        ENDIF
+
+ 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+
+              rocumul = 0.D0
+              DO j = 1, NDLW
+                 rocumul = rocumul + 
+     &                     RO(i,j,1,nnur) + RO(i,j,2,nnur)
+              ENDDO
+              IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
+               
+              WRITE (8,99010) u, rocumul,
+     &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 1,11)
+c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 11,21)
+c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
+           ENDDO
+
            WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
@@ -2262,7 +2290,13 @@ c    &                     (RO(i,j,1,nnur),j = 21,31)
 
            DO i = 1, NEX(nnur)
 
- 	        IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+              IF(ADIv.eq.0) then
+                u = EX(i,nnur)
+	        ELSE
+                u = UEXcit(i,nnur)
+	        ENDIF
+
+ 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2270,7 +2304,7 @@ c    &                     (RO(i,j,1,nnur),j = 21,31)
               ENDDO
               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
                
-              WRITE (8,99010) EX(i,nnur), rocumul,
+              WRITE (8,99010) u, rocumul,
      &              (RO(i,j,1,nnur),j = 1,11)
 c     &             (RO(i,j,1,nnur),j = 11,21)
 c     &             (RO(i,j,1,nnur),j = 21,31)
@@ -2283,7 +2317,13 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
            DO i = 1, NEX(nnur)
 
- 	        IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+              IF(ADIv.eq.0) then
+                u = EX(i,nnur)
+	        ELSE
+                u = UEXcit(i,nnur)
+	        ENDIF
+
+ 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2291,7 +2331,7 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
               ENDDO
                
               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
-              WRITE (8,99010) EX(i,nnur), rocumul,
+              WRITE (8,99010) u, rocumul,
      &              (RO(i,j,2,nnur),j = 1,11)
 c     &             (RO(i,j,2,nnur),j = 11,21)
 c     &             (RO(i,j,2,nnur),j = 21,31)
@@ -2358,15 +2398,13 @@ C
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
      &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
       INTEGER INT
-      LOGICAL LREad, ADDnuc, fexist
+      LOGICAL LREad, ADDnuc
 
       ADDnuc = .FALSE.
 
       ia = A(Nnuc) + 0.001
       iz = Z(Nnuc) + 0.001
 
-C-----Check if FITLEV option was run
-      INQUIRE (FILE = ('FITLEV.PS'),EXIST = fexist)
 C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
       IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
         OPEN (47,FILE = trim(empiredir)//'/RIPL/resonances'
@@ -2470,24 +2508,12 @@ C-------constructing input and filenames
         ENDDO
         GOTO 100
       ELSE
-C----------nmax is a number of levels that constitute a complete scheme as
-C----------estimated by Belgya for RIPL. We find it generally much too high.
-C----------If run with FITLEV>0 has not been executed we divide nmax by 2.
-C----------A visual check with FITLEV is always HIGHLY RECOMMENDED!!!
-c       IF(FITlev.EQ.0 .AND. .not.fexist .AND. nmax.GT.6) THEN
-c          nmax = MIN(nmax/2 + 1, 15)
-c          WRITE (8,'('' WARNING:'')')
-c          WRITE (8,'('' WARNING: For isotope '',A5)')
-c    &            chelem
-c          WRITE (8,'('' WARNING: number of levels was reduced to '',
-c    &            I3)') nmax
-c          WRITE (8,'('' WARNING: since FITLEV option had not been'',
-c    &            '' run before'')')
-c       ENDIF
-C----------create file with levels (*.lev)
-C----------NLV   number of levels with unique spin and parity
-C----------NCOMP number of levels up to which the level scheme is estimated
-C----------to be complete
+C-------create file with levels (*.lev)
+C-------nmax is a number of levels that constitute a complete scheme as
+C-------estimated by Belgya for RIPL. We find it generally much too high.
+C-------NLV   number of levels with unique spin and parity
+C-------NCOMP number of levels up to which the level scheme is estimated
+C-------------to be complete
 C
         IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
           BACKSPACE (13)
@@ -7780,14 +7806,6 @@ C-----Set EGSM normalization factors for each Z
    95    CLOSE(31)
       ENDIF
 
-C     IF (ADIv.EQ.3.0D0 .and. FITLEV.LE.0.1) THEN
-C        WRITE(8,'(1X)')
-C        WRITE(8,'(1X)')
-C        WRITE(8,'(4X,''L e v e l  d e n s i t y  p a r a m e t e r s  n
-C    & o r m a l i z a t i o n'')')
-C        WRITE(8,'(4X,54(''-''))')
-C     ENDIF
-
       IF (ADIv.NE.3.0D0 .and. FITLEV.LE.0.1) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
@@ -7929,7 +7947,7 @@ C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for all models bu
             ROPar(3,nnuc) = del                 ! pairing
 
 C-----------Print resulting level density parameters
-            IF (FITlev.GT.0.0D0) THEN
+            IF (FITlev.GT.0) THEN
               WRITE (8,*) ' '
               WRITE (8,*) ' '
               WRITE(8,
