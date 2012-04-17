@@ -1,6 +1,6 @@
-#$Rev: 2754 $
-#$Author: shoblit $
-#$Date: 2012-03-27 15:50:58 +0200 (Di, 27 Mär 2012) $
+#$Rev: 2795 $
+#$Author: rcapote $
+#$Date: 2012-04-17 17:18:56 +0200 (Di, 17 Apr 2012) $
 
 # set default fortran compiler:
 
@@ -39,17 +39,21 @@ else ifeq ($(FC),ifort)
   #----INTEL f95 compiler
   #---------------------------
   #----flags for production compilation using ifort
-  FFLAGS = -O3 -x=host -ipo
+  #FFLAGS = -O3 -x=host -ipo -logo 
   #FFLAGS = -O3 -x=host -ipo -ftrapuv -trace
   #FFLAGS = -O3
   #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
-  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace
+  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
   #----flags for ECIS
-  EFLAGS = -O2 -x=host
+  #EFLAGS = -O2 -x=host
+  #------------------------------------------------------------------------------------------------
   #----flags for automatic parallelization
-  #FFLAGS =  -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  EFLAGS = -O2 -x=host -logo -parallel -openmp 
+  #LIBS = -openmp-lib 
+  #------------------------------------------------------------------------------------------------
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #----For Debugging under ifort:
   #----For optimized code under ifort
