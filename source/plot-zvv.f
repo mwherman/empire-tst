@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2794 $
+Ccc   * $Rev: 2796 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
+Ccc   * $Date: 2012-04-18 02:26:45 +0200 (Mi, 18 Apr 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -76,14 +76,18 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
       CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz//ldname,' ')
 
       kminex = 1
-      DO kk = 3, NEX(Nnuc)
-        IF(ADIv.eq.0) then
+      DO kk = 1, NEX(Nnuc)
+        IF(ADIv.ne.3) then
           u = EX(kk,Nnuc)
 	  ELSE
           u = UEXcit(kk,Nnuc)
 	  ENDIF
 	  if(u.gt.ELV(NLV(Nnuc),Nnuc)) then
-          kminex = kk - 2
+	    if(FITlev.GT.0) then
+            kminex = kk 
+		else
+		  kminex = max(kk-1,1)
+		endif  
           exit
         endif
 	ENDDO
@@ -92,7 +96,7 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
 
       DO kk = kminex, NEX(Nnuc)
 
-        IF(ADIv.eq.0) then
+        IF(ADIv.ne.3) then
           u = EX(kk,Nnuc)
 	  ELSE
           u = UEXcit(kk,Nnuc)
@@ -187,6 +191,7 @@ C
       CHARACTER*20 ctmp
       CHARACTER*7 caz, ldname
       CHARACTER*5 ctmp1
+	CHARACTER*1 cbar
       CHARACTER*10 fname
 C     CHARACTER*37 ctmp2
  
@@ -200,6 +205,7 @@ C     CHARACTER*37 ctmp2
      >      SYMb(Nnuc), int(A(Nnuc))
       endif
 
+      write(cbar,'(I1)') ib
       IF(FISden(Nnuc).LE.1) then
         write(fname,'(A9,I1)') 'LD_EGSM_S',ib
         write(ctmp,'(A20)') fname//'_'//ctmp1//'.zvd'
@@ -215,7 +221,8 @@ C     CHARACTER*37 ctmp2
       ENDIF
  
       OPEN (36, FILE=ctmp, STATUS='unknown')
-      CALL OPEN_ZVV(36,'RHO(U)   at saddle of '//ctmp1//ldname,' ')
+      CALL OPEN_ZVV(36,
+     &   'RHO(U)   at saddle '//cbar//' of '//ctmp1//ldname,' ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul1 = 0.d0
@@ -369,7 +376,7 @@ C---------GCM,OGCM
             ENDDO
           ENDIF
 
-          IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+          IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
           WRITE (36,*) u*1.d6, rocumul            
  	    ncalc = ncalc + 1
@@ -396,7 +403,7 @@ C---------GCM,OGCM
           ENDDO
         ENDIF
 
-	  IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+	  IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
         WRITE (36,*) u*1.d6, rocumul            
  	  ncalc = ncalc + 1
@@ -594,7 +601,7 @@ C---------GCM,OGCM
             ENDDO
           ENDIF
 
-C         IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+C         IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
           WRITE (34,*) u, rocumul            
  	    ncalc = ncalc + 1
@@ -621,7 +628,7 @@ C---------GCM,OGCM
           ENDDO
         ENDIF
 
-C       IF(u.lt.0.7*ELV(NLV(Nnuc),Nnuc)) cycle
+C       IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
         WRITE (34,*) u, rocumul            
  	  ncalc = ncalc + 1
