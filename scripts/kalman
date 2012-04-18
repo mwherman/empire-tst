@@ -35,35 +35,39 @@ if [ ! -s $file.endf ]; then
    echo "ENDF FILE NOT FOUND ($file.endf)"
    exit 0
 fi
-if [ ! -s $file.xsc ]; then
-   echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
-   exit 1
-fi
 if [ ! -s $file-inp.sen ]; then
    echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
-   exit 2
+   exit 1
 fi
 if [ $PFNS = 0 ]; then
    echo "Fitting only cross sections from $file-mat.sen."
+   if [ ! -s $file.xsc ]; then
+     echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
+     exit 2
+   fi
    if [ ! -s $file-mat.sen ]; then
      echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
      exit 3
    fi
 elif [ $PFNS = 1 ]; then
    echo "Fitting only prompt fission neutron spectra from $file-pfns-mat.sen."
+   if [ ! -s $file-pfns.out ]; then
+      echo "PROMPT NEUTRON FISSION SPECTRA FILE NOT FOUND ($file-pfns.out)"
+      exit 4
+   fi
    if [ ! -s $file-pfns-mat.sen ]; then
      echo "SENSITIVITY FILE NOT FOUND ($file-pfns-mat.sen)"
-     exit 4
+     exit 5
    fi
 else
    echo "Option PFNS = $PFNS has not been implemented yet."
-   exit 5
+   exit 6
 fi
 if [ ! -s $file-kal.c4 ]; then
    echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
    if [ ! -s $file.c4 ]; then
      echo "C4 FILE NOT FOUND ($file.c4)"
-     exit 6
+     exit 7
    else
      cp $file.c4 $file-kal.c4
    fi
@@ -105,6 +109,7 @@ then
 else
   echo  "Running pnt2kal"
   $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
+#exit
 fi
 
 
@@ -168,7 +173,6 @@ done
     cat fort.16 fort.32 > fort.48
  
     $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
-
 
     if [ -s check.out ]; then
        exit
