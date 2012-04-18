@@ -34,7 +34,7 @@ C*********************************************************************
       DIMENSION X(NS),Y(NS),W(NS,NS),V2(NS,NS)
       DIMENSION S(NS),E(NS),D(NS),V(NS,NS),C(NS,NS)
       DIMENSION M(NR),EG(NS),SG(NS,NR)
-      CHARACTER*4  XSC
+      CHARACTER*15  XSC
       CHARACTER*8  XSCKAL
       CHARACTER*12 REACTION,RECTN(NR)
       CHARACTER*25 FILE
@@ -43,7 +43,6 @@ C*********************************************************************
 
       RES=.FALSE.
 
-      XSC='.xsc'
       XSCKAL='-xsc.kal'
 
 
@@ -65,7 +64,13 @@ c
       MTL=0
 
 
-      READ(5,*) FILE,MT1,MAT1
+      READ(5,*) FILE,MT1,MAT1,NEX,NPFNS
+  
+      IF (NPFNS.EQ.0) THEN
+        XSC='.xsc'
+      ELSE
+        XSC='-pfns.kal'
+      ENDIF
 
       CALL STRLEN(FILE,L1,L2)
 
@@ -74,7 +79,7 @@ c
 C GET THE SEQUENCE OF REACTIONS IN XSC FILE IN ORDER TO GET THE CROSS SECTIONS
 C IN THE FILE -xsc.kal (FORT.13).
 
-      OPEN(10,FILE=FILE(L1:L2)//XSC,STATUS='OLD',ERR=100)
+      OPEN(10,FILE=FILE(L1:L2)//trim(XSC),STATUS='OLD',ERR=100)
       READ(10,'(1X,I3)') NNUCD
       IF (NNUCD .GT. NR) STOP 'TOO MANY REACTIONS'
       READ(10,'(12X,(3A12),(A10),(90A12))') (RECTN(I),I=1,NNUCD)
