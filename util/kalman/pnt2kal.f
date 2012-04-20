@@ -47,7 +47,7 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       IMPLICIT NONE
 
-      CHARACTER*60 pntfile, proj, inpsen
+      CHARACTER*60 pntfile, proj, inpsen, pfnskal
       CHARACTER*6 param
       INTEGER*4 MAXEXP ! Number of experiments
       INTEGER*4 nexp,MT1,MAT,NEX, nparam, ierr,MS
@@ -62,21 +62,22 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       pntfile=trim(proj)//'.pnt'
       inpsen=trim(proj)//'-inp.sen'
+      pfnskal=trim(proj)//'-pfns.kal'
 
 c     Checking if pntfile is already present, making it unnecessary to run lsttab
       inquire(file = pntfile, exist = fexists)
       if(.NOT.fexists) CALL run_lsttab(proj)
-
-
 
 c
 c     Reading pnt file
 c
       CALL READPNT(pntfile,EXPDATA,NEXP,MAXEXP)
 
-c
+c     Checking if pfnskal file is already present, making it 
+c     unnecessary to run subroutine central_spectra
+      inquire(file=pfnskal,exist = fexists)
 c     Reading 'proj-pfns.out' and writing 'proj-pfns.kal'
-c
+c     if(.NOT.fexists) CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
       CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
 
 
@@ -334,41 +335,36 @@ c
       CHARACTER*60 proj, pfnsout, pfnskal
       CHARACTER*10 nucleus
       CHARACTER*5 Echar
-      INTEGER*4 MAXEXP,ierr,nexp,iexp,i,NEinc,ip,np,ne,ispec,ierr2,
-     &i0
+      INTEGER*4 MAXEXP,MAXEEMIT,MAXEINC,ierr,nexp,iexp,i,NEinc,
+     & ip,np,ne,ispec,i0
       LOGICAL fexists
-C      PARAMETER(MAXEEMIT=1000)
-      REAL*8 Einc(50) ! Incident energies in pnt file
-      REAL*8 Elab(50) ! Incident enery read and kept from -pfns.out
+      PARAMETER(MAXEEMIT=1000,MAXEINC=50)
+      REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
+      REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
+      REAL*8 Eemit(MAXEEMIT) ! Array with the values of the emitted neutron energies
+      REAL*8 pfns(MAXEINC,MAXEEMIT) ! Matrix to store the spectra: 
+                                    ! first index identify the spectra (i.e., runs over incident energy)
+                                    ! second index runs over the emitted neutron energy
 
       TYPE (DATASET) EXPDATA(MAXEXP)
-      TYPE (VECTOR) pfns(50)
 
 
       pfnsout=trim(proj)//'-pfns.out'
       pfnskal=trim(proj)//'-pfns.kal'
 
-c
-c     Testing to see if there is already a pfnskal file present,
-c     implying there is no need to run this subroutine
-c
-      inquire(file=pfnskal,exist = fexists)
-c     if(fexists) return
 
+c     Storing the experimental incident energies in Einc, without repeating values
       i=1
       Einc(i)=EXPDATA(i)%Einc
       do iexp=2,nexp
+c       Checking if current Einc is different from previous
         if(DABS(EXPDATA(iexp)%Einc-EXPDATA(iexp-1)%Einc).GT.1.D-20) then
           i = i + 1
-          Einc(i)=EXPDATA(iexp)%Einc   ! Storing in Einc
+          Einc(i) = EXPDATA(iexp)%Einc   ! Storing in Einc
         endif
       enddo
       NEinc = i
-      Einc=Einc/1.D6   ! Converting from eV to MeV
-c     write(*,*) 'NEinc = ', Neinc, Einc(1)
-
-
-
+      Einc = Einc/1.D6   ! Converting from eV to MeV
 
 c
 c     Opening -pfns.out file
@@ -378,32 +374,17 @@ c
         WRITE(*,*) 'ERROR: FILE ',pfnsout,' NOT FOUND!'
         STOP
       endif
-c
-c     Opening -pfns.kal file
-c
-      OPEN(300,FILE=pfnskal)
-
-
-
 
 c
-c     Comparing incident energies from pfnsout with Einc() and writing the ones 
+c     Comparing incident energies from pfnsout with experimental Einc() and storing the ones 
 c     that match in pfnskal
 c
-c     do i=1,NEinc
-c       write(*,*) 'i=',i,' Einc(i)= ', Einc(i)
-c     enddo
-
-
-
-
       ispec=1
-      ierr2=0
       i0=1
-c     write(*,*) 'Before the loop!'
-      do while(ierr2.EQ.0)
-c       write(*,*) 'HERE!!!'
-80      read(250,100,iostat=ierr2,end=180) Echar
+      do while(0==0)
+c       Looking for 'Elab=' string. Has to be done this way because, if there is no match,
+c       we do not know beforehand how many lines to skip until next header
+80      read(250,100,end=180) Echar
 100     format(30X,A5)
         if(Echar.eq.'Elab=') then
           BACKSPACE(250)
@@ -412,24 +393,15 @@ c       write(*,*) 'HERE!!!'
         endif
         read(250,110) nucleus, Elab(ispec)
 110     format(18X,A10,7X,G10.5)
-c       write(*,*)  'Elab= ', Elab(ispec)
         i=i0
-c       write(*,*) 'i=',i,' i0=',i0
         do while(i.LE.NEinc)
-c         write(*,115) i0,i,Elab(ispec),Einc(i)
-c115       format('i0=',i3,' i=',i3,' Elab(ispec)=',1Pd13.5,' Einc(i)=',
-c     &1Pd13.5)
-c          write(*,*) 'diff=',DABS(Elab(ispec)-Einc(i))
           if(DABS(Elab(ispec)-Einc(i)).LT.4.748D-7) then    ! this is roughly the difference between Empire's lower energy limit (5.d-7) and termal energy
-c          write(*,*) 'MATCH! Elab(ispec)= ',Elab(ispec),' Einc(',i,')=',
-c     & Einc(i)
             read(250,*)
             read(250,*)
             ierr=0
             ip=1
             do while(ierr.EQ.0)
-              read(250,120,iostat=ierr) pfns(ispec)%POINT(ip)%X,
-     & pfns(ispec)%POINT(ip)%Y
+              read(250,120,iostat=ierr) Eemit(ip), pfns(ispec,ip)
 120           format(E10.4,19X,E11.5)
               ip=ip+1
             enddo
@@ -446,12 +418,14 @@ c     & Einc(i)
 180   continue
       NE=ispec-1
 
-c      write(*,*) 'NEinc=',Neinc,' NE=',Ne
       if(NE.NE.Neinc) call error_mismatch(proj,Einc,NEinc,Elab,NE)
 
+      CLOSE(250)
 
-
-
+c
+c     Opening -pfns.kal file
+c
+      OPEN(300,FILE=pfnskal)
 c
 c     Writing pfns for matching incident energies in pfnskal
 c
@@ -460,14 +434,10 @@ c200   format('#',i3,/,'#  Eemit',2X,50(' E: ',1PE8.2))
 200   format('#',i3,10X,A10,/,'#  Eemit',2X,50(2X,1PE8.2,2X))
       ip=1
       do ip=1, NP
-        write(300,210) pfns(1)%POINT(ip)%X, (pfns(ispec)%POINT(ip)%Y,
-     & ispec=1,NEinc)
+        write(300,210) Eemit(ip), (pfns(ispec,ip),ispec=1,NEinc)
 210     format(G10.4,1P,50(1X,E11.5))
       enddo
 
-
-
-      CLOSE(250)
       CLOSE(300)
 
       END
@@ -513,7 +483,7 @@ c200   format('#',i3,/,'#  Eemit',2X,50(' E: ',1PE8.2))
       write(*,*) 'Please make sure that ',trim(proj),'-pfns.out file',
      &' contains all incident energies from '
       write(*,*) 'file ',trim(proj),'.pnt',
-     &' by including them explicitly in Empire input file, or, '
+     &' by including them explicitly in Empire input file, or, ',
      &'alternatively, by removing them from '
       write(*,*) 'the ',trim(proj),'.pnt file.'
 
