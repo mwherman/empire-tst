@@ -24,6 +24,15 @@ c       TYPE (DATAPOINT) DAT(MAXDAT)
         INTEGER*4 NDAT
       END TYPE DATASET
 
+      TYPE PAIR
+        REAL*8 X
+        REAL*8 Y
+      END TYPE PAIR
+
+      TYPE VECTOR
+        TYPE (PAIR) POINT(5000)
+      END TYPE VECTOR
+
 
       end module
 
@@ -68,7 +77,7 @@ c
 c
 c     Reading 'proj-pfns.out' and writing 'proj-pfns.kal'
 c
-c     CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
+      CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
 
 
 
@@ -323,12 +332,17 @@ c
       IMPLICIT NONE
 
       CHARACTER*60 proj, pfnsout, pfnskal
+      CHARACTER*10 nucleus
       CHARACTER*5 Echar
-      INTEGER*4 MAXEXP,ierr,nexp,iexp,i, NEinc
+      INTEGER*4 MAXEXP,ierr,nexp,iexp,i,NEinc,ip,np,ne,ispec,ierr2,
+     &i0
       LOGICAL fexists
-      REAL*8 Einc(30) ! Incident energies in pnt file
+C      PARAMETER(MAXEEMIT=1000)
+      REAL*8 Einc(50) ! Incident energies in pnt file
+      REAL*8 Elab(50) ! Incident enery read and kept from -pfns.out
 
       TYPE (DATASET) EXPDATA(MAXEXP)
+      TYPE (VECTOR) pfns(50)
 
 
       pfnsout=trim(proj)//'-pfns.out'
@@ -346,10 +360,11 @@ c     if(fexists) return
       do iexp=2,nexp
         if(DABS(EXPDATA(iexp)%Einc-EXPDATA(iexp-1)%Einc).GT.1.D-20) then
           i = i + 1
-          Einc(i)=EXPDATA(iexp)%Einc/1.D6   ! Storing in Einc and converting from eV to MeV
+          Einc(i)=EXPDATA(iexp)%Einc   ! Storing in Einc
         endif
       enddo
       NEinc = i
+      Einc=Einc/1.D6   ! Converting from eV to MeV
 c     write(*,*) 'NEinc = ', Neinc, Einc(1)
 
 
@@ -358,7 +373,7 @@ c     write(*,*) 'NEinc = ', Neinc, Einc(1)
 c
 c     Opening -pfns.out file
 c
-      OPEN(200,FILE=pfnsout,iostat=ierr)
+      OPEN(250,FILE=pfnsout,iostat=ierr)
       if(ierr.ne.0) then
         WRITE(*,*) 'ERROR: FILE ',pfnsout,' NOT FOUND!'
         STOP
@@ -375,23 +390,141 @@ c
 c     Comparing incident energies from pfnsout with Einc() and writing the ones 
 c     that match in pfnskal
 c
-      read(200,100) Echar
-100   format(30X,A5)
-c     if(Echar.eq.'Elab=')
+c     do i=1,NEinc
+c       write(*,*) 'i=',i,' Einc(i)= ', Einc(i)
+c     enddo
 
 
 
 
+      ispec=1
+      ierr2=0
+      i0=1
+c     write(*,*) 'Before the loop!'
+      do while(ierr2.EQ.0)
+c       write(*,*) 'HERE!!!'
+80      read(250,100,iostat=ierr2,end=180) Echar
+100     format(30X,A5)
+        if(Echar.eq.'Elab=') then
+          BACKSPACE(250)
+        else
+          goto 80
+        endif
+        read(250,110) nucleus, Elab(ispec)
+110     format(18X,A10,7X,G10.5)
+c       write(*,*)  'Elab= ', Elab(ispec)
+        i=i0
+c       write(*,*) 'i=',i,' i0=',i0
+        do while(i.LE.NEinc)
+c         write(*,115) i0,i,Elab(ispec),Einc(i)
+c115       format('i0=',i3,' i=',i3,' Elab(ispec)=',1Pd13.5,' Einc(i)=',
+c     &1Pd13.5)
+c          write(*,*) 'diff=',DABS(Elab(ispec)-Einc(i))
+          if(DABS(Elab(ispec)-Einc(i)).LT.4.748D-7) then    ! this is roughly the difference between Empire's lower energy limit (5.d-7) and termal energy
+c          write(*,*) 'MATCH! Elab(ispec)= ',Elab(ispec),' Einc(',i,')=',
+c     & Einc(i)
+            read(250,*)
+            read(250,*)
+            ierr=0
+            ip=1
+            do while(ierr.EQ.0)
+              read(250,120,iostat=ierr) pfns(ispec)%POINT(ip)%X,
+     & pfns(ispec)%POINT(ip)%Y
+120           format(E10.4,19X,E11.5)
+              ip=ip+1
+            enddo
+            NP=ip-2
+            i0=i+1
+            i=NEinc
+            ispec = ispec + 1
+            BACKSPACE(250)
+          endif
+          i=i+1
+        enddo
+
+      enddo
+180   continue
+      NE=ispec-1
+
+c      write(*,*) 'NEinc=',Neinc,' NE=',Ne
+      if(NE.NE.Neinc) call error_mismatch(proj,Einc,NEinc,Elab,NE)
 
 
 
 
+c
+c     Writing pfns for matching incident energies in pfnskal
+c
+      write(300,200) NEinc,nucleus,(Einc(i),i=1,NEinc)
+c200   format('#',i3,/,'#  Eemit',2X,50(' E: ',1PE8.2))
+200   format('#',i3,10X,A10,/,'#  Eemit',2X,50(2X,1PE8.2,2X))
+      ip=1
+      do ip=1, NP
+        write(300,210) pfns(1)%POINT(ip)%X, (pfns(ispec)%POINT(ip)%Y,
+     & ispec=1,NEinc)
+210     format(G10.4,1P,50(1X,E11.5))
+      enddo
 
 
-      CLOSE(200)
+
+      CLOSE(250)
       CLOSE(300)
 
       END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE error_mismatch(proj,Epnt,NEpnt,Epfns,NEpfns)
+
+      IMPLICIT NONE
+
+      CHARACTER*60 proj
+      REAL*8 Epnt(50),Epfns(50)
+      INTEGER*4 NEpnt,Nepfns,i
+
+      write(*,*) ' ERROR!!'
+      write(*,*) ' ERROR!!  Incident-energy values missing from ',
+     &trim(proj),'-pfns.out'
+      write(*,*) ' ERROR!!'
+      write(*,*)
+      write(*,*) 'Incident energies found in ',trim(proj),'.pnt file:'
+      write(*,*)
+      write(*,10) (i,Epnt(i),i=1,NEpnt)
+10    format('E(',i2,') = ',1PD13.5) 
+      write(*,*)
+      write(*,*)
+      write(*,*) 'Matching energies in file ',trim(proj),'-pfns.out:'
+      write(*,*)
+      write(*,20) (i,Epfns(i),i=1,NEpfns)
+20    format('E(',i2,') = ',1PD13.5) 
+      write(*,*)
+      write(*,*) 'Please make sure that ',trim(proj),'-pfns.out file',
+     &' contains all incident energies from '
+      write(*,*) 'file ',trim(proj),'.pnt',
+     &' by including them explicitly in Empire input file, or, '
+     &'alternatively, by removing them from '
+      write(*,*) 'the ',trim(proj),'.pnt file.'
+
+      STOP
+
+      END
+
+
+
+
+
 
 
 
