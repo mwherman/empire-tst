@@ -9043,10 +9043,11 @@ refer to them by keywords defined in the input description (see Section
 
 \subsubsection*{Fusion}
 
-We have to distinguish between heavy ion and Light Ion ($A<5$) of nucleon
-induced reactions. Heavy ion induced reactions:
+We have to distinguish between Heavy Ion (HI) and Light Ion ($A<5$) or nucleon
+induced reactions. For HI induced reactions one may use following parameters to 
+control fusion cross section:
 
-\begin{description}[style=multiline,leftmargin=2cm]
+\begin{description}[style=multiline,leftmargin=3cm]
 \item [{FUSRED}] scales calculated fusion cross section with an arbitrary
 factor to set the parameter directly to the desired value, but lacks
 any physical significance and predictive power. Should be used as
@@ -9074,9 +9075,10 @@ the spin distribution. Larger DFUS, the higher the spins populated,
 and this effect may contribute to an increase of the fission cross
 section and resulting reduction in the evaporation residues.
 \end{description}
-Most of the parameters discussed above concern HI induced reactions.
-There are fewer possibilities for nucleons as the fusion (or absorption)
-cross section is calculated using the optical model. Users may try
+
+There are fewer possibilities for nucleon or LI induced reactions  as the cross section 
+for fusion (also referred as absorption or reaction)
+ is calculated using the optical model. Users may try
 different parameterizations available in the RIPL\index{RIPL} library
 or internal OMP systematics. If this fails, increasing the imaginary
 part of the OMP will increase the absorption cross section. However,
@@ -10007,15 +10009,17 @@ the DIRPOT option.
 \item [{CALCTL}] Controls use of calculated transmission coefficients for both 
 projectile and ejectiles.\\
 
-= 0 Transmission coefficients calculated during the first run are stored, and reused
+\begin{description}[style=multiline,leftmargin=1cm]
+
+\item[= 0] Transmission coefficients calculated during the first run are stored, and reused
     in subsequent EMPIRE runs (default),
        
-$>0$ Transmission coefficients are calculated independently for each run; no reusage
-    is allowed. This option is useful to calculate some quantities that are only used
-    if TL are not already present (e.g. Bass fusion barrier in HI induced reactions).
-    However, this potion slows down the execution of the code in subsequent runs up
-    to a factor of 10 times (additional time is needed to calculate TLs again; reading
-    them is much faster.
+\item[$>0$] Transmission coefficients are calculated for each run even if they were calculated before and respective files  exist. This option is useful to calculate some quantities that are only used if TL are not already present (e.g. Bass fusion barrier in HI induced reactions).
+
+    NOTE: this option slows down the execution of the code in subsequent runs by
+    up to a factor of 10  (additional time is needed to calculate TLs again; reading
+    them is much faster).
+\end{description}
 
 \item [{EcDWBA}] Automatically selects all discrete levels to be used in DWBA
 calculations for uncoupled collective levels. \\
