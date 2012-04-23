@@ -532,7 +532,7 @@ c     Getting the Maxwellian temperature used for normalization
 c     from file proj-pfns.out
       OPEN(150,file=trim(proj)//'-pfns.out')
       read(150,10) TMaxw  ! in MeV
-10    format(76X,G8.4)
+10    format(81X,G8.4)
       CLOSE(150)
 
 c     Opening and writing lsttab input file
