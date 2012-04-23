@@ -41,21 +41,23 @@ C  GENERATE CROSS SECTION FILE - UNIT 50
       IE=I-1
 
 C CHECKING IF THE REQUIRED MT1 IS PRESENT IN THE FILE.XSC FILE
-      J=0
-      DO 15 I=1,NNUCD
-         CALL RCTN(REACTION(I),MT)
-         IF (MT .EQ. MT1) THEN
-            J=1
-            GOTO 16
-         ENDIF
- 15      CONTINUE
- 16   CONTINUE
-      IF (J .EQ. 0) THEN
-         WRITE(0,*) 'REACTION( MT=',MT1,') NOT FOUND IN '
+      IF(NPFNS.EQ.0) THEN ! This check is only necessary when fitting cross sections, not pfns
+        J=0
+        DO 15 I=1,NNUCD
+           CALL RCTN(REACTION(I),MT)
+           IF (MT .EQ. MT1) THEN
+              J=1
+              GOTO 16
+           ENDIF
+ 15        CONTINUE
+ 16     CONTINUE
+        IF (J .EQ. 0) THEN
+           WRITE(0,*) 'REACTION( MT=',MT1,') NOT FOUND IN '
      &   ,FILE(L1:L2)//trim(XSC)
-         WRITE(6,*)  'REACTION( MT=',MT1,') NOT FOUND IN '
+           WRITE(6,*)  'REACTION( MT=',MT1,') NOT FOUND IN '
      &   ,FILE(L1:L2)//trim(XSC)
-         STOP
+           STOP
+        ENDIF
       ENDIF
 
 
