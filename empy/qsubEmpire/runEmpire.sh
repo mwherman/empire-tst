@@ -23,7 +23,9 @@ fi
 if [ $clean = Y ]; then
     # keep only .xsc file:
     #find . ! -name $file.xsc -exec rm -rf {} \;
-    ls | grep -v $file.xsc | xargs rm -rf
+    #ls | grep -v '$file.xsc' | xargs rm -rf
+    grep_pattern="$file.xsc\|$file-pfns.out"
+    ls | grep -v $grep_pattern | xargs rm -rf
 fi
 
 exit

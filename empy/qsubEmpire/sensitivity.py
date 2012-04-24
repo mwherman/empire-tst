@@ -38,6 +38,8 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY',
         'TRUNC', 'WIDEX', 'DEFNUC')
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
+# Defining list of prompt fission neutron spectra parameters
+pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
 # these global parameters don't need Z,A of isotope specified
 Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED')
@@ -130,6 +132,12 @@ def init(proj):
         optvals.append( readOption(opt) )
     #print optvals
     
+    # Checking value of FISSPE option in input file and storing it in pfnsval
+    pfnsval = 0.0
+    for opt in options:
+        if opt.startswith('FISSPE'):
+           name, pfnsval, i1, i2, i3, i4 = readOption(opt)[:]
+    
     # create dir for original input.
     # Also copy -inp.fis, .lev and -lev.col if available
     os.mkdir(proj+"_orig")
@@ -162,8 +170,13 @@ def init(proj):
             parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
             continue
         
-        if not (name in allowed or name in restricted):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             print "%s can't be varied. Skipping" % name
+            continue
+
+        # Checking if a non-zero valued option FISSPE exists input, otherwise skips PFNS parameters
+        if (name in pfnsPar and pfnsval < 0.5):
+            print "No FISSPE option in input file. Skipping %s" % name
             continue
         
         def isMatch(opt):
@@ -314,7 +327,7 @@ def run(proj):
         
         name, val, i1, i2, i3, i4 = tmp[:]
         if not (name in allowed or name in restricted
-                or name in fisPars):
+                or name in fisPars or name in pfnsPar):
             continue
         
         nameP, nameM = genNames(line,proj)
