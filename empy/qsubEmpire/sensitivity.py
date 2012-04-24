@@ -292,7 +292,7 @@ def copyTLs(proj):
         
         name, val, i1, i2, i3, i4 = tmp[:]
         if not (name in allowed or name in restricted
-                or name in fisPars):
+                or name in fisPars or name in pfnsPar):
             continue
         
         nameP, nameM = genNames(line,proj)
