@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2714 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-03-16 15:13:31 +0100 (Fr, 16 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -66,14 +66,14 @@ C-----do loop over decaying nucleus parity
         IF(EINl.LE.0.002d0) THEN
           WRITE(8,
      &    '(1x,''Renormalization of gamma-ray strength function'')')
-	  ELSE
+      ELSE
           WRITE(8,'(1x,
      &    ''WARNING: First incident energy Einc must be < 2keV for Do an
      &d Gg calculations'')')
           WRITE(8,'(1x,
      &    ''WARNING: for the renormalization of gamma-ray strength funct
      &ion'')')
-	  ENDIF
+      ENDIF
         WRITE(8,'(1x,
      &    ''------------------------------------------------------------
      &-'')')
@@ -129,7 +129,7 @@ C
 C           dencomp = H_Sumtl
             sumfis = 0.d0
 C
-	      IF (FISsil(nnuc)) THEN
+          IF (FISsil(nnuc)) THEN
               IF (FISshi(nnuc).EQ.1.) THEN
                 CALL FISSION(nnuc,ke,jcn,sumfis)
               ELSE
@@ -137,7 +137,7 @@ C
               ENDIF
               H_Sumtl = H_Sumtl + sumfis
               H_Sweak = H_Sweak + sumfis
-	      ENDIF
+          ENDIF
 
             IF (H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)
      &          THEN
@@ -252,7 +252,7 @@ C
      &            ( (cnspin.eq.XJLv(LEVtarg,0)+0.5) .OR.
      &              (cnspin.eq.XJLv(LEVtarg,0)-0.5) ) ) THEN
                 d0c = d0c + RO(ke,jcn,ipar,nnuc)
-!        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
+C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
                 WRITE(8,'(A12,f4.1,A6,A1,A6,F7.3,A4,/,A37,d12.6)')
      &           'CN state J=',cnspin,', Par:',cpar(ipar),
      &           ' at U=',EX(ke,nnuc),' MeV',
@@ -336,12 +336,8 @@ C
          ENDIF
          WRITE(8,*)
       ENDIF
-
       RETURN
       END
-C
-C
-C
       SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Sum,Nhrtw)
 Ccc
 Ccc   ********************************************************************

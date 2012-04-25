@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2796 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-18 02:26:45 +0200 (Mi, 18 Apr 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -25,7 +25,7 @@ C
       CHARACTER*36 title
 
       DOUBLE PRECISION u, frho1, frho2
-	INTEGER nene, kminex
+      INTEGER nene, kminex
 
       IF(NLV(Nnuc).le.3) return
 
@@ -57,13 +57,13 @@ C
       
       WRITE (36,*) '0.0 1.0'
       DO kk = 2, NLV(Nnuc)-1
-	   delta_energy = ELV(kk,Nnuc) - ELV(kk-1,Nnuc) 
-	   if(delta_energy.le.0.d0) cycle 
+         delta_energy = ELV(kk,Nnuc) - ELV(kk-1,Nnuc)
+         if(delta_energy.le.0.d0) cycle
 C        f'(a) = ( f(a) - f(a-h) )/h  : backward difference
 C        f(a) - f(a-h) = Nlev(kk) - Nlev(kk-1) = 1
          frho1 = 1.d0/delta_energy
-	   delta_energy = ELV(kk+1,Nnuc) - ELV(kk,Nnuc) 
-	   if(delta_energy.le.0.d0) cycle 
+         delta_energy = ELV(kk+1,Nnuc) - ELV(kk,Nnuc)
+         if(delta_energy.le.0.d0) cycle
 C        f'(a) = ( f(a+h) - f(a) )/h  : forward  difference
 C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
          frho2 = 1.d0/delta_energy
@@ -79,28 +79,28 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
       DO kk = 1, NEX(Nnuc)
         IF(ADIv.ne.3) then
           u = EX(kk,Nnuc)
-	  ELSE
+      ELSE
           u = UEXcit(kk,Nnuc)
-	  ENDIF
-	  if(u.gt.ELV(NLV(Nnuc),Nnuc)) then
-	    if(FITlev.GT.0) then
+      ENDIF
+      if(u.gt.ELV(NLV(Nnuc),Nnuc)) then
+        if(FITlev.GT.0) then
             kminex = kk 
-		else
-		  kminex = max(kk-1,1)
-		endif  
-          exit
+        else
+           kminex = max(kk-1,1)
         endif
-	ENDDO
+          exit
+      endif
+      ENDDO
 
-	nene = 0
+      nene = 0
 
       DO kk = kminex, NEX(Nnuc)
 
         IF(ADIv.ne.3) then
           u = EX(kk,Nnuc)
-	  ELSE
+        ELSE
           u = UEXcit(kk,Nnuc)
-	  ENDIF
+        ENDIF
 
         rolowint1 = 0.D0
         rolowint2 = 0.D0
@@ -110,7 +110,7 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
         ENDDO
 
         IF(rolowint1+rolowint2.gt.1e30) exit
-	  nene = nene + 1
+        nene = nene + 1
 C
 C       Avoiding printing the first point 
 C       as LDs are defined above the discrete levels  
@@ -123,7 +123,7 @@ C
       IF(rolowint1+rolowint2.le.0.d0 .or. nene.lt.5) then
         CLOSE (36,STATUS='DELETE')
         RETURN 
-	ENDIF 
+      ENDIF
 
       IF(ADIv.NE.3) THEN 
         write(title,'(A27,F5.2,A4)') 'Energy continuum starts at ',
@@ -132,7 +132,7 @@ C
         CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ',title)
         CLOSE (36)
         RETURN 
-	ENDIF  
+      ENDIF
 
       CALL CLOSE_ZVV(36,' ',' ')
 
@@ -191,7 +191,7 @@ C
       CHARACTER*20 ctmp
       CHARACTER*7 caz, ldname
       CHARACTER*5 ctmp1
-	CHARACTER*1 cbar
+      CHARACTER*1 cbar
       CHARACTER*10 fname
 C     CHARACTER*37 ctmp2
  
@@ -210,14 +210,14 @@ C     CHARACTER*37 ctmp2
         write(fname,'(A9,I1)') 'LD_EGSM_S',ib
         write(ctmp,'(A20)') fname//'_'//ctmp1//'.zvd'
         write(caz,'(A6,I1)') 'EGSM-S',Ib
-	  write(ldname,'(A7)') ' (EGSM)'
+        write(ldname,'(A7)') ' (EGSM)'
       ENDIF
 
       IF(FISden(Nnuc).eq.3) then
         write(fname,'(A9,I1)') 'LD_HFBM_S',ib
         write(ctmp,'(A20)') fname//'_'//ctmp1//'.zvd'
         write(caz,'(A6,I1)') 'HFBM-S',Ib
-	  write(ldname,'(A7)') ' (HFBM)'
+        write(ldname,'(A7)') ' (HFBM)'
       ENDIF
  
       OPEN (36, FILE=ctmp, STATUS='unknown')
@@ -247,9 +247,9 @@ C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
 
         CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ' ')
         CLOSE (36)
-	  RETURN 
+      RETURN
 
-	ENDIF  
+      ENDIF
 
       CALL CLOSE_ZVV(36,' ',' ')
 
@@ -349,7 +349,7 @@ C
       CALL CLOSE_ZVV(36,' ',' ')
 
       CALL OPEN_ZVV(36,'Integral [RHO(U)] of '//caz//ldname,' ')
-	
+
       ncalc = 0 
       rocumul = 1.D0
 C     WRITE (36,*) '0.0 1.0'
@@ -360,7 +360,7 @@ C     WRITE (36,*) '0.0 1.0'
      &           /(NEXreq-1) 
         nplot = (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)+2.d0)/defit
 
-	  DO kk = 2, nplot
+        DO kk = 2, nplot
 
           u = defit*(kk - 1) 
 
@@ -379,11 +379,11 @@ C---------GCM,OGCM
           IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
           WRITE (36,*) u*1.d6, rocumul            
- 	    ncalc = ncalc + 1
+          ncalc = ncalc + 1
 
         ENDDO
 
-	else
+      else
 
         DO kk = 2, NEX(Nnuc)
         defit = EX(kk,Nnuc) - EX(kk-1,Nnuc)
@@ -403,14 +403,14 @@ C---------GCM,OGCM
           ENDDO
         ENDIF
 
-	  IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
+      IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
         WRITE (36,*) u*1.d6, rocumul            
- 	  ncalc = ncalc + 1
+        ncalc = ncalc + 1
 
         ENDDO
 
-	endif
+      endif
 
  14   write(ctmp2,'(A27,F5.2,A4)') 'Energy continuum starts at ',
      >  Elv(NLV(Nnuc),Nnuc),' MeV' 
@@ -418,9 +418,9 @@ C---------GCM,OGCM
       CALL CLOSE_ZVV_CUMUL(36,' CUMULATIVE NUMBER OF LEVELS ',ctmp2)
       if(ncalc.le.5) then
         close(36,status='DELETE')
-	else
+      else
         close(36)
-	endif
+      endif
       RETURN
       END
 
@@ -459,9 +459,9 @@ C======================================================
       write(iout,*) '#begin aa/c'
       write(iout,*) 'tit: ',trim(titlex)
       write(iout,*) 'tit2: ',trim(titley)
-	write(iout,*) 'x-unit:1000000, (MeV)'
+      write(iout,*) 'x-unit:1000000, (MeV)'
       write(iout,*) 'ix-unit: 1  '
-	write(iout,*) 'y-unit:1,   '
+      write(iout,*) 'y-unit:1,   '
       write(iout,*) 'iy-unit: 1'
       write(iout,*) 'X-SCALE: lin'
       write(iout,*) 'Y-SCALE: lin'
@@ -488,9 +488,9 @@ C======================================================
       write(iout,*) '#begin aa/c'
       write(iout,*) 'tit: ',trim(titlex)
       write(iout,*) 'tit2: ',trim(titley)
-	write(iout,*) 'x-unit:1000000, (MeV)'
+      write(iout,*) 'x-unit:1000000, (MeV)'
       write(iout,*) 'ix-unit: 1'
-	write(iout,*) 'y-unit:1, (1/MeV)'
+      write(iout,*) 'y-unit:1, (1/MeV)'
       write(iout,*) 'iy-unit: 1'
       write(iout,*) 'X-SCALE: lin'
       write(iout,*) 'Y-SCALE: log'
@@ -552,14 +552,14 @@ C
 99009   FORMAT ('set title "',I3,'-',A2,'-',I3,
      &        '   T = ',F6.3,' Ux = ',F5.2,' Def = ',F6.2,
      &        ' atil=',F4.1,' E0=',F4.1,' Ncut=',I3,'"')
-	ELSE
+      ELSE
         WRITE (35,99010) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &                    dshift, UCRt - DEL - dshift, DEF(1,Nnuc),
      &                    ATIl, NLV(Nnuc)
 99010   FORMAT ('set title "',I3,'-',A2,'-',I3,
      &           '   Ushift = ',F6.3,' Ucrt = ',F5.2,' Def = ',F6.2,
      &           ' atil=',F4.1,' Ncut=',I3,'"')
-	ENDIF
+      ENDIF
 
       WRITE (35,*) 'set logscale y'
       WRITE (35,*) 'set xlabel '' Excitation energy U [MeV]'' '
@@ -604,11 +604,11 @@ C---------GCM,OGCM
 C         IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
           WRITE (34,*) u, rocumul            
- 	    ncalc = ncalc + 1
+          ncalc = ncalc + 1
 
         ENDDO
 
-	else
+      else
 
         DO kk = 2, NEX(Nnuc)
         defit = EX(kk,Nnuc) - EX(kk-1,Nnuc)
@@ -631,21 +631,21 @@ C---------GCM,OGCM
 C       IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
         WRITE (34,*) u, rocumul            
- 	  ncalc = ncalc + 1
+        ncalc = ncalc + 1
 
         ENDDO
 
-	endif
+      endif
 
       if(ncalc.le.5) then
         close(36,status='DELETE')
         close(35,status='DELETE')
         close(34,status='DELETE')
-	else
+      else
         close(34)
         close(35)
         close(36)
-	endif
+      endif
 
       IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
 

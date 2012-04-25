@@ -1,5 +1,5 @@
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -1070,11 +1070,11 @@ C     Local variables
 
 
 
-	if(ja.le.0) ja=1
+      if(ja.le.0) ja=1
 
-	if(jb.gt.NFISBARPNT) jb=NFISBARPNT
+      if(jb.gt.NFISBARPNT) jb=NFISBARPNT
 
-	if(jb.le.0) jb=1
+      if(jb.le.0) jb=1
 
       
       IF(ABS(uexc-Vdef_1d(ja)).EQ.uexc-Vdef_1d(ja)) is0 = 1

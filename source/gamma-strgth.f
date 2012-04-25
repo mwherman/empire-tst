@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2719 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -60,7 +60,7 @@ C
       IF (CE1.EQ.0.0D0) CE1 = 0.01
       IF (CE2.EQ.0.0D0) CE2 = 0.1
       IF (CM1.EQ.0.0D0) CM1 = 0.1
-C-----Plujko_new-2005      
+C-----Plujko-2005      
       IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
 C-----GDR parameters according to Messina sytematics
         esys2 = 50.0*A(Nnuc)**( - 0.232)
@@ -108,7 +108,6 @@ C-----GDR parameters according to Messina sytematics
         IF (GDRpar(4,Nnuc).EQ.0.0D0) GDRpar(4,Nnuc) = e(2)
         IF (GDRpar(5,Nnuc).EQ.0.0D0) GDRpar(5,Nnuc) = g(2)
         IF (GDRpar(6,Nnuc).EQ.0.0D0) GDRpar(6,Nnuc) = s(2)
-C-------Plujko_new-2005
         EG1 = GDRpar(1, Nnuc)
         GW1 = GDRpar(2, Nnuc)
         CS1 = GDRpar(3, Nnuc)
@@ -179,7 +178,7 @@ C
       ED2 = GDRpar(4,Nnuc)**2
       EE2 = GQRpar(1,Nnuc)**2
       EM1 = GMRpar(1,Nnuc)**2
-	RETURN
+      RETURN
       END
  
  

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2715 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-16 16:48:15 +0100 (Fr, 16 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -420,7 +420,7 @@ C-----calculation of factorial      ***** done *******
          STOP
       ENDIF
 C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
-	ggg = GDIv
+      ggg = GDIv
       if(GDIV.LE.0) ggg=13.d0
       G = A(1)/ggg
       IF (STMro.EQ.1.0D0) THEN

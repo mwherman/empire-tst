@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2767 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-05 11:50:34 +0200 (Do, 05 Apr 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)

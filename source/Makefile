@@ -1,12 +1,12 @@
-#$Rev: 2795 $
-#$Author: rcapote $
-#$Date: 2012-04-17 17:18:56 +0200 (Di, 17 Apr 2012) $
+#$Rev: 2807 $
+#$Author: mherman $
+#$Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
 # set default fortran compiler:
 
 FC   =  gfortran
 #FC  =  ifort
-#FC  =  af90
+#FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
 

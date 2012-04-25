@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -843,7 +843,7 @@ C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
         Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
-	ENDIF
+      ENDIF
 
 C      Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       ROPar(1,Nnuc) = ac
@@ -1539,7 +1539,7 @@ C-----------Dilg's recommendations
       IF (IOUt.GE.6. .AND. NLV(Nnuc).GT.3) then
         Call PLOT_ZVV_NumCumul(Nnuc)
         CALL PLOT_ZVV_GSLD(Nnuc)     
-	ENDIF
+      ENDIF
       
       ROPar(4,Nnuc) = eo
       ROPar(2,Nnuc) = ux
@@ -1839,7 +1839,7 @@ C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
         Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
-	ENDIF
+      ENDIF
 
       RETURN
       END
@@ -2243,7 +2243,7 @@ C
 
       CHARACTER*2 car2
       REAL*8 DLOG10
-	CHARACTER*38 filename
+      CHARACTER*38 filename
       INTEGER i, ia, iar, ipp, iugrid, iz, izr, j, jmaxl, k, khi, kk,
      &        klo
 
@@ -2613,7 +2613,7 @@ c
         VIBfdt(Mmod)= vibbfdt
         VIBfnorm(Mmod)= vn
       
-	ENDIF
+      ENDIF
 
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       RETURN

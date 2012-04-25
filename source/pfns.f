@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2705 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-15 03:10:18 +0100 (Do, 15 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -33,7 +33,7 @@ C     Kornilov model parameters
 C     data ThCF/0.8868d0/,r/1.248d0/
 C     Tuned model parameters 
       data ThCF/0.9020d0/, r/1.1752d0/
-	data U0Cf/32.9d0/
+      data U0Cf/32.9d0/
 
 C     Scission neutrons for Th-232 following Lovchikova et al (Phys.At.Nuclei 67 (2004) p890)
 C     data wscn/0.10d0/ ! "wscn,tscn" fitted to get scission neutron temperature (0.38 +/- 0.04)
@@ -726,7 +726,7 @@ C
 c====================================================================
       SUBROUTINE INTERPOL1(iopt,x,sigc)
 c=========================================
-	INTEGER iopt
+      INTEGER iopt
       DOUBLE PRECISION x,sigc
 
       DOUBLE PRECISION eel(500),sigl(500)

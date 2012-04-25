@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2644 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-07 17:52:51 +0100 (Mi, 07 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3263,7 +3263,7 @@ C        Setting it to zero to delete discrete spectra before redistributing
            if( IDNa(3,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.2 ) 
      >       CSEmsd(ie,Nejc) = 0.d0
            if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
-	   ENDIF
+       ENDIF
        ENDDO
        csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
 C
@@ -3364,7 +3364,7 @@ C
            eee = DE*(ie - 1)
            IF (eee.GT.eemi) EXIT 
            csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-	     IF(ENDF(1).GT.0) then
+         IF(ENDF(1).GT.0) then
 C            Deleting the corresponding XS from the continuum
 C              as it is moved to discrete spectra
              CSEmsd(ie,Nejc) = 0.d0
@@ -3372,7 +3372,7 @@ C            Deleting the corresponding angular distribution
              do na=1,NDAng 
                CSEa(ie,na,Nejc,1) = 0.d0
              enddo
-	     ENDIF
+         ENDIF
            istart = ie + 1
          ENDDO
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl

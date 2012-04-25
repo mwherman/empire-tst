@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2791 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 C
       SUBROUTINE CLEAR
 Ccc

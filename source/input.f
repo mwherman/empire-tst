@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2794 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-17 08:55:44 +0200 (Di, 17 Apr 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -22,7 +22,7 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
+C     COMMON variables
 C
       INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
 
@@ -34,7 +34,7 @@ C
       COMMON /MLOCOM2/ KEYload, KZZ, KAA
       COMMON /R250COM/ INDexf,INDexb,BUFfer
 C
-C Local variables
+C     Local variables
 C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
@@ -278,7 +278,7 @@ C
          DIRect = -1
          KTRompcc = 0
          SOFt  = .FALSE.
-	   DYNam = .FALSE.
+         DYNam = .FALSE.
          CCCalc = .FALSE.
          BENchm = .FALSE.
          EMPtitle(1:1)=' '
@@ -476,9 +476,9 @@ C--------ejectile alpha
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
            WRITE (8,*)
-     >    ' WARNING: this version of EMPIRE is prepared to emit complex'
+     &    ' WARNING: this version of EMPIRE is prepared to emit complex'
            WRITE (8,*)
-     >    ' WARNING: particles, NDEjc must be >= 6 in dimension.h '
+     &    ' WARNING: particles, NDEjc must be >= 6 in dimension.h '
           STOP 'You have to increase NDEjc in dimension.h (set NDEjc=6)'
          ENDIF
 
@@ -1176,7 +1176,7 @@ C
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
             WRITE(8,*)  'WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
-	        FISden(i) = 0
+            FISden(i) = 0
             ENDDO
          ENDIF
 
@@ -1185,7 +1185,7 @@ C
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
             WRITE(8,*)  'WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
-	        FISden(i) = 0
+               FISden(i) = 0
             ENDDO
          ENDIF
 
@@ -1382,7 +1382,7 @@ C
 C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
          IF (MSD.EQ.1) THEN
             IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN
-	         MSD = 0
+               MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
      &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
@@ -1392,7 +1392,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IDNa(2,2) = 0
                IDNa(3,2) = 0
                IDNa(4,2) = 0
-	      ELSE
+          ELSE
                IF (NPRoject.EQ.1) THEN
                  IF (DIRect.EQ.0) IDNa(1,2) = 1
                  IDNa(2,2) = 1
@@ -1401,11 +1401,11 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IDNa(4,2) = 1
                ENDIF
             ENDIF
-	   ENDIF
+         ENDIF
 
          IF (MSD.EQ.2) THEN
             IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN
-	         MSD = 0
+               MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
      &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
@@ -1415,22 +1415,22 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IDNa(2,2) = 0
                IDNa(3,2) = 0
                IDNa(4,2) = 0
-	      ELSE
+            ELSE
                IF (NPRoject.EQ.1) THEN
                  IDNa(1,2) = 1
                  IDNa(2,2) = 1
-	         ENDIF 
+            ENDIF
                IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
                  IDNa(4,2) = 1
                ENDIF
             ENDIF
-	   ENDIF
+         ENDIF
 C
 C--------set MSC  (.,3) (note no discrete transitions in MSC)
          IF (MSC.GT.0) THEN
             IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN
-	         MSC = 0
+               MSC = 0
                WRITE (8,*) ''
                WRITE (8,*)
      &          'WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
@@ -1440,7 +1440,7 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                IDNa(2,3) = 0
                IDNa(3,3) = 0
                IDNa(4,3) = 0
-	      ELSE
+           ELSE
                IDNa(2,3) = 1
                IDNa(4,3) = 1
                IF (GST.GT.0) IDNa(5,3) = 1
@@ -1450,7 +1450,7 @@ C--------------stop MSC charge-exchange if DDHMS or PCROSS active
                  IF (NPRoject.EQ.2)  IDNa(2,3) = 0
                ENDIF
             ENDIF
-	   ENDIF
+      ENDIF
 C
 C--------set HMS  (.,5) for incident N and P, assuming that MSC+MSD not used
          IF (LHMs.GT.0) THEN
@@ -1949,7 +1949,7 @@ C-----set energy bin for recoils (max. energy is increased by 5%)
       ENDIF
 C-----energy bins for recoils is increased to avoid fluctuations
 C-----if these persist increase multiplier
-      DERec = DERec*2.00
+C      DERec = DERec*2.00
 C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
       irec = (EINl - EIN)/DERec + 1.001
 C-----setting irec=1 below practically removes CM motion energy from recoils
@@ -2185,8 +2185,8 @@ C
       ENDIF
 99010 FORMAT (1X,14(G10.4,1x))
       END
-C
-C
+
+
       SUBROUTINE INP_LD(Nnur)
 
       INCLUDE 'dimension.h'
@@ -2213,7 +2213,7 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
          ELSE 
            WRITE (8,99004) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
      &          NLV(nnur), DEF(1,nnur), ATIlnor(nnur) 
-	   ENDIF
+      ENDIF
 
          IF (ADIv.NE.3.0D0) THEN
 
@@ -2231,7 +2231,7 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 
             DO i = 1, NEX(nnur)
 
- 	         IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+            IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
 
                rocumul = 0.D0
                DO j = 1, NDLW
@@ -2244,7 +2244,7 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 c    &              (2*RO(i,j,1,nnur),j = 11,21)
 c    &              (2*RO(i,j,1,nnur),j = 21,31)     
            ENDDO
-	     WRITE (8,*)
+           WRITE (8,*)
 
          ELSE
 
@@ -2263,11 +2263,11 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
 
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-	        ELSE
+           ELSE
                 u = UEXcit(i,nnur)
-	        ENDIF
+            ENDIF
 
- 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2292,11 +2292,11 @@ c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
 
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-	        ELSE
+            ELSE
                 u = UEXcit(i,nnur)
-	        ENDIF
+            ENDIF
 
- 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2319,11 +2319,11 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
 
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-	        ELSE
+              ELSE
                 u = UEXcit(i,nnur)
-	        ENDIF
+            ENDIF
 
- 	        IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2337,7 +2337,7 @@ c     &             (RO(i,j,2,nnur),j = 11,21)
 c     &             (RO(i,j,2,nnur),j = 21,31)
            ENDDO
 
- 	     WRITE (8,*)
+           WRITE (8,*)
 
          ENDIF
       ENDIF
@@ -2348,7 +2348,8 @@ c     &             (RO(i,j,2,nnur),j = 21,31)
      &        ' Def = ',F6.2,' Anorm(ATILNO) = ',F6.3)
 99010 FORMAT (1X,14(G10.4,1x))
       END
- 
+
+
       SUBROUTINE LEVREAD(Nnuc)
 Ccc
 Ccc   ********************************************************************
@@ -2895,15 +2896,15 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
          WRITE (12,*) 'MF=5 Energy distributions                       '
          WRITE (12,*) '   MT=18 PFNS: EMPIRE calculations using        '
          IF(FISspe.eq.1) 
-     >   WRITE (12,*) '           Madland-Nix (Los Alamos) model  [MN] '
+     &   WRITE (12,*) '           Madland-Nix (Los Alamos) model  [MN] '
          IF(FISspe.eq.2)
-     >   WRITE (12,*) '           Kornilov et al parameterization [KO] '
+     &   WRITE (12,*) '           Kornilov et al parameterization [KO] '
         ENDIF
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
-	  IF(NPRIm_g.gt.0) then
+        IF(NPRIm_g.gt.0) then
          WRITE (12,*) '     Primary capture gammas are entered as      '
          WRITE (12,*) '     discrete lines                             '
          WRITE (12,*) '                                                '
@@ -3495,7 +3496,7 @@ C
         GOTO 100  ! next line
       ENDIF
 
-	name = '      '
+      name = '      '
       READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
          IF (name.EQ.'GO    ') THEN
             CLOSE(95)
@@ -8824,11 +8825,11 @@ c            CCFUS deformations
      &       'Default dynamical deformations 0.05 (3-) used'
       ENDIF
 
-	IF(ZEJc(0).GT.0 .and. beta3.gt.0.03) then
+      IF(ZEJc(0).GT.0 .and. beta3.gt.0.03) then
         WRITE (8,*) ' WARNING: ',
      &        '3- dynamical deformation reduced to 0.03'
-	  beta3 = max(0.03d0,beta3)
-	ENDIF
+        beta3 = max(0.03d0,beta3)
+      ENDIF
       IF(AEJc(0).LE.4) GOTO 350
       ia = AEJc(0)
       iz = ZEJc(0)
@@ -9025,9 +9026,9 @@ C
 
          ldynamical = .false.
          if(comment(36:39).eq.'dyna') THEN
-	     DYNam = .TRUE.
-	     SOFT  = .TRUE.
-	   endif
+            DYNam = .TRUE.
+           SOFT  = .TRUE.
+         endif
          if(comment(36:39).eq.'soft') SOFT  = .TRUE.
 
          if(SOFT .or. DYNam) then

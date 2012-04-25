@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2780 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-09 23:57:26 +0200 (Mo, 09 Apr 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2764,18 +2764,18 @@ C
      & ,F8.2,'' mb  !!''/
      & 1x,'' WARNING: Reaction  cross section ='',F8.2,'' mb''/)') 
      &   SINlcc, SINl, SINlcont, ABScs
-	  IF(SINlcont.gt.0) then
+        IF(SINlcont.gt.0) then
           SINlcont = 0.d0
           WRITE (8,*) 
      &	' WARNING: DWBA to the continuum neglected at Einc =',EINl
-	    goto 158
-	  ENDIF
-	  IF(SINl.gt.0) then
+        goto 158
+        ENDIF
+        IF(SINl.gt.0) then
           SINl = 0.d0
           WRITE (8,*) 
      &	' WARNING: DWBA to uncoupled levels neglected at Einc =',EINl
-	    goto 158
-	  ENDIF
+        goto 158
+        ENDIF
         WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of DWBA uncoupled levels'
         WRITE (8,*) ' ERROR: or ECIS does not converge'
@@ -3083,7 +3083,7 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER INT, NINT
-	LOGICAL inc_channel
+      LOGICAL inc_channel
 
 
 
@@ -3175,7 +3175,7 @@ C        ECIs2(40:40) = 'T'
 
       IF (El.LT.0.D0) THEN
 
-	   inc_channel = .true.
+         inc_channel = .true.
          El = DABS( - El)
          elab = El
          ikey = -1
@@ -3753,9 +3753,7 @@ C
       INTEGER*4 PIPE,iwin
       INTEGER INT, NINT
 
-	LOGICAL inc_channel
-
-
+      LOGICAL inc_channel
 
       inc_channel = .false.
 
@@ -4373,7 +4371,7 @@ C
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
       INTEGER NINT
-	LOGICAL inc_channel
+      LOGICAL inc_channel
 
 
 
@@ -4547,7 +4545,7 @@ C
 C-----Writing OPTMAN input
       OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
 C-----CARD 1 : Title
-	IF(imodel.ne.4) then
+      IF(imodel.ne.4) then
         WRITE (1,'(f10.5,'' MeV '',
      &   a8,'' on '',i3,a2,'': soft rotor, RIPL OMP # '',i5)')
      &   elab, PARname(ip), NINT(A(Nnuc)), Symb(Nnuc), iref
@@ -4555,7 +4553,7 @@ C-----CARD 1 : Title
         WRITE (1,'(f10.5,'' MeV '',
      &   a8,'' on '',i3,a2,'': rigid+soft rotor, RIPL OMP # '',i5)')
      &   elab, PARname(ip), NINT(A(Nnuc)), Symb(Nnuc), iref
-	ENDIF
+      ENDIF
 
       write(1,'(16i2.2)') 
      +mejob,mepot,meham,mepri,mesol,mesha,mesho,mehao,
@@ -4745,9 +4743,9 @@ C
       IF (IOPsys.EQ.0) THEN
         ctmp = trim(empiredir)//'/source/optmand'
         iwin = PIPE(ctmp)
-	  ELSE
+      ELSE
         iwin = PIPE(' optmand')
-	  ENDIF  
+      ENDIF
 
       RETURN
       END

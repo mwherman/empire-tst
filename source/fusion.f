@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2719 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-03-18 03:45:45 +0100 (So, 18 Mär 2012) $
+Ccc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -23,7 +23,7 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
+C     COMMON variables
 C
       DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW)
       DOUBLE PRECISION S1, SINl, TOTcs, SINlcc, SINlcont
@@ -739,8 +739,8 @@ C-----Print elastic and direct cross sections from ECIS
      >   ' FUSRED scaled by ', sngl(FUSRED),
      >   ' to impose requested scaling of total by TOTRED =',
      >   sngl(TOTred)
-	  TOTred = 1.D0
-	ENDIF
+         TOTred = 1.D0
+      ENDIF
 
       el = EINl
       relcal = .FALSE.

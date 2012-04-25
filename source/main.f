@@ -1,6 +1,6 @@
-cc   * $Rev: 2766 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-05 11:49:34 +0200 (Do, 05 Apr 2012) $
+cc   * $Rev: 2807 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -123,7 +123,7 @@ C             -----------------------------------------------
 C-----
 C-----Skip mandatory part of the standard input
 C-----
-	REWIND 5
+      REWIND 5
       DO i=1,10
          READ(5,*)
       ENDDO
@@ -138,7 +138,7 @@ C-----Read line of optional input
         enddo
         EMPtitle(1:1)= ' '
       ENDIF
-	REWIND 5
+      REWIND 5
 C-----
 C-----Read and prepare input data
 C-----
@@ -1547,7 +1547,7 @@ C-----------------Calculate total emission
  1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
 C
-            IF (ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
+            IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
             IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0
      &         .and. fisxse.gt.0) THEN
