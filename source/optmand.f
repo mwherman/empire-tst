@@ -707,8 +707,8 @@ C     CROSS SECTION FILES
 C
 
       IF(MEPRI.EQ.99) THEN  
-        open(unit=93,file=TRIM(fname)//'.CS')
-        open(unit=98,file=TRIM(fname)//'.ICS')
+        open(unit=93,file=TRIM(fname)//'.cs')
+        open(unit=98,file=TRIM(fname)//'.ics')
       ENDIF
 
       IF(ETA.EQ.0.) THEN
@@ -762,8 +762,8 @@ C       WRITE(93,'(1X,E14.8)') (CST - CSN(1))*1000.
         close(93)
         close(98)
 C
-        open(unit=96,file=TRIM(fname)//'.LEG')
-        open(unit=97,file=TRIM(fname)//'.ANG')
+        open(unit=96,file=TRIM(fname)//'.leg')
+        open(unit=97,file=TRIM(fname)//'.ang')
 C
 c       IF(ETA.EQ.0.) WRITE(96,'(10H<LEGENDRE>,F10.2,F10.5,F10.2,2I5)') 
         IF(ETA.EQ.0.) WRITE(96,1000) ANEU,EN,AT,NINT(0.5*JO(1)),NMAX
@@ -3267,7 +3267,7 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
 
-       open(unit=92,file=TRIM(fname)//'.TLJ')
+       open(unit=92,file=TRIM(fname)//'.tlj')
 
 C      WRITE(92,'(10H<TLJ     >,F10.2,F10.5,F10.2,2I5)') 
        WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
@@ -3307,7 +3307,7 @@ C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
 
        Stl = 0.d0
 
-       OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.TLJ', ERR=1200)
+       OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
 
        READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
 C------JC,ParC is the channel spin and parity
