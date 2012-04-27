@@ -236,6 +236,40 @@ def reconstructXsec(inputFile):
     xsc.close()
 
 
+
+def reconstructPFNS(inputFile):
+    """ 
+    reconstruct -pfns.out file only
+    More efficient for sensitivity calculation where we only need xsc or -pfns.out
+    """    
+    path = getPath(inputFile)
+    proj = os.path.basename(inputFile).split('.')[0]
+    h,o,energies = parseInput(inputFile)
+    
+    # assume enlist is in order:
+    enlist = [e[0].strip() for e in energies]
+    
+    name = os.path.join(path,proj+"-"+enlist[0])
+    #print "Initial energy:",enlist[0]
+    # -pfns.out is easy, just append each new energy to end of first file
+    bash.cp("%s/%s-pfns.out" % (name,proj), path)
+    pfnsfile = open("%s/%s-pfns.out" % (path,proj), "a")    # append mode
+    
+    for e in enlist[1:]:
+        #print "next energy:",e
+        name = os.path.join(path,proj+"-"+e)
+        pfnsA = open("%s/%s-pfns.out" % (name,proj), "r").readlines()
+        n_lines = 0
+        for line in pfnsA: n_lines += 1
+        i = n_lines/2
+        while i < n_lines: 
+           pfnsfile.write(pfnsA[i])
+           i += 1
+        
+    pfnsfile.close()
+
+
+
 def clean(inputFile):
     """
     remove all the 'single-energy' directories

@@ -307,7 +307,7 @@ def run(proj):
     use init to set up the project, then run!
     """
     print "Starting original input"
-    # 'clean=True': delete everything but .xsc file after running
+    # 'clean=True': delete everything but .xsc and -pfns.out file after running
     qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False)
     
     # start watching queue, report when all jobs finish:
@@ -388,7 +388,7 @@ def analyze(proj):
         
         name, val, i1, i2, i3, i4 = tmp[:]
         if not (name in allowed or name in restricted
-                or name in fisPars):
+                or name in fisPars or name in pfnsPar):
             print "Parameter %s shouldn't be varied."%name\
                     + " Will not include in sensitivity output."
             continue
@@ -432,6 +432,104 @@ def analyze(proj):
     senfile.close()
 
 
+def pfns(proj):
+    """
+    generate sensitivity matrix after run() finishes
+    """
+    import numpy
+    # file for writing matrix:
+    senfile = open("%s-pfns-full-mat.sen" % proj, "w")
+    
+    def getPFNS(filename):
+        """
+        return numpy array with x-sections from empire input 'filename'
+        """
+        qsubEmpire.reconstructPFNS(filename)
+        
+        # Reformatting -pfns.out file into -pfns.fmt analogously to .xsc file
+        tmpfile = open("tmp.dat" , "w")
+        tmpfile.write(filename.replace(".inp","\n"))
+        tmpfile.close()
+        os.system("$EMPIREDIR/util/kalman/refmt-pfns < tmp.dat")
+        os.system("rm -f tmp.dat >& /dev/null")
+
+        pfnsfile = filename.replace(".inp","-pfns.fmt")
+        pfnsfile = open(pfnsfile,"r")
+        arr = []
+        for l in pfnsfile.readlines()[2:]:
+            # read all prompt fission spectra into array
+            vals = [float(a) for a in l.split()]
+            arr.append(vals)
+        pfnsfile.close()
+        return numpy.array( arr )
+    
+    # start with original input:
+    pfns0 = getPFNS("%s_orig/%s.inp" % (proj,proj))
+    
+    # grab two 'header' lines from original input:
+    f = open("%s_orig/%s-pfns.fmt" % (proj,proj),"r")
+    header = (f.next(),f.next())
+    f.close()
+    
+    # open sensitivity input:
+    sens = open(proj+"-inp.sen", "r") # sensitivity input
+    
+    for line in sens:
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
+            continue
+        
+        tmp = line.split('!')[0]
+        tmp = tmp.split()
+        while len(tmp) < 6:
+            tmp.append('0')
+        
+        name, val, i1, i2, i3, i4 = tmp[:]
+        if not (name in allowed or name in restricted
+                or name in fisPars or name in pfnsPar):
+            print "Parameter %s shouldn't be varied."%name\
+                    + " Will not include in sensitivity output."
+            continue
+        val = float(val)
+        i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
+        
+        nameP, nameM = genNames(line,proj)
+        # reconstruct cross sections for val+sigma and val-sigma:
+        pfnsplus = getPFNS(nameP+"/%s.inp" % proj)
+        pfnsminus = getPFNS(nameM+"/%s.inp" % proj)
+        
+        # make a modified version of sens. matrix, KALMAN-specific
+        smat = (pfnsplus[:,1:]-pfnsminus[:,1:]) / pfns0[:,1:]
+        # this produces 'nan' wherever xs0==0. Replace 'nan' with 0
+        smat[pfns0[:,1:]==0] = 0.0
+        # also truncate sensitivities below 10**-5
+        smat[abs(smat)<1e-5] = 0.0
+        
+        # 'sens' contains only sensitivities. Also create 'en' with energies:
+        en = pfns0[:,0]
+        
+        # write matrix to file
+        senfile.write(header[0])
+        str = "# Parameter: %-6s  %3i%3i%3i%3i  variation: +-%5.3f"+\
+                "     Sensitivity matrix\n"
+        senfile.write(str % (name,i1,i2,i3,i4,val))
+        senfile.write(header[1].rstrip()+' \n')
+        for i in range(len(smat)):
+            if en[i]<0.1:
+                str = "%-10.4E"%en[i]
+            else:
+                str = "%#-10.5G"%en[i]
+            #str = str + smat.shape[1]*"%12.4E"%tuple(smat[i]) + "\n"
+            str = str+smat.shape[1]*"%12.4E"%tuple(smat[i])+"\n"
+            # or write one extra 0.0 to match previous style:
+            #str = str+smat.shape[1]*"%12.4E"%tuple(smat[i])+"%12.4E"%0+"\n"
+            senfile.write(str)
+        senfile.write("\n")
+    
+    sens.close()
+    senfile.close()
+
+
+
 def process_args():
     # see http://docs.python.org/lib/optparse-tutorial.html
     from optparse import OptionParser
@@ -447,6 +545,8 @@ no options: setup and run all parameters"""
             help="run (after initializing manually)")
     parser.add_option("-a", "--analyze", action="store_true", dest="analyze", 
             help="after running, generate sensitivity matrix")
+    parser.add_option("-p", "--pfns", action="store_true", dest="pfns", 
+            help="after running, generate sensitivity matrix for pfns")
     parser.add_option("-c", "--clean", action="store_true", dest="clean", 
             help="remove all subdirectories")
     # help message (-h) is generated by OptionParser
@@ -467,6 +567,8 @@ def main():
         run(proj)
     elif opts.analyze:
         analyze(proj)
+    elif opts.pfns:
+        pfns(proj)
     else: # if no options, setup and run the analysis
         init(proj)
         run(proj)
