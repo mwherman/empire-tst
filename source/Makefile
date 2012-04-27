@@ -1,6 +1,6 @@
-#$Rev: 2807 $
-#$Author: mherman $
-#$Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+#$Rev: 2810 $
+#$Author: rcapote $
+#$Date: 2012-04-27 16:30:33 +0200 (Fr, 27 Apr 2012) $
 
 # set default fortran compiler:
 
@@ -10,11 +10,15 @@ FC   =  gfortran
 #FC  =  pfg90
 #FC  =  lf95
 
-LIBS =
-
 # various flags are set based on compiler FC:
 # FFLAGS are the normal complier options for production code
 # DFLAGS are the options used when debugging (except for ECIS)
+# EFLAGS are the options used for ECIS compilation (no debug allowed)
+
+LIBS =
+DFLAGS = 
+FFLAGS = 
+EFLAGS = 
 
 ifeq ($(FC),gfortran)
 
@@ -50,9 +54,15 @@ else ifeq ($(FC),ifort)
   #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
   #----flags for automatic parallelization
-  FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  # FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  FFLAGS = -O3 -x=host -logo -parallel -openmp 
   EFLAGS = -O2 -x=host -logo -parallel -openmp 
-  #LIBS = -openmp-lib 
+  LIBS = -openmp-lib 
+  #----flags with no parallelization
+  #FFLAGS =  -O3 -x=host -ipo -logo 
+  #FFLAGS = -O3 -x=host -logo  
+  #EFLAGS = -O2 -x=host -logo  
+  #LIBS = 
   #------------------------------------------------------------------------------------------------
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #----For Debugging under ifort:
@@ -124,7 +134,7 @@ empire: $(OBJF) subecis06m.o
 	$(FC) $(FFLAGS) -o $@ $(OBJF) $(LIBS) subecis06m.o
 
 optmand: optmand.o
-	$(FC)  $(FFLAGS) -o $@ optmand.o
+	$(FC)  $(FFLAGS) $(LIBS) -o $@ optmand.o
 
 # When making a debug image, don't compile ECIS /debug
 dbg:  
