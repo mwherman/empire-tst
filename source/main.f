@@ -1,6 +1,6 @@
-cc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+cc   * $Rev: 2809 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -204,6 +204,16 @@ C	&      '  csinel    '
 C-----
 C-----Prepare Giant Resonance parameters - systematics
 C-----
+      CALL WHERE(IZA(0),nnuc,iloc)
+	if(iloc.eq.0) then
+        GDRpar(1,0) = GDRpar(1,nnuc) 
+        GDRpar(2,0) = GDRpar(2,nnuc) 
+        GDRpar(3,0) = GDRpar(3,nnuc) 
+        GDRpar(4,0) = GDRpar(4,nnuc) 
+        GDRpar(5,0) = GDRpar(5,nnuc) 
+        GDRpar(6,0) = GDRpar(6,nnuc) 
+	endif
+
       CALL ULM(0) ! target
 C-----
 C-----Calculate reaction cross section and its spin distribution
@@ -218,11 +228,20 @@ C-----Locate position of the target among residues
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-      nnuc = 1
-C-----
-C-----Prepare Giant Resonance parameters - systematics
-C-----
-      CALL ULM(1) ! compound
+    	IF(IZAejc(0).ne.0) then
+C-------Prepare Giant Resonance parameters - systematics
+C-------
+	  CALL WHERE(IZA(1),nnuc,iloc)
+	  if(iloc.eq.0 .and. nnuc.ne.1) then
+          GDRpar(1,1) = GDRpar(1,nnuc) 
+          GDRpar(2,1) = GDRpar(2,nnuc) 
+          GDRpar(3,1) = GDRpar(3,nnuc) 
+          GDRpar(4,1) = GDRpar(4,nnuc) 
+          GDRpar(5,1) = GDRpar(5,nnuc) 
+          GDRpar(6,1) = GDRpar(6,nnuc) 
+	  endif
+        CALL ULM(1) ! compound
+	ENDIF
 C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 

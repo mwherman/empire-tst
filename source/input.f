@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2809 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -215,7 +215,7 @@ c-----------set Levels flag to -1 (no levels stored)
          ENDDO
          NSTOred(0) = -1
 C--------set gamma-strength parameters
-         DO nnuc = 1, NDNUC
+         DO nnuc = 0, NDNUC
             GDRpar(1,nnuc) = 0.d0
             GDRpar(2,nnuc) = 0.d0
             GDRpar(3,nnuc) = 0.d0
@@ -416,23 +416,23 @@ C--------GST controls gamma emission in MSC (0 no gamma, 1 with gamma)
 C--------D1FRA ratio of the spreading to total width of the GDR
          D1Fra = 0.8
 C--------GDR parameters
-         GDRdyn = 0.
-         EGDr1 = 0.
-         GGDr1 = 0.
-         CSGdr1 = 0.
-         EGDr2 = 0.
-         GGDr2 = 0.
-         CSGdr2 = 0.
-         DIToro = 0.0026
-         GDResh = 0.
-         GDRwa1 = 0.
-         GDRwa2 = 0.
-         GDRspl = 0.
-         EWSr1 = 1.0
-         EWSr2 = 1.0
-         GDRweis = 1.
+         GDRdyn = 0.d0
+         EGDr1 = 0.d0
+         GGDr1 = 0.d0
+         CSGdr1 = 0.d0
+         EGDr2 = 0.d0
+         GGDr2 = 0.d0
+         CSGdr2 = 0.d0
+         DIToro = 0.0026d0
+         GDResh = 0.d0
+         GDRwa1 = 0.d0
+         GDRwa2 = 0.d0
+         GDRspl = 0.d0
+         EWSr1 = 1.0d0
+         EWSr2 = 1.0d0
+         GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
-         PEQcont = 0.0
+         PEQcont = 0.0d0
          PEQc = 1.5  ! default PE
          MFPp = 1.5
 
@@ -945,6 +945,8 @@ C--------Retrieve C4 experimental data  *** done ***
          NEXclusive = 0
          DO nnuc = 1, NNUcd
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
+
+
 
             ENDf(nnuc) = 1
             ENDfa(nnuc) = 1

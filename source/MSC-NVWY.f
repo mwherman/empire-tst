@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2809 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -332,11 +332,11 @@ C
      &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2),
      &                 xga, xxxx, y, yd, ygdr, ggg
       DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
-      REAL FLOAT
+
       INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, iloc, inc,
      &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, izares,
      &        izpcon, j, jr, jx, k, k1, k2, k3, kc, kc1, kcn, ke,
-     &        key_tmp, kg, kgin, ki, ks, m, m1, m2, mpigx(NG), mpigy(NG)
+     &        kg, kgin, ki, ks, m, m1, m2, mpigx(NG), mpigy(NG)
      &        , nc1, ncm, ncont, nejc, nnur, npigzero, nresn, nresp
       DOUBLE PRECISION yre, ysp
       EQUIVALENCE (PIM(1,1),PIM1)
@@ -1424,11 +1424,8 @@ C-----------------------
 C--------------------------gamma transmission coefficient
 C--------------------------Plujko_new
 C--------------------------not tested (only changing E1 (6 parameters now))
-                           key_tmp = KEY_shape
 Cb                         tg = E1(eg, TNUc(kcn, 1))
-                           tg = E1(nnur,Z,A,eg,TNUc(kcn,1),UEXcit(kcn,1)
-     &                          )
-                           KEY_shape = key_tmp
+                           tg = E1(1,Z,A,eg,TNUc(kcn,1),UEXcit(kcn,1))
 C--------------------------Plujko_new(End)
 C--------------------------
 C--------------------------SD contribution

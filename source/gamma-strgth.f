@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2809 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -57,9 +57,9 @@ C
       CE2 = GQRpar(8,Nnuc)
       TM1 = GMRpar(7,Nnuc)
       CM1 = GMRpar(8,Nnuc)
-      IF (CE1.EQ.0.0D0) CE1 = 0.01
-      IF (CE2.EQ.0.0D0) CE2 = 0.1
-      IF (CM1.EQ.0.0D0) CM1 = 0.1
+      IF (CE1.EQ.0.0D0) CE1 = 0.01d0
+      IF (CE2.EQ.0.0D0) CE2 = 0.1d0
+      IF (CM1.EQ.0.0D0) CM1 = 0.1d0
 C-----Plujko-2005      
       IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
 C-----GDR parameters according to Messina sytematics
@@ -425,7 +425,7 @@ C     GRED = 1.
          eexcitf = Uex
  
 C        init GDRGFL parametrs
-         CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
+C        CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
          E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),eexcitf,temperf,
      &        Eg,KEY_shape)
          RETURN
