@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2809 $
+Ccc   * $Rev: 2813 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -1425,7 +1425,7 @@ C--------------------------gamma transmission coefficient
 C--------------------------Plujko_new
 C--------------------------not tested (only changing E1 (6 parameters now))
 Cb                         tg = E1(eg, TNUc(kcn, 1))
-                           tg = E1(1,Z,A,eg,TNUc(kcn,1),UEXcit(kcn,1))
+                           tg = E1(1,eg,TNUc(kcn,1),UEXcit(kcn,1))
 C--------------------------Plujko_new(End)
 C--------------------------
 C--------------------------SD contribution
@@ -1542,6 +1542,7 @@ C-----------------------T GAMMA GAMMA ESTIMATE
 C                       DO LE = 1, 21, 2
 C                       ENG = LE
 C                       TG = E1(ENG,T)
+C                       TG = E1(1,ENG,T,0.d0)
 C                       XGA = (2.0 - TG - 2.0*SQRT(1.0 - TG))/TG
 Ccc                     TLG1 = GNOT*PROP*TG/(6.28*OMJ(1,1,0,J,HIS(1),0))
 C                       1                  /(1+XGA)/2.

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2809 $
+Ccc   * $Rev: 2813 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -34,13 +34,19 @@ Ccc
 C
 C COMMON variables
 C
-      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, CS1, CS2, D1, D2, DE2, 
-     &                 DM1, ED1, ED2, EE2, EG1, EG2, EM1, GW1, GW2, TE1,
-     &                 TE2, TM1, W1, W2L, WE2, WM1
-      INTEGER NG
+      DOUBLE PRECISION TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+      
+	DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
+      DOUBLE PRECISION BETagfl2, S2Plusgfl
+      INTEGER NG
+
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
+
 C
 C Dummy arguments
 C
@@ -51,15 +57,19 @@ C
       DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
       A2 = A(Nnuc)**0.666667
       A4 = A(Nnuc)**1.333333
+
       TE1 = GDRpar(7,Nnuc)
-      CE1 = GDRpar(8,Nnuc)
       TE2 = GQRpar(7,Nnuc)
-      CE2 = GQRpar(8,Nnuc)
       TM1 = GMRpar(7,Nnuc)
+
+      CE1 = GDRpar(8,Nnuc)
+      CE2 = GQRpar(8,Nnuc)
       CM1 = GMRpar(8,Nnuc)
+
       IF (CE1.EQ.0.0D0) CE1 = 0.01d0
       IF (CE2.EQ.0.0D0) CE2 = 0.1d0
       IF (CM1.EQ.0.0D0) CM1 = 0.1d0
+
 C-----Plujko-2005      
       IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
 C-----GDR parameters according to Messina sytematics
@@ -114,7 +124,9 @@ C-----GDR parameters according to Messina sytematics
         EG2 = GDRpar(4, Nnuc)
         GW2 = GDRpar(5, Nnuc)
         CS2 = GDRpar(6, Nnuc)
+
       ELSE
+
 C-------GDR parameters according to RIPL
         CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
 C       Transferring to EMPIRE arrays 
@@ -124,7 +136,12 @@ C       Transferring to EMPIRE arrays
         IF(GDRpar(4, Nnuc).EQ.0.0D0)GDRpar(4, Nnuc) = EG2
         IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = GW2
         IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = CS2
+
+        GDRpar(9 , Nnuc) = BETagfl2
+        GDRpar(10, Nnuc) = S2Plusgfl 
+
       ENDIF
+C
       D1 = 5.46E-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
       D2 = 5.46E-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
 C
@@ -170,7 +187,7 @@ C
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,*) 
       ENDIF
-      W1 = GDRpar(2,Nnuc)**2
+      W1  = GDRpar(2,Nnuc)**2
       W2L = GDRpar(5,Nnuc)**2
       WE2 = GQRpar(2,Nnuc)**2
       WM1 = GMRpar(2,Nnuc)**2
@@ -178,6 +195,7 @@ C
       ED2 = GDRpar(4,Nnuc)**2
       EE2 = GQRpar(1,Nnuc)**2
       EM1 = GMRpar(1,Nnuc)**2
+
       RETURN
       END
  
@@ -348,7 +366,7 @@ C
       END
  
  
-      DOUBLE PRECISION FUNCTION E1(Nnuc,Z,A,Eg,T,Uex)
+      DOUBLE PRECISION FUNCTION E1(Nnuc,Eg,T,Uex)
 Ccc
 Ccc ********************************************************************
 Ccc *                                                         class:PPU*
@@ -387,27 +405,32 @@ Ccc *                                                                  *
 Ccc ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 C
 C COMMON variables
 C
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2, WE2, WM1
-      INTEGER KEY_gdrgfl, KEY_shape
+
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-      COMMON /GSA   / KEY_shape, KEY_gdrgfl
+
+      DOUBLE PRECISION EG1, GW1, CS1, EG2, GW2, CS2, BETagfl2, S2Plusgfl 
+      INTEGER NG
+      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
 C
 C Dummy arguments
 C
       DOUBLE PRECISION Eg, T, Uex
       INTEGER Nnuc
-      DOUBLE PRECISION A(0:NDNUC), Z(0:NDNUC)
 C
 C Local variables
 C
-      DOUBLE PRECISION ed, eexcitf, gdr, gred, pi, temperf
+      DOUBLE PRECISION ed, gdr, gred
       DOUBLE PRECISION GAMMA_STRENGTH
-      DATA pi/3.1415926D0/
+
+      CALL INIT_GDR_COMMONS(Nnuc)
 C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
@@ -421,12 +444,7 @@ C     GRED = 1.
       gdr = 0.d0
  
       IF (KEY_shape.NE.0) THEN
-         temperf = T
-         eexcitf = Uex
- 
-C        init GDRGFL parametrs
-C        CALL GDRGFLDATA(Z(Nnuc),A(Nnuc))
-         E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),eexcitf,temperf,
+         E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
      &        Eg,KEY_shape)
          RETURN
       ENDIF
@@ -444,6 +462,7 @@ C        GRED = 1.
      &                          SQRT(ED2)
       ENDIF
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
+      RETURN
       END
  
  

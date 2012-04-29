@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2813 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -829,7 +829,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded)
             corr = 1.0
          ENDIF
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
-         xle(1) = E1(Nnuc,Z,A,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
+         xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
      &      *TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
          xle(2) = E2(eg)*TUNe(0, Nnuc)
@@ -916,7 +916,7 @@ C--------do loop over discrete levels -----------------------------------
              eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
              ipar = (1 + LVP(i, Nnuc)*Ipc)/2
              iodd = 1 - ipar
-             xle(1) = E1(Nnuc,Z,A,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
+             xle(1) = E1(Nnuc,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
      &           *TUNe(0, Nnuc)
              xlm(1) = XM1(eg)*TUNe(0, Nnuc)
              IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)

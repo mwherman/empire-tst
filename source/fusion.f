@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2813 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -209,7 +209,7 @@ C--------END of spin distribution from file SDFILE
 C-----------E1
             IF (IGE1.NE.0) THEN
 C-----------factor 10 near HHBarc from fm**2-->mb
-               e1tmp = 10*HHBarc**2*PI*E1(Ntrg,Z,A,EINl,0.D0,0.D0)
+               e1tmp = 10*HHBarc**2*PI*E1(Ntrg,EINl,0.D0,0.D0)
      &                 /(2*EINl**2)
                qdtmp = SIGQD(Z(Ntrg),A(Ntrg),EINl,LQDfac)
                e1tmp = (e1tmp + qdtmp/3.0D0)/(2*XJLv(LEVtarg,Ntrg) + 1)

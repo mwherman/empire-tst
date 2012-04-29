@@ -1,9 +1,11 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2813 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
+
+      IMPLICIT none
       INCLUDE 'dimension.h' 
       INCLUDE 'global.h'
 C
@@ -52,13 +54,13 @@ C
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
-     &       dstrip, dbreak, dpickup, step
+     &       dstrip, dbreak, dpickup, step, ggg
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
-     &          ihmax, j, p, zc, zp, zr, zo
+     &          ihmax, j, p, zc, zp, zr, zo, iang
 
       LOGICAL callpcross
       DOUBLE PRECISION DBLE, DENSW
@@ -260,7 +262,7 @@ C
       IF(scompn.eq.0.d0) goto 60
 
       WRITE (8,99005)
-99005 FORMAT (//5X,' Preequilibrium decay (PCROSS)',/)
+99005 FORMAT (5X,' Preequilibrium decay (PCROSS)',/)
       WRITE (8,99010) MFPp
 99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
 
@@ -339,19 +341,19 @@ C-----------PRIMARY ENERGY CYCLE
 C
             DO ienerg = iemin(nejc), iemax(nejc)
                eee = DE*(ienerg - 1)
+               er = EMAx(nnur) - eee
+               IF (er.LE.EPS) cycle
 C--------------Inverse cross section
                IF (nejc.EQ.0) THEN
                   aat = ac
                   azt = zc
-                  sg = SGAM(aat,azt,eee)
+                  sg = SGAM(aat,azt,eee,er,TNUc(ienerg,1))
                ELSEIF (ETL(5,nejc,nnur).EQ.0) THEN
                   sg = SIGabs(ienerg + 5,nejc,nnur)
                ELSE
                   sg = SIGabs(ienerg,nejc,nnur)
                ENDIF
-               IF (sg.EQ.0.) GOTO 20
-               er = EMAx(nnur) - eee
-               IF (er.LE.EPS) GOTO 20
+               IF (sg.le.0) cycle
                hlp1 = 0.D0
 C--------------PREEQ n & p EMISSION
                IF (nejc.gt.0 .and. nejc.LE.2) THEN
@@ -373,7 +375,7 @@ C--------------PREEQ GAMMA EMISSION
      &                     gc*eee*DENSW(gc,pc,p - 1,hh - 1,er)/
      &                            (DBLE(p + hh - 2) + eee*gc)
                ENDIF
-               IF (hlp1.EQ.0.) GOTO 20
+               IF (hlp1.EQ.0.) cycle
                ff3 = hlp1*eee*sg
                IF (nejc.EQ.0) ff3 = ff3*eee
                ff = ff1*ff3/ff2
@@ -384,7 +386,7 @@ C--------------PREEQ GAMMA EMISSION
                fint(icon) = ff
 C              write(8,'(1x,3i3,1x,7(d12.6,1x))')
 C    &             nejc,h1,ienerg,hlp1,sg,eee,wda,ff1,ff2,ff3
-   20       ENDDO
+            ENDDO
 C-----------END OF EMISSION ENERGY LOOP
 C
 C-----------INTEGRATION PROCEDURE #1 (EMISSION RATES)
@@ -581,7 +583,7 @@ cig ***  totemis includes the preequilibrium contribution only !  ******
 c     totemis=sigr*fr
       write(8,*) 
       WRITE (8,99020)
-99020 FORMAT (/' ',57('-')/)
+99020 FORMAT (/' ',125('*')/)
       END
 
       SUBROUTINE KALBACH(Jcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
@@ -1270,7 +1272,7 @@ C
       RETURN
       END
 
-      FUNCTION SGAM(A,Z,Eg)
+      FUNCTION SGAM(A,Z,Eg,Uex,Tt)
 C
 C     Photoabsorption cross-section in "mb"
 C     If "Key_shape = 0" old expression for photoabsorption
@@ -1285,15 +1287,15 @@ C
 C
 C Dummy arguments
 C
-      REAL*8 A, Eg, Z
+      REAL*8 A, Eg, Z, Tt, Uex
       REAL*8 SGAM
 C
 C Local variables
 C
       REAL*8 a3, egr, gam, sgm
       REAL*8 GAMMA_STRENGTH
-      IF (KEY_shape.NE.0) THEN
-         SGAM = (10.D0/8.674D-7)*Eg*GAMMA_STRENGTH(Z,A,0.D0,0.D0,Eg,
+      IF (KEY_shape.NE.0) THEN                                 
+         SGAM = (10.D0/8.674D-7)*Eg*GAMMA_STRENGTH(Z,A,Uex,Tt,Eg,
      &          KEY_shape)
          RETURN
       ELSE

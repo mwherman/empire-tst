@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2809 $
+Ccc   * $Rev: 2813 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -215,15 +215,14 @@ c-----------set Levels flag to -1 (no levels stored)
          ENDDO
          NSTOred(0) = -1
 C--------set gamma-strength parameters
-         DO nnuc = 0, NDNUC
-            GDRpar(1,nnuc) = 0.d0
-            GDRpar(2,nnuc) = 0.d0
-            GDRpar(3,nnuc) = 0.d0
-            GDRpar(4,nnuc) = 0.d0
-            GDRpar(5,nnuc) = 0.d0
-            GDRpar(6,nnuc) = 0.d0
-            GDRpar(7,nnuc) = 1.d0
-         ENDDO
+         GDRpar = 0.d0
+         GQRpar = 0.d0
+         GMRpar = 0.d0
+         do nnuc = 0,NNUcd
+           GDRpar(7,nnuc) = 1.0
+           GQRpar(7,nnuc) = 1.0
+           GMRpar(7,nnuc) = 1.0
+         enddo
 C
 C--------set fission normalization factors
          DO nnuc = 1, NDNUC
@@ -946,8 +945,6 @@ C--------Retrieve C4 experimental data  *** done ***
          DO nnuc = 1, NNUcd
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
 
-
-
             ENDf(nnuc) = 1
             ENDfa(nnuc) = 1
 
@@ -1029,9 +1026,7 @@ C
 C           KTRlom(NDEJC,i) = xxx  ! default potential for cluster emission
 C                                 ! that needs to be compiled into RIPL
 C
-C           KTRlom(NPRoject,i) = KTRlom(0,0)
          ENDDO
-
 C
 C--------inteligent defaults *** done ***
 C
@@ -1251,14 +1246,6 @@ C
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
             WRITE (8,*) ' '
          ENDIF
-C--------------------------------------------------------------------------
-C        IF (MSD.NE.0 .AND. MSC.NE.0.D0 .AND. LHMs.NE.0) THEN
-C           LHMs = 0
-C           WRITE (8,*) ' '
-C           WRITE (8,*) ' WARNING: HMS calculations suppressed'
-C           WRITE (8,*) ' WARNING: MSD/MSC active             '
-C           WRITE (8,*) ' '
-C        ENDIF
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
@@ -1731,32 +1718,7 @@ C     for the incident channel
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
-
-C-----set giant resonance parameters for target
-      GDRpar(1,0) = 0.0
-      GDRpar(2,0) = 0.0
-      GDRpar(3,0) = 0.0
-      GDRpar(4,0) = 0.0
-      GDRpar(5,0) = 0.0
-      GDRpar(6,0) = 0.0
-      GDRpar(7,0) = 1.0
-      GDRpar(8,0) = 0.0
-      GQRpar(1,0) = 0.0
-      GQRpar(2,0) = 0.0
-      GQRpar(3,0) = 0.0
-      GQRpar(4,0) = 0.0
-      GQRpar(5,0) = 0.0
-      GQRpar(6,0) = 0.0
-      GQRpar(7,0) = 1.0
-      GQRpar(8,0) = 0.0
-      GMRpar(1,0) = 0.0
-      GMRpar(2,0) = 0.0
-      GMRpar(3,0) = 0.0
-      GMRpar(4,0) = 0.0
-      GMRpar(5,0) = 0.0
-      GMRpar(6,0) = 0.0
-      GMRpar(7,0) = 1.0
-      GMRpar(8,0) = 0.0
+C
 C-----compound nucleus 1
       nnuc = 1
 C-----determination of discrete levels and pairing shift for cn
@@ -1778,24 +1740,6 @@ C-----determination of discrete levels and pairing shift for cn
             ROPar(3,nnuc) = ROPar(3,nnuc) + deln(INT(XN(nnuc) + 0.001))
          ENDIF
       ENDIF
-C-----set giant resonance parameters for CN
-      GDRpar(8,nnuc) = 0.0
-      GQRpar(1,nnuc) = 0.0
-      GQRpar(2,nnuc) = 0.0
-      GQRpar(3,nnuc) = 0.0
-      GQRpar(4,nnuc) = 0.0
-      GQRpar(5,nnuc) = 0.0
-      GQRpar(6,nnuc) = 0.0
-      GQRpar(7,nnuc) = 1.0
-      GQRpar(8,nnuc) = 0.0
-      GMRpar(1,nnuc) = 0.0
-      GMRpar(2,nnuc) = 0.0
-      GMRpar(3,nnuc) = 0.0
-      GMRpar(4,nnuc) = 0.0
-      GMRpar(5,nnuc) = 0.0
-      GMRpar(6,nnuc) = 0.0
-      GMRpar(7,nnuc) = 1.0
-      GMRpar(8,nnuc) = 0.0
       IF (Q(0,1).EQ.0.0D0) CALL BNDG(0,1,Q(0,1))
 
       write(8,*)
@@ -1998,23 +1942,7 @@ C--------------determination of discrete levels and pairing shifts for rn
                   ENDIF
                ENDIF
 C--------------determination of giant resonance parameters for residual nuclei
-               GDRpar(8,nnur) = 0.0
-               GQRpar(1,nnur) = 0.0
-               GQRpar(2,nnur) = 0.0
-               GQRpar(3,nnur) = 0.0
-               GQRpar(4,nnur) = 0.0
-               GQRpar(5,nnur) = 0.0
-               GQRpar(6,nnur) = 0.0
-               GQRpar(7,nnur) = 1.0
-               GQRpar(8,nnur) = 0.0
-               GMRpar(1,nnur) = 0.0
-               GMRpar(2,nnur) = 0.0
-               GMRpar(3,nnur) = 0.0
-               GMRpar(4,nnur) = 0.0
-               GMRpar(5,nnur) = 0.0
-               GMRpar(6,nnur) = 0.0
-               GMRpar(7,nnur) = 1.0
-               GMRpar(8,nnur) = 0.0
+C              removed
             ENDIF
 C-----------determination of excitation energy matrix in res. nuclei
             ECUt(nnur) = ELV(NLV(nnur),nnur)
@@ -10575,6 +10503,68 @@ C-----for  calculation  of  the  GFL model parameter
  1000 betagfl = 1.5853*ABS(alpha2)
       BETagfl2 = betagfl**2
       S2Plusgfl = 217.156/aann**2
+      END
+
+      SUBROUTINE INIT_GDR_COMMONS(Nnuc)
+C
+C COMMON variables
+C
+      IMPLICIT none
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1
+
+      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
+     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
+
+      DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
+      DOUBLE PRECISION BETagfl2, S2Plusgfl
+      INTEGER NG
+
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
+      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+C
+C Local variables
+C
+      EG1 = GDRpar(1, Nnuc)
+      GW1 = GDRpar(2, Nnuc)
+      CS1 = GDRpar(3, Nnuc)
+      EG2 = GDRpar(4, Nnuc)
+      GW2 = GDRpar(5, Nnuc)
+      CS2 = GDRpar(6, Nnuc)
+      NG  = 2
+
+      IF (EG1.EQ.EG2) NG = 1
+      IF (EG2.LE.0) NG = 1
+
+      ED1 = GDRpar(1,Nnuc)**2
+      D1  = 5.46E-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
+      W1  = GDRpar(2,Nnuc)**2
+
+      ED2 = GDRpar(4,Nnuc)**2
+      D2  = 5.46E-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
+      W2L = GDRpar(5,Nnuc)**2
+
+      IF(Key_shape.EQ.5) THEN
+        BETagfl2  = GDRpar(9 , Nnuc)
+        S2Plusgfl = GDRpar(10, Nnuc)
+      ENDIF
+
+      EE2 = GQRpar(1,Nnuc)**2
+      DE2 = 3.276E-7*GQRpar(3,Nnuc)*GQRpar(2,Nnuc)**2
+      WE2 = GQRpar(2,Nnuc)**2
+
+      EM1 = GMRpar(1,Nnuc)**2
+      DM1 = 5.46E-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
+      WM1 = GMRpar(2,Nnuc)**2
+
+	RETURN
       END
 
 C R250.F77     The R250 Pseudo-random number generator

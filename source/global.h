@@ -1,6 +1,6 @@
-C $Rev: 2791 $
+C $Rev: 2813 $
 C $Author: rcapote $
-C $Date: 2012-04-16 07:01:56 +0200 (Mo, 16 Apr 2012) $
+C $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -190,7 +190,7 @@ C
       
 	  COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
-      COMMON /DEPTH / POTe
+C     COMMON /DEPTH / POTe
       COMMON /ENDFEA/  POPcsed, POPcsedlab, POPcsealab, POPcseaf
       COMMON /ENDFEMIS/ POPcs
       COMMON /ENDFSPEC/ POPcse

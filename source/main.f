@@ -1,6 +1,6 @@
-cc   * $Rev: 2809 $
+cc   * $Rev: 2813 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-27 16:28:42 +0200 (Fr, 27 Apr 2012) $
+Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -212,6 +212,10 @@ C-----
         GDRpar(4,0) = GDRpar(4,nnuc) 
         GDRpar(5,0) = GDRpar(5,nnuc) 
         GDRpar(6,0) = GDRpar(6,nnuc) 
+        GDRpar(7,0) = GDRpar(7,nnuc) 
+        GDRpar(8,0) = GDRpar(8,nnuc) 
+        GDRpar(9,0) = GDRpar(9,nnuc) 
+        GDRpar(10,0) = GDRpar(10,nnuc) 
 	endif
 
       CALL ULM(0) ! target
@@ -228,20 +232,21 @@ C-----Locate position of the target among residues
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-    	IF(IZAejc(0).ne.0) then
-C-------Prepare Giant Resonance parameters - systematics
-C-------
-	  CALL WHERE(IZA(1),nnuc,iloc)
-	  if(iloc.eq.0 .and. nnuc.ne.1) then
-          GDRpar(1,1) = GDRpar(1,nnuc) 
-          GDRpar(2,1) = GDRpar(2,nnuc) 
-          GDRpar(3,1) = GDRpar(3,nnuc) 
-          GDRpar(4,1) = GDRpar(4,nnuc) 
-          GDRpar(5,1) = GDRpar(5,nnuc) 
-          GDRpar(6,1) = GDRpar(6,nnuc) 
-	  endif
-        CALL ULM(1) ! compound
-	ENDIF
+C-----Prepare Giant Resonance parameters - systematics
+C-----
+      CALL WHERE(IZA(1),nnuc,iloc)
+      if(iloc.eq.0 .and. nnuc.ne.1) then
+        GDRpar(1,1) = GDRpar(1,nnuc) 
+        GDRpar(2,1) = GDRpar(2,nnuc) 
+        GDRpar(3,1) = GDRpar(3,nnuc) 
+        GDRpar(4,1) = GDRpar(4,nnuc) 
+        GDRpar(5,1) = GDRpar(5,nnuc) 
+        GDRpar(6,1) = GDRpar(6,nnuc) 
+        GDRpar(7,1) = GDRpar(7,nnuc) 
+        GDRpar(8,1) = GDRpar(8,nnuc) 
+        GDRpar(9,1) = GDRpar(9,nnuc) 
+        GDRpar(10,1) = GDRpar(10,nnuc) 
+      endif
 C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
@@ -523,16 +528,9 @@ C------------End of adding inelastic to continuum
  1400 CLOSE (45)
       IF (DIRect.NE.0) CLOSE (46)
 
-      IF (KTRlom(0,0).GT.0 .AND. FIRst_ein) THEN
-        IF (DIRect.EQ.0) THEN
-        ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
-         if((CSMsd(1)+CSMsd(2)).NE.0.)
-     &   WRITE (8,*) ' Some discrete levels are embedded into continuum'
-        ELSEIF (DIRect.EQ.3) THEN
-         if(xsinlcont.NE.0.)
-     &   WRITE (8,*) ' Some discrete levels are embedded into continuum'
-        ENDIF
-      ENDIF
+      IF (KTRlom(0,0).GT.0 .AND. FIRst_ein .AND.
+	&  DIRect.NE.0 .AND. xsinlcont.NE.0 ) 
+     &  WRITE (8,*) ' Some discrete levels are embedded into continuum'
 
       TOTcorr = 1.d0
 
@@ -563,8 +561,6 @@ C
          WRITE(8,'(/)')
       ENDIF
       IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
-C        WRITE (8,99010) CSFus + (SINlcc + SINl)*FCCred + SINlcont
-C99010   FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb')
          WRITE (8,99010) CSFus/FUSred,FUSRED,CSFus
 99010    FORMAT (/,2x,
      &           'Absorption cross section    :',e14.7,' mb',
@@ -576,16 +572,20 @@ C99010   FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb')
      &                   (SINlcc + SINl)*FCCred + SINlcont
          WRITE(8,'(/)')
       ENDIF
-      WRITE (8,99015)
-      WRITE (8,99020)
       gang = 180.0/(NDAng - 1)
       angstep = 180.0/(NANgela - 1)
-      DO iang = 1, NANgela/4 + 1
-         imint = 4*(iang - 1) + 1
-         imaxt = MIN0(4*iang,NANgela)
-         WRITE (8,99025) 
+
+      IF (AEJc(0).GT.0) THEN
+        WRITE (8,99015)
+        WRITE (8,99020)
+        DO iang = 1, NANgela/4 + 1
+          imint = 4*(iang - 1) + 1
+          imaxt = MIN0(4*iang,NANgela)
+          WRITE (8,99025) 
      &     ((j - 1)*angstep,ELAred*elada(j),j = imint,imaxt)
-      ENDDO
+        ENDDO
+	ENDIF
+
 99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
 99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
@@ -1388,7 +1388,7 @@ C--------Jump to end of loop after elastic when fitting
             GOTO 1500
          ENDIF
 C--------Prepare gamma transition parameters
-         IF (nnuc.gt.1) CALL ULM(nnuc)
+         CALL ULM(nnuc)
 C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
