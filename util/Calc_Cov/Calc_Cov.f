@@ -29,7 +29,7 @@ C
 C-Title  : Program eigenv_cov
 C-Purpose: Calculate eigenvalues of the covariance matrix
       REAL*8 Cov(Nenergies,Nenergies)
-	REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
+      REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
 
       lcovar = .false.
       do ir=1,Nreact
@@ -64,7 +64,7 @@ C         read(10,'(12x,(90A12))') (REAction(ir),ir=1,NNUcd)
 
           do ir= 7,NNUcd
             nstrlenx=len(trim(REAction(ir)))
-	      if(nstrlenx.gt.7) then
+            if(nstrlenx.gt.7) then
               do ix=1,NNUcd
                 lcovar(ix,ir)=.false.
                 lcovar(ir,ix)=.false.
@@ -83,8 +83,7 @@ C         read(10,'(12x,(90A12))') (REAction(ir),ir=1,NNUcd)
 
 C         Limiting the maximum number of reactions (z,xn),(z,p),(z,d),...
           Nnucd = Ncalc
-	    Ncalc = 0
-       
+          Ncalc = 0
           ie = 1
           do i=1,Nenergies
 C           WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
@@ -92,16 +91,16 @@ C           WRITE(41,'(G10.5,1P(90E12.5))') EINl, TOTcs*TOTred,
             ie = ie + 1 
           enddo
 100       ie = ie - 1
-	    REWIND (10)
-	  endif
+        REWIND (10)
+        endif
 C
         read(10,*) ! Skipping first line
         read(10,*) ! Skipping title 
         do i=1,ie
           read(10,'(10x,90E12.5)') (rndvec(ir,i),ir=1,Nnucd)
-	    do ir=1,Nnucd
-	      if(rndvec(ir,i).le.1.d-5) rndvec(ir,i)=0.d0
-	    enddo
+          do ir=1,Nnucd
+             if(rndvec(ir,i).le.1.d-5) rndvec(ir,i)=0.d0
+          enddo
         enddo
         close(10)
 
@@ -132,12 +131,12 @@ C
         do i=1,ie
           avermod(ir,i) = avermod(ir,i)/Ncalc
           if(avermod(ir,i).le.0)  then 
-		  nt(ir)=i
-	    else
+          nt(ir)=i
+        else
             dtmp = covmod(ir,ir,i,i)/Ncalc - avermod(ir,i)**2
             sigmod(ir,i) = avermod(ir,i)
             if(dtmp.gt.0.d0) sigmod(ir,i) = dsqrt(dtmp)
-	    endif
+        endif
         enddo
 
         if ( (nt(ir).EQ.ie) .or. (nt(ir).eq.0) ) then
@@ -145,8 +144,8 @@ C
             lcovar(ix,ir)=.false.
             lcovar(ir,ix)=.false.
           enddo 
-	    cycle
-	  endif
+       cycle
+      endif
         if ( nt(ir).NE.1 ) nt(ir) = nt(ir) + 1
       enddo
 
@@ -176,12 +175,12 @@ C     Getting covariance matrix
       do ir=1,Nnucd
 
         if( .not.lcovar(ir,ir) ) cycle 
-	  
+
         write(16,615) reaction(ir),ie - nt(ir) + 1, e(nt(ir)), Ncalc
         do i=nt(ir),ie
           write(16,616) e(i),avermod(ir,i),sigmod(ir,i)
      >                      ,sigmod(ir,i)/avermod(ir,i)*100    
-  	  enddo
+        enddo
         write(16,*) 
 
         nstrlenx=len(trim(REAction(ir)))
@@ -195,7 +194,7 @@ C       Threshold uncertainty modified to twice the value at the first energy
         if(nt(ir).gt.1) sigmod(ir,nt(ir)-1) = 2*sigmod(ir,nt(ir))          
         DO i = max(nt(ir)-1,1), ie
           WRITE (20,'(G10.3,2X,E12.5,2X,E12.5)') 
-     >  	   1d6*e(i),1.d-3*avermod(ir,i),1.d-3*sigmod(ir,i)
+     >        1d6*e(i),1.d-3*avermod(ir,i),1.d-3*sigmod(ir,i)
         ENDDO
         CALL CLOSE_ZVV(20,' ',' ')
         CLOSE(20)
@@ -231,7 +230,7 @@ C    >        (sigmod(ir,i)*sigmod(ir,j)),j=nt(ir)+1,ie)
 
         enddo
 
-	  cnorm_coef = 1.d2
+       cnorm_coef = 1.d2
 
 C       Printing model covariance matrix
         write(16,618) 
@@ -253,16 +252,16 @@ C    >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir)+1,ie)
         write(16,640) (j,j=nt(ir),ie) 
 
 
-	  cov = 0.d0
-	  ex =0.d0
+        cov = 0.d0
+        ex =0.d0
         ey =0.d0
-	  ndimx = ie - nt(ir) + 1
+        ndimx = ie - nt(ir) + 1
         ndimy = ie - nt(ir) + 1
 
-	  if(ndimx.gt.3 .and. ndimy.gt.3) then
+        if(ndimx.gt.3 .and. ndimy.gt.3) then
          do i=nt(ir),ie
           ex(i-nt(ir)+1) = e(i) 
-	    do j=nt(ir),ie
+          do j=nt(ir),ie
             ey(j-nt(ir)+1) = e(j) 
 
 C           Approximation corresponding to printed covarainces with 3 digits
@@ -273,7 +272,7 @@ C
             cov(i-nt(ir)+1,j-nt(ir)+1) = ftmp*sigmod(ir,i)*sigmod(ir,j)
 C           cov(i-nt(ir)+1,j-nt(ir)+1) = 
 C    >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
-	    enddo 
+           enddo
          enddo
 
          nstrlenx=len(trim(REAction(ir)))
@@ -287,22 +286,22 @@ C    >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
      >     caz, ' Relative covariance matrix for '//reaction(ir) )
 
          close(21)
-	  endif
+        endif
 
-  	  EigenVect = 0.d0
-	  EigenVal = 0.d0
+      EigenVect = 0.d0
+      EigenVal = 0.d0
 
         call JCB_DAG (Cov,EigenVect,EigenVal,ndimx,Nenergies,1.d-10)
 
         DO i=1,ndimx
-	   DO j=1,i 
-	    if(EigenVal(j).lt.EigenVal(i)) then
-		  ftmp=EigenVal(i)	    
-	      EigenVal(i)=EigenVal(j)
-	      EigenVal(j)=ftmp
-	    endif
-	   ENDDO
-	  ENDDO
+          DO j=1,i
+             if(EigenVal(j).lt.EigenVal(i)) then
+                ftmp=EigenVal(i)
+                EigenVal(i)=EigenVal(j)
+                EigenVal(j)=ftmp
+             endif
+          ENDDO
+        ENDDO
 
         write(16,*) 
         write(16,*)
@@ -330,13 +329,10 @@ C    >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
 
       do ix=1,Nnucd
         
-	  if( .not.lcovar(ix,ix) ) cycle 
-
-	  do ir=ix+1,Nnucd
-
-  	    if( .not.lcovar(ix,ir) ) cycle 
-          
-          if( .not.lcovar(ir,ix) ) cycle 
+        if( .not.lcovar(ix,ix) ) cycle
+        do ir=ix+1,Nnucd
+           if( .not.lcovar(ix,ir) ) cycle
+              if( .not.lcovar(ir,ix) ) cycle
 
 C***************************************
 C         GENERATE FORT.16 FOR FILE 33 *
@@ -355,30 +351,30 @@ C         WRITE(14,550) (avermod(ir,i),i=nt(ir),ie)
             WRITE(14,550) (covmod(ix,ir,i,j),j=nt(ir),ie)
           enddo
 
-  	    cov = 0.d0
-	    ex =0.d0
+          cov = 0.d0
+          ex =0.d0
           ey =0.d0
-	    ndimx = ie - nt(ix) + 1
+          ndimx = ie - nt(ix) + 1
           ndimy = ie - nt(ir) + 1
 
-	    if(ndimx.gt.3 .and. ndimy.gt.3) then
+          if(ndimx.gt.3 .and. ndimy.gt.3) then
            do i=nt(ix),ie
             ex(i-nt(ix)+1) = e(i) 
-	      do j=nt(ir),ie
+            do j=nt(ir),ie
               ey(j-nt(ir)+1) = e(j) 
               cov(i-nt(ix)+1,j-nt(ir)+1) = 
      >          covmod(ix,ir,i,j)/(sigmod(ix,i)*sigmod(ir,j))
-	      enddo 
+            enddo
            enddo
 
            nstrlenx=len(trim(REAction(ix)))
-	     nstrleny=len(trim(REAction(ir)))
+           nstrleny=len(trim(REAction(ir)))
            open(21,file='COV_'//
-     >	 reaction(ix)(2:nstrlenx)//'_'//reaction(ir)(2:nstrleny)//
+     >     reaction(ix)(2:nstrlenx)//'_'//reaction(ir)(2:nstrleny)//
      >     '.zvd')
 
            write(caxy,'(I2.2,1h-,A2,1h-,I3.3,A)') 
-     >        iz,symb,ia,TRIM(reaction(ix))//' '//TRIM(reaction(ir))       
+     >        iz,symb,ia,TRIM(reaction(ix))//' '//TRIM(reaction(ir))
 
            CALL CALL plot3D_to_ZVD 
      >      (21, ex, ey, cov, ndimx, ndimy, Nenergies, 
@@ -386,7 +382,7 @@ C         WRITE(14,550) (avermod(ir,i),i=nt(ir),ie)
      >            //trim(reaction(ix))//' x '//trim(reaction(ir)) )
 
            close(21)
-	    endif
+        endif
 
 c         Printing cross-reaction correlation matrix
           write(16,618) 
@@ -436,136 +432,136 @@ c         Printing cross-reaction correlation matrix
       end
 
       Subroutine JCB_DAG(a,v,e,n,ndmn,acc)
-	    implicit real*8(a-h,o-z)
-c	      Jacobi diagonalization of a real symmetric matrix (Box 5-6)
-c          	A(ndmn,ndmn):	input matrix
-c		      diagonal elements are the eigenvalues on return
-c		      upper triangle used in the calculation
-c		      diagonal element and lower triangle not changed.
-c	        V(ndmn,ndmn):	output eigenvectors, j-th in row j (2nd index)
-c	        E(ndmn)	: eigenvalues
-c	        N	: number of rows and columns of the matrices
-c	        NDMN	: dimension of the 2d arrays A and V in the calling program
-c	        ACC	: size of off-diagonal m.e. below which it is treated as 0
-	    parameter (iter_max=2000,eps=1.0d-13)
-c	       set the maximum number of iterations to 50
-c	       set the default value of ACC to be 1.0e-6
-	    integer*4 n,ndmn
-	    dimension a(ndmn,ndmn),v(ndmn,ndmn),e(ndmn)
-	    logical more_iter
-c	    define two functions corresponding to (5-85) and (5-86)
-			t_up(alpha,beta)=alpha-s*(beta+tau*alpha)
-			t_dn(alpha,beta)=beta+s*(alpha-tau*beta)
-c					initialization
-			if (acc.le.0.d0) acc=eps
-c				set V to unit matrix and E to the diagonal matrix elements of A
-			do 80 i=1,n
-				do 70 j=1,n
-					v(i,j)=0.d0
-70			continue
-		   	v(i,i)=1.d0
-			  e(i)=a(i,i)
-80	  continue
-c	      zero the iteration counter
-	    iter=0
-100	    iter=iter+1
-	    more_iter=.false.
-c	    scan all the off-diagonal elements in the upper triangle
-	    do 380 i=1,n-1																																			
-	       do 370 j=i+1,n																																			
-c	         If | a_{i,j}| > ACC																																			
-		       if (abs(a(i,j)).gt.acc) then																																			
-c	         	Set the condition for needing further iteration to true.																																			
-		       more_iter=.true.																																			
-c		       apply a two-dimensional rotation to reduce the matrix 																																			
-c			     element to zero.																																			
-c		     Calculate the parameters $t$, $c$, $s$, and $\tau$ 																																			
-c			   in (5-81), (5-82) and (5-85).																																			
-		       r=(e(j)-e(i))/(2.d0*a(i,j))																																			
-		       t=abs(r)+sqrt(1.d0+r*r)																																			
-		       if (r.gt.0.d0) then																																			
-			     t=1.d0/t																																			
-		       else																																			
-			     t=-1.d0/t																																			
-		      endif																																			
-		      c=1.0/sqrt(1.d0+t*t)																																			
-		      s=c*t																																			
-		    tau=s/(1.d0+c)																																			
-c		    Modify the values of the diagonal matrix elements 																																			
-c			using (5-83) and (5-84).																																			
-		    e(i)=e(i)-t*a(i,j)																																			
-		    e(j)=e(j)+t*a(i,j)																																			
-c		    Put the off-diagonal matrix element $a_{i,j}$ to zero.																																			
-		    a(i,j)=0.d0																																			
-c		Change the other off-diagonal matrix elements in the upper 																																			
-c		triangle of columns $i$ and $j$, and rows $i$ and $j$ 																																			
-c		according to (5-85) and (5-86). Three separate loops are used 																																			
-c		in order not to distribute the matrix elements of $\bfA$ 																																			
-c		along the diagonal and below.																																			
-		    if (i.gt.1) then																																			
-c		Elements in columns $i$ and $j$, represented as diamonds																																			
-c			($\diamond$) in Fig. 5-2																																			
-			do 320 k=1,i-1																																			
-			    alpha=a(k,i)																																			
-			    beta=a(k,j)																																			
-			    a(k,i)=t_up(alpha,beta)																																			
-			    a(k,j)=t_dn(alpha,beta)																																			
-320			continue
-		    endif
-c		The remaining off-diagonal elements in columns $j$ and 
-c		elements in row $j$ between columns $i$ and $j$, represented 
-c		as bullets ($\bullet$) in Fig. 5-2 (complicated due to upper 
-c		triangle only)
-		    if (j-i.gt.1) then
-			do 340 k=i+1,j-1
-			    alpha=a(i,k)
-			    beta=a(k,j)
-			    a(i,k)=t_up(alpha,beta)
-			    a(k,j)=t_dn(alpha,beta)
-340			continue
-		    endif
-c		The remaining elements in rows $i$ and $j$, represented as 
-c		crosses in Fig. 5-2
-		    if (j.lt.n) then
-			  do 350 k=j+1,n
-			    alpha=a(i,k)
-			    beta=a(j,k)
-			    a(i,k)=t_up(alpha,beta)
-			    a(j,k)=t_dn(alpha,beta)
-350			 continue
-		    endif
-c		 Update the matrix V using (5-87)
-		    do 360 k=1,n
-			    alpha=v(k,i)
-			    beta=v(k,j)
-			     v(k,i)=t_up(alpha,beta)
-			     v(k,j)=t_dn(alpha,beta)
-360		    continue
-		    endif
-370	    continue
-380	  continue
-c	    Check if there are any needs for further iterations. 
-	    if (more_iter) then
-c	    If so, check if the maximum number of allowed iteration is exceeded 
-		  if (iter.lt.iter_max) then
-c		  If not carry out another iteration
-			   go to 100
-		  else
-c	     If the maximum number of iteration is reach, print out a warning
-c		   message and exit.
-			 print 10, iter,acc
-		  endif
-	    endif
-10	  format (' More than',i4,' iterations needed for acc =',1pe10.3)
+      implicit real*8(a-h,o-z)
+c     Jacobi diagonalization of a real symmetric matrix (Box 5-6)
+c          A(ndmn,ndmn):   input matrix
+c          diagonal elements are the eigenvalues on return
+c          upper triangle used in the calculation
+c          diagonal element and lower triangle not changed.
+c          V(ndmn,ndmn):   output eigenvectors, j-th in row j (2nd index)
+c          E(ndmn)   : eigenvalues
+c          N: number of rows and columns of the matrices
+c           NDMN: dimension of the 2d arrays A and V in the calling program
+c           ACC: size of off-diagonal m.e. below which it is treated as 0
+      parameter (iter_max=2000,eps=1.0d-13)
+c          set the maximum number of iterations to 50
+c          set the default value of ACC to be 1.0e-6
+       integer*4 n,ndmn
+       dimension a(ndmn,ndmn),v(ndmn,ndmn),e(ndmn)
+       logical more_iter
+c       define two functions corresponding to (5-85) and (5-86)
+         t_up(alpha,beta)=alpha-s*(beta+tau*alpha)
+         t_dn(alpha,beta)=beta+s*(alpha-tau*beta)
+c               initialization
+         if (acc.le.0.d0) acc=eps
+c            set V to unit matrix and E to the diagonal matrix elements of A
+         do 80 i=1,n
+            do 70 j=1,n
+               v(i,j)=0.d0
+70         continue
+            v(i,i)=1.d0
+           e(i)=a(i,i)
+80     continue
+c         zero the iteration counter
+       iter=0
+100       iter=iter+1
+       more_iter=.false.
+c       scan all the off-diagonal elements in the upper triangle
+       do 380 i=1,n-1
+          do 370 j=i+1,n
+c            If | a_{i,j}| > ACC
+             if (abs(a(i,j)).gt.acc) then
+c               Set the condition for needing further iteration to true.
+             more_iter=.true.
+c             apply a two-dimensional rotation to reduce the matrix
+c              element to zero.
+c           Calculate the parameters $t$, $c$, $s$, and $\tau$
+c            in (5-81), (5-82) and (5-85).
+             r=(e(j)-e(i))/(2.d0*a(i,j))
+             t=abs(r)+sqrt(1.d0+r*r)
+             if (r.gt.0.d0) then
+              t=1.d0/t
+             else
+              t=-1.d0/t
+            endif
+            c=1.0/sqrt(1.d0+t*t)
+            s=c*t
+          tau=s/(1.d0+c)
+c          Modify the values of the diagonal matrix elements
+c         using (5-83) and (5-84).
+          e(i)=e(i)-t*a(i,j)
+          e(j)=e(j)+t*a(i,j)
+c          Put the off-diagonal matrix element $a_{i,j}$ to zero.
+          a(i,j)=0.d0
+c      Change the other off-diagonal matrix elements in the upper
+c      triangle of columns $i$ and $j$, and rows $i$ and $j$
+c      according to (5-85) and (5-86). Three separate loops are used
+c      in order not to distribute the matrix elements of $\bfA$
+c      along the diagonal and below.
+          if (i.gt.1) then
+c      Elements in columns $i$ and $j$, represented as diamonds
+c         ($\diamond$) in Fig. 5-2
+         do 320 k=1,i-1
+             alpha=a(k,i)
+             beta=a(k,j)
+             a(k,i)=t_up(alpha,beta)
+             a(k,j)=t_dn(alpha,beta)
+320         continue
+          endif
+c      The remaining off-diagonal elements in columns $j$ and
+c      elements in row $j$ between columns $i$ and $j$, represented
+c      as bullets ($\bullet$) in Fig. 5-2 (complicated due to upper
+c      triangle only)
+          if (j-i.gt.1) then
+         do 340 k=i+1,j-1
+             alpha=a(i,k)
+             beta=a(k,j)
+             a(i,k)=t_up(alpha,beta)
+             a(k,j)=t_dn(alpha,beta)
+340         continue
+          endif
+c      The remaining elements in rows $i$ and $j$, represented as
+c      crosses in Fig. 5-2
+          if (j.lt.n) then
+           do 350 k=j+1,n
+             alpha=a(i,k)
+             beta=a(j,k)
+             a(i,k)=t_up(alpha,beta)
+             a(j,k)=t_dn(alpha,beta)
+350          continue
+          endif
+c       Update the matrix V using (5-87)
+          do 360 k=1,n
+             alpha=v(k,i)
+             beta=v(k,j)
+              v(k,i)=t_up(alpha,beta)
+              v(k,j)=t_dn(alpha,beta)
+360          continue
+          endif
+370       continue
+380     continue
+c       Check if there are any needs for further iterations.
+       if (more_iter) then
+c       If so, check if the maximum number of allowed iteration is exceeded
+        if (iter.lt.iter_max) then
+c        If not carry out another iteration
+            go to 100
+        else
+c        If the maximum number of iteration is reach, print out a warning
+c         message and exit.
+          print 10, iter,acc
+        endif
+       endif
+10     format (' More than',i4,' iterations needed for acc =',1pe10.3)
       do k=1,n
-	     if(abs(e(k)).gt.acc) cycle
-   	     e(k) = 0.d0
-		 do j=1,n
-		   v(k,j) = 0.d0
-		 enddo
+        if(abs(e(k)).gt.acc) cycle
+           e(k) = 0.d0
+       do j=1,n
+         v(k,j) = 0.d0
+       enddo
       enddo
 
-c	  return eigenvalues in $\bfE$ and eigenvectors in $\bfV$.
+c     return eigenvalues in $\bfE$ and eigenvectors in $\bfV$.
       return
       end
 
@@ -599,14 +595,14 @@ c	  return eigenvalues in $\bfE$ and eigenvectors in $\bfV$.
      >  (iounit, ex, ey, covar, ndimx, ndimy, ndecl_dim,
      >   cfunctname, ctitle)
 C
-	implicit none
+      implicit none
       character*(*) ctitle, cfunctname
       integer*4 iounit, ndimx, ndimy, ndecl_dim
       real*8 covar(ndecl_dim,ndecl_dim), ex(ndecl_dim), ey(ndecl_dim)
       integer*4 i,j
 
       CALL OPEN_ZVV3d(iounit,cfunctname,ctitle,ndimx,ndimy)
-	  
+
       write(iounit,'(4H$xx:)')
       write(iounit,'(6(1x,G11.3,1x))') (1d6*ex(i),i=1,ndimx)
       write(iounit,'(4Hend )')
@@ -626,7 +622,7 @@ C
       end
 
       SUBROUTINE OPEN_ZVV3D(iout,tfunct,title,ndimx,ndimy)
-	implicit none
+      implicit none
       character*(*) title, tfunct
       integer*4 iout,ndimx,ndimy
 C
@@ -642,7 +638,7 @@ C
       end
 
       SUBROUTINE CLOSE_ZVV3D(iout)
-	implicit none
+      implicit none
       integer*4 iout
 C
       write(iout,'(A2)') '//'
