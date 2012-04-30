@@ -1,6 +1,6 @@
-cc   * $Rev: 2813 $
+cc   * $Rev: 2816 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-04-30 08:49:11 +0200 (Mo, 30 Apr 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -529,7 +529,7 @@ C------------End of adding inelastic to continuum
       IF (DIRect.NE.0) CLOSE (46)
 
       IF (KTRlom(0,0).GT.0 .AND. FIRst_ein .AND.
-	&  DIRect.NE.0 .AND. xsinlcont.NE.0 ) 
+     &  DIRect.NE.0 .AND. xsinlcont.NE.0 ) 
      &  WRITE (8,*) ' Some discrete levels are embedded into continuum'
 
       TOTcorr = 1.d0
