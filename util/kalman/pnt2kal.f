@@ -382,10 +382,6 @@ c     and writes out in file 'proj-pfns.kal' only the NEinc pfns that have incid
 c     in pnt file (already stored in variable Einc). The format of the spectra written in 'proj-pfns.kal' is the same of 
 c     the 'proj-pfns.fmt' file. 
 
-
-
-
-
       IMPLICIT NONE
 
       CHARACTER*100 file_in,file_out,pntfile
@@ -463,8 +459,6 @@ c       Writing header
         write(410,120) (Einc(i),i=1,NEinc)
 120     format('#  Eemit',2X,500(2X,1PE9.3,1X))
        
-        write(*,*) 'NEemit= ', neemit
-       
 c       Reading values from file_in and writing on file_out only for matching energies
         do i=1,NEemit
           read(400,*) (temp(j),j=0,NElab)
@@ -485,189 +479,6 @@ c       Reading and writing extra blank lines between parameter-blocks when deal
       END
  
  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      SUBROUTINE central_spectra_old(proj,nexp,Einc,NEinc)
-c
-c     Subroutine that reads the central values of the prompt fission neutron spectra from file 'proj-pfns.out',
-c     and writes them, normalized by the Maxwellian, in file 'proj-pfns.kal', but only those 
-c     that have incident energies matching existing experiments in pnt file. The format of the spectra written
-c     in 'proj-pfns.kal' is the same of the '.xsc' file for cross sections. So, 'proj-pfns.kal', should be
-c     equivalent, from the kalman point of view, to the regular cross-section file, in the case of regular 
-c     cross section fits. The correspondence should be:
-c     
-c          PFNS                X-SEC
-c                          
-c        -pfns.kal             .xsc
-c     incident energy        reaction
-c      emmited energy     incident energy
-c         spectra         cross sections
-c
-
-      use dataio
-
-      IMPLICIT NONE
-
-      CHARACTER*60 proj, pfnsout, pfnskal
-      CHARACTER*10 nucleus
-      CHARACTER*5 Echar
-      INTEGER*4 MAXEEMIT,MAXEINC,ierr,nexp,iexp,i,NEinc,
-     & ip,np,ne,ispec,i0
-      LOGICAL fexists
-      PARAMETER(MAXEEMIT=1000,MAXEINC=50)
-      REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
-      REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
-      REAL*8 Eemit(MAXEEMIT) ! Array with the values of the emitted neutron energies
-      REAL*8 pfns(MAXEINC,MAXEEMIT) ! Matrix to store the spectra: 
-                                    ! first index identify the spectra (i.e., runs over incident energy)
-                                    ! second index runs over the emitted neutron energy
-
-
-      pfnsout=trim(proj)//'-pfns.out'
-      pfnskal=trim(proj)//'-pfns.kal'
-
-
-c
-c     Opening -pfns.out file
-c
-      OPEN(250,FILE=pfnsout,iostat=ierr)
-      if(ierr.ne.0) then
-        WRITE(*,*) 'ERROR: FILE ',pfnsout,' NOT FOUND!'
-        STOP
-      endif
-
-c
-c     Comparing incident energies from pfnsout with experimental Einc() and storing the ones 
-c     that match in pfnskal
-c
-      ispec=1
-      i0=1
-      do while(0==0)
-c       Looking for 'Elab=' string. Has to be done this way because, if there is no match,
-c       we do not know beforehand how many lines to skip until next header
-80      read(250,100,end=180) Echar
-100     format(30X,A5)
-        if(Echar.eq.'Elab=') then
-          BACKSPACE(250)
-        else
-          goto 80
-        endif
-        read(250,110) nucleus, Elab(ispec)
-110     format(18X,A10,7X,G10.5)
-        i=i0
-        do while(i.LE.NEinc)
-          if(DABS(Elab(ispec)-Einc(i)).LT.4.748D-7) then    ! this is roughly the difference between Empire's lower energy limit (5.d-7) and termal energy
-            read(250,*)
-            read(250,*)
-            ierr=0
-            ip=1
-            do while(ierr.EQ.0)
-              read(250,120,iostat=ierr) Eemit(ip), pfns(ispec,ip)
-120           format(E10.4,19X,E11.5)
-              ip=ip+1
-            enddo
-            NP=ip-2
-            i0=i+1
-            i=NEinc
-            ispec = ispec + 1
-            BACKSPACE(250)
-          endif
-          i=i+1
-        enddo
-
-      enddo
-180   continue
-      NE=ispec-1
-
-      if(NE.NE.Neinc) call error_mismatch(proj,Einc,NEinc,Elab,NE)
-
-      CLOSE(250)
-
-c
-c     Opening -pfns.kal file
-c
-      OPEN(300,FILE=pfnskal)
-c
-c     Writing pfns for matching incident energies in pfnskal
-c
-      write(300,200) NEinc,nucleus,(Einc(i),i=1,NEinc)
-c200   format('#',i3,/,'#  Eemit',2X,50(' E: ',1PE8.2))
-200   format('#',i3,10X,A10,/,'#  Eemit',2X,50(2X,1PE8.2,2X))
-      ip=1
-      do ip=1, NP
-        write(300,210) Eemit(ip), (pfns(ispec,ip),ispec=1,NEinc)
-210     format(G10.4,1P,50(1X,E11.5))
-      enddo
-
-      CLOSE(300)
-
-      END
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
