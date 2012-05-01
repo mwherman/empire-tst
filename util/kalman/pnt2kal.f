@@ -47,12 +47,17 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       IMPLICIT NONE
 
-      CHARACTER*60 pntfile, proj, inpsen, pfnskal
+      CHARACTER*100 pntfile, proj, inpsen, pfnskal,pfnsout,pfnsfmt, 
+     &fullmatsen,matsen
       CHARACTER*6 param
-      INTEGER*4 MAXEXP ! Number of experiments
-      INTEGER*4 nexp,MT1,MAT,NEX, nparam, ierr,MS
+      INTEGER*4 MAXEXP   ! Number of experiments
+      INTEGER*4 MAXEINC  ! Number of incident energies
+      INTEGER*4 NEemit   ! Number of neutron emitting energies
+      INTEGER*4 nexp,MT1,MAT,NEX, nparam, ierr,MS,NEinc,i
       LOGICAL fexists
-      PARAMETER(MAXEXP=500)
+      PARAMETER(MAXEXP=500)     ! Maximum number of experiments in pnt file
+      PARAMETER(MAXEINC=500)    ! Maximum number of incident energies in input file
+      REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
 
       TYPE (DATASET) EXPDATA(MAXEXP)
 
@@ -62,7 +67,11 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
       pntfile=trim(proj)//'.pnt'
       inpsen=trim(proj)//'-inp.sen'
+      pfnsout=trim(proj)//'-pfns.out'
       pfnskal=trim(proj)//'-pfns.kal'
+      pfnsfmt=trim(proj)//'-pfns.fmt'
+      fullmatsen=trim(proj)//'-pfns-full-mat.sen'
+      matsen=trim(proj)//'-pfns-mat.sen'
 
 c     Checking if pntfile is already present, making it unnecessary to run lsttab
       inquire(file = pntfile, exist = fexists)
@@ -73,20 +82,23 @@ c     Reading pnt file
 c
       CALL READPNT(pntfile,EXPDATA,NEXP,MAXEXP)
 
+c
+c     Storing the experimental incident energies (in MeV) in Einc, without repeating values
+      CALL get_Einc(Einc,NEinc,EXPDATA,NEXP,MAXEXP,MAXEINC)
+
+c     Reformatting pfns.out into pfns.fmt
+      CALL REFORMAT(proj,len(trim(proj)),NEemit)
+
+
+
 c     Checking if pfnskal file is already present, making it 
 c     unnecessary to run subroutine central_spectra
       inquire(file=pfnskal,exist = fexists)
 c     Reading 'proj-pfns.out' and writing 'proj-pfns.kal'
 c     if(.NOT.fexists) CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
-      CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
+      CALL trim_energies(pfnsfmt,pfnskal,pntfile,Einc,NEinc,MAXEINC,
+     &NEemit,0)
 
-
-
-      IF (NEX .NE. 0) THEN
-        MS=NEXP
-      ELSE
-        MS=0
-      ENDIF
 
 c     Counting the number of parameters in sensitivity input file
       OPEN(200,FILE=inpsen,iostat=ierr)
@@ -101,6 +113,18 @@ c     Counting the number of parameters in sensitivity input file
         if(ierr.eq.0.and.param(1:1).ne.'!'.and.param(1:1).ne.'') 
      &nparam=nparam+1
       enddo
+
+
+c     Reading 'proj-pfns-full-mat.sen' and writing 'proj-pfns-mat.sen'
+      CALL trim_energies(fullmatsen,matsen,pntfile,Einc,NEinc,MAXEINC,
+     &NEemit,Nparam)
+
+
+      IF (NEX .NE. 0) THEN
+        MS=NEXP
+      ELSE
+        MS=0
+      ENDIF
 
 
 
@@ -310,8 +334,183 @@ c       Writing in fort.75 for plotting of experimental data
 
 
 
+      SUBROUTINE get_Einc(Einc,NEinc,EXPDATA,nexp,MAXEXP,MAXEINC)
 
-      SUBROUTINE central_spectra(proj,EXPDATA,MAXEXP,nexp)
+      use dataio
+
+      IMPLICIT NONE
+
+      INTEGER*4 i,iexp,nexp,NEinc,MAXEINC,MAXEXP
+
+      REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
+
+      TYPE (DATASET) EXPDATA(MAXEXP)
+
+c     Storing the experimental incident energies in Einc, without repeating values
+      i=1
+      Einc(i)=EXPDATA(i)%Einc
+      do iexp=2,nexp
+c       Checking if current Einc is different from previous
+        if(DABS(EXPDATA(iexp)%Einc-EXPDATA(iexp-1)%Einc).GT.1.D-20) then
+          i = i + 1
+          Einc(i) = EXPDATA(iexp)%Einc   ! Storing in Einc
+        endif
+      enddo
+      NEinc = i
+      Einc = Einc/1.D6   ! Converting from eV to MeV
+
+      END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE trim_energies(file_in,file_out,pntfile,Einc,NEinc,
+     & MAXEINC,NEemit,Nparam)
+c
+c     Subroutine that reads the formatted central values of the prompt fission neutron spectra from file 'proj-pfns.fmt',
+c     and writes out in file 'proj-pfns.kal' only the NEinc pfns that have incident energies matching existing experiments 
+c     in pnt file (already stored in variable Einc). The format of the spectra written in 'proj-pfns.kal' is the same of 
+c     the 'proj-pfns.fmt' file. 
+
+
+
+
+
+      IMPLICIT NONE
+
+      CHARACTER*100 file_in,file_out,pntfile
+      CHARACTER*10 rubbish,nucleus
+      CHARACTER*76 paramline
+      INTEGER*4 i,j,j0,ierr,ipar,nparmax,NElab,NEinc,NEemit,Nparam,
+     &MAXEINC
+      INTEGER*4 match_index(MAXEINC)  ! Array that stores the indices of Elab for which the values of Elab and Einc match
+      INTEGER*4 n_match    ! Number of match energies
+      REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
+      REAL*8 Einc(MAXEINC) ! Incident energies from pnt file
+      REAL*8 temp(0:MAXEINC)
+c
+c     Opening file to be read (-pfns.fmt or -pfns-full-mat.sen)
+c
+      OPEN(400,FILE=file_in,iostat=ierr)
+      if(ierr.ne.0) then
+        WRITE(*,*) 'ERROR: FILE ',file_in,' NOT FOUND!'
+        STOP
+      endif
+
+c     Reading from file_in the total number of incident energies
+      read(400,10) NElab, nucleus
+10    format(1X,I3,10X,A10)
+
+
+      if(Nparam.NE.0) read(400,20) paramline
+20    format(A)
+
+
+c     Reading from file_in the values of incident energy in the header
+      read(400,*) rubbish,rubbish,(Elab(i),i=1,NElab)
+
+c
+c     Comparing incident energies from Elab() with experimental Einc() and storing the index of Elab()
+c     in integer array match_index for which matching occurs 
+c
+
+      n_match=0
+      j0=1
+      do i=1,NEinc
+        j=j0
+        do while (j.LE.NElab)
+          if(DABS(Elab(j)-Einc(i)).LT.4.748D-7) then  ! this is roughly the difference between Empire's lower energy limit (5.d-7) and thermal energy
+            match_index(i)=j
+            j=NElab
+            n_match=n_match+1
+          endif
+          j=j+1
+        enddo
+      enddo
+
+c     If a match is not found for all experimental energies in Einc print error and stop
+      if(n_match.NE.Neinc) call error_mismatch(file_in,pntfile,Einc,
+     &                        NEinc,Elab,n_match,match_index,MAXEINC)
+
+c     Opening file_out
+      OPEN(410,FILE=file_out)
+
+      REWIND(400)
+      nparmax=Nparam
+      if(Nparam.EQ.0) nparmax=1
+c     Looping over parameters
+      do ipar=1,nparmax
+       
+c       Skipping and reading header
+        read(400,*)
+        if(Nparam.NE.0) read(400,20) paramline
+        read(400,*)
+       
+c       Writing header
+        write(410,100) NEinc, nucleus
+100     format('#',I3,10X,A10)
+        if(Nparam.NE.0) write(410,20) paramline
+        write(410,120) (Einc(i),i=1,NEinc)
+120     format('#  Eemit',2X,500(2X,1PE9.3,1X))
+       
+        write(*,*) 'NEemit= ', neemit
+       
+c       Reading values from file_in and writing on file_out only for matching energies
+        do i=1,NEemit
+          read(400,*) (temp(j),j=0,NElab)
+          write(410,150) temp(0), (temp(match_index(j)),j=1,NEinc)
+150       format(G10.4,1P,500(1X,E11.4))
+        enddo
+       
+c       Reading and writing extra blank lines between parameter-blocks when dealing with sensitivity
+        if(Nparam.NE.0) then
+          read(400,*)
+          write(410,*)
+        endif
+      enddo
+
+      CLOSE(400)
+      CLOSE(410)
+
+      END
+ 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE central_spectra_old(proj,nexp,Einc,NEinc)
 c
 c     Subroutine that reads the central values of the prompt fission neutron spectra from file 'proj-pfns.out',
 c     and writes them, normalized by the Maxwellian, in file 'proj-pfns.kal', but only those 
@@ -335,7 +534,7 @@ c
       CHARACTER*60 proj, pfnsout, pfnskal
       CHARACTER*10 nucleus
       CHARACTER*5 Echar
-      INTEGER*4 MAXEXP,MAXEEMIT,MAXEINC,ierr,nexp,iexp,i,NEinc,
+      INTEGER*4 MAXEEMIT,MAXEINC,ierr,nexp,iexp,i,NEinc,
      & ip,np,ne,ispec,i0
       LOGICAL fexists
       PARAMETER(MAXEEMIT=1000,MAXEINC=50)
@@ -346,25 +545,10 @@ c
                                     ! first index identify the spectra (i.e., runs over incident energy)
                                     ! second index runs over the emitted neutron energy
 
-      TYPE (DATASET) EXPDATA(MAXEXP)
-
 
       pfnsout=trim(proj)//'-pfns.out'
       pfnskal=trim(proj)//'-pfns.kal'
 
-
-c     Storing the experimental incident energies in Einc, without repeating values
-      i=1
-      Einc(i)=EXPDATA(i)%Einc
-      do iexp=2,nexp
-c       Checking if current Einc is different from previous
-        if(DABS(EXPDATA(iexp)%Einc-EXPDATA(iexp-1)%Einc).GT.1.D-20) then
-          i = i + 1
-          Einc(i) = EXPDATA(iexp)%Einc   ! Storing in Einc
-        endif
-      enddo
-      NEinc = i
-      Einc = Einc/1.D6   ! Converting from eV to MeV
 
 c
 c     Opening -pfns.out file
@@ -456,36 +640,83 @@ c200   format('#',i3,/,'#  Eemit',2X,50(' E: ',1PE8.2))
 
 
 
-      SUBROUTINE error_mismatch(proj,Epnt,NEpnt,Epfns,NEpfns)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE error_mismatch(filename,pnt,Epnt,NEpnt,Epfns,
+     & NEpfns,ind,MAXEINC)
 
       IMPLICIT NONE
 
-      CHARACTER*60 proj
-      REAL*8 Epnt(50),Epfns(50)
-      INTEGER*4 NEpnt,Nepfns,i
+      CHARACTER*100 filename,pnt
+      REAL*8 Epnt(MAXEINC),Epfns(MAXEINC)
+      INTEGER*4 NEpnt,i,ind(MAXEINC),MAXEINC,NEpfns
 
       write(*,*) ' ERROR!!'
-      write(*,*) ' ERROR!!  Incident-energy values missing from ',
-     &trim(proj),'-pfns.out'
+      write(*,*) ' ERROR!!  Incident-energy values missing from file ',
+     &trim(filename)
       write(*,*) ' ERROR!!'
       write(*,*)
-      write(*,*) 'Incident energies found in ',trim(proj),'.pnt file:'
+      write(*,*) 'Incident energies found in ',trim(pnt),' file:'
       write(*,*)
       write(*,10) (i,Epnt(i),i=1,NEpnt)
 10    format('E(',i2,') = ',1PD13.5) 
       write(*,*)
       write(*,*)
-      write(*,*) 'Matching energies in file ',trim(proj),'-pfns.out:'
+      write(*,*) 'Matching energies in file ',trim(filename),':'
       write(*,*)
-      write(*,20) (i,Epfns(i),i=1,NEpfns)
+      write(*,20) (i,Epfns(ind(i)),i=1,NEpfns)
 20    format('E(',i2,') = ',1PD13.5) 
       write(*,*)
-      write(*,*) 'Please make sure that ',trim(proj),'-pfns.out file',
+      write(*,*) 'Please make sure that ',trim(filename),' file',
      &' contains all incident energies from '
-      write(*,*) 'file ',trim(proj),'.pnt',
+      write(*,*) 'file ',trim(pnt),
      &' by including them explicitly in Empire input file, or, ',
      &'alternatively, by removing them from '
-      write(*,*) 'the ',trim(proj),'.pnt file.'
+      write(*,*) 'the ',trim(pnt),' file.'
 
       STOP
 

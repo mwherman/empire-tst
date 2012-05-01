@@ -78,12 +78,12 @@ genkal.exe:   $(OBJI)
 #	$(FC) -o $@ $(OBJL)
 
 
-OBJM =	pnt2kal.o 
+OBJM =	pnt2kal.o aux_routines.o 
 
 pnt2kal :   $(OBJM)
 	$(FC) -o $@ $(OBJM)
 
-OBJN =	refmt-pfns.o 
+OBJN =	refmt-pfns.o aux_routines.o
 
 refmt-pfns :   $(OBJN)
 	$(FC) -o $@ $(OBJN)
