@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Rev: 2820 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-05-03 07:18:20 +0200 (Do, 03 Mai 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -139,7 +139,7 @@ C       starting seed is used
         Call R250Init(iseed)
       endif
 
-      IF (EIN.EQ.0.0D0) THEN	! EIN IF BLOCK (I)
+      IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
 C--------default input parameters (skipped in non-first-energy calculation)
 C
@@ -1499,7 +1499,7 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
               IF (NPRoject.EQ.2) THEN
                 IDNa(3,6) = 0
                 IDNa(4,6) = 0
-	        ENDIF
+           ENDIF
               IF (NPRoject.EQ.1) THEN
                 IDNa(1,6) = 0
                 IDNa(2,6) = 0
@@ -1600,7 +1600,7 @@ C
 C------PE model matrix initialization done
 C************************************************************************
 
-      IF (FIRst_ein) THEN	! EIN IF BLOCK (II)
+      IF (FIRst_ein) THEN   ! EIN IF BLOCK (II)
 
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
@@ -2482,11 +2482,11 @@ C
                 WRITE (8,
      &'('' Number of discrete levels changed from RIPL default of '',I3,
      &'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
-	          NLV(Nnuc) = max(ilv - 1,1)
- 	          IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
+             NLV(Nnuc) = max(ilv - 1,1)
+              IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
                 GOTO 200
-	        ENDIF
-	      ENDIF
+           ENDIF
+         ENDIF
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
               NLV(Nnuc) = max(ilv - 1,1)
@@ -3913,7 +3913,7 @@ C-----
               WRITE (8,
      & '('' ERROR: LEVDEN must be 0,1,2,3,4; default EGSM = 0 used '')')
               GOTO 100
-	      ELSE
+         ELSE
               ADIv = val
             ENDIF
             IF (ADIv.EQ.0.0D0) WRITE (8,
@@ -3921,15 +3921,15 @@ C-----
             IF (ADIv.EQ.1.0D0) WRITE (8,
      &           '('' GSM (Ignatyuk) level densities selected '')')
             IF (ADIv.EQ.2.0D0) THEN
-C 		    WRITE (8,
+C           WRITE (8,
 C    &           '('' Gilbert-Cameron level densities selected '')')
-  	        WRITE (8,
+             WRITE (8,
      &           '('' WARNING: Gilbert-Cameron level densities should be 
      & refitted to the available experimental data '')')
-  	        WRITE (8,
+             WRITE (8,
      &           '('' Changed to EMPIRE 2.18 Gilbert-Cameron (LEVDEN 4)
      &'')')
-	        val = 4.d0
+           val = 4.d0
             ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (8,
      &          '('' Microscopic parity dependent HFB level densities se
@@ -3942,15 +3942,15 @@ C
             IF (ADIv.EQ.1.0D0) WRITE (12,
      &           '('' GSM level densities (Ignatyuk)  '')')
             IF (ADIv.EQ.2.0D0) THEN
-C 		    WRITE (12,
+C           WRITE (12,
 C    &           '('' Gilbert-Cameron level densities '')')
-  	        WRITE (12,
+             WRITE (12,
      &           '('' WARNING: Gilbert-Cameron level densities should be 
      & refitted to the available experimental data '')')
-  	        WRITE (12,
+             WRITE (12,
      &           '('' WARNING: Changed to EMPIRE 2.18 Gilbert-Cameron (L
      &EVDEN 4)'')')
-	        val = 4.d0
+           val = 4.d0
             ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
@@ -3961,11 +3961,11 @@ C    &           '('' Gilbert-Cameron level densities '')')
 C-----
          IF (name.EQ.'ECONT ') THEN
             izar = i1*1000 + i2
-			if(izar.eq.0) then
+         if(izar.eq.0) then
                WRITE (8,'('' WARNING: ECONT should be defined for a sele
      &cted nucleus, not globally. This value is ignored '')')
                GOTO 100
-			endif
+         endif
 C
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
@@ -3977,7 +3977,7 @@ C
             ENDIF
             if(val.ge.0.) then
               ECOnt(nnuc) = val
-			  IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
+           IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
               WRITE (8,
      &        '('' Energy continuum for nucleus '',I3,A2,
      &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
@@ -6921,7 +6921,7 @@ C        PFNNIU is the nubar parameter
 C        TMAXW  is the Maxwellian temperature used to scale PFNS plots
 C
          IF (name(1:5).EQ.'TMAXW') THEN
-	      IF(val.ge.0.9 .and. val.le.2.0) then
+         IF(val.ge.0.9 .and. val.le.2.0) then
               TMAxw = val
               WRITE (8,
      &'('' Tmaxw for PFNS plot normalization set to '',F5.2)') val
@@ -7830,7 +7830,7 @@ C             Should be replaced once GSM is refitted
 C-----------Gilbert-Cameron (no explicit collective effects)
             IF (ADIv.EQ.2.D0) THEN
               ! for the time being, G&C not refitted !
-	        ! arogc below should be replaced by the new one
+           ! arogc below should be replaced by the new one
               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
               atil = ap1*A(nnuc) + ap2*a23
               tcrt = 0.567*delp
@@ -8737,7 +8737,7 @@ c            CCFUS deformations
              WRITE (8,'(/1x,A41/1x,A11,F7.3)')
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
-	       IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
+          IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
          ENDIF
       ENDDO
  250  IF (beta2.EQ.0.D0) THEN
@@ -8929,7 +8929,7 @@ C
 
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
-	COLfile = fexist
+      COLfile = fexist
 
       IF (fexist) THEN
          WRITE (8,*) ' '
@@ -9026,8 +9026,8 @@ C
              READ (32,'(3x,3I5)') ND_nlv
              WRITE (8,'(3x,3I5)') ND_nlv
              WRITE (12,'(3x,3I5)') ND_nlv
-	     
-		 else
+
+       else
 
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
@@ -9067,7 +9067,7 @@ C----------Reading ground state information (to avoid overwriting deformation)
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
-	     
+
            WRITE(8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
@@ -9284,19 +9284,19 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
          write(8,*)
      >       '----------------------------------------------------------
      >-------'
-	   IF(.not.SOFT) then
-	     IF(DEFORMED) then
+      IF(.not.SOFT) then
+        IF(DEFORMED) then
              write(8,*) '  Rigid rotor model assumed' 
-	     ELSE
+        ELSE
              write(8,*) '  Spherical model assumed' 
-	     ENDIF
-	   ELSE
-	     IF(DYNam) then
+        ENDIF
+      ELSE
+        IF(DYNam) then
              write(8,*) '  Rigid-soft rotor model assumed' 
-	     ELSE
+        ELSE
              write(8,*) '  Soft rotor model assumed' 
-	     ENDIF
-	   ENDIF
+        ENDIF
+      ENDIF
 
          write(8,*)'  States with number < ',LEVcc, 
      >             '  in the file *-lev.col coupled'
@@ -10564,7 +10564,7 @@ C
       DM1 = 5.46E-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
       WM1 = GMRpar(2,Nnuc)**2
 
-	RETURN
+      RETURN
       END
 
 C R250.F77     The R250 Pseudo-random number generator

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
+Ccc   * $Rev: 2820 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Date: 2012-05-03 07:18:20 +0200 (Do, 03 Mai 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -29,7 +29,7 @@ C
 
       CALL GETENV ('EMPIREDIR', empiredir)
 
-	EMPtitle='   '
+	   EMPtitle='   '
 C
 C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
