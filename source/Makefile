@@ -1,6 +1,6 @@
-#$Rev: 2810 $
-#$Author: rcapote $
-#$Date: 2012-04-27 16:30:33 +0200 (Fr, 27 Apr 2012) $
+#$Rev: 2822 $
+#$Author: shoblit $
+#$Date: 2012-05-03 20:44:12 +0200 (Do, 03 Mai 2012) $
 
 # set default fortran compiler:
 
@@ -29,7 +29,7 @@ ifeq ($(FC),gfortran)
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -g --bounds-check -std=legacy -ftrapv 
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
   #----flags for ECIS
   EFLAGS = -O2 -std=legacy -ffast-math
@@ -49,7 +49,7 @@ else ifeq ($(FC),ifort)
   #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
-  DFLAGS = -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
+  DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
   #----flags for ECIS
   #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ else ifeq ($(FC),ifort)
   # FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   FFLAGS = -O3 -x=host -logo -parallel -openmp 
   EFLAGS = -O2 -x=host -logo -parallel -openmp 
-  LIBS = -openmp-lib 
+  LIBS = -openmp-lib compat
   #----flags with no parallelization
   #FFLAGS =  -O3 -x=host -ipo -logo 
   #FFLAGS = -O3 -x=host -logo  
@@ -131,7 +131,7 @@ all:
 	$(MAKE) optmand
 
 empire: $(OBJF) subecis06m.o
-	$(FC) $(FFLAGS) -o $@ $(OBJF) $(LIBS) subecis06m.o
+	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
 
 optmand: optmand.o
 	$(FC)  $(FFLAGS) $(LIBS) -o $@ optmand.o
