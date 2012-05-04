@@ -72,7 +72,7 @@ elif [ "$option" = "clean" ] ; then
    $EMPIREDIR/scripts/clean u238-HFB-par-fis 
    $EMPIREDIR/scripts/clean u238-rigid-soft-omp         
    $EMPIREDIR/scripts/clean u238-rot-CC-direct-2 
-   rm *.zvd file* spec ecis* >& /dev/null
+   rm *.zvd file* spec ecis* COVAR* >& /dev/null
    mv TeMpOrArYdIr/* ./
    rm -r TeMpOrArYdIr >& /dev/null
 
