@@ -1,6 +1,6 @@
-#$Rev: 2822 $
-#$Author: shoblit $
-#$Date: 2012-05-03 20:44:12 +0200 (Do, 03 Mai 2012) $
+#$Rev: 2823 $
+#$Author: gnobre $
+#$Date: 2012-05-04 18:14:10 +0200 (Fr, 04 Mai 2012) $
 
 # set default fortran compiler:
 
@@ -53,16 +53,18 @@ else ifeq ($(FC),ifort)
   #----flags for ECIS
   #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
-  #----flags for automatic parallelization
   # FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
-  FFLAGS = -O3 -x=host -logo -parallel -openmp 
-  EFLAGS = -O2 -x=host -logo -parallel -openmp 
-  LIBS = -openmp-lib compat
+  # flags for automatic & openMP directives
+  #FFLAGS = -O3 -x=host -logo -parallel -par-report1 -openmp
+  #EFLAGS = -O2 -x=host -logo
+  # LIBS = -openmp-lib compat
+  #----flags for automatic parallelization & inter-procedural optimization
+  FFLAGS = -O3 -x=host -logo -ipo -parallel -par-report1
+  EFLAGS = -O2 -x=host -logo
   #----flags with no parallelization
-  #FFLAGS =  -O3 -x=host -ipo -logo 
-  #FFLAGS = -O3 -x=host -logo  
-  #EFLAGS = -O2 -x=host -logo  
-  #LIBS = 
+  #FFLAGS = -O3 -x=host -ipo -logo
+  #FFLAGS = -O3 -x=host -logo
+  #EFLAGS = -O2 -x=host -logo
   #------------------------------------------------------------------------------------------------
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #----For Debugging under ifort:
@@ -150,4 +152,4 @@ subecis06m.o : subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
 
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod empire optmand
