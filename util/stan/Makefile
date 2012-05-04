@@ -28,5 +28,8 @@ endif
 stan: stan.f90 ../IO/*.o
 	$(FC) $(FFLAGS) $(R_8) -I ../IO/ -o stan stan.f90 ../IO/*.o
 
+chkr: chkr.f90 ../IO/*.o
+	$(FC) $(FFLAGS) $(R_8) -I ../IO/ -o chkr chkr.f90 ../IO/*.o
+
 clean:
-	rm -f stan
+	rm -f stan chkr

@@ -22,6 +22,8 @@
         stop '  STAN aborted'
     endif
 
+    call reset_mf1
+
     write(6,'(a)') ' Writing '//outfile(1:nout)
     status = write_endf_file(outfile(1:nout),endf)
     if(status .ne. 0) then
@@ -30,7 +32,39 @@
         stop '  STAN aborted'
     endif
 
-    end
+    contains
+
+    subroutine reset_mf1
+
+    ! routine to reset MAT number in MF1 comment line 3 to MAT number
+    ! in column 67:70. Also reset ENDF format number in comment line 5
+    ! to the NFOR in MF1. 
+
+    type (endf_mat), pointer :: mat
+    type (mf_1), pointer :: mf1
+    type (MF1_451), pointer :: r1
+
+    mat => endf%mat
+    do while(associated(mat))
+        mf1 => mat%mf1
+        if(.not.associated(mf1)) cycle
+        r1 => mf1%mt451
+        if(.not.associated(r1)) cycle
+        if(r1%mat .ne. mat%mat) then
+            write(6,'(a,i4)') 'Resetting MAT in MF1 comment to ',mat%mat
+            r1%mat = mat%mat
+        endif
+        if(r1%mfor .ne. r1%nfor) then
+            write(6,'(a,i4)') 'Resetting ENDF format number to ',r1%nfor
+            r1%mfor = r1%nfor
+        endif
+        mat => mat.next
+    end do
+
+    return
+    end subroutine reset_mf1
+
+    end program stanef
 
 !-----------------------------------------------------
 
