@@ -1,6 +1,6 @@
-#$Rev: 2823 $
+#$Rev: 2826 $
 #$Author: gnobre $
-#$Date: 2012-05-04 18:14:10 +0200 (Fr, 04 Mai 2012) $
+#$Date: 2012-05-04 20:13:19 +0200 (Fr, 04 Mai 2012) $
 
 # set default fortran compiler:
 
@@ -152,4 +152,7 @@ subecis06m.o : subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
 
 clean:
+	rm -f *.o *.mod
+
+cleanall:
 	rm -f *.o *.mod empire optmand
