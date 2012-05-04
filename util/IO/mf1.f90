@@ -39,6 +39,9 @@ module ENDF_MF1_IO
         integer nver                              ! library version number
         real temp                                 ! temp for Doppler broadened evals.
         integer ldrv                              ! special derived material flag. 0=primary
+	integer mat                               ! MAT number from comment record 3, chars 32:35. should = MAT
+        integer irev                              ! revision number from comment record 3, chars 54:56
+        integer mfor                              ! format number from comment record 5, char 12. should = nfor
         integer nwd                               ! number of records of descriptive text
         integer nxc                               ! number of records in directory
         character*11 zsymam                       ! char rep of material
@@ -49,6 +52,8 @@ module ENDF_MF1_IO
         character*10 ddate                        ! orig distribution date
         character*10 rdate                        ! date & number of last revision.
         character*8 endate                        ! NNDC master file entry date.
+        character*17 libtyp                       ! library type & version (eg, 'ENDF/B-VII.1')
+        character*61 sublib                       ! sub-library identifier, (eg, 'INCIDENT NEUTRON DATA')
         character*66, pointer :: cmnt(:)          ! lines of ascii comments (nwd)
         type (MF1_sect_list), pointer :: dir(:)   ! "directory" of sections (nxc)
     end type
@@ -215,7 +220,7 @@ module ENDF_MF1_IO
 
     type (mf1_451), intent(out) :: r1
 
-    integer i,n
+    integer i,n,ios
     real xx
 
     call get_endf(r1%za, r1%awr, r1%lrp, r1%lfi, r1%nlib, r1%nmod)
@@ -239,10 +244,25 @@ module ENDF_MF1_IO
     r1%alab   = r1%cmnt(1)(12:22)
     r1%edate  = r1%cmnt(1)(23:32)
     r1%auth   = r1%cmnt(1)(34:66)
+
     r1%ref    = r1%cmnt(2)(2:22)
     r1%ddate  = r1%cmnt(2)(23:32)
     r1%rdate  = r1%cmnt(2)(34:43)
     r1%endate = r1%cmnt(2)(56:63)
+
+    r1%libtyp = r1%cmnt(3)(5:21)
+    read(r1%cmnt(3)(32:35),'(i4)',iostat=ios) r1%mat
+    if(ios .ne. 0) r1%mat = 0
+    if(r1%cmnt(3)(45:52) .eq. 'REVISION') then
+        read(r1%cmnt(3)(54:56),*,iostat=ios) r1%irev
+        if(ios .ne. 0) r1%irev = 0
+    else
+        r1%irev = 0
+    endif
+
+    r1%sublib = r1%cmnt(4)(6:66)
+    read(r1%cmnt(5)(12:12),'(i1)',iostat=ios) r1%mfor
+    if(ios .ne. 0) r1%mfor = 0
 
     return
     end subroutine read_451
@@ -485,7 +505,7 @@ module ENDF_MF1_IO
 
     type (mf1_451), intent(in) :: r1
 
-    integer i,nmod
+    integer i,nmod,ios
 
     ! reset nmod using directory modifcation numbers
 
@@ -499,10 +519,68 @@ module ENDF_MF1_IO
     call write_endf(r1%awi, r1%emax, r1%lrel, 0, r1%nsub, r1%nver)
     call write_endf(r1%temp, zero, r1%ldrv, 0, r1%nwd, r1%nxc)
 
-    do i = 1,r1%nwd
+    ! remake comments 1-5 since they contain standardized fields
+
+    endline(1:11) = r1%zsymam
+    endline(12:22) = r1%alab
+    endline(23:32) = r1%edate
+    endline(34:66) = r1%auth
+    call put_endline
+
+    endline = ' '
+    endline(2:22) = r1%ref
+    endline(23:32) = r1%ddate
+    endline(34:43) = r1%rdate
+    endline(56:63) = r1%endate
+    call put_endline
+
+    endline = '----'
+    endline(5:21) = r1%libtyp
+    endline(23:30) = 'MATERIAL'
+    write(endline(32:35),'(i4)',iostat=ios) r1%mat
+    if(ios .ne. 0) then
+        write(erlin,*) 'Error writing MAT in MF1/451 comment line 3'
+        call endf_error(erlin)
+    endif
+    if(r1%irev .gt. 0) then
+        endline(45:52) = 'REVISION'
+        if(r1%irev .lt. 10) then
+            write(endline(54:54),'(i1)',iostat=ios) r1%irev
+        else if(r1%irev .lt. 100) then
+            write(endline(54:55),'(i2)',iostat=ios) r1%irev
+        else if(r1%irev .lt. 1000) then
+            write(endline(54:56),'(i3)',iostat=ios) r1%irev
+        else
+            write(erlin,*) 'Revision number too large in MF1/451, line 3:',r1%irev
+            call endf_error(erlin)
+        endif
+        if(ios .ne. 0) then
+            write(erlin,*) 'Error writing revision number in MF1/451 comment line 3'
+            call endf_error(erlin)
+        endif
+    endif
+    call put_endline
+
+    endline = '-----'
+    endline(6:66) = r1%sublib
+    call put_endline
+
+    endline = '------ENDF-X FORMAT'
+    write(endline(12:12),'(i1)',iostat=ios) r1%mfor
+    if(ios .ne. 0) then
+        write(erlin,*) 'Error writing format number in MF1/451 comment line 5'
+        call endf_error(erlin)
+    endif
+    call put_endline
+
+    ! the rest of the comment lines are free-format strings
+
+    do i = 6,r1%nwd
         endline(1:66) = r1%cmnt(i)
         call put_endline
     end do
+
+    ! write directory at end
 
     do i = 1,r1%nxc
         call write_endf(0,r1%dir(i)%mf, r1%dir(i)%mt, r1%dir(i)%nc, r1%dir(i)%mod)
