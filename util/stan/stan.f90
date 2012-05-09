@@ -16,7 +16,7 @@
 
     write(6,'(a)') ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
-    if(status .ne. 0) then
+    if(status /= 0) then
         write(6,*) ' Error reading '//infile(1:nin)
         write(6,*) ' No output file written'
         stop '  STAN aborted'
@@ -26,7 +26,7 @@
 
     write(6,'(a)') ' Writing '//outfile(1:nout)
     status = write_endf_file(outfile(1:nout),endf)
-    if(status .ne. 0) then
+    if(status /= 0) then
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
         stop '  STAN aborted'
@@ -50,15 +50,15 @@
         if(.not.associated(mf1)) cycle
         r1 => mf1%mt451
         if(.not.associated(r1)) cycle
-        if(r1%mat .ne. mat%mat) then
+        if(r1%mat /= mat%mat) then
             write(6,'(a,i4)') 'Resetting MAT in MF1 comment to ',mat%mat
             r1%mat = mat%mat
         endif
-        if(r1%mfor .ne. r1%nfor) then
+        if(r1%mfor /= r1%nfor) then
             write(6,'(a,i4)') 'Resetting ENDF format number to ',r1%nfor
             r1%mfor = r1%nfor
         endif
-        mat => mat.next
+        mat => mat%next
     end do
 
     return
@@ -90,38 +90,38 @@
     call getarg(i,cmd)
     len = len_trim(cmd)
 
-    do while(len .gt. 0)
+    do while(len > 0)
 
-       if(cmd(1:len) .eq. '-o') then
+       if(cmd(1:len) == '-o') then
 
            i = i + 1
            call getarg(i,outfile)
            nout = len_trim(outfile)
-           if((nout .le. 0) .or. (outfile(1:1) .eq. '-')) then
+           if((nout <= 0) .or. (outfile(1:1) == '-')) then
                write(6,20) char(7),' Error parsing output filename'
                call abort_parsing
            endif
 
-       else if(cmd(1:len) .eq. '-cm') then
+       else if(cmd(1:len) == '-cm') then
 
            write(6,10) ' Ignoring MAT numbers that change while processing materials'
            call set_ignore_badmat(.true.)
 
-       else if(cmd(1:len) .eq. '-cf') then
+       else if(cmd(1:len) == '-cf') then
 
            write(6,10) ' Ignoring MF numbers that change while processing materials'
            call set_ignore_badmf(.true.)
 
-       else if(cmd(1:len) .eq. '-ct') then
+       else if(cmd(1:len) == '-ct') then
 
            write(6,10) ' Ignoring MT numbers that change while processing materials'
            call set_ignore_badmt(.true.)
 
-       else if(cmd(1:len) .eq. '-v') then
+       else if(cmd(1:len) == '-v') then
 
            call set_io_verbose(.true.)
 
-       else if(cmd(1:len) .eq. '-h') then
+       else if(cmd(1:len) == '-h') then
 
            write(6,10)
            write(6,10) ' stan   version 1.0'
@@ -149,7 +149,7 @@
            write(6,10)
            call endf_quit(0)
 
-       else if(cmd(1:1) .eq. '-') then
+       else if(cmd(1:1) == '-') then
 
            write(6,20) char(7)//' Unknown option : ', cmd(1:len)
            call abort_parsing
@@ -166,7 +166,7 @@
            i = i + 1
            call getarg(i,cmd)
            len = len_trim(cmd)
-           if(len .gt. 0) then
+           if(len > 0) then
                write(6,20) char(7),' Too many parameters specified on command line'
                call abort_parsing
            endif
@@ -179,7 +179,7 @@
 
     end do
 
-    if(nin .eq. 0) then
+    if(nin == 0) then
         write(6,10) ' Input ENDF file not specified'
         call abort_parsing
     endif
@@ -190,13 +190,13 @@
         call abort_parsing
     endif
 
-    if(nout .eq. 0) then
+    if(nout == 0) then
        i = nin
-       do while(i .ge. 1)
-           if(infile(i:i) .eq. '.') exit
+       do while(i >= 1)
+           if(infile(i:i) == '.') exit
            i = i - 1
        end do
-       if(i .eq. 0) i = nin+1
+       if(i == 0) i = nin+1
        outfile(1:i-1) = infile(1:i-1)
        outfile(i:i+3) = '.STN'
        nout = i+3
