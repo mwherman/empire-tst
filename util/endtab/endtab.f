@@ -18,6 +18,7 @@ C-V        - Increase MPT from 200000 to 1200000.
 C-V  11/11 Print more digits for energy to curves file.
 C-V  12/02 Fix upper energy cutoff
 C-V  12/03 Fix processing of nu-bar
+C-V  12/05 Increase precision of argument printout for 1E6<E<1e8
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -546,17 +547,18 @@ C*
   961 FORMAT(40X,'Searching for MT',I5,'  MF',I2,'  Mat',F8.1)
       END
       SUBROUTINE CH11PK(CH,R)
-C-Title  : CH8PCK subroutine
+C-Title  : CH11PCK subroutine
 C-Purpose: Write a real number R into CH string, 11 characters long
 C-Author : A.Trkov, Institute Jozef Stefan, Ljubljana, Slovenia
 C-Version 2011
+C-V  12/05 Increase precision of argument printout for 1E6<E<1e8
       CHARACTER*11 CH
       DOUBLE PRECISION R,F,AR
       IF( R .NE. 0) GO TO 10
       CH ='         0'
       RETURN
    10 AR =ABS(R)
-      IF( AR .GE. 1.E-2 .AND. AR .LT. 1.E6) GO TO 20
+      IF( AR .GE. 1.E-2 .AND. AR .LT. 1.E8) GO TO 20
       F=R
       M=0
    12 IF(ABS(F).LT.10) GO TO 14
@@ -571,36 +573,36 @@ C-Version 2011
       IF(IABS(M).LT.10) WRITE(CH(10:11),22) M
       IF(IABS(M).GE.10) WRITE(CH( 9:11),23) M
       RETURN
-   20 IF( AR .GT.  9.99999999) GO TO 30
+   20 IF( AR .GT.  9.99999999D0) GO TO 30
       WRITE(CH,21) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   30 IF( AR .GT.  99.9999999) GO TO 40
+   30 IF( AR .GT.  99.9999999D0) GO TO 40
       WRITE(CH,31) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   40 IF( AR .GT.  999.999999) GO TO 50
+   40 IF( AR .GT.  999.999999D0) GO TO 50
       WRITE(CH,41) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   50 IF( AR .GT.  9999.99999) GO TO 60
+   50 IF( AR .GT.  9999.99999D0) GO TO 60
       WRITE(CH,51) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   60 IF( AR .GT.  99999.9999) GO TO 70
+   60 IF( AR .GT.  99999.9999D0) GO TO 70
       WRITE(CH,61) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   70 IF( AR .GT.  999999.999) GO TO 80
-      WRITE(CH,61) R
+   70 IF( AR .GT.  999999.999D0) GO TO 80
+      WRITE(CH,71) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   80 IF( AR .GT.  9999999.99) GO TO 90
-      WRITE(CH,61) R
+   80 IF( AR .GT.  9999999.99D0) GO TO 90
+      WRITE(CH,81) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
-   90 IF( AR .GT.  99999999.9) GO TO 100
-      WRITE(CH,61) R
+   90 IF( AR .GT.  99999999.9D0) GO TO 100
+      WRITE(CH,91) R
 C...  IF( CH(11:11) .NE. '0' ) RETURN
       RETURN
   100 IR=R+0.5
