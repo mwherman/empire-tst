@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2820 $
+Ccc   * $Rev: 2831 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-05-03 07:18:20 +0200 (Do, 03 Mai 2012) $
+Ccc   * $Date: 2012-05-11 01:05:36 +0200 (Fr, 11 Mai 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1845,7 +1845,6 @@ C
 
       return
       end
-
       subroutine sensitivity
 Ccc
 Ccc   ********************************************************************

@@ -1,6 +1,6 @@
-cc   * $Rev: 2816 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 08:49:11 +0200 (Mo, 30 Apr 2012) $
+cc   * $Rev: 2831 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-05-11 01:05:36 +0200 (Fr, 11 Mai 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -187,7 +187,7 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
      &      '  Direct    ','Pre-equil   ','Coup-Chan   ',
      &      ' DWBA-disc  ','DWBA-cont   ','   MSD      ',
      &      '    MSC     ','  PCROSS    ','   HMS      '
-C	&      '  csinel    '
+C    &      '  csinel    '
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
@@ -205,7 +205,7 @@ C-----
 C-----Prepare Giant Resonance parameters - systematics
 C-----
       CALL WHERE(IZA(0),nnuc,iloc)
-	if(iloc.eq.0) then
+      if(iloc.eq.0) then
         GDRpar(1,0) = GDRpar(1,nnuc) 
         GDRpar(2,0) = GDRpar(2,nnuc) 
         GDRpar(3,0) = GDRpar(3,nnuc) 
@@ -216,7 +216,7 @@ C-----
         GDRpar(8,0) = GDRpar(8,nnuc) 
         GDRpar(9,0) = GDRpar(9,nnuc) 
         GDRpar(10,0) = GDRpar(10,nnuc) 
-	endif
+      endif
 
       CALL ULM(0) ! target
 C-----
@@ -439,7 +439,7 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                READ (46,*,END = 1400) popread
                READ (45,*,END = 1400)     ! Skipping level identifier line
              ENDIF
-	     ELSEIF(MSD.eq.0)then
+           ELSEIF(MSD.eq.0)then
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0)
@@ -584,7 +584,7 @@ C
           WRITE (8,99025) 
      &     ((j - 1)*angstep,ELAred*elada(j),j = imint,imaxt)
         ENDDO
-	ENDIF
+      ENDIF
 
 99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
@@ -761,7 +761,7 @@ C-----
 C-----Calculate MSD contribution
 C-----
       corrmsd = 1.0
-	xsinl   = 0.d0
+      xsinl   = 0.d0
       IF (MSD.NE.0 .AND. EINl.GE.EMInmsd) THEN
 C
 C--------call ORION
@@ -988,7 +988,7 @@ C--------
          CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
          CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
          xsmsc = xsmsc + CSMsc(0) + CSMsc(1) + CSMsc(2)
-C        if(nvwful) goto 1500	      
+C        if(nvwful) goto 1500
 C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
       ENDIF
 
@@ -1043,7 +1043,7 @@ C        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))')
 C    &     'PE + Direct contribution       ',
 C    &                               sngl((1.d0-corrmsd)*CSFus),' mb',
 C    &                               sngl((1.d0-corrmsd)*100),' %'
-	   ftmp = xsinl + totemis + tothms + xsmsc
+         ftmp = xsinl + totemis + tothms + xsmsc
          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
      &     'Total pre-equilibrium          ',
      &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
@@ -1393,7 +1393,7 @@ C--------Calculate compound nucleus level density at saddle point
          IF (FISshi(nnuc).EQ.1.) THEN
             IF (FISsil(nnuc)) THEN
                CALL ROEMP(nnuc,1.D0,0.0D0)
-	         IF(FIRst_ein) WRITE (8,*)
+               IF(FIRst_ein) WRITE (8,*)
      &         ' WARNING: For HI reactions (FISSHI  1), LD model at sadd
      &les is EGSM'
                IF (IOUt.EQ.6) THEN
@@ -2227,11 +2227,11 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
       xspreequ = xsinl + xsmsc + totemis + tothms
 
       WRITE(107,'(G10.5,1P,(20E12.5))') EINl, 
-     &     TOTcs*TOTred*TOTcorr,					  !total = reaction + shape-el
+     &     TOTcs*TOTred*TOTcorr,                    !total = reaction + shape-el
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont, !reaction
      &     ELAcs*ELAred,  4.*PI*ELCncs,             !shape_el,CN_el
      &     CSFus*corrmsd - tothms - xsmsc,          !CN-formation 
-     &     xsdirect, xspreequ, 					  !direct, preequil
+     &     xsdirect, xspreequ,                      !direct, preequil
      &     SINlcc*FCCred, SINl*FCCred, SINlcont,    !CC_inl,DWBA_dis,DWBA_cont  
      &     xsinl,xsmsc,totemis, tothms              !MSD,MSC,PCROSS,HMS
 
@@ -2503,7 +2503,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
                         ENDDO
                         DO ie = 1, nspec - 1
                                             ! MT=849 (continuum)
-	                     if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) 
+                           if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0)
      &                          cycle
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                        *DE/recorp,
@@ -2518,7 +2518,7 @@ C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
      &                            0.d0
                   ELSE  !all other emissions (continuum and levels together)
                         DO ie = 1, nspec - 1
-	                     if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) 
+                           if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0)
      &                          cycle
                            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
      &                     *DE/recorp,
@@ -2582,7 +2582,7 @@ C             Assumed maximum energy of neutrons from fragments will be 25 MeV
 C
 C             Special grid for printing, ONLY VALID for deltae_pfns = 0.1d0 
 C
-	        csetmp(1) = enepfns(1)
+              csetmp(1) = enepfns(1)
               csetmp(2) = 4.d-11
               csetmp(3) = 7.d-11
               csetmp(4) = 1.d-10
@@ -2764,7 +2764,7 @@ C-----
         eneutr = 0.d0
         do ie =2, nepfns
           fmed = 
-     &	(csepfns(ie)+csepfns(ie-1))*0.5*(enepfns(ie)-enepfns(ie-1))
+     &    (csepfns(ie)+csepfns(ie-1))*0.5*(enepfns(ie)-enepfns(ie-1))
           eneutr = eneutr + fmed*(enepfns(ie)+enepfns(ie-1))*0.5d0
           ftmp = ftmp + fmed
         enddo
@@ -2915,10 +2915,10 @@ C     ENDDO
 
          DO nejc = 0, NEJcm
             csemax = 0.d0
-	      ftmp = 0.d0
+            ftmp = 0.d0
             DO i = 1, NDEX
               csemax = DMAX1(CSE(i,nejc,0),csemax)
-	        ftmp   = ftmp + CSE(i,nejc,0)
+              ftmp   = ftmp + CSE(i,nejc,0)
             ENDDO
             if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
  
@@ -2932,10 +2932,10 @@ C     ENDDO
             WRITE (8,'(11x,''**********************'')')
             DO nejc = 0, NEJcm
               csemax = 0.d0
-	        ftmp = 0.d0
+              ftmp = 0.d0
               DO i = 1, NDEX
                 csemax = DMAX1(CSEt(i,nejc),csemax)
-	          ftmp   = ftmp + CSEt(i,nejc)
+                ftmp   = ftmp + CSEt(i,nejc)
               ENDDO
               if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
 
@@ -2984,7 +2984,7 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  '('' * Calculated nonelastic cross section            '',G13.6,
      &              '' mb  '')')
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont
-  	    IF(FISsil(1)) WRITE (8,
+            IF(FISsil(1)) WRITE (8,
      &  '('' * Calculated fission cross section               '',G13.6,
      &              '' mb  '')') TOTcsfis
         WRITE (8,
@@ -4049,7 +4049,7 @@ C
            ENDDO
          ENDIF
 
-	   Sumfis = TF(1)*TFB/(TF(1) + TFB)
+         Sumfis = TF(1)*TFB/(TF(1) + TFB)
          
          DENhf = DENhf + Sumfis
  

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Rev: 2831 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-05-11 01:05:36 +0200 (Fr, 11 Mai 2012) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -40,7 +40,7 @@ C
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
       
-	DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
+      DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
       DOUBLE PRECISION BETagfl2, S2Plusgfl
       INTEGER NG
 
