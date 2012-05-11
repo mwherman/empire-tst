@@ -1,6 +1,6 @@
-cc   * $Rev: 2831 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-05-11 01:05:36 +0200 (Fr, 11 Mai 2012) $
+cc   * $Rev: 2832 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-05-11 17:19:33 +0200 (Fr, 11 Mai 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -176,7 +176,8 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+4,
      &      int(Z(0)), SYMb(0), int(A(0))
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
-     &       '  Elastic   ','  Reaction  ','  Fission   ',
+C    &       '  Elastic   ','  Reaction  ','  Fission   ',
+     &       '  Elastic   ','  Nonelast  ','  Fission   ',
      &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
 
         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') 15,
@@ -226,7 +227,10 @@ C-----
 C     Total cross section is set to absorption cross section
 C     for photon induced reactions (to process them in EMPEND)
 C
-      IF (INT(AEJc(0)).EQ.0) TOTcs = CSFus
+      IF (INT(AEJc(0)).EQ.0) then
+	  TOTcs = CSFus
+	  ELAcs = 0.d0
+	ENDIF
 C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
 C-----Locate position of the projectile among ejectiles
@@ -830,8 +834,8 @@ C        xsinl is calculated by MSD
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis)
       ENDIF          ! PCRoss done
-
-      IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. .AND. NPRoject.gt.0
+                                                     ! To include inel for (g,x)
+      IF ((xsinl+totemis+SINl+SINlcc+SINlcont).gt.0. !.AND. NPRoject.gt.0 
      &    .AND. NREs(NPRoject).GE.0 ) THEN
 C--------Print inelastic PE double differential cross sections
          nejc = NPRoject
@@ -952,6 +956,7 @@ C----------Add PE contribution to energy spectra (angle int.)
 C----------Add PE contribution to the total NEJC emission
            CSEmis(i,1) = CSEmis(i,1) + CSMsd(i)
          ENDDO
+C
       ENDIF
       tothms = 0.d0
 C-----
@@ -2017,7 +2022,7 @@ C          ENDIF
          TOTcsfis = TOTcsfis + CSFis
 C--------Add compound elastic to shape elastic before everything falls
 C--------down on the ground state
-9876     IF (nnuc.EQ.1 .AND. INT(AEJc(0)).NE.0
+9876     IF (nnuc.EQ.1 ! .AND. INT(AEJc(0)).NE.0
      &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
            WRITE (8,*)
            WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
@@ -2218,8 +2223,8 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
       WRITE(41,'(G10.5,1P,(95E12.5))') EINl, TOTcs*TOTred*TOTcorr,
-     &     ELAcs*ELAred + 4.*PI*ELCncs,
-     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont,
+     &     ELAcs*ELAred + 4.*PI*ELCncs,			
+     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont - 4.*PI*ELCncs, ! Comp elast substracted from reaction
      &     TOTcsfis, CSPrd(1), csinel,
      &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
