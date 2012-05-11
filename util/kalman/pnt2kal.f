@@ -283,11 +283,12 @@ c       Writing while converting emitted energy from eV to MeV
 
 
 
-C     Writing Kalman input (to be thrown into file 'KALMAN.INP')
+C     Writing Kalman input (file 'KALMAN.INP')
 C     (based on c4tokal.f)
-      WRITE(6,*)  'INPUT'
-      WRITE(6,300) MS,NPARAM,0,0,1,1.0,0.0,0.0
-      WRITE(6,310)(I,I=1,NPARAM)
+      OPEN(60,file='KALMAN.INP')
+      WRITE(60,*)  'INPUT'
+      WRITE(60,300) MS,NPARAM,0,0,1,1.0,0.0,0.0
+      WRITE(60,310)(I,I=1,NPARAM)
 300   FORMAT(5I5,5X,3E10.3)
 310   FORMAT(14I5)
       do iexp=1, NEXP
@@ -296,15 +297,15 @@ c       in case there are more reactions/MTs in xsec and sensitivity files. In t
 c       it should later on correspond to additional incident energies. It is the index of 
 c       column that is being fitted (disregarding the first one, obviously, since it corresponds to the energy) 
 c       write(6,350) 4, 1 
-        write(6,350) 1, 1 
+        write(60,350) 1, 1 
 350     format(2I5)
 c       Again, the line below should also be modified when this code is generalized to handle 
 c       additional incident energies. (see line 125 of c4tokal (rev. 2719)
         if(MT1.eq.EXPDATA(iexp)%MT.and.nex.eq.1) then
-          write(6,360) 1.0, EXPDATA(iexp)%REF
+          write(60,360) 1.0, EXPDATA(iexp)%REF
 360       format(1PE10.3,5X,A25)
         else
-          write(6,370) 0.0
+          write(60,370) 0.0
 370       format(1PE10.3)
         endif
 
@@ -317,6 +318,7 @@ c       Writing in fort.75 for plotting of experimental data
 400     FORMAT(3(1X,E12.5),I4)
         enddo
       enddo
+      CLOSE(60)
 
 
 

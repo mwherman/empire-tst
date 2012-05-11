@@ -108,8 +108,8 @@ then
   $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
 else
   echo  "Running pnt2kal"
-  $EMPIREDIR/util/kalman/pnt2kal < INPUT.D > KALMAN.INP
-#exit
+  $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
+# exit
 fi
 
 
