@@ -198,8 +198,8 @@ The following codes are incorporated in the present version of EMPIRE:
 
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [ECIS06] Coupled-Channels\index{Coupled-Channels}
-and DWBA\index{DWBA} code by J. Raynal~\cite{ECIS},
-\item[OPTMAN] Coupled-Channels code with soft-rotor capability by Soukhovitskii \emph{et al.}~\cite{OPTMAN}
+and DWBA\index{DWBA} code by J. Raynal~\cite{Raynal70,Raynal72},
+\item[OPTMAN] Coupled-Channels code with soft-rotor capability by Soukhovitskii \emph{et al.}~\cite{OPTMAN1,OPTMAN3,OPTMAN3}
 \item [CCFUS] simplified Coupled-Channels calculation
 of HI fusion cross section by C.H. Dasso and S. Landowne~\cite{CCFUS},
 \item [{ORION}] TUL\index{TUL}~\cite{TUL}
@@ -309,7 +309,7 @@ energy.
 
 For projectiles with mass numbers $A<5$ the transmission coefficients
 entering Eq.~\ref{fusion} are calculated using optical model routine
-ECIS06\cite{ECIS} unless an external file FUSION exists. In the latter
+ECIS06\cite{Raynal70,Raynal72} unless an external file FUSION exists. In the latter
 case, the spin distribution of the Compound Nucleus is constructed
 from this file.
 
@@ -406,9 +406,9 @@ cross section is specified in the input, then the code adjusts $l_{cr}$
 in order to reproduce the requested value. 
 
 
-\section{Coupled-Channels\index{Coupled-Channels} Code ECIS\index{ECIS}}
+\section{Coupled-Channels\index{Coupled-Channels} Code ECIS\index{Raynal70,Raynal72}}
 
-ECIS \cite{ECIS} is a well known and highly respected code for calculations
+ECIS \cite{Raynal70,Raynal72} is a well known and highly respected code for calculations
 within the generalized optical model and Coupled-Channels model (CC).
 These are important for modeling reactions on deformed nuclei and,
 in particular, for the correct description of a strong population
@@ -513,7 +513,7 @@ to investigate nucleon-nucleus interaction mechanisms and as a basic tool
 for nuclear data evaluation for reactor design and other applications, being 
 widely used in BROND-2 evaluations~\cite{Blokhin91}. In addition to standard
 rigid rotator and harmonic vibrator coupling schemes encoded in widely-used 
-ECIS \cite{Raynal70} code (which is already included in EMPIRE), 
+ECIS \cite{Raynal70,Raynal72} code (which is already included in EMPIRE), 
 level-coupling schemes based on a non-axial soft-rotator model are included for 
 even-even nuclei in OPTMAN. This allows accounting of stretching of soft
 nuclei by rotations, which results in change of equilibrium deformations for
@@ -532,7 +532,7 @@ sukhnd2001U8}, but can be also applied
 very successfully even to a very light nucleus, namely $^{12}$C \cite%
 {chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
 vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite%
-{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. many of those soft-rotor
+{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. Many of those soft-rotor
 potentials are available within the RIPL library, being therefore available for EMPIRE 
 calculations, once OPTMAN was included. 
 
@@ -546,7 +546,7 @@ states and therefore, making possible to derive Lane consistent potentials inclu
 new Lane-consistent Coulomb correction. 
 
 A complete OPTMAN\ code's manual \cite%
-{OPTMANmanual2005} and its newest extension \cite{OPTMANmanual2008} give details
+{OPTMAN1,OPTMAN2} and its newest extension \cite{OPTMAN3} give details
 of the soft-rotator theory, physical ideas and computation algorithms developed
 and incorporated into OPTMAN code, and description of input and output files, 
 allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
@@ -555,7 +555,7 @@ EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing
 
 
 The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
-withint the EMPIRE system allowing the use of state-of-the-art optical model potentials
+within the EMPIRE system allowing the use of state-of-the-art optical model potentials
 based on soft-rotor couplings in EMPIRE theoretical modeling.
 
 \section{Photoabsorption}
@@ -1637,8 +1637,6 @@ calculations of the cluster formation probability by Iwamoto and Harada~\cite%
 
 
 
-
-
 Fig.~\ref{goldna} illustrates the essential improvement brought by the
 Iwamoto-Harada model to the interpretation of $\alpha$-particle emission
 in the $^{197}$Au(n,$\alpha $) reaction.
@@ -2364,7 +2362,7 @@ incident projectile justifies neglect of dynamical effects.
 
 The phenomenological version of the Generalized Superfluid Model (GSM) is 
 characterized by a phase 
-transition from superfluid behaviour at low energy~\cite{75IS,83I}, 
+transition from superfluid behaviour at low energy~\cite{ignaa,83I}, 
 where pairing correlations strongly influence the
 level density, to a high energy region which is described by
 the FGM. Thus, the GSM resembles the GC to the extent that the model
@@ -2528,7 +2526,7 @@ the rotational and vibrational enhancements ($K_{rot}$, $K_{vib}$) and their dam
 \\ 
 {\bf Rotational enhancement.} In the adiabatic approximation, the rotational enhancement of the level
 density depends on the nuclear shape symmetry and can be written as \cite%
-{74B}
+{BM}
 \begin{equation}
 K_{rot} = \left\{
 \begin{array}{ll}
@@ -2541,7 +2539,7 @@ This formula is valid if the mirror and axial symmetry
 of a deformed nuclei is assumed. The most stable nuclei of the rare-earth elements
  ($150 \le A\le 190$) and the actinides $A\ge 230$ are of this shape. For non-axial
 forms the rotational enhancement of the level density becomes greater \cite%
-{74B} (see fission level densities in Section~\ref{fission}).
+{BM} (see fission level densities in Section~\ref{fission}).
 \\
 Over the previous twenty years, some microscopic models have been developed
 to consider collective effects in highly excited nuclei. The results of all
@@ -3008,7 +3006,7 @@ in EMPIRE is the  microscopic combinatorial approach developed during the RIPL-3
 project.  The method consists in using
 single-particle level schemes obtained from constrained axially symmetric
 Hartree-Fock-Bogoliubov  method (HFBM) based on the BSk14 Skyrme force \cite%
-{bsk14} to construct incoherent particle-hole (ph) state densities $\omega
+{gsp07} to construct incoherent particle-hole (ph) state densities $\omega
 _{ph}(E_x,M,\pi )$ as functions of the excitation energy $E_x$, the spin
 projection $M$ (on the intrinsic symmetry axis of the nucleus) and the
 parity $\pi $. It is worth mentioning that this $HFB+BSk14$ method is also
@@ -3036,7 +3034,7 @@ phonons' energies. These expressions  are
 \omega _{3}\mathrm{[MeV]}=100A^{-5/6}/(1+0.05E_{shell}),  \label{w3theo}
 \end{equation}%
 \noindent for the octupole excitations. The hexadecapole mode can be
-expressed relative to the quadrupole mode~\cite{ig85}, leading to a similar
+expressed relative to the quadrupole mode, leading to a similar
 expression, i.e, 
 \begin{equation}
 \omega _{4}\mathrm{[MeV]}=160A^{-5/6}/(1+0.05E_{shell})~.  \label{w4theo}
@@ -3624,7 +3622,7 @@ for two modes known as super-long symmetric (SL) and standard asymmetric
 %
 \begin{figure}[htbp]
 \begin{center}
-\includegraphics[width=0.7\paperwidth]{emp-fis-mod.eps}
+\includegraphics[width=0.5\paperwidth]{emp-fis-mod.eps}
 \caption{Double-humped fission barriers used in multi-modal calculations.}
 \label{fis-multimod}
 \end{center}
@@ -3649,7 +3647,7 @@ HFB numerical barriers (see next paragraph) for 59 actinides.
 
 
 \paragraph{(ii) Numerical barriers}
-The fission paths have been estimated within the HFB model with BSk14 Skyrme force \cite{Goriely:07-mass}
+The fission paths have been estimated within the HFB model with BSk14 Skyrme force \cite{gsp07}
 for all nuclei with $90 \le Z \le 102$ lying between the valley of $\beta$-stability and the neutron 
 drip lines, i.e about 1000 nuclei.  Generally, for most of the neutron-rich nuclei, three 
 barriers are found.
@@ -4419,19 +4417,19 @@ is assumed to separate under-damped and over-damped motion.
 
 \subsection{Prompt Fission Neutrons}
 \label{pfns}
-The Madland-Nix or Los Alamos model~\cite{Madland:1982a} constitutes the basis for the evaluation
+The Madland-Nix or Los Alamos model~\cite{Madland:82} constitutes the basis for the evaluation
 of prompt fission neutrons spectra in most current evaluated nuclear data libraries.
 Through a relatively simple and compact formalism, with only a handful of adjustable parameters, this model
 has been very successful in predicting the prompt neutrons spectra for neutron-induced as well as 
 spontaneous fission reactions for a wide range of nuclei and incident neutron energies. 
 More refined or/and elaborate versions of the Los Alamos model have been developed in recent years for 
 evaluation purposes, but they all rely on the implementation of this model in the first place. 
-The Los Alamos (LA) model is described at length in Ref.~\cite{Madland:1982a},
+The Los Alamos (LA) model is described at length in Ref.~\cite{Madland:82},
 and we will only summarize its main results here. 
 
 In this model, the prompt fission neutron spectrum 
 $N(E)$ is calculated as a function of the fissioning nucleus and its excitation energy. 
-Weisskopf statistical evaporation theory~\cite{Weisskopf:1937a} is used to explain the emission of 
+Weisskopf statistical evaporation theory~\cite{Weisskopf:37} is used to explain the emission of 
 neutrons from an excited CN at a given temperature $T$, and a triangular distribution of initial fission 
 fragments residual temperatures is assumed.
 
@@ -4656,7 +4654,7 @@ A methodology for evaluating cross section covariance data has therefore been de
 system. The methodology covers the thermal energy, resolved resonance, unresolved
 resonance and fast neutron regions and builds on the following major components:
 \begin{itemize}
-\item Nuclear reaction model code EMPIRE~\cite{empire:2007},
+\item Nuclear reaction model code EMPIRE,
 \item Atlas of Neutron Resonances~\cite{Mughabghab:06},
 \item Kalman filter code~\cite{Kawano:97} and Monte Carlo sampling~\cite{Smith:04}.
 \end{itemize}
@@ -4667,7 +4665,7 @@ modeling low- to-intermediate- energy nuclear reactions. It
 incorporates an extensive set of nuclear reaction models able to
 describe all relevant reaction mechanisms, each of them conveniently
 coupled to the up-to-date library of input model
-parameters~\cite{RIPL-3}. The code is also suitable for massive
+parameters~\cite{RIPL3}. The code is also suitable for massive
 calculations, is easy to use, has readily available default input
 values for all parameters, and is applicable to  a wide range of
 target nuclei and incident neutron energies from about 1 keV to 150 MeV.
@@ -7780,6 +7778,7 @@ in an output):
 \item \ldots{}
 \end{itemize}
 \end{itemize}
+\end{itemize}
 
 \subsection{{*}.out (OUTPUT.DAT)}
 
@@ -8287,7 +8286,7 @@ interactively using the ZVView package of Zerkin~ \cite{ZVView}.
 %
 \begin{figure}[top]
 \begin{centering}
-\includegraphics[width=0.7\textwidth,angle=-90]{mo100n2n.ps}
+\includegraphics[width=0.9\textwidth,angle=-90]{mo100n2n.pdf}
 \par\end{centering}
 
 \caption{\label{fig: 100Mon2n}Comparison of the experimental data extracted
@@ -9825,7 +9824,7 @@ $>0$ HRTW width fluctuation correction up to the energy set by VAL.
 
 = 0 PFNS are not calculated (default)
 
-= 1 PFNS are calculated using Los Alamos model \cite{PFNS_losalamos}
+= 1 PFNS are calculated using Los Alamos model \cite{Madland:82}
 
 = 2 PFNS are calculated using Kornilov parameterization \cite{PFNS_kornilov}
 
@@ -9975,7 +9974,7 @@ UOMPAS   2.5000   24    55   2
 
 \section*{Scattering on collective levels}
 EMPIRE includes two coupled-channels codes: ECIS\index{ECIS}} and
-OPTMAN\cite{OPTMAN}. ECIS is the default optical model solver,
+OPTMAN\cite{OPTMAN1,OPTMAN2,OPTMAN3}. ECIS is the default optical model solver,
 but OPTMAN should be used for selected potentials, when soft-rotor 
 couplings are desired, as well as for actinide potentials that couple levels
 beyond the ground state rotational band.
