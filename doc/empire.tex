@@ -3787,7 +3787,7 @@ In the end, the level density at the saddle point $h$ reads:
 \end{equation}
 with the parameters entering $\rho^{EGSM}$ specific to the saddle point deformation.
 
-It should be noted that the uncertainty of above estimates is significant~\cite{80B2},
+It should be noted that the uncertainty of above estimates is significant~\cite{Bjornholm:80},
 therefore they can be modified to reproduce the experimental data in different
 energy ranges. 
 
@@ -3920,7 +3920,7 @@ mechanisms  are the direct transmission coefficient
 ($T_{d}$) and the indirect ($T_{i}$) one, respectively, the sum of their contributions representing the total
 fission coefficient ($T_{f}$).
 
-In \cite{si} is presented a recursive method to calculate the transmission coefficients through a barrier 
+In \cite{Sin:08} is presented a recursive method to calculate the transmission coefficients through a barrier 
 with $N_h$ humps and $N_w$ wells. Using the notation appropriate for recursive derivation the general
 expression for the fission coefficient is 
 \begin{equation}
@@ -4748,7 +4748,7 @@ ${\bf P}_{0}$ with ${\bf P}_{n+1}$ in Eq.~(\ref{eq:mtrx}), %
 
 \noindent The updating procedure described above is often called Bayesian,
 although Eqs.~(4-\ref{eq:mtrxp}) can be derived without any reference
-to the Bayes theorem as shown in Ref.~\cite{Muir:89}.
+to the Bayes theorem.
 
 The experimental covariance matrix, ${\bf C}_{n}^{\textrm{exp}}$,
 %for the experimental data set \textit{n} 
@@ -9826,7 +9826,7 @@ $>0$ HRTW width fluctuation correction up to the energy set by VAL.
 
 = 1 PFNS are calculated using Los Alamos model \cite{Madland:82}
 
-= 2 PFNS are calculated using Kornilov parameterization \cite{PFNS_kornilov}
+= 2 PFNS are calculated using Kornilov parameterization \cite{Kornilov:99}
 
 \item [{BENCHM}] Controls if benchmark calculation is requested. 
 
@@ -10081,8 +10081,8 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The relative uncertainty of the scaling factor in \% could be given by I1.
                 
 \item [{PFNALP}] Used in prompt fission neutron (PFN) calculations.
-                 The default parameter $\alpha$ ($\alpha_0=1$ for Madland-Nix (LA) model and
-                 $\alpha_0~0.9$ for Kornilov parameterization) will be multiplied by VAL (default: 1.).
+                 The default parameter $\alpha$ ($\alpha_0=1$ for Madland-Nix (LA) model~\cite{Madland:82} and
+                 $\alpha_0~0.9$ for Kornilov parameterization~\cite{Kornilov:99}) will be multiplied by VAL (default: 1.).
                  The values $E_f^L$ and $E_f^H$ of the average kinetic energy per nucleon
                  of the average light fragment AL and average heavy fragment AH are scaled
                  by $\alpha$. The effect of this parameter on PFNS calculations will be corerelated
@@ -10092,8 +10092,8 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
  
 \item [{PFNRAT}] Used in prompt fission neutron (PFN) calculations.
-                 The default parameter $r=T_f^L/T_f^H$ ($r_0=1$ for Madland-Nix (LA) model and
-                 $r_0=1.248$ for Kornilov parameterization) will be multiplied by VAL (default: 1.).
+                 The default parameter $r=T_f^L/T_f^H$ ($r_0=1$ for Madland-Nix (LA) model~\cite{Madland:82} and
+                 $r_0=1.248$ for Kornilov parameterization~\cite{Kornilov:99}) will be multiplied by VAL (default: 1.).
                  This parameter defines the ratio of temperatures of the light to heavy fragment.
                  Recent evidence strongly supports ~20\% higher temperature of the light fragment.\\
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
