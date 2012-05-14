@@ -199,7 +199,7 @@ The following codes are incorporated in the present version of EMPIRE:
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [ECIS06] Coupled-Channels\index{Coupled-Channels}
 and DWBA\index{DWBA} code by J. Raynal~\cite{Raynal70,Raynal72},
-\item[OPTMAN] Coupled-Channels code with soft-rotor capability by Soukhovitskii \emph{et al.}~\cite{OPTMAN1,OPTMAN3,OPTMAN3}
+\item[OPTMAN] Coupled-Channels code with soft-rotor capability by Soukhovitskii \emph{et al.}~\cite{OPTMAN1,OPTMAN2,OPTMAN3}
 \item [CCFUS] simplified Coupled-Channels calculation
 of HI fusion cross section by C.H. Dasso and S. Landowne~\cite{CCFUS},
 \item [{ORION}] TUL\index{TUL}~\cite{TUL}
@@ -309,7 +309,7 @@ energy.
 
 For projectiles with mass numbers $A<5$ the transmission coefficients
 entering Eq.~\ref{fusion} are calculated using optical model routine
-ECIS06\cite{Raynal70,Raynal72} unless an external file FUSION exists. In the latter
+ECIS06~\cite{Raynal70,Raynal72} unless an external file FUSION exists. In the latter
 case, the spin distribution of the Compound Nucleus is constructed
 from this file.
 
@@ -406,8 +406,9 @@ cross section is specified in the input, then the code adjusts $l_{cr}$
 in order to reproduce the requested value. 
 
 
-\section{Coupled-Channels\index{Coupled-Channels} Code ECIS\index{Raynal70,Raynal72}}
+\section{Coupled-Channels\index{Coupled-Channels} Codes}
 
+\subsection{Coupled-Channels Code ECIS}
 ECIS \cite{Raynal70,Raynal72} is a well known and highly respected code for calculations
 within the generalized optical model and Coupled-Channels model (CC).
 These are important for modeling reactions on deformed nuclei and,
@@ -433,26 +434,79 @@ odd-A nuclei. In these cases automatic construction of the file with
 collective levels is not possible and the user must prepare the corresponding
 file manually.
 
-Once ECIS06\index{ECIS} is invoked, the code prepares several interim
-files to be read by EMPIRE. In most cases, the code prepares two additional
-files:
+\subsection{Coupled-Channels Code OPTMAN}
+For more than twenty years, an original coupled-channels optical model code
+OPTMAN has been developed at Joint Institute of Energy and Nuclear Research
+to investigate nucleon-nucleus interaction mechanisms and as a basic tool
+for nuclear data evaluation for reactor design and other applications~\cite{OPTMAN1,OPTMAN2}, being 
+widely used in BROND-2 evaluations~\cite{Blokhin91}. In addition to standard
+rigid rotator and harmonic vibrator coupling schemes encoded in widely-used 
+ECIS \cite{Raynal70,Raynal72} code (which is already included in EMPIRE), 
+level-coupling schemes based on a non-axial soft-rotator model are included for 
+even-even nuclei in OPTMAN. This allows accounting of stretching of soft
+nuclei by rotations, which results in change of equilibrium deformations for
+excited collective states compared with that of the ground state.
+
+Calculations with OPTMAN are now possible both for neutrons and protons as
+the projectile, and the upper incident nucleon energy is extended up to 200 MeV
+\cite{tsukuba}. Current version of soft-rotator model of
+OPTMAN takes into account the non-axial quadrupole, octupole and
+hexadecapole deformations, and $\beta _{2}$, $\beta _{3}$ and $\gamma -$%
+vibrations with account of nuclear volume conservation. With this option,
+OPTMAN is able to analyze the collective level structure, E2, E3, E4 $\gamma
+-$transition probabilities and reaction data in a self-consistent manner.
+OPTMAN can be applied not only to heavy rotational nuclei  \cite{sukhjnst00,
+sukhnd2001U8}, but can be also applied
+very successfully even to a very light nucleus, namely $^{12}$C \cite%
+{chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
+vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite%
+{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. Many of those soft-rotor
+potentials are available within the RIPL library, being therefore available for EMPIRE 
+calculations, once OPTMAN was included. 
+
+Since 2005 the main efforts in the development of the OPTMAN code were
+devoted to the improvement of the optical model formalism. Dispersion 
+relationships between imaginary and real parts of the
+optical potential were included \cite{socaqu05,casoqu05}, allowing to decrease 
+significantly the number of optical parameters used. We also extended the OPTMAN code
+allowing for calculations of the (p,n) cross sections with excitation of isobaric analog
+states and therefore, making possible to derive Lane consistent potentials including a 
+new Lane-consistent Coulomb correction. 
+
+A complete OPTMAN\ code's manual \cite%
+{OPTMAN1,OPTMAN2} and its newest extension \cite{OPTMAN3} give details
+of the soft-rotator theory, physical ideas and computation algorithms developed
+and incorporated into OPTMAN code, and description of input and output files, 
+allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
+amy consult those documents. OPTMAN is called as an independent module by EMPIRE; 
+EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing channels. 
+
+
+The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
+within the EMPIRE system allowing the use of state-of-the-art optical model potentials
+based on soft-rotor couplings in EMPIRE theoretical modeling.
+
+\subsection{Input of coupled-channels Codes ECIS and OPTMAN}
+Once coupled-channels calculation is invoked, the EMPIRE system prepares 
+two additional files to contain the input needed in those calculations:
 
 \begin{description}[style=multiline,leftmargin=5cm]
-\item [{TARGET\_COLL.DAT}] collective levels and their deformations to
-be used by the rotational or vibrational CC. In the case of vibrational
-model the phonon structure of the levels is also read from this file
-(in the case of the rotational model this information is ignored).
+\item [{TARGET\_COLL.DAT}] collective levels and their structure information to
+be used by the rotational, vibrational or soft-rotor CC calculation. In 
+the case of vibrational and rotational-vibrational models the phonon structure
+of the levels is included. For soft-rotor potentials the soft-rotor hamiltonian 
+parameters are included into the file. Typical examples of collective levels' file
+for different models (both for ECIS and OPTMAN codes) are given below.
 \item [{OMPAR.DIR}] parameters of the Optical Model Potential (OMP) to
 be used in the inelastic channel (discrete collective levels). OMP
 parameters may be selected via a new keyword DIRPOT (similar to OMPOT,
 but only for the inelastic channel). This information is supplemented
-by the parameters read from the \emph{{*}-lev.col} file.
+by the parameters read from the TARGET\_COLL.DAT (\emph{{*}-lev.col}) file.
 \end{description}
-ECIS06\index{ECIS} can be invoked by the EMPIRE in three different
+ECIS06 can be invoked by the EMPIRE in three different
 ways, using input directive DIRECT. The default value (DIRECT=0) calls
 the spherical optical model and suppresses calculation of direct reactions
 to the discrete levels. The remaining options have the following meaning:
-
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{DIRECT~1.}] Population of discrete, collective levels in the inelastic
 scattering is calculated using the Coupled-Channels\index{Coupled-Channels}
@@ -505,58 +559,8 @@ S-OMP parameters in the DWBA calculations tuning inelastic cross sections
 by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.col}
 .
 \end{description}
-
-\section{Coupled-Channels Code OPTMAN}
-For more than twenty years, an original coupled-channels optical model code
-OPTMAN has been developed at Joint Institute of Energy and Nuclear Research
-to investigate nucleon-nucleus interaction mechanisms and as a basic tool
-for nuclear data evaluation for reactor design and other applications, being 
-widely used in BROND-2 evaluations~\cite{Blokhin91}. In addition to standard
-rigid rotator and harmonic vibrator coupling schemes encoded in widely-used 
-ECIS \cite{Raynal70,Raynal72} code (which is already included in EMPIRE), 
-level-coupling schemes based on a non-axial soft-rotator model are included for 
-even-even nuclei in OPTMAN. This allows accounting of stretching of soft
-nuclei by rotations, which results in change of equilibrium deformations for
-excited collective states compared with that of the ground state.
-
-Calculations with OPTMAN are now possible both for neutrons and protons as
-the projectile, and the upper incident nucleon energy is extended up to 200 MeV
-\cite{tsukuba}. Current version of soft-rotator model of
-OPTMAN takes into account the non-axial quadrupole, octupole and
-hexadecapole deformations, and $\beta _{2}$, $\beta _{3}$ and $\gamma -$%
-vibrations with account of nuclear volume conservation. With this option,
-OPTMAN is able to analyze the collective level structure, E2, E3, E4 $\gamma
--$transition probabilities and reaction data in a self-consistent manner.
-OPTMAN can be applied not only to heavy rotational nuclei  \cite{sukhjnst00,
-sukhnd2001U8}, but can be also applied
-very successfully even to a very light nucleus, namely $^{12}$C \cite%
-{chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
-vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite%
-{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. Many of those soft-rotor
-potentials are available within the RIPL library, being therefore available for EMPIRE 
-calculations, once OPTMAN was included. 
-
-Since 2005 the main efforts in the development of the OPTMAN code were
-devoted to the improvement of the optical model formalism. Dispersion 
-relationships between imaginary and real parts of the
-optical potential were included \cite{socaqu05,casoqu05}, allowing to decrease 
-significantly the number of optical parameters used. We also extended the OPTMAN code
-allowing for calculations of the (p,n) cross sections with excitation of isobaric analog
-states and therefore, making possible to derive Lane consistent potentials including a 
-new Lane-consistent Coulomb correction. 
-
-A complete OPTMAN\ code's manual \cite%
-{OPTMAN1,OPTMAN2} and its newest extension \cite{OPTMAN3} give details
-of the soft-rotator theory, physical ideas and computation algorithms developed
-and incorporated into OPTMAN code, and description of input and output files, 
-allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
-amy consult those documents. OPTMAN is called as an independent module by EMPIRE; 
-EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing channels. 
-
-
-The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
-within the EMPIRE system allowing the use of state-of-the-art optical model potentials
-based on soft-rotor couplings in EMPIRE theoretical modeling.
+OPTMAN can be invoked by the EMPIRE for DIRECT=1,2,3 for those optical model 
+potentials thta use either soft-rotor for both spherical and/or deformed nuclei.
 
 \section{Photoabsorption}
 
@@ -1859,21 +1863,21 @@ spectra from more than one of the three possible mechanisms (MSC\index{MSC}
 multiple-counting and must be avoided.
 
 An additional complication is introduced by the possibility of using
-ECIS06\index{ECIS}, which calculates Coupled-Channel\index{Coupled-Channels}
+ECIS06\index{ECIS} or OPTMAN code, which calculate Coupled-Channel\index{Coupled-Channels}
 contributions to the collective discrete levels. In general, these
 contributions are so strong that adding those provided by the exciton
-model leave the results practically unchanged. Thus, ECIS06 can be
-considered compatible HMS\index{HMS} since the latter does not include
-collective excitations. By the same token ECIS06\index{ECIS} is not
+model leave the results practically unchanged. Thus, ECIS06/OPTMAN can be
+considered compatible with HMS\index{HMS} since the latter does not include
+collective excitations. By the same token ECIS06/OPTMAN codes are not
 compatible with MSD\index{MSD} as both include collectivity of discrete
-levels. However, ECIS06 and MSD can be combined providing that only
+levels. However, ECIS06/OPTMAN and MSD can be combined providing that only
 the continuum contribution from the MSD is retained.
 
 To avoid double-counting when combining different models EMPIRE applies
 the following priorities:
 
 \begin{description}
-\item [{ECIS06\index{ECIS}}] provides inelastic scattering to collective
+\item [{ECIS06\index{ECIS} or OPTMAN}] provides inelastic scattering to collective
 levels independently of the settings for the remaining models. 
 \item [{MSD\index{MSD}}] provides inelastic continuum independently of
 other settings. Inelastic to the discrete levels is suppressed if
@@ -1931,16 +1935,13 @@ to be suppressed  leaving emission of protons and
 clusters.
 
 Selecting DIRECT =1 (or 2 or 3), MSD=1, MSC=1, PCROSS=1.5 is supposed
-to give the best results at low incident energies (say up to 30 MeV).
+to give the best results at low incident nucleon energies (say up to 50 MeV).
 At higher incident energies the preference should be given to the
 HMS\index{HMS} model, which is the only one that accounts for the multiple preequilibrium
 emission. When selecting appropriate models the user should take into
 account that not all of them provide the same set of observables.
-For example, preequilibrium
-$\gamma$-emission can be obtained from  PCROSS or MSC\index{MSC}
+For example, preequilibrium $\gamma$-emission can be obtained from PCROSS or MSC\index{MSC}
 but not from HMS. 
-
-
 
 %
 %
