@@ -10,7 +10,8 @@ MT=$2
 MAT=$3
 EXPDAT=$4
 PFNS=$5
-#CRCOV=$6
+EINC=$6   # Incident energy for which to fit PFNS (in MeV)
+#CRCOV=$7
 
 if [ -z $file ]; then
 echo "INPUT FILE NOT FOUND"
@@ -27,6 +28,9 @@ if [ -z $EXPDAT ]; then
 fi
 if [ -z $PFNS ]; then
    PFNS=0
+fi
+if [ -z $EINC ]; then
+   EINC="NONE"
 fi
 #if [ -z $CRCOV ]; then
 #   CRCOV="0"
@@ -95,7 +99,7 @@ for k in $MT; do
     fi
 
     cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT $PFNS
+$file ${k} $MAT $EXPDAT $PFNS $EINC
 EOF
 
     if [ -s KALMAN.INP ]; then

@@ -53,16 +53,19 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
       INTEGER*4 MAXEXP   ! Number of experiments
       INTEGER*4 MAXEINC  ! Number of incident energies
       INTEGER*4 NEemit   ! Number of neutron emitting energies
-      INTEGER*4 nexp,MT1,MAT,NEX, nparam, ierr,MS,NEinc,i
+      INTEGER*4 nexp,MT1,MAT,NEX,NPFNS, nparam, ierr,MS,NEinc,i,
+     &index_Einc
       LOGICAL fexists
       PARAMETER(MAXEXP=500)     ! Maximum number of experiments in pnt file
       PARAMETER(MAXEINC=500)    ! Maximum number of incident energies in input file
       REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
+      REAL*8 E_fit   ! Incident energy which is to be fitted
 
       TYPE (DATASET) EXPDATA(MAXEXP)
 
 
-      READ(5,*) proj,MT1,MAT,NEX
+      READ(5,*) proj,MT1,MAT,NEX,NPFNS,E_fit
+      write(*,*) 'Wanted energy: ', E_fit
 
 
       pntfile=trim(proj)//'.pnt'
@@ -101,11 +104,7 @@ c     if(.NOT.fexists) CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
 
 
 c     Counting the number of parameters in sensitivity input file
-      OPEN(200,FILE=inpsen,iostat=ierr)
-      if(ierr.ne.0) then
-        WRITE(*,*) 'PARAMETER FILE NOT FOUND: ',inpsen
-        STOP
-      endif
+      OPEN(200,FILE=inpsen)
       ierr=0
       nparam=0
       do while (ierr.eq.0)
@@ -127,9 +126,13 @@ c     Reading 'proj-pfns-full-mat.sen' and writing 'proj-pfns-mat.sen'
       ENDIF
 
 
+C     Finding the index in Einc corresponding to the energy which is to be fitted
+      CALL get_indexEinc(Einc,NEinc,E_fit,index_Einc)
 
+       write(*,*) 'Index = ',index_Einc
 
-      CALL WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex)
+      CALL WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex,index_Einc,
+     &E_fit,Einc,NEinc)
 
 
       END
@@ -236,7 +239,60 @@ c       Making it an error to have exp. sets with 0 points
 
 
 
-      SUBROUTINE WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex)
+
+
+
+
+
+
+
+      SUBROUTINE get_indexEinc(E,NE,E_fit,ind)
+
+      IMPLICIT NONE
+
+      REAL*8 E(NE),E_fit
+      INTEGER*4 NE,ind,i
+      
+      ind=0
+      do i=1,NE
+        if(dabs(E(i)-E_fit).LT.1.D-15) ind=i
+      enddo
+
+      if(ind.EQ.0) then
+        write(*,10) E_fit 
+10      format(/,'ERROR: PFNS for energy ',1PE10.4,' MeV',
+     &' cannot be found in input/pnt files.',/)
+        STOP
+      endif
+      END
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      SUBROUTINE WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex,
+     &index_Einc,E_fit,Einc,NEinc)
 C     Writing input for Kalman
 
       use dataio
@@ -244,7 +300,9 @@ C     Writing input for Kalman
       IMPLICIT NONE
 
       INTEGER*4 iexp, MAXEXP, idat, nexp, nparam, MS, MT1, nex, i
-      REAL*8 norm
+      INTEGER*4 ind, NEinc, index_Einc
+      REAL*8 Einc(NEinc)
+      REAL*8 norm,E_fit
       
       TYPE (DATASET) EXPDATA(MAXEXP)
 
@@ -292,16 +350,13 @@ C     (based on c4tokal.f)
 300   FORMAT(5I5,5X,3E10.3)
 310   FORMAT(14I5)
       do iexp=1, NEXP
-c       The first number one below corresponds do variable J2 in c4tokal. It is used
-c       in case there are more reactions/MTs in xsec and sensitivity files. In the case of PFNS
-c       it should later on correspond to additional incident energies. It is the index of 
-c       column that is being fitted (disregarding the first one, obviously, since it corresponds to the energy) 
-c       write(6,350) 4, 1 
-        write(60,350) 1, 1 
+        CALL get_indexEinc(Einc,NEinc,EXPDATA(iexp)%Einc*1.D-6,ind)
+        write(60,350) ind, 1 
 350     format(2I5)
 c       Again, the line below should also be modified when this code is generalized to handle 
 c       additional incident energies. (see line 125 of c4tokal (rev. 2719)
-        if(MT1.eq.EXPDATA(iexp)%MT.and.nex.eq.1) then
+        if((DABS(EXPDATA(iexp)%Einc*1.D-6-E_fit).LT.1.D-20.and.nex.eq.1)
+     &.OR.(nex.EQ.2))  then
           write(60,360) 1.0, EXPDATA(iexp)%REF
 360       format(1PE10.3,5X,A25)
         else
