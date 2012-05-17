@@ -405,7 +405,8 @@ def analyze(proj):
         smat = (xsplus[:,1:]-xsminus[:,1:]) / xs0[:,1:]
 #       schk = (abs(xsplus[:,1:]-xs0[:,1:])-abs(xsminus[:,1:]-xs0[:,1:])) / xs0[:,1:]
 #       schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(abs(xsplus[:,1:]-xsminus[:,1:]))
-        schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])
+#       schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])
+        schk = ((xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])) * (smat / 2)
         # this produces 'nan' wherever xs0==0. Replace 'nan' with 0
         smat[xs0[:,1:]==0] = 0.0
         schk[xs0[:,1:]==0] = 0.0
