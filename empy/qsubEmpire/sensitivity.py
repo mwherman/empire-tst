@@ -350,6 +350,7 @@ def analyze(proj):
     import numpy
     # file for writing matrix:
     senfile = open("%s-mat.sen" % proj, "w")
+    chkfile = open("%s-chk.sen" % proj, "w")
     
     def getCrossSection(filename):
         """
@@ -402,20 +403,29 @@ def analyze(proj):
         
         # make a modified version of sens. matrix, KALMAN-specific
         smat = (xsplus[:,1:]-xsminus[:,1:]) / xs0[:,1:]
+#       schk = (abs(xsplus[:,1:]-xs0[:,1:])-abs(xsminus[:,1:]-xs0[:,1:])) / xs0[:,1:]
+#       schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(abs(xsplus[:,1:]-xsminus[:,1:]))
+        schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])
         # this produces 'nan' wherever xs0==0. Replace 'nan' with 0
         smat[xs0[:,1:]==0] = 0.0
+        schk[xs0[:,1:]==0] = 0.0
+#       schk[(xsplus[:,1:]-xsminus[:,1:])==0] = 0.0
         # also truncate sensitivities below 10**-5
         smat[abs(smat)<1e-5] = 0.0
+#       schk[abs(smat)<1e-5] = 0.0
         
         # 'sens' contains only sensitivities. Also create 'en' with energies:
         en = xs0[:,0]
         
         # write matrix to file
         senfile.write(header[0])
+        chkfile.write(header[0])
         str = "# Parameter: %-6s  %3i%3i%3i%3i  variation: +-%5.3f"+\
                 "     Sensitivity matrix\n"
         senfile.write(str % (name,i1,i2,i3,i4,val))
+        chkfile.write(str % (name,i1,i2,i3,i4,val))
         senfile.write(header[1].rstrip()+' \n')
+        chkfile.write(header[1].rstrip()+' \n')
         for i in range(len(smat)):
             if en[i]<0.1:
                 str = "%-10.4E"%en[i]
@@ -427,9 +437,18 @@ def analyze(proj):
             #str = str+smat.shape[1]*"%12.4E"%tuple(smat[i])+"%12.4E"%0+"\n"
             senfile.write(str)
         senfile.write("\n")
+        for i in range(len(schk)):
+            if en[i]<0.1:
+                str = "%-10.4E"%en[i]
+            else:
+                str = "%#-10.5G"%en[i]
+            str = str+schk.shape[1]*"%12.4E"%tuple(schk[i])+"\n"
+            chkfile.write(str)
+        chkfile.write("\n")
     
     sens.close()
     senfile.close()
+    chkfile.close()
 
 
 def pfns(proj):
