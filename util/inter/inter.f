@@ -1,3 +1,7 @@
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2012/03/09 18:47:57 $ 
+Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $ 
+
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
@@ -32,10 +36,13 @@
 !-P Calculate integral constants from cross sections
 !-V
 !-V         Version 8.02   March 2012     R. Capote
-!-V                        1. Chaged printout to get all isotopes consecutively
+!-V                        1. Suppress redefinition of thermal temperature
+!-V                        2. Definitions of constants added to header
+!-V                        3. Chaged printout to get all isotopes consecutively
+!-V                           WARNING - print layout changed!
 !-V         Version 8.01   February 2012     A. Trkov
 !-V                        1. Process MF 10 data
-!-V                        2. Minor improvements to improve accuracy
+!-V                        2. Minor improvements for more precision
 !-V         Version 8.0    October 2009     A. Trkov
 !-V                        Reorganize in style with other codes
 !-V         Version 7.0    October 2004     C.L. Dunford
@@ -257,7 +264,7 @@
       INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
       INTEGER(KIND=I4) :: MATH,MFH,MTH,NSP
 !     FINAL STATE DESIGNATION
-      CHARACTER(LEN=2)  FS
+      CHARACTER(LEN=2)  TS,FS
 !
 !     CONTENTS OF CURRENT TEXT RECORD
 !
@@ -267,7 +274,7 @@
       REAL(KIND=R4), DIMENSION(3,2) :: ELO,EHI ! INTEG PANEL LIMITS
 !
       INTEGER(KIND=I4) :: LINES,MATPR  ! CURRENT LINE COUNT, MATERIAL NUMBER    
-      INTEGER(KIND=I4), PARAMETER :: MAXLIN=800 !MAXIMUM LINES PER PAGE
+      INTEGER(KIND=I4), PARAMETER :: MAXLIN=60 !MAXIMUM LINES PER PAGE
 !
 !     CROSS SECTIONS AT THERMAL, 2200 METERS AND 14MEV
 !
@@ -319,7 +326,7 @@
       INTEGER(KIND=I4) :: IDESC
       INTEGER(KIND=I4) :: MATP,MTP
       INTEGER(KIND=I4) :: MAT,MF,MT,NS
-      INTEGER(KIND=I4) :: I, IPRINT
+      INTEGER(KIND=I4) :: I
       REAL(KIND=R4) :: TZ
       REAL(KIND=R4) :: Z1,Z2
       REAL(KIND=R4) :: SIGAV,SIGFAV,GFACT,RESINT
@@ -341,9 +348,7 @@
 !
 !     CHECK FOR COMMAND LINE INPUT (VMS ONLY)
 !
-
-
-      IPRINT = 1
+      LINES = 0
       IONEPASS = 0
       CALL GET_FROM_CLINE
 !
@@ -356,6 +361,24 @@
       END IF
       IFOUND = 0
 !
+!     Write header label
+!
+      WRITE(NOUT,'(/1(3A))')                                            &       
+     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
+     &          ' --- ------------- ---  ---------- ----------- -',     &
+     &          '---------- ---------- -------  ----------- -',         &
+     &          '---------- ----------- ----'
+      WRITE(IOUT,'(/1(3A))')                                            &       
+     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
+     &          ' --- ------------- ---  ---------- ----------- -',     &
+     &          '---------- ---------- -------  ----------- -',         &
+     &          '---------- ----------- ----'
+      LINES=10
+!
 !     READ TAPE LABEL
 !
       READ(JIN,'(66X,I4,I2,I3,I5)')   MAT,MF,MT,NS
@@ -364,11 +387,11 @@
 !     READ CONTROL RECORD FOR NEXT MATERIAL
 !
    20 CALL CONTIN
-
+C...
 C     PRINT *,' '
 C     print *,'Next material',math,mfh,mth,c1h
 C    &       ,INTER_DATA%MATMIN,INTER_DATA%MATMAX
-
+C...
       IF(MATH.GE.INTER_DATA%MATMIN) THEN
          IF(MATH.LE.INTER_DATA%MATMAX) GO TO 30
          IF(INTER_DATA%MATMAX.GT.0) GO TO 90
@@ -387,44 +410,53 @@ C    &       ,INTER_DATA%MATMIN,INTER_DATA%MATMAX
       CALL CONTIN
       LIS0 = L2H
       FS = '  '
-
-C     print *,'      New Z,A',IZ,IA
-
-      IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
-         IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
-!
-!           REDEFINE EZERO FROM TEMPERATURE ON THE ENDF FILE
-!
-            CALL CONTIN
-            CALL CONTIN
-            IF(C1H.EQ.0) THEN
-               TZ = THER
-            ELSE
-               TZ = C1H
-            END IF
-!
-!           IF TEMPERATURE ON THE FILE DIFFERS BY MORE THAN 0.2 K
-!
-            IF(ABS(TZ-TZERO).GT.0.2) THEN
-               TZERO = TZ
-               INTER_DATA%EZERO = TZERO*ETH/THER
-               INTER_DATA%EHT = 20*INTER_DATA%EZERO
-               Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
-               Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
-               PNORM1 = (Z1+1.0)*EXP(-Z1)-(Z2+1.0)*EXP(-Z2)
-               WRITE(NOUT,'(/A,1PE13.5,A)')                             &       
-     &           'Temperature from ENDF file redefined to',TZERO,' K'
-               WRITE(NOUT,'(A,1PE12.5,A)')                              &       
-     &           'Maxwellian Spectrum at Temperature = ',               &       
-     &           INTER_DATA%EZERO,' (eV)'
-               WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                    &       
-     &           'Integration Limits from     ',INTER_DATA%ELT,         &       
-     &           ' (eV) to',INTER_DATA%EHT,' (eV)'
-               WRITE(NOUT,'(A,1PE12.5//)')                              &       
-     &           'Integral of Spectrum =        ',PNORM1
-            END IF
-         END IF
+      IF     (LIS0.EQ.0) THEN
+        TS = '  '
+      ELSE IF(LIS0.EQ.1) THEN
+        TS = ' m'
+      ELSE IF(LIS0.EQ.2) THEN
+        TS = ' n'
+      ELSE
+        TS = ' *'
       END IF
+C...
+C     print *,'      New Z,A',IZ,IA
+C...
+C...      IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
+C...         IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
+C...!
+C...!           REDEFINE EZERO FROM TEMPERATURE ON THE ENDF FILE
+C...!
+C...            CALL CONTIN
+C...            CALL CONTIN
+C...            IF(C1H.EQ.0) THEN
+C...               TZ = THER
+C...            ELSE
+C...               TZ = C1H
+C...            END IF
+C...!
+C...!           IF TEMPERATURE ON THE FILE DIFFERS BY MORE THAN 0.2 K
+C...!
+C...            IF(ABS(TZ-TZERO).GT.0.2) THEN
+C...               TZERO = TZ
+C...               INTER_DATA%EZERO = TZERO*ETH/THER
+C...               INTER_DATA%EHT = 20*INTER_DATA%EZERO
+C...               Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
+C...               Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
+C...               PNORM1 = (Z1+1.0)*EXP(-Z1)-(Z2+1.0)*EXP(-Z2)
+C...               WRITE(NOUT,'(/A,1PE13.5,A)')                             &       
+C...     &           'Temperature from ENDF file redefined to',TZERO,' K'
+C...               WRITE(NOUT,'(A,1PE12.5,A)')                              &       
+C...     &           'Maxwellian Spectrum at Temperature = ',               &       
+C...     &           INTER_DATA%EZERO,' (eV)'
+C...               WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                    &       
+C...     &           'Integration Limits from     ',INTER_DATA%ELT,         &       
+C...     &           ' (eV) to',INTER_DATA%EHT,' (eV)'
+C...               WRITE(NOUT,'(A,1PE12.5//)')                              &       
+C...     &           'Integral of Spectrum =        ',PNORM1
+C...            END IF
+C...         END IF
+C...      END IF
 !
 !     POSITION MATERIAL AT FILE 3
 !
@@ -432,9 +464,9 @@ C     print *,'      New Z,A',IZ,IA
          IF(MFH.EQ.0) GO TO 20
          CALL FEND
          CALL CONTIN
-
+C...
 C        print *,'Reading',math,mfh,mth
-
+C...
       END DO
 !
 !     TEST IF THIS SECTION SHOULD BE PROCESSED (SEE MTWANT LIST)
@@ -446,9 +478,9 @@ C        print *,'Reading',math,mfh,mth
             MATO = MATH
             MFO = MFH
             MTO = MTH
-            NSECT = N2
+            NSECT = N2H
             JSECT = 0
-            CALL OUT_STATUS
+!           CALL OUT_STATUS
             GO TO 45
          END IF
       END DO
@@ -457,9 +489,9 @@ C        print *,'Reading',math,mfh,mth
 !
    45 JSECT = JSECT + 1
       CALL PRSEC
-
+C...
 C     print *,'read one xs set',JSECT,NSECT
-
+C...
 !
 !     READING DONE, READ SEND RECORD IF LAST SECTION
 !
@@ -509,57 +541,44 @@ C     print *,'read one xs set',JSECT,NSECT
          SIGFAV = 0.
       END IF
 !
-!     CHECK FOR NEW PAGE
-!
-
-!     print *,'lines,maxlin,matp,matpr',lines,maxlin,matp,matpr
-
-      IF(LINES.GT.MAXLIN) THEN
-        WRITE(NOUT,'(3A)')                                              &       
-     &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
-     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)   Sig(E14)   MAT'
-         MATPR = MATP
-         LINES = 4
-         GO TO 50
-      END IF
-!
 !     OUTPUT RESULTS FOR SECTION
 !
       IF(MATP.NE.MATPR)  THEN
+!        -- Message to default output (screen)
          MATPR = MATP
          IF(LINES+7.GT.MAXLIN) THEN
-            WRITE(IOUT,'(A)')  CHAR(12)
+            WRITE(IOUT,'(1X,A)')  CHAR(12)
             LINES = 1
          ELSE
-            WRITE(IOUT,'(/)')
-            LINES = LINES + 2
+            WRITE(IOUT,'(1X,A)') ' '
+            LINES = LINES + 1
          END IF
-         WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
-         WRITE(IOUT,'(1x,3A)')                                          &       
-     &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
-     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)   Sig(E14)   '
-         LINES = LINES + 3
-      END IF
-
-C     IF(IPRINT.EQ.1) THEN
-C       IPRINT = 0
-C       WRITE(NOUT,'(3A)')                                              &       
+C...
+C        WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
+C        WRITE(IOUT,'(1x,3A)')                                          &
 C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
 C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-C    &          'Sig(Fiss)   Sig(E14)   MAT'
-C     ENDIF
-
-   50 WRITE(NOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
-     &     SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
-
-      WRITE(IOUT,55) IZ,IA,LIS0,FS,MTP,MTDESC(IDESC),C025,CZERO,        &       
-     &     SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
-
-   55 FORMAT(I3,1X,I4,3X,I1,4X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,       &       
+C    &          'Sig(Fiss)   Sig(E14)   '
+C        LINES = LINES + 2
+C...
+      END IF
+      IF(LINES.LE.1) THEN
+        LINES = LINES + 3
+        WRITE(IOUT,'(/1(3A))')                                          &       
+     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
+     &          ' --- ------------- ---  ---------- ----------- -',     &
+     &          '---------- ---------- -------  ----------- -',         &
+     &          '---------- ----------- ----'
+      ENDIF
+C...
+   50 WRITE(IOUT,55) IZ,IA,TS,FS,MTP,MTDESC(IDESC),C025,CZERO,          &       
+     &               SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
+      WRITE(NOUT,55) IZ,IA,TS,FS,MTP,MTDESC(IDESC),C025,CZERO,          &       
+     &               SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
+   55 FORMAT(I4,I4,A2,6X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,             &       
      &        0PF8.5,1PE13.5,2(1PE12.5),I5)
-
       LINES = LINES+1
 !
 !     CHECK IF ALL SECTIONS WERE PROCESSED
@@ -569,9 +588,9 @@ C     ENDIF
 !     READ HEAD RECORD OF NEXT SECTION OR FEND CARD
 !
    80 CALL CONTIN
-
+C...
 C        print *,'Next',math,mfh,mth
-
+C...
       IF(MATH.EQ.0) GO TO 20
       IF(MFH.EQ. 0) GO TO 80
       IF(MFH.GT.10) THEN
@@ -995,7 +1014,7 @@ C        print *,'Next',math,mfh,mth
       ITLEN = LEN_TRIM('PROGRAM INTER VERSION '//VERSION)
       WRITE(NOUT,'(29X,2A)') 'PROGRAM INTER VERSION ',VERSION
       WRITE(NOUT,'(29X,A//A)')  REPEAT('-',ITLEN),                      &       
-     &'Selected Integrations of ENDF File 3 and File 10 Cross Sections'
+     &' Selected Integrations of ENDF File 3 and File 10 Cross Sections'
 !
 !     INITIALIZE FOR OUTPUT HEADING
 !
@@ -1004,39 +1023,46 @@ C        print *,'Next',math,mfh,mth
 !
 !     OUTPUT INTEGRATION SUMMARY
 !
+         WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
+     &     ' Thermal cross section : Sig(2200) = Sig(E0)'               &
+     &    ,' Thermal energy        : E0 = ',0.0253,' (eV)'
+!
       IF(INTER_DATA%ITHER.NE.0)    THEN
-         WRITE(NOUT,'(/A,1PE12.5,A)')                                   &       
-     &     'Maxwellian Spectrum at Temperature = ',                     &       
-     &     INTER_DATA%EZERO,' (eV)'
-         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
-     &     'Integration Limits from     ',INTER_DATA%ELT,               &       
-     &     ' (eV) to',INTER_DATA%EHT,' (eV)'
-         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
-     &     'Integral of Spectrum =        ',PNORM1
+         WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
+     &     ' Ezero cross section   : Sig(Ezero)'                        &
+     &    ,' Ezero energy (input)  : E0 = ',INTER_DATA%EZERO,' (eV)'
+         WRITE(NOUT,'(/A,A/A/A,1P,E12.5,A/A,E12.5,A,E12.5,A/A,E12.5)')                      &       
+     &     ' Maxwellian average    : Avg-Sigma = '                      &
+     &    ,' Intg[E1:E2] Sig(E) Phi_m(E) dE / Intg[E1:E2] Phi_m(E) dE'  &
+     &    ,' Maxwellian spectrum   : Phi_m(E)  = (E/E0) exp(-E/E0)'     &
+     &    ,' Spectrum Temperature  : E0 = ',INTER_DATA%EZERO,' (eV)'    &
+     &    ,' Integration Limits    : E1 = ',INTER_DATA%ELT              &
+     &    ,' (eV)  E2 = ',INTER_DATA%EHT,' (eV)'                        &
+     &    ,' Integral of Spectrum       = ',PNORM1
+         WRITE(NOUT,'(/A,A)')                                           &       
+     &     ' Westcott g-factor     : G-fact = 2/sqrt(Pi)'               &
+     &    ,'  Avg-Sigma / Sig(2200)'
       END IF
       IF(INTER_DATA%IRESI.NE.0)  THEN
-         WRITE(NOUT,'(/A)')                                             &       
-     &     '1/E Spectrum for Resonance Integrals'
-         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
-     &     'Integration Limits from     ',INTER_DATA%ELRI,' (eV) to',   &       
-     &     INTER_DATA%EHRI,' (eV)'
-         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
-     &     'Integral of Spectrum =        ',PNORM2
+         WRITE(NOUT,'(/A/A,1P,E12.5,A,E12.5,A/A,E12.5,A)')              &
+     &    ' Resonance Integral    : Res.Integ = Intg[E3:E4] Sig(E)/E dE'&
+     &   ,' Integration Limits    : E3 = ',INTER_DATA%ELRI              &
+     &   ,' (eV)  E4 = ',INTER_DATA%EHRI,' (eV)'                        &
+     &   ,' Integral of Spectrum       = ',PNORM2
       END IF
       IF(INTER_DATA%IFISSI.NE.0) THEN
-         WRITE(NOUT,'(/A,1PE12.5,A)')                                   &       
-     &     'Fission Spectrum at Temperature = ',INTER_DATA%FTEMP,' (eV)'
-         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
-     &     'Integration Limits from     ',INTER_DATA%ELFI,' (eV) to',   &       
-     &      INTER_DATA%EHFI,' (eV)'
-         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
-     &     'Integral of Spectrum =        ',PNORM3
+         WRITE(NOUT,'(/A,A/A/A,1P,E12.5,A/A,E12.5,A,E12.5,A/A,E12.5)')  &
+     &   ' Fiss.spect. average   : Sig(Fiss) = '                        &
+     &  ,'Intg[E1:E2] Sig(E) Phi_f(E) dE / Intg[E1:E2] Phi_f(E) dE'     &
+     &  ,' Fission spectrum      : Phi_f(E)  = sqrt(E/Ef)/Ef exp(-E/E0)'&
+     &  ,' Spectrum Temperature  : Ef = ',INTER_DATA%FTEMP,' (eV)'      &
+     &  ,' Integration Limits    : E1 = ',INTER_DATA%ELFI               &
+     &  ,' (eV)  E2 = ',INTER_DATA%EHFI,' (eV)'                         &
+     &  ,' Integral of Spectrum       = ',PNORM3
       END IF
-      WRITE(NOUT,'(/A,1PE12.5,A)')                                      &       
-     &   'Thermal spectrum temperature (Ezero) = ',                     &       
-     &                      INTER_DATA%EZERO,' eV'
-      WRITE(NOUT,'(A,1PE12.5,A/)')                                      &       
-     &   'Selected energy (E14) = ',INTER_DATA%E14/1.E+6,' MeV'
+      WRITE(NOUT,'(/A/A,1P,E12.5,A/)')                                  &       
+     &   ' E14 cross-section     : Sig(E14)'                            &
+     &  ,' Selected Energy       : E14 = ',INTER_DATA%E14,' eV'
 !
   100 RETURN
       END SUBROUTINE BEGIN
@@ -1222,6 +1248,8 @@ C        print *,'Next',math,mfh,mth
           FS = 'm'
         ELSE IF(L2H.EQ.2) THEN
           FS = 'n'
+!       ELSE IF(L2H.EQ.3) THEN
+!         FS = ' o'
         ELSE
           FS = '*'
         END IF
@@ -1568,12 +1596,13 @@ C        print *,'Next',math,mfh,mth
 !
           CASE (2)
 c...         Z = (X2-X1)/X1
-             Z =  dble(X2)/dble(X1)-1
-             IF(ABS(Z).GT.0.1D0 ) THEN
-                FACLOG = DBLE(X2/X1)
-                FACLOG = LOG(FACLOG)
+             Z =  dble(X2)/dble(X1)
+             IF(ABS(Z-1).GT.0.1D0 ) THEN
+                FACLOG = LOG(Z)
+                Z = Z - 1
              ELSE
                 FACLOG = AM(8)
+                Z = Z - 1
                 DO J=1,7
                   JM8 = 8-J
                   FACLOG=FACLOG*Z+AM(JM8)
@@ -2103,8 +2132,8 @@ c...         Z = (X2-X1)/X1
       IF(MATO.GT.0.AND.MFO.GT.0.AND.MTO.GT.0) THEN
 !+++MDC+++
 !...VMS, ANS, WIN, UNX, MOD
-!        WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
-!    &         'PROCESSING MAT=',MATO,', MF=',MFO,', MT=',MTO
+         WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
+     &         'PROCESSING MAT=',MATO,', MF=',MFO,', MT=',MTO
 !...DVF, LWI
 !/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MATO,MFO,MTO)
 !---MDC---
