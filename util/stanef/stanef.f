@@ -1,5 +1,5 @@
-! $Rev: 2162 $                                                        
-! $Date: 2011-12-01 20:53:23 +0100 (Do, 01 Dez 2011) $
+! $Rev: 2849 $                                                        
+! $Date: 2012-05-18 15:47:33 +0200 (Fr, 18 Mai 2012) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -29,6 +29,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.07   May 2012, A. Trkov
+!-V                        1. Increase POINTSMAX from 500000 to 800000.
 !-V         Version 8.06   November 2011, A. Trkov
 !-V                        1. Prevent stripping of the header record if
 !-V                           tape ID equals zero.
@@ -181,9 +183,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -288,7 +290,7 @@
 !     INTEGER(KIND=I4), PARAMETER :: POINTSMAX=90000
 !original start
 !trkov    start
-      INTEGER(KIND=I4), PARAMETER :: POINTSMAX=500000
+      INTEGER(KIND=I4), PARAMETER :: POINTSMAX=800000
 !trkov    end
       REAL(KIND=R8), DIMENSION(POINTSMAX) :: XP,YP
 !
