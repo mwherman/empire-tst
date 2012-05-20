@@ -27,6 +27,9 @@ projectiles = {
         '0':'gammas',
         '1':'neutrons',
         '1001':'protons',
+        '1002':'deuterons',	
+        '2003':'helions',			
+        '2004':'alphas',		
         'other':'other'
         }
 
