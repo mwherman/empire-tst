@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2820 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-05-03 07:18:20 +0200 (Do, 03 Mai 2012) $
+Ccc   * $Rev: 2851 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-05-20 22:30:49 +0200 (So, 20 Mai 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -8604,11 +8604,17 @@ C-----concatenate file name with the projectile path
         filename = '/EXFOR/neutrons/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 1001) THEN
         filename = '/EXFOR/protons/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 1002) THEN
+        filename = '/EXFOR/deuterons/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 2004) THEN
+        filename = '/EXFOR/alphas/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 2003) THEN
+        filename = '/EXFOR/helions/'//trim(caz)
       ELSEIF(IZAejc(0) .EQ. 0) THEN
         filename = '/EXFOR/gammas/'//trim(caz)
       ELSE
         WRITE (8,
-     & '('' WARNING: No EXFOR retrievals for complex projectiles'')')
+     & '('' WARNING: No EXFOR retrievals for these projectiles'')')
         WRITE (8,*)     
         RETURN
       ENDIF
