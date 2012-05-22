@@ -169,7 +169,8 @@ C*
 C* Read the first C4 record
       IEX=1
       IDX=0
-      READ (LEX,901,END=80) REC
+  17  READ (LEX,901,END=80) REC
+      IF(REC(1:1).EQ.'#') GO TO 17
       IF(REC(1:40).EQ.BLNK) GO TO 80
       READ (REC,902) IZI0,IZA0,MS0,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
      &              ,PRA0,PRB0,PRC0,PRD0,CHC0,REF0,NEN0,NSU0
@@ -218,7 +219,8 @@ C* Process all C4 records and check for changes
       IEF =1
       MMF =99
       MMT =999
-      READ (LEX,901,END=40) REC
+   18 READ (LEX,901,END=40) REC
+      IF(REC(1:1).EQ.'#') GO TO 18
       IF(REC(1:40).EQ.BLNK) GO TO 40
       READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
