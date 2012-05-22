@@ -16,32 +16,22 @@ if [ "$1" = "" ]
     echo ' '
     echo -n 'Choose one of the above (without .c4 extention!): '
     read file
-fi                          
-if [ -f $file-raw.c4 ]; then
-   echo 'Using existing C4 file:'  $file-raw.c4
-   else
-   echo 'Input file :' $file-raw.c4 ' does not exist'
-   exit
 fi
-
-ln  -sf $file-raw.c4 C4.DAT
-
-# ADD MU-BAR DATA TO THE C4 FILE
-cat >ANG_MU.INP<<EOF
-C4.DAT
-C4.TMP
-EOF
-
-# RUN ang_mu
-$EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
-rm C4.DAT
-
+echo ' '
+if [ -f $file-raw.c4 ]; then
+   echo 'Original C4 file stored as :'  $file-raw.c4
+else
+   echo 'Backup of the original C4 file:'  $file-raw.c4
+   cp $file.c4 $file-raw.c4
+fi
+echo ' '
+ln  -sf $file.c4 C4.DAT
 # SORT C4 FILE
 ln -sf $EMPIREDIR/util/c4sort/iaea-std.dat iaea-std.dat
 cat >C4SORT.INP<<EOF
 \$* C4SORT
           Sort the EXFOR file in C4 format NOT overwriting the original file
-   FLC4IN C4.TMP
+   FLC4IN C4.DAT
    FLC4OU C4.SRT
    FLESTD iaea-std.dat
    DPATH  $EMPIREDIR/RIPL/levels/
@@ -67,17 +57,29 @@ EOF
 
 # RUN c4sort TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
+
+# ADD MU-BAR DATA TO THE C4 FILE
+cat >ANG_MU.INP<<EOF
+C4.SRT
+C4.TMP
+EOF
+
+# RUN ang_mu
+$EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
+echo ' '
+mv C4.TMP C4.DAT
+
+# RUN c4sort the second time TO SORT C4 DATA   
+$EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
+
 mv C4.SRT $file.c4
-rm C4.TMP
-
+echo ' '
 if [ -s $file.c4 ]; then
-  echo 'EXFOR data in computational format are stored in :'$file.c4
-    else
-    echo 'File with EXFOR data in computational format is EMPTY'
-  fi
-
-rm ANG_MU.INP
-rm C4SORT.INP
-rm C4SORT.TMP
-rm iaea-std.dat
+  echo 'EXFOR sorted data in computational (c4) format are stored in : '$file.c4
+else
+  echo 'File with EXFOR data in computational (c4) format is EMPTY'
+fi
+echo ' '
+rm ANG_MU.INP C4SORT.INP C4SORT.TMP C4.DAT iaea-std.dat c4sort.scr C4SORT.TM2
+rm angdis.pnt angdis.p92 angdis.cur 
 exit
