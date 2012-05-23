@@ -449,7 +449,7 @@ c     the 'proj-pfns.fmt' file.
       INTEGER*4 match_index(MAXEINC)  ! Array that stores the indices of Elab for which the values of Elab and Einc match
       INTEGER*4 n_match    ! Number of match energies
       REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
-      REAL*8 Einc(MAXEINC) ! Incident energies from pnt file
+      REAL*8 Einc(NEinc) ! Incident energies from pnt file
       REAL*8 temp(0:MAXEINC)
 c
 c     Opening file to be read (-pfns.fmt or -pfns-full-mat.sen)
@@ -483,9 +483,9 @@ c
         j=j0
         do while (j.LE.NElab)
           if(DABS(Elab(j)-Einc(i)).LT.4.748D-7) then  ! this is roughly the difference between Empire's lower energy limit (5.d-7) and thermal energy
-            match_index(i)=j
-            j=NElab
             n_match=n_match+1
+            match_index(n_match)=j
+            j=NElab
           endif
           j=j+1
         enddo

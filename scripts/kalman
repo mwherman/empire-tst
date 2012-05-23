@@ -176,7 +176,11 @@ done
     mv fort.15 $file-par.kal
     cat fort.16 fort.32 > fort.48
  
+   if [ $PFNS -eq 0 ]; then
     $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
+   else
+    exit
+   fi
 
     if [ -s check.out ]; then
        exit
