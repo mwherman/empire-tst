@@ -54,13 +54,13 @@ if [ $PFNS = 0 ]; then
      exit 3
    fi
 elif [ $PFNS = 1 ]; then
-   echo "Fitting only prompt fission neutron spectra from $file-pfns-mat.sen."
+   echo "Fitting only prompt fission neutron spectra from $file-pfns-full-mat.sen."
    if [ ! -s $file-pfns.out ]; then
       echo "PROMPT NEUTRON FISSION SPECTRA FILE NOT FOUND ($file-pfns.out)"
       exit 4
    fi
-   if [ ! -s $file-pfns-mat.sen ]; then
-     echo "SENSITIVITY FILE NOT FOUND ($file-pfns-mat.sen)"
+   if [ ! -s $file-pfns-full-mat.sen ]; then
+     echo "SENSITIVITY FILE NOT FOUND ($file-pfns-full-mat.sen)"
      exit 5
    fi
 else
