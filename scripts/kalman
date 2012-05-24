@@ -83,6 +83,7 @@ rm fort.* 2>/dev/null
 rm check.out 2>/dev/null
 rm $file-*-c4.gpd 2>/dev/null
 rm $file-{c4,par,*-err}.kal 2>/dev/null
+rm ENERGYANDINDEX.TMP 2>/dev/null
 #rm $file-33-*.cov  2>/dev/null
 
 
@@ -110,10 +111,26 @@ if [ "$PFNS" -eq 0 ]
 then
   echo  "Running c4tokal"
   $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
+  for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
+    l=`echo ${j}`
+    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
+  done
 else
   echo  "Running pnt2kal"
   $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
-# exit
+  if [ ! -s ENERGYANDINDEX.TMP ]; then
+    echo "ERROR: pnt2kal ended abnormally! Aborting... "
+    exit
+  fi
+  read NE INDEX EINC < ENERGYANDINDEX.TMP
+  i=1
+  while [ $i -le $NE ]
+  do
+    printf -v l "%3d\n" $i
+    grep "^.\{49,51\}$l" fort.75 >>$file-PFNS-${i}-c4.gpd
+    i=$(($i + 1))
+  done
 fi
 
 
@@ -123,11 +140,6 @@ fi
        exit
     fi
 
-# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
-for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
-    l=`echo ${j}`
-    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
-done
 
 # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
@@ -234,6 +246,7 @@ rm INPUT.D
 rm KALMAN.INP
 rm fort.{1*,50,52,75}
 rm check.out
+rm ENERGYANDINDEX.TMP
 
 exit
 

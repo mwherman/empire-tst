@@ -65,7 +65,6 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
 
       READ(5,*) proj,MT1,MAT,NEX,NPFNS,E_fit
-      write(*,*) 'Wanted energy: ', E_fit
 
 
       pntfile=trim(proj)//'.pnt'
@@ -78,7 +77,13 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
 
 c     Checking if pntfile is already present, making it unnecessary to run lsttab
       inquire(file = pntfile, exist = fexists)
-      if(.NOT.fexists) CALL run_lsttab(proj)
+      if(.NOT.fexists) then
+        write(*,*) 'File ',trim(pntfile),' does not exist. ',
+     &'Running lsttab to generate it.'
+        CALL run_lsttab(proj)
+      else
+        write(*,*) 'Using existing ',trim(pntfile),' file'
+      endif
 
 c
 c     Reading pnt file
@@ -129,7 +134,6 @@ c     Reading 'proj-pfns-full-mat.sen' and writing 'proj-pfns-mat.sen'
 C     Finding the index in Einc corresponding to the energy which is to be fitted
       CALL get_indexEinc(Einc,NEinc,E_fit,index_Einc)
 
-       write(*,*) 'Index = ',index_Einc
 
       CALL WRITEKAL(EXPDATA,NEXP,MAXEXP,MS,nparam,MT1,nex,index_Einc,
      &E_fit,Einc,NEinc)
@@ -302,7 +306,7 @@ C     Writing input for Kalman
       INTEGER*4 iexp, MAXEXP, idat, nexp, nparam, MS, MT1, nex, i
       INTEGER*4 ind, NEinc, index_Einc
       REAL*8 Einc(NEinc)
-      REAL*8 norm,E_fit
+      REAL*8 E_fit
       
       TYPE (DATASET) EXPDATA(MAXEXP)
 
@@ -319,17 +323,9 @@ c       Writing the headers
         write(12,200) EXPDATA(iexp)%REF,EXPDATA(iexp)%KENTRY,
      & EXPDATA(iexp)%KSUBENT, -EXPDATA(iexp)%NDAT
 200     format(A25,5X,A5,I3,5X,I5)
-        if(EXPDATA(iexp)%Einc.GT.1.D-20) then
-c         Normalized spectra
-          norm = 1.D0
-        else
-c         Cross section: Converting from barns to mb
-          norm = 1.D3
-        endif
 c       Writing while converting emitted energy from eV to MeV
         write(10,220) (EXPDATA(iexp)%DAT(idat)%E*1.D-6, 
-     & EXPDATA(iexp)%DAT(idat)%VAL*norm,
-     & idat=1,EXPDATA(iexp)%NDAT)
+     & EXPDATA(iexp)%DAT(idat)%VAL,idat=1,EXPDATA(iexp)%NDAT)
         write(11,220) (EXPDATA(iexp)%DAT(idat)%E*1.D-6, 
      & EXPDATA(iexp)%DAT(idat)%relaerr, idat=1,EXPDATA(iexp)%NDAT)
 220     format(6(1PE11.4))
@@ -353,8 +349,6 @@ C     (based on c4tokal.f)
         CALL get_indexEinc(Einc,NEinc,EXPDATA(iexp)%Einc*1.D-6,ind)
         write(60,350) ind, 1 
 350     format(2I5)
-c       Again, the line below should also be modified when this code is generalized to handle 
-c       additional incident energies. (see line 125 of c4tokal (rev. 2719)
         if((DABS(EXPDATA(iexp)%Einc*1.D-6-E_fit).LT.1.D-20.and.nex.eq.1)
      &.OR.(nex.EQ.2))  then
           write(60,360) 1.0, EXPDATA(iexp)%REF
@@ -369,11 +363,19 @@ c       Writing in fort.75 for plotting of experimental data
           if(EXPDATA(iexp)%DAT(idat)%ERR.GT.1.D-15) write(75,400) 
      & EXPDATA(iexp)%DAT(idat)%E*1.D-6,
      & EXPDATA(iexp)%DAT(idat)%VAL,EXPDATA(iexp)%DAT(idat)%ERR,
-     & EXPDATA(iexp)%MT
-400     FORMAT(3(1X,E12.5),I4)
+     & EXPDATA(iexp)%MT,ind,Einc(ind)
+400     FORMAT(3(1X,E12.5),I4,'  PFNS',I3,1X,1PE11.4)
         enddo
       enddo
       CLOSE(60)
+
+
+c     Writing in a temporary file the value of the incident energy that is to be fitted and
+c     its corresponding index in Einc. This will be later used by kalman script and kalend.
+      OPEN(70,FILE='ENERGYANDINDEX.TMP')
+      write(70,450) NEinc,index_Einc,E_fit
+450   format(2(I3,1X),1PE11.4)
+      CLOSE(70)
 
 
 
