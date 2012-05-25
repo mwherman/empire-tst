@@ -1024,17 +1024,17 @@ C...
 !     OUTPUT INTEGRATION SUMMARY
 !
          WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
-     &     ' Thermal cross section : Sig(2200) = Sig(E0)'               &
-     &    ,' Thermal energy        : E0 = ',0.0253,' (eV)'
+     &     ' Thermal cross section : Sig(2200) = Sig(Eth)'              &
+     &    ,' Thermal energy        : Eth= ',0.0253,' (eV)'
 !
       IF(INTER_DATA%ITHER.NE.0)    THEN
          WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
      &     ' Ezero cross section   : Sig(Ezero)'                        &
      &    ,' Ezero energy (input)  : E0 = ',INTER_DATA%EZERO,' (eV)'
          WRITE(NOUT,'(/A,A/A/A,1P,E12.5,A/A,E12.5,A,E12.5,A/A,E12.5)')                      &       
-     &     ' Maxwellian average    : Avg-Sigma = '                      &
+     &     ' Maxwellian average    : Avg-Sigma = (2/sqrt(Pi))'          &
      &    ,' Intg[E1:E2] Sig(E) Phi_m(E) dE / Intg[E1:E2] Phi_m(E) dE'  &
-     &    ,' Maxwellian spectrum   : Phi_m(E)  = (E/E0) exp(-E/E0)'     &
+     &    ,' Maxwellian spectrum   : Phi_m(E)  = (E/E0^2) exp(-E/E0)'   &
      &    ,' Spectrum Temperature  : E0 = ',INTER_DATA%EZERO,' (eV)'    &
      &    ,' Integration Limits    : E1 = ',INTER_DATA%ELT              &
      &    ,' (eV)  E2 = ',INTER_DATA%EHT,' (eV)'                        &
