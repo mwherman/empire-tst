@@ -1,5 +1,5 @@
-! $Rev: 2857 $                                                          | 
-! $Date: 2012-05-25 09:41:51 +0200 (Fr, 25 Mai 2012) $                                                     
+! $Rev: 2858 $                                                          | 
+! $Date: 2012-05-25 09:52:23 +0200 (Fr, 25 Mai 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -252,12 +252,7 @@
 !
 !     CHECKR Version Number
 !
-!+++MDC+++
-!...VMS, UNX, ANSI, WIN, LWI, DVF
       CHARACTER(LEN=*), PARAMETER :: VERSION = '8.17'
-!...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.17'
-!---MDC---
 !
 !     Define variable precision
 !
@@ -332,9 +327,9 @@
 !
 !+++MDC+++
 !...ANS
-!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 0
-!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
-!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+        INTEGER(KIND=I4), PARAMETER :: IMDC = 0
+        CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
+        CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...VMS
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 1
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
@@ -344,9 +339,9 @@
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
 !/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...UNX
-      INTEGER(KIND=I4), PARAMETER :: IMDC = 3
-      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!/    INTEGER(KIND=I4), PARAMETER :: IMDC = 3
+!/    CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+!/    CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...DVF
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 4
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
@@ -7165,7 +7160,7 @@ c        END IF
 !...VMS
 !/      INTEGER(KIND=2) :: ILENP2
 !...ANS
-!/      CHARACTER(LEN=100) :: CFILE
+        CHARACTER(LEN=100) :: CFILE
 !---MDC---
 !
       INPAR = ' '
@@ -7177,17 +7172,17 @@ c        END IF
 !/      CALL LIB$GET_FOREIGN(INPAR,,ILENP2)
 !/      ILENP = ILENP2
 !...UNX
-!      CALL GETCL(INPAR)
-!      ILENP = LEN_TRIM(INPAR)
+!/     CALL GETCL(INPAR)
+!/     ILENP = LEN_TRIM(INPAR)
 !...DVF
-      CALL GETARG(1,INPAR)
-      ILENP = LEN_TRIM(INPAR)
+!/      CALL GETARG(1,INPAR)
+!/    ILENP = LEN_TRIM(INPAR)
 !...ANS
-!/      WRITE(IOUT,'(A)')                                               &       
-!/     &    ' Control File Specification        - '
-!/      READ(NIN,'(A)') CFILE
-!/      NIN = 19
-!/      OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
+        WRITE(IOUT,'(A)')                                               &       
+       &    ' Control File Specification        - '
+        READ(NIN,'(A)') CFILE
+        NIN = 19
+        OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
 !---MDC---
 !
       RETURN
