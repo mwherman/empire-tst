@@ -1,5 +1,5 @@
-! $Rev: 2858 $                                                          | 
-! $Date: 2012-05-25 09:52:23 +0200 (Fr, 25 Mai 2012) $                                                     
+! $Rev: 2859 $                                                          | 
+! $Date: 2012-05-25 10:05:50 +0200 (Fr, 25 Mai 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -7179,7 +7179,7 @@ c        END IF
 !/    ILENP = LEN_TRIM(INPAR)
 !...ANS
         WRITE(IOUT,'(A)')                                               &       
-       &    ' Control File Specification        - '
+     &    ' Control File Specification        - '
         READ(NIN,'(A)') CFILE
         NIN = 19
         OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
