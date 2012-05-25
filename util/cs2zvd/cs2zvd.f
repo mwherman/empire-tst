@@ -3,7 +3,7 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       implicit none
       integer maxr,maxen
       parameter(maxr=100,maxen=500)
-      integer nreac,iz,ia,ncol
+      integer nreac,iz,ia,ncol,nch,ios,ich
       integer i,j,nen,toplot(maxr)
       character*2 symb
       character*22 caz
@@ -74,12 +74,19 @@ C    &
       enddo
        
       do j=1,nreac
-C       Deleting old plots 
-        open(20,file='XS_'//TRIM(creaction(j))//'.zvd')       
-        close(20,status='DELETE')
+C       Deleting old plots
+        nch = len_trim(creaction(j))
+        ich = 1
+        do while(ich .lt. nch)
+           if(creaction(j)(ich:ich) .ne. ' ') exit
+           ich = ich + 1
+        end do
+        open(20,file='XS_'//creaction(j)(ich:nch)//'.zvd',iostat=ios)
+        if(ios .eq. 0) close(20,status='DELETE')
 C       Skipping plots 
         if(toplot(j).eq.0) cycle 
-        open(20,file='XS_'//TRIM(creaction(j))//'.zvd')       
+        open(20,file='XS_'//creaction(j)(ich:nch)//'.zvd',iostat=ios)
+        if(ios .ne. 0) cycle
         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
      &    iz,symb,ia,TRIM(creaction(j))       
         
@@ -88,6 +95,7 @@ C       Skipping plots
           WRITE (20,'(G10.3,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
         ENDDO
         CALL CLOSE_ZVV(20,' ',' ')
+
         CLOSE(20)
 
       ENDDO
