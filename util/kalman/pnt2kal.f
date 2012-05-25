@@ -167,17 +167,19 @@ C     Finding the index in Einc corresponding to the energy which is to be fitte
       CHARACTER*60 pntfile
       INTEGER*4 ierr, iexp, MAXEXP, idat, nexp
       REAL*8 up, down
+      LOGICAL fexists
       
       TYPE (DATASET) EXPDATA(MAXEXP)
 
 c
 c     Opening pnt file
 c
-      OPEN(100,FILE=pntfile,iostat=ierr)
-      if(ierr.ne.0) then
+      inquire(file = pntfile, exist = fexists)
+      if(.NOT.fexists) then
         WRITE(*,*) 'PNT FILE NOT FOUND: ',pntfile
         STOP
       endif
+      OPEN(100,FILE=pntfile)
 c
 c     Reading pnt file
 c
@@ -446,21 +448,24 @@ c     the 'proj-pfns.fmt' file.
       CHARACTER*100 file_in,file_out,pntfile
       CHARACTER*10 rubbish,nucleus
       CHARACTER*76 paramline
-      INTEGER*4 i,j,j0,ierr,ipar,nparmax,NElab,NEinc,NEemit,Nparam,
+      INTEGER*4 i,j,j0,ipar,nparmax,NElab,NEinc,NEemit,Nparam,
      &MAXEINC
       INTEGER*4 match_index(MAXEINC)  ! Array that stores the indices of Elab for which the values of Elab and Einc match
       INTEGER*4 n_match    ! Number of match energies
       REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
       REAL*8 Einc(NEinc) ! Incident energies from pnt file
       REAL*8 temp(0:MAXEINC)
+      LOGICAL fexists
 c
 c     Opening file to be read (-pfns.fmt or -pfns-full-mat.sen)
 c
-      OPEN(400,FILE=file_in,iostat=ierr)
-      if(ierr.ne.0) then
-        WRITE(*,*) 'ERROR: FILE ',file_in,' NOT FOUND!'
+      inquire(file = file_in, exist = fexists)
+      if(.NOT.fexists) then
+        WRITE(*,5) trim(file_in)
+5       FORMAT('ERROR: FILE ',A,' NOT FOUND!')
         STOP
       endif
+      OPEN(400,FILE=file_in)
 
 c     Reading from file_in the total number of incident energies
       read(400,10) NElab, nucleus

@@ -61,7 +61,8 @@ elif [ $PFNS = 1 ]; then
    fi
    if [ ! -s $file-pfns-full-mat.sen ]; then
      echo "SENSITIVITY FILE NOT FOUND ($file-pfns-full-mat.sen)"
-     exit 5
+     echo "ALLOWING TO CONTINUE TO COMPARE INCIDENT ENERGIES, EVEN THOUGH pnt2kal WILL CRASH"
+#    exit 5
    fi
 else
    echo "Option PFNS = $PFNS has not been implemented yet."
