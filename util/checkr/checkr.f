@@ -1,5 +1,5 @@
-! $Rev: 2859 $                                                          | 
-! $Date: 2012-05-25 10:05:50 +0200 (Fr, 25 Mai 2012) $                                                     
+! $Rev: 2867 $                                                          | 
+! $Date: 2012-05-26 00:09:46 +0200 (Sa, 26 Mai 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,10 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.18   May 2012 A. Trkov
+!-V                        Standard Fortran ANS option set as default
+!-V                        but modified for compatibility with other
+!-V                        options for interactive input
 !-V         Version 8.17   May 2012
 !-V                        Parameter consistency improvement to avoid
 !-V                        compiler messages (reported by A. Koning).
@@ -252,7 +256,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.17'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.18'
 !
 !     Define variable precision
 !
@@ -327,9 +331,9 @@
 !
 !+++MDC+++
 !...ANS
-        INTEGER(KIND=I4), PARAMETER :: IMDC = 0
-        CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
-        CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+      INTEGER(KIND=I4), PARAMETER :: IMDC = 0
+      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
+      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...VMS
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 1
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
@@ -339,9 +343,9 @@
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
 !/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...UNX
-!/    INTEGER(KIND=I4), PARAMETER :: IMDC = 3
-!/    CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-!/    CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 3
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...DVF
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 4
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
@@ -727,10 +731,12 @@
          CHECKR_DATA%MATMAX = 0
       END IF
       SELECT CASE (IMDC)
-         CASE (0)
-            IW = 'N'
-            IONEPASS = 0
-         CASE (1,2,3)
+C... ANS batch mode is no longer supported
+C...     CASE (0)
+C...        IW = 'N'
+C...        IONEPASS = 0
+C...     CASE (1,2,3)
+         CASE (0,1,2,3)
             IF(ILENP.NE.0)  THEN
                CALL TOKEN(INPAR,'%',1,CHECKR_DATA%INFIL)
                CALL TOKEN(INPAR,'%',2,CHECKR_DATA%OUTFIL)
@@ -756,10 +762,10 @@
 !
       IF(IMDC.LT.4) THEN
          IF(CHECKR_DATA%INFIL.EQ.'*') THEN
-            IF(IMDC.NE.0) THEN
+C...        IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
-     &             ' Input File Specification             - '
-            END IF
+     &             ' Input ENDF File Specification        - '
+C...        END IF
             READ(NIN,'(A)') CHECKR_DATA%INFIL
          ELSE
             WRITE(IOUT,'(/2A)') ' Input file - ',                       &       
@@ -782,7 +788,8 @@
             WRITE(IOUT,'(/A/)')  '       COULD NOT FIND INPUT FILE'
          END IF
          SELECT CASE (IMDC)
-            CASE (1,2,3)
+C...        CASE (1,2,3)
+            CASE (0,1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
          END SELECT
          IQUIT = 1
@@ -794,10 +801,10 @@
 !
       IF(IMDC.LT.4) THEN
          IF(CHECKR_DATA%OUTFIL.EQ.'*' ) THEN
-            IF(IMDC.NE.0) THEN
+C...        IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &              ' Output Message File Specification    - '
-            END IF
+C...        END IF
             READ(NIN,'(A)') CHECKR_DATA%OUTFIL
          ELSE
             WRITE(IOUT,'(/2A)') ' Output file - ',                      &       
@@ -810,7 +817,7 @@
 !
 !     CHECK IF ENTIRE TAPE TO BE PROCESSED (INTERACTIVE MODE ONLY)
 !
-      IF(IMDC.NE.0) THEN
+C...  IF(IMDC.NE.0) THEN
          IF(IW.EQ.'*') THEN
             IF(IMDC.LT.4) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
@@ -820,11 +827,12 @@
                IF(IC.GT.96.AND.IC.LT.123) IW = CHAR(IC-32)
             END IF
          END IF
-      END IF
+C...  END IF
 !
 !     GET MATERIAL NUMBER RANGE (ALL) IF DEFAULT NOT SELECTED
 !
-      IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
+C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
+      IF(              IW.EQ.'N'.AND.IMDC.LT.4 ) THEN
          CALL SELECT_MATS
       END IF
 !
@@ -7177,12 +7185,12 @@ c        END IF
 !...DVF
 !/      CALL GETARG(1,INPAR)
 !/    ILENP = LEN_TRIM(INPAR)
-!...ANS
-        WRITE(IOUT,'(A)')                                               &       
-     &    ' Control File Specification        - '
-        READ(NIN,'(A)') CFILE
-        NIN = 19
-        OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
+C...!...ANS
+C...    WRITE(IOUT,'(A)')                                               &       
+C... &    ' Control File Specification        - '
+C...    READ(NIN,'(A)') CFILE
+C...    NIN = 19
+C...    OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
 !---MDC---
 !
       RETURN
