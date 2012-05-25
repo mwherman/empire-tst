@@ -120,7 +120,7 @@ else
   echo  "Running pnt2kal"
   $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
   if [ ! -s ENERGYANDINDEX.TMP ]; then
-    echo "ERROR: pnt2kal ended abnormally! Aborting... "
+    echo "ERROR: pnt2kal ended abnormally! Aborting kalman script... "
     exit
   fi
   read NE INDEX EINC < ENERGYANDINDEX.TMP
@@ -133,7 +133,7 @@ else
   done
 fi
 
-
+    echo  "Running genkal"
     $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
 
     if [ -s check.out ]; then
@@ -181,18 +181,16 @@ fi
         fi
     fi
 
+    echo  "Running kalman"
     $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
 
-    mv fort.13 $file-xsc.kal
+    mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
     cat fort.16 fort.32 > fort.48
  
-   if [ $PFNS -eq 0 ]; then
+    echo  "Running kalend"
     $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
-   else
-    exit
-   fi
 
     if [ -s check.out ]; then
        exit
@@ -206,8 +204,11 @@ fi
     mv fort.18 $file-${k}-err.kal
 
 
-    cp $file-${k}-c4.gpd expxscplot.d
-
+    if [ $PFNS -eq 0 ]; then
+      cp $file-${k}-c4.gpd expxscplot.d
+    else
+      cp $file-PFNS-${INDEX}-c4.gpd expxscplot.d
+    fi
 
 #PLOT DATA ONLY WITH EXPERIMENTAL DATA
     if [ "$EXPDAT" != 0 ]; then
@@ -219,8 +220,8 @@ fi
       fi
     fi
 
-    mv corrplot.d $file-${k}-cov.gpd
-    mv xscplot.d  $file-${k}-xsc.gpd
+    mv corrplot.d $file-${k}-cov.gpd # Should give a different name for this file in the pfns case, but which? 
+    mv xscplot.d  $file-${k}-xsc.gpd # Should give a different name for this file in the pfns case, but which? 
 
     rm fort.17
     rm fort.20

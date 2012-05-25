@@ -70,6 +70,8 @@ c
         XSC='.xsc'
       ELSE
         XSC='-pfns.kal'
+        OPEN(70,FILE='ENERGYANDINDEX.TMP')
+        READ(70,'(4X,I3)') index_fit
       ENDIF
 
       CALL STRLEN(FILE,L1,L2)
@@ -91,24 +93,29 @@ C IN THE FILE -xsc.kal (FORT.13).
       CLOSE(10)
       NENRG=I-1
 
-      DO 11 I=1,NNUCD
+      IF (NPFNS.EQ.0) THEN
+       DO 11 I=1,NNUCD
          CALL RCTN(RECTN(I),M(I))
- 11   CONTINUE
+ 11    CONTINUE
 
-      NSKIP=0
-      DO 12 I=1,NNUCD
-         IF (M(I) .EQ. MT1) THEN
-            NSKIP=I
-            GOTO 13
-         ENDIF
- 12   CONTINUE
- 13   CONTINUE
+       NSKIP=0
+       DO 12 I=1,NNUCD
+          IF (M(I) .EQ. MT1) THEN
+             NSKIP=I
+             GOTO 13
+          ENDIF
+ 12    CONTINUE
+ 13    CONTINUE
+      ELSE
+       NSKIP=index_fit
+      ENDIF
 
 
       CALL READENDF(MT1, MAT1, ZA, AWR, XMF1, XLFS1, ETH, RES)
       ETH=ETH*EV
 
 
+      icount=1
  99   READ(16,1900,END=101) NENRG,REACTION
       READ(16,2010)(X(I),I=1,NENRG)
       READ(16,2010)(Y(I),I=1,NENRG)
@@ -120,8 +127,13 @@ C IN THE FILE -xsc.kal (FORT.13).
          WRITE(0,*) 'NO MT NUMBER IN ENDF FILE!'
          STOP
       ENDIF
-      CALL RCTN(REACTION,MT)
-      IF (MT.EQ.MT1) GOTO 100
+      IF (NPFNS.EQ.0) THEN
+        CALL RCTN(REACTION,MT)
+        IF (MT.EQ.MT1) GOTO 100
+      ELSE
+        IF (icount.EQ.index_fit) GOTO 100
+      ENDIF
+      icount=icount+1
       GOTO 99
  101     PAUSE 'NO COVARIANCE MATRIX FOUND IN FORT.16'
  100  CONTINUE
@@ -144,7 +156,7 @@ C COMPARISON BETWEEN PRIOR AND POSTERIOR CROSS SECTIONS
 
 C PLOT FOR MOST IMPORTANT MT NUMBERS (1,2,4,16,18,102,103,107)
       REWIND(16)
-      CALL PLOTUNC(NNUCD,RECTN)
+      CALL PLOTUNC(NNUCD,RECTN,NPFNS)
       CLOSE(16)
 
 
@@ -318,7 +330,7 @@ C NN DEFINES THE MESH IN PLOTTING - HIGHER NN MAKES BIGGER (IN SIZE) PLOTS.
  3000 STOP
       END
 
-      SUBROUTINE PLOTUNC(NNUCD,RECTN)
+      SUBROUTINE PLOTUNC(NNUCD,RECTN,NPFNS)
       IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       PARAMETER (NRMAX=20,NR=60,NS=1300,EV=1.D-6,NC=8)
       CHARACTER*12 REACTION,RECTN(NR)
@@ -327,40 +339,49 @@ C NN DEFINES THE MESH IN PLOTTING - HIGHER NN MAKES BIGGER (IN SIZE) PLOTS.
 
       DO 10 I=1,NNUCD
 
-       DO 11 J=1,NNUCD
-          CALL RCTN(RECTN(J),M(J))
-C          write(0,*) NNUCD,RECTN(j),mt1(j)
-  11   CONTINUE
-
-
-       NSKIP=0
-       DO 12 K=1,NNUCD
-          IF (M(K) .EQ. MT1(I)) THEN
-             NSKIP=K
-             GOTO 13
-          ENDIF
-  12   CONTINUE
-  13   CONTINUE
+       IF (NPFNS.EQ.0) THEN
+         DO 11 J=1,NNUCD
+            CALL RCTN(RECTN(J),M(J))
+C            write(0,*) NNUCD,RECTN(j),mt1(j)
+  11     CONTINUE
+        
+         NSKIP=0
+         DO 12 K=1,NNUCD
+            IF (M(K) .EQ. MT1(I)) THEN
+               NSKIP=K
+               GOTO 13
+            ENDIF
+  12     CONTINUE
+  13     CONTINUE
+       ELSE
+         NSKIP=I
+       ENDIF
 
 
 C      CALL READENDF(MT1(I), MAT1, ZA, AWR, XMF1, XLFS1, ETH, RES)
 C      ETH=ETH*EV
 
+      icount=1
  99   READ(16,1900,END=101) NENRG,REACTION
       READ(16,2010)(X(K),K=1,NENRG)
       READ(16,2010)(Y(K),K=1,NENRG)
       DO K=1,NENRG
           READ(16,2010)(W(K,L),L=1,NENRG)
       ENDDO
-      MT=0
-      IF (M(I).EQ.-111) THEN
-         WRITE(0,*) 'NO MT NUMBER IN ENDF FILE!'
-         STOP
+      IF (NPFNS.EQ.0) THEN
+        MT=0
+        IF (M(I).EQ.-111) THEN
+           WRITE(0,*) 'NO MT NUMBER IN ENDF FILE!'
+           STOP
+        ENDIF
+        CALL RCTN(REACTION,MT)
+C        write(0,*) reaction,mt,mt1(i)
+C        IF (MT.EQ.MT1(I)) GOTO 100
+        IF (MT.EQ.M(I)) GOTO 100
+      ELSE
+        IF (I.EQ.icount) GOTO 100
       ENDIF
-      CALL RCTN(REACTION,MT)
-C      write(0,*) reaction,mt,mt1(i)
-C      IF (MT.EQ.MT1(I)) GOTO 100
-      IF (MT.EQ.M(I)) GOTO 100
+      icount=icount+1
       GOTO 99
  101     PAUSE 'NO COVARIANCE MATRIX FOUND IN FORT.16'
  100  CONTINUE
