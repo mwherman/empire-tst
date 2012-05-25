@@ -1,5 +1,5 @@
-! $Rev: 2163 $                                                          | 
-! $Date: 2011-12-01 20:56:28 +0100 (Do, 01 Dez 2011) $                                                     
+! $Rev: 2857 $                                                          | 
+! $Date: 2012-05-25 09:41:51 +0200 (Fr, 25 Mai 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,10 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.17   May 2012
+!-V                        Parameter consistency improvement to avoid
+!-V                        compiler messages (reported by A. Koning).
+!-V                        No impact on results is expected.
 !-V         Version 8.16   November 2011
 !-V                        Allow MT numbers 152-200 approved by CSEWG
 !-V                        Special case: suppress testing ZASYM if ZA=MAT
@@ -250,9 +254,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.17'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.17'
 !---MDC---
 !
 !     Define variable precision
@@ -500,10 +504,12 @@
       INTEGER(KIND=I4) :: IQUIT ! Flag to indicate whether or not to exit       
       INTEGER(KIND=I4) :: IFIND ! Flags whether desired material found
       INTEGER(KIND=I4) :: IFL2
-      INTEGER(KIND=I4) :: INDX1,INDX2
-      INTEGER(KIND=I4) :: N,NN
+      INTEGER(KIND=I4) :: INDX1,INDX2,I000
+      INTEGER(KIND=I4) :: N,NN,IZRO
 !
       CHARACTER(LEN=*), PARAMETER :: DASHES = REPEAT('-',80)
+!
+      DATA IZRO,I000 / 0, 1000 /
 !
 !     Output program identification
 !
@@ -583,7 +589,7 @@
             IF(IFL2.EQ.0.AND.LRP.GE.0)  THEN
                WRITE(EMESS,'(A,I3,A)') 'LRP =',LRP,                     &       
      &          ' Requires the presence of File 2, but it is missing.'
-               CALL ERROR_MESSAGE(0)
+               CALL ERROR_MESSAGE(IZRO)
                NERROR=NERROR+1
                IFL2 = 1
             END IF
@@ -610,12 +616,12 @@
             NN=MIN(NXC,NSECMAX)
             DO N=1,NN
                IF(INDX(N,2).EQ.1) THEN
-                  INDX1 = INDX(N,1)/1000
-                  INDX2 = MOD(INDX(N,1),1000)
+                  INDX1 = INDX(N,1)/I000
+                  INDX2 = MOD(INDX(N,1),I000)
                   WRITE(EMESS,'(A,I5,3X,A,I3,3X,A,I4,3X,A)')            &
      &                 'SECTION MAT=',MATO,'MF=',INDX1,'MT=',           &       
      &                 INDX2,'IS MISSING'
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(IZRO)
                   NERROR=NERROR+1
                END IF
             END DO
@@ -1266,8 +1272,10 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: I
+      INTEGER(KIND=I4) :: I,IZRO
       INTEGER(KIND=I4) :: NSEQB
+!
+      DATA IZRO / 0 /
 !
       IF(IERX.NE.0) GO TO 50
 !
@@ -1432,7 +1440,7 @@
 !
       WRITE(EMESS,'(2A,I8,A,I8)') 'SECTION CANNOT BE',                  &       
      &      ' CHECKED FROM SEQUENCE NUMBER ',NSEQB,' TO',NSEQ
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(IZRO)
       NERROR=NERROR+1
    60 IF(MAT.LT.0)  THEN
          CALL CONTROL_ERRORS(1)
@@ -1683,12 +1691,14 @@
       INTEGER(KIND=I4) :: IEF
       INTEGER(KIND=I4) :: MFT,MFTP
       INTEGER(KIND=I4) :: N1
-      INTEGER(KIND=I4) :: K,N,NC
+      INTEGER(KIND=I4) :: K,N,NC,IZRO
       REAL(KIND=R4) :: EMAX,TEMP
 !
       INTEGER(KIND=I4), PARAMETER :: NPARTS = 8
       INTEGER(KIND=I4), DIMENSION(NPARTS), PARAMETER ::                  &      
      &         IPART = (/0,1,11,1001,1002,1003,2003,2004/)
+!
+      DATA IZRO / 0 /
 !
 !     DEFINE ELEMENT SYMBOLS
 !
@@ -1954,7 +1964,7 @@
          CALL ERROR_MESSAGE(NSEQP)
          EMESS = '    ALL TESTS WHICH DEPEND ON ITS PRESENCE WILL '//   &       
      &             'NOT BE DONE'
-         CALL ERROR_MESSAGE(0)
+         CALL ERROR_MESSAGE(IZRO)
          GO TO 100
       END IF
 !
@@ -2144,7 +2154,9 @@
       INTEGER(KIND=I4) :: JPOT
       INTEGER(KIND=I4) :: LFW,LRU
       INTEGER(KIND=I4) :: NER,NERM
-      INTEGER(KIND=I4) :: N,NI
+      INTEGER(KIND=I4) :: N,NI,IZRO
+!
+      DATA IZRO / 0 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -2211,7 +2223,7 @@
 !**************UNRESOLVED RESONANCE REGION
                   IF(N.NE.NER) THEN
                      EMESS = 'ONLY ONE UNRESOLVED RESONANCE REGION IS '
-                     CALL ERROR_MESSAGE(0)
+                     CALL ERROR_MESSAGE(IZRO)
                      EMESS = ' PERMITTED AND IT MUST BE THE LAST ONE.'
                      CALL ERROR_MESSAGE(NSEQP)
                   END IF
@@ -2227,7 +2239,7 @@
          IF(LRP.NE.0)  THEN
             EMESS ='LRP FLAG MUST BE ZERO IN 1/451 BECAUSE ONLY '//     &       
      &              'POTENTIAL'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(IZRO)
             EMESS = '    SCATTERING IS GIVEN IN FILE 2 FOR ALL '//      &       
      &              'ISOTOPES.'
             CALL ERROR_MESSAGE(NSEQP)
@@ -2236,7 +2248,7 @@
          IF(LRP.EQ.0)  THEN
             EMESS = 'LRP FLAG MAY NOT BE ZERO IN 1/451 BECAUSE '//      &       
      &              'RESONANCE '
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(IZRO)
             EMESS = 'PARAMETERS ARE GIVEN FOR AT LEAST ONE ISOTOPE.'
             CALL ERROR_MESSAGE(NSEQP)
          END IF
@@ -3166,11 +3178,13 @@
       INTEGER(KIND=I4) :: NW,NWT
       INTEGER(KIND=I4) :: NPSX
       INTEGER(KIND=I4) :: NMU
-      INTEGER(KIND=I4) :: I,N,NU
+      INTEGER(KIND=I4) :: I,N,NU,IONE
 !
       INTEGER(KIND=I4), PARAMETER :: LAWMAX=7
       INTEGER(KIND=I4), PARAMETER :: LANGMAX=15,LEPMAX=5
       INTEGER(KIND=I4), PARAMETER :: NPSXMAX=20
+!
+      DATA IONE / 1 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -3193,7 +3207,7 @@
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM2,'/',MT,         &       
      &       ' NOT BE PRESENT'
-         CALL ERROR_MESSAGE(1)
+         CALL ERROR_MESSAGE(IONE)
       END IF
       MFM1 = MF - 1
       CALL TESTS(MFM1,MT,ISET)
@@ -3201,7 +3215,7 @@
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM1,'/',MT,         &       
      &       ' NOT BE PRESENT'
-         CALL ERROR_MESSAGE(1)
+         CALL ERROR_MESSAGE(IONE)
       END IF
 !
 !     CHECK LAB-CM FLAG
@@ -3679,8 +3693,10 @@
       INTEGER(KIND=I4) :: LCON,LCOV
       INTEGER(KIND=I4) :: NER
       INTEGER(KIND=I4) :: LB,NPP
-      INTEGER(KIND=I4) :: N,NN
+      INTEGER(KIND=I4) :: N,NN,IONE
       REAL(KIND=R4) :: STYPE
+!
+      DATA IONE / 1 /
 !
 !     CHECK FOR CORRECT INITIAL STATE FLAGS
 !
@@ -3787,7 +3803,7 @@
             IF(NER.NE.0)   THEN
                WRITE(EMESS,'(A,F4.1)')                                  &       
      &            'LCON=1 REQUIRES NER=0 FOR STYPE = ',STYPE
-               CALL ERROR_MESSAGE(1)
+               CALL ERROR_MESSAGE(IONE)
             END IF
             GO TO 30
          END IF
@@ -3838,7 +3854,9 @@
 !
       INTEGER(KIND=I4) :: MFM1,ISET,INAT
       INTEGER(KIND=I4) :: NS,LFSO,LFSP,IZAP,IZAPP
-      INTEGER(KIND=I4) :: N
+      INTEGER(KIND=I4) :: N,IONE
+!
+      DATA IONE / 1 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -3863,7 +3881,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &        'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,         &       
      &        ' NOT BE PRESENT'
-            CALL ERROR_MESSAGE(1)
+            CALL ERROR_MESSAGE(IONE)
          END IF
       ELSE
 !
@@ -3955,7 +3973,9 @@
       INTEGER(KIND=I4) :: LP,LF
       INTEGER(KIND=I4) :: LG,NS
       INTEGER(KIND=I4) :: NUM
-      INTEGER(KIND=I4) :: J2
+      INTEGER(KIND=I4) :: J2,IZRO,IONE
+!
+      DATA IZRO,IONE / 0, 1 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -3990,7 +4010,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A)')                                &       
      &         'THIS SECTION REQUIRES THAT SECTION',MFM1,'/',MT,        &       
      &         ' NOT BE PRESENT'
-            CALL ERROR_MESSAGE(1)
+            CALL ERROR_MESSAGE(IONE)
          END IF
 !********L1(LO) MUST BE 0
          LO = L1H
@@ -4022,7 +4042,7 @@
                IF(ISET.GE.3)  THEN
                   EMESS = 'CONTINUUM PHOTONS REQUIRE A SECTION IN '//   &       
      &                    'MF=15'
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(IZRO)
                END IF
             END IF
             LP = L1
@@ -4107,7 +4127,9 @@
       INTEGER(KIND=I4) :: NK,NI
       INTEGER(KIND=I4) :: LI,LTT
       INTEGER(KIND=I4) :: NE
-      INTEGER(KIND=I4) :: N,M
+      INTEGER(KIND=I4) :: N,M,IONE
+!
+      DATA IONE / 1 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -4129,7 +4151,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A,I3,A,I3)')                        &       
      &        'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFM2,     &       
      &        '/',MT,' OR',MFM1,'/',MT
-            CALL ERROR_MESSAGE(1)
+            CALL ERROR_MESSAGE(IONE)
          END IF
       END IF
 !
@@ -4208,7 +4230,9 @@
       INTEGER(KIND=I4) :: NC
       INTEGER(KIND=I4) :: LF
       INTEGER(KIND=I4) :: NE
-      INTEGER(KIND=I4) :: I,NM
+      INTEGER(KIND=I4) :: I,NM,IONE
+!
+      DATA IONE / 1 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -4230,7 +4254,7 @@
             WRITE(EMESS,'(A,I3,A,I3,A,I3,A,I3)')                        &       
      &        'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFM2,     &       
      &        '/',MT,' OR',MFM1,'/',MT
-            CALL ERROR_MESSAGE(1)
+            CALL ERROR_MESSAGE(IONE)
          END IF
       END IF
 !
@@ -4477,7 +4501,9 @@
       INTEGER(KIND=I4) :: NIS,LRU,LRUM
       INTEGER(KIND=I4) :: LFW
       INTEGER(KIND=I4) :: NER,NERM
-      INTEGER(KIND=I4) :: N,NI
+      INTEGER(KIND=I4) :: N,NI,IZRO
+!
+      DATA IZRO / 0 /
 !
 !     Test for a valid MT number
 !
@@ -4544,7 +4570,7 @@
 !              Check for only one region
                IF(N.NE.NER) THEN
                   EMESS = 'ONLY ONE UNRESOLVED RESONANCE REGION IS '
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(IZRO)
                   EMESS = ' PERMITTED AND IT MUST BE THE LAST ONE.'
                   CALL ERROR_MESSAGE(NSEQP)
                END IF
@@ -4893,7 +4919,9 @@
       INTEGER(KIND=I4) :: NL,NC,NI
       INTEGER(KIND=I4) :: MAT1,MAT1B,MT1,MT1B
       INTEGER(KIND=I4) :: IE
-      INTEGER(KIND=I4) :: I1
+      INTEGER(KIND=I4) :: I1,IZRO
+!
+      DATA IZRO / 0 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -4930,7 +4958,7 @@
             CALL ERROR_MESSAGE(NSEQP)
             EMESS = '    COVARIANCE SECTION FOR MT = MTL '//            &       
      &             'IS MISSING'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(IZRO)
          NERROR=NERROR+1
          END IF
 !
@@ -5164,8 +5192,10 @@
       INTEGER(KIND=I4) :: LS,LB
       INTEGER(KIND=I4) :: NK
       INTEGER(KIND=I4) :: NE,NTT
-      INTEGER(KIND=I4) :: I1
+      INTEGER(KIND=I4) :: I1,IZRO
       REAL(KIND=R4) :: EL,EU
+!
+      DATA IZRO / 0 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -5204,7 +5234,7 @@
          IF(I1.GT.1.AND.EL.NE.EU) THEN
             WRITE(EMESS,'(A,I2)')                                       &       
      &           'LOWER ENERGY OF SUBSECTION ',I1,' DOES NOT'
-            CALL ERROR_MESSAGE(0)
+            CALL ERROR_MESSAGE(IZRO)
             WRITE(EMESS,'(12X,A,I2)')                                   &       
      &           'MATCH UPPER ENERGY OF SUBSECTION ',I1-1
             CALL ERROR_MESSAGE(NSEQP1)
@@ -5237,7 +5267,9 @@
       INTEGER(KIND=I4) :: MAT1,MF1,MT1,LFS1
       INTEGER(KIND=I4) :: MAT1B,MF1B,MT1B,LFS1B
       INTEGER(KIND=I4) :: IE,ISET
-      INTEGER(KIND=I4) :: I1,N
+      INTEGER(KIND=I4) :: I1,N,IZRO
+!
+      DATA IZRO / 0 /
 !
 !     TEST FOR A VALID MT NUMBER
 !
@@ -5304,7 +5336,7 @@
                IF(MAT1.NE.0.OR.MF1.NE.10.OR.MT1.NE.MT.OR.               &       
      &                 LFS1.NE.LFS) THEN
                   EMESS = 'FIRST SUB-SUBSECTION MUST BE MAT1=0, MF1=10,'
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(IZRO)
                   EMESS = '    MT1=MT AND LFS1=LFS'
                   CALL ERROR_MESSAGE(NSEQP)
                END IF
@@ -5332,7 +5364,7 @@
                   WRITE(EMESS,'(A,I4,A,I2,A,I3,A,I2)')                  &       
      &                'SUB-SUBSECTION MAT1/MF1/MT1/LFS1 = ',MAT1,'/',   &       
      &                         MF1,'/',MT1,'/',LFS1
-                  CALL ERROR_MESSAGE(0)
+                  CALL ERROR_MESSAGE(IZRO)
                   EMESS = 'OUT OF ORDER'
                   CALL ERROR_MESSAGE(NSEQP)
                END IF
@@ -6083,9 +6115,11 @@
       CHARACTER(LEN=5) :: RFIELD
       CHARACTER(LEN=25):: FMT
       INTEGER(KIND=I4) :: NB
-      INTEGER(KIND=I4) :: K
+      INTEGER(KIND=I4) :: K,IZRO
 !
       INTEGER(KIND=I4), DIMENSION(4) :: L
+!
+      DATA IZRO / 0 /
 !
 !     PROCESS INTEGER FIELDS
 !
@@ -6117,9 +6151,9 @@
       EMESS = 'FORMAT ERROR IN RECORD'
       CALL ERROR_MESSAGE(NSEQR)
       EMESS = '    EXPECT FORMAT '//FMT
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(IZRO)
       EMESS = '    READ   '//IFIELD
-      CALL ERROR_MESSAGE(0)
+      CALL ERROR_MESSAGE(IZRO)
 !
       RETURN
       END SUBROUTINE SEQRD
@@ -6872,7 +6906,9 @@ c        END IF
       INTEGER(KIND=I4) :: MF1,MT1
 !
       INTEGER(KIND=I4) :: MFTEM,MTTEM
-      INTEGER(KIND=I4) :: ISET
+      INTEGER(KIND=I4) :: ISET,IONE
+!
+      DATA IONE / 1 /
 !
       MFTEM = MF1
       MTTEM = MT1
@@ -6881,7 +6917,7 @@ c        END IF
          WRITE(EMESS,'(A,I3,A,I3)')                                     &       
      &       'THIS SECTION REQUIRES THE PRESENCE OF SECTION',MFTEM,     &       
      &       '/',MTTEM
-         CALL ERROR_MESSAGE(1)
+         CALL ERROR_MESSAGE(IONE)
       END IF
 !
       RETURN
