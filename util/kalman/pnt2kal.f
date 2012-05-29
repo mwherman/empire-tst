@@ -186,7 +186,7 @@ c
 c     Experiment loop
       do iexp=1, MAXEXP 
 c       Reading header
-        read(100,10,end=150) EXPDATA(iexp)%REF, EXPDATA(iexp)%IZ,
+5       read(100,10,end=150) EXPDATA(iexp)%REF, EXPDATA(iexp)%IZ,
      & EXPDATA(iexp)%IA, EXPDATA(iexp)%MF, EXPDATA(iexp)%MT,
      & EXPDATA(iexp)%Einc, EXPDATA(iexp)%KENTRY,EXPDATA(iexp)%KSUBENT
 10      format(A25,15X,I3,4X,I3,1X,I3,1X,I4,3X,G7.2,31X,A5,I3)
@@ -211,7 +211,7 @@ c         Calculating relative errors
      & EXPDATA(iexp)%DAT(idat)%ERR/
      & EXPDATA(iexp)%DAT(idat)%VAL
           endif
-
+          
         enddo
 100     CONTINUE
         BACKSPACE(100)
@@ -221,6 +221,15 @@ c       Making it an error to have exp. sets with 0 points
           write(*,*) 'ERROR: No data points for ', EXPDATA(iexp)%REF
           stop
         endif
+c       Disregarding experiments with incident energies between thermal and Empire's minimum energy
+        IF(EXPDATA(iexp)%Einc.GT.2.53D-2.AND.
+     &EXPDATA(iexp)%Einc.LT.5.0D-1) THEN
+          write(*,120) trim(EXPDATA(iexp)%REF),EXPDATA(iexp)%Einc
+120       format(/,'WARNING: Skipped dataset ',A,' because its',
+     &' incident energy, ',1PD11.5,'eV,',/,8X,' is greater than',
+     &' thermal but lower than Empire''s minimum. ',/)
+          GOTO 5
+        ENDIF
       enddo
 150   CONTINUE
       NEXP = iexp - 1
