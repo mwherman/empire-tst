@@ -19,7 +19,7 @@ set log xy
 set pm3d map
 set cbrange [-100:100]
 
-splot[0.4:20][0.4:20] 'corrplot.d' u 1:2:($3*100) not w pm3d
+splot[0.4:25][0.4:25] 'corrplot.d' u 1:2:($3*100) not w pm3d
 
 reset
 
@@ -30,8 +30,8 @@ pause -2
 #set xrange [ 0 : * ]
 #set yrange [ 0 : * ]
 
-set xlabel 'Energy [MeV]'
-set ylabel 'Cross Section [barn]'
+set xlabel 'Outgoing-neutron energy [MeV]'
+set ylabel 'PFNS ratio to Maxwellian'
 
 ev=1.e-6
 
