@@ -6,6 +6,8 @@ FC   =  gfortran
 #FC  =  lf95
 
 # set FFLAGS based on compiler setting
+# set minimal flag -c as default
+FFLAGS = -c
 
 ifeq ($(FC),gfortran)
 
