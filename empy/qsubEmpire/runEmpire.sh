@@ -9,29 +9,29 @@
 #
 #SCRIPT TO RUN FULL EMPIRE PACKAGE
 
-# for local testing
-# dir=/home/herman/temp
-# file=u235
-# clean=Y
-
 origDir=`pwd`
 
-# create directory on local /dev/shm using local
-# directory and one level up.
+# do a couple of sanity checks to make sure this 
+# was run from qsubEmpire. If not, abort.
 
-strt=${dir%/*/*}
-end=${dir#$strt}
-work=/dev/shm$end
-
-# make local working directory if not already there
-
-if [ ! -e $work ]; then
-   mkdir -p $work
+if [ -z $dir ]; then
+  echo " Working directory not specified!"
+  echo " Was this run from qsubEmpire?"
+  exit
 fi
 
-# copy files over to local directory
+if [ -z $PBS_JOBID ]; then
+  echo " PBS JOB_ID not defined!"
+  echo " Was this run from qsubEmpire?"
+  exit
+fi
 
-rm -r $work/* 2>/dev/null
+# setup working directory on local scratch disk
+work=/dev/shm/${PBS_JOBID%%.*}
+if [ -e $work ]; then
+        rm -r $work
+fi
+mkdir $work
 cd $work
 cp -r $dir/* ./
 
@@ -40,26 +40,30 @@ cp -r $dir/* ./
 ~/empire/scripts/runE $file
 
 # check if everything completed properly:
-
 if [ ! `tail -n 2 $file.out | grep -c "SUCCESSFULLY"` = 1 ]; then
     echo crash: $dir >> $origDir/crashlog.txt
 fi
 
+# all done - copy local files back to orig dir
+if [ -z $clean ]; then
+   clean="N"
+fi
 if [ $clean = Y ]; then
-    # keep only .xsc file:
-    #find . ! -name $file.xsc -exec rm -rf {} \;
-    #ls | grep -v '$file.xsc' | xargs rm -rf
-    grep_pattern="$file.xsc\|$file-pfns.out"
-    ls | grep -v $grep_pattern | xargs rm -rf
+    # only copy .xsc & pfns.out files
+   if [ -e $file.xsc ]
+   then
+      cp $file.xsc $dir
+   fi
+   if [ -e $file-pfns.out ]
+   then
+      cp $file-pfns.out $dir
+   fi
+else
+   # copy everything
+   cp -r ./* $dir
 fi
 
-# all done. Copy local directory back to original
-
-cp -r ./* $dir
-
-# clean up - remove working directory and parent (if empty)
-
-rm -r $work 2>/dev/null
-rmdir ${work%/*} 2>/dev/null
+# delete working dir
+rm -r $work
 
 exit
