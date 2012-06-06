@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-06-06 19:00:15 +0200 (Mi, 06 Jun 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -70,14 +70,12 @@ c-----reasigning humps and wells
       
 C---- Momentum integrals are calculated
       iphas_opt=0  ! phases calculated on decoupled parabolas
-
       IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) iphas_opt=1
       IF(FISbar(Nnuc).EQ.3)THEN
-        CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
+         CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
       ELSE
-        CALL PHASES_Parab(ee, nnuc, phase, discrete)
+         CALL PHASES_Parab(ee, nnuc, phase, discrete)
       ENDIF
-
 C-----Calculating transmission from phases
       DO ih = 1, nrbar, 2
          TFDd(ih/2 + 1) = 1.d0/
@@ -417,12 +415,15 @@ C     Momentum integrals
       UEXc = ee
       DO k = 1, NRBar
          phase(k) = 0.D0
-         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.)then
+         IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.
+     &       .AND.FISOPT(Nnuc).LT.3)then
             dmom = GaussLegendre41(FmomentParab,
      &             einters(2*k - 1),einters(2*k),abserr) 
          ELSE
             dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
          ENDIF
+         IF(FISOPT(Nnuc).EQ.3)
+     &    dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
          phase(k)   = min(dmom,50.d0)  
       ENDDO              
 

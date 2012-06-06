@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2851 $
+Ccc   * $Rev: 2873 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-05-20 22:30:49 +0200 (So, 20 Mai 2012) $
+Ccc   * $Date: 2012-06-06 19:00:15 +0200 (Mi, 06 Jun 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6617,9 +6617,10 @@ C-----
 C        FISopt(Nnuc).EQ.0. = '  Full damping model (Ind.Barr.)'
 C        FISopt(Nnuc).EQ.1. = '  Optical model for fission     '
 C        FISopt(Nnuc).EQ.2. = '  Complex fission potential, isomeric fission'
-
+C        FISopt(Nnuc).EQ.3. = '  Same as 2 but with phases calculated only  '
+C                                along the corresponding parabola                         
          IF (name.EQ.'FISOPT') THEN
-            IF(val.lt.0 .or. val.gt.2) THEN
+            IF(val.lt.0 .or. val.gt.3) THEN
               WRITE (8,'('' ERROR: FISOPT ='',I1)') NINT(val)
               WRITE (8,
      &          '('' ERROR: FISOPT must be 0,1,2; default 0 used '')')
