@@ -39,6 +39,7 @@ C	STOP
 C     endif  
       nreac = 30 ! reading up to 30 reactions only 	
 
+
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         
@@ -48,15 +49,10 @@ C    &
       creaction(3)='(z,nonel)'
       creaction(4)='(z,f)'
 
-
-	do j=1,nreac
-
+      do j=1,nreac
 	  if(creaction(j).eq.'(z,p)') toplot(j)=1
-
 	  if(creaction(j).eq.'(z,a)') toplot(j)=1
-
-	enddo
-
+      enddo
 
       nen = 0
       do i=1,maxen
@@ -70,7 +66,7 @@ C    &
  20   CLOSE(20)
 
       do i=1,nreac
-	if(check_cs(i).le.1.d-12) toplot(i)=0
+        if(check_cs(i).le.1.d-12) toplot(i)=0
       enddo
        
       do j=1,nreac
@@ -112,7 +108,7 @@ C       Skipping plots
       if(title(1:1).ne.' ') write(iout,'(A30)') title      
       write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A10)') 'thick: 2   '
-      write(iout,'(A10/2H//)') 'length: 250 '
+      write(iout,'(A10/2H//)') 'length:250'
       return
       end
 
