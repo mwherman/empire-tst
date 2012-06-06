@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2873 $
+Ccc   * $Rev: 2874 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-06 19:00:15 +0200 (Mi, 06 Jun 2012) $
+Ccc   * $Date: 2012-06-06 19:09:00 +0200 (Mi, 06 Jun 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6623,7 +6623,7 @@ C                                along the corresponding parabola
             IF(val.lt.0 .or. val.gt.3) THEN
               WRITE (8,'('' ERROR: FISOPT ='',I1)') NINT(val)
               WRITE (8,
-     &          '('' ERROR: FISOPT must be 0,1,2; default 0 used '')')
+     &          '('' ERROR: FISOPT must be 0,1,2,3; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6684,6 +6684,18 @@ C                                along the corresponding parabola
                WRITE (12,
      &'('' Isomeric fission model with partial damping used for '', 
      &             I3,A2,'' (FISOPT=2)'')') i2, SYMb(nnuc)
+            ENDIF
+            IF(val.eq.3) then
+               WRITE (8 ,
+     &'('' Isomeric fission model with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=3)'')') i2, SYMb(nnuc)
+               WRITE (8 ,
+     &'('' Phases calculated for a single parabola at each barrier '')') 
+               WRITE (12,
+     &'('' Isomeric fission model with partial damping used for '', 
+     &             I3,A2,'' (FISOPT=3)'')') i2, SYMb(nnuc)
+               WRITE (12 ,
+     &'('' Phases calculated for a single parabola at each barrier '')') 
             ENDIF
             GOTO 100
          ENDIF
