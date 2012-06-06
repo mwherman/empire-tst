@@ -3905,9 +3905,9 @@ fission coefficient becomes:
 \label{tf-classic}
 \end{equation}
 \end{itemize}
-Using the directive input FISOPT, one can choose between the simplified calculation coressponding
+Using the directive input FISOPT, one can choose between the simplified calculation corresponding
 to the complete damping (FISOPT=0) and the full optical model formalism which describes partial
-damping (FISOPT=1).
+damping (FISOPT=1,2,3).
 It should be noted that FISOPT=0 option, used in almost all reaction codes, leads to an overestimation of the 
 fission cross section if is used for subbarrier excitation energies. 
 
@@ -7283,7 +7283,7 @@ which it is said explicitly otherwise.
 \item[ ] FISBAR = 3 $\leftrightarrow$ FISBAR $<$3
 \item[ ] FISMOD = 0 $\leftrightarrow$ FISMOD $>$0
 \end{itemize}
-If FISOPT = 0 $\rightarrow$ FISOPT = 1 one has to make sure that the number of transition states at each
+If FISOPT = 0 $\rightarrow$ FISOPT > 0 one has to make sure that the number of transition states at each
 extremum is the same.
 
 \noindent The \emph{{*}-inp.fis} file is divided into sections corresponding to each fissioning
@@ -7291,7 +7291,7 @@ nucleus. Each section starts with the key-word "Isotope". Therefore in the follo
 we will have as reference the line containing "Isotope" denoted L=1.
 
 \paragraph {Example 1}
-Fission input created if FISSHI=0; FISOPT=0,1; FISBAR$<$3, FISDEN=0,2; FISDIS=0,1; FISMOD=0
+Fission input created if FISSHI=0; FISOPT=0,1,2,3; FISBAR$<$3, FISDEN=0,2; FISDIS=0,1; FISMOD=0
 
 \begin{itemize}
 \item[- ] {L=6} - 
@@ -7324,7 +7324,7 @@ by copying L=21 in L=22 also.
 %
 \item[- ]{L=25+$N_w$} -
 number of discrete states for the first hump $N_{dis}(h_1)$. It is writen and read as 'I2'  format starting after 
-"=" sign and has the maximum value equal to 30.  For FISOPT=1 The number of discrete states and their order 
+"=" sign and has the maximum value equal to 30.  For FISOPT>0 The number of discrete states and their order 
 ($K\pi$) must be the same. For FISOPT=0, the discrete states number might differ from one hump to another.
 However their values have to be equal to the number of lines below, associated to each discrete state.
 %
@@ -7334,7 +7334,7 @@ spin projection on the symmetry axes, parity and excitation energy with respect 
 discrete transition states (rotational band-heads) at hump $h$.
 This sequence of lines plus the one above are repeated for each extremum: first for the humps and next for the
 wells. 
-All the numbers on these lines can be changed but keeping in mind that for FISOPT=1 the number of discrete
+All the numbers on these lines can be changed but keeping in mind that for FISOPT>0 the number of discrete
 states and the order of $K\pi$ must be the same for all extrema.
 %
 \item[- ]{L=29+$N_w+[N_{dis,h}+2]*N_{parab}+h;~(h=1,N_h)$} - 
@@ -7435,7 +7435,7 @@ Isotope:
 
 
 \paragraph {Example 2}
-Fission input created if FISSHI=0; FISOPT=0,1; FISBAR=3, FISDEN=0,2; FISDIS=0; FISMOD=0
+Fission input created if FISSHI=0; FISOPT=0,1,2,3; FISBAR=3, FISDEN=0,2; FISDIS=0; FISMOD=0
 
 \begin{itemize}
 \item[- ] {L=9} - number of points $N_p$ for which the numerical path is defined; cannot be changed.
@@ -10549,6 +10549,9 @@ Estimated uncertainty of this parameter can be given by I3.
 
 = 2  subbarrier effects considered including isomeric fission and gamma emission inside
  the wells (under development) 
+
+= 3  the same as 2; but the phases are calculated assuming the barrier (or well) is 
+represented by uncoupled parabola (under development) 
 
 \item [{FISDIS}] Controls discrete transitional states 
 
