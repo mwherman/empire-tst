@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2872 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-06-06 18:57:15 +0200 (Mi, 06 Jun 2012) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -432,7 +432,7 @@ C======================================================
       if(title(1:2).ne.'  ') write(iout,*) trim(title)      
       write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A10)') 'thick: 2   '
-      write(iout,'(A10/2H//)') 'length: 92 '
+      write(iout,'(A10/2H//)') 'length:250'
       return
       end
 
