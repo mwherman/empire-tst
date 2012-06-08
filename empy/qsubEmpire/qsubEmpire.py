@@ -75,6 +75,18 @@ def parseInput(inputFile):
     return header, options, zip(energies,extraopts)
 
 
+def copyFiles(proj,dir):
+    """
+    Copy various project input files from
+    project directory to specified directory.
+    """
+    bash.cp(proj+"-inp.fis",dir,False)
+    bash.cp(proj+".lev",dir,False)
+    bash.cp(proj+"-lev.col",dir,False)
+    bash.cp(proj+"-omp.dir",dir,False)
+    bash.cp(proj+"-omp.ripl",dir,False)
+
+
 def runInput(inputFile, clean=False):
     """
     1) creates a set of new input files, each in its own directory. 
@@ -118,14 +130,10 @@ def runInput(inputFile, clean=False):
         fnew.close()
         
         # copy other inputs as well, if available (no error message otherwise)
-        bash.cp(join(path,proj+"-inp.fis"),join(path,name),False)
-        bash.cp(join(path,proj+".lev"),join(path,name),False)
-        bash.cp(join(path,proj+"-lev.col"),join(path,name),False)
-        bash.cp(join(path,proj+"-omp.dir"),join(path,name),False)
-        bash.cp(join(path,proj+"-omp.ripl"),join(path,name),False)
+        dir = join(path,name)
+        copyFiles(join(path,proj),dir)
         
         log = join( path,"empire_%s.log" % (name) )
-        dir = join( path,name )
         if clean:
             cmd = "qsub -N emp_%sMeV -o %s -l ncpus=1 " +\
                     "-v dir=%s,file=%s,energy=%s,clean=Y ~/bin/runEmpire.sh"
@@ -236,7 +244,6 @@ def reconstructXsec(inputFile):
     xsc.close()
 
 
-
 def reconstructPFNS(inputFile):
     """ 
     reconstruct -pfns.out file only
@@ -267,7 +274,6 @@ def reconstructPFNS(inputFile):
            i += 1
         
     pfnsfile.close()
-
 
 
 def clean(inputFile):

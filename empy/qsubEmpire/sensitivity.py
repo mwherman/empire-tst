@@ -140,12 +140,10 @@ def init(proj):
     
     # create dir for original input.
     # Also copy -inp.fis, .lev and -lev.col if available
-    os.mkdir(proj+"_orig")
-    shutil.copy(proj+".inp",proj+"_orig/")
-    bash.cp(proj+"-inp.fis",proj+"_orig/",False)
-    bash.cp(proj+".lev",proj+"_orig/",False)
-    bash.cp(proj+"-lev.col",proj+"_orig/",False)
-
+    dir = proj + "_orig"
+    os.mkdir(dir)
+    shutil.copy(proj+".inp",dir)
+    qsubEmpire.copyFiles(proj,dir)
 
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -214,11 +212,7 @@ def init(proj):
             # copy files to newly-created dir if available
             # suppress error messages if not:
             for dir in (nameP,nameM):
-                bash.cp(proj+"-inp.fis",dir,False)
-                bash.cp(proj+".lev",dir,False)
-                bash.cp(proj+"-lev.col",dir,False)
-                bash.cp(proj+"-omp.dir",dir,False)
-                bash.cp(proj+"-omp.ripl",dir,False)
+                qsubEmpire.copyFiles(proj,dir)
             
             plus = open( nameP+"/%s.inp" % proj, "w")
             minus = open( nameM+"/%s.inp" % proj, "w")
@@ -249,6 +243,7 @@ def init(proj):
                 minus.writelines(options[-1])
         
         # after GO, write energies:
+        
         for en in energies:
             if en[0]=='$':
                 tmp = readOption(en[1:]) 
