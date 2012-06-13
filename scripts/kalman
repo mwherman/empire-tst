@@ -248,7 +248,7 @@ rm INPUT.D
 rm KALMAN.INP
 rm fort.{1*,50,52,75}
 rm check.out
-rm ENERGYANDINDEX.TMP
+rm ENERGYANDINDEX.TMP 2>/dev/null
 
 exit
 
