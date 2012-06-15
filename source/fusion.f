@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
+Ccc   * $Rev: 2880 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-06-16 01:08:21 +0200 (Sa, 16 Jun 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -734,7 +734,7 @@ C-----Print elastic and direct cross sections from ECIS
 
       IF(CSFus.gt.0.d0 .and. TOTred.ne.1.d0) then
         if(FUSred.NE.1) WRITE (8,*) 'WARNING: INPUT FUSred dismissed'
-        FUSred = (TOTred*TOTcs - ELAcs)/CSFus
+        FUSred = (TOTred*TOTcs - ELAcs*ELAred)/CSFus
         WRITE (8,'(1x,A18,F5.2,A49,F5.2)') 
      >   ' FUSRED scaled by ', sngl(FUSRED),
      >   ' to impose requested scaling of total by TOTRED =',
