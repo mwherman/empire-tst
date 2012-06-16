@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2881 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-06-16 17:07:34 +0200 (Sa, 16 Jun 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -822,7 +822,9 @@ C
 C
 C
       Iloc = 0
-      DO Nejc = 0, NDEJC
+C     Ejectile 0 not considered = Projectile (RCN, June 2012)
+C     DO Nejc = 0, NDEJC
+      DO Nejc = 1, NDEJC
          IF (IZAejc(Nejc).EQ.Izaf) RETURN
       ENDDO
 C     For HI calculations

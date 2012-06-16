@@ -1,6 +1,6 @@
-cc   * $Rev: 2832 $
+cc   * $Rev: 2881 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-05-11 17:19:33 +0200 (Fr, 11 Mai 2012) $
+Ccc   * $Date: 2012-06-16 17:07:34 +0200 (Sa, 16 Jun 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -61,7 +61,7 @@ C
      &                 step, sum, sumfis, sumfism(NFMOD), totsp,
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
-     &                 deform(NDCOLLEV), cseaprnt(ndecse,ndangecis),
+     &                                   cseaprnt(ndecse,ndangecis),
 C                      -----------------------------------------------
 C                      PFNS quantities  
 C                      Total prompt fission spectra only for neutrons
@@ -93,7 +93,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
      &        jcn, ke, kemax, kemin, ltrmax, m, jz, jn, jzmx, jnmx, 
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp, jfiss,
      &        nnur, nnurec, nspec, neles, nxsp, npsp, ncon,
-     &        itemp(NDCOLLEV), ikey1, ikey2, ikey3, ikey4, 
+     &        ikey1, ikey2, ikey3, ikey4, 
 C             -----------------------------------------------
 C             PFNS quantities  
 C             Total prompt fission spectra only for neutrons
@@ -609,81 +609,75 @@ C
       IF (ncoll.GT.0) THEN
 C--------Locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0),nejcec,iloc)
+C
          WRITE (8,*) ' '
          gang = 180.d0/(NDANG - 1)
-         its = 2
-         DO ilv = 2,ncoll
-            DO iang= ilv+1,ncoll
-              if(ICOller(iang).eq.ICOller(ilv)) goto 700
-            ENDDO
-            itemp(its) = ICOller(ilv)
-            deform(its)   = D_DEF(ilv,2)
-            its = its +1
- 700     ENDDO
-         its = its -1
+         its = ncoll
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-           WRITE (8,99029)
-           WRITE (8,99030) (itemp(ilv),ilv = 2,MIN(its,10))
-           WRITE (8,99031) (ELV(itemp(ilv),nnurec),ilv = 2,MIN(its,10))
-           WRITE (8,99033) (XJLv(itemp(ilv),nnurec)*
-     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv = 2,MIN(its,10))
-           WRITE (8,*) ' '
+           WRITE(8,99029)
+           WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))
+           WRITE(8,99031) (ELV(ICOller(ilv),nnurec),ilv = 2,MIN(its,10))
+           WRITE(8,99033) (XJLv(ICOller(ilv),nnurec)*
+     &        LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),ilv = 2,MIN(its,10))
+           WRITE(8,*) ' '
            DO iang = 1, NDANG
              WRITE (8,99035) (iang - 1)*gang,
-     &         (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
+     &            (CSAlev(iang,ICOller(ilv),nejcec),ilv = 2,MIN(its,10))
            ENDDO
-           WRITE (8,*) ' '
-           WRITE (8,99040)(POPlv(itemp(ilv),nnurec),ilv = 2,MIN(its,10))
+           WRITE(8,*) ' '
+           WRITE(8,99040)(POPlv(ICOller(ilv),nnurec),ilv= 2,MIN(its,10))
+C
            IF(its.gt.10) THEN
-              WRITE (8,*) ' '
-              WRITE (8,*) ' '
-              WRITE (8,99030) (itemp(ilv),ilv = 11,MIN(its,20))
-              WRITE (8,99032)(ELV(itemp(ilv),nnurec),ilv=11,MIN(its,20))
-              WRITE (8,99034)(XJLv(itemp(ilv),nnurec)*
-     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =11,MIN(its,20))
-              WRITE (8,*) ' '
-              DO iang = 1, NDANG
-                WRITE (8,99035) (iang - 1)*gang,
-     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 11,MIN(its,20))
-              ENDDO
-              WRITE (8,*) ' '
-              WRITE (8,99040) (POPlv(itemp(ilv),nnurec),ilv = 11,
-     &                      MIN(its,20))
+             WRITE(8,*) ' '
+             WRITE(8,*) ' '
+             WRITE(8,99030)(ICOller(ilv),ilv = 11,MIN(its,20))
+             WRITE(8,99032)(ELV(ICOller(ilv),nnurec),ilv=11,MIN(its,20))
+             WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &         LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),ilv=11,MIN(its,20))
+             WRITE (8,*) ' '
+             DO iang = 1, NDANG
+               WRITE (8,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 11,MIN(its,20))
+             ENDDO
+             WRITE (8,*) ' '
+             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 11,
+     &                        MIN(its,20))
            ENDIF
+
            IF(its.gt.20) THEN
-              WRITE (8,*) ' '
-              WRITE (8,*) ' '
-              WRITE (8,99030) (itemp(ilv),ilv = 21,MIN(its,30))
-              WRITE (8,99032)(ELV(itemp(ilv),nnurec),ilv=21,MIN(its,30))
-              WRITE (8,99034)(XJLv(itemp(ilv),nnurec)*
-     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =21,MIN(its,30))
-              WRITE (8,*) ' '
-              DO iang = 1, NDANG
-                WRITE (8,99035) (iang - 1)*gang,
-     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 21,MIN(its,30))
-              ENDDO
-              WRITE (8,*) ' '
-              WRITE (8,99040) (POPlv(itemp(ilv),nnurec),ilv = 21,
-     &                      MIN(its,30))
+             WRITE(8,*) ' '
+             WRITE(8,*) ' '
+             WRITE(8,99030) (ICOller(ilv),ilv = 21,MIN(its,30))
+             WRITE(8,99032)(ELV(ICOller(ilv),nnurec),ilv=21,MIN(its,30))
+             WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &         LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),ilv=21,MIN(its,30))
+             WRITE (8,*) ' '
+             DO iang = 1, NDANG
+               WRITE (8,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 21,MIN(its,30))
+             ENDDO
+             WRITE (8,*) ' '
+             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 21,
+     &                        MIN(its,30))
            ENDIF
 C
 C----------Because of the ENDF format restrictions the maximum
 C----------number of discrete levels is limited to 40
 C
            IF(its.gt.30) THEN
-              WRITE (8,*) ' '
-              WRITE (8,*) ' '
-              WRITE (8,99030)(itemp(ilv),ilv = 31,MIN(its,40))
-              WRITE (8,99032)(ELV(itemp(ilv),nnurec),ilv=31,MIN(its,40))
-              WRITE (8,99034)(XJLv(itemp(ilv),nnurec)*
-     &           LVP(itemp(ilv),nnurec),deform(ilv),ilv =31,MIN(its,40))
-              WRITE (8,*) ' '
-              DO iang = 1, NDANG
-                WRITE (8,99035) (iang - 1)*gang,
-     &           (CSAlev(iang,itemp(ilv),nejcec),ilv = 31,MIN(its,40))
-              ENDDO
-              WRITE (8,*) ' '
-              WRITE (8,99040) (POPlv(itemp(ilv),nnurec),ilv = 31,
+             WRITE(8,*) ' '
+             WRITE(8,*) ' '
+             WRITE(8,99030)(ICOller(ilv),ilv = 31,MIN(its,40))
+             WRITE(8,99032)(ELV(ICOller(ilv),nnurec),ilv=31,MIN(its,40))
+             WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &         LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),ilv=31,MIN(its,40))
+             WRITE (8,*) ' '
+             DO iang = 1, NDANG
+               WRITE (8,99035) (iang - 1)*gang,
+     &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 31,MIN(its,40))
+             ENDDO
+             WRITE (8,*) ' '
+             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 31,
      &                      MIN(its,40))
            ENDIF
            WRITE (8,*) ' '
@@ -1348,39 +1342,34 @@ C--------------Write elastic to tape 12 and to tape 68
      &              WRITE (8,*) 'WARNING: CN elastic is 0'
 C
                   IF (FITomp.LT.0) THEN
-                   WRITE(40,'(F12.4,3D12.5)')   EINl,TOTcs,ABScs
-                   IF (ncoll.GT.0) THEN
-C-------------------locate position of the projectile among ejectiles
-                    CALL WHEREJC(IZAejc(0),nejcec,iloc)
-                    its = 2
-                    DO ilv = 2,ncoll
-                     DO iang= ilv+1,ncoll
-                      if(ICOller(iang).eq.ICOller(ilv)) goto 710
-                     ENDDO
-                     itemp(its) = ICOller(ilv)
-                     its = its +1
- 710                ENDDO
-                    its = its -1
-                    WRITE (40,'(12x,11D12.5)') ELAcs,
-     &               (CSDirlev(itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-                    IF (ICAlangs.gt.0) THEN
-                     DO iang = 1, NDANG
-                      WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                 elada(iang) + elcncs,
-     &              (CSAlev(iang,itemp(ilv),nejcec),ilv = 2,MIN(its,10))
-                     ENDDO
+                    WRITE(40,'(F12.4,3D12.5)') 
+     &                EINl,TOTcs*TOTred,ABScs*FUSred
+                    IF (ncoll.GT.0) THEN
+C---------------------locate position of the projectile among ejectiles
+                      CALL WHEREJC(IZAejc(0),nejcec,iloc)
+                      its = ncoll
+                      WRITE (40,'(12x,11D12.5)') ELAred*ELAcs,
+     &                         (CSDirlev(ICOller(ilv),nejcec),
+     &                          ilv = 2,MIN(its,10))
+                      IF (ICAlangs.gt.0) THEN
+                        DO iang = 1, NDANG
+                          WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &                                ELAred*elada(iang) + ELCncs,
+     &                          (CSAlev(iang,ICOller(ilv),nejcec),
+     &                           ilv = 2,MIN(its,10))
+                        ENDDO
+                      ENDIF
+                    ELSE
+                      WRITE (40,'(12x,11D12.5)') ELAred*ELAcs
+                      IF (ICAlangs.gt.0) THEN
+                        DO iang = 1, NDANG
+                          WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
+     &                                ELAred*elada(iang) + ELCncs
+                        ENDDO
+                      ENDIF
                     ENDIF
-                   ELSE
-                    WRITE (40,'(12x,11D12.5)') ELAcs
-                    IF (ICAlangs.gt.0) THEN
-                     DO iang = 1, NDANG
-                      WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                                             elada(iang) + elcncs
-                     ENDDO
-                    ENDIF
-                   ENDIF
                   ENDIF
-              ENDIF
+               ENDIF
             ENDIF
          ENDIF
 C--------Jump to end of loop after elastic when fitting
@@ -2338,18 +2327,18 @@ C---------------Exclusive DDX spectra (neutrons & protons)
      &                   (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
                 ! first emission reactions
 C-----------------------(discrete levels part)
-                        DO il = 1, NLV(nnuc)  !(levels)
+                     DO il = 1, NLV(nnuc)  !(levels)
                            espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                            IF (espec.GE.0) WRITE (12,
-     &                       '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &                -espec, (max(CSAlev(nang,il,nejc)*recorp/DE,0.d0),
-     &                                                  nang = 1,NDANG)
-                      ENDDO
+     &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
+     &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
+     &                               0.d0),nang = 1,NDANG)
+                     ENDDO
                    ENDIF
 C-----------------------(continuum part - same for all n and p)
                    DO ie = 1, nspec + 1 ! clean DDX matrix
                      DO nang = 1, NDANG
-                       cseaprnt(ie,nang) = 0.0
+                       cseaprnt(ie,nang) = 0.d0
                      ENDDO
                    ENDDO
                    IF(LHMs.EQ.0) THEN
@@ -2493,9 +2482,7 @@ C-----------------double the first bin x-sec to preserve integral in EMPEND
                   WRITE (12,'(''    Energy    mb/MeV'')')
 C                 WRITE (12,'('' Energy    mb/MeV'')')
                   WRITE (12,*) ' '
-                  IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
-     &                (nnuc.EQ.mt649 .AND. nejc.EQ.2).OR.
-     &                (nnuc.EQ.mt849 .AND. nejc.EQ.3)) THEN
+                  IF (nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN
                                         ! first emission 
                     DO il = 1, NLV(nnuc) ! (levels)
 C--------------------------Although DDX spectra are available for emission
