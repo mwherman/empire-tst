@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2874 $
+Ccc   * $Rev: 2882 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-06 19:09:00 +0200 (Mi, 06 Jun 2012) $
+Ccc   * $Date: 2012-06-21 10:33:31 +0200 (Do, 21 Jun 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4912,10 +4912,10 @@ C-----
               ENDDO
               WRITE (8,
      &        '('' GDR first hump cross section in all nuclei set to ''
-     &        ,F5.2)') val
+     &        ,F7.2)') val
               WRITE (12,
      &        '('' GDR first hump cross section in all nuclei set to ''
-     &        ,F5.2)') val
+     &        ,F7.2)') val
               GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -4938,7 +4938,7 @@ C-----
               ENDIF
               WRITE (8,
      &        '('' GDR first hump cross section sampled value : ''
-     &        ,f5.2)') GDRpar(3,nnuc)
+     &        ,f7.2)') GDRpar(3,nnuc)
                IPArCOV = IPArCOV +1
                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(3,nnuc), INDexf,INDexb
@@ -4946,10 +4946,10 @@ C-----
               GDRpar(3,nnuc) = val
               WRITE (8,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val
+     &      ,F7.2)') i2, SYMb(nnuc), val
               WRITE (12,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val
+     &      ,F7.2)') i2, SYMb(nnuc), val
              endif
             GOTO 100
          ENDIF
@@ -5062,10 +5062,10 @@ C-----
               ENDDO
               WRITE (8,
      &        '('' GDR second hump cross section in all nuclei set to ''
-     &        ,F5.2)') val
+     &        ,F7.2)') val
               WRITE (12,
      &        '('' GDR second hump cross section in all nuclei set to ''
-     &        ,F5.2)') val
+     &        ,F7.2)') val
               GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -5088,7 +5088,7 @@ C-----
               ENDIF
               WRITE (8,
      &        '('' GDR second hump cross section sampled value : ''
-     &        ,f5.2)') GDRpar(6,nnuc)
+     &        ,f7.2)') GDRpar(6,nnuc)
                IPArCOV = IPArCOV +1
                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(6,nnuc), INDexf,INDexb
@@ -5096,10 +5096,10 @@ C-----
               GDRpar(6,nnuc) = val
               WRITE (8,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val
+     &      ,F7.2)') i2, SYMb(nnuc), val
               WRITE (12,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
-     &      ,F5.2)') i2, SYMb(nnuc), val
+     &      ,F7.2)') i2, SYMb(nnuc), val
              endif
             GOTO 100
          ENDIF
