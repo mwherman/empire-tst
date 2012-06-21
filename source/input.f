@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2882 $
+Ccc   * $Rev: 2883 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-21 10:33:31 +0200 (Do, 21 Jun 2012) $
+Ccc   * $Date: 2012-06-21 11:04:01 +0200 (Do, 21 Jun 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -8639,7 +8639,7 @@ C     write(6,*)trim(empiredir)//trim(filename)
         write (*,*)' ',trim(empiredir)//trim(filename)
         WRITE (*,*)
         WRITE (8,
-     & '('' WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
         write (8,*)' ',trim(empiredir)//trim(filename)
         WRITE (8,*)
         RETURN 
