@@ -326,9 +326,9 @@ C* All ENDF material processed - insert mu-bar into the ENDF file
       REWIND LIN
       REWIND LTM
       CALL RDTEXT(LTM,MATH,MFH,MTH,H66,IER)
+C* Read the header of the original source ENDF file
       NS=0
       CALL RDTEXT(LIN,MAT ,MF ,MT ,C66,IER)
-      CALL WRTEXT(LOU,MAT ,MF ,MT ,NS, C66)
 C* Read the first record from the data to be inserted
   210 CALL RDTEXT(LTM,MATH,MFH,MTH,H66,IER)
       IF(MATH.LT.0 .OR. IER.NE.0) GO TO 280
@@ -336,6 +336,8 @@ c...
 C...  print *,'MATH,MFH,MTH',MATH,MFH,MTH
 c...
       IF(MTH.LE.0) GO TO 210
+      NS=0
+      CALL WRTEXT(LOU,MAT ,MF ,MT ,NS, C66)
 C* Copy the source ENDF file up to the position for insertion
       MF =-1
   220 MF0=MF
@@ -348,7 +350,7 @@ C...    print *,'Insert before',mat,mf,mt
 c...
         GO TO 260
       END IF
-C*    -- Write the record
+C*    -- Write the record to the output ENDF file
       CALL WRTEXT(LOU,MAT ,MF ,MT ,NS, C66)
       IF(MAT.LT.0) GO TO 290
       GO TO 220
