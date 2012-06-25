@@ -22,7 +22,10 @@ C-V        Correct Angstrom to eV conversion (N. Otsuka, V. Zerkin).
 C-V  09/09 Identify resonance energy when given as data (V. Zerkin)
 C-V        Convert Energy/
 C-V  12/03 Add operation to scale fission spectrum by Maxwellian
-C-D        distribution when MXD qualifier is present (A. Trkov).
+C-V        distribution when MXD qualifier is present (A. Trkov).
+C-V  12/06 Fix translation of discrete inelastic levels when level
+C-V        energies are given in dual representation (level energy
+C-V        or range of levels, e.g.: #20788006) (A. Trkov).
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
 C-A  -------------------------------------
@@ -2387,6 +2390,18 @@ C-----INITIALIZE DEFINITION OF FIELD 7-8.                               X4T21050
       II=KMOUT(I,ISANR)                                                 X4T21080
 C-----SKIP UNUSED FIELDS AND ZERO ERROR FIELDS.                         X4T21090
       IF(II.LE.0) GO TO 340                                             X4T21100
+C-----Allow multiple fields for EN-LVL, select the one that is non-zero
+      IF(I.EQ.7 .AND. II.GT.8) THEN
+        J1=II/100
+        J2=II-100*J1
+        IF(VALUES(J1).NE.0) THEN
+          II=J1
+          J1=KMOUT(8,ISANR)
+          VALUES(J1)=0
+        ELSE
+          II=J2
+        END IF
+      END IF
       OVALUE=VALUES(II)                                                 X4T21110
 C---zvv+++2009.09.09
       if (ovalue.gt.1.e37) then
@@ -3695,8 +3710,23 @@ C                                                                       X4T33490
 C     CANNOT RESOLVE MULTIPLE FIELD DEFINITION. PRINT ERROR MESSAGE     X4T33500
 C     WHEN PROCESSING FIRST POINT OF TABLE.                             X4T33510
 C                                                                       X4T33520
-  260 IF(NPT.GT.1) GO TO 290                                            X4T33530
-      WRITE(OUTP,6010) KFIELD                                           X4T33540
+  260 IF(NPT.EQ.1) WRITE(OUTP,6010) KFIELD
+C-----Allow multiple definition of E-LVL and E-LVL-MIN, use non-zero
+      JJ=IMOUT(KFIELD,ISANR,1)
+      J1=IMOUT(KFIELD,ISANR,2)
+      IF( (TITLE(JJ).EQ.'E-LVL      ' .AND. TITLE(J1).EQ.'E-LVL-MIN  ')
+     &.OR.(TITLE(JJ).EQ.'E-LVL-MIN  ' .AND. TITLE(J1).EQ.'E-LVL      '))
+     &THEN
+        IF(NPT.EQ.1) WRITE(OUTP,6052)
+        IF(TITLE(JJ).EQ.'E-LVL      ') THEN
+          JJ=100*JJ+J1
+        ELSE
+          JJ=100*J1+JJ
+        END IF
+        GO TO 300
+      END IF
+C-----Use first otherwise
+      IF(NPT.GT.1) GO TO 290
   270 WRITE(OUTP,6050)                                                  X4T33550
       DO KMULT=1,JMULT
         JJ=IMOUT(KFIELD,ISANR,KMULT)
@@ -3717,6 +3747,7 @@ C-----DEFINE UNIQUE INPUT FIELD INDEX TO MAP INTO OUTPUT FIELD.         X4T33610
      1       10X,'DEFINE AVERAGE FOLLOWED BY ERROR (FIELD=',I2,' USED)')X4T33710
  6042 FORMAT(10X,'WARNING.....FIELD=',I2,' ALREADY USED - OVERWRITE')
  6050 FORMAT(10X,'WILL USE THE FIRST OF THE FOLLOWING COLUMN TITLES')   X4T33720
+ 6052 FORMAT(10X,'WILL USE THE NON-ZERO ENTRY')
  6060 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT SELECT LARGEST AND'/  X4T33730
      1 10X,'SMALLEST VALUES (NO FIELD 9)')                              X4T33740
  6070 FORMAT(10X,'WARNING.....FIELD=',I2,' CANNOT SELECT LARGEST AND'/  X4T33750
