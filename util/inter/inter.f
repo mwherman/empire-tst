@@ -35,25 +35,8 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
-!-V         Version 8.04   May 2012       A. Trkov
-!-V                        Cases were identified where the precision of
-!-V                        the energy variable was insufficient and led
-!-V                        to differences in the resonance integral,
-!-V                        particularly with zero K cross sections.
-!-V                        All variables and floating point operations
-!-V                        are now declared double-precision.
-!-V         Version 8.03   May 2012       A. Trkov
-!-V                        The ANS option to read the filename of the
-!-V                        input file is no longer supported. The
-!-V                        instructions are read from the default input
-!-V                        like in all other cases. If needed, an
-!-V                        input file can be piped-in as the default
-!-V                        input (works on Windows and Unix).
 !-V         Version 8.02   March 2012     R. Capote
-!-V                        1. Suppress redefinition of thermal temperature
-!-V                        2. Definitions of constants added to header
-!-V                        3. Chaged printout to get all isotopes consecutively
-!-V                           WARNING - print layout changed!
+!-V                        1. Chaged printout to get all isotopes consecutively
 !-V         Version 8.01   February 2012     A. Trkov
 !-V                        1. Process MF 10 data
 !-V                        2. Minor improvements for more precision
@@ -143,9 +126,9 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.04'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.02'
 !---MDC---
 !
 !     Define variable precision
@@ -173,9 +156,9 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !+++MDC+++
 !...ANS
-      INTEGER(KIND=I4), PARAMETER :: IMDC = 0
-      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
-      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+!/      INTEGER(KIND=I4), PARAMETER :: IMDC = 0
+!/      CHARACTER(LEN=*), PARAMETER :: TFMT = ' '
+!/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...VMS
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 1
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
@@ -185,9 +168,9 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
 !/      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...UNX
-!/    INTEGER(KIND=I4), PARAMETER :: IMDC = 3
-!/    CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
-!/    CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
+      INTEGER(KIND=I4), PARAMETER :: IMDC = 3
+      CHARACTER(LEN=*), PARAMETER :: TFMT = '(/A,$)'
+      CHARACTER(LEN=*), PARAMETER :: OSTATUS = 'REPLACE'
 !...DVF
 !/      INTEGER(KIND=I4), PARAMETER :: IMDC = 4
 !/      CHARACTER(LEN=*), PARAMETER :: TFMT = '(A)'
@@ -212,19 +195,19 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
          CHARACTER(LEN=100) :: OUTFIL
          INTEGER(KIND=I4)   :: MATMIN
          INTEGER(KIND=I4)   :: MATMAX
-         REAL(KIND=R8)      :: E14
-         REAL(KIND=R8)      :: ERRX
+         REAL(KIND=R4)      :: E14
+         REAL(KIND=R4)      :: ERRX
          INTEGER(KIND=I4)   :: ITHER
-         REAL(KIND=R8)      :: EZERO
-         REAL(KIND=R8)      :: ELT
-         REAL(KIND=R8)      :: EHT
+         REAL(KIND=R4)      :: EZERO
+         REAL(KIND=R4)      :: ELT
+         REAL(KIND=R4)      :: EHT
          INTEGER(KIND=I4)   :: IRESI
-         REAL(KIND=R8)      :: ELRI
-         REAL(KIND=R8)      :: EHRI
+         REAL(KIND=R4)      :: ELRI
+         REAL(KIND=R4)      :: EHRI
          INTEGER(KIND=I4)   :: IFISSI
-         REAL(KIND=R8)      :: FTEMP
-         REAL(KIND=R8)      :: ELFI
-         REAL(KIND=R8)      :: EHFI
+         REAL(KIND=R4)      :: FTEMP
+         REAL(KIND=R4)      :: ELFI
+         REAL(KIND=R4)      :: EHFI
       END TYPE INTER_INPUT
 !
       TYPE(INTER_INPUT) INTER_DATA
@@ -238,35 +221,35 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      REAL(KIND=R8), PARAMETER :: THER=293.16D0 ! DEFINE THERMAL TEMP.
-      REAL(KIND=R8), PARAMETER :: ETH=0.0253D0 ! EV EQUIVALENT
-      REAL(KIND=R8) :: TZERO
+      REAL(KIND=R4), PARAMETER :: THER=293.16 ! DEFINE THERMAL TEMP.
+      REAL(KIND=R4), PARAMETER :: ETH=0.0253 ! EV EQUIVALENT
+      REAL(KIND=R4) :: TZERO
 !
-      REAL(KIND=R8), PARAMETER :: DEFAULT_EZERO=0.0D0
+      REAL(KIND=R4), PARAMETER :: DEFAULT_EZERO=0.0
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_EZEROT='0.0'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_ELT=1.0D-05
+      REAL(KIND=R4), PARAMETER :: DEFAULT_ELT=1.0E-05
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_ELTT='1.0E-05'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_EHT=10.0D0
+      REAL(KIND=R4), PARAMETER :: DEFAULT_EHT=10.0
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_EHTT='10.0'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_ELRI=0.5D0
+      REAL(KIND=R4), PARAMETER :: DEFAULT_ELRI=0.5
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_ELRIT='0.5'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_EHRI=1.0D+05
+      REAL(KIND=R4), PARAMETER :: DEFAULT_EHRI=1.0E+05
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_EHRIT='1.0E+05'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_FTEMP=1.35D+06   ! MODIFIED FROM 1.02E
+      REAL(KIND=R4), PARAMETER :: DEFAULT_FTEMP=1.35E+06   ! MODIFIED FROM 1.02E
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_FTEMPT='1.35E+06'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_ELFI=1.0D+03
+      REAL(KIND=R4), PARAMETER :: DEFAULT_ELFI=1.0E+03
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_ELFIT='1.0E+03'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_EHFI=20.D+06
+      REAL(KIND=R4), PARAMETER :: DEFAULT_EHFI=20.E+06
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_EHFIT='20.E+06'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_ERRX=0.001D0
+      REAL(KIND=R4), PARAMETER :: DEFAULT_ERRX=0.001
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_ERRXT='0.001'
-      REAL(KIND=R8), PARAMETER :: DEFAULT_E14=14.0D+6
+      REAL(KIND=R4), PARAMETER :: DEFAULT_E14=14.0E+6
       CHARACTER(LEN=*), PARAMETER :: DEFAULT_E14T='14.0E+6'
 !
       INTEGER(KIND=I4), PARAMETER :: NIRMAX=20   ! INTERPOLATION REGIONS
       INTEGER(KIND=I4), DIMENSION(NIRMAX) :: NBT,JNT
       INTEGER(KIND=I4), PARAMETER :: NITMAX=997  ! POINTS IN PAGED TABLE
-      REAL(KIND=R8), DIMENSION(NITMAX) :: X,Y
+      REAL(KIND=R4), DIMENSION(NITMAX) :: X,Y
       INTEGER(KIND=I4) :: IBOT,ITOP ! POINT RANGE OF CURRENT PAGED TABLE
       INTEGER(KIND=I4) :: N1,N2
 !
@@ -274,7 +257,7 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !     CURRENT HEAD RECORD CONTENTS
 !
-      REAL(KIND=R8) :: C1H,C2H
+      REAL(KIND=R4) :: C1H,C2H
       INTEGER(KIND=I4) :: L1H,L2H,N1H,N2H
       INTEGER(KIND=I4) :: MATH,MFH,MTH,NSP
 !     FINAL STATE DESIGNATION
@@ -285,21 +268,21 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
       CHARACTER(LEN=66) :: TEXT
 !
       INTEGER(KIND=I4), PARAMETER :: JMAX=12 ! MAX ITERATIONS TO CONVERGE       
-      REAL(KIND=R8), DIMENSION(3,2) :: ELO,EHI ! INTEG PANEL LIMITS
+      REAL(KIND=R4), DIMENSION(3,2) :: ELO,EHI ! INTEG PANEL LIMITS
 !
       INTEGER(KIND=I4) :: LINES,MATPR  ! CURRENT LINE COUNT, MATERIAL NUMBER    
-      INTEGER(KIND=I4), PARAMETER :: MAXLIN=60 !MAXIMUM LINES PER PAGE
+      INTEGER(KIND=I4), PARAMETER :: MAXLIN=20 !MAXIMUM LINES PER PAGE
 !
 !     CROSS SECTIONS AT THERMAL, 2200 METERS AND 14MEV
 !
-      REAL(KIND=R8) :: CZERO,C025,C14
+      REAL(KIND=R4) :: CZERO,C025,C14
 !
 !     UNNORMALIZED THERMAL CROSS SECTION, RESONANCE INTEGRAL AND
 !       FISSION AVERAGED CROSS SECTION AND NORMALIZATION FACTORS
-      REAL(KIND=R8) :: TIN1,TIN2,TIN3
-      REAL(KIND=R8) :: PNORM1,PNORMX,PNORMY
+      REAL(KIND=R4) :: TIN1,TIN2,TIN3
+      REAL(KIND=R4) :: PNORM1,PNORMX,PNORMY
 !
-      REAL(KIND=R8), PARAMETER :: RPI2=0.886226925D0   ! SQRT(PI)/2
+      REAL(KIND=R4), PARAMETER :: RPI2=0.886226925   ! SQRT(PI)/2
 !
       INTEGER(KIND=I4) :: NSECT, JSECT
 !
@@ -332,18 +315,18 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
       IMPLICIT NONE
 !
       CHARACTER(LEN=1), INTRINSIC :: CHAR
-      INTEGER(KIND=I4), INTRINSIC :: MOD, IFIX, NINT
-      REAL(KIND=R8), INTRINSIC :: SQRT
+      INTEGER(KIND=I4), INTRINSIC :: MOD, IFIX
+      REAL(KIND=R4), INTRINSIC :: SQRT
 !
       INTEGER(KIND=I4) :: IQUIT,IFOUND
       INTEGER(KIND=I4) :: IZ,IA,LIS0
       INTEGER(KIND=I4) :: IDESC
       INTEGER(KIND=I4) :: MATP,MTP
       INTEGER(KIND=I4) :: MAT,MF,MT,NS
-      INTEGER(KIND=I4) :: I,I000
-      REAL(KIND=R8) :: TZ
-      REAL(KIND=R8) :: Z1,Z2
-      REAL(KIND=R8) :: SIGAV,SIGFAV,GFACT,RESINT
+      INTEGER(KIND=I4) :: I, IPRINT
+      REAL(KIND=R4) :: TZ
+      REAL(KIND=R4) :: Z1,Z2
+      REAL(KIND=R4) :: SIGAV,SIGFAV,GFACT,RESINT
 !
       INTEGER(KIND=I4), PARAMETER :: MTMAX=12
       CHARACTER(LEN=8), DIMENSION(MTMAX) :: MTDESC
@@ -351,10 +334,7 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
      &            'n,3n    ','Fission ','n,gamma ','n,p     ',          &       
      &            'n,d     ','n,t     ','n,He3   ','n,alpha '/
       INTEGER(KIND=I4), DIMENSION(MTMAX) :: MTWANT
-
-!
       DATA MTWANT/1,2,4,16,17,18,102,103,104,105,106,107/
-      DATA I000 / 1000 /
 !
 !     OUTPUT PROGRAM IDENTIFICATION
 !
@@ -365,7 +345,7 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !     CHECK FOR COMMAND LINE INPUT (VMS ONLY)
 !
-      LINES = 0
+      IPRINT = 1
       IONEPASS = 0
       CALL GET_FROM_CLINE
 !
@@ -377,24 +357,6 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
          GO TO 100
       END IF
       IFOUND = 0
-!
-!     Write header label
-!
-      WRITE(NOUT,'(/1(3A))')                                            &       
-     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
-     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
-     &          ' --- ------------- ---  ---------- ----------- -',     &
-     &          '---------- ---------- -------  ----------- -',         &
-     &          '---------- ----------- ----'
-      WRITE(IOUT,'(/1(3A))')                                            &       
-     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
-     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
-     &          ' --- ------------- ---  ---------- ----------- -',     &
-     &          '---------- ---------- -------  ----------- -',         &
-     &          '---------- ----------- ----'
-      LINES=10
 !
 !     READ TAPE LABEL
 !
@@ -421,9 +383,8 @@ C...
 !     MATERIAL SHOULD BE PROCESSED
 !
    30 IFOUND = 1
-      IA = NINT(C1H)
-      IZ = IA/I000
-      IA = MOD(IA,I000)
+      IZ = IFIX(C1H)/1000
+      IA = MOD(IFIX(C1H),1000)
       MATP = MATH
       CALL CONTIN
       LIS0 = L2H
@@ -440,41 +401,41 @@ C...
 C...
 C     print *,'      New Z,A',IZ,IA
 C...
-C...      IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
-C...         IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
-C...!
-C...!           REDEFINE EZERO FROM TEMPERATURE ON THE ENDF FILE
-C...!
-C...            CALL CONTIN
-C...            CALL CONTIN
-C...            IF(C1H.EQ.0) THEN
-C...               TZ = THER
-C...            ELSE
-C...               TZ = C1H
-C...            END IF
-C...!
-C...!           IF TEMPERATURE ON THE FILE DIFFERS BY MORE THAN 0.2 K
-C...!
-C...            IF(ABS(TZ-TZERO).GT.0.2) THEN
-C...               TZERO = TZ
-C...               INTER_DATA%EZERO = TZERO*ETH/THER
-C...               INTER_DATA%EHT = 20*INTER_DATA%EZERO
-C...               Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
-C...               Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
-C...               PNORM1 = (Z1+1.0)*EXP(-Z1)-(Z2+1.0)*EXP(-Z2)
-C...               WRITE(NOUT,'(/A,1PE13.5,A)')                             &       
-C...     &           'Temperature from ENDF file redefined to',TZERO,' K'
-C...               WRITE(NOUT,'(A,1PE12.5,A)')                              &       
-C...     &           'Maxwellian Spectrum at Temperature = ',               &       
-C...     &           INTER_DATA%EZERO,' (eV)'
-C...               WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                    &       
-C...     &           'Integration Limits from     ',INTER_DATA%ELT,         &       
-C...     &           ' (eV) to',INTER_DATA%EHT,' (eV)'
-C...               WRITE(NOUT,'(A,1PE12.5//)')                              &       
-C...     &           'Integral of Spectrum =        ',PNORM1
-C...            END IF
-C...         END IF
-C...      END IF
+      IF(INTER_DATA%ITHER.NE.0.AND.TZERO.GE.0.) THEN
+         IF(MFH.EQ.1.AND.MTH.EQ.451) THEN
+!
+!           REDEFINE EZERO FROM TEMPERATURE ON THE ENDF FILE
+!
+            CALL CONTIN
+            CALL CONTIN
+            IF(C1H.EQ.0) THEN
+               TZ = THER
+            ELSE
+               TZ = C1H
+            END IF
+!
+!           IF TEMPERATURE ON THE FILE DIFFERS BY MORE THAN 0.2 K
+!
+            IF(ABS(TZ-TZERO).GT.0.2) THEN
+               TZERO = TZ
+               INTER_DATA%EZERO = TZERO*ETH/THER
+               INTER_DATA%EHT = 20*INTER_DATA%EZERO
+               Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
+               Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
+               PNORM1 = (Z1+1.0)*EXP(-Z1)-(Z2+1.0)*EXP(-Z2)
+               WRITE(NOUT,'(/A,1PE13.5,A)')                             &       
+     &           'Temperature from ENDF file redefined to',TZERO,' K'
+               WRITE(NOUT,'(A,1PE12.5,A)')                              &       
+     &           'Maxwellian Spectrum at Temperature = ',               &       
+     &           INTER_DATA%EZERO,' (eV)'
+               WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                    &       
+     &           'Integration Limits from     ',INTER_DATA%ELT,         &       
+     &           ' (eV) to',INTER_DATA%EHT,' (eV)'
+               WRITE(NOUT,'(A,1PE12.5//)')                              &       
+     &           'Integral of Spectrum =        ',PNORM1
+            END IF
+         END IF
+      END IF
 !
 !     POSITION MATERIAL AT FILE 3
 !
@@ -498,7 +459,7 @@ C...
             MTO = MTH
             NSECT = N2H
             JSECT = 0
-!           CALL OUT_STATUS
+            CALL OUT_STATUS
             GO TO 45
          END IF
       END DO
@@ -518,16 +479,16 @@ C...
 !     CHECK IF REQUESTED LIMITS WERE ACTUALLY USED IN THERMAL
 !       INTEGRATION
 !
-      SIGAV = 0
-      GFACT = 0
-      IF(INTER_DATA%ITHER.NE.0 .AND. TIN1.NE.0) THEN
+      SIGAV = 0.
+      GFACT = 0.
+      IF(INTER_DATA%ITHER.NE.0.AND.TIN1.NE.0.) THEN
          IF(INTER_DATA%ELT.EQ.ELO(1,2).AND.                             &       
      &              INTER_DATA%EHT.EQ.EHI(1,2)) THEN
             PNORMX = PNORM1
          ELSE
             Z1 = ELO(1,2)/INTER_DATA%EZERO
             Z2 = EHI(1,2)/INTER_DATA%EZERO
-            PNORMX = (Z1+1.D0)*EXP(-Z1) - (Z2+1.D0)*EXP(-Z2)
+            PNORMX = (Z1+1.0)*EXP(-Z1) - (Z2+1.0)*EXP(-Z2)
          END IF
 !
 !        CALCULATE AVERAGE CROSS SECTION FOR EZERO
@@ -536,12 +497,11 @@ C...
 !
 !        CALCULATE G-FACTOR
 !
-         IF(ABS(C025).LT.1.D-20) THEN
-           GFACT=0
+         IF(ABS(C025).LT.1.E-20) THEN
+           GFACT=0.0
          ELSE
            GFACT=SQRT(INTER_DATA%EZERO/.0253)*SIGAV/C025
          END IF
-         IF(GFACT.GT.99.9999D0) GFACT=99.9999D0
       END IF
 !
 !     CALCULATE RESONANCE INTEGRAL
@@ -549,15 +509,30 @@ C...
       IF(INTER_DATA%IRESI.NE.0) THEN
          RESINT = TIN2
       ELSE
-         RESINT = 0
+         RESINT = 0.
       END IF
 !
 !     CALCULATE FISSION AVERAGE CROSS SECTION
 !
-      IF(INTER_DATA%IFISSI.NE.0 .AND. TIN3.NE.0) THEN
+      IF(INTER_DATA%IFISSI.NE.0.AND.TIN3.NE.0.) THEN
          SIGFAV=TIN3/PNORMY
       ELSE
-         SIGFAV = 0
+         SIGFAV = 0.
+      END IF
+!
+!     CHECK FOR NEW PAGE
+!
+C...
+C     print *,'lines,maxlin,matp,matpr',lines,maxlin,matp,matpr
+C...
+      IF(LINES.GT.MAXLIN) THEN
+        WRITE(NOUT,'(3A)')                                              &       
+     &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+     &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+     &          'Sig(Fiss)   Sig(E14)   MAT'
+         MATPR = MATP
+         LINES = 4
+         GO TO 50
       END IF
 !
 !     OUTPUT RESULTS FOR SECTION
@@ -566,11 +541,11 @@ C...
 !        -- Message to default output (screen)
          MATPR = MATP
          IF(LINES+7.GT.MAXLIN) THEN
-            WRITE(IOUT,'(1X,A)')  CHAR(12)
+            WRITE(IOUT,'(A)')  CHAR(12)
             LINES = 1
          ELSE
-            WRITE(IOUT,'(1X,A)') ' '
-            LINES = LINES + 1
+            WRITE(IOUT,'(/)')
+            LINES = LINES + 2
          END IF
 C...
 C        WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
@@ -578,25 +553,23 @@ C        WRITE(IOUT,'(1x,3A)')                                          &
 C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
 C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
 C    &          'Sig(Fiss)   Sig(E14)   '
-C        LINES = LINES + 2
+C        LINES = LINES + 3
+C     END IF
 C...
-      END IF
-      IF(LINES.LE.1) THEN
-        LINES = LINES + 3
-        WRITE(IOUT,'(/1(3A))')                                          &       
-     &          '   Z   A LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+      IF(IPRINT.EQ.1) THEN
+        IPRINT = 0
+        WRITE(NOUT,'(/3A)')                                              &       
+     &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
      &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)    Sig(E14)   MAT',                          &
-     &          ' --- ------------- ---  ---------- ----------- -',     &
-     &          '---------- ---------- -------  ----------- -',         &
-     &          '---------- ----------- ----'
+     &          'Sig(Fiss)   Sig(E14)   MAT'
+         LINES = LINES + 2
       ENDIF
 C...
    50 WRITE(IOUT,55) IZ,IA,TS,FS,MTP,MTDESC(IDESC),C025,CZERO,          &       
      &               SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
       WRITE(NOUT,55) IZ,IA,TS,FS,MTP,MTDESC(IDESC),C025,CZERO,          &       
      &               SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
-   55 FORMAT(I4,I4,A2,6X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,             &       
+   55 FORMAT(I3,1X,I4,A2,6X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,          &       
      &        0PF8.5,1PE13.5,2(1PE12.5),I5)
       LINES = LINES+1
 !
@@ -662,9 +635,9 @@ C...
       CHARACTER(LEN=4) :: BUF
       CHARACTER(LEN=12) :: BUF1,BUF2
       INTEGER(KIND=I4) :: IC, ITLEN
-      REAL(KIND=R8) :: Z1,Z2
-      REAL(KIND=R8) :: EX1,EX2,ER1,ER2,W1,W2
-      REAL(KIND=R8) :: PNORM2,PNORM3,RNORM3
+      REAL(KIND=R4) :: Z1,Z2
+      REAL(KIND=R4) :: EX1,EX2,ER1,ER2,W1,W2
+      REAL(KIND=R4) :: PNORM2,PNORM3,RNORM3
       REAL(KIND=R8) :: SQRZ1,SQRZ2,SQRW1,SQRW2
 !
       NOUT = IOUT
@@ -673,8 +646,8 @@ C...
 ! **********************************************************************
 ! *
 ! *   INPUT CONSISTS OF THE FOLLOWING=
-! *   INFIL        INPUT ENDF FILE SPECIFICATION
-! *   OUTFIL       OUTPUT LIST FILE SPECIFICATION
+! *   INFIL        INPUT FILE SPECIFICATION
+! *   OUTFIL       OUTPUT FILE SPECIFICATION
 ! *   MATMIN/MATMAX RANGE OF MATERIALS TO BE PROCESSED
 ! *   E14          ANY ENERGY AT WHICH A CROSS SECTION IS TO BE
 ! *                EXTRACTED
@@ -712,18 +685,16 @@ C...
          INTER_DATA%E14 = DEFAULT_E14
       END IF
       SELECT CASE (IMDC)
-!... Reading just the filename of the input file is no longer supported
-!        CASE (0)
-!           IW = 'N'
-!           IONEPASS = 0
-!        CASE(1,2,3)
-         CASE(0,1,2,3)
+         CASE (0)
+            IW = 'N'
+            IONEPASS = 0
+         CASE(1,2,3)
             IF(ILENP.NE.0)  THEN
                CALL TOKEN(INPAR,'%',1,INTER_DATA%INFIL)
                CALL TOKEN(INPAR,'%',2,INTER_DATA%OUTFIL)
                CALL TOKEN(INPAR,'%',3,IW)
                IC = ICHAR(IW)
-               IF(IC.GT.96 .AND. IC.LT.123)   IW = CHAR(IC-32)
+               IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
                IF(IW.EQ.' ') THEN
                   IW = 'Y'
                ELSE IF(IW.NE.'Y'.AND.IW.NE.'N') THEN
@@ -743,10 +714,10 @@ C...
 !
       IF(IMDC.LT.4) THEN
          IF(INTER_DATA%INFIL.EQ.'*') THEN
-!...        IF(IMDC.NE.0) THEN
+            IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
-     &             ' Input ENDF File Specification        - '
-!...        END IF
+     &             ' Input File Specification             - '
+            END IF
             READ(NIN,'(A)') INTER_DATA%INFIL
          ELSE
             WRITE(IOUT,'(/2A)') ' Input file - ', TRIM(INTER_DATA%INFIL)
@@ -768,8 +739,7 @@ C...
             WRITE(IOUT,'(/7X,A/)')  'COULD NOT FIND INPUT FILE'
          END IF
          SELECT CASE (IMDC)
-!...        CASE (1,2,3)
-            CASE (0,1,2,3)
+            CASE (1,2,3)
                IF(IONEPASS.EQ.0) GO TO 10
          END SELECT
          IQUIT = 1
@@ -781,10 +751,10 @@ C...
 !
       IF(IMDC.LT.4) THEN
          IF(INTER_DATA%OUTFIL.EQ.'*' ) THEN
-!...        IF(IMDC.NE.0) THEN
+            IF(IMDC.NE.0) THEN
                WRITE(IOUT,FMT=TFMT)                                     &       
      &           ' Output Message File Specification    - '
-!...        END IF
+            END IF
             READ(NIN,'(A)') INTER_DATA%OUTFIL
          ELSE
             WRITE(IOUT,'(/2A)') ' Output file - ',                      &       
@@ -798,8 +768,7 @@ C...
 !     CHECK FOR STANDARD OPTIONS
 !
       IF(IW.EQ.'*') THEN
-!...     IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
-         IF(IMDC.LT.4) THEN
+         IF(IMDC.GE.1.AND.IMDC.LE.3) THEN
    15       WRITE(IOUT,FMT=TFMT)  ' Standard Options (Y(es),N(o),?)?  '
             READ(NIN,'(A)')  IW
             IC = ICHAR(IW)
@@ -830,65 +799,62 @@ C...
 !
 !        DEFINE SINGLE ENERGY
 !
-!...     IF(IMDC.EQ.0) THEN
-!...        CALL TOKEN(MATSIN,',',6,BUF1)
-!...     ELSE
+         IF(IMDC.EQ.0) THEN
+            CALL TOKEN(MATSIN,',',6,BUF1)
+         ELSE
             WRITE(IOUT,FMT=TFMT)  '  Single Energy (eV)---'
             READ(NIN,'(A)') BUF1
-!...     END IF
+         END IF
          IF(BUF1.NE.' ')   THEN
             READ(BUF1,'(BN,E12.5)',ERR=25)  INTER_DATA%E14
          END IF
 !
 !        DEFINE ERROR
 !
-   25    CONTINUE
-!...     IF(IMDC.EQ.0) THEN
-!...        CALL TOKEN(MATSIN,',',7,BUF1)
-!...     ELSE
+   25    IF(IMDC.EQ.0) THEN
+            CALL TOKEN(MATSIN,',',7,BUF1)
+         ELSE
             WRITE(IOUT,TFMT) '  Fractional Error--------'
             READ(NIN,'(A)') BUF1
-!...     END IF
+         END IF
          IF(BUF1.NE.' ')   THEN
             READ(BUF1,'(BN,E12.5)',ERR=30)   INTER_DATA%ERRX
          END IF
 !
 !        THERMAL CROSS SECTIONS
 !
-   30    CONTINUE
-!...     IF(IMDC.EQ.0) THEN
-!...        CALL TOKEN(MATSIN,',',3,BUF)
-!...        IW = BUF(1:1)
-!...     ELSE
+   30    IF(IMDC.EQ.0) THEN
+            CALL TOKEN(MATSIN,',',3,BUF)
+            IW = BUF(1:1)
+         ELSE
             WRITE(IOUT,TFMT) '  Maxwellian Average (Y(es),N(o)) ---'
             READ(NIN,'(A)')  IW
-!...     END IF
+         END IF
          IC = ICHAR(IW)
          IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
          IF(IW.NE.'Y')    THEN
             INTER_DATA%ITHER = 0
          ELSE
-!...        IF(IMDC.EQ.0) THEN
-!...           READ(NIN,'(A)') TDIN
-!...           CALL TOKEN(TDIN,',',1,BUF1)
-!...        ELSE
+            IF(IMDC.EQ.0) THEN
+               READ(NIN,'(A)') TDIN
+               CALL TOKEN(TDIN,',',1,BUF1)
+            ELSE
                WRITE(IOUT,TFMT) '     Spectrum Temperature (eV)--'
                READ(NIN,'(A)') BUF1
-!...        END IF
+            END IF
             IF(BUF1.NE.' ') THEN
                READ(BUF1,'(BN,E12.5)',ERR=35)   INTER_DATA%EZERO
             END IF
-   35       CONTINUE
-!...        IF(IMDC.EQ.0) THEN
-!...           CALL TOKEN(TDIN,',',2,BUF1)
-!...           CALL TOKEN(TDIN,',',3,BUF2)
-!...        ELSE
+   35       IF(IMDC.EQ.0) THEN
+               CALL TOKEN(TDIN,',',2,BUF1)
+               CALL TOKEN(TDIN,',',3,BUF2)
+            ELSE
                WRITE(IOUT,TFMT)                                         &       
      &            '     Integration Limits(ELOW,EHIGH)(eV)---'
                READ(NIN,'(A)') TDIN
                CALL TOKEN(TDIN,',',1,BUF1)
                CALL TOKEN(TDIN,',',2,BUF2)
-!...        END IF
+            END IF
             IF(BUF1.NE.' ')  THEN
                READ(BUF1,'(BN,E12.5)',ERR=40) INTER_DATA%ELT
             END IF
@@ -899,24 +865,23 @@ C...
 !
 !        RESONANCE INTEGRALS
 !
-   45    CONTINUE
-!...     IF(IMDC.EQ.0) THEN
-!...        CALL TOKEN(MATSIN,',',4,BUF)
-!...        IW = BUF(1:1)
-!...     ELSE
+   45    IF(IMDC.EQ.0) THEN
+            CALL TOKEN(MATSIN,',',4,BUF)
+            IW = BUF(1:1)
+         ELSE
             WRITE(IOUT,TFMT)                                            &       
      &           '  Resonance Integral (Y(es),N(o))---'
             READ(NIN,'(A)')  IW
-!...     END IF
+         END IF
          IC = ICHAR(IW)
          IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
          IF(IW.NE.'Y')    THEN
             INTER_DATA%IRESI = 0
          ELSE
-c...        IF(IMDC.NE.0) THEN
+            IF(IMDC.NE.0) THEN
                WRITE(IOUT,TFMT)                                         &       
      &               '     Integration Limits(ELOW,EHIGH)(eV)---'
-c...        END IF
+            END IF
             READ(NIN,'(A)') RIIN
             CALL TOKEN(RIIN,',',1,BUF1)
             CALL TOKEN(RIIN,',',2,BUF2)
@@ -930,41 +895,39 @@ c...        END IF
 !
 !        FISSION SPECTRUM AVERAGE
 !
-   55    CONTINUE
-!...     IF(IMDC.EQ.0) THEN
-!...        CALL TOKEN(MATSIN,',',5,BUF)
-!...        IW = BUF(1:1)
-!...     ELSE
+   55    IF(IMDC.EQ.0) THEN
+            CALL TOKEN(MATSIN,',',5,BUF)
+            IW = BUF(1:1)
+         ELSE
             WRITE(IOUT,TFMT)                                            &       
      &           '  Fission Spectrum Average (Y(es),N(o)) ---'
             READ(NIN,'(A)')  IW
-!...     END IF
+         END IF
          IC = ICHAR(IW)
          IF(IC.GT.96.AND.IC.LT.123)   IW = CHAR(IC-32)
          IF(IW.NE.'Y')    THEN
             INTER_DATA%IFISSI = 0
          ELSE
-!...        IF(IMDC.EQ.0) THEN
-!...           READ(NIN,'(A)') FIIN
-!...           CALL TOKEN(FIIN,',',1,BUF1)
-!...        ELSE
+            IF(IMDC.EQ.0) THEN
+               READ(NIN,'(A)') FIIN
+               CALL TOKEN(FIIN,',',1,BUF1)
+            ELSE
                WRITE(IOUT,TFMT) '     Spectrum Temperature (eV)--'
                READ(NIN,'(A)') BUF1
-!...        END IF
+            END IF
             IF(BUF1.NE.' ') THEN
                READ(BUF1,'(BN,E12.5)',ERR=60)   INTER_DATA%FTEMP
             END IF
-   60       CONTINUE
-!...        IF(IMDC.EQ.0) THEN
-!...           CALL TOKEN(FIIN,',',2,BUF1)
-!...           CALL TOKEN(FIIN,',',3,BUF2)
-!...        ELSE
+   60       IF(IMDC.EQ.0) THEN
+               CALL TOKEN(FIIN,',',2,BUF1)
+               CALL TOKEN(FIIN,',',3,BUF2)
+            ELSE
                WRITE(IOUT,TFMT)                                         &       
      &              '     Integration Limits(ELOW,EHIGH)(eV)---'
                READ(NIN,'(A)') FIIN
                CALL TOKEN(FIIN,',',1,BUF1)
                CALL TOKEN(FIIN,',',2,BUF2)
-!...        END IF
+            END IF
             IF(BUF1.NE.' ')  THEN
                READ(BUF1,'(BN,E12.5)',ERR=65) INTER_DATA%ELFI
             END IF
@@ -1000,13 +963,13 @@ c...        END IF
       IF(INTER_DATA%ITHER.NE.0) THEN
          Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
          Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
-         PNORM1 = (Z1+1.D0)*EXP(-Z1)-(Z2+1.D0)*EXP(-Z2)
+         PNORM1 = (Z1+1.0)*EXP(-Z1)-(Z2+1.0)*EXP(-Z2)
       END IF
 !
 !     CALCULATE INTEGRAL OF SECOND WT FUNCTION (1/E)
 !
       IF(INTER_DATA%IRESI.NE.0)   THEN
-         PNORM2 = LOG(INTER_DATA%EHRI/INTER_DATA%ELRI)
+         PNORM2 = ALOG(INTER_DATA%EHRI/INTER_DATA%ELRI)
       END IF
 !
 !     CALCULATE INTEGRAL OF FISSION MAXWELLIAN
@@ -1023,8 +986,8 @@ c...        END IF
          ER2 = DERF(SQRZ2,1)
          PNORMY = SQRZ1*EX1 - SQRZ2*EX2 + RPI2*(ER2-ER1)
 !***** Renormalisation constant
-         W1 = 1.0D3/INTER_DATA%FTEMP
-         W2 = 2.0D7/INTER_DATA%FTEMP
+         W1 = 1.0E3/INTER_DATA%FTEMP
+         W2 = 2.0E7/INTER_DATA%FTEMP
          SQRW1 = SQRT(W1)
          SQRW2 = SQRT(W2)
          EX1  =EXP(-W1)
@@ -1043,7 +1006,7 @@ c...        END IF
       ITLEN = LEN_TRIM('PROGRAM INTER VERSION '//VERSION)
       WRITE(NOUT,'(29X,2A)') 'PROGRAM INTER VERSION ',VERSION
       WRITE(NOUT,'(29X,A//A)')  REPEAT('-',ITLEN),                      &       
-     &' Selected Integrations of ENDF File 3 and File 10 Cross Sections'
+     &'Selected Integrations of ENDF File 3 and File 10 Cross Sections'
 !
 !     INITIALIZE FOR OUTPUT HEADING
 !
@@ -1052,46 +1015,39 @@ c...        END IF
 !
 !     OUTPUT INTEGRATION SUMMARY
 !
-         WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
-     &     ' Thermal cross section : Sig(2200) = Sig(Eth)'              &
-     &    ,' Thermal energy        : Eth= ',0.0253,' (eV)'
-!
       IF(INTER_DATA%ITHER.NE.0)    THEN
-         WRITE(NOUT,'(/A/A,1P,E12.5,A)')                                &       
-     &     ' Ezero cross section   : Sig(Ezero)'                        &
-     &    ,' Ezero energy (input)  : E0 = ',INTER_DATA%EZERO,' (eV)'
-         WRITE(NOUT,'(/A,A/A/A,1P,E12.5,A/A,E12.5,A,E12.5,A/A,E12.5)')                      &       
-     &     ' Maxwellian average    : Avg-Sigma = (2/sqrt(Pi))'          &
-     &    ,' Intg[E1:E2] Sig(E) Phi_m(E) dE / Intg[E1:E2] Phi_m(E) dE'  &
-     &    ,' Maxwellian spectrum   : Phi_m(E)  = (E/E0^2) exp(-E/E0)'   &
-     &    ,' Spectrum Temperature  : E0 = ',INTER_DATA%EZERO,' (eV)'    &
-     &    ,' Integration Limits    : E1 = ',INTER_DATA%ELT              &
-     &    ,' (eV)  E2 = ',INTER_DATA%EHT,' (eV)'                        &
-     &    ,' Integral of Spectrum       = ',PNORM1
-         WRITE(NOUT,'(/A,A)')                                           &       
-     &     ' Westcott g-factor     : G-fact = 2/sqrt(Pi)'               &
-     &    ,'  Avg-Sigma / Sig(2200)'
+         WRITE(NOUT,'(/A,1PE12.5,A)')                                   &       
+     &     'Maxwellian Spectrum at Temperature = ',                     &       
+     &     INTER_DATA%EZERO,' (eV)'
+         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
+     &     'Integration Limits from     ',INTER_DATA%ELT,               &       
+     &     ' (eV) to',INTER_DATA%EHT,' (eV)'
+         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
+     &     'Integral of Spectrum =        ',PNORM1
       END IF
       IF(INTER_DATA%IRESI.NE.0)  THEN
-         WRITE(NOUT,'(/A/A,1P,E12.5,A,E12.5,A/A,E12.5,A)')              &
-     &    ' Resonance Integral    : Res.Integ = Intg[E3:E4] Sig(E)/E dE'&
-     &   ,' Integration Limits    : E3 = ',INTER_DATA%ELRI              &
-     &   ,' (eV)  E4 = ',INTER_DATA%EHRI,' (eV)'                        &
-     &   ,' Integral of Spectrum       = ',PNORM2
+         WRITE(NOUT,'(/A)')                                             &       
+     &     '1/E Spectrum for Resonance Integrals'
+         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
+     &     'Integration Limits from     ',INTER_DATA%ELRI,' (eV) to',   &       
+     &     INTER_DATA%EHRI,' (eV)'
+         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
+     &     'Integral of Spectrum =        ',PNORM2
       END IF
       IF(INTER_DATA%IFISSI.NE.0) THEN
-         WRITE(NOUT,'(/A,A/A/A,1P,E12.5,A/A,E12.5,A,E12.5,A/A,E12.5)')  &
-     &   ' Fiss.spect. average   : Sig(Fiss) = '                        &
-     &  ,'Intg[E1:E2] Sig(E) Phi_f(E) dE / Intg[E1:E2] Phi_f(E) dE'     &
-     &  ,' Fission spectrum      : Phi_f(E)  = sqrt(E/Ef)/Ef exp(-E/E0)'&
-     &  ,' Spectrum Temperature  : Ef = ',INTER_DATA%FTEMP,' (eV)'      &
-     &  ,' Integration Limits    : E1 = ',INTER_DATA%ELFI               &
-     &  ,' (eV)  E2 = ',INTER_DATA%EHFI,' (eV)'                         &
-     &  ,' Integral of Spectrum       = ',PNORM3
+         WRITE(NOUT,'(/A,1PE12.5,A)')                                   &       
+     &     'Fission Spectrum at Temperature = ',INTER_DATA%FTEMP,' (eV)'
+         WRITE(NOUT,'(A,1PE12.5,A,1PE12.5,A)')                          &       
+     &     'Integration Limits from     ',INTER_DATA%ELFI,' (eV) to',   &       
+     &      INTER_DATA%EHFI,' (eV)'
+         WRITE(NOUT,'(A,1PE12.5/)')                                     &       
+     &     'Integral of Spectrum =        ',PNORM3
       END IF
-      WRITE(NOUT,'(/A/A,1P,E12.5,A/)')                                  &       
-     &   ' E14 cross-section     : Sig(E14)'                            &
-     &  ,' Selected Energy       : E14 = ',INTER_DATA%E14,' eV'
+      WRITE(NOUT,'(/A,1PE12.5,A)')                                      &       
+     &   'Thermal spectrum temperature (Ezero) = ',                     &       
+     &                      INTER_DATA%EZERO,' eV'
+      WRITE(NOUT,'(A,1PE12.5,A/)')                                      &       
+     &   'Selected energy (E14) = ',INTER_DATA%E14/1.E+6,' MeV'
 !
   100 RETURN
       END SUBROUTINE BEGIN
@@ -1249,7 +1205,7 @@ c...        END IF
 !
       INTEGER(KIND=I4) :: IPMAX,IST,INTX,N
       INTEGER(KIND=I4) :: I
-      REAL(KIND=R8) :: AAINT
+      REAL(KIND=R4) :: AAINT
 !
 !     NOTE SECTION HEAD RECORD ALREADY READ
 !
@@ -1257,15 +1213,15 @@ c...        END IF
 !
 !     ZERO OUT INTEGRALS
 !
-      TIN1 = 0
-      TIN2 = 0
-      TIN3 = 0
+      TIN1 = 0.0
+      TIN2 = 0.0
+      TIN3 = 0.0
 !
 !     ZERO OUT CROSS SECTIONS
 !
-      CZERO = 0
-      C14 = 0
-      C025 = 0
+      CZERO = 0.0
+      C14 = 0.0
+      C025 = 0.0
 !
 !     READ IN SECTION
 !
@@ -1377,16 +1333,16 @@ c...        END IF
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: N,F
-      REAL(KIND=R8) :: TINT,EL,EH
+      REAL(KIND=R4) :: TINT,EL,EH
 !
       INTEGER(KIND=I4), INTRINSIC :: INT
-      REAL(KIND=R8), INTRINSIC ::  LOG10
+      REAL(KIND=R4), INTRINSIC :: ALOG10
 !
       INTEGER(KIND=I4) :: IFLAG,INTX,INTR,MLAST
       INTEGER(KIND=I4) :: I,J,K
-      REAL(KIND=R8) :: AAINT,XP2,STEMP,XBASE,TEST
+      REAL(KIND=R4) :: AAINT,XP2,STEMP,XBASE,TEST
       INTEGER(KIND=I4), DIMENSION(2) :: INTER
-      REAL(KIND=R8), DIMENSION(2) :: XP,YP,PARTS,GOOF
+      REAL(KIND=R4), DIMENSION(2) :: XP,YP,PARTS,GOOF
 !
 !     TEST LOWER LIMIT
 !
@@ -1455,7 +1411,7 @@ c...        END IF
 !
 !        TEST IF FUNCTION IS ZERO AT BOTH PTS BEING INTEGRATED
 !
-         IF(YP(1).EQ.0 .AND. YP(2).EQ.0) THEN
+         IF(YP(1).EQ.0.0.AND.YP(2).EQ.0.0) THEN
             XP(1)=XP(2)
             YP(1)=YP(2)
             GO TO 90
@@ -1464,13 +1420,13 @@ c...        END IF
 !        TEST IF POINTS ARE TOO FAR APART
 !
          TEST = XP(2)/XP(1)
-         IF(TEST.GT.1.D3) THEN
+         IF(TEST.GT.1000.) THEN
             XBASE = XP(1)
-            MLAST = INT(LOG10(TEST)) - 1
+            MLAST = INT(ALOG10(TEST)) - 1
             DO K=1,MLAST
-               XP(2) = XBASE*10.D0**K
+               XP(2) = XBASE*10.0**K
                CALL FIND(XP(2),YP(2),INTR)
-               IF(YP(1).NE.0 .OR. YP(2).NE.0) THEN
+               IF(YP(1).NE.0.0.OR.YP(2).NE.0.0) THEN
                   CALL GREAT1(F,N,AAINT,2,XP,PARTS,GOOF,INTER,          &       
      &                   INTER_DATA%ERRX, NOUT)
                   TINT = TINT + AAINT
@@ -1489,7 +1445,7 @@ c...        END IF
 !        NORMAL INTEGRATION-TEST FOR DISCONTINUITIES
 !
          ELSE
-            IF(TEST.NE.1) THEN
+            IF(TEST.NE.1.0) THEN
                CALL GREAT1(F,N,AAINT,2,XP,PARTS,GOOF,INTER,             &       
      &               INTER_DATA%ERRX,NOUT)
             END IF
@@ -1513,13 +1469,13 @@ c...        END IF
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: INTT
-      REAL(KIND=R8) :: XP,YP
+      REAL(KIND=R4) :: XP,YP
 !
       INTEGER(KIND=I4) :: IFLAG,IREAL
       INTEGER(KIND=I4) :: I,J
 !
       IFLAG = 0
-      YP = 0
+      YP = 0.0
       INTT = 0
 !
 !     LOCATE XP
@@ -1531,7 +1487,7 @@ c...        END IF
             GO TO 10
          ELSE IF(X(I).GT.XP) THEN
             IF(I.EQ.1) THEN
-               YP = 0
+               YP = 0.0
                INTT = 0
                GO TO 100
             END IF
@@ -1561,9 +1517,9 @@ c...        END IF
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: INLAW,ITYPE
-      REAL(KIND=R8) :: X1,Y1,X2,Y2,CONS1,AAINT
+      REAL(KIND=R4) :: X1,Y1,X2,Y2,CONS1,AAINT
 !
-      REAL(KIND=R8), INTRINSIC :: SQRT
+      REAL(KIND=R4), INTRINSIC :: SQRT
 !
       INTEGER(KIND=I4) :: JM8
       INTEGER(KIND=I4) :: J
@@ -1577,8 +1533,8 @@ c...        END IF
 !
 !     INITIALIZE
 !
-      AAINT = 0
-      IF(ABS(X1-X2).LT.1.0D-30)  GO TO 100
+      AAINT = 0.0
+      IF(ABS(X1-X2).LT.1.0E-30)  GO TO 100
 !
 !     DETERMINE TYPE OF INTEGRATION
 !
@@ -1589,16 +1545,16 @@ c...        END IF
          CASE(1)
             STEMP = CONS1
             Z1 = X1/STEMP
-            IF(Z1.LT.88.028D0) THEN
+            IF(Z1.LT.88.028) THEN
                EX1 = DEXP(-Z1)
             ELSE
-               EX1 = 0
+               EX1 = 0.0
             END IF
             Z2 = X2/STEMP
-            IF(Z2.LT.88.028D0) THEN
+            IF(Z2.LT.88.028) THEN
                EX2 = DEXP(-Z2)
             ELSE
-               EX2 = 0
+               EX2 = 0.0
             END IF
             SELECT CASE (INLAW)
 !
@@ -1625,8 +1581,7 @@ c...        END IF
 !
           CASE (2)
 c...         Z = (X2-X1)/X1
-C...         Z =  dble(X2)/dble(X1)
-             Z =  X2/X1
+             Z =  dble(X2)/dble(X1)
              IF(ABS(Z-1).GT.0.1D0 ) THEN
                 FACLOG = LOG(Z)
                 Z = Z - 1
@@ -1658,16 +1613,16 @@ C...         Z =  dble(X2)/dble(X1)
          CASE (3)
             STEMP = CONS1
             Z1 = DBLE(X1)/STEMP
-            IF(Z1.LT.88.028D0) THEN
+            IF(Z1.LT.88.028) THEN
                EX1 = DEXP(-Z1)
             ELSE
-               EX1 = 0
+               EX1 = 0.0
             END IF
             Z2 = DBLE(X2)/STEMP
-            IF(Z2.LT.88.028D0)THEN
+            IF(Z2.LT.88.028)THEN
                EX2=DEXP(-Z2)
             ELSE
-               EX2=0
+               EX2=0.0
             END IF
             SQRZ1=SQRT(Z1)
             SQRZ2=SQRT(Z2)
@@ -1744,20 +1699,20 @@ C...         Z =  dble(X2)/dble(X1)
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: NOUT,N,F
-      REAL(KIND=R8) :: FINT,ERROR
+      REAL(KIND=R4) :: FINT,ERROR
       INTEGER(KIND=I4) :: NTAB
       INTEGER(KIND=I4), DIMENSION(NTAB) :: INTER
-      REAL(KIND=R8), DIMENSION(NTAB) :: XTAB,PARTS,GOOF
+      REAL(KIND=R4), DIMENSION(NTAB) :: XTAB,PARTS,GOOF
 !
-      REAL(KIND=R8), INTRINSIC :: FLOAT
+      REAL(KIND=R4), INTRINSIC :: FLOAT
 !
       INTEGER(KIND=I4) :: NM1,II
       INTEGER(KIND=I4) :: I,J,K
-      REAL(KIND=R8) :: ERRN,TOTAL,TOTAL1,REST,XNOW,DX
+      REAL(KIND=R4) :: ERRN,TOTAL,TOTAL1,REST,XNOW,DX
 !
 !     INITIALIZE VALUE OF THE INTEGRAL
 !
-      FINT = 0
+      FINT = 0.0
 !
 !     CALCULATE THE NUMBER OF INTERVALS
 !
@@ -1769,23 +1724,23 @@ C...         Z =  dble(X2)/dble(X1)
 !
 !     CALCULATE INITIAL APPROXIMATION
 !
-      TOTAL = 0
+      TOTAL = 0.0
       DO I=1,NM1
          INTER(I) = 1
          SELECT CASE (F)
             CASE (1)
-               PARTS(I) = 0.5D0*(XTAB(I+1)-XTAB(I))*                    &       
+               PARTS(I) = 0.5*(XTAB(I+1)-XTAB(I))*                      &       
      &                    (FMAXW(XTAB(I+1))+FMAXW(XTAB(I)))
             CASE (2)
-               PARTS(I) = 0.5D0*(XTAB(I+1)-XTAB(I))*                    &       
+               PARTS(I) = 0.5*(XTAB(I+1)-XTAB(I))*                      &       
      &                    (FMAXW1(XTAB(I+1))+FMAXW1(XTAB(I)))
             CASE (3)
-               PARTS(I) = 0.5D0*(XTAB(I+1)-XTAB(I))*                    &       
+               PARTS(I) = 0.5*(XTAB(I+1)-XTAB(I))*                      &       
      &                    (FEM1(XTAB(I+1))+FEM1(XTAB(I)))
          END SELECT
          TOTAL = TOTAL + PARTS(I)
       END DO
-      IF(TOTAL.EQ.0)   GO TO 100
+      IF(TOTAL.EQ.0.)   GO TO 100
 !
 !     CALCULATE INITIAL ERRORS
 !
@@ -1810,10 +1765,10 @@ C...         Z =  dble(X2)/dble(X1)
 !              DOUBLE NUMBER OF STEPS
                INTER(I) = 2*INTER(I)
 !              INITIALIZE CONTRIBUTION TO INTEGRAL
-               REST=0
+               REST=0.0
                II = INTER(I)
 !              INITIALIZE ORDINATE
-               XNOW = XTAB(I) + 0.5D0*DX
+               XNOW = XTAB(I) + 0.5*DX
 !
 !              LOOP OVER ORDINATES
 !
@@ -1829,7 +1784,7 @@ C...         Z =  dble(X2)/dble(X1)
                   XNOW = XNOW + DX
                END DO
 !              CALCULATE NEXT PARTIAL INTEGRAL
-               REST = 0.5D0*(PARTS(I) + DX*REST)
+               REST = 0.5*(PARTS(I) + DX*REST)
 !              ADD NEW PARTIAL INTEGRAL AND SUBTRACT OLD
                TOTAL = TOTAL + REST - PARTS(I)
 !              CALCULATE NEW ERROR AND SET PARTIAL INTEGRAL TO NEW
@@ -1840,7 +1795,7 @@ C...         Z =  dble(X2)/dble(X1)
 !
 !        CHECK FOR CONVERGENCE
 !
-         IF(ABS(1-TOTAL1/TOTAL).LE.ERROR) THEN
+         IF(ABS(1.-TOTAL1/TOTAL).LE.ERROR) THEN
             FINT = TOTAL
             GO TO 100
          END IF
@@ -1871,17 +1826,17 @@ C...         Z =  dble(X2)/dble(X1)
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: I
-      REAL(KIND=R8) :: X1,Y1,X2,Y2,X,Y
+      REAL(KIND=R4) :: X1,Y1,X2,Y2,X,Y
 !
       INTEGER(KIND=I4) :: II
-      REAL(KIND=R8) :: XA,YA,XB,YB,XP,YP
+      REAL(KIND=R4) :: XA,YA,XB,YB,XP,YP
 !
       XA = X1
       YA = Y1
       XB = X2
       YB = Y2
       XP = X
-      YP = 0
+      YP = 0.
 !
       IF(XA.NE.XB)  THEN
          IF(I.LE.0.OR.I.GT.5)  THEN
@@ -1895,33 +1850,33 @@ C...         Z =  dble(X2)/dble(X1)
             CASE (2)
                YP = YA + (XP-XA)*(YB-YA)/(XB-XA)
             CASE (3)
-               IF(XA.LE.0 .OR.XB.LE.0)   THEN
+               IF(XA.LE.0.0.OR.XB.LE.0.0)   THEN
                   YP = YA + (XP-XA)*(YB-YA)/(XB-XA)
                ELSE
-                  IF(XP.GT.0) THEN
-                     YP = YA + LOG(XP/XA)*(YB-YA)/LOG(XB/XA)
+                  IF(XP.GT.0.) THEN
+                     YP = YA + ALOG(XP/XA)*(YB-YA)/ALOG(XB/XA)
                   END IF
                END IF
             CASE (4)
-               IF(YA.LE.0 .OR. YB.LE.0)   THEN
+               IF(YA.LE.0.0.OR.YB.LE.0.0)   THEN
                   YP = YA + (XP-XA)*(YB-YA)/(XB-XA)
                ELSE
-                  YP = YA*EXP((XP-XA)*LOG(YB/YA)/(XB-XA))
+                  YP = YA*EXP((XP-XA)*ALOG(YB/YA)/(XB-XA))
                END IF
             CASE (5)
-               IF(YA.LE.0 .OR. YB.LE.0)  THEN
-                  IF(XA.LE.0 .OR. XB.LE.0)   THEN
+               IF(YA.LE.0.0.OR.YB.LE.0.0)  THEN
+                  IF(XA.LE.0.0.OR.XB.LE.0.0)   THEN
                      YP = YA + (XP-XA)*(YB-YA)/(XB-XA)
                   ELSE
                      IF(XP.GT.0.) THEN
-                        YP = YA + LOG(XP/XA)*(YB-YA)/LOG(XB/XA)
+                        YP = YA + ALOG(XP/XA)*(YB-YA)/ALOG(XB/XA)
                      END IF
                   END IF
-               ELSE IF(XA.LE.0 .OR. XB.LE.0)  THEN
-                  YP = YA*EXP((XP-XA)*LOG(YB/YA)/(XB-XA))
+               ELSE IF(XA.LE.0.0.OR.XB.LE.0.0)  THEN
+                  YP = YA*EXP((XP-XA)*ALOG(YB/YA)/(XB-XA))
                ELSE
                   IF(XP.GT.0.)   THEN
-                     YP = YA*EXP(LOG(XP/XA)*LOG(YB/YA)/LOG(XB/XA))
+                     YP = YA*EXP(ALOG(XP/XA)*ALOG(YB/YA)/ALOG(XB/XA))
                   END IF
                END IF
  
@@ -1934,20 +1889,20 @@ C...         Z =  dble(X2)/dble(X1)
 !
 !***********************************************************************
 !
-      REAL(KIND=R8) FUNCTION FMAXW(X)
+      REAL(KIND=R4) FUNCTION FMAXW(X)
 !
 !     COMPUTES CROSS SECTION TIMES WEIGHT (MAXWELLIAN) AT ENERGY = X
 !
       IMPLICIT NONE
 !
-      REAL(KIND=R8) :: X
+      REAL(KIND=R4) :: X
 !
-      REAL(KIND=R8) :: Z,WT,Y
+      REAL(KIND=R4) :: Z,WT,Y
       INTEGER(KIND=I4) :: IDUM
 !
 !     TEST IF X IS WITHIN REQUESTED RANGE
 !
-      FMAXW = 0
+      FMAXW = 0.0
       IF(X.GE.INTER_DATA%ELT.AND.X.LE.INTER_DATA%EHT) THEN
 !
 !        CALCULATE WEIGHT
@@ -1965,22 +1920,22 @@ C...         Z =  dble(X2)/dble(X1)
 !
 !***********************************************************************
 !
-      REAL(KIND=R8) FUNCTION FMAXW1(X)
+      REAL(KIND=R4) FUNCTION FMAXW1(X)
 !
 !     COMPUTES CROSS SECTION TIMES WEIGHT (FISSION) AT ENERGY = X
 !
       IMPLICIT NONE
 !
-      REAL(KIND=R8) :: X
+      REAL(KIND=R4) :: X
 !
-      REAL(KIND=R8), INTRINSIC :: SQRT
+      REAL(KIND=R4), INTRINSIC :: SQRT
 !
       INTEGER(KIND=I4) :: IDUM
-      REAL(KIND=R8) :: Z,WT,Y
+      REAL(KIND=R4) :: Z,WT,Y
 !
 !     TEST IF XX IS WITHIN REQUESTED RANGE
 !
-      FMAXW1 = 0
+      FMAXW1 = 0.
       IF(X.GE.INTER_DATA%ELFI.AND.X.LE.INTER_DATA%EHFI) THEN
 !
 !        CALCULATE WEIGHT
@@ -1998,25 +1953,25 @@ C...         Z =  dble(X2)/dble(X1)
 !
 !***********************************************************************
 !
-      REAL(KIND=R8) FUNCTION FEM1(X)
+      REAL(KIND=R4) FUNCTION FEM1(X)
 !
 !     COMPUTES CROSS SECTION TIMES WEIGHT (1/E) AT ENERGY = X
 !
       IMPLICIT NONE
 !
-      REAL(KIND=R8) :: X
+      REAL(KIND=R4) :: X
 !
       INTEGER(KIND=I4) :: IDUM
-      REAL(KIND=R8) :: WT,Y
+      REAL(KIND=R4) :: WT,Y
 !
 !     TEST IF X IS WITHIN REQUESTED RANGE
 !
-      FEM1 = 0
+      FEM1 = 0.
       IF(X.GE.INTER_DATA%ELRI.AND.X.LE.INTER_DATA%EHRI) THEN
 !
 !        CALCULATE WEIGHT
 !
-         WT = 1/X
+         WT = 1./X
 !
 !        RETRIEVE CROSS SECTION
 !
@@ -2124,7 +2079,7 @@ C...         Z =  dble(X2)/dble(X1)
 !...VMS
 !/      INTEGER(KIND=2) ILENP2
 !...ANS
-      CHARACTER(LEN=100) :: CFILE
+!/      CHARACTER(LEN=100) :: CFILE
 !---MDC---
 !
       INPAR = ' '
@@ -2138,15 +2093,15 @@ C...         Z =  dble(X2)/dble(X1)
 !/     CALL GETCL(INPAR)
 !/      ilenp = LEN_TRIM(INPAR)
 !...WIN
-!/      CALL GETARG(1,INPAR)
-!/      ilenp = LEN_TRIM(INPAR)
-!---MDC---
-!...ANS coding no longer supported
-!/      WRITE(IOUT,'(A)')                                                 &       
+      CALL GETARG(1,INPAR)
+      ilenp = LEN_TRIM(INPAR)
+!...ANS
+!/      WRITE(IOUT,'(A)')                                               &       
 !/     &    ' Control File Specification        - '
 !/      READ(NIN,'(A)') CFILE
 !/      NIN = 19
 !/      OPEN(UNIT=NIN,FILE=CFILE,STATUS='OLD')
+!---MDC---
 !
       RETURN
       END SUBROUTINE GET_FROM_CLINE
