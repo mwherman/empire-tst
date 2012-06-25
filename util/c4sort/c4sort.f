@@ -35,6 +35,7 @@ C-V        - Skip comments (processing of C5 files).
 C-V        - Improve stability (denominator ZA/MT is missing in some
 C-V          C5 file entries (A. Trkov)
 C-V        - Special treatment for correct positioning of mu-bar.
+C-V  12/06 Fix explicit level assignment when given as range (Elo=Ehi)
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -507,16 +508,18 @@ C* Decode secondary or discrete level energy
 C* Convert outgoing particle energy to level energy, if applicable
 C* (same coding also after label 30)
       LB3=REC(95:97)
-      IF(LB3.EQ.' E2' .AND. MT.EQ.51) THEN
+      IF((LB3.EQ.' E2' .OR. LB3.EQ.'LVL') .AND. MT.EQ.51) THEN
         READ (REC(86:94),931,ERR=801) FLV1
         IF(NINT(FLV1).EQ.0 .OR. NINT(FLV).EQ.NINT(FLV1)) THEN
           LB3='LVL'
           REC(95:97)=LB3
           REC(86:94)='         '
-C*        -- Approximately convert level energy to CM
-          READ (REC(3: 5),*) AP
-          READ (REC(9:11),*) AT
-          IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+          IF(LB3.EQ.' E2') THEN
+C*          -- Approximately convert level energy to CM
+            READ (REC(3: 5),*) AP
+            READ (REC(9:11),*) AT
+            IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+          END IF
         END IF
       END IF
 C* Adjust the level energy if necessary (and possible)
@@ -664,16 +667,18 @@ C* Decode the incident particle energy
 C* Adjust the level energy if necessary (and possible)
       READ(REC(77:85),931,ERR=801) FLV
       LB3=REC(95:97)
-      IF(LB3.EQ.' E2' .AND. MT.EQ.51) THEN
+      IF((LB3.EQ.' E2' .OR. LB3.EQ.'LVL') .AND. MT.EQ.51) THEN
         READ (REC(86:94),931,ERR=801) FLV1
         IF(NINT(FLV1).EQ.0 .OR. NINT(FLV).EQ.NINT(FLV1)) THEN
           LB3='LVL'
           REC(95:97)=LB3
           REC(86:94)='         '
-C*        -- Approximately convert level energy to CM
-          READ (REC(3: 5),*) AP
-          READ (REC(9:11),*) AT
-          IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+          IF(LB3.EQ.' E2') THEN
+C*          -- Approximately convert level energy to CM
+            READ (REC(3: 5),*) AP
+            READ (REC(9:11),*) AT
+            IF(AT.GT.0) FLV=FLV*(AP+AT)/AT
+          END IF
         END IF
       END IF
       IF(FLV.GT.0 .AND. (LB3.EQ.'LVL' .OR. LB3.EQ.'EXC')) THEN
