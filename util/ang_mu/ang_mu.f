@@ -1,6 +1,6 @@
       PROGRAM ANG_MU
 C-Title  : ANG_MU Program
-C-Purpose: Add mu-bar to C4 from angular distributions
+C-Purpose: Legendre moments to C4 from angular distributions
 C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
 C-M  
@@ -47,7 +47,7 @@ C*
       PARAMETER   (MXNP=200,MXLG=65,MXRW=10000)
       DIMENSION    CSN(MXNP),XSR(MXNP),XSU(MXNP),PLN(MXLG),RWO(MXRW)
 C* Character to mark the modification in the string
-      DATA CH/'*'/
+      DATA CH/'+'/
       DATA PI/3.1415926/
 C* Filenames and logical file units
       DATA LIN,LOU,LKB,LTT / 1, 2, 5, 6 /
@@ -106,13 +106,18 @@ C*       (no need to add to C4, conversion is done in DXSEXF if needed)
         LCT=2
         QI =0
         AWI=IZIH-1000*(IZIH/1000)
-        AWR=IZAH-1000*(IZAH/1000)
+        IZ =IZAH/1000
+        IA =IZAH-1000*IZ
+        AWR=IZ
+        IF(IA.EQ.0) AWR=2*IZ
         CALL CMLAB2B(EINH,EOUH,CSNH,XSRH,AWR,AWI,QI,LCT)
       END IF
       CSN(NP)=CSNH
       XSR(NP)=XSRH
       XSU(NP)=XSDH
       WRITE(LOU,932) REC
+      CSMN=CSNH
+      CSMX=CSNH
   120 RC1=REC
       IEF=1
       READ (LIN,932,END=600) REC
@@ -122,42 +127,53 @@ C*       (no need to add to C4, conversion is done in DXSEXF if needed)
       IF(IZIH.EQ.IZIG .AND. IZAH.EQ.IZAG .AND. MTH.EQ.MTG .AND.
      &   EINH.EQ.EING .AND. IXEH.EQ.IXEG .AND. IXSH.EQ.IXSG) THEN
         EMM=MAX(EMM,XSDG/XSRG)
+c...
+c...    print *,'Input',eing,xsrg,csng,awr,awi,qi,lct
+c...
         IF(REC(22:22).EQ.'C')
      &    CALL CMLAB2B(EING,EOUG,CSNG,XSRG,AWR,AWI,QI,LCT)
+c...
+c...    print *,'                      Lab',eing,xsrg,csng
+c...
         NP=NP+1
         IF(NP.GT.MXNP) STOP 'ANG_MU ERROR - MXNP limit exceeded'
         CSN(NP)=CSNG
         XSR(NP)=XSRG
         XSU(NP)=XSDG
         WRITE(LOU,932) REC
+        CSMN=MIN(CSMN,CSNG)
+        CSMX=MAX(CSMX,CSNG)
         GO TO 120
       END IF
 C*    -- Tighten the fitting convergence criterion a bit (fraction)
       EMMF=MAX(0.07,EMM/SQRT(2.0))
-C*    -- Skip fitting if less than four points are given.
-      IF(NP.LT.4) GO TO 600
+C*    -- Skip fitting if less than four points or narrow range.
+      IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.8)) GO TO 600
 C*    -- One panel read - calculate mu-bar
 C*       Prepare header for test print in TESTPLT
       WRITE(HDR,'(A2,1P,E8.2E1,A20)') 'E',EINH/1.E6,'MeV '//RC1(98:117)
 c...
-C...  PRINT *,HDR,NP,emmF,'"',CH,'"',mxlg,mxrw,mxnp
+c...  PRINT *,HDR,NP,emmF,'"',CH,'"',mxlg,mxrw,mxnp
 c...
       LMI=2
-      LMX=24
+      LMX=22
       IF(NP*4+(LMX+4)*(LMX+1).GT.MXRW)
      &STOP 'ANG_MU ERROR - MXRW limit exceeded'
       CALL LSQLGV(CSN,XSR,NP,PLN,LMI,LMX,EMMF,ERR,RWO,MXRW)
       EEMX=MAX(EMMF,ERR)
       IF(EEMX.GT.1 .OR. PLN(1).LT.0 .OR. PLN(2).LT.0) THEN
         PRINT *,'WARNING - Large error fitting ang.dist',EEMX
-     &         ,PLN(1),PLN(2)
+     &         ,PLN(1),PLN(2),hdr
         GO TO 600
       END IF
 C*    --Compare fitted curve to measured
       CALL TSTPLT(NP,CSN,XSR,XSU,LMX,PLN,L92,LCU,LPT,HDR)
+C... Plot first NP points of extended mesh
+C...  CALL TSTPLT(NP,RWO,RWO(4*(NP+1)+1),XSU,LMX,PLN,L92,LCU,LPT,HDR)
+C...
 C*    --Prepare the output record for mu-bar (remove CM flag, if any)
       WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,154,MTH
-      REC(22:22)=' '
+      RC1(22:22)=' '
 C*    --Arbitrarily increment subsection number by 500
       JXSH=IXSH+500
       WRITE(RC1(128:130),'(I3)') JXSH
@@ -224,8 +240,8 @@ C-
 C*
       WRITE(L92,*) 'ANG_MU Fitting measured angular distributions'
       WRITE(L92,*) ' '
-      WRITE(L92,821) 0,0,0,0
-      WRITE(L92,821) 1,2,0
+      WRITE(L92,821) -1.0, 1.0, 0,0,0,0
+      WRITE(L92,822)            1,2,0
 C*
       WRITE(LPT,*) HDR
       DO K=1,NAN
@@ -245,7 +261,8 @@ C*
       END DO
       WRITE(LCU,*) ' '
       RETURN
-  821 FORMAT(22X,4I11)
+  821 FORMAT(2F11.4,4I11)
+  822 FORMAT(22X,4I11)
   934 FORMAT(3F11.6,1P,3E11.4)
       END
       SUBROUTINE LBLMRK(LABL,LNC,CH)
@@ -366,9 +383,6 @@ C-
       LM1=LM0+1
       LST=0
       MNS=0
-
-      icount=0
-
 C*    -- Max. number of adjustment cycles on -ve distributions
 c*       (does not work very well)
       MNSMX=0
@@ -376,16 +390,53 @@ C* Check if zero-order
       QQ(1)=YP(1)
       IF(NP.LT.2) GO TO 40
 C* Check statistics of the distribution
-      SS1=YP(1)
-      SS2=SS1*SS1
-      SY =0
+      SY0=0
+      SY1=0
+      X2 =XP(1)
+      Y2 =YP(1)
+C*    -- End correction to the integral
+      IF((X2.LT.XP(NP) .AND. X2.GT.-1) .OR.
+     &   (X2.GT.XP(NP) .AND. X2.LT. 1)) THEN
+        XB =XP(NP)
+        YB =YP(NP)
+        IF(X2.LT.XB) THEN
+          X1=-1
+        ELSE
+          X1= 1
+        END IF
+        Y1 =Y2 + (X1-X2)*(YB-Y2)/(XB-X2)
+        SY0=SY0+ (X2-X1)*(Y2+Y1)/2
+        SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
+      END IF
+      SS1=Y2
+      SS2=Y2*Y2
       DO I=2,NP
-        SS1=SS1+ YP(I)
-        SS2=SS2+ YP(I)*YP(I)
-        SY =SY + 0.5*(YP(I)+YP(I-1))*(XP(I)-XP(I-1))
+        X1 =X2
+        Y1 =Y2
+        X2 =XP(I)
+        Y2 =YP(I)
+        SS1=SS1+ Y2
+        SS2=SS2+ Y2*Y2
+        SY0=SY0+ (Y2+Y1)*(X2-X1)/2
+        SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
       END DO
-      IF(SY.EQ.0) GO TO 40
-      QQ(1)=SY/(XP(NP)-XP(1))
+C*    -- End correction to the integral
+      IF((X2.LT.XP(1) .AND. X2.GT.-1) .OR.
+     &   (X2.GT.XP(1) .AND. X2.LT. 1)) THEN
+        XB =XP(NP)
+        YB =YP(NP)
+        IF(X2.LT.XB) THEN
+          X1=-1
+        ELSE
+          X1= 1
+        END IF
+        Y1 =Y2 + (X1-X2)*(YB-Y2)/(XB-X2)
+        SY0=SY0+ (X2-X1)*(Y2+Y1)/2
+        SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
+      END IF
+C*    -- Check for zero integral
+      IF(SY0.EQ.0) GO TO 40
+      QQ(1)=SY0/2
       IF(LMX.LT.1) GO TO 30
 C* Average and standard deviation
       SS1=SS1/NP
@@ -400,11 +451,13 @@ C* Clear the coefficients field
         QQ(L+1)=0
       END DO
 C* Save the input points, allow for quadrupling the mesh
+C* (reserve 2 extra points to extrapolate to the boundary, if needed)
       MXP=4*(NP+1)
       NNP=NP
       LXP=2
       LYP=LXP+MXP
       LLG=LYP+MXP
+C* Save points to scratch array
       DO I=1,NP
         RWO(LXP-1+I)=XP(I)
         RWO(LYP-1+I)=YP(I)
@@ -418,6 +471,10 @@ C* Loop to find the appropriate Legendre order
       LMM=MIN(LM0,NNP*2/3)
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
+c...
+c...  print *,'*** Fitting with order',N1-1,np
+c...
+C* Try fit of Legendre polynomial order LO1 (=N1-1)
       CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
       IF(LST.NE.0) GO TO 40
 C* Trap zero-determinant
@@ -443,11 +500,14 @@ C* and for negative distributions
       JNP=0
       JNM=0
       JRE=0
-      DO IP=1,NP
-        YCI=POLLG1(XP(IP),QQ,NLG)
-C       RER=ABS((YCI-YP(IP))/YCI)
-C       RER=ABS((YCI-YP(IP))/QQ(1))
-        RER=ABS((YCI-YP(IP))/MAX(YCI,QQ(1)))
+      DO IP=1,NNP
+C* Calculate relative difference at mesh points
+        XXI=RWO(LXP-1+IP)
+        YYI=RWO(LYP-1+IP)
+        YCI=POLLG1(XXI,QQ,NLG)
+C       RER=ABS((YCI-YYI)/YCI)
+C       RER=ABS((YCI-YYI)/QQ(1))
+        RER=ABS((YCI-YYI)/MAX(YCI,QQ(1)))
         IF(RER.GT.ERR) THEN
           ERR=RER
           JRE=IP
@@ -455,17 +515,21 @@ C       RER=ABS((YCI-YP(IP))/QQ(1))
 C* Test minimum value of distribution at mesh point
         IF(YCI.LT.YNP) THEN
           IF(YCI.LT.0) KNP=KNP+1
-          JNP=IP
+          JNP=IP-1
           YNP=YCI
         END IF
 C* Test minimum value of distribution at midpoint
-        IF(IP.LT.NP) THEN
-          XPI=(XP(IP)+XP(IP+1))/2
-          YCI=POLLG1(XPI,QQ,NLG)
-          IF(YCI.LT.YNM) THEN
-            IF(YCI.LT.0) KNM=KNM+1
-            JNM=IP
-            YNM=YCI
+        IF(IP.GT.1) THEN
+          XXB=(RWO(LXP-1+IP)+RWO(LXP-2+IP))/2
+          YYB=POLLG1(XXB,QQ,NLG)
+c...
+c...      print *,'        xx-1,xx',RWO(LXP-2+IP),RWO(LXP-1+IP)
+c...      print *,'        xxi,xxb,yyb',xxi,xxb,yyb,ynm
+c...
+          IF(YYB.LT.YNM) THEN
+            IF(YYB.LT.0) KNM=KNM+1
+            JNM=IP-1
+            YNM=YYB
           END IF
         END IF
       END DO
@@ -481,24 +545,29 @@ c...
 C*
 C* Take corrective action
       IF(LO1.EQ.LL1 .AND. (KNP.GT. 0 .OR. ERR.GT.EMM)) THEN
-C* Case: Tolerance limit not satisfied and If the first point is
+C...  IF(LO1.EQ.  1 .AND. (KNP.GT. 0 .OR. ERR.GT.EMM)) THEN
+C* Case: Tolerance limit not satisfied and if the first point is
 C*       not on the extreme boundary, generate the point artificially
 C*       by extrapolation with the gradient of the 3-rd order
 C*       Legendre polynomial
         XX1=RWO(LXP)
         XX2=RWO(LXP+NNP-1)
-c...
-c...    print *,'lxp,lyp,nnp,xx1,xx2',lxp,lyp,nnp,xx1,xx2
-c...
+        YP1=RWO(LYP)
+        YP2=RWO(LYP+NNP-1)
         ONE=1
         TOL=1.E-3
         IF( (ONE-ABS(XX1)).GT. TOL .OR. (ONE-ABS(XX2)).GT.TOL) THEN
-          YP1=RWO(LYP)
-          YP2=RWO(LYP+NNP-1)
+c...
+c...      print *,'Expand to boundaries'
+c...      print *,'lxp,lyp,nnp,xx1,xx2',lxp,lyp,nnp,xx1,xx2
+c...
           IF(XX1.GT.0) THEN
             XXB=1
             IF(XXB-XX1.GT.TOL) THEN
-              YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
+              ZP1=LOG(YP1)
+              ZP2=LOG(YP2)
+              YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
+c...          YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
               LXP=LXP-1
               LYP=LYP-1
               RWO(LXP)=XXB
@@ -510,7 +579,11 @@ c...
             END IF
             XXB=-1
             IF(XX2-XXB.GT.TOL) THEN
-              YYB=YP2
+              ZP1=LOG(YP1)
+              ZP2=LOG(YP2)
+              YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
+c...          YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
+c...          YYB=YP2
               RWO(LXP+NNP)=XXB
               RWO(LYP+NNP)=YYB
               NNP=NNP+1
@@ -521,7 +594,11 @@ c...
           ELSE
             XXB=-1
             IF(XX1-XXB.GT.TOL) THEN
-              YYB=YP1
+              ZP1=LOG(YP1)
+              ZP2=LOG(YP2)
+              YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
+C...          YYB=YP1
+C...          YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
               LXP=LXP-1
               LYP=LYP-1
               RWO(LXP)=XXB
@@ -533,12 +610,15 @@ C...
             END IF
             XXB= 1
             IF(XXB-XX2.GT.TOL) THEN
-              YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
-              RWO(LXP)=XXB
-              RWO(LYP)=YYB
+              ZP1=LOG(YP1)
+              ZP2=LOG(YP2)
+              YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
+C...          YYB=YP1+(XXB-XX1)*(YP2-YP1)/(XX2-XX1)
+              RWO(LXP+NNP)=XXB
+              RWO(LYP+NNP)=YYB
               NNP=NNP+1
 C...
-C...          print *,'Hi',xx1,xx2,xxb,yP1,yP2,yyb
+c...          print *,'Hi',xx1,xx2,xxb,yP1,yP2,yyb
 C...
             END IF
           END IF
@@ -556,6 +636,9 @@ C* Case: Distribution negative at mesh point - increase L
           ERHI(LO1)=ERR
           IF(LO1.LT.LMX .AND. MNS.EQ.0) THEN
             LO1=LO1+1
+c...
+c...        print *,'Distribution negative - increase order to',LO1
+c...
             GO TO 20
           END IF
         END IF
@@ -563,37 +646,37 @@ C* Case: Distribution negative at mesh point - increase L
       IF(ERR.GT.EMM) THEN
 C* Case: Tolerance limit not satisfied
         IF(LO1.LT.LMM .AND. JER.EQ.0) THEN
-C*          -- If the first point is not on the boundary, generate the
-C*             point artificially by extrapolation
-            IF(ABS(RWO(LXP)-1).GT. 1.E-3 .AND. LO1.EQ.3) THEN
-              XX1=-1
-              IF(XP(1).GT.0) XX1=1
-              LXP=LXP-1
-              LYP=LYP-1
-              RWO(LXP)=XX1
-              RWO(LYP)=POLLG1(XX1,QQ,LO1)
-              NNP=NNP+1
-              IF(ABS(RWO(LXP+NNP-1)-1).GT. 1.E-3) THEN
-                XX1=-XX1
-                RWO(LXP+NNP)=XX1
-                RWO(LYP+NNP)=POLLG1(XX1,QQ,LO1)
-                NNP=NNP+1
-              END IF
-              GO TO 20
-            END IF
+c...            IF(ABS(RWO(LXP)-1).GT. 1.E-3 .AND. LO1.EQ.3) THEN
+c...C*            -- If the first point is not on the boundary, generate
+c...C*               the point artificially by extrapolation
+c...              XX1=-1
+c...              IF(XP(1).GT.0) XX1=1
+c...              LXP=LXP-1
+c...              LYP=LYP-1
+c...              RWO(LXP)=XX1
+c...              RWO(LYP)=POLLG1(XX1,QQ,LO1)
+c...              NNP=NNP+1
+c...              IF(ABS(RWO(LXP+NNP-1)-1).GT. 1.E-3) THEN
+c...                XX1=-XX1
+c...                RWO(LXP+NNP)=XX1
+c...                RWO(LYP+NNP)=POLLG1(XX1,QQ,LO1)
+c...                NNP=NNP+1
+c...              END IF
+c...              GO TO 20
+c...            END IF
 C*          Try increasing the order of approximation
-c...
-c...        print *,'            Increase order to',LO1
-c...
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
           IF(LO1.LT.LMX .AND. MNS.EQ.0) THEN
             LO1=LO1+1
+c...
+c...        print *,'Tolerance exceeded - increase order to',LO1
+c...
             GO TO 20
           END IF
         ELSE
 c...
-c...        print *,'            Double the mesh to',1+(NNP-1)*2
+c...      print *,'Double the mesh to',1+(NNP-1)*2
 c...
 C*        --Try Doubling the mesh
 C*          (adding linearly interpolated values at midpoints)
@@ -612,9 +695,12 @@ C*          (adding linearly interpolated values at midpoints)
         END IF
       END IF
 C* Case: Distribution is negative - force extra points
+c...
+c...  print *,'check for extra points knm,knp,mns',knm,knp,mns
+c...
       IF((KNM.GT.0 .OR. KNP.GT.0) .AND.
      &    MNS.EQ.0 .AND. NNP.LT.MXP) THEN
-C*    Force extra point if distribution negative at midpoint
+C*      --Force extra point if distribution negative at midpoint
         IF(YNP.LT.YNM) THEN
           IP=JNP
         ELSE
@@ -636,7 +722,7 @@ C*      Assign log-average value to midpoint
         NNP=NNP+1
 C...
 c...        print *,'insert',ip,rwo(lyp+ip),yp1,yp2
-c...     1         ,' at',rwo(lxp+ip),rwo(lxp-1+ip),rwo(lxp+1+ip)
+c... 1             ,' at',rwo(lxp+ip),rwo(lxp-1+ip),rwo(lxp+1+ip)
 c...
 c...        print *,(rwo(lxp-1+j),j=1,nnp)
 c...        print *,(rwo(lyp-1+j),j=1,nnp)
@@ -651,7 +737,7 @@ c...
       ELS=ERR
       LL0=LO1
 c...
-C...      print *,'Fitted order: l,els,err',lO1,els,emm
+c...  print *,'Fitted order: l,els,err',lO1,els,emm
 c...
 c###  DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
 C### &          ERHI(LO1-1).LT.2.0*EMM .AND. 
@@ -673,16 +759,22 @@ c...
 C*
 C* Terminate iterations
    40 LMX=NLG
-      IF(YNM.LT.0 .AND. JNM.GT.NP*4/5 .AND.
-     &   NLG.GT.2 .AND. MNS.LT.MNSMX) THEN
-C*      -- Try to fix -ve distrib. by adjusting 2-nd & 3-rd parameter
-
-        print *,'Increment coef by',YNM,' of',NLG
-
-        QQ(2)=QQ(2)+YNM
-        QQ(3)=QQ(3)-YNM
-        MNS=MNS+1
-        GO TO 30
+      IF(YNM.LT.0) THEN
+        IF(JNM.GT.NP*4/5 .AND. NLG.GT.2 .AND. MNS.LT.MNSMX) THEN
+C*        -- Try to fix -ve distrib. by adjusting 2-nd & 3-rd parameter
+c...    
+c...      print *,'Increment coef by',YNM,' of',NLG
+c...    
+          QQ(2)=QQ(2)+YNM
+          QQ(3)=QQ(3)-YNM
+          MNS=MNS+1
+          GO TO 30
+        ELSE
+C*        -- Last resort ...
+          QQ(1)=  SY0/2
+          QQ(2)=3*SY1/2
+          LMX=1
+        END IF
       END IF
 c...
 c...      print *,'jnm',jnm,NP,nnp,LMI,LMX,EMM,ERR,ynp,ynm
