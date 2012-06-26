@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2819 $
+Ccc   * $Rev: 2891 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-05-02 15:50:07 +0200 (Mi, 02 Mai 2012) $
+Ccc   * $Date: 2012-06-26 13:01:35 +0200 (Di, 26 Jun 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1306,9 +1306,9 @@ C           first run with default TARGET_COLL.DAT
            WRITE (32,*)
            WRITE (96,*)
            READ (97,*) 
-           WRITE (8 ,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
-           WRITE (32,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
-           WRITE (96,*)' N   E[MeV]  J   pi Ntu Nb Ng  Dyn.Def.'
+           WRITE (8 ,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
+           WRITE (32,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
+           WRITE (96,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
 
            DO k = 1, ND_nlv
 
