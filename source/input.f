@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2883 $
+Ccc   * $Rev: 2894 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-21 11:04:01 +0200 (Do, 21 Jun 2012) $
+Ccc   * $Date: 2012-06-26 15:27:02 +0200 (Di, 26 Jun 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -9607,7 +9607,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = beta2
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1) THEN
@@ -9644,7 +9644,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = beta2
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.1.d0 .AND. lvpr.EQ.-1) THEN
@@ -9700,7 +9700,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
             IF (ECUtcoll.GT.0. .AND. elvr.GE.ECUtcoll) GOTO 600
