@@ -104,8 +104,8 @@ nuclear reaction models, such as optical model, Coupled Channels
 and DWBA (ECIS06), Coupled Channels' Soft-Rotator (OPTMAN), 
 Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
 Compound, exciton model PCROSS, hybrid Monte Carlo simulation
-(DDHMS), and the full featured Hauser-Feshbach model including the 
-optical model for fission. 
+(DDHMS), and the full featured Hauser-Feshbach model including width 
+fluctuations and the optical model for fission. 
 Heavy ion fusion cross section can be calculated within the
 simplified coupled channels approach (CCFUS). A comprehensive library
 of input parameters based on the RIPL-3 library 
@@ -249,7 +249,7 @@ written by D.E. Cullen)~\cite{PREPRO}
 \item [{\textbf{PLTLST}}] prepares a list of data types in the EXFOR data-base
 that can be compared to quantities in the ENDF files
 (module of ENDVER package, written by A.Trkov)~\cite{ENDVER},
-\item [{\textbf{RECENT}}] reconstructs the resonace contribution to the
+\item [{\textbf{RECENT}}] reconstructs the resonance contribution to the
 cross sections in an ENDF file into linearly interpolable form 
 (Program of the Pre-Pro series, written by D.E. Cullen)~\cite{PREPRO}
 \item [{\textbf{SIGMA1}}] Doppler broadens neutron induced cross sections
@@ -279,15 +279,15 @@ This manual consists of three parts: (i) outline of the nuclear reaction models 
 
 To facilitate further reading we anticipate our discussion by providing a brief description of the EMPIRE code operation and naming convention that will be used through the manual. The code depends on the naming scheme which has to be strictly preserved. The work is organized by projects;  each project has a user assigned name (e.g., {\color{cyan}Fe56-project}), which forms a root of all the project files (e.g.,{ \color{cyan}Fe56-project.inp},   { \color{cyan}Fe56-project-lev.col}, { \color{cyan}Fe56-project.lst}, ...). All project files are located in the same working directory selected by the user.  
 
-The next chapter outlines nuclear reaction models used in the code.
-Both, the structure of the code and the input/output files are described
-in Chapter~\ref{Chap:code}. Use of the code, the role of input parameters,
-and a few typical examples of input files are discussed in Chapter~\ref{Chap:work}.
+This manual is divided in four Parts. The Part~\ref{Chap:model} outlines nuclear reaction models and the corresponding physics
+covered by the code. Tools needed for nuclear data evaluation that include resonance evaluation and generation of covariance matrices
+are described in Part~\ref{Chap:eval}. Both, the structure of the code and the input/output files are described in Part~\ref{Chap:code}. 
+Use of the code, the role of input parameters, and a few typical examples of input files are discussed in Part~\ref{Chap:work}. 
+Finally, the input description is given in Appendix A.
 
-\part{NUCLEAR REACTION  MODELS }
+\part{NUCLEAR REACTION  MODELS\label{Chap:model}}
 
 \chapter{Direct reactions and fusion cross sections}
-
 
 \section{Fusion/reaction cross section\label{sec: fusion}}
 
@@ -308,10 +308,10 @@ $\epsilon$ and $U$ stand for the projectile and compound nucleus
 energy. 
 
 For projectiles with mass numbers $A<5$ the transmission coefficients
-entering Eq.~\ref{fusion} are calculated using optical model routine
-ECIS06~\cite{Raynal70,Raynal72} unless an external file FUSION exists. In the latter
-case, the spin distribution of the Compound Nucleus is constructed
-from this file.
+entering Eq.~\ref{fusion} are calculated using optical model routines
+ECIS06~\cite{Raynal70,Raynal72} and OPTMAN~\cite{OPTMAN1,OPTMAN2} unless
+an external file FUSION exists. In the latter case, the spin distribution
+of the Compound Nucleus is constructed from this file.
 
 The heavy ion fusion cross section is calculated using Eq. \ref{fusion}
 with transmission coefficients determined according to one of the
@@ -418,11 +418,11 @@ was added to EMPIRE as its new extensive module by R. Capote in February
 2001 and replaced with the ECIS06 version in EMPIRE-3.1. Symmetric
 rotational, vibrational-rotational and harmonic-vibrational CC modes
 are available. The implementation features automatic preparation of
-the ECIS06 input. It uses the RIPL\index{RIPL}-2 \cite{RIPL} optical
-model segment and resorts to the RIPL-2 discrete level schemes and
+the ECIS06 input. It uses the RIPL~\cite{RIPL} optical
+model segment and resorts to the RIPL discrete level schemes and
 to the deformation parameters (quadrupole deformations $\beta_{2}$)
 only if these are not included in the optical model parameter set
-available from RIPL-2. Since EMPIRE has no table of vibrational (dynamical)
+available from RIPL. Since EMPIRE has no table of vibrational (dynamical)
 deformations, these are defined in a somewhat ad hoc manner as 0.15
 for quadrupole and 0.05 for octupole vibrations. 
 
@@ -481,7 +481,6 @@ allowing easy running, understanding and using of OPTMAN outputs. Interested rea
 amy consult those documents. OPTMAN is called as an independent module by EMPIRE; 
 EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing channels. 
 
-
 The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
 within the EMPIRE system allowing the use of state-of-the-art optical model potentials
 based on soft-rotor couplings in EMPIRE theoretical modeling.
@@ -492,24 +491,25 @@ two additional files to contain the input needed in those calculations:
 
 \begin{description}[style=multiline,leftmargin=5cm]
 \item [{TARGET\_COLL.DAT}] collective levels and their structure information to
-be used by the rotational, vibrational or soft-rotor CC calculation. In 
-the case of vibrational and rotational-vibrational models the phonon structure
+be used by the rotational, vibrational, soft-rotor and rotational-vibrational CC calculation. 
+In the case of vibrational and rotational-vibrational models the phonon structure
 of the levels is included. For soft-rotor potentials the soft-rotor hamiltonian 
 parameters are included into the file. Typical examples of collective levels' file
-for different models (both for ECIS and OPTMAN codes) are given below.
+for different models (both for ECIS and OPTMAN codes) are given in the Section \ref{lev-coll} below.
 \item [{OMPAR.DIR}] parameters of the Optical Model Potential (OMP) to
 be used in the inelastic channel (discrete collective levels). OMP
 parameters may be selected via a new keyword DIRPOT (similar to OMPOT,
-but only for the inelastic channel). This information is supplemented
-by the parameters read from the TARGET\_COLL.DAT (\emph{{*}-lev.col}) file.
+but only for the inelastic channel). No information on coupled levels is given.
+This information is supplemented by the parameters read from the TARGET\_COLL.DAT (\emph{{*}-lev.col}) file.
 \end{description}
-ECIS06 can be invoked by the EMPIRE in three different
+ECIS06/OPTMAN can be invoked by the EMPIRE in three different
 ways, using input directive DIRECT. The default value (DIRECT=0) calls
 the spherical optical model and suppresses calculation of direct reactions
-to the discrete levels. The remaining options have the following meaning:
+to the discrete levels (ECIS06 always used in this case). The remaining options
+have the following meaning:
 \begin{description}[style=multiline,leftmargin=3cm]
-\item [{DIRECT~1.}] Population of discrete, collective levels in the inelastic
-scattering is calculated using the Coupled-Channels\index{Coupled-Channels}
+\item [{DIRECT~1.}] Population of discrete, collective levels in the incident channel
+is calculated using the Coupled-Channels\index{Coupled-Channels}
 model. The direct cross sections are exact but spherical transmission
 coefficients $T_{l}$ are used for subsequent preequilibrium and HF\index{Hauser-Feshbach}
 calculations in the whole energy grid. These results are re-normalized
@@ -524,8 +524,8 @@ perform well for the weakly coupled levels. For strong coupling, such
 as in the highly deformed rotational bands in heavy nuclei, it should
 be used with caution. It is the recommended option if accuracy is
 not a critical issue and the appropriate CC-OMP is available.
-\item [{DIRECT~2.}] Population of discrete, collective levels in the inelastic
-scattering is calculated within the CC as above. Importantly, the
+\item [{DIRECT~2.}] Population of discrete, collective levels both in the incident and
+outgoing channels is calculated within the CC as above. Importantly, the
 CC is used consistently, considering the ground state and the coupled
 levels, to calculate all necessary transmission coefficients for subsequent
 preequilibrium and HF\index{Hauser-Feshbach} calculations. These
@@ -560,7 +560,8 @@ by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.c
 .
 \end{description}
 OPTMAN can be invoked by the EMPIRE for DIRECT=1,2,3 for those optical model 
-potentials thta use either soft-rotor for both spherical and/or deformed nuclei.
+potentials that use either soft-rotor for spherical nuclei, or deformed vibrational-rotational
+model for deformed nuclei.
 
 \section{Photoabsorption}
 
@@ -575,9 +576,8 @@ pair (a quasi-deuteron, QD), which has a large dipole moment, is the
 dominant mechanism. 
 
 In EMPIRE, the photoabsorption cross section is calculated as the
-sum of two components\cite{PHNuc},\[
+sum of two components~\cite{PHNuc},\[
 \sigma_{abs}(E_{\gamma})=\sigma_{GDR}(E_{\gamma})+\sigma_{QD}(E_{\gamma}).\]
-
 
 The GDR component, $\sigma_{GDR}(E_{\gamma})$, is given by a Lorentzian
 shape, with parameters describing the total absorption of the giant
@@ -588,7 +588,7 @@ where $\sigma_{i}$, $E_{i}$ and $\Gamma_{i}$ are the GDR peak cross
 section, energy and width, respectively. The summation is limited
 to $i=1$ for spherical nuclei, while for deformed nuclei the resonance
 is split and one uses $i=1,2$. As a rule, the parameters are derived
-from fits to experimental data or from systematics\cite{RIPL2}. 
+from fits to experimental data or from systematics~\cite{RIPL2}. 
 
 The QD component, $\sigma_{QD}(E_{\gamma})$, is taken from the model
 of Chadwick \emph{et al.} \cite{chadQD}, which uses a Levinger-type
@@ -608,7 +608,7 @@ integral whose solution could be well approximated in the energy range
 20 -- 140 MeV by the polynomial expression\begin{eqnarray*}
 f(E_{\gamma}) & = & \;8.3714\times10^{-2}-9.8343\times10^{-3}E_{\gamma}+4.1222\times10^{-4}E_{\gamma}^{2}\\
  &  & -3.4762\times10^{-6}E_{\gamma}^{3}+9.3537\times10^{-9}E_{\gamma}^{4}\,,\end{eqnarray*}
-with $E_{\gamma}$ in MeV. In Ref. \cite{chadQD}, the Pauli-blocking
+with $E_{\gamma}$ in MeV. In Ref.~\cite{chadQD}, the Pauli-blocking
 function was not parametrized below 20 MeV, where it tends to zero,
 or above 140 MeV, where it tends to unity. As the contribution needs
 to be defined at all energies considered, EMPIRE follows the example
@@ -2068,7 +2068,7 @@ This model is briefly reviewed in the next subsection.
 Particular attention is dedicated to the determination of the level 
 densities\index{level densities}, which can be calculated in the 
 non-adiabatic approach allowing for the rotational and vibrational 
-enhancements (see Section \ref{NLD}). 
+enhancements (see Section~\ref{NLD}). 
 
 In the Hauser-Feshbach model the $(a,b)$ reaction cross section
 is written as:
@@ -2128,7 +2128,7 @@ spread over the available energy interval.
 To account for the correlation between incident and exit channels in
 elastic scattering we use model proposed by Hofmann, Richert, Tepel
 and Weidenmueller (HRTW)~\cite{HRTW}. In the case of no direct reaction
-contribution, the averaged$S$-matrix element connecting channels $a$ and
+contribution, the averaged $S$-matrix element connecting channels $a$ and
 $b$ can be written as
 \begin{equation}
 <S>_{ab}=\delta_{ab}e^{i\varsigma_{ab}}(1-T_{a})^{1/2},
@@ -2189,7 +2189,7 @@ In EMPIRE the level densities \index{level densities} are described by several m
 with the corresponding parametrizations.
 Three of them are phenomenological (Gilbert-Cameron Model (GCM), Generalized Superfluid Model (GSM),
 Enhanced Generalized Superfluid Model (EGSM)) and one is based on Hartree-Fock-Bogoliubov 
-microscopic model (HFBM). All of them are included also in RIPL-2 or RIPL-3. Another common feature is 
+microscopic model (HFBM). All of them are included also in RIPL. Another common feature is 
 that they are parametrized or normalized to reproduce the average parameters of the neutron resonances
 and the data on the cumulative number of low-lying nuclear levels.
 Choice of the proper representation depends on a case being considered.
@@ -2620,7 +2620,7 @@ enhancement is much weaker than for the quadrupole excitations.
  For selected nuclei for which 
 experimental information exist the precalculated asymptotic value of $a$-parameter,
 $\omega_2$, and $\Delta_0$
-from RIPL-2 were included in \textit{/data/level-densities-par.dat} and used by EMPIRE.
+from RIPL-3 were included in \textit{/data/level-densities-par.dat} and used by EMPIRE.
 For the other nuclei the asymptotic $a$-parameter is parametrized as:
 \begin{equation}
 \tilde a= \alpha A+ \beta A^{2/3}\qquad \gamma=\gamma_0A^{1/3}
@@ -4529,7 +4529,7 @@ where the average total excitation energy for the $i^{th}$-chance fission is
 Here, $<\epsilon_j>$ it the mean kinetic energy of the neutron evaporated from the $(Z,A-j+1)$ nucleus.
 
 
-\part{NUCLEAR DATA EVALUATION}
+\part{NUCLEAR DATA EVALUATION\label{Chap:eval}}
 
 Evaluation of nuclear data has been a major driving force in evolution of the
 EMPIRE code.
@@ -4580,7 +4580,7 @@ The module consists of the GUI script (resonance.tcl),  I/O and analysis tools
 controls the codes, plots results of statistical analysis of resonances, and compares graphically
 calculated cross sections with experimental data and other evaluated nuclear data libraries
 such as ENDF/B-VII.0, JEFF-3.1 and JENDL-3.3.
-\item [{READRP}] reads basic physical parameters from the Atlas and RIPL-2.
+\item [{READRP}] reads basic physical parameters from the Atlas and RIPL.
 \item[{SCANR}] performs and plots the least square fit of the resonances to determine the upper
 boundary of the resolved resonance region.
 \item[{THERMX}] computes cross sections for sensitivity calculations (modified version of RECENT).
@@ -4599,7 +4599,7 @@ To make it functional, 'xterm' also needs to be installed.
 \subsubsection{GUI control panel}
 
 At a start-up, the module reads all the necessary data for the target nucleus including individual,
-as well as average, resonance parameters from the Atlas of Neutron Resonances and RIPL-2
+as well as average, resonance parameters from the Atlas of Neutron Resonances and RIPL
 and displays them on the screen. The evaluator has the possibility to modify
 the nuclear parameters before starting the calculations.
 Fig.~\ref{fig:rmodule1} shows an example screen shot for Mn-55.
@@ -4615,7 +4615,7 @@ The left part of the screen is the editable input area. The evaluator has a poss
 evaluation for another nuclide by entering the new ZA and MAT and then pressing the 'Reload' button.
 SF, Gg, D represent the strength function, average gamma width and average level spacing, respectively.
 Emax of the resolved and unresolved resonance regions is automatically calculated by retrieving the
-resonance parameters from Atlas and by reading the first excited level from RIPL-2 respectively.
+resonance parameters from Atlas and by reading the first excited level from RIPL respectively.
 In the case the $E_{max}$ of the resolved resonance region is larger than that of the unresolved region,
 as  shown in Fig.~\ref{fig:rmodule1}, the module will generate a warning.
 
@@ -5363,7 +5363,7 @@ speed up the calculation.
 
 The parameters to be adjusted are specified by using the FITabc or
 FITDEF options, described in more detail below. The RIPL parametrization
-described in Section \ref{sec:RIPLomp} is used to identify the optical
+described in Section~\ref{sec:RIPLomp} is used to identify the optical
 model parameters, any of which may be adjusted. The adjustable deformations
 are simply those of the collective level file. Quadrupole and hexadecapole
 deformations are permitted for nuclei identified as rotational, while
@@ -5385,10 +5385,10 @@ is run one last time with all options and energies given in the input
 file, excepting the fit ones. 
 
 
-\part{STRUCTURE  OF  EMPIRE CODE}
+\part{STRUCTURE  OF  EMPIRE CODE\label{Chap:code}}
 
 
-\chapter{Code} \label{Chap:code}
+\chapter{Code}
 The full EMPIRE system resides in a user defined directory (e.g., \emph{empire/})  which name is specified in an environment variable EMPIREDIR.     
 We remind that  the operation of the code depends on the file naming scheme which has to be strictly preserved.   The work is organized by projects;  each project has a user assigned name (e.g., {\color{cyan}Fe56-project}), which forms a root of all the project files (e.g.,{ \color{cyan}Fe56-project.inp},   { \color{cyan}Fe56-project-lev.col}, { \color{cyan}Fe56-project.lst}, ...). All project files are located in the same working directory selected by the user.  
 
@@ -5418,8 +5418,11 @@ relevant to optical model calculations
 \item \textbf{/fission} - data relevant to fission 
 \item \textbf{/masses} - nuclear masses, g.s. deformations and abundances
 \end{itemize}
-\item \textbf{/work} - directory in which input and output files of the calculations are stored; there can be any number of these directories with arbitrary names; starting with EMPIRE-3.1 working directories can also be placed anywhere in the system if environment variable EMPIREDIR is set (see section~\ref{empiredir}).
-\item \textbf{/scripts} - bash, python and Tcl/Tk scripts designed to streamline the use of EMPIRE. Scripts are described in more detail in section~\ref{sec:executing}
+\item \textbf{/work} - directory in which input and output files of the calculations are stored; there can be
+any number of these directories with arbitrary names; starting with EMPIRE-3.1 working directories can also
+be placed anywhere in the system if environment variable EMPIREDIR is set (see section~\ref{empiredir}).
+\item \textbf{/scripts} - bash, python and Tcl/Tk scripts designed to streamline the use of EMPIRE. 
+Scripts are described in more detail in section~\ref{sec:executing}
 \item \textbf{/EXFOR} - Full EXFOR library of experimental data translated into C4 format
 
 \begin{itemize}
@@ -5756,7 +5759,7 @@ collective levels  \protect \\
 \item{Parabolic fit to HFB barriers \protect \\
 (\emph{empire/data/HFB-parab-fisbar.dat})}
 
-\item{Level density parameters for EGSM, Gilbert-Cameron (EMPIRE) and GSM (RIPL-2) models (this file is used rather than \emph{empire/RIPL/densities/total/level-densities-egsm.dat })\protect \\
+\item{Level density parameters for EGSM, Gilbert-Cameron (EMPIRE) and GSM (RIPL) models (this file is used rather than \emph{empire/RIPL/densities/total/level-densities-egsm.dat })\protect \\
 (\emph{empire/data/level-densities-par.dat})}
 
 \item{Full set of resonance parameters from ENDF/B-VII.1 \protect \\
@@ -5991,7 +5994,7 @@ energy-dependent GDR width and the non-zero limit at E$_{\gamma}$=0.
 Calculates dipole radiative strength functions for $\gamma$-decay
 and photo-absorption using one of the following approaches MLO1, MLO2,
 MLO3, EGLO, GFL, SLO (adapted from the code provided by V. Plujko
-to RIPL-2).
+to RIPL).
 
 
 \subsection*{print.f }
@@ -7072,7 +7075,7 @@ Source panel allow easy access to the FORTRAN modules in the empire/source direc
 %data points in the $\chi^{2}$are weighted in the standard manner
 %using the experimental uncertainties given in the C4.dat file. Natural
 %element data can be inserted in the C4.dat file and used in the fit.
-%In the case of neutron scattering, the file \emph{empire/RIPL-2/resonances/resonances0.dat}
+%In the case of neutron scattering, the file \emph{empire/RIPL/resonances/resonances0.dat}
 %is also searched for an s-wave strength function, which is included
 %in the experimental data set when found. 
 %
@@ -7092,7 +7095,7 @@ Source panel allow easy access to the FORTRAN modules in the empire/source direc
 %speed up the calculation. 
 %
 %The parameters to be adjusted are specified by using the FITabc or
-%FITDEF options, described in more detail below. The RIPL-2 parametrization
+%FITDEF options, described in more detail below. The RIPL parametrization
 %described in Section \ref{sec:RIPLomp} is used to identify the optical
 %model parameters, any of which may be adjusted. The adjustable deformations
 %are simply those of the collective level file. Quadrupole and hexadecapole
@@ -7823,9 +7826,10 @@ versions of EMPIRE, excess levels \textbf{must not} be removed.
 The first run with the DIRECT option different from zero results in
 EMPIRE creating a file that contains collective levels to be used
 in the Coupled-Channels\index{Coupled-Channels} or DWBA\index{DWBA}
-calculations. Whenever possible coupled-channel data are taken from the optical
-segment of the RIPL\index{RIPL} library (note that CC potentials
-in RIPL contain the necessary information on the levels to be coupled), while data for additional collective levels are retrieved from the \emph{{*}.lev} file. 
+calculations. Whenever possible coupled-channel data (i.e. coupled levels nad coupling model) 
+are taken from the optical segment of the RIPL\index{RIPL} library (note that CC potentials
+in RIPL contain the necessary information on the levels to be coupled and the coupling model), 
+while data for additional collective levels are retrieved from the \emph{{*}.lev} file. 
 If the necessary information is not available in RIPL (spherical optical
 potential is being used), the code tries to identify collective levels
 internally among those available in \emph{{*}.lev} file. In such circumstances,
@@ -7834,15 +7838,34 @@ default dynamic deformations are ascribed to each collective level
 (note that band deformation is used in the rotational model and dynamic
 deformations are used in the vibrational model). The format of the
 \emph{{*}-lev.col} file is analogous to the one used in the optical
-segment of the RIPL library (see Section \ref{sec:RIPLomp}).
-Additional uncoupled collective levels may be also retrieved from the \emph{{*}.lev} file, depending on input keyword ECDWBA.
+segment of the RIPL library (see Section~\ref{sec:RIPLomp}).
+Additional uncoupled collective levels may be also retrieved from the \emph{{*}.lev} file, 
+depending on input keyword ECDWBA. The default cut-off energy is $3x30/A^{2/3}$, and the default maximum
+spin 4 (e.g. with these defaults all levels with excitation energy less than 2.4 MeV for $^{238}$U, and less than
+6.2 MeV for $^{56}$Fe are considered). Default selection rules for energy and spin could be modified in the input.
  
-An example, containing 16 collective levels in $^{238}$U is reproduced
-below. In the sample file those collective levels are divided in three groups: 
+
+A first sample, containing 16 collective levels in $^{238}$U obtained for a coupled-channel rigid-rotor potential
+RIPL 2408 is reproduced below. Please note the keyword "deformed" in the third line that defines the rigid-rotor
+coupling model. In this sample file those collective levels are divided in three groups: 
   \begin{itemize}
-  \item The first group contains five levels used in the  Coupled Channels calculations. These are the collective levels in the target, which happen to be consecutive in  the EMPIRE file with discrete levels (\emph{{*}.lev}) hence their numbering is 1 through 5.  In  general, collective levels are mixed with the non-collective ones,  thus their N numbers in the  \emph{{*}-lev.col} file are not necessarily consecutive. 
-\item The second group are uncoupled collective levels, with N from 26 through 36, which are considered for the additional DWBA calculations. In order to distinguish them from the coupled-levels 20 is added to their serial number in the \emph{{*}.lev} file (it implies that only first 20 levels can be used in the CC calculations. The number 20 is also printed in the second line of the file, and corresponds to the parameter LEVCC defined in \emph{dimension.h}). CC calculations can couple as many as LEVCC - 1 levels, if a larger number is needed, then the LEVCC parameter should be modified and EMPIRE code recompiled.     
-\item The third group, marked as "cont",  consists of collective levels embedded in the continuum that are not included in \emph{{*}.lev}. Their numbering follows the second group but actual numbers of these "dummy" levels have no importance. They might, but do not have to, coincide with some of the discrete levels in the original RIPL file. The levels in this group are used in the DWBA calculations to the continuum, and their scattering cross sections are spread among neighboring continuum energy bins.
+  \item The first group contains five levels used in the  Coupled Channels calculations. These are the collective
+  levels in the target, which happen to be consecutive in the EMPIRE file with discrete levels (\emph{{*}.lev}) 
+  hence their numbering is 1 through 5.  In  general, collective levels are mixed with the non-collective ones,  
+  thus their N numbers in the  \emph{{*}-lev.col} file are not necessarily consecutive. Dynamical deformations are
+  dummy entries for the level fo the ground-state rotational band, as the GS-band deformation is determined from the 
+  nucleus deformation given in the sixth line of the file.
+\item The second group are uncoupled collective levels, with N from 26 through 36, which are considered for the 
+additional DWBA calculations. In order to distinguish them from the coupled-levels 20 is added to their serial number
+in the \emph{{*}.lev} file (it implies that only first 20 levels can be used in the CC calculations. The number 20 
+is also printed in the second line of the file, and corresponds to the parameter LEVCC defined in \emph{dimension.h}). 
+CC calculations can couple as many as LEVCC - 1 levels, if a larger number is needed, then the LEVCC parameter should
+be modified and EMPIRE code recompiled.     
+\item The third group, marked as "cont",  consists of duumy collective levels embedded in the continuum that may not be included
+in \emph{{*}.lev}. Their numbering follows the second group but actual numbers of these "dummy" levels have no importance.
+They might, but do not have to, coincide with some of the discrete levels in the original RIPL file. The levels in this
+group are used in the DWBA calculations to the continuum, and their scattering cross sections are spread among neighboring
+continuum energy bins using a gaussian function with the energy resolution defined by parameter RESOLF.
 \end{itemize}
 
 How these three groups of levels are actually used in the calculations depends on the value of the DIRECT keyword:
@@ -7850,7 +7873,8 @@ How these three groups of levels are actually used in the calculations depends o
 \item Direct excitation of all collective levels is only considered if DIRECT $> 0$.
 \item If DIRECT = 1 or 2, coupled channels are calculated within the CC method,
 remaining levels by DWBA.
-\item If DIRECT = 3, then scattering on all levels is calculated within the  DWBA approach.
+\item If DIRECT = 3, then scattering on all collective levels is calculated within the DWBA approach, using
+the dynamical deformation listed in the file. One-phonon states are assumed.
 \end{itemize}
 
 \begin{verbatim}
@@ -7892,21 +7916,176 @@ model for a particular \emph{iz, ia}
 \item [{J}] level spin 
 \item [{pi}] level parity 
 \item [{Nph}] 1 for pure 1-phonon state\\
-2 for pure 2-phonon state\\
-3 for mixture of 1- and 2-phonon states
+2 for pure 2-phonon state
+\item [{L}] level orbital momentum
+\item [{K}] level spin projection
+\item [{Dyn.Def.}] vibrational model deformation parameter. Not used for coupled levels.
+\end{description}
+
+A second sample, containing 33 collective levels in $^{238}$U obtained for a rigid-soft rotor  coupled-channel 
+potential RIPL 2412 is reproduced below. Please note the keyword "dynamically deformed" in the third line that
+defines the rigid-soft rotor coupling model. All levels belong to the discrete region (continuum was defined to
+start above 1.3 MeV). Coupled channels correspond to level number < 30; there are 14 coupled channels in this case. 
+\begin{verbatim}
+ Collective levels: RIPL 2412 CC OMP, rigid+soft rotor model
+  N <          30  for coupled levels in CC calculation                         
+  92 238     nucleus is treated as dynamically deformed
+ 
+    Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)
+      33    8    6   0.0  0.230E+00  0.600E-01 -0.640E-02
+ 
+  N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.
+  1  0.0000  0.0  1.  0  0  0  0.230E+00
+  2  0.0449  2.0  1.  0  0  0  0.100E-01
+  3  0.1484  4.0  1.  0  0  0  0.100E-01
+  4  0.3072  6.0  1.  0  0  0  0.100E-01
+  5  0.5181  8.0  1.  0  0  0  0.100E-01
+  6  0.6801  1.0 -1.  0  0  1  0.550E-01
+  7  0.7319  3.0 -1.  0  0  1  0.550E-01
+  9  0.8266  5.0 -1.  0  0  1  0.550E-01
+ 10  0.9272  0.0  1.  0  0  3  0.800E-02
+ 13  0.9661  2.0  1.  0  0  3  0.800E-02
+ 15  0.9972  0.0  1.  0  0  2  0.100E-01
+ 18  1.0373  2.0  1.  0  0  2  0.100E-01
+ 22  1.0603  2.0  1.  4  0  4  0.200E-01
+ 24  1.1057  3.0  1.  4  0  4  0.200E-01
+ 38  0.7759 10.0  1.  0  0  0  0.100E-01
+ 41  0.9305  1.0 -1.  0  0  0  0.500E-02
+ 42  0.9501  2.0 -1.  0  0  0  0.500E-02
+ 46  0.9976  3.0 -1.  0  0  0  0.500E-02
+ 47  1.0280  4.0 -1.  0  0  0  0.500E-02
+ 49  1.0564  4.0  1.  0  0  0  0.500E-02
+ 50  1.0577  3.0  1.  0  0  0  0.500E-02
+ 51  1.0597  3.0  1.  0  0  0  0.500E-02
+ 55  1.1288  2.0 -1.  0  0  0  0.500E-02
+ 56  1.1307  4.0  1.  0  0  0  0.500E-02
+ 57  1.1357  1.0  1.  0  0  0  0.500E-02
+ 60  1.1630  4.0  1.  0  0  0  0.500E-02
+ 61  1.1680  4.0  1.  0  0  0  0.500E-02
+ 62  1.1689  3.0 -1.  0  0  0  0.500E-02
+ 63  1.2238  2.0  1.  0  0  0  0.500E-02
+ 65  1.2393  3.0  1.  0  0  0  0.500E-02
+ 67  1.2609  4.0  1.  0  0  0  0.500E-02
+ 68  1.2692  6.0  1.  0  0  0  0.500E-02
+ 69  1.2785  2.0  1.  0  0  0  0.500E-02
+\end{verbatim}
+
+The  symbols are :
+\begin{description}[style=multiline,leftmargin=3cm]
+\item [{Ncoll}] number of collective states in the coupled-channel rotational
+model for a particular \emph{iz, ia}
+\item [{Lmax}] maximum \emph{l} value for multipole expansion
+\item [{IDef}] largest order of deformation
+\item [{Kgs}] \emph{k} for the rotational band
+\item [{Def}] deformation parameters, \emph{l}=2,4,6,...through Lmax
+\item [{E}] level excitation energy (MeV)
+\item [{J}] level spin 
+\item [{pi}] level parity 
+\item [{2*K}] twice the level spin projection quantum number K
+\item [{Nc}] Flag indicating isobar-analogue states (>0) or normal states (=0)
+\item [{Nb}] Band number. The ground-state band always has Nb=0.
+\item [{Dyn.Def.}] vibrational model deformation parameter. Not used for the ground state band.
+\end{description}
+
+A third sample, containing 10 collective levels in $^{56}$Fe obtained for a soft-rotor  coupled-channel potential
+RIPL 2602 is reproduced below. Please note the keyword "soft" in the third line that defines the soft-rotor
+coupling model. All levels belong to the discrete region (continuum was defined to start 
+above 3.5 MeV). Coupled channels correspond to level number < 30; there are seven coupled channels in this case. 
+
+\begin{verbatim}
+ Collective levels: RIPL CC OMP + default, soft rotor 
+  N <         30 for coupled levels in CC calculation                           
+  26  56     nucleus is treated as soft     
+ 
+ Soft rotator hamiltonian parameters for OPTMAN
+ .25666E+01  .48922E+00  .12600E+00  .32552E+00  .23200E+00 -.46000E+00
+ .53202E-07  .93896E-01  .69718E+00  .64617E+00  .14557E+00  .29933E+00
+ .35000E+00  .48730E-02  .00000E+00  .73536E+01  .00000E+00
+                                                                                
+    Ncoll
+      10
+
+  N   E[MeV]  J   pi Ntu Nb Ng   -----   No
+  1   .0000   .0  1.  1  0  0   .500E-02  0
+  2   .8468  2.0  1.  1  0  0   .500E-02  0
+  3  2.0851  4.0  1.  1  0  0   .500E-02  0
+  4  2.6576  2.0  1.  2  0  0   .500E-02  0
+  5  2.9415   .0  1.  1  1  0   .500E-02  0
+  7  3.0762  3.0 -1.  1  0  0   .500E-02  0
+ 36  2.9599  2.0  1.  1  0  0   .500E-02  0
+ 38  3.1201  1.0  1.  1  0  0   .500E-02  0
+ 39  3.1229  4.0  1.  1  0  0   .500E-02  0
+ 40  3.3698  2.0  1.  1  0  0   .500E-02  0
+\end{verbatim}
+
+The  symbols are :
+\begin{description}[style=multiline,leftmargin=3cm]
+\item [{Ncoll}] number of collective states in the coupled-channel rotational
+model for a particular \emph{iz, ia}
+\item [{Lmax}] maximum \emph{l} value for multipole expansion
+\item [{IDef}] largest order of deformation
+\item [{Kgs}] \emph{k} for the rotational band
+\item [{Def}] deformation parameters, \emph{l}=2,4,6,...through Lmax
+\item [{E}] level excitation energy (MeV)
+\item [{J}] level spin 
+\item [{pi}] level parity 
+\item [{Ntu}] Number of solution for spin J (close to the approximate spin projection K)
+\item [{Nb}] \beta-vibration quantum number.
+\item [{Ng}] \gamma-vibration quantum number.
+\item [{No}] Octupole vibration quantum number.
+\item [{Dyn.Def.}] vibrational model deformation parameter. Not used in this case.
+\end{description}
+
+A fourth and last sample, containing 10 collective levels in $^{56}$Fe obtained for a vibrational coupled-channel potential
+RIPL 425 is reproduced below. Please note the keyword "spherical" in the third line that defines the vibrational
+coupling model. All levels belong to the discrete region (continuum was defined to start 
+above 3.5 MeV). Coupled channels correspond to level number < 30; there are seven coupled channels in this case. 
+
+\begin{verbatim}
+ Collective levels: RIPL CC OMP + default, vibr. model
+  N <         30 for coupled levels in CC calculation                           
+  26  56     nucleus is treated as spherical
+ 
+    Ncoll
+      10
+ 
+  N   E[MeV]  J   pi Nph L  K   Dyn.Def.
+  1   .0000   .0  1.  0  0  0   .500E-02
+  2   .8468  2.0  1.  1  0  0   .240E+00
+  7  3.0762  3.0 -1.  1  0  0   .197E+00
+  4  2.6576  2.0  1.  2  0  0   .500E-02
+  5  2.9415   .0  1.  2  0  0   .500E-02
+  3  2.0851  4.0  1.  2  0  0   .500E-02
+ 36  2.9599  2.0  1.  1  0  0   .500E-02
+ 38  3.1201  1.0  1.  1  0  0   .500E-02
+ 39  3.1229  4.0  1.  1  0  0   .500E-02
+ 40  3.3698  2.0  1.  1  0  0   .500E-02
+\end{verbatim}
+
+The  symbols are :
+\begin{description}[style=multiline,leftmargin=3cm]
+\item [{Ncoll}] number of collective states in the coupled-channel rotational
+model for a particular \emph{iz, ia}
+\item [{Lmax}] maximum \emph{l} value for multipole expansion
+\item [{IDef}] largest order of deformation
+\item [{Kgs}] \emph{k} for the rotational band
+\item [{Def}] deformation parameters, \emph{l}=2,4,6,...through Lmax
+\item [{E}] level excitation energy (MeV)
+\item [{J}] level spin 
+\item [{pi}] level parity 
+\item [{Nph}] 1 for pure 1-phonon state\\
+2 for pure 2-phonon state
 \item [{L}] level orbital momentum
 \item [{K}] level spin projection
 \item [{Dyn.Def.}] vibrational model deformation parameter
 \end{description}
+
 Users may choose to modify the \emph{{*}-lev.col} file to fit experimental
 data. In fact, such modifications are expected to be necessary if
-the file was created internally rather then copied from the RIPL\index{RIPL}
-library. In particular, deformation parameters should be given appropriate
+the file was created internally rather then copied from the RIPL\index{RIPL} optical model
+library. In particular, deformation parameters (both static and dynamic) should be given appropriate
 attention since cross sections are very sensitive to their values.
-Deformation parameters can be modified automatically using the FITOMP
-option. 
-
-
+Static deformation parameters can be modified automatically using the FITOMP option. 
 
 }\subsection{{*}-fiss.out (FISSION.OUT)\label{fissout}}
 
@@ -7929,7 +8108,7 @@ involved in the calculations extracted from the RIPL\index{RIPL}
 library. This file is created by EMPIRE if RIPL potential is requested
 in the input and the \emph{{*}-omp.ripl} file does not already exist
 (typically during the first run). The format is identical to the RIPL
-optical segment (see Section \ref{sec:RIPLomp}). Optical model parameters
+optical segment (see Section~\ref{sec:RIPLomp}). Optical model parameters
 contained in the \emph{{*}-omp.ripl} file can be modified manually
 if desired.
 
@@ -7940,7 +8119,7 @@ Used to store optical model parameters that are input to ECIS06\index{ECIS}
 for Coupled-Channels\index{Coupled-Channels} or DWBA\index{DWBA}
 calculations. The format is the same as that of the \emph{{*}-omp.ripl}
 file described above, and coincides with the RIPL\index{RIPL} format
-(see Section \ref{sec:RIPLomp}) used to represent optical model parameters.
+(see Section~\ref{sec:RIPLomp}) used to represent optical model parameters.
 The reason for creating \emph{{*}-omp.dir} file, in addition to the
 \emph{{*}-omp.ripl}, is in order to use the Coupled-Channels\index{Coupled-Channels}
 optical model potential for the incident channel, in which CC or DWBA
@@ -8548,17 +8727,15 @@ MeV.}
 
 \end{figure}
 
-
 There are no restrictions on the contents of the input file ({*}.\emph{inp)}
 used for displaying the cumulative plots except that the FITLEV record
 must be included with VAL different from 0. Dispositions that do not
 consider level densities are ignored as the code exits after the plots
 are completed without performing any cross section calculations.
 
+\section{Handling OM potentials\index{RIPLomp}}
 
-\section{Handling OM potentials}
-
-Interface to the RIPL-2 optical model segment has been developed by
+Interface to the RIPL optical model segment has been developed by
 Capote. This interface allows the use of any type of Optical Model
 Potential (OMP) contained in the library (including dispersive ones)
 by specifying the OMP catalog number in the optional input (list of
@@ -8571,9 +8748,9 @@ than from the internal sets coded in EMPIRE. The second value defines
 the type of particle. For example,
 
 \begin{description}[style=multiline,leftmargin=5cm]
-\item [{OMPOT~~~-401.~~~~~~1}] selects RIPL-2 Wilmore-Hodgson
-global potential (RIPL-2 number 401) for neutrons,
-\item [{OMPOT~~-4004.~~~~~~2}] selects RIPL-2 CC potential for
+\item [{OMPOT~~~-401.~~~~~~1}] selects RIPL Wilmore-Hodgson
+global potential (RIPL number 401) for neutrons,
+\item [{OMPOT~~-4004.~~~~~~2}] selects RIPL CC potential for
 protons (to be used for $^{197}$Au only).
 \end{description}
 The code will create \emph{{*}-omp.ripl} file containing parameters
@@ -8853,7 +9030,7 @@ and discrete levels up to N$_{max}=10$ (note that in EMPIRE-3.1
 Koning-DeLaroche potential is a standard),%
 
 \item [{Ko-Be}] Koning-DeLaroche S-OMP for neutrons and protons, discrete
-levels up to the N$_{max}$ recommended by RIPL-2 (limited to 40 by
+levels up to the N$_{max}$ recommended by RIPL (limited to 40 by
 the ENDF-6 format), and EMPIRE-specific level densities,
 \item [{Ko-Be-Go\label{Ko-Be-Go}}] as above but using HFB\index{HFB}
 microscopic level densities\index{level densities}\cite{HFBCS} instead
@@ -9214,7 +9391,7 @@ However, this general statement may not hold in cases with strong
 irregularities in the cumulative plots. Extending the discrete level
 scheme too far involves a risk of including the region with missing
 levels which would lead to an unphysical reduction of level densities.
-The new RIPL-2 library of discrete levels contains estimates of the
+The new RIPL library of discrete levels contains estimates of the
 completeness of the scheme (N$_{max}$), which is used by EMPIRE as
 a default. These values have been compared with the EMPIRE level densities
 (i) and (ii) and were found to be compatible in about 75\% of cases.
@@ -10144,14 +10321,14 @@ This parameter has a dual use:\\
 2) It may be used to simulate the CN resonances observed in total cross sections (obviously not included
   in the optical model). In this case it is recommended to not combine it with ELARED. 
 
-\item [{DXSRED}] The calculated deuteron break-up/pick-up cross section for incident deuteron on the target
+\item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron on the target
                  nucleus will be multiplied by VAL). 
-                 It  has no effect on other incident particles. 
+                 It has no effect on other incident particles. 
                   
               \begin{description}[style=multiline,leftmargin=3cm]
-              \item[$>0$] deuteron break-up/pick-up parameterization of Kalbach used for incident deuterons (default: 1.),
-               \item[$=0$] deuteron break-up/pick-up suppressed.  
-               \end{description}
+               \item[$>0$] deuteron pick-up/stripping parameterization of Kalbach used for incident deuterons (default: 1.),
+               \item[$=0$] deuteron pick-up/stripping suppressed.  
+              \end{description}
 
 \end{description}
 
@@ -10442,9 +10619,9 @@ lower than 0.54 will produce smaller preequilibrium contribution.
 
 \item[= 0] EMPIRE-specific level densities, adjusted to RIPL-3 experimental $D_{obs}$ 
 and to discrete levels (default),
-\item[= 1] Generalized Superfluid Model (GSM, Ignatyuk et al), adjusted to RIPL-2
+\item[= 1] Generalized Superfluid Model (GSM, Ignatyuk et al), adjusted to RIPL
 experimental $D_{obs}$ and to discrete levels,
-\item[= 2] Gilbert-Cameron level densities (parametrized by Ijinov et al), , adjusted to RIPL-2
+\item[= 2] Gilbert-Cameron level densities (parametrized by Ijinov et al), , adjusted to RIPL
 experimental $D_{obs}$ and to discrete levels,
 \item[= 3] RIPL-3 microscopic HFB level densities.
 \end{description}
@@ -10619,13 +10796,13 @@ set to VAL (default: 40).
 = 0 EGLO enhanced generalized Lorentzian (Uhl-Kopecki)
 as in  2.18  and earlier 
 
-= 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL-2) (default)
+= 1 MLO1 modified Lorentzian version 1 (Plujko, RIPL) (default)
 
-= 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL-2) 
+= 2 MLO2 modified Lorentzian version 2 (Plujko, RIPL) 
 
-= 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL-2) 
+= 3 MLO3 modified Lorentzian version 3 (Plujko, RIPL) 
 
-= 4 EGLO enhanced generalized Lorentzian (RIPL-2) 
+= 4 EGLO enhanced generalized Lorentzian (RIPL) 
 
 = 5 GFL (Mughabghab) 
 
@@ -10639,7 +10816,7 @@ as in  2.18  and earlier
 
 = 0 Messina systematics
 
-= 1 experimental or systematics of RIPL-2 (default)
+= 1 experimental or systematics of RIPL (default)
 \item [{GDRDYN}] Controls GDR treatment,
 
 = 0 GDR shape depends on the ground state deformation (default),
@@ -10765,8 +10942,8 @@ be wrong in the preliminary version of RIPL-2 (M. Herman).
 \item MSD is automatically turned off for non-nucleon incident reactions
 (M. Herman). 
 \item Internal conversion coefficients included in the gamma cascade between
-discrete levels (ICC data from RIPL-2)(M. Herman).
-\item Bug in reading branching ratios from the RIPL-2 file corrected (emission
+discrete levels (ICC data from RIPL)(M. Herman).
+\item Bug in reading branching ratios from the RIPL file corrected (emission
 probabilities instead of branching ratios were used in the previous
 RIPL-2 versions) (R. Capote).
 \item Bug in DEGAS resulting in lack of the preequilibrium population in
@@ -10850,7 +11027,7 @@ negative energies and end points of the spectra are indicated by repeating
 the line.
 \item EMPEND adjusted to accept format of p.41 above - improves energy balance
 above reaction thresholds (A. Trkov).
-\item Suite of gamma-strength functions from RIPL-2 coded by Plujko and
+\item Suite of gamma-strength functions from RIPL coded by Plujko and
 implemented by R. Capote and M. Herman.
 \item Reaction/MT-number conversion table for X4TOC4 updated to include
 gammas in the incident channel (A. Trkov \& M. Herman).
