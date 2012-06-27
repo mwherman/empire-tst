@@ -97,13 +97,12 @@ energies and incident particles.
 The system can be used for theoretical investigations of nuclear reactions 
 as well as for nuclear data evaluation work.
 Photons, nucleons, deuterons, tritons, helions ($^3$He), $\alpha$'s, and light or
-heavy ions can be selected as projectiles. The energy range starts just above the resonance region
-in the case of a neutron projectile, and extends up to few hundred
-MeV for heavy ion induced reactions. The code accounts for the major
+heavy ions can be selected as projectiles. The energy range starts just above the 
+resonance region in the case of a neutron projectile, and extends up to few 
+hundred MeV for heavy ion induced reactions. The code accounts for the major
 nuclear reaction models, such as optical model, Coupled Channels
-and DWBA (ECIS06), Coupled Channels' Soft-Rotator (OPTMAN), 
-Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
-Compound, exciton model PCROSS, hybrid Monte Carlo simulation
+and DWBA (ECIS06 and OPTMAN), Multi-step Direct (ORION + TRISTAN), NVWY Multi-step
+Compound, exciton model (PCROSS), hybrid Monte Carlo simulation
 (DDHMS), and the full featured Hauser-Feshbach model including width 
 fluctuations and the optical model for fission. 
 Heavy ion fusion cross section can be calculated within the
@@ -125,23 +124,23 @@ data in computational format C4 that are automatically retrieved during the
 calculations. 
 
 EMPIRE contains  the resonance module that retrieves data from the electronic
-version of the Atlas of Neutron Resonances by Mughabghab (not provided with the EMPIRE distribution),
-to produce resonance section and related covariances for the ENDF-6 formatted files. 
-EMPIRE can be used to determine covariances of the calculated data using either
+version of the Atlas of Neutron Resonances by Mughabghab (not provided with the EMPIRE
+distribution), to produce resonance section and related covariances for the ENDF-6 formatted
+files. EMPIRE can be used to determine covariances of the calculated data using either
 sensitivity matrices along with the KALMAN code or employing Monte Carlo approach
-to produce  model generated covariances. In both cases  experimental data can be
-taken into account, either directly (KALMAN) or by using Monte Carlo prior and
-covariance in the least square fitting GANDR system.
+to produce  model generated covariances. In both cases experimental data can be
+taken into account, either directly (KALMAN) or by feeding the EMPIRE calculated Monte
+Carlo modelling covariance as a prior to the least square fitting GANDR system.
 
 Publication quality graphs can be obtained using the powerful and flexible
 plotting package ZVView. Interactive plots with ZVView comparing experimental
 results with calculations can be produced with ENDVER modules. 
 
 The backbone of the EMPIRE system are bash-shell UNIX scripts that provide
-for seamless console operation of EMPIRE on Linux, Mac OS X, and Windows
+for seamless console operation of EMPIRE on Linux, Mac OS X, and Microsoft Windows
 with GNU gfortran compiler installed. Additionally,  the graphical interface,
-provides for an easy operation of the system on Linux and Mac OS X.
-
+provides for an easy operation of the system on Linux, Mac OS X and virtual Linux machines
+running on Microsoft Windows.
 
 \end{abstract}
 
@@ -498,10 +497,21 @@ parameters are included into the file. Typical examples of collective levels' fi
 for different models (both for ECIS and OPTMAN codes) are given in the Section \ref{lev-coll} below.
 \item [{OMPAR.DIR}] parameters of the Optical Model Potential (OMP) to
 be used in the inelastic channel (discrete collective levels). OMP
-parameters may be selected via a new keyword DIRPOT (similar to OMPOT,
-but only for the inelastic channel). No information on coupled levels is given.
+parameters may be selected via a keyword DIRPOT (similar to OMPOT,
+but only for the inelastic channel). The coupling scheme is not stored in OMPAR files.
 This information is supplemented by the parameters read from the TARGET\_COLL.DAT (\emph{{*}-lev.col}) file.
 \end{description}
+
+Independently of the selected optical model, in the first EMPIRE run 
+$T_{l}$ values are calculated for the whole energy grid. These values
+are stored in the file \emph{{*}.tl} for further use. Although the 
+first run may take quite a lot of time (specially for DIRECT>0), all 
+successive runs are much faster. It should be noted that files 
+\emph{{*}.tl} can be used for successive runs only if no changes were
+made to the files \emph{{*}-lev.col} and \emph{{*}-omp.ripl}. For
+each incident energy in the input file, there is one set of \emph{{*}.tl}
+files stored in the \emph{work} directory. 
+
 ECIS06/OPTMAN can be invoked by the EMPIRE in three different
 ways, using input directive DIRECT. The default value (DIRECT=0) calls
 the spherical optical model and suppresses calculation of direct reactions
@@ -524,6 +534,7 @@ perform well for the weakly coupled levels. For strong coupling, such
 as in the highly deformed rotational bands in heavy nuclei, it should
 be used with caution. It is the recommended option if accuracy is
 not a critical issue and the appropriate CC-OMP is available.
+
 \item [{DIRECT~2.}] Population of discrete, collective levels both in the incident and
 outgoing channels is calculated within the CC as above. Importantly, the
 CC is used consistently, considering the ground state and the coupled
@@ -534,34 +545,27 @@ is available for the preequilibrium and HF decay. The absorption cross
 section sums up with the direct cross sections to collective levels
 to the reaction cross section. DIRECT=2 is an exact option that considers
 flux decrease due to the collective excitations at the level of $T_{l}$.
-In the first run with DIRECT=2, $T_{l}$ values are calculated for
-the whole energy grid. These values are stored in the file \emph{{*}.tl}
-for further use. Although the first run takes quite a lot of time,
-all successive runs are much faster. It should be noted that file
-\emph{{*}.tl} can be used for successive runs only if no changes were
-made to the files \emph{{*}-lev.col} and \emph{{*}-omp.ripl}. For
-each incident energy in the input file, there is one \emph{{*}.tl}
-file stored in the \emph{work} directory. The DIRECT=2 is a recommended
-option for accurate calculations whenever an appropriate CC-OMP is
-available.
+The DIRECT=2 is a recommended option for accurate calculations whenever an 
+appropriate CC-OMP is available.
+
 \item [{DIRECT~3.}] Population of discrete collective levels in the inelastic
 scattering is calculated using the DWBA\index{DWBA} method providing
 approximate direct cross sections. The spherical transmission coefficients
 $T_{l}$ are used for the whole energy grid in subsequent preequilibrium
 and HF\index{Hauser-Feshbach} calculations. These results are re-normalized
-at the $T_{l}$ level by taking into account direct component. \\
+at the $T_{l}$ level by taking into account DWBA calculated direct component. \\
 This option is fairly fast, though some accuracy may be lost. In general,
 it should perform well for weakly coupled levels. For a strong coupling,
 such as in the highly deformed rotational bands in heavy nuclei, it
 should be used with caution. The DWBA\index{DWBA} option has an advantage
 if the suitable CC-OMP is not available. In such a case, one can use
 S-OMP parameters in the DWBA calculations tuning inelastic cross sections
-by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.col}
-.
+by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.col}.
+
 \end{description}
 OPTMAN can be invoked by the EMPIRE for DIRECT=1,2,3 for those optical model 
-potentials that use either soft-rotor for spherical nuclei, or deformed vibrational-rotational
-model for deformed nuclei.
+potentials that use either soft-rotor for spherical nuclei, or rigid-rotor or deformed
+vibrational-rotational model for deformed nuclei.
 
 \section{Photoabsorption}
 
@@ -1474,20 +1478,28 @@ spin distribution reflects dominant contribution of the first step
 of the MSD\index{MSD}, which leaves the residual nucleus in the 2-exciton
 state. 
 
-The MSD\index{MSD} cross section to the discrete states is distributed
-arbitrary among 2+, 3-, and 4+ states with relative weights 4:2:1
-respectively and inversely proportional to the squared distance between
-the energy of the populated level and the energy of the level to which
-field parameters in the response functions were fitted. In the case
-of an odd nucleus all levels with spins that differ from 2+, 3-, and
+The MSD\index{MSD} cross section to the discrete states is calculated if the 
+keyword MSD is equal 2 (default MSD=1). In that case the MSD cross section 
+to discrete levels is distributed arbitrarily among 2+, 3-, and 4+ states
+with relative weights 4:2:1 respectively and inversely proportional to the
+squared distance between the energy of the populated level and the energy of
+the level to which field parameters in the response functions were fitted. In
+the case of an odd nucleus all levels with spins that differ from 2+, 3-, and
 4+ by 1/2 are assumed to belong to the respective spin multiplet.
 There was no attempt to treat MSD\index{MSD} population of discrete
 levels more accurately as this kludge can be removed by using strict
-Coupled-Channels\index{Coupled-Channels} calculations.
+Coupled-Channels\index{Coupled-Channels} calculations that include explicitly 
+both vibrational and rotational levels with a proper momentum coupling.
 
 \chapter{Phenomenological preequilibrium models}
-Two  preequilibrium models are described in this section, the classical exciton model including nucleon, cluster and gamma emissions, and the Monte Carlo DDHMS inspired by Blann's Hybrid model that is limited to nucleon emission. The former includes only the first pre equilibrium emitted particle and is therefore valid up to about 50 MeV. The latter also includes multiple preequilibrium emission, which extends its applicability to much higher energies.
-The exciton model code DEGAS implementing full angular momentum coupling  in pre equilibrium emission of nucleons and gammas  has been temporarily disabled  due to incompatibilities with the current system. 
+Two  preequilibrium models are described in this section, the classical exciton model
+including nucleon, cluster and gamma emissions, and the Monte Carlo DDHMS inspired
+by Blann's Hybrid model that is limited to nucleon emission. The former includes only
+the first pre equilibrium emitted particle and is therefore valid up to about 50 MeV. 
+The latter also includes multiple preequilibrium emission, which extends its applicability
+to much higher energies. The exciton model code DEGAS implementing full angular momentum 
+coupling  in pre equilibrium emission of nucleons and gammas has been temporarily disabled
+due to incompatibilities with the current system. 
 
 \section{Exciton model (PCROSS code)}\label{PCROSS}}
 
@@ -1851,16 +1863,15 @@ calculation run rises a problem of double-counting. The current version
 of EMPIRE has 4 modules for preequilibrium decay: MSD\index{MSD},
 MSC\index{MSC},  HMS\index{HMS} and PCROSS\index{PCROSS}.
 While MSD and MSC describe different reaction mechanisms and are complementary,
-neither of them is compatible with  HMS or PCROSS. Therefore,
-neither of the latter three can be used together with MSD or MSC in
-the same exit channel. Also  HMS and PCROSS mutually exclude
+neither of them is compatible with HMS or PCROSS. Therefore,
+neither of the latter two can be used together with MSD or MSC in
+the same exit channel. Also HMS and PCROSS mutually exclude
 each other. However, these models can be combined if used in different
 exit channels, e.g., neutron inelastic scattering may be calculated
 using MSD\&MSC while the emission of protons can be treated within
 the exciton model using PCROSS. We also note that summing $\gamma$-emission
-spectra from more than one of the three possible mechanisms (MSC\index{MSC}
-(GST=1 option),  PCROSS) would be obvious
-multiple-counting and must be avoided.
+spectra from more than one of the two possible mechanisms (MSC\index{MSC}
+(GST=1 option) or PCROSS) would be obvious multiple-counting and must be avoided.
 
 An additional complication is introduced by the possibility of using
 ECIS06\index{ECIS} or OPTMAN code, which calculate Coupled-Channel\index{Coupled-Channels}
@@ -2057,9 +2068,9 @@ but not from HMS.
 The statistical model used in the EMPIRE is an advanced implementation
 of the Hauser-Feshbach\index{Hauser-Feshbach} theory. The exact angular
 momentum and parity coupling is observed. The emission of neutrons,
-protons, $\alpha$-particles, deuterons, tritons, He-3, and another light
-ion is taken into account along with the competing fission channel. 
-The full $\gamma$-cascade in the residual nuclei is considered. 
+protons, $\alpha$-particles, deuterons, tritons, and He-3 is taken into 
+account along with the competing fission channel. The full $\gamma$-cascade
+in the residual nuclei is considered. 
 
 To account for the correlation between incident and exit channels in
 elastic scattering (width fluctuation correction)the model proposed by 
@@ -2617,11 +2628,10 @@ $\omega _3=50A^{-2/3}$~MeV were adopted for the octupole excitations.
 Due to the higher energies, the influence of the octupole
 enhancement is much weaker than for the quadrupole excitations.
 
- For selected nuclei for which 
-experimental information exist the precalculated asymptotic value of $a$-parameter,
-$\omega_2$, and $\Delta_0$
-from RIPL-3 were included in \textit{/data/level-densities-par.dat} and used by EMPIRE.
-For the other nuclei the asymptotic $a$-parameter is parametrized as:
+For selected nuclei for which experimental information exist the precalculated asymptotic
+value of $a$-parameter, $\omega_2$, and $\Delta_0$ from RIPL-3 were included in 
+\textit{/data/level-densities-par.dat} and used by EMPIRE. For the other nuclei the 
+asymptotic $a$-parameter is parametrized as:
 \begin{equation}
 \tilde a= \alpha A+ \beta A^{2/3}\qquad \gamma=\gamma_0A^{1/3}
 \end{equation}
@@ -2634,8 +2644,6 @@ The energy shift (in MeV) is approximated by the relationship:
 \begin{equation}
 \delta=0.61700-0.00164 A.
 \end{equation}
-
-
 
 
 %****************************************************************
@@ -7848,8 +7856,8 @@ spin 4 (e.g. with these defaults all levels with excitation energy less than 2.4
 A first sample, containing 16 collective levels in $^{238}$U obtained for a coupled-channel rigid-rotor potential
 RIPL 2408 is reproduced below. Please note the keyword "deformed" in the third line that defines the rigid-rotor
 coupling model. In this sample file those collective levels are divided in three groups: 
-  \begin{itemize}
-  \item The first group contains five levels used in the  Coupled Channels calculations. These are the collective
+\begin{itemize}
+\item The first group contains five levels used in the  Coupled Channels calculations. These are the collective
   levels in the target, which happen to be consecutive in the EMPIRE file with discrete levels (\emph{{*}.lev}) 
   hence their numbering is 1 through 5.  In  general, collective levels are mixed with the non-collective ones,  
   thus their N numbers in the  \emph{{*}-lev.col} file are not necessarily consecutive. Dynamical deformations are
@@ -7981,7 +7989,7 @@ model for a particular \emph{iz, ia}
 \item [{E}] level excitation energy (MeV)
 \item [{J}] level spin 
 \item [{pi}] level parity 
-\item [{2*K}] twice the level spin projection quantum number K
+\item [{2*K}] twice the level spin projection quantum number $K$
 \item [{Nc}] Flag indicating isobar-analogue states (>0) or normal states (=0)
 \item [{Nb}] Band number. The ground-state band always has Nb=0.
 \item [{Dyn.Def.}] vibrational model deformation parameter. Not used for the ground state band.
@@ -8030,8 +8038,8 @@ model for a particular \emph{iz, ia}
 \item [{J}] level spin 
 \item [{pi}] level parity 
 \item [{Ntu}] Number of solution for spin J (close to the approximate spin projection K)
-\item [{Nb}] \beta-vibration quantum number.
-\item [{Ng}] \gamma-vibration quantum number.
+\item [{Nb}] $\beta$-vibration quantum number.
+\item [{Ng}] $\gamma$-vibration quantum number.
 \item [{No}] Octupole vibration quantum number.
 \item [{Dyn.Def.}] vibrational model deformation parameter. Not used in this case.
 \end{description}
@@ -9853,9 +9861,10 @@ encouragement and support for the development of EMPIRE.
 
 %contributors
 We would like to thank A. Ventura who was involved in the early formulations
-of the fission theory used in EMPIRE, E. B{\v e}t{\' a}k who developed exciton model with angular momentum conservation used in earlier versions of EMPIRE, and to A. Hoering who took part in the
-implementation of $\gamma $-emission within the multi-step compound
-mechanism. 
+of the fission theory used in EMPIRE, E. B{\v e}t{\' a}k who developed exciton model
+with angular momentum conservation used in earlier versions of EMPIRE, and to A.
+Hoering who took part in the implementation of $\gamma $-emission within the 
+Multi-Step Compound mechanism. 
 
 We would like to thank A. Ignatyuk who has been a permanent source of
 inspiration, constructive criticism and encouragement and lately has been
