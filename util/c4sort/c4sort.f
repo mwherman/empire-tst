@@ -35,7 +35,9 @@ C-V        - Skip comments (processing of C5 files).
 C-V        - Improve stability (denominator ZA/MT is missing in some
 C-V          C5 file entries (A. Trkov)
 C-V        - Special treatment for correct positioning of mu-bar.
-C-V  12/06 Fix explicit level assignment when given as range (Elo=Ehi)
+C-V  12/06 - Fix explicit level assignment when given as range (Elo=Ehi)
+C-V        - If ratio to standard, make sure it is the denominator.
+C-V        - Improve trapping of undefined cross sections.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -229,6 +231,7 @@ C* Character to mark the modified string
       NSET=0
       MPG =20000
       FLV =-1
+      RC1 =BLNK//BLNK//BLNK
 C*
 C* Default path to RIPL nuclide level energy files
       DPATH='../Sources/Inputs/Levels/'
@@ -255,7 +258,7 @@ C* Print a warning to default output and try reading default input
       CALL C4SINP(LKB,LTT,FLC4,FLOU,FLES,NALI,ALIA,DPATH,LPATH,IER)
       FLIN='Keyboard'
       IF(IER.EQ.0) GO TO 16
-C* Try input/output ENDF files from default input/output
+C* Try input/output C4 files from default input/output
       LC4=LKB
       LOU=LTT
       LTT=0
@@ -286,16 +289,42 @@ C* Convert ratios to cross sections when possible - write to scratch
         MT1 =-1
    17   READ (LC4,901,END=18) REC
         IF(REC(1:1).EQ.'#') GO TO 17
-        READ (REC(13:15),'(I4)') MF
+        READ(REC(41:58),'(2F9.0)',ERR=17) XSR,DXS
+        READ (REC(13:15),'(I4)',ERR=17) MF
         IF(MF.EQ.203) THEN
-          READ(REC(59:76),'(2F9.0)') RMT,RZA
-C*        -- If ratio denominator undefined, assume same as numerator
+C*        -- Ratio data encountered
+          READ(REC( 6:11),'(I6)',ERR=17) IZAR
+          READ(REC(16:19),'(I4)',ERR=17) MT
+          READ(REC(59:76),'(2F9.0)',ERR=17) RMT,RZA
+C*        -- Skip undefined/unknown reactions
+          IF(MT.LT.1 .OR.MT.GT.9999) GO TO 17
+C*        -- Check if the numerator is a standard --> force denominator
+          IF( (IZAR.EQ. 3006 .AND. MT.EQ.103) .OR.
+     &        (IZAR.EQ. 5010 .AND. MT.EQ.107) .OR.
+     &        (IZAR.EQ.79197 .AND. MT.EQ.102) .or.
+     &        (IZAR.EQ.92235 .AND. MT.EQ. 18) ) THEN
+            DMY =RMT
+            MT  =NINT(RMT)
+            RMT =DMY
+            DMY =RZA
+            IZAR=NINT(RZA)
+            RZA =DMY
+            READ(REC(41:58),'(2F9.0)',ERR=17) XSR,DXS
+            IF(XSR.LT.1E-20) GO TO 17
+            DXS=DXS/XSR
+            XSR=1/XSR
+            DXS=XSR*DXS
+            CALL CH9PCK(XSR,POU)
+            REC(41:49)=POU
+            CALL CH9PCK(DXS,POU)
+            REC(50:58)=POU
+          END IF
+C*        -- If denominator of the reaction ratio is undefined,
+C*           assume it is the same as the numerator
           IF(RMT.LE.0) THEN
-            READ(REC(16:19),'(I4)') MT
             RMT=MT+0.9
           END IF
           IF(RZA.LE.0) THEN
-            READ(REC(6:11),'(I6)') IZAR
             RZA=IZAR+0.9
           END IF
           IZAR=10*IFIX(RZA)
@@ -358,12 +387,12 @@ C...
             END IF
           END DO
         ELSE IF(MF.EQ.205) THEN
-          READ(REC(59:76),*) RMT,RZA
+          READ(REC(59:76),*,ERR=17) RMT,RZA
           IZAR=10*IFIX(RZA)
           MFR =5
           MTR =IFIX(RMT)
 C*        -- Check specifically for Cf-252 sf spectrum in the numerator
-          READ(REC(1:19),902) KIN,KZA,KF,KMT
+          READ(REC(1:19),902,ERR=17) KIN,KZA,KF,KMT
           IF(KIN.EQ.0 .AND. KZA.EQ.98252 .AND. KMT.EQ.18) THEN
 C*          -- Invert the reaction
 C...
@@ -620,6 +649,7 @@ c...  print '(i5,3a)',nen,ent(nen),' ',ref//' in30'
 c...  print '( a,3a)','"',ent(nen),' ',ref(1:12)
 c...
       NSET=0
+      JSET=0
 C* Proceed to next record
       GO TO 20
 C*
@@ -1912,11 +1942,12 @@ C-D    convenience.
 C-D NOTE: This routine is complementary to the SRTTRE routine,
 C-D       which operates on real numbers.
 C-Reference: Moj Mikro (1989)
-C... Coding marked with "..." does not work with g77 on Linux (???)
-C...  CHARACTER X*(K)
-C...  DIMENSION L(1),M(1),X(1)
-      CHARACTER X*1
-      DIMENSION L(1),M(1),X(K,1)
+C... Coding below does not work with g77 on Linux (???)
+      CHARACTER*(K) X(*)
+      DIMENSION L(*),M(*)
+C...
+C-g77 CHARACTER X*1
+C-g77 DIMENSION L(1),M(1),X(K,1)
 C...
       L(1)= 0
       M(1)= 0
@@ -1924,9 +1955,9 @@ C...
       L(I)= 0
       M(I)= 0
       J   = 1
-C...8 IF(X(I).GT.X(J)) GO TO 15
-C...8 IF(X(1,I)(1:K).GT.X(1,J)(1:K)) GO TO 15
-    8 IF(X(1,I)(1:K).GE.X(1,J)(1:K)) GO TO 15
+    8 IF(X(I).GE.X(J)) GO TO 15
+C...
+C-g77 8 IF(X(1,I)(1:K).GE.X(1,J)(1:K)) GO TO 15
 C...
       IF(L(J).EQ.0)    GO TO 12
       J = L(J)
