@@ -37,6 +37,7 @@ C-V         - Differentiate between entries for the same author if
 C-V           the EXFOR ID changes.
 C-V         - Implement plotting of mu-bar from Legendre moment given
 C-V           in the C4 file.
+C-V  12/06  Guard against unreasonable cosines in C4 (Trkov)
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -616,6 +617,7 @@ C-Title  : Subroutine DXSEXF
 C-Purpose: Extract data from EXFOR computational format file
 C-Version:
 C-V  09/03 Make angular tolerance 1 deg. (consistent with PLTLST).
+C-V  12/06 Guard against unreasonable cosines
 C-Description:
 C-D  Numeric data are extracted from the C4 file (EXFOR computational
 C-D  format)
@@ -896,7 +898,7 @@ C* Convert cosine (and uncertainty) to degrees
         F5=ACOS(F5)*180/PI
         WRITE(REC(1),911) F5
 C*      -- Uncertainty is not given for general emission (MT=9000)
-        IF(MT.LT.9000) THEN
+        IF(MT.LT.9000 .AND. (A6.GT.0 .AND. A6.LT.1)) THEN
           A6=ABS(ACOS(A6)*180/PI-F5)
           WRITE(REC(2),912) A6
           WRITE(REC(3),912) A6
