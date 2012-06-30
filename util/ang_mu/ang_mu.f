@@ -777,9 +777,9 @@ C*      Reduce order as long as error <1.2*last and <2.0*max
 C*        -- Reduce order as long as error <1.2*previous
           LO1=LO1-1
           ELS=MIN(ELS,ERHI(LO1))
-
-          print *,' Reduce order',LO1-1,ERHI(LO1-1),ELS
-
+C...
+C...      print *,' Reduce order',LO1-1,ERHI(LO1-1),ELS
+C...
           GO TO 32
         END IF
       END IF
@@ -795,7 +795,7 @@ C* Terminate iterations
         IF(JNM.GT.NP*4/5 .AND. NLG.GT.2 .AND. MNS.LT.MNSMX) THEN
 C*        -- Try to fix -ve distrib. by adjusting 2-nd & 3-rd parameter
 c...    
-          print *,'Increment coef by',YNM,' of',NLG
+c...      print *,'Increment coef by',YNM,' of',NLG
 c...    
           QQ(2)=QQ(2)+YNM
           QQ(3)=QQ(3)-YNM
