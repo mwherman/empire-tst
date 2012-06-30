@@ -3,6 +3,7 @@ C-Title  : ANG_MU Program
 C-Purpose: Legendre moments to C4 from angular distributions
 C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
+C-V  12/06 Fix bug on action when fitting is unsuccessful.
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -61,9 +62,11 @@ C* Test print filenames and logical file units
      &     FLPT/'angdis.pnt'/
       DATA L92,LCU,LPT/30,31,32/
 C*
-          OPEN (UNIT=L92,FILE=FL92,STATUS='UNKNOWN')
+C* Define C4 input and output files
           OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
           OPEN (UNIT=LPT,FILE=FLPT,STATUS='UNKNOWN')
+C* Initialise PLOTTAB input file
+          OPEN (UNIT=L92,FILE=FL92,STATUS='UNKNOWN')
           WRITE(L92,821) 0.5,14., 0.5,10., 1, 1, 1.2
           WRITE(L92,822)  1,  1, 1,  0,  4, 0, 0
           WRITE(L92, * ) 'Angle                                   '
@@ -120,21 +123,22 @@ C*       (no need to add to C4, conversion is done in DXSEXF if needed)
       CSMX=CSNH
   120 RC1=REC
       IEF=1
-      READ (LIN,932,END=600) REC
+      READ (LIN,932,END=200) REC
       IEF=0
   122 READ (REC,902) IZIG,IZAG,ZAMG,MFG,MTG,EING,EID,XSRG,XSDG,CSNG,PRB
      &              ,IXEG,IXSG
       IF(IZIH.EQ.IZIG .AND. IZAH.EQ.IZAG .AND. MTH.EQ.MTG .AND.
      &   EINH.EQ.EING .AND. IXEH.EQ.IXEG .AND. IXSH.EQ.IXSG) THEN
         EMM=MAX(EMM,XSDG/XSRG)
+        IF(REC(22:22).EQ.'C') THEN
 c...
-c...    print *,'Input',eing,xsrg,csng,awr,awi,qi,lct
+c...      print *,'Input cm-->lab',eing,xsrg,csng,awr,awi,qi,lct
 c...
-        IF(REC(22:22).EQ.'C')
-     &    CALL CMLAB2B(EING,EOUG,CSNG,XSRG,AWR,AWI,QI,LCT)
+          CALL CMLAB2B(EING,EOUG,CSNG,XSRG,AWR,AWI,QI,LCT)
 c...
-c...    print *,'                      Lab',eing,xsrg,csng
+c...      print *,'                      Lab',eing,xsrg,csng
 c...
+        END IF
         NP=NP+1
         IF(NP.GT.MXNP) STOP 'ANG_MU ERROR - MXNP limit exceeded'
         CSN(NP)=CSNG
@@ -146,7 +150,7 @@ c...
         GO TO 120
       END IF
 C*    -- Tighten the fitting convergence criterion a bit (fraction)
-      EMMF=MAX(0.07,EMM/SQRT(2.0))
+  200 EMMF=MAX(0.07,EMM/SQRT(2.0))
 C*    -- Skip fitting if less than four points or narrow range.
       IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.8)) GO TO 600
 C*    -- One panel read - calculate mu-bar
@@ -388,6 +392,9 @@ c*       (does not work very well)
       MNSMX=0
 C* Check if zero-order
       QQ(1)=YP(1)
+c...
+c...  print *,'np',np
+c...
       IF(NP.LT.2) GO TO 40
 C* Check statistics of the distribution
       SY0=0
@@ -395,6 +402,7 @@ C* Check statistics of the distribution
       X2 =XP(1)
       Y2 =YP(1)
 C*    -- End correction to the integral
+C*       Extrapolate to the boundary using the first and the last point
       IF((X2.LT.XP(NP) .AND. X2.GT.-1) .OR.
      &   (X2.GT.XP(NP) .AND. X2.LT. 1)) THEN
         XB =XP(NP)
@@ -407,9 +415,13 @@ C*    -- End correction to the integral
         Y1 =Y2 + (X1-X2)*(YB-Y2)/(XB-X2)
         SY0=SY0+ (X2-X1)*(Y2+Y1)/2
         SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
+c...
+c...    print *,'End-correction-1 sy0,sy1',sy0,sy1
+c...
       END IF
       SS1=Y2
       SS2=Y2*Y2
+      YYM=YP(1)
       DO I=2,NP
         X1 =X2
         Y1 =Y2
@@ -419,12 +431,17 @@ C*    -- End correction to the integral
         SS2=SS2+ Y2*Y2
         SY0=SY0+ (Y2+Y1)*(X2-X1)/2
         SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
+        YYM=MIN(YYM,YP(I))
       END DO
+c...
+c...  print *,'Central sy0,sy1',sy0,sy1
+c...
 C*    -- End correction to the integral
+C*       Extrapolate to the boundary using the first and the last point
       IF((X2.LT.XP(1) .AND. X2.GT.-1) .OR.
      &   (X2.GT.XP(1) .AND. X2.LT. 1)) THEN
-        XB =XP(NP)
-        YB =YP(NP)
+        XB =XP(1)
+        YB =YP(1)
         IF(X2.LT.XB) THEN
           X1=-1
         ELSE
@@ -433,8 +450,15 @@ C*    -- End correction to the integral
         Y1 =Y2 + (X1-X2)*(YB-Y2)/(XB-X2)
         SY0=SY0+ (X2-X1)*(Y2+Y1)/2
         SY1=SY1+ (X2-X1)*(Y2*X2+Y1*X1)/2
+c...
+c...    print *,'End-correction-2 sy0,sy1',sy0,sy1
+c...    print *,'X1,X2,XP1,XB',X1,X2,XP(1),XB
+c...
       END IF
 C*    -- Check for zero integral
+c...
+C...  print *,'sy0,sy1',sy0,sy1
+c...
       IF(SY0.EQ.0) GO TO 40
       QQ(1)=SY0/2
       IF(LMX.LT.1) GO TO 30
@@ -472,10 +496,13 @@ C* Loop to find the appropriate Legendre order
       IF(LL+(NLG+1)*(NLG+3).GT.MXR) 
      1 STOP 'EMPEND ERROR - MXR limit exceeded in LSQLGV'
 c...
-c...  print *,'*** Fitting with order',N1-1,np
+c...  print *,'*** Fitting with order L points NP',N1-1,nnp
 c...
 C* Try fit of Legendre polynomial order LO1 (=N1-1)
       CALL LSQLEG(RWO(LXP),RWO(LYP),NNP,RWO(LLG),N1,RWO(LL),JER)
+c...
+c...  print *,'    jer,lst,nnp',jer,lst,nnp
+c...
       IF(LST.NE.0) GO TO 40
 C* Trap zero-determinant
       IF(JER.NE.0) THEN
@@ -543,9 +570,11 @@ c...
       IF(YNM.LT.0) ERR=MIN(ERR,YNM)
       LL1=2
 C*
-C* Take corrective action
+C* Take corrective action if neg. points KNP>0 or error ERR>EMM
+c...
+c...  print *,'LO1,LL1,LMM,KNP,ERR,EMM',LO1,LL1,LMM,KNP,ERR,EMM
+c...
       IF(LO1.EQ.LL1 .AND. (KNP.GT. 0 .OR. ERR.GT.EMM)) THEN
-C...  IF(LO1.EQ.  1 .AND. (KNP.GT. 0 .OR. ERR.GT.EMM)) THEN
 C* Case: Tolerance limit not satisfied and if the first point is
 C*       not on the extreme boundary, generate the point artificially
 C*       by extrapolation with the gradient of the 3-rd order
@@ -630,7 +659,7 @@ C...
         END IF
       END IF
       IF(KNP.GT. 0 ) THEN
-C* Case: Distribution negative at mesh point - increase L
+C* Case: Distribution negative at mesh point - increase L if L<LMM
         IF(LO1.LT.LMM) THEN
           IF(LO1.GE.MXEH) STOP 'LSQLGV ERROR - MXEH Limit exceeded'
           ERHI(LO1)=ERR
@@ -696,7 +725,7 @@ C*          (adding linearly interpolated values at midpoints)
       END IF
 C* Case: Distribution is negative - force extra points
 c...
-c...  print *,'check for extra points knm,knp,mns',knm,knp,mns
+c...  print *,'Force extra points knm,knp,mns,mxp',knm,knp,mns,mxp
 c...
       IF((KNM.GT.0 .OR. KNP.GT.0) .AND.
      &    MNS.EQ.0 .AND. NNP.LT.MXP) THEN
@@ -743,11 +772,14 @@ c###  DO WHILE (LO1.GT.1 .AND. ERHI(LO1-1).GT.0 .AND.
 C### &          ERHI(LO1-1).LT.2.0*EMM .AND. 
 C### &          ERHI(LO1-1).LT.1.2*ELS)
 C*      Reduce order as long as error <1.2*last and <2.0*max
-   32 IF(LO1.GT.1 .AND. MNS.EQ.0) THEN
+   32 IF(LO1.GT.LMI .AND. MNS.EQ.0) THEN
         IF(ERHI(LO1-1).GT.0 .AND. ERHI(LO1-1).LT.1.2*ELS) THEN
 C*        -- Reduce order as long as error <1.2*previous
           LO1=LO1-1
           ELS=MIN(ELS,ERHI(LO1))
+
+          print *,' Reduce order',LO1-1,ERHI(LO1-1),ELS
+
           GO TO 32
         END IF
       END IF
@@ -763,7 +795,7 @@ C* Terminate iterations
         IF(JNM.GT.NP*4/5 .AND. NLG.GT.2 .AND. MNS.LT.MNSMX) THEN
 C*        -- Try to fix -ve distrib. by adjusting 2-nd & 3-rd parameter
 c...    
-c...      print *,'Increment coef by',YNM,' of',NLG
+          print *,'Increment coef by',YNM,' of',NLG
 c...    
           QQ(2)=QQ(2)+YNM
           QQ(3)=QQ(3)-YNM
@@ -774,10 +806,18 @@ C*        -- Last resort ...
           QQ(1)=  SY0/2
           QQ(2)=3*SY1/2
           LMX=1
+          Q3=QQ(1)-QQ(2)
+          IF(Q3.LT.0) THEN
+            QQ(3)=-Q3+YYM/2
+            LMX=2
+          END IF
+C...
+C...      print *,' Last resort ...',sy0,sy1
+C...
         END IF
       END IF
 c...
-c...      print *,'jnm',jnm,NP,nnp,LMI,LMX,EMM,ERR,ynp,ynm
+C...  print *,'jnm',jnm,NP,nnp,LMI,LMX,EMM,ERR,ynp,ynm
 c...
       RETURN
       END
