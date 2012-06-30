@@ -12,6 +12,7 @@ C-V        For backward compatibility MT0=5 on input is set to 9000
 C-V        but this aliasing will be removed in future.
 C-V  09/12 PLNLEG Legendre summation done in double precision
 C-V  11/11 Add charged particle x.s. at fixed angle for like particles
+C-V  12/06 Aliasing of MT=5 with MT=9000 has been suppressed.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -98,7 +99,7 @@ C*
 C*
 C... Temporary aliasing of MT0=5 with MT0=9000 for backward compatibility
       IF(MT0.EQ. 5) MT0=9000
-C...  IF(MT0.EQ.-5) MT0=5
+      IF(MT0.EQ.-5) MT0=5
 C...
       NE1=0
       IEL=1
@@ -1755,7 +1756,7 @@ C* Suppress searching for covariance data unless MF0=3
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-      print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+C...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -3180,7 +3181,7 @@ C*
 C* Search the ENDF file for section MT in file MF3
       CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-      print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
+c...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*      
