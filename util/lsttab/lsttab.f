@@ -37,7 +37,9 @@ C-V         - Differentiate between entries for the same author if
 C-V           the EXFOR ID changes.
 C-V         - Implement plotting of mu-bar from Legendre moment given
 C-V           in the C4 file.
-C-V  12/06  Guard against unreasonable cosines in C4 (Trkov)
+C-V  12/06  - Guard against unreasonable cosines in C4 (Trkov)
+C-V         - Force the use of index numbers in the list file when
+C-V           they are not in sequence (e.g. deleted by the user).
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -164,9 +166,7 @@ C* or zero to plot the spectrum
    45 WRITE(LTT,91) '$Enter kT [eV] to plot ratio to Mxw.  : '
       READ (LKB,98,ERR=45) EKTNRM
 C*
-C* Open the output files
-      OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
-      OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
+C* Open the output log file
       OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
 C* Print input specifications to terminal
       WRITE(LTT,91) BLNK
@@ -206,8 +206,19 @@ C* Select the PLOTC4 list entry index
       IF(SCL.EQ.0) SCL=1
 C*
 C* Process the index entry
-      C84=RFX(IDX)
-      READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
+      DO I=1,NID
+        C84=RFX(I)
+        READ(C84(73:76),'(I4)') JDX
+        IF(JDX.EQ.IDX) GO TO 56
+      END DO
+      WRITE(LTT,95) ' LSTTAB WARNING - Non-existent index  : ',IDX
+      WRITE(LTT,95) '                  Processing terminated '
+      WRITE(LLG,95) ' LSTTAB WARNING - Non-existent index  : ',IDX
+      WRITE(LLG,95) '                  Processing terminated '
+      GO TO 90
+C*
+C* Proceed with the processing of data
+   56 READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
 C*
       ZAI=IZI
 C*
@@ -247,6 +258,10 @@ C* Log the start of request
       WRITE(LTT,93) ' Scaling factor                       : ',SCL
       WRITE(LTT,95) ' Emitted particle ZA                  : ',IZP
       WRITE(LTT,96) COM2
+C*
+C* Open the output curves and points files
+      OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
+      OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
