@@ -1006,9 +1006,6 @@ c...
       CLOSE(UNIT=LC4)
 C*
 C* Sort the entries
-C*
-      WRITE(LTT,921) ' '
-      WRITE(LTT,921) ' Begin sorting the indices              '
       CALL SRTTCH(NEN,LCH,ID1,ID2,EN1)
 C...
 c...      PRINT *,'Writing sorted entry list to c4sort.scr'
