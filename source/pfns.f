@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
+Ccc   * $Rev: 2909 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Date: 2012-07-05 22:59:44 +0200 (Do, 05 Jul 2012) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -19,7 +19,7 @@ C     Dummy parameters
 C     Local variables
       real*8 CNdef,HFdef,LFdef,ftmp, Erel
       real*8 ThCF,TlCF,r,e,Efkin,Tlf,Thf
-	real*8 Ux,EniuL,EniuH
+      real*8 Ux,EniuL,EniuH
       real*8 fmed
       integer iah,ial,iaf,izf,izh,izl,i
 C     real*8 fpost, fnscn, tscn, wscn
@@ -103,7 +103,7 @@ C     Following formulae (7) of the paper
       Tlf = TlCF * coeff
       Thf = ThCF * coeff
       ftmp = 0.D0
-	emed = 0.d0
+      emed = 0.d0
       do i =1,nen_emis
         e = emiss_en(i)
         fragmPFNS(i) = 0.5d0*(fwatt(e,EniuH,Thf) + fwatt(e,EniuL,Tlf))
@@ -140,7 +140,7 @@ C     Dummy parameters
 C     Local variables
       real*8 ftmp1, ftmp2
       real*8 CNdef,HFdef,LFdef,ftmp, Erel,r,e,Efkin,Tlf,Thf
-	real*8 Ux,EniuL,EniuH,Tm
+      real*8 Ux,EniuL,EniuH,Tm
 
 
       real*8 eplus, emin 
@@ -198,7 +198,7 @@ C     LA model (eq.11 CPC)
       Thf = Tm
 
       ftmp = 0.D0
-	emed = 0.d0
+      emed = 0.d0
       do i =1,nen_emis
         e = emiss_en(i)
 
@@ -277,7 +277,7 @@ C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Np-237 Bn=6.57
 C       Exact energy should be 7.80 Mev - Bn(IAF,ZAF), For Pu-239 Bn=5.65
         ELSEIF(en.gt.0.0001d0 .and. en.le.2.15) THEN
           TKE = TKE - 0.12*en
-	  ELSE
+        ELSE
           TKE = TKE - 0.21*en
         ENDIF
         return
