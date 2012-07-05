@@ -1,6 +1,6 @@
-cc   * $Rev: 2881 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-16 17:07:34 +0200 (Sa, 16 Jun 2012) $
+cc   * $Rev: 2908 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-07-05 22:32:46 +0200 (Do, 05 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -58,7 +58,7 @@ C
      &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
-     &                 step, sum, sumfis, sumfism(NFMOD), totsp,
+     &                 step, sum, sumfis, sumfism(NFMOD), totsp, xnub,
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                                   cseaprnt(ndecse,ndangecis),
@@ -103,8 +103,11 @@ C             -----------------------------------------------
       LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
 
-      INCLUDE 'io.h'
+      real*8, external :: mu_bar
+
       DATA ctldir/'TL/'/
+
+      call open_files
 
       icalled = 0
       CALL THORA(8)
@@ -173,11 +176,12 @@ C       OPEN (UNIT = 68,FILE='ELASTIC.DAT', STATUS = 'UNKNOWN')  ! for Chris
             i = i + 1
             preaction(i) = REAction(nnuc)
         ENDDO
-        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+4,
+        WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+6,
      &      int(Z(0)), SYMb(0), int(A(0))
         WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
      &       '  Elastic   ','  Nonelast  ','  Fission   ',
+     &       '  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(i,NDNUC,87))
 
         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') 15,
@@ -2211,11 +2215,18 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
           csprnt(i) = CSPrd(nnuc)
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
+
+      if(NUBarread) then
+          xnub = PFNniu*fniu_nubar_eval(EINl)
+      else
+          xnub = 0.D0
+      endif
+
       WRITE(41,'(G10.5,1P,(95E12.5))') EINl, TOTcs*TOTred*TOTcorr,
      &     ELAcs*ELAred + 4.*PI*ELCncs,			
      &     CSFus + (SINl+SINlcc)*FCCred + SINlcont - 4.*PI*ELCncs, ! Comp elast substracted from reaction
-     &     TOTcsfis, CSPrd(1), csinel,
-     &     (csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
+     &     TOTcsfis, mu_bar(amass(0),NANgela,ELAred,ELCncs,elada), xnub,
+     &     CSPrd(1), csinel,(csprnt(nnuc),nnuc=1,min(i,NDNUC,84))
 
       xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont
       xspreequ = xsinl + xsmsc + totemis + tothms

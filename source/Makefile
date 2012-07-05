@@ -1,6 +1,6 @@
-#$Rev: 2826 $
-#$Author: gnobre $
-#$Date: 2012-05-04 20:13:19 +0200 (Fr, 04 Mai 2012) $
+#$Rev: 2908 $
+#$Author: shoblit $
+#$Date: 2012-07-05 22:32:46 +0200 (Do, 05 Jul 2012) $
 
 # set default fortran compiler:
 
@@ -59,8 +59,8 @@ else ifeq ($(FC),ifort)
   #EFLAGS = -O2 -x=host -logo
   # LIBS = -openmp-lib compat
   #----flags for automatic parallelization & inter-procedural optimization
-  FFLAGS = -O3 -x=host -logo -ipo -parallel -par-report1
-  EFLAGS = -O2 -x=host -logo
+  FFLAGS = -O3 -x=host -ipo -parallel -par-report1
+  EFLAGS = -O2 -x=host
   #----flags with no parallelization
   #FFLAGS = -O3 -x=host -ipo -logo
   #FFLAGS = -O3 -x=host -logo
@@ -124,9 +124,8 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
             HRTW-comp.o       ddhms.o           pcross.o       nubar_reader.o\
             gamma-strength-analytic.o           thora.o        empire_ctl.o\
             pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
-            plot-zvv.o    kailas07emp.o         systematics.o
-
-IOLIB =  ../util/IO/*.o
+            plot-zvv.o    kailas07emp.o         systematics.o  open_files.o\
+            mubar.o
 
 all: 
 	$(MAKE) empire
@@ -144,7 +143,7 @@ dbg:
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h
-main.o  : io.h nubar_reader.o
+main.o  : nubar_reader.o
 input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
