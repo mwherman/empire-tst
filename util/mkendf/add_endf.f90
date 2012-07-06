@@ -3,16 +3,16 @@
 	! this routine takes as input 2 endf files.
 	! the 1st file is the output from EMPEND - the converted empire output file
 	! the 2nd file should contain the additional needed MF/MT sections to 
-	! make the empire file complete:
+	! make the EMPEND endf-file complete:
 	!  MF          MT
 	!  1     any of 452,455,456,458
 	!  4           18
 	!  5     18, any of 452,455,456,458
 	! these sections from file 2 will be added to file 1
-	! and then the new file will be written out as file1 with a "_1"
-	! added to the filename.
-	! It is additionally assumed that both files will contain only 1 MAT,
-	! and that MAT1 = MAT2.
+	! and then the new file will be written out as file1
+        ! with a "_1" added to the filename.
+	! It is additionally assumed that both files will contain
+        ! only 1 material, and that MAT1 = MAT2.
 
 	use endf_io
 
@@ -32,33 +32,68 @@
 	call getarg(1,file1)
 	nch1 = len_trim(file1)
 	status = read_endf_file(file1(1:nch1),endf1)
-	if(status /= 0) stop ' Error opening File 1'
+	if(status /= 0) then
+            write(6,*) ' Error opening EMPEND ENDF file: ',file1(1:nch1)
+            stop 1
+        endif
+
 	mat1 => endf1%mat
-	if(.not.associated(mat1)) stop ' File 1 contains no materials!'
-	if(.not.associated(mat1%mf1)) stop ' File 1 contains no MF1!'
+	if(.not.associated(mat1)) then
+            write(6,*) ' EMPEND endf file contains no materials!'
+            stop 1
+        endif
+	if(.not.associated(mat1%mf1)) then
+            write(6,*) ' EMPEND endf file contains no MF1!'
+            stop 1
+        endif
 
 	call getarg(2,file2)
 	nch2 = len_trim(file2)
 	status = read_endf_file(file2(1:nch2),endf2)
-	if(status /= 0) stop ' Error opening File 2'
+	if(status /= 0) then
+            write(6,*) ' Error opening original ENDF file: ',file2(1:nch2)
+            stop 1
+        endif
+
 	mat2 => endf2%mat
-	if(.not.associated(mat2)) stop ' File 2 contains no materials!'
-	if(mat1%mat /= mat2%mat) stop ' File 2 MAT number not same as File 1 MAT!'
-	if(.not.associated(mat2%mf1)) stop ' File 2 contains no MF1!'
-	if(.not.associated(mat2%mf4)) stop ' File 2 contains no MF4!'
-	if(.not.associated(mat2%mf5)) stop ' File 2 contains no MF5!'
+	if(.not.associated(mat2)) then
+            write(6,*) ' Original ENDF file contains no materials!'
+            stop 1
+        endif
+	if(mat1%mat /= mat2%mat) then
+            write(6,*) ' Original ENDF file MAT number not same as that in EMPEND file'
+            stop 1
+        endif
+	if(.not.associated(mat2%mf1)) then
+            write(6,*) ' Original ENDF file contains no MF1!'
+            stop 1
+        endif
+	if(.not.associated(mat2%mf4)) then
+            write(6,*) ' Original ENDF file contains no MF4!'
+            stop 1
+        endif
+	if(.not.associated(mat2%mf5)) then
+            write(6,*) ' Original ENDF file contains no MF5!'
+            stop 1
+        endif
 	mf418 => mat2%mf4
 	do while(associated(mf418))
 		if(mf418%mt == 18) exit
 		mf418 => mf418%next
 	end do
-	if(.not.associated(mf418)) stop ' File 2 contains no MF4/MT18!'
+	if(.not.associated(mf418)) then
+            write(6,*) ' Original ENDF file contains no MF4/MT18!'
+            stop 1
+        endif
 	mf518 => mat2%mf5
 	do while(associated(mf518))
 		if(mf518%mt == 18) exit
 		mf518 => mf518%next
 	end do
-	if(.not.associated(mf518)) stop ' File 2 contains no MF5/MT18!'
+	if(.not.associated(mf518)) then
+            write(6,*) ' Original ENDF file contains no MF5/MT18!'
+            stop 1
+        endif
 
         write(6,*)' Files read in'
 
@@ -68,7 +103,8 @@
 	mf4 => mat1%mf4
 	do while(associated(mf4))
 		if(mf4%mt == 18) then
-			stop ' File 1 already contains a MF4/MT18!'
+			write(6,*) ' EMPEND ENDF file already contains a MF4/MT18!'
+                        stop 1
 		else if(mf4%mt > 18) then
 			exit
 		endif
@@ -97,7 +133,10 @@
 	write(6,*) ' MF5 moved - writing output file'
 
 	status = write_endf_file(file1(1:nch1)//'add',endf1)
-	if(status /= 0) stop ' Error writing output ENDF file'
+	if(status /= 0) then
+           write(6,*) ' Error writing output ENDF file'
+           stop 1
+        endif
 
 	contains
 

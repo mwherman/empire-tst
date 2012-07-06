@@ -4,23 +4,48 @@
 # par 2 = project (file) name
 
 fil=${2%.*}
+cd $1
 
-if [ ! -e ${fil}.res ]
+# check that all the required files are present
+
+outfil=${fil}.out
+
+if [ ! -e ${outfil} ]
 then
-    echo ' Resonance file not found!'
-    echo ' Please create file '${fil}.res
-    exit
+   echo ' Empire output file not found: '${1%/}/${outfil}
+   exit
 fi
 
-matnum=$(getmtn ${fil}.res)
+if [ -e ${fil}.res ]
+then
+   resfil=${fil}.res
+elif [ -e ../${fil}.res ]
+   then resfil=../${fil}.res
+else
+   echo ' Resonance file (MF2/32) not found!'
+   echo ' Please create file '${fil}.res
+   exit
+fi
+
+if [ -e ${fil}_orig.endf ]
+then
+   origfil=${fil}_orig.endf
+elif [ -e ../${fil}_orig.endf ]
+   then origfil=../${fil}_orig.endf
+else
+   echo ' Original ENDF file not found!'
+   echo ' Please create file '${fil}_orig.endf
+   exit
+fi
+
+matnum=$(getmtn ${resfil})
 matnum=${matnum:?" undefined!"}
 echo 'MAT = '$matnum
 
-cd $1
-
-echo ' Processing Empire output'
+echo ' Processing Empire output file '${1%/}/${outfil}
 echo ''
-# remove any old temp files
+
+# clean up old temp files
 
 if [ -e ${fil}.endf ]
 then
@@ -54,14 +79,8 @@ fi
 
 # convert Empire output to ENDF format & add resonances
 
-if [ ! -e ${fil}.out ]
-then
-    echo ' Empire output file not found!'
-    exit
-fi
-
 cat > input <<EOF
-${fil}.out
+${outfil}
 ${fil}_1.endf
 1
 -1.0
@@ -72,7 +91,7 @@ EOF
 
 cat > input <<EOF
 ${fil}_1.endf
-../${fil}.res
+${resfil}
 ${fil}_2.endf
 0
 EOF
@@ -85,11 +104,15 @@ rm endres.scr
 rm angdis.*
 rm input
 
-# add in nubar, fission spectra(MF5,MT18) and
-# ang dist (MF4,MT18) from file ${fil}_orig.endf
+# add in nubar, fission spectra(MF5,MT18) and ang dist
+# (MF4,MT18) from "original" file containing these MFs
 # only do this if it's a fissile material!
 
-/home/herman/empire/util/mkendf/add_endf ${fil}_2.endf ../${fil}_orig.endf
+if ! /home/herman/empire/util/mkendf/add_endf ${fil}_2.endf ${origfil}
+then
+    echo 'Error adding sections to ENDF file'
+    exit
+fi
 rm ${fil}_2.endf
 # cp ${fil}_2.endf ${fil}_2.endfadd
 
@@ -133,7 +156,14 @@ mv ${fil}_3.STN ${fil}.endf
 rm ${fil}_3.endf
 
 # finally, process this file with NJOY
-runNJOY.py ../njoy_33grp.sh ${fil}.endf
+if [ -e njoy_33grp.sh ]
+then
+    runNJOY.py njoy_33grp.sh ${fil}.endf
+elif [ -e ../njoy_33grp.sh ]
+    then runNJOY.py ../njoy_33grp.sh ${fil}.endf
+else
+    echo ' ENDF file not processed with NJOY'
+fi
 
 # To run NJOY on local machine (don't!):
 # ../njoyActinides.sh ${fil}.endf
