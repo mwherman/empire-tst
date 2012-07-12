@@ -6,7 +6,7 @@ module c4_io
 
     integer*4 :: c4_unit = 20                          ! fortran i/o unit, defaults to 20, but user may change
 
-    private write_point, write_real
+    private write_point, write_real, assign_section
 
     type c4_data_point
         sequence
@@ -42,6 +42,10 @@ module c4_io
         integer*4 nsec
         type (c4_section), pointer :: sec(:)
     end type
+
+    interface assignment (=)
+        module procedure assign_section
+    end interface
 
     contains
 
@@ -294,5 +298,36 @@ module c4_io
 
     return
     end subroutine delete_c4
+
+    !-----------------------------------------------------------------------------------------
+
+    subroutine assign_section(sc1, sc2)
+
+    ! set sc2 = sc2
+
+    implicit none
+
+    type (c4_section), intent(out) :: sc1
+    type (c4_section), intent(in)  :: sc2
+
+    sc1%pza = sc2%pza
+    sc1%tza = sc2%tza
+    sc1%mf = sc2%mf
+    sc1%mt = sc2%mt
+    sc1%ndat = sc2%ndat
+    sc1%tmeta = sc2%tmeta
+    sc1%pmeta = sc2%pmeta
+    sc1%x4stat = sc2%x4stat
+    sc1%cm = sc2%cm
+    sc1%mdf = sc2%mdf
+    sc1%fid = sc2%fid
+    sc1%ref = sc2%ref
+    sc1%ent = sc2%ent
+    sc1%sub = sc2%sub
+    allocate(sc1%pt(sc1%ndat))
+    sc1%pt = sc2%pt
+
+    return
+    end subroutine assign_section
 
 end module c4_io
