@@ -76,7 +76,7 @@ else
        mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o\
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
-  all : $(OBJF) c4_io.o
+  all : $(OBJF) c4_io.o endf.o
   endf.o : $(OBJF) endf_base.o endf_cov.o
   endf_line.o : endf_unx.o $(LINIO)
   endf_base.o : endf_line.o
