@@ -24,11 +24,18 @@ rm EXFOR14A.DAT EXFOR24A.DAT EXFOR25A.DAT
 mv NEWX4.DAT $file.x42c4_errs
 mv X4TOC4.LST $file.x42c4_lst
 mv C4.DAT $file-raw.c4
-if [ -s $file.c4 ]; then
-   echo 'EXFOR data in computational format are stored in: '$file-raw.c4
-   cp $file-raw.c4 $file.c4    
-else
+if [ ! -s $file-raw.c4 ]; then
    echo 'File with EXFOR data in computational format is EMPTY'
+   exit
+fi
+if [ -s $file.c4 ]; then
+   echo 'EXFOR data converted to computational format and stored in '$file-raw.c4
+   echo 'WARNING: Existing file ' $file.c4 ' was not overwritten!'
+   echo 'Hit ENTER to continue...'
+   read aaa
+else
+   echo 'EXFOR data converted to computational format and stored in '$file-raw.c4
+   cp $file-raw.c4 $file.c4 | echo 'File '$file-raw.c4' was copyied to '$file.c4
 fi
 exit
 
