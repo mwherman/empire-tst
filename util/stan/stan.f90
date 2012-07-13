@@ -7,12 +7,13 @@
     ! author: Sam Hoblit, NNDC, BNL
     ! routine to check format of ENDF-6 files
 
+    logical*4 qover
     integer*4 nout,nin,status
     character*200 outfile, infile
 
     type (endf_file) endf
 
-    call parse_cmd_line(outfile,nout,infile,nin)
+    call parse_cmd_line(outfile,nout,qover,infile,nin)
 
     write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
@@ -25,7 +26,7 @@
     call reset_mf1
 
     write(6,*) ' Writing '//outfile(1:nout)
-    status = write_endf_file(outfile(1:nout),endf)
+    status = write_endf_file(outfile(1:nout),endf,qover)
     if(status /= 0) then
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
@@ -68,12 +69,13 @@
 
 !-----------------------------------------------------
 
-    subroutine parse_cmd_line(outfile,nout,infile,nin)
+    subroutine parse_cmd_line(outfile,nout,qovr,infile,nin)
 
     use endf_io
 
     implicit none
 
+    logical*4, intent(out) :: qovr
     integer, intent(out) :: nout, nin
     character*(*), intent(out) :: outfile, infile
 
@@ -85,6 +87,7 @@
     nout = 0
     infile = ' '
     outfile = ' '
+    qovr = .false.
 
     i = 1
     call getarg(i,cmd)
@@ -117,7 +120,7 @@
        else if(cmd(1:len) == '-f') then
 
            write(6,10) '  Previously existing output file may be overwritten'
-           call set_overwrite(.true.)
+           qovr = .true.
 
        else if(cmd(1:len) == '-ct') then
 
