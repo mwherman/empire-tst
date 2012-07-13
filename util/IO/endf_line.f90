@@ -122,7 +122,7 @@ module endf_lines
        ix = ix + 1
     end do
 
-    write(6,*) ' ****** ERROR ******',char(7)
+    write(6,*) ' ##### ERROR #####'
     write(6,*)
     write(6,*) ' ',errline(ix:ler)
 
