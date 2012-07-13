@@ -51,11 +51,11 @@
         r1 => mf1%mt451
         if(.not.associated(r1)) cycle
         if(r1%mat /= mat%mat) then
-            write(6,'(a,i4)') '  Comment: resetting MAT in MF1 comment to ',mat%mat
+            write(6,'(a,i4)') '  Comment: resetting MF1 HSUB MAT field to ',mat%mat
             r1%mat = mat%mat
         endif
         if(r1%mfor /= r1%nfor) then
-            write(6,'(a,i4)') '  Comment: resetting ENDF format number to ',r1%nfor
+            write(6,'(a,i4)') '  Comment: resetting MF1 HSUB format # to ',r1%nfor
             r1%mfor = r1%nfor
         endif
         mat => mat%next
@@ -98,7 +98,7 @@
            call getarg(i,outfile)
            nout = len_trim(outfile)
            if((nout <= 0) .or. (outfile(1:1) == '-')) then
-               write(6,*) ' ****** ERROR ******',char(7)
+               write(6,*) ' ##### ERROR #####'
                write(6,*)
                write(6,*) ' Error parsing output filename'
                call abort_stan
@@ -160,7 +160,7 @@
 
        else if(cmd(1:1) == '-') then
 
-           write(6,*) ' ****** ERROR ******',char(7)
+           write(6,*) ' ##### ERROR #####'
            write(6,*)
            write(6,*)' Unknown option : ', cmd(1:len)
            call abort_stan
@@ -178,7 +178,7 @@
            call getarg(i,cmd)
            len = len_trim(cmd)
            if(len > 0) then
-               write(6,*) ' ****** ERROR ******',char(7)
+               write(6,*) ' ##### ERROR #####'
                write(6,*)
                write(6,*) ' Too many parameters specified on command line'
                call abort_stan
@@ -193,7 +193,7 @@
     end do
 
     if(nin == 0) then
-        write(6,*) ' ****** ERROR ******',char(7)
+        write(6,*) ' ##### ERROR #####'
         write(6,*)
         write(6,*) ' Input ENDF file not specified on command line'
         call abort_stan
@@ -201,7 +201,7 @@
 
     inquire(file=infile(1:nin),exist=qx)
     if(.not.qx) then
-        write(6,*) ' ****** ERROR ******',char(7)
+        write(6,*) ' ##### ERROR #####'
         write(6,*)
         write(6,*) ' Specified input file does not exist:',infile(1:nin)
         call abort_stan
