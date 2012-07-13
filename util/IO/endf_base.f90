@@ -94,7 +94,7 @@ module BASE_ENDF_IO
     public write_endf, put_endf, read_endf, get_endf, write_send, write_fend
     public open_endfile, get_endline, put_endline, close_endfile, del_tab1, remove_tab1
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_overwrite, find_mat
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat
 
 !------------------------------------------------------------------------------
     contains

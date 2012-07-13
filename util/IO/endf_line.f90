@@ -22,7 +22,6 @@ module endf_lines
     logical*4 :: qmat = .false.           ! if true, chill when MAT changes unexpectedly
     logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
     logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
-    integer*4 :: iov = 0                  ! if /= 0, overwrite existing files for output
 
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
@@ -38,7 +37,7 @@ module endf_lines
     public endline                        ! line supplied by endf_line_io
     integer, public :: ipos               ! current position on line
 
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_overwrite
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal
 
@@ -46,16 +45,23 @@ module endf_lines
     contains
 !------------------------------------------------------------------------------
 
-    subroutine open_endfile(efil,qwrite)
+    subroutine open_endfile(efil,qwrite,qover)
 
     implicit none
 
-    character*(*), intent(in) :: efil       ! endf file name
-    logical*4, intent(in) :: qwrite
+    character*(*), intent(in) :: efil             ! endf file name
+    logical*4, intent(in) :: qwrite               ! true for output file
+    logical*4, intent(in), optional :: qover      ! true to allow overwriting existing file
 
-    integer*4 status
-
+    integer*4 status,iov
     if(qopen) call endf_error('Attempting to open an ENDF file when another already open',-1)
+
+    iov = 0
+    if(qwrite) then
+      if(present(qover)) then
+         if(qover) iov = 1
+      endif
+    endif
 
     status = open_endf_file(efil,qwrite,iov)
     if(status .lt. 0) then
@@ -268,34 +274,31 @@ module endf_lines
             else if(endline(73:75) .eq. '  0') then
                 write(erlin,*) 'Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else
-                write(erlin,*) 'MT  changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
                 if(qmt) then
                     write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'   on line',filin
-                else
-                    call endf_error(erlin)
+                    return
                 endif
+                write(erlin,*) 'MT  changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
             endif
         endif
 
         if(endline(71:72) .ne. cmft(5:6)) then
-            write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
             if(qmf) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'     on line',filin
-            else
-                call endf_error(erlin)
+                return
             endif
+            write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
         endif
 
         if(endline(67:70) .ne. cmft(1:4)) then
-            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
             if(qmat) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
-            else
-                call endf_error(erlin)
+                return
             endif
+            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
         endif
 
-        return
+        call endf_error(erlin)
 
     case(isend)
 
@@ -303,10 +306,10 @@ module endf_lines
         ! see if next line has new MT or end of file with MF=0
 
         if(endline(67:70) .ne. cmft(1:4)) then
-            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
             if(qmat) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
             else
+                write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
                 call endf_error(erlin)
             endif
         endif
@@ -323,28 +326,26 @@ module endf_lines
                 return
             endif
             write(erlin,*) 'In MF',cmft(5:6),' found MT=',endline(73:75),' <= to previous MT=',lmft(7:9)
-            call endf_error(erlin)
         else if(endline(71:72) .eq. ' 0') then
             ! MF=0 -> changing files
             ! make sure MT is also still 0
-            if(endline(73:75) .ne. '  0') then
-                write(erlin,*) 'FEND record (MF=0) encountered with non-zero MT:',endline(73:75)
-                call endf_error(erlin)
+            if(endline(73:75) == '  0') then
+                istate = ifend
+                return
             endif
-            istate = ifend
-            return
+            write(erlin,*) 'FEND record (MF=0) encountered with non-zero MT:',endline(73:75)
         else
             if(qmf) then
                 ! if we're ignoring changing MFs, just report this and keep going with old MF
-                write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'     on line',filin
-            else
-                ! assume a new file is starting w/o ending the last with a MF=0 FEND record
-                ! report this error and quit processing
-                write(erlin,*) 'FEND (MF=0) record not found for MF=',lmft(5:6)
-                call endf_error(erlin)
+                return
             endif
+            ! assume a new file is starting w/o ending the last with a MF=0 FEND record
+            ! report this error and quit processing
+            write(erlin,*) 'FEND (MF=0) record not found for MF=',lmft(5:6)
         endif
+
+        call endf_error(erlin)
 
     case(ifend)
 
@@ -389,7 +390,7 @@ module endf_lines
 
     case default
 
-        write(erlin,*) ' *********** Internal logic error while reading file, please send bug report'
+        erlin = ' *********** Internal logic error while reading file, please send bug report'
         call endf_error(erlin)
 
     end select
@@ -739,20 +740,5 @@ module endf_lines
 
     return
     end subroutine set_ignore_badmt
-
-!------------------------------------------------------------------------------
-
-    subroutine set_overwrite(qm)
-
-    logical*4, intent(in) :: qm
-
-    if(qm) then
-       iov = 1
-    else
-       iov = 0
-    endif
-
-    return
-    end subroutine set_overwrite
 
 end module endf_lines

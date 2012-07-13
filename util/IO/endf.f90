@@ -216,6 +216,7 @@ module ENDF_IO
     integer*4, private :: inmat,nfil
     character*500, private :: endfil
     type (endf_file), pointer, private :: endf
+    logical*4 q_overwrite
 
     ! hide these routines from end user
 
@@ -465,12 +466,13 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    integer*4 function write_endf_file(filename,usend)
+    integer*4 function write_endf_file(filename,usend,qov)
 
     implicit none
 
     character*(*), intent(in), target :: filename
     type (endf_file), intent(in), target :: usend
+    logical*4, intent(in), optional :: qov
 
     integer*4, external :: endf_try
 
@@ -481,6 +483,12 @@ module ENDF_IO
     endif
     endfil = filename
     endf => usend
+
+    if(present(qov)) then
+       q_overwrite = qov
+    else
+       q_overwrite = .false.
+    endif
 
     write_endf_file = endf_try(endf_file_writer)
 
@@ -495,7 +503,7 @@ module ENDF_IO
 
     type (endf_mat), pointer :: mx
 
-    call open_endfile(endfil(1:nfil),.true.)
+    call open_endfile(endfil(1:nfil),.true.,q_overwrite)
 
     endline = endf%hdline
     call put_endline
