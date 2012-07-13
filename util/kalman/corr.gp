@@ -33,15 +33,11 @@ pause -2
 set xlabel 'Energy [MeV]'
 set ylabel 'Cross Section [barn]'
 
-ev=1.e-6
-
-b=1.e-3
-
 set logscale y
 set logscale x
 
 plot[][]\
 'expxscplot.d' u 1:2:3 not w yerr,\
-'xscplot.d'    u 1:($2*b) t 'posterior' w l,'' u 3:($4*b) t 'prior' w l
+'xscplot.d'    u 1:2 t 'posterior' w l,'' u 3:4 t 'prior' w l
 
 pause -1
