@@ -14,14 +14,19 @@ EINC=$6   # Incident energy for which to fit PFNS (in MeV)
 #CRCOV=$7
 
 if [ -z $file ]; then
-echo "INPUT FILE NOT FOUND"
+echo "INPUT FILE NOT SPECIFIED"
 exit
+fi
+if [ ! -s $file.endf ]; then
+   echo "ENDF FILE NOT FOUND ($file.endf)"
+   exit 0
 fi
 if [ -z $MT -o "$MT" = "0" ]; then
    MT="1 2 3 4 16 17 18 102 103 107"
 fi
-if [ -z $MAT ]; then
-   MAT="1111"
+if [ -z $MAT -o "$MAT" = "0" ]; then
+   # MAT="1111"
+   MAT=$($EMPIREDIR/util/mkendf/getmtn ${file}.endf)
 fi
 if [ -z $EXPDAT ]; then
    EXPDAT="0"
@@ -35,14 +40,11 @@ fi
 #if [ -z $CRCOV ]; then
 #   CRCOV="0"
 #fi
-if [ ! -s $file.endf ]; then
-   echo "ENDF FILE NOT FOUND ($file.endf)"
-   exit 0
-fi
 if [ ! -s $file-inp.sen ]; then
    echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
    exit 1
 fi
+
 if [ $PFNS = 0 ]; then
    echo "Fitting only cross sections from $file-mat.sen."
    if [ ! -s $file.xsc ]; then
@@ -68,71 +70,44 @@ else
    echo "Option PFNS = $PFNS has not been implemented yet."
    exit 6
 fi
-if [ ! -s $file-kal.c4 ]; then
-   echo "$file-kal.c4 NOT FOUND. USING $file.c4 INSTEAD."
-   if [ ! -s $file.c4 ]; then
-     echo "C4 FILE NOT FOUND ($file.c4)"
-     exit 7
-   else
-     cp $file.c4 $file-kal.c4
-   fi
-fi
 
-rm INPUT.D 2>/dev/null
-rm KALMAN.INP 2>/dev/null
-rm fort.* 2>/dev/null
-rm check.out 2>/dev/null
-rm $file-*-c4.gpd 2>/dev/null
-rm $file-{c4,par,*-err}.kal 2>/dev/null
-rm ENERGYANDINDEX.TMP 2>/dev/null
+rm -f fort.* check.out $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
+#rm check.out 2>/dev/null
+#rm $file-*-c4.gpd 2>/dev/null
+#rm $file-{c4,par,*-err}.kal 2>/dev/null
+#rm ENERGYANDINDEX.TMP 2>/dev/null
 #rm $file-33-*.cov  2>/dev/null
 
-
-# parse .c4 file for only reactions (MT #s) of interest:
-for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
-    grep "^.\{12,19\}  3 $j " $file-kal.c4 >>$file-c4.kal
-done
-
 for k in $MT; do
+
     echo "MT= ${k}"
+    echo $file ${k} $MAT $EXPDAT $PFNS $EINC > INPUT.D
+    rm -f KALMAN.INP
 
-    if [ -s INPUT.D ]; then
-       rm INPUT.D
+    if [ "$PFNS" -eq 0 ]
+    then
+      echo  "Running c4tokal"
+      if ! $EMPIREDIR/util/kalman/c4tokal < INPUT.D
+      then
+         echo " Error running c4tokal"
+         exit
+      fi
+    else
+      echo  "Running pnt2kal"
+      $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
+      if [ ! -s ENERGYANDINDEX.TMP ]; then
+        echo "ERROR: pnt2kal ended abnormally! Aborting kalman script... "
+        exit
+      fi
+      read NE INDEX EINC < ENERGYANDINDEX.TMP
+      i=1
+      while [ $i -le $NE ]
+      do
+        printf -v l "%3d\n" $i
+        grep "^.\{49,51\}$l" fort.75 >>$file-PFNS-${i}-c4.gpd
+        i=$(($i + 1))
+      done
     fi
-
-    cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT $PFNS $EINC
-EOF
-
-    if [ -s KALMAN.INP ]; then
-       rm KALMAN.INP
-    fi
-
-if [ "$PFNS" -eq 0 ]
-then
-  echo  "Running c4tokal"
-  $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
-# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
-  for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102" "103" "107"; do
-    l=`echo ${j}`
-    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
-  done
-else
-  echo  "Running pnt2kal"
-  $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
-  if [ ! -s ENERGYANDINDEX.TMP ]; then
-    echo "ERROR: pnt2kal ended abnormally! Aborting kalman script... "
-    exit
-  fi
-  read NE INDEX EINC < ENERGYANDINDEX.TMP
-  i=1
-  while [ $i -le $NE ]
-  do
-    printf -v l "%3d\n" $i
-    grep "^.\{49,51\}$l" fort.75 >>$file-PFNS-${i}-c4.gpd
-    i=$(($i + 1))
-  done
-fi
 
     echo  "Running genkal"
     $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
@@ -141,8 +116,7 @@ fi
        exit
     fi
 
-
-# EXPERIMENTAL DATA AND THEIR CORRELATIONS
+    # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
     if [ "$EXPDAT" != 0 ]; then
        if [ ! -s $file-expxsc.kal ]; then
@@ -161,7 +135,8 @@ fi
        rm fort.12
     fi
 
-# CORRELATIONS AMONG MODEL PARAMETERS
+    # CORRELATIONS AMONG MODEL PARAMETERS
+
     if [ ! -s $file-parcorr.kal ]; then
        cp fort.52 $file-parcorr.kal
     else
@@ -191,19 +166,7 @@ fi
     cat fort.16 fort.32 > fort.48
  
     echo  "Running kalend"
-    $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
-
-    if [ -s check.out ]; then
-       exit
-    fi
-
-    # generate ENDF-formatted covariance matrix
-    sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
-    awk ' BEGIN{}
-    { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
-
-    mv fort.18 $file-${k}-err.kal
-
+    $EMPIREDIR/util/kalman/kalend <INPUT.D
 
     if [ $PFNS -eq 0 ]; then
       cp $file-${k}-c4.gpd expxscplot.d
@@ -211,7 +174,8 @@ fi
       cp $file-PFNS-${INDEX}-c4.gpd expxscplot.d
     fi
 
-#PLOT DATA ONLY WITH EXPERIMENTAL DATA
+    #PLOT DATA ONLY WITH EXPERIMENTAL DATA
+
     if [ "$EXPDAT" != 0 ]; then
       if [ "$PFNS" -eq 0 ]
       then
@@ -224,8 +188,6 @@ fi
     mv corrplot.d $file-${k}-cov.gpd # Should give a different name for this file in the pfns case, but which? 
     mv xscplot.d  $file-${k}-xsc.gpd # Should give a different name for this file in the pfns case, but which? 
 
-    rm fort.17
-    rm fort.20
     rm expxscplot.d
 
 # CROSS-REACTION CORRELATIONS TAKEN FROM KALMAN
@@ -246,11 +208,10 @@ done
 
 rm INPUT.D
 rm KALMAN.INP
-rm fort.{1*,50,52,75}
+rm -f fort.{1*,50,52,75}
 rm check.out
 rm ENERGYANDINDEX.TMP 2>/dev/null
 
 exit
-
 
 # l=`echo ${#k}` IT GIVES THE LENGTH OF THE STRING K
