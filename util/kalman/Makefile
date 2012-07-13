@@ -52,31 +52,30 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-#all: kalman3 kalend2 kalend3 c4tokal genkal
 all: kalman3.exe kalend c4tokal genkal.exe pnt2kal refmt-pfns
 
 kalman3.exe : kalman3.1.f
-	$(FC) -o $@ kalman3.1.f
+	$(FC) $(FFLAGS) -o $@ kalman3.1.f
 
 OBJG =	kalend.f90 rctn.o strlen.o
 kalend :   $(OBJG)
-	$(FC) -I ../IO -o $@ $(OBJG) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO -o $@ $(OBJG) ../IO/*.o
 
 OBJH =	c4tokal.f90 rctn.o strlen.o 
 c4tokal:   $(OBJH)
-	$(FC) -I ../IO -o $@ $(OBJH) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO -o $@ $(OBJH) ../IO/*.o
 
 OBJI =	genkal.f rctn.o strlen.o 
 genkal.exe:   $(OBJI)
-	$(FC) -o $@ $(OBJI)
+	$(FC) $(FFLAGS) -o $@ $(OBJI)
 
 OBJM =	pnt2kal.o aux_routines.o 
 pnt2kal :   $(OBJM)
-	$(FC) -o $@ $(OBJM)
+	$(FC) $(FFLAGS) -o $@ $(OBJM)
 
 OBJN =	refmt-pfns.o aux_routines.o
 refmt-pfns :   $(OBJN)
-	$(FC) -o $@ $(OBJN)
+	$(FC) $(FFLAGS) -o $@ $(OBJN)
 
 clean:
 	rm -f *.o *.mod
