@@ -14,22 +14,22 @@
 
     call parse_cmd_line(outfile,nout,infile,nin)
 
-    write(6,'(a)') ' Reading '//infile(1:nin)
+    write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
     if(status /= 0) then
         write(6,*) ' Error reading '//infile(1:nin)
         write(6,*) ' No output file written'
-        stop '  STAN aborted'
+        call abort_stan
     endif
 
     call reset_mf1
 
-    write(6,'(a)') ' Writing '//outfile(1:nout)
+    write(6,*) ' Writing '//outfile(1:nout)
     status = write_endf_file(outfile(1:nout),endf)
     if(status /= 0) then
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
-        stop '  STAN aborted'
+        call abort_stan
     endif
 
     contains
@@ -51,11 +51,11 @@
         r1 => mf1%mt451
         if(.not.associated(r1)) cycle
         if(r1%mat /= mat%mat) then
-            write(6,'(a,i4)') 'Resetting MAT in MF1 comment to ',mat%mat
+            write(6,'(a,i4)') '  Comment: resetting MAT in MF1 comment to ',mat%mat
             r1%mat = mat%mat
         endif
         if(r1%mfor /= r1%nfor) then
-            write(6,'(a,i4)') 'Resetting ENDF format number to ',r1%nfor
+            write(6,'(a,i4)') '  Comment: resetting ENDF format number to ',r1%nfor
             r1%mfor = r1%nfor
         endif
         mat => mat%next
@@ -98,23 +98,30 @@
            call getarg(i,outfile)
            nout = len_trim(outfile)
            if((nout <= 0) .or. (outfile(1:1) == '-')) then
-               write(6,20) char(7),' Error parsing output filename'
-               call abort_parsing
+               write(6,*) ' ****** ERROR ******',char(7)
+               write(6,*)
+               write(6,*) ' Error parsing output filename'
+               call abort_stan
            endif
 
        else if(cmd(1:len) == '-cm') then
 
-           write(6,10) ' Ignoring MAT numbers that change while processing materials'
+           write(6,10) '  Ignoring MAT numbers that change while processing materials'
            call set_ignore_badmat(.true.)
 
        else if(cmd(1:len) == '-cf') then
 
-           write(6,10) ' Ignoring MF numbers that change while processing materials'
+           write(6,10) '  Ignoring MF numbers that change while processing materials'
            call set_ignore_badmf(.true.)
+
+       else if(cmd(1:len) == '-f') then
+
+           write(6,10) '  Previously existing output file may be overwritten'
+           call set_overwrite(.true.)
 
        else if(cmd(1:len) == '-ct') then
 
-           write(6,10) ' Ignoring MT numbers that change while processing materials'
+           write(6,10) '  Ignoring MT numbers that change while processing materials'
            call set_ignore_badmt(.true.)
 
        else if(cmd(1:len) == '-v') then
@@ -146,13 +153,17 @@
            write(6,10) '        MF and MT for each section encountered.'
            write(6,10) ' -o   : output filename. If not specified, the output filename is just'
            write(6,10) '        the input filename with extension ".STN"'
+           write(6,10) ' -f   : allows an existing file to be overwritten on output'
+           write(6,10) '        the default is for the write to fail if output file already exists'
            write(6,10)
            call endf_quit(0)
 
        else if(cmd(1:1) == '-') then
 
-           write(6,20) char(7)//' Unknown option : ', cmd(1:len)
-           call abort_parsing
+           write(6,*) ' ****** ERROR ******',char(7)
+           write(6,*)
+           write(6,*)' Unknown option : ', cmd(1:len)
+           call abort_stan
 
        else
 
@@ -167,8 +178,10 @@
            call getarg(i,cmd)
            len = len_trim(cmd)
            if(len > 0) then
-               write(6,20) char(7),' Too many parameters specified on command line'
-               call abort_parsing
+               write(6,*) ' ****** ERROR ******',char(7)
+               write(6,*)
+               write(6,*) ' Too many parameters specified on command line'
+               call abort_stan
            endif
 
        endif
@@ -180,14 +193,18 @@
     end do
 
     if(nin == 0) then
-        write(6,10) ' Input ENDF file not specified'
-        call abort_parsing
+        write(6,*) ' ****** ERROR ******',char(7)
+        write(6,*)
+        write(6,*) ' Input ENDF file not specified on command line'
+        call abort_stan
     endif
 
     inquire(file=infile(1:nin),exist=qx)
     if(.not.qx) then
-        write(6,20) char(7)//' Specified input file does not exist:',infile(1:nin)
-        call abort_parsing
+        write(6,*) ' ****** ERROR ******',char(7)
+        write(6,*)
+        write(6,*) ' Specified input file does not exist:',infile(1:nin)
+        call abort_stan
     endif
 
     if(nout == 0) then
@@ -201,26 +218,18 @@
        outfile(i:i+3) = '.STN'
        nout = i+3
     endif
-    inquire(file=outfile(1:nout),exist=qx)
-    if(qx) then
-        write(6,20) char(7)//' Output file already exists:',outfile(1:nout)
-        call abort_parsing
-    endif
 
     return
 
 10  format(a)
-20  format(a,a)
 
-    contains
+    end subroutine parse_cmd_line
 
-    subroutine abort_parsing
+    subroutine abort_stan
 
     implicit none
 
-    write(6,'(a)') ' stan aborted'
+    write(6,*) ' STAN aborted'
     call endf_quit(1)
 
-    end subroutine abort_parsing
-
-    end subroutine parse_cmd_line
+    end subroutine abort_stan
