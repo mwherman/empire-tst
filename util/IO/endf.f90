@@ -252,9 +252,8 @@ module ENDF_IO
 
     nfil = len_trim(filename)
     if(nfil > 500) then
-        write(6,*) ' Filename too long:',filename
-        read_endf_file = -1
-        return
+        erlin = 'Filename too long:'//filename(1:nfil)
+        call endf_error(erlin)
     endif
     endfil = filename
     endf => usend
@@ -295,7 +294,7 @@ module ENDF_IO
         endf%hdline(67:80) = hdlin(67:80)    ! reset these fields
         call get_endline
     else
-        write(6,*) ' No header line found in ',endfil(1:nfil)
+        write(6,*) ' WARNING: No header line found in ',endfil(1:nfil)
         write(6,*) ' Header will be set to standard header line with SVN tags'
         endf%hdline = hdlin
     endif
@@ -304,9 +303,8 @@ module ENDF_IO
 
     mat = get_mat()
     if(mat .lt. 0) then
-        write(6,*) ' No materials found in ',endfil(1:nfil)
-        call close_endfile
-        return
+        erlin = 'No materials found in '//endfil(1:nfil)
+        call endf_error(erlin)
     endif
 
     allocate(endf%mat)
@@ -327,12 +325,11 @@ module ENDF_IO
         call get_endline(status)
         if(status .ne. 0) then
             if(status .eq. -1) then
-		! hit EOF. Just tell user and close.
-		write(6,*) ' Hit EOF when expecting TEND record'
-                call close_endfile
-                return
+		! hit EOF. Tell user and close.
+                erlin = 'Hit EOF when expecting TEND record'
+                call endf_error(erlin)
             endif
-            write(erlin,*) 'Error returned from READ:',status
+            write(erlin,*) 'Error reading line from ENDF file',status
             call endf_error(erlin)
         endif
         mat = get_mat()
@@ -345,7 +342,7 @@ module ENDF_IO
             allocate(mx%next)
             mx => mx%next
         else
-            write(erlin,*) 'Undefined MAT number encountered in file:',mat
+            write(erlin,*) 'Undefined MAT number encountered in file: ',mat
             call endf_error(erlin)
         endif
     end do
@@ -442,7 +439,8 @@ module ENDF_IO
             call read_mf(mx%mf40)
         case default
             ! unknown MF
-            write(6,*) ' Undefined MF encountered:',mf
+            write(erlin,*) 'Undefined MF number encountered in file: ',mf
+            call endf_error(erlin)
         end select
 
         call get_endline
@@ -478,9 +476,8 @@ module ENDF_IO
 
     nfil = len_trim(filename)
     if(nfil > 500) then
-        write(6,*) ' Filename too long:',filename
-        write_endf_file = -1
-        return
+        erlin = 'Filename too long:'//filename(1:nfil)
+        call endf_error(erlin)
     endif
     endfil = filename
     endf => usend
@@ -938,7 +935,10 @@ module ENDF_IO
         r40 => r40%next
     end do
 
-    if(i .ne. mtc) write(6,*) ' ERROR COUNTING DIRECTORIES'
+    if(i .ne. mtc) then
+       erlin = 'Inconsistency encountered when creating MF1 directory'
+       call endf_error(erlin)
+    endif
 
     ! set line count & add to first section, MF1/451
 

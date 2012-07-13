@@ -22,6 +22,7 @@ module endf_lines
     logical*4 :: qmat = .false.           ! if true, chill when MAT changes unexpectedly
     logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
     logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
+    integer*4 :: iov = 0                  ! if /= 0, overwrite existing files for output
 
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
@@ -37,7 +38,7 @@ module endf_lines
     public endline                        ! line supplied by endf_line_io
     integer, public :: ipos               ! current position on line
 
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_overwrite
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal
 
@@ -56,9 +57,17 @@ module endf_lines
 
     if(qopen) call endf_error('Attempting to open an ENDF file when another already open',-1)
 
-    status = open_endf_file(efil,qwrite)
+    status = open_endf_file(efil,qwrite,iov)
     if(status .lt. 0) then
-        write(erlin,*) 'Error opening ',efil,'  Error status =',status
+        if(status == file_not_80) then
+            erlin = efil//' contains record(s) that are NOT 80 characters!'
+        else if(status == file_bad_read) then
+            erlin = 'Read from ENDF file incomplete'
+        else if(status == file_bad_write) then
+            erlin = 'Write to ENDF file incomplete'
+        else
+            write(erlin,*) 'Error opening ',efil,'  Error status =',status
+        endif
         call endf_error(erlin)
     endif
 
@@ -83,7 +92,7 @@ module endf_lines
 
     status = close_endf_file()
     if(status .lt. 0) then
-        write(6,*) '  Close returned error code :',status
+        write(6,*) ' WARNING: Close returned error code :',status
     endif
     qopen = .false.
 
@@ -104,11 +113,18 @@ module endf_lines
     character*(*), intent(in) :: errline
     integer*4, intent(in), optional :: errstat
 
-    integer*4 ios,mft,i,j,k
+    integer*4 ios,mft,i,j,k,ler,ix
+
+    ler = len_trim(errline)
+
+    ix = 1
+    do while((errline(ix:ix) == ' ') .and. (ix < ler))
+       ix = ix + 1
+    end do
 
     write(6,*) ' ****** ERROR ******',char(7)
     write(6,*)
-    write(6,*) '    ',errline(1:len_trim(errline))
+    write(6,*) ' ',errline(ix:ler)
 
     ! check to see if we were reading/writing a file
 
@@ -133,12 +149,12 @@ module endf_lines
     if(mft .eq. 0) mft = -1
 
     if(qwrt) then
-        write(6,*) '    Last line written line number:',filin
-        write(6,'(4x,a80)') endline
+        write(6,*) ' Last line written line number:',filin
+        write(6,'(1x,a80)') endline
         call close_endfile
     else
-        write(6,*) '    Last line read line number:',filin
-        write(6,'(4x,a80)') endline
+        write(6,*) ' Last line read line number:',filin
+        write(6,'(1x,a80)') endline
         call close_endfile
     endif
 
@@ -723,5 +739,20 @@ module endf_lines
 
     return
     end subroutine set_ignore_badmt
+
+!------------------------------------------------------------------------------
+
+    subroutine set_overwrite(qm)
+
+    logical*4, intent(in) :: qm
+
+    if(qm) then
+       iov = 1
+    else
+       iov = 0
+    endif
+
+    return
+    end subroutine set_overwrite
 
 end module endf_lines

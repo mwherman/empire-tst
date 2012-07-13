@@ -19,9 +19,9 @@
 static struct stat file_stat;
 static jmp_buf savctx;
 
-int open_endf_blkfile_(char *file, int *flg, int len)
+int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 {
-   int fhn;
+   int fhn, flags;
    char lfil[len+1];
    char *s, *t;
 
@@ -35,10 +35,15 @@ int open_endf_blkfile_(char *file, int *flg, int len)
 
    /*now open the file. if flg=0, open new file for output.
     Otherwise open existing file for read. When creating
-    an output file also set privs for new file. */
+    an output file also set privs for new file. Allow the
+    overwriting of existing file if excl/=0. */
 
    if(*flg) {
-      fhn = open(lfil, O_WRONLY|O_CREAT|O_EXCL);
+      if(*excl)
+         flags = O_WRONLY|O_CREAT;
+      else
+         flags = O_WRONLY|O_CREAT|O_EXCL;
+      fhn = open(lfil, flags);
       if(fhn>0) fchmod(fhn, 436);
       }
    else

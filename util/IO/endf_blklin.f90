@@ -15,6 +15,12 @@ module endf_line_io
     integer*4, parameter :: nrc = 4096*4    ! number of endf_records in a block
     integer*4, parameter :: nrb = nrc*81    ! number of byte in a block
 
+    integer*4, parameter :: file_not_80    = -1000000   ! status code for file with record length .ne. 80
+    integer*4, parameter :: file_bad_read  = -2000000   ! status for bad number of read bytes
+    integer*4, parameter :: file_bad_write = -3000000   ! status for bad number of read bytes
+    integer*4 :: file_bytes_requested    ! for error reporting. Number of bytes requeseted for read/write
+    integer*4 :: file_bytes_receieved    ! for error reporting. Number of bytes recieved for read/write
+
     integer*4 :: handl                      ! file handle
     integer*4 :: numrec                     ! # 81-byte records in input file
     integer*4 :: curek                      ! "current" record in buffer
@@ -40,24 +46,26 @@ module endf_line_io
     character*80, public, pointer :: endline                ! current line
     public filin                                            ! line #
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file
+    public file_not_80, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
 
 !------------------------------------------------------------------------------
     contains
 !------------------------------------------------------------------------------
 
-    integer*4 function open_endf_file(endfile,qwrt)
+    integer*4 function open_endf_file(endfile,qwrt,iover)
 
     implicit none
 
     character*(*), intent(in) :: endfile    ! endf file name
-    logical*4, intent(in) :: qwrt
+    logical*4, intent(in) :: qwrt           ! set true when creating new file
+    integer*4, intent(in) :: iover          ! set /= 0 to overwrite existing file
 
     integer*4 i,status,fbyts
 
     if(qwrt) then
-        handl = open_endf_blkfile(endfile,1)
+        handl = open_endf_blkfile(endfile,1,iover)
     else
-        handl = open_endf_blkfile(endfile,0)
+        handl = open_endf_blkfile(endfile,0,0)
     end if
 
     if(handl .lt. 0) then
@@ -85,9 +93,8 @@ module endf_line_io
         fbyts = endf_file_size(handl)
         numrec = fbyts/81
         if(81*numrec .ne. fbyts) then
-            write(6,*) endfile,' contains a non-integral number of 80-char records'
             status = close_endf_blkfile(handl)
-            open_endf_file = -1
+            open_endf_file = file_not_80
             return
         endif
 
@@ -116,10 +123,10 @@ module endf_line_io
             get_endf_line = numbyt
             return
         else if(numbyt .ne. num*81) then
-            write(6,*) ' Bytes requested = ',num*81
-            write(6,*) ' Bytes read      = ',numbyt
             status = close_endf_file()
-            get_endf_line = -1
+            file_bytes_requested = num*81
+            file_bytes_receieved = numbyt
+            get_endf_line = file_bad_read
             return
         endif
     endif
@@ -163,10 +170,10 @@ module endf_line_io
         put_endf_line = numbyt
         return
     else if(numbyt .ne. nrb) then
-        write(6,*) ' Bytes requested = ',nrb
-        write(6,*) ' Bytes written   = ',numbyt
-        status = close_endf_file()
-        put_endf_line = -1
+        status = close_endf_blkfile(handl)
+        file_bytes_requested = nrb
+        file_bytes_receieved = numbyt
+        put_endf_line = file_bad_write
         return
     endif
 
@@ -201,9 +208,9 @@ module endf_line_io
                 return
             else if(numbyt .ne. curek*81) then
                 status = close_endf_blkfile(handl)
-                write(6,*) ' Bytes requested = ',curek*81
-                write(6,*) ' Bytes written   = ',numbyt
-                close_endf_file = -1
+                file_bytes_requested = curek*81
+                file_bytes_receieved = numbyt
+                close_endf_file = file_bad_write
                 return
             endif
         endif

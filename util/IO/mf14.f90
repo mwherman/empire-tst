@@ -86,7 +86,7 @@ module ENDF_MF14_IO
             ! nl = # of anisotropic photons. Make sure it makes sense
 
             if(nl .eq. 0) then
-                write(6,*) ' Warning: No ang dist data specified with LTT=0 in MF14'
+                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
                 write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
                 call endf_error(erlin)
@@ -188,7 +188,7 @@ module ENDF_MF14_IO
             ! nl = # of anisotropic photons. Make sure it makes sense
 
             if(nl .eq. 0) then
-                write(6,*) ' Warning: No ang dist data specified with LTT=0 in MF14'
+                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
                 write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
                 call endf_error(erlin)
@@ -309,7 +309,7 @@ module ENDF_MF14_IO
             nl = r14%nk - r14%ni
             ! nl = # of anisotropic photons. Make sure it makes sense
             if(nl .eq. 0) then
-                write(6,*) ' Warning: No ang dist data specified with LTT=0 in MF14'
+                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
             else if(nl .lt. 0) then
                 write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
                 call endf_error(erlin)

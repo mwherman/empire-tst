@@ -830,7 +830,7 @@ module ENDF_MF32_IO
     do l = 1,ur%nls
         pm => ur%lpm(l)
         call read_endf(pm%awri, xx, pm%l, n, m, pm%njs)
-        if(m .ne. 6*pm%njs) write(6,*) ' Warning: Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
+        if(m .ne. 6*pm%njs) write(6,*) ' WARNING: Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
         snj = snj + pm%njs
         allocate(pm%jpm(pm%njs),stat=n)
         if(n .ne. 0) call endf_badal
@@ -843,7 +843,7 @@ module ENDF_MF32_IO
         call endf_error(erlin)
     endif
 
-    if(m .ne. ur%npar*(ur%npar+1)/2) write(6,*) ' Warning: Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
+    if(m .ne. ur%npar*(ur%npar+1)/2) write(6,*) ' WARNING: Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
     allocate(ur%rv(ur%npar,ur%npar),stat=n)
     if(n .ne. 0) call endf_badal
     call read_endf(ur%rv,ur%npar)
