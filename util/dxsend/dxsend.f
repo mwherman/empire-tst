@@ -13,6 +13,7 @@ C-V        but this aliasing will be removed in future.
 C-V  09/12 PLNLEG Legendre summation done in double precision
 C-V  11/11 Add charged particle x.s. at fixed angle for like particles
 C-V  12/06 Aliasing of MT=5 with MT=9000 has been suppressed.
+C-V  12/07 Fix bug printing the first angular distribution curve.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -809,6 +810,7 @@ C*
      D  'Unknown error ?                         '/
 C*
       LOOP=0
+      IL  =1
       LX  =1
       NE1 =0
       NEN =0
@@ -927,7 +929,7 @@ C...
 C*        -- Case: Search for a range of levels
           IF(EE*(1+EPS).GE.PAR .AND. EE.LE.ELV*(1+EPS)) THEN
 C...
-C...        print *,'adding to list',MF,MT,ee,elv,par
+c...        print *,'adding to list',MF,MT,ee,elv,par
 C...
             MT1=MT
             LOOP=LOOP+1
@@ -1027,6 +1029,9 @@ C* Select contributiong reactions
      &     (MT.GT. 600 .AND. MT.LE.649) .OR.
      &     (MT.GT. 800 .AND. MT.LE.849)) THEN
           LOOP=LOOP+1
+c...
+c...      print *,'Adding',MT,' loop',loop,' at 1'
+c...
           LST(LOOP)=MT
           IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
           IF(MT.GE.600 .AND. MT.LE.649) I600=1
@@ -1047,6 +1052,9 @@ C* Check for double counting of reactions
         DO I=1,LOOP
           IF(LST(I).EQ.MT) GO TO 46
         END DO
+c...
+c...      print *,'Adding',MT,' loop',loop,' at 2'
+c...
         LOOP=LOOP+1
         LST(LOOP)=MT
         GO TO 46
@@ -1077,6 +1085,9 @@ c...
       IF(IPROC.LT.0) GO TO 50
 C* Add reaction as contributor to MT0
       LOOP=LOOP+1
+c...
+c...      print *,'Adding',MT,' loop',loop,' at 3'
+c...
       IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
       LST(LOOP)=MT
       GO TO 48
@@ -1269,6 +1280,9 @@ c...    print *,i,enr(i),dxs(i),uxs(i)
 c...
       END DO
 C* Select next reaction
+c...
+c...  print *,'muln,loop,il',muln,loop,il
+c...
       IF(MULN.GT. 0) GO TO 60
    74 IF(IL.LT.LOOP) THEN
         IL=IL+1
@@ -1280,9 +1294,9 @@ C* All processing completed
    90 CONTINUE
       IF(ML.GT.0 .AND. LOOP.GT.0) WRITE(LTT,904) ML,LOOP
 c...
-C...      print *,'MT0,nen',mt0,nen
-C...      print *,enr(1),dxs(1)
-C...      print *,enr(nen),dxs(nen)
+c...      print *,'MT0,nen',mt0,nen
+c...      print *,enr(1),dxs(1)
+c...      print *,enr(nen),dxs(nen)
 c...
       RETURN
 C*
@@ -2275,7 +2289,7 @@ C* Calculate  integral SS over distribution DXS at cosines ENR
       INA=INR(1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INA)
 c...
-c...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
+C...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
 c...
 C*
 C* Process energy distributions for two-body reactions (AWP>0)
@@ -2324,7 +2338,7 @@ C*        Outgoing particle energy: equation (E.10)
           DXS(I)=DXS(I)*DCM
           RWO(LXE-1+I)=EO
 C...
-C...    print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,dxs(i)
+c...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,dxs(i)
 C...
         END DO
       END IF
@@ -3125,7 +3139,7 @@ c...
         DXS(I)=SS*DXS(I)
       END DO
 c...
-c...      print *,'nen',nen
+c...      print *,'nen',nen,' points, first and last'
 c...      print *,enr(1),dxs(1)
 c...      print *,enr(nen),dxs(nen)
 c...
