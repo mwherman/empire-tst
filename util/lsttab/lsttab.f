@@ -115,7 +115,7 @@ C* Define the PLOTC4 list file
       IF(FLNM.NE.BLNK) FLLS=FLNM
       OPEN (UNIT=LLS,FILE=FLLS,STATUS='OLD',ERR=12)
 C* Read the PLOTC4 list file
-      CALL RDC4LS(LLS,NID,RFX)
+      CALL RDC4LS(LLS,NID,MXID,RFX)
       CLOSE(UNIT=LLS)
 C* Define the EXFOR file in computational format
    22 WRITE(LTT,91) ' Default C4 file of EXFOR data        : ',FLC4
@@ -197,7 +197,7 @@ C* Select the PLOTC4 list entry index
    50 WRITE(LTT,91) '$Enter entry index number             : '
       READ (LKB,97,ERR=50,END=90) IDX
       IF(IDX.LE.0) GO TO 90
-      IF(IDX.GT.NID) THEN
+      IF(IDX.GT.MXID) THEN
         WRITE(LTT,91) '           ERROR - Invalid entry - redo '
         GO TO 50
       END IF
@@ -534,20 +534,23 @@ C
       END DO
       RETURN
       END
-      SUBROUTINE RDC4LS(LLS,NID,RFX)
+      SUBROUTINE RDC4LS(LLS,NID,MXID,RFX)
 C-Title  : Subroutine RDC4LS
 C-Purpose: Read the PLOTC4 list file
       CHARACTER*84 C84,RFX(1)
       CHARACTER*1  CM
 C*
       NID=0
+      MXID=0
       READ (LLS,96,END=20) C84
 C* Test for partial list file beginning with " MATERIAL "
       IF(C84(1:10).EQ.' MATERIAL ') GO TO 15
       IF(C84(1:10).NE.' PLOT ENDF') THEN
 C* Test for partial list file beginning with the items list directly
 C* (dummy read)
-        READ (C84,92,ERR=14) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU
+        READ (C84,92,ERR=14) IZ,IA,CM,IZP,MF,MT
+     &                      ,JEP,JXP,JFX,EIN,DEG,EOU,JDX
+        MXID=MAX(MXID,JDX)
         GO TO 17
       END IF
 C* Search for the " MATERIAL " string
@@ -558,6 +561,10 @@ C* Search for the " MATERIAL " string
 C* Read the items into RFX array
    16 READ (LLS,96,END=20) C84
    17 IF(C84(1:10).EQ.' =========') GO TO 20
+C* Check the maximum index number
+        READ (C84,92,ERR=20) IZ,IA,CM,IZP,MF,MT
+     &                      ,JEP,JXP,JFX,EIN,DEG,EOU,JDX
+        MXID=MAX(MXID,JDX)
 C* Move any "metastable" nuclide flag for easier reading
       IF(C84(9:9).EQ.'M') THEN
         C84( 9: 9)=' '
