@@ -39,6 +39,7 @@ C-V  12/06 - Fix explicit level assignment when given as range (Elo=Ehi)
 C-V        - If ratio to standard, make sure it is the denominator.
 C-V        - Improve trapping of undefined cross sections.
 C-V        - Convert discrete gamma production to levels (GLTOEL)
+C-V  12/07 - Increase MXPR from 500 to 2000 in GLTOEL (Case U-238).
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -1299,7 +1300,7 @@ C-
       CHARACTER*132 REC
       DOUBLE PRECISION ELV
 C*
-      PARAMETER (MXLV=400,MXPR=500)
+      PARAMETER (MXLV=400,MXPR=2000)
       DIMENSION ELV(MXLV),DLV(MXLV),ETH(MXLV)
       DIMENSION EN(MXPR),DE(MXPR),CS(MXPR),DC(MXPR),EL(MXPR)
 C*
