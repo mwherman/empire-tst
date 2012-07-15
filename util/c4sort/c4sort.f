@@ -40,6 +40,7 @@ C-V        - If ratio to standard, make sure it is the denominator.
 C-V        - Improve trapping of undefined cross sections.
 C-V        - Convert discrete gamma production to levels (GLTOEL)
 C-V  12/07 - Increase MXPR from 500 to 2000 in GLTOEL (Case U-238).
+C-V        - Update RDTAB1 routine for consistency with DXSEND.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -1942,9 +1943,12 @@ C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-C-D        9  Available field length NMX is exceeded.
+C-D       -8  WARNING - Numerical underflow (<E-36)
+C-D        8  WARNING - Numerical overflow  (>E+36)
+C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
-      DIMENSION    NBT(1),INR(1)
+      DOUBLE PRECISION EE(3),XX(3)
+      DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
       IER=0
@@ -1955,7 +1959,25 @@ C*
         JP=NMX
         IER=9
       END IF
-      READ (LEF,904,END=100,ERR=200) (EN(J),XS(J),J=1,JP)
+      JR=(JP+2)/3
+      J=0
+      DO K=1,JR
+        READ(LEF,904,END=100,ERR=200) (EE(M),XX(M),M=1,3)
+        DO M=1,3
+          J=J+1
+          IF(J.LE.JP) THEN
+            IF(ABS(XX(M)).LT.1E-36) THEN
+              XX(M)=0
+C...          IER=-8
+            ELSE IF(ABS(XX(M)).GT.1.E36) THEN
+              XX(M)=1E36
+              IER=8
+            END IF
+            EN(J)=EE(M)
+            XS(J)=XX(M)
+          END IF
+        END DO
+      END DO
       RETURN
   100 IER=1
       RETURN
