@@ -20,6 +20,7 @@ C-V  2009/02 Fix small bug in sequencing the forced entries.
 C-V  2011/11 Fix ZA of projectile for added reactions.
 C-V  2012/03 - Guard cosines>1 in C4 - interpret as degrees
 C-V          - Add mu-bar to the list of reactions (MF3/MT251),
+C-V  2012/07 Improve the checking against illegal cosines.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -288,7 +289,7 @@ C* Mark partial inelastic MF 3 where level energy changes
 C* Mark ang.distr. MF 4 where level energy changes and save angle
       IF(MF1 .EQ. 4) THEN
         IF(ELV1.NE.ELV0 .OR. ELZ1.NE.ELZ0) GO TO 40
-        IF(PRA1.GT.1) THEN
+        IF(ABS(PRA1).GT.1) THEN
           ANJ=PRA1
           WRITE(LTT,905) ' PLTLST WARNING - Angular cosine        ',ANJ
           WRITE(LTT,905) '                  assumed to be degrees '
