@@ -54,20 +54,18 @@ rm ENDFB.IN
 rm MU_BAR.INP
 mv ENDFB.OUT $work/$file-mub.endf
 
-# Running LEGEND is no longer needed with current version of DXSEND
-cp $work/$file-mub.endf $work/$file-l.endf
+# Running LEGEND to convert angular distributions into tabular form
+#cp $work/$file-mub.endf $work/$file-l.endf
 
-# # RUN LEGEND
-# 
-# rm $file-l.endf 2>/dev/null
-# ln -sf $work/$file-sig.endf ENDF.IN
-# ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
-# 
-# $EMPIREDIR/util/legend/legend < LEGEND.INP
-# rm ENDF.IN
-# rm LEGEND.INP LEGEND.TMP
-# mv LEGEND.OUT $work/$file-l.endf
-# mv LEGEND.LST $work/$file-log.legend
+rm $file-l.endf 2>/dev/null
+ln -sf $work/$file-sig.endf ENDF.IN
+ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
+
+$EMPIREDIR/util/legend/legend < LEGEND.INP
+rm ENDF.IN
+rm LEGEND.INP LEGEND.TMP
+mv LEGEND.OUT $work/$file-l.endf
+mv LEGEND.LST $work/$file-log.legend
 
 # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
 
