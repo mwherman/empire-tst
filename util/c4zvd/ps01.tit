@@ -27,7 +27,8 @@ LG_PS_BOXTITLE: 0 20 Helvetica
 !NODIALOG: 2
 
 TIT:    
-TIT2: 
+TIT2:
+mode: varsym
 !TIT3XY: 100 200
 !X-SCALE: log
 !X-RANGE: 10 20
