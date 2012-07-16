@@ -28,8 +28,9 @@ $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
 rm LSTTAB.INP 2>/dev/null
 
 # stay in local dir, don't cd to util/c4zvd:
+ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit        
 #make actual plot 
-# Commented to avoiud getting message if zvview windows is closed by pressing X (RCN, Aug 2010)
+# Commented to avoid getting message if zvview windows is closed by pressing X (RCN, Aug 2010)
 #$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
 #    || { echo; echo 'zvview plotting failed!'; read; }
 $EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
