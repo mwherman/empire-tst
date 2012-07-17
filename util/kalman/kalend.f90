@@ -232,7 +232,7 @@ program kalend
        stop 1
     endif
 
-    if(mt1 < 200) then
+    if(mt1 < 200 .and. npfns == 0) then
         xf = 1.0D-3
     else
        xf = 1.0
