@@ -1,6 +1,6 @@
-#$Rev: 2908 $
-#$Author: shoblit $
-#$Date: 2012-07-05 22:32:46 +0200 (Do, 05 Jul 2012) $
+#$Rev: 2940 $
+#$Author: rcapote $
+#$Date: 2012-07-17 03:09:02 +0200 (Di, 17 Jul 2012) $
 
 # set default fortran compiler:
 
@@ -60,7 +60,8 @@ else ifeq ($(FC),ifort)
   # LIBS = -openmp-lib compat
   #----flags for automatic parallelization & inter-procedural optimization
   FFLAGS = -O3 -x=host -ipo -parallel -par-report1
-  EFLAGS = -O2 -x=host
+  EFLAGS = -O2 -x=host -ipo -parallel -par-report1
+  #EFLAGS = -O2 -x=host 
   #----flags with no parallelization
   #FFLAGS = -O3 -x=host -ipo -logo
   #FFLAGS = -O3 -x=host -logo
@@ -135,7 +136,7 @@ empire: $(OBJF) subecis06m.o
 	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
 
 optmand: optmand.o
-	$(FC)  $(FFLAGS) $(LIBS) -o $@ optmand.o
+	$(FC) $(EFLAGS) $(LIBS) -o $@ optmand.o
 
 # When making a debug image, don't compile ECIS /debug
 dbg:  
