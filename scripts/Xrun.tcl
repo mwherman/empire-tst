@@ -1,6 +1,6 @@
-# $Rev: 2750 $
-# $Author: mherman $
-# $Date: 2012-03-27 00:09:36 +0200 (Di, 27 Mär 2012) $
+# $Rev: 2941 $
+# $Author: rcapote $
+# $Date: 2012-07-17 03:09:37 +0200 (Di, 17 Jul 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5719,7 +5719,7 @@ set maxwelltemp 1.382E+6
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list Makefile dimension.h main.f input.f fusion.f tl.f empire_ctl.f ccfus.f readMSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f fitbarrier.f plot-zvv.f ddhms.f  pcross.f HF-comp.f  HRTW-comp.f bar_mom.f gamma-strgth.f  gamma-strength-analytic.f lev-dens.f read_nubar.f90 ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.f systematics.f pfns.f dtrans.f optmand.f kailas07emp.f global.h io.h ddhms.cmb]
+set modules [list Makefile dimension.h main.f input.f fusion.f tl.f empire_ctl.f ccfus.f MSD-orion.f MSD-tristan.f MSC-NVWY.f subecis06m.f fis_io.f fitbarrier.f plot-zvv.f ddhms.f pcross.f HF-comp.f HRTW-comp.f bar_mom.f gamma-strgth.f gamma-strength-analytic.f lev-dens.f nubar_reader.f90 ph-lev-dens.f  print.f  auxiliary.f  thora.f pipe.f systematics.f pfns.f dtrans.f optmand.f mubar.f90 open_files.f kailas07emp.f global.h ddhms.cmb]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
