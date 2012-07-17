@@ -56,8 +56,10 @@ C     into the format needed by kalman. This is neede for running kalman for PFN
       INTEGER*4 nexp,MT1,MAT,NEX,NPFNS, nparam, ierr,MS,NEinc,i,
      &index_Einc
       LOGICAL fexists
+      REAL*8 EMPIRE_Emin
       PARAMETER(MAXEXP=500)     ! Maximum number of experiments in pnt file
       PARAMETER(MAXEINC=500)    ! Maximum number of incident energies in input file
+      PARAMETER(EMPIRE_Emin=5.0001D-7)
       REAL*8 Einc(MAXEINC) ! Incident energies in pnt file
       REAL*8 E_fit   ! Incident energy which is to be fitted
 
@@ -82,13 +84,19 @@ c     Checking if pntfile is already present, making it unnecessary to run lstta
      &'Running lsttab to generate it.'
         CALL run_lsttab(proj)
       else
-        write(*,*) 'Using existing ',trim(pntfile),' file'
+        write(*,*)
+        write(*,*) 'Using existing ',trim(pntfile),' file instead of ',
+     &'generating it from ',trim(proj)//'.c4.'
+        write(*,*) 'WARNING: If changes have been ',
+     &'made to ',trim(proj),'.c4 since previous run,',
+     &'         then existing ',trim(pntfile),
+     &' should be deleted!'
       endif
 
 c
 c     Reading pnt file
 c
-      CALL READPNT(pntfile,EXPDATA,NEXP,MAXEXP)
+      CALL READPNT(pntfile,EXPDATA,NEXP,MAXEXP,EMPIRE_Emin)
 
 c
 c     Storing the experimental incident energies (in MeV) in Einc, without repeating values
@@ -105,7 +113,7 @@ c     unnecessary to run subroutine central_spectra
 c     Reading 'proj-pfns.out' and writing 'proj-pfns.kal'
 c     if(.NOT.fexists) CALL central_spectra(proj,EXPDATA,MAXEXP,NEXP)
       CALL trim_energies(pfnsfmt,pfnskal,pntfile,Einc,NEinc,MAXEINC,
-     &NEemit,0)
+     &NEemit,0,EMPIRE_Emin)
 
 
 c     Counting the number of parameters in sensitivity input file
@@ -121,7 +129,7 @@ c     Counting the number of parameters in sensitivity input file
 
 c     Reading 'proj-pfns-full-mat.sen' and writing 'proj-pfns-mat.sen'
       CALL trim_energies(fullmatsen,matsen,pntfile,Einc,NEinc,MAXEINC,
-     &NEemit,Nparam)
+     &NEemit,Nparam,EMPIRE_Emin)
 
 
       IF (NEX .NE. 0) THEN
@@ -158,7 +166,7 @@ C     Finding the index in Einc corresponding to the energy which is to be fitte
 
 
 
-      SUBROUTINE READPNT(pntfile,EXPDATA,NEXP,MAXEXP)
+      SUBROUTINE READPNT(pntfile,EXPDATA,NEXP,MAXEXP,EMPIRE_Emin)
 
       use dataio
 
@@ -166,7 +174,7 @@ C     Finding the index in Einc corresponding to the energy which is to be fitte
 
       CHARACTER*60 pntfile
       INTEGER*4 ierr, iexp, MAXEXP, idat, nexp
-      REAL*8 up, down
+      REAL*8 up, down, EMPIRE_Emin
       LOGICAL fexists
       
       TYPE (DATASET) EXPDATA(MAXEXP)
@@ -192,7 +200,7 @@ c       Reading header
 10      format(A25,15X,I3,4X,I3,1X,I3,1X,I4,3X,G7.2,31X,A5,I3)
 
 c       Data-points loop
-c       Units are eV and barns for cross sections and eV and unitless for spectra
+c       Units are eV and unitless for spectra
         ierr=0
         idat=0
         do while(ierr==0)
@@ -221,13 +229,16 @@ c       Making it an error to have exp. sets with 0 points
           write(*,*) 'ERROR: No data points for ', EXPDATA(iexp)%REF
           stop
         endif
-c       Disregarding experiments with incident energies between thermal and Empire's minimum energy
-        IF(EXPDATA(iexp)%Einc.GT.2.53D-2.AND.
-     &EXPDATA(iexp)%Einc.LT.5.0D-1) THEN
-          write(*,120) trim(EXPDATA(iexp)%REF),EXPDATA(iexp)%Einc
-120       format(/,'WARNING: Skipped dataset ',A,' because its',
-     &' incident energy, ',1PD11.5,'eV,',/,8X,' is greater than',
-     &' thermal but lower than Empire''s minimum. ',/)
+c       Setting incident energies below EMPIRE's minimum limit as corresponding to thermal (2.53D-2 eV) energy
+        IF(EXPDATA(iexp)%Einc*1.D-6.LE.EMPIRE_Emin.AND.
+     &DABS(EXPDATA(iexp)%Einc-2.53D-2).GT.1.D-8) THEN
+          write(*,120) trim(EXPDATA(iexp)%REF),EXPDATA(iexp)%Einc*1.D-6,
+     &EMPIRE_Emin
+120       format(/,' WARNING: Incident energy from dataset ',A,
+     &' has been set to ',/,10X,'thermal (2.53D-8 MeV) because its ',
+     &'original value, ',1PD11.5,' MeV, is lower than ',/,10X,
+     &'Empire''s minimum acceptable energy, ',1PD11.5,' MeV.')
+          EXPDATA(iexp)%Einc=2.53D-2
           GOTO 5
         ENDIF
       enddo
@@ -445,7 +456,7 @@ c       Checking if current Einc is different from previous
 
 
       SUBROUTINE trim_energies(file_in,file_out,pntfile,Einc,NEinc,
-     & MAXEINC,NEemit,Nparam)
+     & MAXEINC,NEemit,Nparam,EMPIRE_Emin)
 c
 c     Subroutine that reads the formatted central values of the prompt fission neutron spectra from file 'proj-pfns.fmt',
 c     and writes out in file 'proj-pfns.kal' only the NEinc pfns that have incident energies matching existing experiments 
@@ -463,7 +474,7 @@ c     the 'proj-pfns.fmt' file.
       INTEGER*4 n_match    ! Number of match energies
       REAL*8 Elab(MAXEINC) ! Incident enery read and kept from -pfns.out
       REAL*8 Einc(NEinc) ! Incident energies from pnt file
-      REAL*8 temp(0:MAXEINC)
+      REAL*8 temp(0:MAXEINC), EMPIRE_Emin
       LOGICAL fexists
 c
 c     Opening file to be read (-pfns.fmt or -pfns-full-mat.sen)
@@ -509,7 +520,8 @@ c
 
 c     If a match is not found for all experimental energies in Einc print error and stop
       if(n_match.NE.Neinc) call error_mismatch(file_in,pntfile,Einc,
-     &                        NEinc,Elab,n_match,match_index,MAXEINC)
+     &                          NEinc,Elab,n_match,match_index,MAXEINC,
+     &                          EMPIRE_Emin)
 
 c     Opening file_out
       OPEN(410,FILE=file_out)
@@ -571,14 +583,16 @@ c       Reading and writing extra blank lines between parameter-blocks when deal
 
 
       SUBROUTINE error_mismatch(filename,pnt,Epnt,NEpnt,Epfns,
-     & NEpfns,ind,MAXEINC)
+     & NEpfns,ind,MAXEINC,EMPIRE_Emin)
 
       IMPLICIT NONE
 
       CHARACTER*100 filename,pnt
-      REAL*8 Epnt(MAXEINC),Epfns(MAXEINC)
+      REAL*8 Epnt(MAXEINC),Epfns(MAXEINC), EMPIRE_Emin
       INTEGER*4 NEpnt,i,ind(MAXEINC),MAXEINC,NEpfns
 
+      write(*,*)
+      write(*,*)
       write(*,*) ' ERROR!!'
       write(*,*) ' ERROR!!  Incident-energy values missing from file ',
      &trim(filename)
@@ -592,15 +606,24 @@ c       Reading and writing extra blank lines between parameter-blocks when deal
       write(*,*)
       write(*,*) 'Matching energies in file ',trim(filename),':'
       write(*,*)
-      write(*,20) (i,Epfns(ind(i)),i=1,NEpfns)
-20    format('E(',i2,') = ',1PD13.5) 
+      if(NEpfns==0) then
+        write(*,*) '   No matches found in file ',trim(filename),'!!!'
+      else
+        write(*,20) (i,Epfns(ind(i)),i=1,NEpfns)
+20      format('E(',i2,') = ',1PD13.5) 
+      endif
       write(*,*)
       write(*,*) 'Please make sure that ',trim(filename),' file',
      &' contains all incident energies from '
       write(*,*) 'file ',trim(pnt),
      &' by including them explicitly in Empire input file, or, ',
-     &'alternatively, by removing them from '
-      write(*,*) 'the ',trim(pnt),' file.'
+     &'alternatively, by removing them from the ',trim(pnt),' file.'
+      write(*,30) EMPIRE_Emin
+30    format(/,' Please note that for fitting PFNS at thermal energy, ',
+     &'the first value for',/,' incident energy in Empire''s input ',
+     &'file should be Empire''s minimum acceptable',/,
+     &' energy, ',1PD11.5,' MeV.')
+      write(*,*)
 
       STOP
 
