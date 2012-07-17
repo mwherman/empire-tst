@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2943 $
+Ccc   * $Rev: 2944 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 11:19:22 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-07-17 11:25:32 +0200 (Di, 17 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6262,10 +6262,10 @@ C-----
             GRin(1) = val
             IF (GRin(1).GT.0.0D0) WRITE (8,
      &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
-     &MeV'')') GRin(1)
+     & MeV'')') GRin(1)
             IF (GRin(1).GT.0.0D0) WRITE (12,
      &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
-     &MeV'')') GRin(1)
+     & MeV'')') GRin(1)
             GOTO 100
          ENDIF
 C----
