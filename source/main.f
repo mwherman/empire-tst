@@ -1,6 +1,6 @@
-cc   * $Rev: 2939 $
+cc   * $Rev: 2945 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 03:08:31 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-07-17 11:31:43 +0200 (Di, 17 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3073,24 +3073,25 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
       IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)
      &  .GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont)) THEN
         WRITE (8,*)
-        WRITE (8,'('' WARNING: Sum of production XS(incl.fission)'')')
+        WRITE (8,'('' WARNING: Sum of production XS (incl.fission)'')')
         WRITE (8,'('' WARNING: is not equal reaction cross section'')')
         IF((CSFus + (SINl+SINlcc)*FCCred + SINlcont).NE.0.d0)
-     &  WRITE (8,'('' WARNING:     difference: '', F6.2,'' %'')')
-     &   100.d0*
+     &  WRITE (8,'('' WARNING:     difference: '', F6.2,'' % at E = '',
+     &  G12.5,'' MeV'')') 100.d0*
      &   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)/
-     &                (CSFus + (SINl+SINlcc)*FCCred + SINlcont)
+     &                (CSFus + (SINl+SINlcc)*FCCred + SINlcont),EINl
       ENDIF
       IF(TOTred*TOTcs*TOTcorr.gt.0.d0 .and.
      &     abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont + 
      &     ELAred*ELAcs - TOTred*TOTcs*TOTcorr) .GT.
      &                0.01*TOTred*TOTcs*TOTcorr) THEN
         WRITE (8,*)
-        WRITE (8,'('' WARNING: Total XS is not equal'')')
+        WRITE (8,'('' WARNING: Total cross section is NOT equal'')')
         WRITE (8,'('' WARNING: Elastic + Absorption cross section'')')
-        WRITE (8,'('' WARNING:     difference: '', F6.2,'' %'')')
-     & 100.d0*abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*TOTcorr)/
-     &                 (TOTred*TOTcs*TOTcorr)
+        WRITE (8,'('' WARNING:     difference: '', F6.2,'' % at E = '',
+     &  G12.5,'' MeV'')') 100.d0*
+     &    abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*TOTcorr)/
+     &                 (TOTred*TOTcs*TOTcorr),EINl
       ENDIF
       WRITE (8,*)
       WRITE (8,*) '+++++'
