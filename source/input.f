@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2894 $
+Ccc   * $Rev: 2937 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-26 15:27:02 +0200 (Di, 26 Jun 2012) $
+Ccc   * $Date: 2012-07-17 03:01:35 +0200 (Di, 17 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -6167,11 +6167,11 @@ C-----
      &EFItin(i1 + 1,i2 + 1)                                              ! nilsson
                else                                                      ! nilsson
                   WRITE (8,
-     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
-     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
+     &'('' Field strength of multipolarity/k'',I2''/''I1,'' fitted to th ! nilsson
+     &e level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)         ! nilsson
                   WRITE (12,
-     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
-     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
+     &'('' Field strength of multipolarity/k'',I2''/''I1,'' fitted to th ! nilsson
+     &e level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)         ! nilsson
                endif                                                     ! nilsson
             ENDIF                                                        ! nilsson
             GOTO 100
@@ -9046,7 +9046,7 @@ C
              WRITE (8,'(3x,3I5)') ND_nlv
              WRITE (12,'(3x,3I5)') ND_nlv
 
-       else
+           else
 
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
@@ -9115,6 +9115,14 @@ C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
+C           Giant Resonances flag: negative deformation 
+            IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
+              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+              igreson = 1
+            ENDIF
+
             WRITE (8,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -9123,13 +9131,6 @@ C
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
-C           Giant Resonances flag: negative deformation 
-            IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
-              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-              igreson = 1
-            ENDIF
             WRITE (12,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -9247,7 +9248,6 @@ C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
-C           IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
 C           Giant Resonances flag: negative deformation 
             IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
               IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
@@ -9268,15 +9268,8 @@ C           Giant Resonances flag: negative deformation
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), abs(D_Def(i,2)), ctmp5
 C
-C
-C           Skipping Giant Resonances (negative deformation) 
-C           IF(D_Def(i,2).GT.0 .AND.
-C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
-C
 C           CHECKING EWSR (only for neutrons)
 C
-C           IF(D_Def(i,2).GT.0.d0 .AND.
-C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
             IF( INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               ftmp = abs(D_Def(i,2))
               betasq=ftmp*ftmp
@@ -9303,19 +9296,19 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
          write(8,*)
      >       '----------------------------------------------------------
      >-------'
-      IF(.not.SOFT) then
-        IF(DEFORMED) then
+         IF(.not.SOFT) then
+           IF(DEFORMED) then
              write(8,*) '  Rigid rotor model assumed' 
-        ELSE
+           ELSE
              write(8,*) '  Spherical model assumed' 
-        ENDIF
-      ELSE
-        IF(DYNam) then
+           ENDIF
+         ELSE
+           IF(DYNam) then
              write(8,*) '  Rigid-soft rotor model assumed' 
-        ELSE
+           ELSE
              write(8,*) '  Soft rotor model assumed' 
-        ENDIF
-      ENDIF
+           ENDIF
+         ENDIF
 
          write(8,*)'  States with number < ',LEVcc, 
      >             '  in the file *-lev.col coupled'
@@ -9330,6 +9323,8 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
            if (sheor.gt.0.) betahegor=sqrt(sheor/egrcoll(3,2))
+	   endif
+         if(      INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            write(8,*)
      >       '==========================================================
      >======='
@@ -9348,7 +9343,7 @@ C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
 
            write(8,*)
            write(8,*)
-     > ' If the GR deformation beta is zero, then the EWSR is exhausted'
+     > ' If the GR deformation beta is >= 0, then the EWSR is exhausted'
            write(8,*)
      >       '__________________________________________________________
      >_______'
