@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2937 $
+Ccc   * $Rev: 2943 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 03:01:35 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-07-17 11:19:22 +0200 (Di, 17 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3763,7 +3763,7 @@ C
      &  '('' Collective levels in continuum will be spread using a'')')
               WRITE (8,
      &  '('' Gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
-     &       ''R = '',F6.3, '' keV'' )') WIDcoll*1000
+     &       ''R = '',F8.3, '' keV'' )') WIDcoll*1000
              ENDIF
             GOTO 100
          ENDIF
