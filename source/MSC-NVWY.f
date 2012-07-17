@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
+Ccc   * $Rev: 2947 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-07-17 16:51:30 +0200 (Di, 17 Jul 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -963,8 +963,10 @@ C--------------neutron emission (if accepted, note IF on IDNA)
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
                            DO jr = 1, NLW
-                              pop1 = SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE
-                              pop2 = SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE
+                              pop1 = 
+     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+                              pop2 = 
+     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
                               popt = pop1 + pop2
                               IF (icse.GT.1) THEN
                                  CSE(icse,nejc,1) = CSE(icse,nejc,1)
@@ -1002,8 +1004,10 @@ C--------------proton emission (if accepted, note IF on IDNA)
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
                            DO jr = 1, NLW
-                              pop1 = SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE
-                              pop2 = SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE
+                              pop1 = 
+     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+                              pop2 = 
+     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
                               popt = pop1 + pop2
                               IF (icse.GT.1) THEN
                                  CSE(icse,nejc,1) = CSE(icse,nejc,1)
