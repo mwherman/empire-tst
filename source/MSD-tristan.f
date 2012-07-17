@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 2939 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-07-17 03:08:31 +0200 (Di, 17 Jul 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -407,7 +407,7 @@ C
      &                 ccr(8,8),                                         ! nilsson_newest
      &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    ! nilsson_newest
      &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      ! nilsson_newest
-     &                 ddr(2),
+     &                 ddr(2), dtmp, 
 c    &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
      &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  ! nilsson
      &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
@@ -454,17 +454,20 @@ C     WRITE(17,*)NEBINX,ICMAX
       fpi = 4.*PI
       fourpi = 1.0/fpi
 C-----selfconsistent strength taken for the l=0 transfer field
-      efit(1,1) = 0.0                                                    ! nilsson_newest
+      efit(1,1) = 0.d0                                                   ! nilsson_newest
       IF (EFItin(1,1).GT.0.0D0) efit(1,1) = EFItin(1,1)                  ! nilsson_newest
-      IF (EFItin(1,1).LT.0.0D0) efit(1,1) = 0.0                          ! nilsson_newest
-      efit(2,1) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
-     &          *GDRpar(5,1)*GDRpar(6,1))                                ! nilsson_newest
-     &          /(GDRpar(2,1)*GDRpar(3,1) + GDRpar(5,1)*GDRpar(6,1))     ! nilsson_newest
+      IF (EFItin(1,1).LT.0.0D0) efit(1,1) = 0.d0                         ! nilsson_newest
+      efit(2,1) = 0.d0
+      dtmp = GDRpar(2,1)*GDRpar(3,1) + GDRpar(5,1)*GDRpar(6,1)
+      IF(dtmp.gt.0.d0) 
+     &efit(2,1) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
+     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           ! nilsson_newest
       IF (EFItin(2,1).GT.0.0D0) efit(2,1) = EFItin(2,1)                  ! nilsson_newest
       IF (EFItin(2,1).LT.0.0D0) efit(2,1) = 0.0                          ! nilsson_newest
-      efit(2,2) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
-     &          *GDRpar(5,1)*GDRpar(6,1))                                ! nilsson_newest
-     &          /(GDRpar(2,1)*GDRpar(3,1) + GDRpar(5,1)*GDRpar(6,1))     ! nilsson_newest
+      efit(2,2) = 0.d0
+      IF(dtmp.gt.0.d0) 
+     &efit(2,2) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
+     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           ! nilsson_newest
       IF (EFItin(2,2).GT.0.0D0) efit(2,2) = EFItin(2,2)                  ! nilsson_newest
       IF (EFItin(2,2).LT.0.0D0) efit(2,2) = 0.0                          ! nilsson_newest
       efit(3,1) = -QCC(1)                                                ! nilsson_newest
@@ -595,13 +598,18 @@ C
       nebinx = MAX(INT((efitx+5.*WIDex)/ESTep + 1.),Nebins)
       IF(NEBinx.GE.3*(NDEx+25)) THEN
          nexnew = INT(3*FLOAT(NDEx+25)/FLOAT(nebinx)*NEX(1)-1)
-         WRITE(8,*) ' '
-         WRITE(8,*) 'Insufficent dimensions for response function in'
-         WRITE(8,*) 'MSD-tristan.f  Possible solutions:'
-         WRITE(8,*) '- decrease NEX in input to ', nexnew
-         WRITE(8,*) '- increase NDEX in dimension.h to', nebinx/3-24,
-     &              ' and recompile the source'
-         WRITE(8,*) '- start MSD at higher incident energy '
+         WRITE(8,*) 'ERROR: '
+         WRITE(8,*) 
+     &     'ERROR: Insufficient dimensions for response function in'
+         WRITE(8,*) 
+     &     'ERROR: MSD-tristan.f  Possible solutions:'
+         WRITE(8,*) 
+     &     'ERROR: - decrease NEX in input to ', nexnew
+         WRITE(8,*) 
+     &     'ERROR: - increase NDEX in dimension.h to', nebinx/3-24
+         WRITE(8,*) 
+     &     'ERROR:   and recompile the source'
+         WRITE(8,*) 'ERROR: - start MSD at higher incident energy '
          STOP 'Insuficient dimensions in TRISTAN (see output)'
       ENDIF
       IF (nebinx.NE.Nebins .AND. IOUt.GT.3) WRITE (8,99005) nebinx*ESTep
@@ -3004,8 +3012,18 @@ C-----------------constructed out of discrete levels
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
+      DO ne = 1, nmax
+         DO na = 1, 3
+C           Eliminating the first three angles for continuity
+C           Small error introduced, DIRTY PATCH, RCN, July 2012  
+            CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
+         ENDDO
+	ENDDO
 C-----if ECIS active use only continuum part of the MSD spectrum
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur))
+      WRITE(8,*) ' '
+      WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
+     &   nmax
       DO ne = 1, nmax
          DO na = 1, nangle
             csfit(na) = CSEa(ne,nangle - na + 1,nej,1)
@@ -3015,6 +3033,8 @@ C-----if ECIS active use only continuum part of the MSD spectrum
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
          Xsinl = Xsinl + piece*DE
+         WRITE(8,'(1x,''Nexc='',I5,1x,5(D12.5,1x))') 
+     &       ne,(qq(na),na=1,5)
       ENDDO
       WRITE(8,*) ' '
       WRITE(8,'('' Integrated MSD emission at Elab '', G15.3,'' is ''

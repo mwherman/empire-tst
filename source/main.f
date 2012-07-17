@@ -1,6 +1,6 @@
-cc   * $Rev: 2908 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-07-05 22:32:46 +0200 (Do, 05 Jul 2012) $
+cc   * $Rev: 2939 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-07-17 03:08:31 +0200 (Di, 17 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -224,6 +224,8 @@ C-----
       endif
 
       CALL ULM(0) ! target
+C
+      CALL ULM(1) ! CN
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -235,13 +237,27 @@ C
 	  TOTcs = CSFus
 	  ELAcs = 0.d0
 	ENDIF
-C-----Locate position of the target among residues
-      CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+C
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
 C-----Prepare Giant Resonance parameters - systematics
 C-----
+C-----Locate position of the target among residues
+      CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+      if(iloc.eq.0 .and. nnurec.ne.0) then
+        GDRpar(1,nnurec) = GDRpar(1,0) 
+        GDRpar(2,nnurec) = GDRpar(2,0) 
+        GDRpar(3,nnurec) = GDRpar(3,0) 
+        GDRpar(4,nnurec) = GDRpar(4,0) 
+        GDRpar(5,nnurec) = GDRpar(5,0) 
+        GDRpar(6,nnurec) = GDRpar(6,0) 
+        GDRpar(7,nnurec) = GDRpar(7,0) 
+        GDRpar(8,nnurec) = GDRpar(8,0) 
+        GDRpar(9,nnurec) = GDRpar(9,0) 
+        GDRpar(10,nnurec)= GDRpar(10,0) 
+      endif
+
       CALL WHERE(IZA(1),nnuc,iloc)
       if(iloc.eq.0 .and. nnuc.ne.1) then
         GDRpar(1,1) = GDRpar(1,nnuc) 
@@ -253,7 +269,7 @@ C-----
         GDRpar(7,1) = GDRpar(7,nnuc) 
         GDRpar(8,1) = GDRpar(8,nnuc) 
         GDRpar(9,1) = GDRpar(9,nnuc) 
-        GDRpar(10,1) = GDRpar(10,nnuc) 
+        GDRpar(10,1)= GDRpar(10,nnuc) 
       endif
 C
 C-----check whether NLW is not larger than 
@@ -447,7 +463,9 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                READ (46,*,END = 1400) popread
                READ (45,*,END = 1400)     ! Skipping level identifier line
              ENDIF
-           ELSEIF(MSD.eq.0)then
+C           Allowing states in the continuum even for MSD>0
+C           ELSEIF(MSD.eq.0)then
+            ELSE
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0)
@@ -464,6 +482,18 @@ C            WRITE(8,*) 'Continuum starts at bin number',ncon
 C------------Avoid reading closed channels
              IF (echannel.GE.0.0001 .and. icsl.gt.0) THEN
                READ (46,*,END = 1400) popread
+               if(D_Def(i,2).LT.0  .and.
+     &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
+                 IF(int(D_Xjlv(i)).eq.3) 
+     >      write(8,'(/''  GOR cross section (cont) ='',F7.1,'' mb'')') 
+     >             popread  
+                 IF(int(D_Xjlv(i)).eq.2) 
+     >      write(8,'(/''  GQR cross section (cont) ='',F7.1,'' mb'')') 
+     >             popread  
+                 IF(int(D_Xjlv(i)).eq.0) 
+     >      write(8,'(/''  GMR cross section (cont) ='',F7.1,'' mb'')') 
+     >             popread  
+               endif  
 C
 C--------------This level is not counted as a discrete one
 C--------------but it is embedded in the continuum
@@ -2347,11 +2377,7 @@ C-----------------------(discrete levels part)
                      ENDDO
                    ENDIF
 C-----------------------(continuum part - same for all n and p)
-                   DO ie = 1, nspec + 1 ! clean DDX matrix
-                     DO nang = 1, NDANG
-                       cseaprnt(ie,nang) = 0.d0
-                     ENDDO
-                   ENDDO
+                   cseaprnt = 0.d0 ! clean DDX matrix
                    IF(LHMs.EQ.0) THEN
                      iprinted = 0
                      DO ie = 1, nspec ! reconstruct continuum DDX spectrum
@@ -2360,15 +2386,16 @@ C-----------------------(continuum part - same for all n and p)
                        ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
      &                            piece*POPcseaf(0,nejc,ie,INExc(nnuc))
      &                             )/4.0/PI
-                       IF(ftmp.LT.0.0d0) THEN
-                          ftmp = 0.0d0
-                          IF(iprinted.eq.0) WRITE(8,*)
-     &                          'WARNING: Corrective action to avoid',
-     &                          ' negative ddx cross sections taken'
-                          iprinted = 1
-                          POPcseaf(0,nejc,ie,INExc(nnuc)) =
-     &                           POPcse(0,nejc,ie,INExc(nnuc))/piece
-                       ENDIF
+                       IF(ftmp.LT.0.0d0) CYCLE
+C                      IF(ftmp.LT.0.0d0) THEN
+C                         ftmp = 0.0d0
+C                         IF(iprinted.eq.0) WRITE(8,*)
+C    &                          'WARNING: Corrective action to avoid',
+C    &                          ' negative ddx cross sections taken'
+C                         iprinted = 1
+C                         POPcseaf(0,nejc,ie,INExc(nnuc)) =
+C    &                           POPcse(0,nejc,ie,INExc(nnuc))/piece
+C                      ENDIF
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                       ftmp + CSEa(ie,nang,nejc,1)*
@@ -2400,12 +2427,12 @@ c                     iprinted = 0
 c                     spechk(1) = 0.0d0
 c                     spechk(2) = 0.0d0
 c                     spechk(3) = 0.0d0
-                     DO ie = 1, nspec ! reconstruct continuum DDX spectrum
+                      DO ie = 1, nspec ! reconstruct continuum DDX spectrum
 c                       IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
-                       csetmp(ie) = (POPcse(0,nejc,ie,INExc(nnuc))
+                        csetmp(ie) = (POPcse(0,nejc,ie,INExc(nnuc))
      &                         - xnorm(nejc,INExc(nnuc))
      &                          * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
-                       IF(csetmp(ie).LT.0.0d0) csetmp(ie) = 0.0d0
+                        IF(csetmp(ie).LT.0.0d0) csetmp(ie) = 0.0d0
 c                       spechk(1) = spechk(1) + 
 c     &                                  POPcse(0,nejc,ie,INExc(nnuc))
 c                       spechk(2) = spechk(2) + 
@@ -2416,14 +2443,14 @@ c                       write(8,'(3i5,3e15.5)') nnuc,nejc,ie,
 c     &                  POPcse(0,nejc,ie,INExc(nnuc)),
 c     &                  xnorm(nejc,INExc(nnuc))
 c     &                                  *POPcsed(0,nejc,ie,INExc(nnuc)),
-c     &                   csetmp(ie)
-                      ENDDO
-c                     write(12,'(a5,i5,3f15.4)')'sig0=',nnuc,
+c     &                  csetmp(ie)
+                     ENDDO
+c                    write(12,'(a5,i5,3f15.4)')'sig0=',nnuc,
 c     &                                              (spechk(i)*DE,i=1,3)
                      nspecrec=MIN(INT(recorp*nspec+1),NDECSE)
                      DO ie = nspec+1,nspecrec
                        csetmp(ie)=0.0d0
-                      ENDDO 
+                     ENDDO 
                      CALL HINTERMAT(0.0d0, DE/recorp, csetmp,
      &                     NDECSE, 0.0D0, DE, cseaprnt, NDECSE,
      &                      1, 0.0d0, nspec*DE)
