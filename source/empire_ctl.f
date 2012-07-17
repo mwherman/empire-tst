@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2831 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-05-11 01:05:36 +0200 (Fr, 11 Mai 2012) $
+Ccc   * $Rev: 2938 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-07-17 03:02:39 +0200 (Di, 17 Jul 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -29,12 +29,13 @@ C
 
       CALL GETENV ('EMPIREDIR', empiredir)
 
-	   EMPtitle='   '
+	EMPtitle='   '
 C
 C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
-      if(empiredir(1:1).eq.' ') empiredir(1:3)='../'
+      if(empiredir(1:1).eq.' ') empiredir(1:3)='..'
+
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
