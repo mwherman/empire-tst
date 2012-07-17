@@ -49,6 +49,12 @@ fi
 if [ -f "$file-z3n.zvd" ]; then
  rm "$file-z3n.zvd" 
 fi
+if [ -f "$file-mubar.zvd" ]; then
+ rm "$file-mubar.zvd" 
+fi
+if [ -f "$file-nubar.zvd" ]; then
+ rm "$file-nubar.zvd" 
+fi
 #run cs2zvd to produce ZVView plots
 cp $file.xsc XSECTIONS.OUT
 rm -f CS2ZVD.INP
@@ -84,6 +90,12 @@ if [ -f "XS_(z,2n).zvd" ]; then
 fi
 if [ -f "XS_(z,3n).zvd" ]; then
   mv "XS_(z,3n).zvd" $file-z3n.zvd
+fi
+if [ -f "XS_mubar.zvd" ]; then
+  mv "XS_mubar.zvd" $file-mubar.zvd
+fi
+if [ -f "XS_nubar.zvd" ]; then
+  mv "XS_nubar.zvd" $file-nubar.zvd
 fi
 rm XSECTIONS.OUT
 rm CS2ZVD.INP
