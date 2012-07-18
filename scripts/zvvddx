@@ -37,16 +37,6 @@ $EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
     || { echo; echo 'zvview closed'; }
 mv DDXPLOT.zvd $work/$file-$2.zvd
 
-# not needed now: files saved in local dir by default
-#rm zv*.ps zv*.eps 2>/dev/null
-#if [ -f zv00.ps ]; then
-#   mv zv00.ps $work/$file-$2.ps
-#fi
-#if [ -f zv00.eps ]; then
-#   mv zv00.eps $work/$file-$2.eps
-#fi
-
-#cd $work
-rm C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST cur.zvd pnt.zvd tmp.dat 2>/dev/null
+rm angdis.p92 ps01.tit C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
 exit
 

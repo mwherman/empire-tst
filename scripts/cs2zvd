@@ -91,12 +91,15 @@ fi
 if [ -f "XS_(z,3n).zvd" ]; then
   mv "XS_(z,3n).zvd" $file-z3n.zvd
 fi
-if [ -f "XS_mubar.zvd" ]; then
-  mv "XS_mubar.zvd" $file-mubar.zvd
+if [ -f "XS_Mu-bar.zvd" ]; then
+#  mv "XS_Mu-bar.zvd" $file-mu-bar.zvd
+rm XS_Mu-bar.zvd
 fi
-if [ -f "XS_nubar.zvd" ]; then
-  mv "XS_nubar.zvd" $file-nubar.zvd
+if [ -f "XS_Nu-bar.zvd" ]; then
+#  mv "XS_Nu-bar.zvd" $file-nu-bar.zvd
+rm XS_Nu-bar.zvd
 fi
+rm
 rm XSECTIONS.OUT
 rm CS2ZVD.INP
 exit

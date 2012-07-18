@@ -1,6 +1,6 @@
-# $Rev: 2941 $
+# $Rev: 2952 $
 # $Author: rcapote $
-# $Date: 2012-07-17 03:09:37 +0200 (Di, 17 Jul 2012) $
+# $Date: 2012-07-18 12:03:40 +0200 (Mi, 18 Jul 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8537,30 +8537,34 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -activebackground #dcdcdc -activeforeground #000000 \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu94 add command \
-        -command { editFile $file.lst } -label {EMPIRE full} 
+        -command { editFile $file.lst } -label {EMPIRE full output} 
     $site_3_0.menu94 add command \
-        -command { editFile $file.out } -label {EMPIRE short} 
+        -command { editFile $file.out } -label {EMPIRE short output} 
     $site_3_0.menu94 add command \
-        -command { editFile $file.xsc } -label Cross-sections 
+        -command { editFile $file.xsc } -label {Total production cross sections}
     $site_3_0.menu94 add command \
-        -command { editFile $file-fiss.xsc } -label {Fission chances} 
+        -command { editFile $file-preq.xsc } -label {Pre-equilibrium cross sections}
+    $site_3_0.menu94 add command \
+        -command { editFile $file-gam-tr.xsc } -label {Gamma emission cross sections}
+    $site_3_0.menu94 add command \
+        -command { editFile $file-fiss.xsc } -label {Partial fission cross sections} 
     $site_3_0.menu94 add command \
         -command { editFile $file-pfnm.out } \
         -label {Fiss. neutr. multiplicities (nubar) } 
     $site_3_0.menu94 add command \
-        -command { editFile $file-pfns.out } -label {Fiss. neutr. spectra (PFNS)} 
+        -command { editFile $file-pfns.out } -label {Fission neutron spectra (PFNS)} 
     $site_3_0.menu94 add command \
-        -command { editFile $file.sys } -label {x-sec systematics} 
+        -command { editFile $file.sys } -label {Cross-section systematics} 
     $site_3_0.menu94 add command \
         -command { editFile $file-ompfit.lst } -label {OMP fit output} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
-        -command { editFile $file-ecis.out } -label {ECIS } 
-    $site_3_0.menu94 add separator \
-
+        -command { editFile $file-ecis-vib.out } -label {ECIS SPH calc., last energy} 
     $site_3_0.menu94 add command \
-        -command { editFile $file-optman.out } -label {OPTMAN } 
+        -command { editFile $file-ecis-rot.out } -label {ECIS DEF calc., last energy} 
+    $site_3_0.menu94 add command \
+        -command { editFile $file-optman.out} -label {OPTMAN output, last energy} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
@@ -8572,9 +8576,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu94 add command \
         -command { editFile $file.endf } -label {ENDF final} 
     $site_3_0.menu94 add command \
-        -command { editFile $file-s.endf } -label {ENDF plotted} 
+        -command { editFile $file-s.endf } -label {ENDF for plotting} 
     $site_3_0.menu94 add command \
-        -command { editFile $file-e.endf } -label {ENDF empend} 
+        -command { editFile $file-e.endf } -label {ENDF from empend} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
@@ -8644,6 +8648,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command { editFile $file-log.sigma1 } -font {} -label {SIGMA1 Log} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.legend } -font {} -label {LEGEND Log} 
+    $site_3_0.men70 add command \
+        -command { editFile $file-log.mubar } -font {} -label {MU_BAR Log} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.plotc4 } -font {} -label {PLOTC4 Log} 
     $top.m88 add cascade \
