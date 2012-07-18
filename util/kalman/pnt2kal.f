@@ -239,7 +239,6 @@ c       Setting incident energies below EMPIRE's minimum limit as corresponding 
      &'original value, ',1PD11.5,' MeV, is lower than ',/,10X,
      &'Empire''s minimum acceptable energy, ',1PD11.5,' MeV.')
           EXPDATA(iexp)%Einc=2.53D-2
-          GOTO 5
         ENDIF
       enddo
 150   CONTINUE
