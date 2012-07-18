@@ -1,6 +1,6 @@
-#$Rev: 2940 $
+#$Rev: 2953 $
 #$Author: rcapote $
-#$Date: 2012-07-17 03:09:02 +0200 (Di, 17 Jul 2012) $
+#$Date: 2012-07-18 13:19:01 +0200 (Mi, 18 Jul 2012) $
 
 # set default fortran compiler:
 
@@ -43,27 +43,27 @@ else ifeq ($(FC),ifort)
   #----INTEL f95 compiler
   #---------------------------
   #----flags for production compilation using ifort
-  #FFLAGS = -O3 -x=host -ipo -logo 
-  #FFLAGS = -O3 -x=host -ipo -ftrapuv -trace
-  #FFLAGS = -O3
+  #FFLAGS = -O3 -x=host -logo 
+  #FFLAGS = -O3 -x=host -ftrapuv -trace
+  # Please note that ifort v11.1 does not work properly with -ipo !!!!!  
   #FFLAGS = -arch pn4 -O3 -ipo
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
-  #----flags for ECIS
+  #----flags for ECIS and OPTMAN
   #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
-  # FFLAGS =  -O3 -x=host -ipo -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
   #FFLAGS = -O3 -x=host -logo -parallel -par-report1 -openmp
   #EFLAGS = -O2 -x=host -logo
   # LIBS = -openmp-lib compat
-  #----flags for automatic parallelization & inter-procedural optimization
-  FFLAGS = -O3 -x=host -ipo -parallel -par-report1
-  EFLAGS = -O2 -x=host -ipo -parallel -par-report1
-  #EFLAGS = -O2 -x=host 
+  #----flags for automatic parallelization & inter-procedural optimization 
+  # Please note that ifort v11.1 does not work properly with -ipo !!!!!
+  FFLAGS = -O3 -x=host -parallel -par-report1
+  EFLAGS = -O3 -x=host -logo -parallel -par-report1
   #----flags with no parallelization
-  #FFLAGS = -O3 -x=host -ipo -logo
+  # Please note that ifort v11.1 does not work properly with -ipo !!!!!  
   #FFLAGS = -O3 -x=host -logo
   #EFLAGS = -O2 -x=host -logo
   #------------------------------------------------------------------------------------------------
