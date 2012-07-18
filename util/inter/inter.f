@@ -554,7 +554,7 @@ C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &
 C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
 C    &          'Sig(Fiss)   Sig(E14)   '
 C        LINES = LINES + 3
-C     END IF
+      END IF
 C...
       IF(IPRINT.EQ.1) THEN
         IPRINT = 0
