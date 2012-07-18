@@ -50,15 +50,15 @@ ln -sf $work/$file-sig.endf ENDFB.IN
 ln -sf $EMPIREDIR/util/mu_bar/MU_BAR.INP MU_BAR.INP
 
 $EMPIREDIR/util/mu_bar/mu_bar < MU_BAR.INP
-rm ENDFB.IN
-rm MU_BAR.INP
+mv MU_BAR.LST $work/$file-log.mu_bar
+rm ENDFB.IN MU_BAR.INP MU_BAR.TMP
 mv ENDFB.OUT $work/$file-mub.endf
 
 # Running LEGEND to convert angular distributions into tabular form
 #cp $work/$file-mub.endf $work/$file-l.endf
 
 rm $file-l.endf 2>/dev/null
-ln -sf $work/$file-sig.endf ENDF.IN
+ln -sf $work/$file-mub.endf ENDF.IN
 ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
 
 $EMPIREDIR/util/legend/legend < LEGEND.INP
@@ -84,11 +84,12 @@ $EMPIREDIR/scripts/plotlst $file
 
 # REMOVE INTERMEDIATE ENDF FILES
 
-# rm $work/$file-l.endf 2>/dev/null
-# rm $work/$file-lin.endf 2>/dev/null
-# rm $work/$file-mub.endf 2>/dev/null
-# rm $work/$file-f.endf 2>/dev/null
-# rm $work/$file-f2.endf 2>/dev/null
-# rm $work/$file-rec.endf 2>/dev/null
+rm $work/$file-l.endf 2>/dev/null
+rm $work/$file-sig.endf 2>/dev/null
+rm $work/$file-lin.endf 2>/dev/null
+rm $work/$file-mub.endf 2>/dev/null
+rm $work/$file-f.endf 2>/dev/null
+rm $work/$file-endres.endf 2>/dev/null
+rm $work/$file-rec.endf 2>/dev/null
 
 exit
