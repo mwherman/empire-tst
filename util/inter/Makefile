@@ -1,7 +1,7 @@
 # set default compiler
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
