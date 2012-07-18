@@ -1,6 +1,6 @@
-C $Rev: 2813 $
+C $Rev: 2961 $
 C $Author: rcapote $
-C $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+C $Date: 2012-07-19 01:04:48 +0200 (Do, 19 Jul 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -114,7 +114,7 @@ C
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
-     &                 POPcon(ndnuc), POPdis(ndnuc), ELAred
+     &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       CHARACTER*72 EMPtitle
@@ -148,7 +148,7 @@ C
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED, rFCCRED, rFDWRED, rFUSRED, rELAred 
+      DOUBLE PRECISION rTOTRED,rFCCRED,rFDWRED,rFUSRED,rELAred,rCELred 
       DOUBLE PRECISION rTUNEfi(0:ndnuc)
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
       DOUBLE PRECISION om2_ig(0:NDNUC),delp_ig(0:NDNUC),
@@ -217,8 +217,8 @@ C     COMMON /DEPTH / POTe
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
-     &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt,
-     &                 PFNrat, PFNniu, TMAxw
+     &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
+     &                 PFNrat, PFNniu, TMAxw, rCELred
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
