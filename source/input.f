@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2944 $
+Ccc   * $Rev: 2960 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 11:25:32 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-07-19 01:02:54 +0200 (Do, 19 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -266,10 +266,12 @@ C--------fusion parameters
          FCCred = 1.d0
          TOTred = 1.d0
          ELAred = 1.d0
+         CELred = 1.d0 
          rFUSred = 1.d0
          rFCCred = 1.d0
          rTOTred = 1.d0
          rELAred = 1.d0
+         rCELred = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -4167,6 +4169,37 @@ C-----
             endif
             GOTO 100
          ENDIF
+C-----------
+         IF (name.EQ.'CELRED') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+                WRITE (8,
+     &          '('' Compound elastic cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                sigma = val*i1*0.01
+                IF(IOPran.gt.0) then
+                   IF(rCELred.eq.1.d0) rCELred = grand()
+                   CELred = val + rCELred*sigma
+                ELSE
+                   IF(rCELred.eq.1.d0) rCELred = drand()
+                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
+                ENDIF
+                WRITE (8,
+     &      '('' Compound elastic cross section was scaled by factor ''
+     &          ,f6.3)') CELred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, CELred, INDexf,INDexb
+            else
+                CELred = val
+                WRITE (8,
+     &      '('' Compound elastic cross section was scaled by factor ''
+     &          F6.3)') CELred
+                WRITE (12,
+     &      '('' Compound elastic cross section was scaled by factor ''
+     &          F6.3)') CELred
+            endif
+            GOTO 100
+         ENDIF
 C-----
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
@@ -6519,7 +6552,7 @@ C--------checking for fission data in the optional input
          IF (name.EQ.'FISSHI') THEN
             izar = i1*1000 + i2
             IF (val.EQ.0) THEN
-               fstring = 'fission of light projectiles    '
+               fstring = 'fission induced by light part.  '
             ELSEIF (val.EQ.1) THEN
                fstring = 'HI-fission over 1-humped barrier'
             ELSEIF (val.EQ.2) THEN
@@ -7558,7 +7591,7 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          ia = MOD(izaf(k),1000)
          IF (iz.GT.130 .OR. ia.GT.400) cycle
 C        Corresponds to the definition of atomic mass excess in Audi
-         RESmas(iz,ia) = REAL(ia) + excess(k)/AMUmev 
+         RESmas(iz,ia) = DBLE(REAL(ia)) + excess(k)/AMUmev 
          EXCessmass(iz,ia) = excess(k)
       ENDDO
       DO iz = 6, 100
