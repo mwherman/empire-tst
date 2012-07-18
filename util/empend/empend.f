@@ -105,6 +105,7 @@ C-V          (fission spectrum is interpolated well with lin-lin
 C-V           interpolation except in the tails, but only a single
 C-V           interpolation range can be defined in ENDF)
 C-V        - Reduce emission spectra thinning criterion from 1 to 0.5 %.
+C-V  12/07 Fix Eout for discrete levels when no recoils are given.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -555,6 +556,7 @@ C* Process angular distribution data
 C*
 C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
+      MT4=0
       MT6=IWO(LBI-1+JT6)
 C*    -- Check angular distributions (if none, purely isotropic, -LCT)
       IF(MT6.EQ.649) I600=0
@@ -5437,7 +5439,14 @@ C*      Process all energies for elastic
       ELSE
 C*      Determine the outgoing particle energy for discrete levels
         EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))
-        IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
+c...
+c...    IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
+c... Do recoil correction unconditionally since this is how it is
+c... done in EMPIRE
+                        EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
+c...
+c...    print *,'AWR,AWI,AWP',AWR,AWI,AWP
+c...
         EOU=-EOU
       END IF
       IF(EIN-ETH.LT.-1.E-4 .OR.
