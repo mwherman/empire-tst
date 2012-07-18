@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2939 $
+Ccc   * $Rev: 2959 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 03:08:31 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-07-19 01:00:41 +0200 (Do, 19 Jul 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3012,13 +3012,13 @@ C-----------------constructed out of discrete levels
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
-      DO ne = 1, nmax
-         DO na = 1, 3
+C     DO ne = 1, nmax
+C        DO na = 1, 3
 C           Eliminating the first three angles for continuity
 C           Small error introduced, DIRTY PATCH, RCN, July 2012  
-            CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
-         ENDDO
-	ENDDO
+C           CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
+C        ENDDO
+C	ENDDO
 C-----if ECIS active use only continuum part of the MSD spectrum
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur))
       WRITE(8,*) ' '
@@ -3107,6 +3107,8 @@ C-----number of spectrum bins to continuum WARNING! might be negative!
       nexrt = MIN(INT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C-----total number of bins
       next  = INT(excnq/DE + 1.0001)
+
+      somj = CSMsd(Nejc)
 C
 C     We need statements below as long as discrete data are calculated in MSD
 C
@@ -3361,6 +3363,9 @@ C
        DO ie = istart, next
          csm1 = csm1 + CSEmsd(ie,Nejc)*DE
        ENDDO
+
+       IF(csm1.le.1.d-6) RETURN
+
        csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
 
        csmtot = 0.d0
@@ -3376,15 +3381,15 @@ C        Assigning angular distribution of the first continuum bin "istart"
 C        to the angular distribution of the discrete level "il"
 C                                                    
          do na=1,NDAng 
-           ddxs(na) =   CSEa(istart,na,Nejc,1)
+           ddxs(na) = CSEa(istart,na,Nejc,1)
          enddo
-         csmsdl = 0.d0
 
+         csmsdl = 0.d0
          DO ie = istart, next
            eee = DE*(ie - 1)
            IF (eee.GT.eemi) EXIT 
            csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-         IF(ENDF(1).GT.0) then
+           IF(ENDF(1).GT.0) then
 C            Deleting the corresponding XS from the continuum
 C              as it is moved to discrete spectra
              CSEmsd(ie,Nejc) = 0.d0
@@ -3392,12 +3397,12 @@ C            Deleting the corresponding angular distribution
              do na=1,NDAng 
                CSEa(ie,na,Nejc,1) = 0.d0
              enddo
-         ENDIF
-           istart = ie + 1
+           ENDIF
+C          Commented, RCN, July 2012, probably wrong, CHECK !!!!!
+C          istart = ie + 1
          ENDDO
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl
- 
          csmtot = csmtot + csmsdl
 C--------Normalization factor
          IF (xnor.GT.0) THEN
@@ -3409,7 +3414,9 @@ C--------Store ang. dist.
          DO na = 1, NDANG
            CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xnor*ddxs(na)
          ENDDO
+
        ENDDO
+
       ENDIF
 
       IF(csm2-csmtot.gt.0.1d0) then
