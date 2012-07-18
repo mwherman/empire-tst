@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
+Ccc   * $Rev: 2958 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -484,15 +484,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, s, smax,
+      DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax,
      &                 smin, sumdl, sumtl1, sumtl2, xjc, xjr
-      REAL FLOAT
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
-      INTEGER INT, MIN0
 C
-C
-      Sum = 0.0
+      Sum = 0.d0
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----clear scratch matrices
@@ -610,22 +607,21 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
          ENDDO
          Sum = Sum*DE        
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
+      ENDIF
 C--------
 C--------decay to discrete levels
 C-----
-      ENDIF
-         DO i = 1, NLV(Nejc)
-            SCRtl(i,Nejc) = 0.0
-         ENDDO
-         eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-C--------do loop over discrete levels -----------------------------------
-         DO i = 1, NLV(Nnur)
+      DO i = 1, NLV(Nejc)
+         SCRtl(i,Nejc) = 0.d0
+      ENDDO
+      eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
+C-----do loop over discrete levels -----------------------------------
+      DO i = 1, NLV(Nnur)
             eout = eoutc - ELV(i,Nnur)
 C-----------level above the bin
 C           2.18+
             IF (eout.LT.0.0D0) GOTO 100
-            cor = 1.0
-            sumdl = 0.0
+            sumdl = 0.d0
             CALL TLLOC(Nnur,Nejc,eout,il,frde)
             smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
             smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
@@ -648,15 +644,16 @@ C-----------loop over channel spin ------ done ----------------------------
 C
 C           TUNe commented as it is dangerous to scale Ts for discrete levels 
 C           Dec. 2007, MH, RCN, MS 
+C           sumdl = sumdl*TUNe(Nejc,Nnuc)
 C
-C           sumdl = sumdl*cor*TUNe(Nejc,Nnuc)
-            sumdl = sumdl*cor
             SCRtl(i,Nejc) = sumdl
             Sum = Sum + sumdl
-         ENDDO
-C--------do loop over discrete levels --------- done --------------------
+      ENDDO
+C-----do loop over discrete levels --------- done --------------------
+C
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
+	RETURN
       END
 
 

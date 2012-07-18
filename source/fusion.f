@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2880 $
+Ccc   * $Rev: 2958 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-16 01:08:21 +0200 (Sa, 16 Jun 2012) $
+Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -389,7 +389,6 @@ C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
             WRITE (8,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
-
             einlab = -EINl
             IF (DIRect.EQ.1) THEN
 C--------------Saving KTRlom(0,0)
@@ -481,7 +480,6 @@ C--------------Inelastic cross section (incident.ics)
                CLOSE (47)
 C--------------Angular distribution (incident.ang)
                OPEN (45,FILE = 'dwba.ANG',STATUS = 'OLD',ERR = 240)
-
                READ (45,'(A80)',ERR = 240, END = 240) rstring
                OPEN (46,FILE = 'ccm.ANG' ,STATUS = 'OLD',ERR = 240)
                READ (46,'(A80)',ERR = 230, END = 230) ! first line is taken from dwba
@@ -493,7 +491,6 @@ C-----------------checking the correspondence of the excited states
                   READ (45,'(i5,6x,i4,i5)',END = 240,ERR = 240) 
      &                 istat1, itmp2, nang
                   READ (46,'(i5,6x,i4)',END = 235,ERR = 235) 
-
      &                 istat2
 C-----------------checking the correspondence of the excited states for even-even targets
                   IF ( .not.lodd .AND. istat1.NE.istat2 ) THEN   

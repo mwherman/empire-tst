@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2891 $
+Ccc   * $Rev: 2958 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-26 13:01:35 +0200 (Di, 26 Jun 2012) $
+Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3085,10 +3085,7 @@ C
       INTEGER INT, NINT
       LOGICAL inc_channel
 
-
-
       inc_channel = .false.
-
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -3100,7 +3097,6 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0) ip = 8
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
-C     angstep = 2.5
       angstep = 180.d0/(NANgela-1)
       CALL INIT(Nejc,Nnuc)
 
@@ -3646,16 +3642,11 @@ C
 C
 C-----Running ECIS06
 C
-
       IF(inc_channel .and. Inlkey.NE.0) 
-
      >  write (*,*) '  Running ECIS (vibr) ...'
 
       IF(inc_channel .and. Inlkey.EQ.0) 
-
      >  write (*,*) '  Running ECIS (sphe) ...'
-
-
 
       CALL ECIS('ecis06 ')
 
@@ -3684,7 +3675,6 @@ C        CALL ECIS('ecis06 ')
          ENDIF
       ENDIF
       END
-
 
       SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,Inlkey)
 C
@@ -3767,7 +3757,6 @@ C
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.3.D0) ip = 8
       IF (AEJc(Nejc).EQ.7.D0 .AND. ZEJc(Nejc).EQ.4.D0) ip = 9
 C-----Data initialization
-C     angstep = 2.5
       angstep = 180.d0/(NANgela-1)
       CALL INIT(Nejc,Nnuc)
 
@@ -3804,7 +3793,6 @@ C-----Shift to coupled equations if convergence is not achieved
 C-----Calculations at experimental angles
       IF (ICAlangs.GT.0) ECIs1(31:31) = 'T'
 
-
       ECIs2 = BECis2
       ECIs2(1:1) = 'F'
 C-----Cmatrix output
@@ -3820,9 +3808,7 @@ C-----Angular distribution is calculated
       ECIs2(14:14) = 'T'
 C-----Legendre coefficients output
       ECIs2(15:15) = 'T'
-
       ECIs2(20:20) = 'T'
-
 C-----DWBA option added
       IF (DIRect.EQ.3) THEN
 C-----Iteration scheme used for DWBA
@@ -4373,10 +4359,7 @@ C
       INTEGER NINT
       LOGICAL inc_channel
 
-
-
       inc_channel = .false.
-
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.1.D0) ip = 2
@@ -4392,7 +4375,6 @@ C
      &    'ERROR: OPTMAN can not be used for cluster induced reactions'
 
 C-----Data initialization
-C     angstep = 2.5
       angstep = 180.d0/(NANgela-1)
 
       xmas_nejc = EJMass(Nejc)
@@ -4599,7 +4581,6 @@ C
       write(1,'(6e12.5)') elab
       if(ZEJc(Nejc).gt.0) then
         write(1,'(36I2.2)') 1
-
         ANGles(1) = 0.5d0
       else
         write(1,'(36I2.2)') 0
