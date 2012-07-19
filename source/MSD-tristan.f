@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2959 $
+Ccc   * $Rev: 2963 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 01:00:41 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-19 09:56:54 +0200 (Do, 19 Jul 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3012,13 +3012,13 @@ C-----------------constructed out of discrete levels
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
-C     DO ne = 1, nmax
-C        DO na = 1, 3
-C           Eliminating the first three angles for continuity
-C           Small error introduced, DIRTY PATCH, RCN, July 2012  
-C           CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
-C        ENDDO
-C	ENDDO
+      DO ne = 1, nmax
+        DO na = 1, 3
+C          Eliminating the first three angles for continuity
+C          Small error introduced, DIRTY PATCH, RCN, July 2012  
+           CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
+        ENDDO
+      ENDDO
 C-----if ECIS active use only continuum part of the MSD spectrum
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur))
       WRITE(8,*) ' '
