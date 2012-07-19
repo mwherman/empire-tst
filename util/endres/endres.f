@@ -50,7 +50,8 @@ C-
       PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
-      CHARACTER*40  BLNK,FLNM,FLEM,FLRR,FLOU,FLLG,FLSC,FLS1
+      CHARACTER*40  BLNK
+      CHARACTER*80  FLNM,FLEM,FLRR,FLOU,FLLG,FLSC,FLS1
       CHARACTER*11  CHZA,CHAW
 C*
       DIMENSION     NBT(MXNB),INR(MXNB),MTLS(MXMT),ELOW(MXMT)
@@ -87,8 +88,8 @@ C*   Source ENDF file to be edited
       GO TO 12
    11 WRITE(LTT,691) ' ERROR - REDO: File does not exist      ',FLEM
    12 WRITE(LTT,691) '$Enter source ENDF file to be edited  : '
-      READ (LKB,691) FLNM
-      IF(FLNM.NE.BLNK) FLEM=FLNM
+      READ (LKB,690) FLNM
+      IF(FLNM(1:40).NE.BLNK) FLEM=FLNM
       OPEN (UNIT=LEM,FILE=FLEM,STATUS='OLD',ERR=11)
       CALL RDTEXT(LEM,M1,M2,M3,HD66,IER)
       WRITE(LTT,696) ' File header: '//HD66(1:52)
@@ -100,15 +101,15 @@ C*   Source resonance parameter ENDF file
       GO TO 16
    15 WRITE(LTT,691) ' ERROR - REDO: File does not exist      ',FLRR
    16 WRITE(LTT,691) '$Enter res.param.  ENDF file          : '
-      READ (LKB,691) FLNM
-      IF(FLNM.NE.BLNK) FLRR=FLNM
+      READ (LKB,690) FLNM
+      IF(FLNM(1:40).NE.BLNK) FLRR=FLNM
       OPEN (UNIT=LRR,FILE=FLRR,STATUS='OLD',ERR=15)
       CALL RDTEXT(LRR,I1,I2,I3,CH66,IER)
       WRITE(LTT,696) ' File header: '//CH66(1:52)
 C*   Output ENDF file
       WRITE(LTT,691) '$Enter output ENDF file               : '
-      READ (LKB,691) FLNM
-      IF(FLNM.NE.BLNK) FLOU=FLNM
+      READ (LKB,690) FLNM
+      IF(FLNM(1:40).NE.BLNK) FLOU=FLNM
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
 C* Open the scratch file
       OPEN (UNIT=LSC,FILE=FLSC,STATUS='UNKNOWN')
@@ -117,8 +118,8 @@ C-F  Define the LSSF flag
       WRITE(LTT,691) ' Enter LSSF flag                        '
       WRITE(LTT,691) ' LSSF=0 Calculate x.s. from URRP        '
       WRITE(LTT,691) '$     1 URRP for self-shielding only :  '
-      READ (LKB,691,END=18) FLNM
-      IF(FLNM.NE.BLNK) READ (FLNM,698) LSSF
+      READ (LKB,690,END=18) FLNM
+      IF(FLNM(1:40).NE.BLNK) READ (FLNM,698) LSSF
 C* ENDRES log file
    18 OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
       WRITE(LLG,691) ' ENDRES - Add Resonance Data to ENDF    '
@@ -950,6 +951,7 @@ C-F  Processing completed
 C* Error trap
   284 STOP 'ENDRES ERROR - Processing terminated'
 C*
+  690 FORMAT(A80)
   691 FORMAT(2A40)
   692 FORMAT(A40,I6)
   693 FORMAT(A40,1P,E10.3)
@@ -968,7 +970,7 @@ C-D  - MF9102  flag is set to 1
 C-D  - Cross sections from MF10 are read and normalised by the
 C-D    total in MF3 and written on file FLS1 on Unit LS1 as MF9.
 C-
-      CHARACTER*40 FLS1
+      CHARACTER*80 FLS1
       CHARACTER*66 CH66,BL66
       DIMENSION    RWO(MXRW)
       DIMENSION    NBT(20),INR(20)
