@@ -157,7 +157,7 @@ def init(proj):
         name, val, i1, i2, i3, i4 = tmp[:]
         # some parameters are isotope-specific (optical model, for example)
         # in this case, we get Z,A of isotope from i1, i2:
-        if not name in Globals:
+        if not name in Globals and not name in pfnsPar:
             i2 = atarget-i1-i2 + aproj-zproj
             i1 = ztarget-i1
         
