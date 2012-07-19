@@ -24,6 +24,7 @@ C-V  08/04 - Fix conversion MF10/MT102 to MF9/MT102 when MF8 present.
 C-V  11/06 Take temperature from the source and not the resonance file.
 C-V  11/12 Add MT 19 to the list of adjusted reactions, if present.
 C-V  12/02 Fix NBT,INR array declarations for consistency (R. Capote)
+C-V  12/07 Allow filenames up to 80 characters long.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
