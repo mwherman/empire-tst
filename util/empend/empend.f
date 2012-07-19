@@ -275,7 +275,8 @@ C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
       PARAMETER   (MXE=200,MXT=400,MXM=120,MXR=800000,MXI=8000,MLV=3)
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
-      CHARACTER*40 BLNK,FLNM,FLN1,FLN2,FLER
+      CHARACTER*40 BLNK
+      CHARACTER*80 FLNM,FLN1,FLN2,FLER
       CHARACTER*80 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
@@ -353,14 +354,14 @@ C* Define input parameters - Write banner to terminal
 C* Define the source file
    12 WRITE(LTT,991) ' Default source filename (EMPIRE out.): ',FLN1
       WRITE(LTT,991) '$          Enter new name to redefine : '
-      READ (LKB,991) FLNM
-      IF(FLNM.NE.BLNK) FLN1=FLNM
+      READ (LKB,990) FLNM
+      IF(FLNM(1:40).NE.BLNK) FLN1=FLNM
       OPEN(UNIT=LIN,FILE=FLN1,STATUS='OLD',ERR=12)
 C* Define the output file
    14 WRITE(LTT,991) ' Default output filename              : ',FLN2
       WRITE(LTT,991) '$          Enter new name to redefine : '
-      READ (LKB,991) FLNM
-      IF(FLNM.NE.BLNK) FLN2=FLNM
+      READ (LKB,990) FLNM
+      IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
       OPEN (UNIT=LOU,FILE=FLN2,STATUS='UNKNOWN')
 C* Define the number of points for cross sections fine mesh
       WRITE(LTT,991) ' Number of x-s fine mesh subintervals   '
@@ -823,6 +824,7 @@ C*
       CALL WRCONT(LOU, -1, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       STOP 'EMPEND Completed'
 C*
+  990 FORMAT(A80)
   991 FORMAT(2A40)
   992 FORMAT(BN,I10)
   994 FORMAT(BN,F10.0)
