@@ -205,7 +205,7 @@ C-M           angles which must be grouped to angular distributions
 C-M           at different energies).
 C-M    MXMT - Maximum number of reactions in the Standards file.
 C-
-      PARAMETER       (MXEN=80000,MXAL=20,LCH=53,MXIR=80000,MXMT=300)
+      PARAMETER       (MXEN=80000,MXAL=60,LCH=53,MXIR=80000,MXMT=300)
       PARAMETER       (MEL1=20,MXNP=300000,MXRW=20000)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*80     DPATH
