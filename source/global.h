@@ -1,6 +1,6 @@
-C $Rev: 2961 $
+C $Rev: 2970 $
 C $Author: rcapote $
-C $Date: 2012-07-19 01:04:48 +0200 (Do, 19 Jul 2012) $
+C $Date: 2012-07-21 13:38:37 +0200 (Sa, 21 Jul 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -79,7 +79,7 @@ C
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
-     &        DYNam, COLfile	 
+     &        DYNam, COLfile, LTOtred	 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -88,7 +88,7 @@ C
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
      &                 FISshi(ndnuc), FITlev, FLAm(ndcc),FCCred,FDWred,
-     &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv, 
+     &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv,FCOred, 
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn, DXSred,
      &                 GMRpar(ndgmrpm,0:ndnuc), GQRpar(ndgqrpm,0:ndnuc),
@@ -149,7 +149,7 @@ C
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
       DOUBLE PRECISION rTOTRED,rFCCRED,rFDWRED,rFUSRED,rELAred,rCELred 
-      DOUBLE PRECISION rTUNEfi(0:ndnuc)
+      DOUBLE PRECISION rTUNEfi(0:ndnuc),rFCOred
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
       DOUBLE PRECISION om2_ig(0:NDNUC),delp_ig(0:NDNUC),
      &                 atil_ig(0:NDNUC),dshift_ig(0:NDNUC)
@@ -176,7 +176,7 @@ C
      &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
       
 	  
-	  COMMON /COMFIS_CON/ ROFisp, UGRid, ENH_ld, SHCfis,
+      COMMON /COMFIS_CON/ ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
      &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp,
      &                    HCOnt, ECFis
@@ -188,7 +188,7 @@ C
 
       COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
       
-	  COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
+      COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 C     COMMON /DEPTH / POTe
       COMMON /ENDFEA/  POPcsed, POPcsedlab, POPcsealab, POPcseaf
@@ -201,7 +201,7 @@ C     COMMON /DEPTH / POTe
      &                 EGDr2, GGDr2, CSGdr2, GDRdyn, GDRwa1, GDRwa2,
      &                 GDResh, GDRspl, DIToro, EWSr1, EWSr2, DEFpar,
      &                 DEFprj, DEFga, DEFgw, DEFgp, ADIv, FUSred,
-     &                 FITlev,DV,FCC, STMro, DEGa, 
+     &                 FITlev,DV,FCC, STMro, DEGa, FCOred, rFCOred,
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc,
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
      &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
@@ -258,8 +258,8 @@ C
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
-     &                  NUBarread, BENchm, CALctl, COLfile
-       COMMON /GSA   / KEY_shape, KEY_gdrgfl
+     &                  NUBarread, BENchm, CALctl, COLfile, LTOtred
+      COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
       COMMON /NUMHLP_R/ EXPmax, EXPdec

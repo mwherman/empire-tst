@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2960 $
+Ccc   * $Rev: 2970 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 01:02:54 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-21 13:38:37 +0200 (Sa, 21 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -264,11 +264,14 @@ C--------fusion parameters
          DFUs = 1.d0
          FUSred = 1.d0
          FCCred = 1.d0
+         FCOred = 1.d0
          TOTred = 1.d0
+         LTOtred = .FALSE.
          ELAred = 1.d0
          CELred = 1.d0 
          rFUSred = 1.d0
          rFCCred = 1.d0
+         rFCOred = 1.d0
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
@@ -3454,12 +3457,16 @@ C-----------Print some final input options
                  ENDIF 
                  IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
-               WRITE (8,
+         
+               INQUIRE (FILE = ('TARGET_COLL.DAT'),EXIST = fexist)
+               IF (.not.fexist) then
+                 WRITE (8,
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
-     &     ) ECUtcoll
-               WRITE (8,
+     &             ) ECUtcoll
+                 WRITE (8,
      &'('' Maximum spin of retrieved collective levels J <'',I1)') 
-     &         JCUtcoll+1
+     &             JCUtcoll+1
+               ENDIF
             ENDIF
 
             IF (KEY_shape.EQ.0) WRITE (8,
@@ -4049,7 +4056,7 @@ C-----
          IF (name.EQ.'FCCRED') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
-     &          '('' Direct cross section uncertainty '',
+     &          '('' Disc-lev. cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
                  sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
@@ -4060,7 +4067,7 @@ C-----
                   FCCred = val + 1.732d0*(2*rFCCred-1.)*sigma
                 ENDIF
                 WRITE (8,
-     &     '('' Direct cross section was scaled by factor ''
+     &     '('' Disc-lev. cross section was scaled by factor ''
      &          ,f6.3)') FCCred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
@@ -4068,11 +4075,42 @@ C-----
             else
                 FCCred = val
                 WRITE (8,
-     &      '('' Direct cross section was scaled by factor '',
+     &      '('' Disc-lev. cross section was scaled by factor '',
      &            F6.3)') FCCred
                 WRITE (12,
-     &      '('' Direct cross section was scaled by factor '',
+     &      '('' Disc-lev. cross section was scaled by factor '',
      &           F6.3)') FCCred
+            endif
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'FCORED') THEN
+            if(i1.ne.0 .and. IOPran.ne.0) then
+                WRITE (8,
+     &          '('' Contin.cross section uncertainty '',
+     &          '' is equal to '',i2,'' %'')') i1
+                 sigma = val*i1*0.01
+                IF(IOPran.gt.0) then
+                  IF(rFCOred.eq.1.d0) rFCOred = grand()
+                  FCOred = val + rFCOred*sigma
+                ELSE
+                  IF(rFCOred.eq.1.d0) rFCOred = drand()
+                  FCOred = val + 1.732d0*(2*rFCOred-1.)*sigma
+                ENDIF
+                WRITE (8,
+     &     '('' Contin.cross section was scaled by factor ''
+     &          ,f6.3)') FCOred
+                IPArCOV = IPArCOV +1
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
+     &             IPArCOV, FCOred, INDexf,INDexb
+            else
+                FCOred = val
+                WRITE (8,
+     &      '('' Contin.cross section was scaled by factor '',
+     &            F6.3)') FCOred
+                WRITE (12,
+     &      '('' Contin.cross section was scaled by factor '',
+     &           F6.3)') FCOred
             endif
             GOTO 100
          ENDIF
@@ -4109,6 +4147,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'TOTRED') THEN
+            LTOtred = .TRUE.
             if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Total cross section uncertainty '',
