@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2963 $
+Ccc   * $Rev: 2974 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 09:56:54 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-21 13:42:13 +0200 (Sa, 21 Jul 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -181,7 +181,12 @@ C
       ETMin = 0.
       ETMax = ( - QMAx) + 25.*ESTep
       IF (ETMax.GT.eccm) ETMax = eccm - ESTep
-      NEBinx = (ETMax - ETMin)/ESTep + 1.2
+
+C     icsl = INT(echannel/DE + 1.0001)
+C     ncon = min(
+C    &        NINT((EXCn-Q(nejcec,1)-ECUt(nnurec))/DE + 1.0001),NDEcse)
+
+      NEBinx = min(NINT((ETMax - ETMin)/ESTep + 1.0001),NDEcse)
       EOUtmx = ESTep*FLOAT(NEBinx)
       EOUtmi = EOUtmx - ESTep*FLOAT(NEBinx)
       WRITE (8,99020)
@@ -2988,19 +2993,23 @@ C
                      WRITE (8,99020) eout, s1, s2, s3, sigm, f11, a1,
      &                               a2, a3, ay, f21
                      WRITE (66,99020) eout, s1, s2, sigm
-                  ENDIF
+                  ENDIF							 
 C                 necs = Nbinx - ne + 2
 C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
                   sigm = sigm/2.0
 C-----------------store ddx to continuum
-                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
+C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
+                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
+C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
      &                THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
-                  ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
-     &                    ) THEN
+C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
+                  ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. 
+     &                    necs.GT.(NEX(nnur)  )) THEN
+C    &                    necs.GT.(NEX(nnur)+1)) THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
                   ENDIF
                ENDIF
@@ -3012,6 +3021,10 @@ C-----------------constructed out of discrete levels
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
+C-----if ECIS active use only continuum part of the MSD spectrum
+C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
+      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
+C
       DO ne = 1, nmax
         DO na = 1, 3
 C          Eliminating the first three angles for continuity
@@ -3019,8 +3032,7 @@ C          Small error introduced, DIRTY PATCH, RCN, July 2012
            CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
         ENDDO
       ENDDO
-C-----if ECIS active use only continuum part of the MSD spectrum
-      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur))
+C
       WRITE(8,*) ' '
       WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
      &   nmax
@@ -3104,7 +3116,10 @@ C-----
          excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
-      nexrt = MIN(INT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
+C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
+      nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed) 
+C	Continuum increased by one to fill the hole in MSD calculation
+C	IF(MSD.GT.0) nexrt = nexrt + 1 	
 C-----total number of bins
       next  = INT(excnq/DE + 1.0001)
 
@@ -3140,9 +3155,8 @@ C-----ground state target spin XJLV(1,0)
 C
 C              Population increased to preserve total flux
 C              as calculated by PCROSS or MSD+MSC
-C
                if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-C
+
                POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
                POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
             ENDDO
@@ -3159,7 +3173,8 @@ C              as calculated by PCROSS or MSD+MSC
 C
                pops = CSEmsd(icsp,Nejc)
 C              Commented on Dec 2011 by RCN, to keep integral of spectra = XS
-C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+C              Uncommented on July 2012
+               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
@@ -3214,17 +3229,18 @@ C
 C     Discrete levels not used for alpha (please do not include levels into
 C                   continuum for alpha emission)
 C
-      IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.0 ) return
-      IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.0 ) return
+      IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.0 )  return
+      IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.0 )  return
 
-C     IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 ) return
-C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 ) return
-      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(1,3).EQ.0 ) return
-      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.0 ) return
-C     IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 ) return ! 
+C     IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 )  return
+C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 )  return
+      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(1,3).EQ.0 )  return
+      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.0 )  return
+      IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 )  return  
 
-      IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 ) return
-      IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa(3,6).EQ.0 ) return
+      IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 )  return
+      IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa(3,6).EQ.0 )  return
+      IF (Nejc.eq.0 .and. PEQc.GT.0 .and. IDNa(5,6).EQ.0 )  return  
       IF (Nejc.eq.3 .and. PEQc.GT.0 .and. IDNa(11,6).EQ.0 ) return
       IF (Nejc.eq.4 .and. PEQc.GT.0 .and. IDNa(12,6).EQ.0 ) return
       IF (Nejc.eq.5 .and. PEQc.GT.0 .and. IDNa(13,6).EQ.0 ) return
@@ -3263,6 +3279,9 @@ C
        DO ie = istart, next
          csm1 = csm1 + CSEmsd(ie,Nejc)*DE
        ENDDO
+
+       IF(csm1.le.1.d-6) RETURN
+
        csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
 
 C------MSD or PCROSS contribution is integrated over the discrete level region and
@@ -3285,7 +3304,7 @@ C        Setting it to zero to delete discrete spectra before redistributing
            if( IDNa(3,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.2 ) 
      >       CSEmsd(ie,Nejc) = 0.d0
            if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
-       ENDIF
+         ENDIF
        ENDDO
        csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
 C
