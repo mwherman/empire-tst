@@ -1,6 +1,6 @@
-cc   * $Rev: 2962 $
+cc   * $Rev: 2972 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 01:10:25 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-21 13:40:44 +0200 (Sa, 21 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -91,7 +91,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
      &        icsh, icsl, ie, iizaejc, il, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, ke, kemax, kemin, ltrmax, m, jz, jn, jzmx, jnmx, 
-     &        nang, nbr, ncoll, nejc, nejcec, nnuc, mintsp, jfiss,
+     &        nang, nbr, ncoll, nejc, nejcec, nnuc, jfiss,
      &        nnur, nnurec, nspec, neles, nxsp, npsp, ncon,
      &        ikey1, ikey2, ikey3, ikey4, 
 C             -----------------------------------------------
@@ -224,8 +224,11 @@ C-----
       endif
 
       CALL ULM(0) ! target
+
 C
+
       CALL ULM(1) ! CN
+
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -238,25 +241,41 @@ C
 	  ELAcs = 0.d0
 	ENDIF
 C
+
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
 C-----Prepare Giant Resonance parameters - systematics
 C-----
 C-----Locate position of the target among residues
+
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
+
       if(iloc.eq.0 .and. nnurec.ne.0) then
+
         GDRpar(1,nnurec) = GDRpar(1,0) 
+
         GDRpar(2,nnurec) = GDRpar(2,0) 
+
         GDRpar(3,nnurec) = GDRpar(3,0) 
+
         GDRpar(4,nnurec) = GDRpar(4,0) 
+
         GDRpar(5,nnurec) = GDRpar(5,0) 
+
         GDRpar(6,nnurec) = GDRpar(6,0) 
+
         GDRpar(7,nnurec) = GDRpar(7,0) 
+
         GDRpar(8,nnurec) = GDRpar(8,0) 
+
         GDRpar(9,nnurec) = GDRpar(9,0) 
+
         GDRpar(10,nnurec)= GDRpar(10,0) 
+
       endif
+
+
 
       CALL WHERE(IZA(1),nnuc,iloc)
       if(iloc.eq.0 .and. nnuc.ne.1) then
@@ -371,13 +390,15 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
       ENDIF
 C
 C-----
+
 C-----Get ECIS results for excited levels
+
 C-----
+
       IF (DIRect.NE.0) THEN
-         ggmr = 3.
-         ggqr=85.*A(0)**(-2./3.)
-         ggor=5.
-         mintsp = mod(NINT(2*D_Xjlv(1)),2)
+          ggmr = 3.d0
+          ggqr =85.d0*A(0)**(-2./3.)
+          ggor =5.d0
           OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
           READ (46,*,END = 1400) ctmp ! To skip first line <INE.C.S.> ..
@@ -389,8 +410,7 @@ C          RCN 2010
            IF(ICOllev(i).gt.LEVCC .and. SINl+SINlcont.le.0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
-C          For odd nuclides, collective states in continuum have different spin than the ground state
-C    &         (mod(NINT(2*D_Xjlv(i)),2).eq.mintsp) )THEN
+C
 C------------Adding inelastic to discrete levels
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
 C------------Avoid reading closed channels
@@ -465,18 +485,19 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                   ENDDO
                ENDIF
              ELSE
-               READ (46,*,END = 1400) popread
+               READ (46,*,END = 1400) popread ! reading zero for a closed channel
 C			 Bug found on July 18, 2012 affects calculations with unordered coll.levels
 C              READ (45,'(A)',END = 1400) ctmp    ! Skipping level identifier line
              ENDIF
+C	     
 C          Allowing states in the continuum even for MSD>0
 C          ELSEIF(MSD.eq.0)then
            ELSE
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
-             icsl = INT(echannel/DE + 1.0)
+             icsl = INT(echannel/DE + 1.0001)
              ncon = min(
-     &          NINT((EXCn-Q(nejcec,1)-ECUt(nnurec))/DE),NDEcse)
+     &        NINT((EXCn-Q(nejcec,1)-ECUt(nnurec))/DE + 1.0001),NDEcse)
 C            WRITE(8,*) 'nejcec, nnurec',IZAejc(nejcec), IZA(nnurec)
 C            WRITE(8,*) 'Level in continuum',D_Elv(i)
 C            WRITE(8,*) 'Its bin number',icsl
@@ -486,26 +507,13 @@ C            WRITE(8,*) 'Ecut',ECUt(nnurec)
 C            WRITE(8,*) 'Ex',EX(NEX(1),1)-Q(nejcec,1)-(ncon-1)*DE
 C            WRITE(8,*) 'Continuum starts at bin number',ncon
 C------------Avoid reading closed channels
-             IF (echannel.GE.0.0001 .and. icsl.gt.0) THEN
+             IF (echannel.GE.0.0001) THEN
                READ (46,*,END = 1400) popread
-               if(D_Def(i,2).LT.0  .and.
-     &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
-                 IF(int(D_Xjlv(i)).eq.3) 
-     >      write(8,'(/''  GOR cross section (cont) ='',F7.1,'' mb'')') 
-     >             popread  
-                 IF(int(D_Xjlv(i)).eq.2) 
-     >      write(8,'(/''  GQR cross section (cont) ='',F7.1,'' mb'')') 
-     >             popread  
-                 IF(int(D_Xjlv(i)).eq.0) 
-     >      write(8,'(/''  GMR cross section (cont) ='',F7.1,'' mb'')') 
-     >             popread  
-               endif  
-C
+               popread = popread*FCOred
 C--------------This level is not counted as a discrete one
 C--------------but it is embedded in the continuum
                CSMsd(nejcec) = CSMsd(nejcec) + popread
                xsinlcont = xsinlcont + popread
-C--------------Spreading it using resolution function
 C
 C              Special treatment for Giant Multipole Resonances
 C              Any level with D_Def(i,2)<0 treated as GR
@@ -515,15 +523,57 @@ C
 C              For each L multipolarity Energy Weighted Sum Rule (EWSR) applies:
 C              SUM_i(E_i*beta_i)=57.5*A**(-5/3)*L*(L+1)
 C
+               if(D_Def(i,2).LT.0  .and.
+     >             INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
+                 write(8,
+     >		 '(/''  Giant Multipole Resonance with J ='',F4.1)') 
+     >           D_Xjlv(i)
+                 IF(int(D_Xjlv(i)).eq.3) then
+                   write(8,'( ''  GOR cross section (cont) ='',
+     >               F7.1,'' mb'')') popread
+                   write(8,'( ''  GOR energy ='',F6.2,'' MeV'')')
+     >               D_Elv(i)
+                   write(8,'( ''  GOR width  ='',F6.2,'' MeV'')') ggor		   
+                   write(8,'( ''  GOR deformation ='',F7.4)') 
+     >               -D_Def(i,2)		   		   
+		       ENDIF           
+                 IF(int(D_Xjlv(i)).eq.2) then
+                   write(8,'( ''  GQR cross section (cont) ='',
+     >               F7.1,'' mb'')') popread
+                   write(8,'( ''  GQR energy ='',F6.2,'' MeV'')')      
+     >               D_Elv(i)
+                   write(8,'( ''  GQR width  ='',F6.2,'' MeV'')') ggqr     
+                   write(8,'( ''  GQR deformation ='',F7.4)') 
+     >               -D_Def(i,2)		   		   
+		       ENDIF           
+                 IF(int(D_Xjlv(i)).eq.0) then
+                   write(8,'( ''  GMR cross section (cont) ='',
+     >               F7.1,'' mb'')') popread
+                   write(8,'( ''  GMR energy ='',F6.2,'' MeV'')') 
+     >               D_Elv(i)
+                   write(8,'( ''  GMR width  ='',F6.2,'' MeV'')') ggmr     		   
+                   write(8,'( ''  GMR deformation ='',F7.4)')
+     >               -D_Def(i,2)
+		       ENDIF    
+                 write(8,*)    		   		   		 
+               endif  
+C
+C--------------Spreading discrete levels in the continuum using a resolution function
+C-
                isigma  = isigma0
-               isigma2 = 2*isigma0*isigma0
                if(D_Def(i,2).LT.0  .and.
      &               INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
+C
+C                ggmr = 3.d0
+C                ggqr =85.d0*A(0)**(-2./3.)
+C                ggor =5.d0
+C
                  if(int(D_Xjlv(i)).eq.0) isigma  = nint(ggmr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.2) isigma  = nint(ggqr/DE+0.5)
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
-                 isigma2 = 2*isigma*isigma
                endif
+               isigma2 = 2*isigma*isigma
+C
                if(isigma.gt.0) then
                  dcor  = 0.d0
                  do ie = max(icsl - 3*isigma,1) ,
@@ -534,16 +584,18 @@ C
                    do ie = max(icsl - 3*isigma,1) ,
      &                     min(icsl + 3*isigma,ncon)
                      CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) +
-     &                 popread/DE*dexp(-dble(ie-icsl)**2/isigma2)/dcor
+     &                 popread/DE  *  
+     &                 dexp(-dble(ie-icsl)**2/isigma2)/dcor
                    enddo
                  else
                    CSEmsd(icsl  ,nejcec) = CSEmsd(icsl,nejcec)
-     &              + popread/DE
+     &              + popread/DE 
                  endif
                else
-                 CSEmsd(icsl  ,nejcec) = CSEmsd(icsl,nejcec)
+                 CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec)
      &              + popread/DE
                endif
+C	       
                IF (ICAlangs.EQ.0) THEN
                  READ (45,*,END = 1400)     ! Skipping level identifier line
                  iang = 0
@@ -552,18 +604,20 @@ C
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
-                    if(isigma.gt.0 .and. dtmp.gt.0.d0) then
+                    if(isigma.gt.0 .and. dcor.gt.0.d0) then
                       do ie = max(icsl - 3*isigma,1) ,
      &                        min(icsl + 3*isigma,ncon)
                         CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1)
-     &                  + ftmp/DE * dexp(-dble(ie-icsl)**2/isigma2)/dtmp
+     &                  + ftmp * dexp(-dble(ie-icsl)**2/isigma2)/dcor
                       enddo
                     else
                       CSEa(icsl,iang,nejcec,1) =
-     &                    CSEa(icsl,iang,nejcec,1) + ftmp/DE
+     &                CSEa(icsl,iang,nejcec,1) + ftmp
                     endif
                  ENDDO
                ENDIF
+             ELSE
+               READ (46,*,END = 1400) popread ! reading zero for a closed channel
              ENDIF
 C------------End of adding inelastic to continuum
            ENDIF
@@ -616,6 +670,7 @@ C
      &                   (SINlcc + SINl)*FCCred + SINlcont
          WRITE(8,'(/)')
       ENDIF
+
 
       gang = 180.0/(NDAng - 1)
       angstep = 180.0/(NANgela - 1)
@@ -1059,8 +1114,8 @@ C    &'(''   Spin distribution calculated using '',
 C    &  ''CC transmission coefficients'')')
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
      &     'DWBA to continuum              ',
-     &                        sngl(xsinlcont),' mb',
-     &                        sngl(xsinlcont/CSFus*100),' %'
+     &                        sngl(SINlcont),' mb',
+     &                        sngl(SINlcont/CSFus*100),' %'
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &     'Non-elastic cross section      ',
@@ -1075,8 +1130,8 @@ C    &  '' DWBA inelastic contribution '')')
      &                        sngl(SINl*FCCred/CSFus*100),' %'
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
      &     'DWBA to continuum              ',
-     &                        sngl(xsinlcont),' mb',
-     &                        sngl(xsinlcont/CSFus*100),' %'
+     &                        sngl(SINlcont),' mb',
+     &                        sngl(SINlcont/CSFus*100),' %'
          ENDIF
 C        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
 C    &     'PE + Direct contribution       ',
@@ -1389,6 +1444,7 @@ C---------------------locate position of the projectile among ejectiles
                       CALL WHEREJC(IZAejc(0),nejcec,iloc)
                       its = ncoll
                       WRITE (40,'(12x,11D12.5)') 
+
      &                           ELAred*ELAcs + 4.d0*PI*ELCncs,
      &                         (CSDirlev(ICOller(ilv),nejcec),
      &                          ilv = 2,MIN(its,10))
@@ -1402,6 +1458,7 @@ C---------------------locate position of the projectile among ejectiles
                       ENDIF
                     ELSE
                       WRITE (40,'(12x,11D12.5)') 
+
      &				            ELAred*ELAcs + 4.d0*PI*ELCncs
                       IF (ICAlangs.gt.0) THEN
                         DO iang = 1, NDANG
@@ -2060,7 +2117,9 @@ C--------down on the ground state
            WRITE (8,*) ' Shape elastic cross section',
      &                     ELAred*ELAcs, ' mb'
 C----------CN contribution to elastic ddx
+
            ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI *CELred
+
            WRITE (8,*) ' CN elastic cross section   ',
      &                     POPlv(LEVtarg,mt2)*CELred,' mb'
            WRITE (8,*)
@@ -2386,6 +2445,7 @@ C-----------------------(discrete levels part)
                    ENDIF
 C-----------------------(continuum part - same for all n and p)
                    cseaprnt = 0.d0 ! clean DDX matrix
+
                    IF(LHMs.EQ.0) THEN
                      iprinted = 0
                      DO ie = 1, nspec ! reconstruct continuum DDX spectrum
@@ -2395,7 +2455,9 @@ C-----------------------(continuum part - same for all n and p)
      &                            piece*POPcseaf(0,nejc,ie,INExc(nnuc))
      &                             )/4.0/PI
                        IF(ftmp.LT.0.0d0) CYCLE
+
 C                      IF(ftmp.LT.0.0d0) THEN
+
 C                         ftmp = 0.0d0
 C                         IF(iprinted.eq.0) WRITE(8,*)
 C    &                          'WARNING: Corrective action to avoid',
@@ -2758,7 +2820,9 @@ C
      &       '(''  Equivalent Tmaxwell '',G12.5,'' MeV'')') tequiv
               WRITE (8,*) ' '
 
+
 C            Partial fission spectra not needed in EMPEND, skipping the printout
+
 C    
 C             WRITE (12,
 C    &       '(''  Postfission <En> '', G12.5,'' MeV'')') eneutr
@@ -3002,9 +3066,13 @@ C     ENDDO
      &     '('' * Shape Elastic cross section scaled by '',G13.6)')
      &     ELAred
           if(CELred.ne.1)
+
      &    WRITE (8,
+
      &     '('' * Comp. Elastic cross section scaled by '',G13.6)')
+
      &     CELred
+
           WRITE (8,
      &  '('' * Calculated total cross section                 '',G13.6,
      &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
@@ -3019,11 +3087,11 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  '('' * Calculated shape elastic cross section (ELAcs) '',
      &         G13.6,'' mb  '')') ELAred*ELAcs
         ENDIF
-        WRITE (8,
-     &  '('' * Optical model nonelastic cross section (ABScs) '',G13.6,
-     &              '' mb  '')')
-     &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
-     &   + (SINl+SINlcc)*FCCred + SINlcont
+C       WRITE (8,
+C    &  '('' * Optical model nonelastic cross section (ABScs) '',G13.6,
+C    &              '' mb  '')')
+C    &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
+C    &   + (SINl+SINlcc)*FCCred + SINlcont
           WRITE (8,
      &  '('' * Calculated nonelastic cross section            '',G13.6,
      &              '' mb  '')')
@@ -3091,6 +3159,7 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         WRITE (8,'('' WARNING: is not equal reaction cross section'')')
         IF((CSFus + (SINl+SINlcc)*FCCred + SINlcont).NE.0.d0)
      &  WRITE (8,'('' WARNING:     difference: '', F6.2,'' % at E = '',
+
      &  G12.5,'' MeV'')') 100.d0*
      &   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont - checkXS)/
      &                (CSFus + (SINl+SINlcc)*FCCred + SINlcont),EINl
@@ -3103,7 +3172,9 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
         WRITE (8,'('' WARNING: Total cross section is NOT equal'')')
         WRITE (8,'('' WARNING: Elastic + Absorption cross section'')')
         WRITE (8,'('' WARNING:     difference: '', F6.2,'' % at E = '',
+
      &  G12.5,'' MeV'')') 100.d0*
+
      &    abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*TOTcorr)/
      &                 (TOTred*TOTcs*TOTcorr),EINl
       ENDIF
@@ -3629,7 +3700,7 @@ C
 
         IF(nextenergy(1:1).eq.'@') THEN 
           BACKSPACE 5
-          READ (5,'(A72)') rtitle
+          READ (5,'(A72)',END=1200) rtitle
  
           rtitle(1:1)=' '
 
@@ -3643,17 +3714,17 @@ C
         ENDIF
 
         BACKSPACE 5
-C       READ(nextenergy,'(G15.5)',END=1200) EIN
         READ(5,*,END=1200) EIN
 
       ELSE
+	  
  1158   READ (5,'(A36)',END=1200) nextenergy
         IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &      nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158
 
         IF(nextenergy(1:1).eq.'@') THEN 
           BACKSPACE 5
-          READ (5,'(A72)') rtitle
+          READ (5,'(A72)',END=1200) rtitle
 
           rtitle(1:1)=' '
 
@@ -3667,7 +3738,6 @@ C       READ(nextenergy,'(G15.5)',END=1200) EIN
         ENDIF
 
         BACKSPACE 5
-
         READ (5,*,END=1200) EIN, NDAng, ICAlangs
         IF(NDAng.lt.2) THEN
             NDAng=2
