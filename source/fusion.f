@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2958 $
+Ccc   * $Rev: 2973 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-21 13:41:52 +0200 (Sa, 21 Jul 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -729,14 +729,31 @@ C-----Print elastic and direct cross sections from ECIS
         ENDIF
       ENDIF
 
-      IF(CSFus.gt.0.d0 .and. TOTred.ne.1.d0) then
-        if(FUSred.NE.1) WRITE (8,*) 'WARNING: INPUT FUSred dismissed'
-        FUSred = (TOTred*TOTcs - ELAcs*ELAred)/CSFus
-        WRITE (8,'(1x,A18,F5.2,A49,F5.2)') 
-     >   ' FUSRED scaled by ', sngl(FUSRED),
-     >   ' to impose requested scaling of total by TOTRED =',
-     >   sngl(TOTred)
-         TOTred = 1.D0
+      IF(LTOtred) then
+
+        if(TOTred.eq.1) LTOtred = .false.
+
+        if(FUSred.ne.1) WRITE (8,'(
+     >''  WARNING: FUSRED dismissed as TOTRED is given in the input'')'
+     >)
+        if(ELAred.ne.1) WRITE (8,'(
+     >'' WARNING: ELARED dismissed as TOTRED is given in the input'')'
+     >)
+        if(FCCred.ne.1) WRITE (8,'(
+     >'' WARNING: FCCRED dismissed as TOTRED is given in the input'')'
+     >)
+        if(FCOred.ne.1) WRITE (8,'(
+     >'' WARNING: FCORED dismissed as TOTRED is given in the input'')'
+     >)
+        FUSred = TOTred
+        ELAred = TOTred	
+	  FCCred = TOTred 
+        FCOred = TOTred 
+        WRITE (8,'(1x,A50,A50,F5.3)') 
+     >   ' WARNING: FUSRED,ELARED, FCCRED and FCORED changed',
+     >   ' to impose requested scaling of total by  TOTRED= ',
+     >     TOTred
+        TOTred = 1.d0
       ENDIF
 
       el = EINl
