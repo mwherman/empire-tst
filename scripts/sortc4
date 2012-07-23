@@ -36,6 +36,13 @@ cat >C4SORT.INP<<EOF
    FLESTD iaea-std.dat
    DPATH  $EMPIREDIR/RIPL/levels/
 
+   ALIAS       92000    3    1     92238    3    1
+   ALIAS       92000    3    2     92238    3    2
+   ALIAS       92000    4    2     92238    4    2
+   ALIAS       92000    4 9000     92238    4 9000
+   ALIAS       92000    5 9000     92238    5 9000
+   ALIAS       92000    6 9000     92238    6 9000
+
    ALIAS       14000    3    1     14028    3    1
    ALIAS       14000    5 9000     14028    5 9000
    ALIAS       14000    6 9000     14028    6 9000
