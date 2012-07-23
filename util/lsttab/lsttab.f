@@ -40,6 +40,11 @@ C-V           in the C4 file.
 C-V  12/06  - Guard against unreasonable cosines in C4 (Trkov)
 C-V         - Force the use of index numbers in the list file when
 C-V           they are not in sequence (e.g. deleted by the user).
+C-V  12/07  - Refine the interpretation of groups of levels (for
+C-V           discrete inelastic levels) or output particle energy
+C-V           range (for particle production from discrete level
+C-V           reactions).
+C-V         - Improve retrieval from C4
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -292,8 +297,16 @@ C*        Cross section at fixed angle
 C* Angular distributions (outg. particle energy-integrated)
           KEA=1
 C*        Discrete energy level (if applicable)
-          IF(EOU.GT.0) ELV=EOU
-          IF(DEG.GE.0) PAR=DEG
+          IF(EOU.GT.0) THEN
+            ELV=EOU
+            IF(DEG.GE.0) THEN
+              PAR=DEG
+              IF(MT.EQ.9000) THEN
+                PAR=ELV-DEG
+                ELV=1.0001*ELV
+              END IF
+            END IF
+          END IF
         END IF
       ELSE IF(MF0.EQ.5) THEN
 C* Energy distributions (outg. particle angle-integrated)
@@ -373,7 +386,13 @@ C* Write the data to the PLOTTAB curves file
       DO I=1,NP
 C* Suppress printing negative or zero points
         EE=ES(I)
-        IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
+        IF(KEA.EQ.1) THEN
+          IF(ABS(EE).LE.1) THEN
+            EE=ACOS(EE)*180/PI
+          ELSE
+            PRINT *,'ERROR - Cosine',ee
+          END IF
+        END IF
         IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
         SG(I)=SG(I)*FSP
         UG(I)=UG(I)*FSP
@@ -640,6 +659,7 @@ C-Purpose: Extract data from EXFOR computational format file
 C-Version:
 C-V  09/03 Make angular tolerance 1 deg. (consistent with PLTLST).
 C-V  12/06 Guard against unreasonable cosines
+c-v  12-07 Retrieve double-differential data for range expressed by DE2
 C-Description:
 C-D  Numeric data are extracted from the C4 file (EXFOR computational
 C-D  format)
@@ -672,6 +692,7 @@ C-
       PARAMETER   (MXAU=100)
       DOUBLE PRECISION GETAWT,PROJWT
       CHARACTER*1  MM(3),CM,C1,C2,C3
+      CHARACTER*3  LBL
       CHARACTER*9  CHX4,CHX0,CHXR,CHXU(MXAU)
       CHARACTER*11 REC(6)
       CHARACTER*25 REF,RF0,RF4,RFAU(MXAU)
@@ -739,7 +760,11 @@ C* Test for supported MTs in MF 1
       ELSE IF(MF.EQ.3) THEN
 C* Test outgoing particle and discrete level energy
         EL=F7
-        IF(F8.GT.0) EL=MIN(F7,F8)
+        IF(F8.GT.0) THEN
+          EH=MAX(F7,F8)
+          EL=MIN(F7,F8)
+          IF(LBL.EQ.'DE2') EL=EH-EL
+        END IF
         IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
           IF6=F6
         IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
@@ -763,7 +788,11 @@ C* Test incident and level energy for double differential data
             IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test level energy for angular distribution data
             EL=F7
-            IF(F8.GT.0) EL=MIN(F7,F8)
+            IF(F8.GT.0) THEN
+              EH=MAX(F7,F8)
+              EL=MIN(F7,F8)
+              IF(LBL.EQ.'DE2') EL=EH-EL
+            END IF
             IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
           END IF
         ELSE
