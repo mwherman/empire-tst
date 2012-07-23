@@ -238,6 +238,8 @@ Change to "proton production" (A. Trkov, 06-Jun-06)                            1
 (N,P)DI,SIG                                         1  32103  0
 Add total scattering cross section, 24-Feb-2009, A. Trkov                      1
 (N,SCT),SIG                                         1  39000  0
+Add total scattering cross section, 22-Jul-2012, A. Trkov                      1
+(N,SCT),SIG,,AV
 ... temporarily deactivated (A. Trkov)
 ((N,EL),SIG)+((N,INL)PAR,SIG)                       1  39000  0                1
                                                                                1
@@ -585,9 +587,15 @@ Added fission neutron spectrum - various combinations (A. Trkov, 06 Mar 2012)  1
 (N,F)PR,NU/DE,,MXW/REL                              1  5  18  0
 (N,F)PR,NU/DE,,REL/MXW                              1  5  18  0
 (N,F)PR,NU/DE,,AV/REL                               1  5  18  0
+Fission spectrum relative to SQRT(E)  (A. Trkov, 23-Jul-2012)                  1
+(N,F)PR,NU/DE,,RRE/REL                              1  5  18  0
+Normalised fission spectrum (A. Trkov, 23-Jul-2012)                            1
+(N,F)PR,NU/DE,,NPD                                  1  5  18  0
                                                                                1
 Spontaneous fission                                                            1
 (0,F)PR,NU/DE                                       0  5  18  0
+Normalised fission spectrum (A. Trkov, 23-Jul-2012)                            1
+(0,F)PR,NU/DE,,NPD                                  0  5  18  0
                                                                                1
 Fission spectrum ratio to another nuclide                                      1
 ((N,F)PR,NU/DE)/((N,F),PR,NU/DE)                    1205  18  0
@@ -652,6 +660,8 @@ THE PRODUCED PARTICLE OR ISOTOPE WILL BE DEFINED BY OUTPUTTING ZA IN           1
 FIELD 6.                                                                       1
                                                                                1
 (N,X),SIG                                           1  39000  0
+Added partial cross sections (A. Trkov, 22-Jul-2020)                           1
+(N,X)PAR,SIG                                        1  39000  0
 (N,X)CN,SIG                                         1  39000  0
 (P,X),SIG                                        1001  39000  0
 Independent yield for residual production (A. Trkov, 10 May 2011)              1
