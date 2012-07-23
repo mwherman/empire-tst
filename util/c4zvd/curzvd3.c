@@ -6,15 +6,12 @@
 // 23.08.2005 ZV: reading +dY, -dY
 
 #define LSTR 220
-static  char    str [LSTR];
 static  char    str0[LSTR];
 static  char    str1[LSTR];
 static  char    str2[LSTR];
 static  char    str3[LSTR];
-static  char    str4[LSTR];
 static  char    strTmp[LSTR];
 static  char    strComment[LSTR];
-static  char    isoName[LSTR];
 static  char    plotTitle[LSTR];
 static  char    curveTitle[LSTR];
 static  char    reactionTitle[LSTR];
@@ -210,29 +207,29 @@ struct mtReac {
     char reac[20];
 };
 static struct mtReac mtRc[]={
-    {   1,  ",TOT" }
-   ,{   2,  ",EL" }
-   ,{   4,  ",INL" }
-   ,{  16,  ",2N" }
-   ,{  17,  ",3N" }
-   ,{  18,  ",F" }
-   ,{  22,  ",N+A" }
-   ,{  24,  ",2N+A" }
-   ,{  28,  ",N+P" }
-   ,{  29,  ",N+2A" }
-   ,{  32,  ",N+D" }
-   ,{  33,  ",N+T" }
-   ,{  34,  ",N+HE3" }
-   ,{  42,  ",2N+P" }
-   ,{ 102,  ",G" }
-   ,{ 103,  ",P" }
-   ,{ 104,  ",D" }
-   ,{ 105,  ",T" }
-   ,{ 106,  ",HE3" }
-   ,{ 107,  ",A" }
-   ,{ 108,  ",2A" }
-   ,{ 111,  ",2P" }
-   ,{9000,  ",X" }
+    {   1,  ",tot" }
+   ,{   2,  ",el" }
+   ,{   4,  ",inl" }
+   ,{  16,  ",2n" }
+   ,{  17,  ",3n" }
+   ,{  18,  ",f" }
+   ,{  22,  ",n+a" }
+   ,{  24,  ",2n+a" }
+   ,{  28,  ",n+p" }
+   ,{  29,  ",n+2a" }
+   ,{  32,  ",n+d" }
+   ,{  33,  ",n+t" }
+   ,{  34,  ",n+He3" }
+   ,{  42,  ",2n+p" }
+   ,{ 102,  ",g" }
+   ,{ 103,  ",p" }
+   ,{ 104,  ",d" }
+   ,{ 105,  ",t" }
+   ,{ 106,  ",He3" }
+   ,{ 107,  ",a" }
+   ,{ 108,  ",2a" }
+   ,{ 111,  ",2p" }
+   ,{9000,  ",x" }
 };
 
 struct mfReac {
@@ -386,14 +383,14 @@ int za2particle(int za, char *str)
 {
     int z,a,nNucl;
     switch (za) {
-	case  0:	strcpy(str,"G");	return(0);
-	case  1:	strcpy(str,"N");	return(0);
-	case -1:	strcpy(str,"E");	return(0);
-	case 12:	strcpy(str,"Pos");	return(0);
-	case 1001:	strcpy(str,"P");	return(0);
-	case 1002:	strcpy(str,"D");	return(0);
-	case 1003:	strcpy(str,"T");	return(0);
-	case 2004:	strcpy(str,"A");	return(0);
+	case  0:	strcpy(str,"g");	return(0);
+	case  1:	strcpy(str,"n");	return(0);
+	case -1:	strcpy(str,"e");	return(0);
+	case 12:	strcpy(str,"pos");	return(0);
+	case 1001:	strcpy(str,"p");	return(0);
+	case 1002:	strcpy(str,"d");	return(0);
+	case 1003:	strcpy(str,"t");	return(0);
+	case 2004:	strcpy(str,"a");	return(0);
 	case 2003:	strcpy(str,"He3");	return(0);
 	case 2005:	strcpy(str,"He5");	return(0);
 	case 2006:	strcpy(str,"He6");	return(0);
@@ -414,6 +411,6 @@ int za2nuclide(int za, char *str)
     if (z>=nNucl) return(-1);
 //  sprintf(str,"%d-%s-%d",z,nucl[z],a);
 //  printf("%s-%d...",nucl[z],a); getchar();
-    sprintf(str,"%s-%d",nucl[z],a);
+    sprintf(str,"%d-%s",a,nucl[z]);
     return(0);
 }

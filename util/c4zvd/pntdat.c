@@ -5,8 +5,6 @@
 
 #define LSTR 220
 static  char    str [LSTR];
-static  char    str0[LSTR];
-static  char    str1[LSTR];
 static  char    strTmp[LSTR];
 static  char    strProjectile[LSTR]="N";
 static  int     izaProjectile=1;
@@ -269,29 +267,29 @@ struct mtReac {
     char reac[20];
 };
 static struct mtReac mtRc[]={
-    {   1,  ",TOT" }
-   ,{   2,  ",EL" }
-   ,{   4,  ",INL" }
-   ,{  16,  ",2N" }
-   ,{  17,  ",3N" }
-   ,{  18,  ",F" }
-   ,{  22,  ",N+A" }
-   ,{  24,  ",2N+A" }
-   ,{  28,  ",N+P" }
-   ,{  29,  ",N+2A" }
-   ,{  32,  ",N+D" }
-   ,{  33,  ",N+T" }
-   ,{  34,  ",N+HE3" }
-   ,{  42,  ",2N+P" }
-   ,{ 102,  ",G" }
-   ,{ 103,  ",P" }
-   ,{ 104,  ",D" }
-   ,{ 105,  ",T" }
-   ,{ 106,  ",HE3" }
-   ,{ 107,  ",A" }
-   ,{ 108,  ",2A" }
-   ,{ 111,  ",2P" }
-   ,{9000,  ",X" }
+    {   1,  ",tot" }
+   ,{   2,  ",el" }
+   ,{   4,  ",inl" }
+   ,{  16,  ",2n" }
+   ,{  17,  ",3n" }
+   ,{  18,  ",f" }
+   ,{  22,  ",n+a" }
+   ,{  24,  ",2n+a" }
+   ,{  28,  ",n+p" }
+   ,{  29,  ",n+2a" }
+   ,{  32,  ",n+d" }
+   ,{  33,  ",n+t" }
+   ,{  34,  ",n+he3" }
+   ,{  42,  ",2n+p" }
+   ,{ 102,  ",g" }
+   ,{ 103,  ",p" }
+   ,{ 104,  ",d" }
+   ,{ 105,  ",t" }
+   ,{ 106,  ",He3" }
+   ,{ 107,  ",a" }
+   ,{ 108,  ",2a" }
+   ,{ 111,  ",2p" }
+   ,{9000,  ",x" }
 };
 
 struct mfReac {
@@ -299,10 +297,10 @@ struct mfReac {
     char reac[20];
 };
 static struct mfReac mfRc[]={
-    {   3,  ",SIG" }
-   ,{   4,  ",DA" }
-   ,{   5,  ",DE" }
-   ,{   6,  ",DAE" }
+	    {   3,  ",SIG" }
+	   ,{   4,  ",DA" }
+	   ,{   5,  ",DE" }
+	   ,{   6,  ",DAE" }
 };
 
 int extractReaction(char *str0, int flagPrint)

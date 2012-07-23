@@ -113,14 +113,14 @@ char    **argv;
 	    makeNuclide(za,str1);
 //	    fprintf(outFile,"#begin %s:%s:MF%d:MT%d/3\n",filename,str1,mf,mt);
 //    	fprintf(outFile,"#begin %s:MF%d:MT%d/3\n",str1,mf,mt);
-    	fprintf(outFile,"#begin %s(MT%d)/3\n",str1,mt);
+//    	fprintf(outFile,"#begin %s(MT%d)/3\n",str1,mt);
 
-//     	    if (filename=='') {
-//     	    	fprintf(outFile,"#begin %s:MF%d:MT%d/3\n",str1,mf,mt);
-//     	    }
-//     	    else {
-//         	    fprintf(outFile,"#begin %s/3\n",filename);
-//     	    }
+     	    if (filename==NULL) {
+     	    	fprintf(outFile,"#begin %s(MT%d)/3\n",str1,mt);
+     	    }
+     	    else {
+         	    fprintf(outFile,"#begin %s/3\n",filename);
+     	    }
             fprintf(outFile,"%s\n",str0);
             flagBegin=1;
             for (; ; ) {
