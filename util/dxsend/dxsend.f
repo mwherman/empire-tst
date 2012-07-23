@@ -1,5 +1,5 @@
-      SUBROUTINE DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF0,MT0,KEA,EIN,PAR,EPS
-     1                 ,ENR,DXS,UXS,RWO,NEN,MEN,MRW,LTT,ELV)
+      SUBROUTINE DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF0,MT0,KEA,EIN,PAR0,EPS
+     1                 ,ENR,DXS,UXS,RWO,NEN,MEN,MRW,LTT,ELV0)
 C-Title  : Subroutine DXSELM
 C-Purpose: Extract double differential cross sections from ENDF
 C-Author : A.Trkov, International Atomic Energy Agency, Vienna, Austria.
@@ -13,7 +13,9 @@ C-V        but this aliasing will be removed in future.
 C-V  09/12 PLNLEG Legendre summation done in double precision
 C-V  11/11 Add charged particle x.s. at fixed angle for like particles
 C-V  12/06 Aliasing of MT=5 with MT=9000 has been suppressed.
-C-V  12/07 Fix bug printing the first angular distribution curve.
+C-V  12/07 - Fix bug printing the first angular distribution curve.
+C-V        - Fix particle-production angular distributions for a given
+C-V          outgoing particle energy/range (two-body reactions only)
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -48,16 +50,13 @@ C-D           0  cross sections,
 C-D           1  angular distributions,
 C-D           2  energy spectra.
 C-D  EIN  - Incident particle energy (eV).
-C-D  PAR  - Fixed parameter when requesting differential data:
-C-D         KEA=0, MF0=10, PAR is the requested metastable state
+C-D  PAR0 - Fixed parameter when requesting differential data:
+C-D         KEA=0, MF0=10, PAR0 is the requested metastable state
 C-D                (0=ground, 1=first metastable, etc.).
-C-D         KEA=1, PAR is the requested outgoing particle energy
-C-D                width, defining the reactions (or fractions)
-C-D                to be included in the summation. For example,
-C-D                if ELV defines the upper level energy, PAR
-C-D                defines the lower level energy for lumped
-C-D                inelastic levels in MT=9000. To include elastic
-C-D                in the summation, set PAR=0.
+C-D         KEA=1, PAR0 is the requested outgoing particle energy
+C-D                resolution [eV], defining the reactions to be
+C-D                included in the summation. (See ELV0 definition
+C-D                for more details).
 C-D         KEA=2, PAR is the requested scattering angle (degrees).
 C-D                A value PAR < 0 implies angle integrated energy
 C-D                distribution.
@@ -91,8 +90,18 @@ C-D          12  Correlated energy-angle distributions not in Law-7
 C-D              representation.
 C-D          13  Processing not coded for specified reaction.
 C-D          14  Requested particle not found.
-C-D  ELV  - Discrete level energy where discrete levels are not
-C-D         identified by their MT number.
+C-D  ELV0 - KEA=0: When retrieving the cross sections (MF=3), 
+C-D                ELV0 is the discrete level energy [eV] where
+C-D                discrete levels are not identified by MT.
+C-D         KEA=1: If scattering angular distributions are retrieved, 
+C-D                (MF=4, MT=9000) ELV0 is the mean outgoing particle
+C-D                energy. The resolution is given by the PAR parameter
+C-D                (3% by default). Only the contributions from two-body
+C-D                reactions are considered, with the constraint that
+C-D                Ein-Qlvl falls within the outgoing particle energy
+C-D                resolution window, where Qlvl is the level energy
+C-D                retrieved from the ENDF file as QM-QI. Any difference
+C-D                between CM and Lab coordinate system is ignored.
 C-D
 C-Extern.: DXSEND,DXSEN1
 C*
@@ -102,6 +111,8 @@ C... Temporary aliasing of MT0=5 with MT0=9000 for backward compatibility
       IF(MT0.EQ. 5) MT0=9000
       IF(MT0.EQ.-5) MT0=5
 C...
+      ELV=ELV0
+      PAR=PAR0
       NE1=0
       IEL=1
       ML =0
@@ -749,7 +760,7 @@ c...
       END DO
       RETURN
       END
-      SUBROUTINE DXSEND(LEF,ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
+      SUBROUTINE DXSEND(LEF,ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR0,EPS
      1                 ,ENR,DXS,UXS,RWO,NEN,MEN,MRW,LTT,ELV)
 C-Title  : Subroutine DXSEND
 C-Purpose: Extract double differential cross sections from ENDF
@@ -826,6 +837,7 @@ C*
       M600=0
       M800=0
       ZAP =ZAP0
+      PAR =PAR0
 C* Identify the projectile
       MFX=1
       MTX=451
@@ -897,21 +909,21 @@ C* Skip unwanted reactions (also excluding MT91)
 C* Discrete level found, check energy level
    14   CALL RDTAB2(LEF,QM,QI,L1,L2,NR,NP,NBT,INR,IER)
         CALL SKIPSC(LEF)
-        EE=-QI
-        IF(MT0.NE.9000 .AND. PAR.EQ.0) THEN
+        EDL=-QI
+        IF(MT0.NE.9000 .AND. PAR.LE.0) THEN
 C*        -- Case: search for specific level
 C...
-C...      print *,'MT,ELV,PAR,EE',MT0,ELV,PAR,EE,DE,EPS
+C...      print *,'MT,ELV,PAR,EDL',MT0,ELV,PAR,EDL,DE,EPS
 C...
-          IF(ABS(EE-ELV).LT.DE) THEN
+          IF(ABS(EDL-ELV).LT.DE) THEN
             MT1=MT
-            DE =ABS(EE-ELV)
-            EL1=EE
+            DE =ABS(EDL-ELV)
+            EL1=EDL
 c...
-c...        print *,'MT,ELV,PAR,EE',MT0,ELV,PAR,EE
+c...        print *,'MT,ELV,PAR,EDL',MT0,ELV,PAR,EDL
 c...
           END IF
-          IF(EE.LT.ELV) GO TO 12
+          IF(EDL.LT.ELV) GO TO 12
 C*        -- Assign MT number corresponding to the level nearest to requested
 C*        -- and redefine the requested level energy with the actual
           IF(ABS(EL1-ELV).LE.EPS*ELV) THEN
@@ -927,9 +939,17 @@ C...
           END IF
         ELSE
 C*        -- Case: Search for a range of levels
-          IF(EE*(1+EPS).GE.PAR .AND. EE.LE.ELV*(1+EPS)) THEN
+          EHI=ELV*1.0001
+          IF(PAR.GT.0) THEN
+            ELO=ELV-PAR
+          ELSE
+            ELO=ELV*0.97
+          END IF
+          EOU=EIN-EDL
+          IF(EOU.GE.ELO .AND. EOU.LE.EHI) THEN
 C...
-c...        print *,'adding to list',MF,MT,ee,elv,par
+c...        print *,'adding to list MF,MT,EDL,EHI,ELO,EOU'
+c... &                             ,MF,MT,EDL,EHI,ELO,EOU
 C...
             MT1=MT
             LOOP=LOOP+1
@@ -1501,6 +1521,7 @@ C-V        (account for CM to Lab conversion).
 C-V  10/02 Fix projectile mass and mass ratios for CM/Lab conversion
 C-V  11/01 Implement LAW 3 in MF6.
 C-V  11/11 Add charged particle x.s. at fixed angle for like particles
+C-V  12/07 Fix the outgoing-particle energy convention.
 C-Description:
 C-D  The routine reads an ENDF file and extract cross sections (KEA=0),
 C-D  differential cross section (angular distributions KEA=1 or energy
@@ -2352,15 +2373,17 @@ C...  print *,'AAD - mass ratio of ejectile to projectile (=A")',AAD
 C...  print *,'QI  - reaction Q-value                          ',QI
 C...
 c...
-c...      print *,'spectrum at Ei',EIN,' for MF4/MT',MT
-c...      do i=1,ne1
-c...        print *,'cos,Eou,dst',enr(i),rwo(lxe-1+i),dxs(i)
-c...      end do
-c...
       IF(KEA.EQ.1) THEN
-C* Case: Angular distribution (no further processing required)
+C* Case: Angular distribution
+C*       For two-body reactions no further processing is required
         YL=YL/SS
-        IF(EOU.LT.0) GO TO 800
+        IF(  EOU.LT.0  .OR.  MT.EQ.2    .OR.
+     &      (MT.GE. 50 .AND. MT.LT. 91) .OR.
+     &      (MT.GE.600 .AND. MT.LT.649) .OR.
+     &      (MT.GE.650 .AND. MT.LT.649) .OR.
+     &      (MT.GE.700 .AND. MT.LT.749) .OR.
+     &      (MT.GE.750 .AND. MT.LT.749) .OR.
+     &      (MT.GE.800 .AND. MT.LT.849) ) GO TO 800
       END IF
       INA=2
       IF(DEG.GE.0) THEN
