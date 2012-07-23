@@ -99,7 +99,6 @@ if [ -f "XS_Nu-bar.zvd" ]; then
 #  mv "XS_Nu-bar.zvd" $file-nu-bar.zvd
 rm XS_Nu-bar.zvd
 fi
-rm
 rm XSECTIONS.OUT
 rm CS2ZVD.INP
 exit
