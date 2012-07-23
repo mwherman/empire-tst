@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2974 $
+Ccc   * $Rev: 2982 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-21 13:42:13 +0200 (Sa, 21 Jul 2012) $
+Ccc   * $Date: 2012-07-23 19:23:32 +0200 (Mo, 23 Jul 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2999,8 +2999,8 @@ C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
                   sigm = sigm/2.0
 C-----------------store ddx to continuum
-C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
-                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
+                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
+C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
      &                THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
@@ -3008,7 +3008,8 @@ C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
 C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
                   ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. 
-     &                    necs.GT.(NEX(nnur)  )) THEN
+     &                    necs.GT.(NEX(nnur)-1)) THEN
+C    &                    necs.GT.(NEX(nnur)  )) THEN
 C    &                    necs.GT.(NEX(nnur)+1)) THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
                   ENDIF
@@ -3023,7 +3024,8 @@ C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
 C-----if ECIS active use only continuum part of the MSD spectrum
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
-      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
+C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
+      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
 C
       DO ne = 1, nmax
         DO na = 1, 3
