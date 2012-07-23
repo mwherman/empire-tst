@@ -1,6 +1,6 @@
-cc   * $Rev: 2972 $
+cc   * $Rev: 2976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-21 13:40:44 +0200 (Sa, 21 Jul 2012) $
+Ccc   * $Date: 2012-07-23 14:53:06 +0200 (Mo, 23 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -224,11 +224,8 @@ C-----
       endif
 
       CALL ULM(0) ! target
-
 C
-
       CALL ULM(1) ! CN
-
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -241,7 +238,6 @@ C
 	  ELAcs = 0.d0
 	ENDIF
 C
-
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
@@ -252,30 +248,17 @@ C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),nnurec,iloc)
 
       if(iloc.eq.0 .and. nnurec.ne.0) then
-
         GDRpar(1,nnurec) = GDRpar(1,0) 
-
         GDRpar(2,nnurec) = GDRpar(2,0) 
-
         GDRpar(3,nnurec) = GDRpar(3,0) 
-
         GDRpar(4,nnurec) = GDRpar(4,0) 
-
         GDRpar(5,nnurec) = GDRpar(5,0) 
-
         GDRpar(6,nnurec) = GDRpar(6,0) 
-
         GDRpar(7,nnurec) = GDRpar(7,0) 
-
         GDRpar(8,nnurec) = GDRpar(8,0) 
-
         GDRpar(9,nnurec) = GDRpar(9,0) 
-
         GDRpar(10,nnurec)= GDRpar(10,0) 
-
       endif
-
-
 
       CALL WHERE(IZA(1),nnuc,iloc)
       if(iloc.eq.0 .and. nnuc.ne.1) then
@@ -390,11 +373,8 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
       ENDIF
 C
 C-----
-
 C-----Get ECIS results for excited levels
-
 C-----
-
       IF (DIRect.NE.0) THEN
           ggmr = 3.d0
           ggqr =85.d0*A(0)**(-2./3.)
@@ -819,7 +799,7 @@ C-----------print transmission coefficients
      &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
      &                   ' P=', INT(LVP(1,nnur))
               DO i = 1, netl
-                IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (8,99010)
+                IF (TL(i,1,nejc,nnur).GT.0.0) WRITE (8,99011)
      &             ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
               ENDDO
               WRITE (8,'(1X,/)')
@@ -883,8 +863,8 @@ C        Proposed by H. Wienke
          IF (NLW.LE.15) ltrmax = 5
          IF (NLW.LE.13) ltrmax = 4
          IF (NLW.LE.10) ltrmax = 3
-         IF (NLW.LE.8) ltrmax = 2
-         IF (NLW.LE.6) ltrmax = 1
+         IF (NLW.LE.8)  ltrmax = 2
+         IF (NLW.LE.6)  ltrmax = 1
          WRITE(15,*) qmax,qstep,ltrmax
          q2 = qmax
          q3 = qmax
@@ -970,14 +950,13 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
 
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
-            write(8,*) ' CSFus=',sngl(CSFus)
-     &       ,' xsinl=',sngl(xsinl),
-     &        ' PCROSS=',sngl(totemis)
-C           write(*,*) ' CSFus=',sngl(CSFus)
-C    &       ,' xsinl=',sngl(xsinl),' PCROSS=',sngl(totemis)
+            write(8,*) ' CSFus=',sngl(CSFus),
+     &        ' xsinl   (MSD)   =',sngl(xsinl),
+     &        ' totemis (PCROSS)=',sngl(totemis),
+     &        ' xsinlcont (ECIS)=',sngl(xsinlcont)
+	      SINLcont = 0.d0
             totemis = CSFus - xsinl
             corrmsd = 0.d0
-
             if(xsinl.lt.0.0001d0) then
               xsinl = 0.d0
               totemis =  CSFus
@@ -1133,11 +1112,11 @@ C    &  '' DWBA inelastic contribution '')')
      &                        sngl(SINlcont),' mb',
      &                        sngl(SINlcont/CSFus*100),' %'
          ENDIF
-C        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-C    &     'PE + Direct contribution       ',
-C    &                               sngl((1.d0-corrmsd)*CSFus),' mb',
-C    &                               sngl((1.d0-corrmsd)*100),' %'
-         ftmp = xsinl + totemis + tothms + xsmsc
+         ftmp = (SINl + SINlcc)*FCCred + SINlcont  
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &     'Total direct                   ',
+     &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
+         ftmp = xsinl + totemis + tothms + xsmsc  
          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
      &     'Total pre-equilibrium          ',
      &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
@@ -3087,6 +3066,11 @@ C    &         G13.6,'' mb  '')') ELAred*ELAcs + ABScs*FUSred
      &  '('' * Calculated shape elastic cross section (ELAcs) '',
      &         G13.6,'' mb  '')') ELAred*ELAcs
         ENDIF
+        WRITE (8,
+     &  '('' * Optical model nonelastic cross section (ABScs) '',G13.6,
+     &              '' mb  '')')
+     &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
+     &   + (SINl+SINlcc)*FCCred + SINlcont
 C       WRITE (8,
 C    &  '('' * Optical model nonelastic cross section (ABScs) '',G13.6,
 C    &              '' mb  '')')
@@ -3128,6 +3112,11 @@ C    &   + (SINl+SINlcc)*FCCred + SINlcont
      &  '(''   Calculated shape elastic cross section         '',
      &         G13.6,'' mb  '')') ELAred*ELAcs
         ENDIF
+C       WRITE (*,
+C    &  '(''   Optical model nonelastic cross section (ABScs) '',G13.6,
+C    &              '' mb  '')')
+C    &   (ABScs - (SINl+SINlcc) - SINlcont)*FUSred
+C    &   + (SINl+SINlcc)*FCCred + SINlcont
         WRITE (*,
      &  '(''   Calculated nonelastic cross section            '',
      &        G13.6, '' mb  '')')

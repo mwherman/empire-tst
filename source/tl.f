@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2958 $
+Ccc   * $Rev: 2976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-07-23 14:53:06 +0200 (Mo, 23 Jul 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2635,7 +2635,7 @@ C             Uncoupled discrete levels
            ENDIF
          ELSE
 C          Scattering into continuum
-           SINlcont = SINlcont + dtmp
+           SINlcont = SINlcont + dtmp*FCOred
 C          Not included into inelastic as it is renormalized in main.f
 C          SINl = SINl + dtmp
          ENDIF
