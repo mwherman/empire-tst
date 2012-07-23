@@ -20,7 +20,8 @@ C-V  2009/02 Fix small bug in sequencing the forced entries.
 C-V  2011/11 Fix ZA of projectile for added reactions.
 C-V  2012/03 - Guard cosines>1 in C4 - interpret as degrees
 C-V          - Add mu-bar to the list of reactions (MF3/MT251),
-C-V  2012/07 Improve the checking against illegal cosines.
+C-V  2012/07 - Improve the checking against illegal cosines.
+C-V          - Add to list some MT9000 entries that got missed.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -109,7 +110,7 @@ C*      cross sections at fixed angles.
       MT1 =0
       CHA1=' '
       CHB1=' '
-      CHC1=' '
+      CHC1='   '
       ENR1=0
       DEN1=0
       XSR1=0
@@ -200,7 +201,11 @@ C*      -- Define level energy or range (if applicable)
         ELZ0=0
         IF(PRD0.GT.0) THEN
           ELV0=MAX(PRC0,PRD0)
-          IF(MT0.NE.9000) ELZ0=MIN(PRC0,PRD0)
+c...      IF(MT0.NE.9000) ELZ0=MIN(PRC0,PRD0)
+          IF(MT0.NE.9000 .OR. (MT0.EQ.9000 .AND. MF0.EQ.4) ) THEN
+            ELZ0=MIN(PRC0,PRD0)
+            IF(CHC0.EQ.' E2') ELZ0=ELV0-ELZ0
+          END IF
         END IF
       END IF
       IF(CHA0.EQ.'T' .OR. CHA0.EQ.'+') CHA0=' '
@@ -250,7 +255,12 @@ C*      -- Define level energy or range (if applicable)
         ELZ1=0
         IF(PRD1.GT.0) THEN
           ELV1=MAX(PRC1,PRD1)
-          IF(MT1.NE.9000) ELZ1=MIN(PRC1,PRD1)
+C...      IF(MT1.NE.9000) ELZ1=MIN(PRC1,PRD1)
+
+          IF(MT1.NE.9000 .OR. (MT1.EQ.9000 .AND. MF1.EQ.4) ) THEN
+            ELZ1=MIN(PRC1,PRD1)
+            IF(CHC1.EQ.' E2') ELZ1=ELV1-ELZ1
+          END IF
         END IF
       END IF
       IF(CHA1.EQ.'T' .OR. CHA1.EQ.'+') CHA1=' '
