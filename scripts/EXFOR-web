@@ -1,6 +1,6 @@
 #! /bin/sh -
 #SCRIPT TO connect to the EXFOR website in Internet 
-browser='firefox'
+browser='firefox' # Assuming the browser is firefox
 exfor='http://www-nds.iaea.org/exfor'
 $browser $exfor
 exit
