@@ -418,15 +418,17 @@ C* Suppress printing negative or zero points
 C*
 C* Extract the data from the C4 file
    80 CONTINUE
+      WRITE(LLG,91) ' ------------------------------ EXFOR   '
+      WRITE(LTT,91) ' ------------------------------ EXFOR   '
 C* Check if fission spectra are to be processed
-      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. ICUR.GT.0) THEN
+      IF(MF0.EQ.5 .AND. MT.EQ.18 .AND. ICUR.GT.0) THEN
         LLL=LTM
         OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
       ELSE
         LLL=LPN
         ICUR=0
       END IF
-      IF((MF.EQ.3 .OR. MF.EQ.4) .AND. ELV.GT.0) THEN
+      IF((MF0.EQ.3 .OR. MF0.EQ.4) .AND. ELV.GT.0) THEN
         IF(PAR.GT.0) THEN
           PAR=MIN(PAR,ELV)
         ELSE
@@ -434,13 +436,14 @@ C* Check if fission spectra are to be processed
         END IF
         WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') PAR
       END IF
-      IF(MF.EQ.4 .AND. MT/10000 .EQ.4) THEN
+      IF(MF0.EQ.4 .AND. MT/10000 .EQ.4) THEN
         PAR=DEG
       END IF
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
       PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
      1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
-      CALL DXSEXF(LC4,LLL,ZAI,ZA0,ZAP,MF,MT,KEA,EIN,PAR,NPP,NS,SCL,COM2)
+      CALL DXSEXF(LC4,LLL,ZAI,ZA0,ZAP,MF0,MT,KEA
+     &           ,EIN,PAR,NPP,NS,SCL,COM2)
       IF(NPP.LE.0) THEN
         PRINT *,'DXSEXF ERROR: No matching points'
       ELSE
@@ -679,7 +682,10 @@ C-D            1  - angular distributions
 C-D            2  - energy distributions.
 C-D   EI0   - Incident particle energy.
 C-D   PR0   - Additional parameter for differential data:
-C-D            Energy  level for discrete level angular distributions [eV].
+C-D            Energy  level for discrete level cross sections and
+C-D                    angular distributions [eV].
+C-D                    Note: matching is done on PR0 assuming this is the
+C-D                          lower bound of the level/energy interval.
 C-D            Angle   for double differential energy distributions [deg].
 C-D            Energy  for double differential angular distributions [eV].
 C-D            LFS     metastable state number (0=ground) if MF0=10.
