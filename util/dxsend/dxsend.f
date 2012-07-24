@@ -866,8 +866,8 @@ C*
 C* Do not include particle multiplicities for cross sections
       IF(KEA.EQ.0 .AND. MT0/10000.NE.4) ZAP =-1
 c...
-      print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS'
-      print *,         ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS
+      print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ELV'
+      print *, NINT(10*ZA0),NINT(ZAP0),MF0,MT0,KEA,EIN,PAR,EPS,ELV
 c...
 C*
 C* Find the appropriate discrete level for inelastic angular distrib.
@@ -909,7 +909,7 @@ C* Skip unwanted reactions (also excluding MT91)
 C* Discrete level found, check energy level
    14   CALL RDTAB2(LEF,QM,QI,L1,L2,NR,NP,NBT,INR,IER)
         CALL SKIPSC(LEF)
-        EDL=-QI
+        EDL=QM-QI
         IF(MT0.NE.9000 .AND. PAR.LE.0) THEN
 C*        -- Case: search for specific level
 C...
@@ -938,14 +938,21 @@ C...
             GO TO 62
           END IF
         ELSE
-C*        -- Case: Search for a range of levels
-          EHI=ELV*1.0001
-          IF(PAR.GT.0) THEN
-            ELO=ELV-PAR
+          IF(MT0.EQ.9000) THEN
+C*          -- Case: Search for a range of energies
+            EHI=ELV*1.0001
+            IF(PAR.GT.0) THEN
+              ELO=ELV-PAR
+            ELSE
+              ELO=ELV*0.97
+            END IF
+            EOU=EIN-EDL
           ELSE
-            ELO=ELV*0.97
+C*          -- Case: Search for a range of levels
+            EHI=ELV*1.0001
+            ELO=PAR*0.9999
+            EOU=EDL
           END IF
-          EOU=EIN-EDL
           IF(EOU.GE.ELO .AND. EOU.LE.EHI) THEN
 C...
 c...        print *,'adding to list MF,MT,EDL,EHI,ELO,EOU'
