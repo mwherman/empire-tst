@@ -28,39 +28,8 @@ echo ' '
 ln  -sf $file.c4 C4.DAT
 # SORT C4 FILE
 ln -sf $EMPIREDIR/util/c4sort/iaea-std.dat iaea-std.dat
-cat >C4SORT.INP<<EOF
-\$* C4SORT
-          Sort the EXFOR file in C4 format NOT overwriting the original file
-   FLC4IN C4.DAT
-   FLC4OU C4.SRT
-   FLESTD iaea-std.dat
-   DPATH  $EMPIREDIR/RIPL/levels/
-
-   ALIAS       92000    3    1     92238    3    1
-   ALIAS       92000    3    2     92238    3    2
-   ALIAS       92000    4    2     92238    4    2
-   ALIAS       92000    4 9000     92238    4 9000
-   ALIAS       92000    5 9000     92238    5 9000
-   ALIAS       92000    6 9000     92238    6 9000
-
-   ALIAS       14000    3    1     14028    3    1
-   ALIAS       14000    5 9000     14028    5 9000
-   ALIAS       14000    6 9000     14028    6 9000
-
-   ALIAS       26000    3    1     26056    3    1
-   ALIAS       26000    4    2     26056    4    2
-   ALIAS       26000    5 9000     26056    5 9000
-   ALIAS       26000    6 9000     26056    6 9000
-
-   ALIAS       32000    3    1     32070    3    1
-   ALIAS       32000    4    2     32070    4    2
-   ALIAS       32000    5 9000     32070    5 9000
-   ALIAS       32000    6 9000     32070    6 9000
-
-   ENDC4S
-
-\$* END
-EOF
+ln -sf $EMPIREDIR/util/c4sort/C4SORT.INP C4SORT.INP
+ln -sf $EMPIREDIR/RIPL/levels/ RIPL_LEVELS
 
 # RUN c4sort TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
@@ -88,5 +57,5 @@ else
 fi
 echo ' '
 rm ANG_MU.INP C4SORT.INP C4SORT.TMP C4.DAT iaea-std.dat c4sort.scr C4SORT.TM2
-rm angdis.pnt angdis.p92 angdis.cur 
+rm angdis.pnt angdis.p92 angdis.cur RIPL_LEVELS C4SORT.TM3 
 exit
