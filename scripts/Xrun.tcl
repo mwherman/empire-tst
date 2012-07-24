@@ -1,6 +1,6 @@
-# $Rev: 2952 $
+# $Rev: 2990 $
 # $Author: rcapote $
-# $Date: 2012-07-18 12:03:40 +0200 (Mi, 18 Jul 2012) $
+# $Date: 2012-07-25 01:33:17 +0200 (Mi, 25 Jul 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5486,6 +5486,8 @@ global widget file
    Mclistbox1 delete 0 end
    if {[file exists $file-log.plotc4] == 0} return
    set plotc4log [open $file-log.plotc4 r]
+   set pejc ""
+   set ind 1
    while {[gets $plotc4log line] >= 0} {
       if [regexp MATERIAL $line] break
       }
@@ -5500,28 +5502,65 @@ global widget file
    set ein [string range $line 45 53]
    set ang [string range $line 56 58]
    set elv [string range $line 63 72]
-   if { $ej == " 0" } {set ejc g
-   } elseif {$ej == "   1"} {set ejc n
-   } elseif {$ej == "1001"} {set ejc p
-   } elseif {$ej == "2004"} {set ejc a
-   } else {set ejc ""
+   if { $ej == "   0" } {set ejc "G"
+   } elseif {$ej == "   1"} {set ejc "N"
+   } elseif {$ej == "1001"} {set ejc "P"
+   } elseif {$ej == "2004"} {set ejc "A"
+   } elseif {$ej == "1002"} {set ejc "D"
+   } elseif {$ej == "2003"} {set ejc "H"
+   } elseif {$ej == "1003"} {set ejc "T"
+   } else {set ejc " "
    }
-   if { $mtt == "   2" } {set mt ELAS
-   } elseif {$mtt == "   4"} {set mt INEL
-   } elseif {$mtt == "  51"} {set mt INEL
-   } elseif {$mtt >= 9000} {set mt PROD
+   if {$ind == 1} {
+   set pejc $ejc
+   set ind 2  
+   }  
+   if { $mtt == "   1" } {set mt "TOTAL"
+   } elseif {$mtt == "   2"} {set mt "ELAST"
+   } elseif {$mtt == "   3"} {set mt "NONEL"
+   } elseif {$mtt == "   4"} {set mt "INEL-T"
+   } elseif {$mtt == " 452"} {set mt "NU-tot"
+   } elseif {$mtt == " 455"} {set mt "NU-del"
+   } elseif {$mtt == " 456"} {set mt "NU-pr "
+   } elseif {$mtt == "  16"} {set mt "2N   "
+   } elseif {$mtt == "  17"} {set mt "3N   "
+   } elseif {$mtt == "  18"} {set mt "FISS "
+   } elseif {$mtt == "  37"} {set mt "4N   "
+   } elseif {$mtt == " 102"} {set mt "CAPT "
+   } elseif {$mtt == " 103"} {set mt "P    "
+   } elseif {$mtt == " 107"} {set mt "A    "
+   } elseif {$mtt == "  22"} {set mt "NA   "
+   } elseif {$mtt == "  28"} {set mt "NP   "
+   } elseif {$mtt == " 251"} {set mt "MU-EL"
+   } elseif {$mtt == "  51"} {set mt "INEL "
+   } elseif {$mtt >= 9000} {set mt "X$ejc   "
    } else {set mt $mtt
    }
-   if { $mff == "  3" } {set mf XS
+   if { $mff == "  1" } { set mf INFO
+   } elseif {$mff == "  2"} {set mf RES
+   } elseif {$mff == "  3"} {set mf XS
    } elseif {$mff == "  4"} {set mf DA
-   } elseif {$mff == " 5"} {set mf DE
+   } elseif {$mff == "  5"} {set mf DE
+     if {$mtt == "  18"} {set mt "PFNS"}
    } elseif {$mff == "  6"} {set mf DD
+     if {$mtt == "  18"} {set mt "PFNS"}
    } else {set mf $mff
    }
-   if { $mff == "  3" } {set ejc " "}
-   Mclistbox1 insert end [list $num  $mf $ejc $mt $ein $elv $ang "#" ]
+   if { $mff == "  3" } { # set ejc ""
+     if {$mtt == "  51"} {set ang ""}
+     #if {$mtt == " 251"} {
+     #  set ejc ""
+     #}
+     # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
+     Mclistbox1 insert end [list $num  $mf $pejc $mt $ein $elv $ang "#" ]
+   } else { # set pejc ""
+     if {$mff == "  4"} {set ang ""}
+     if {$mff == "  4" && $mtt >= 9000 } {set elv "EL + INEL"}
+     # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
+     Mclistbox1 insert end [list $num  $mf $pejc $mt $ein $elv $ang "#" ]
    }
-   close $plotc4log
+  }
+  close $plotc4log
 }
 #############################################################################
 ## Procedure:  fileDialog
@@ -6787,7 +6826,7 @@ lappend dd} \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
         -labelrelief flat -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col3 \
-        -background #ffffff -font {Helvetica -10} -label p -labelrelief flat \
+        -background #ffffff -font {Helvetica -10} -label Inc -labelrelief flat \
         -resizable 1 -visible 1 -width 3 
     $site_9_0.mcl78 column add col4 \
         -background #f999f999f999 -font {Helvetica -10} -label MT \
@@ -6796,7 +6835,7 @@ lappend dd} \
         -background #ffffff -font {Helvetica -10} -label Einc \
         -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col6 \
-        -background #f999f999f999 -font {Helvetica -10 } -label Elev \
+        -background #f999f999f999 -font {Helvetica -10 } -label {Elev / Eg} \
         -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col7 \
         -background #ffffff -font {Helvetica -10} -label Ang \
