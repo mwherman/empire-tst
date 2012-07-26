@@ -803,6 +803,7 @@ C* Test incident and level energy for double differential data
             IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test level energy for angular distribution data
             EH=F7
+            EL=0
             IF(F8.GT.0) THEN
               EH=MAX(F7,F8)
               EL=MIN(F7,F8)
