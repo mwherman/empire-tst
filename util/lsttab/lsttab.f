@@ -286,7 +286,9 @@ C*      Discrete energy level (if applicable)
         IF(C84(63:72).NE.'          ') THEN
           ELV=EOU
           IF(DEG.GE.0) PAR=DEG
-          IF(MT.NE.51 .AND. MT.NE.600 .AND. MT.NE.800) MF =10
+C*        -- If not discrete level, check for isomer production (MF10)
+          IF(MT.NE.51 .AND. MT.NE.600 .AND. MT.NE.800 .AND.
+     &       ELV.LT.10 ) MF =10
         END IF
       ELSE IF(MF0.EQ.4) THEN
 C*        Cross section at fixed angle
@@ -342,10 +344,11 @@ c...  IF(MT.EQ.9000) MTE=5
       OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD',ERR=80)
       NUC=0
       EL1=ELV
+      PA1=PAR
       ZEL(1)=ZA
-      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,PAR,ELM'
-     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,PAR,EL1
-      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PAR,EP6
+      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,ELM,PAR'
+     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,PA1,EL1
+      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PA1,EP6
      1           ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
       IF(NP.LE.0) THEN
         PRINT *,'LSTTAB ERROR - No matching curves for',NINT(ZA)
@@ -429,21 +432,16 @@ C* Check if fission spectra are to be processed
         ICUR=0
       END IF
       IF((MF0.EQ.3 .OR. MF0.EQ.4) .AND. ELV.GT.0) THEN
-        IF(PAR.GT.0) THEN
-          PAR=MIN(PAR,ELV)
-        ELSE
-          PAR=ELV
-        END IF
-        WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') PAR
+        WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') ELV
       END IF
       IF(MF0.EQ.4 .AND. MT/10000 .EQ.4) THEN
         PAR=DEG
       END IF
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
-      PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,PAR'
-     1          ,nint(ZA0),IZP,MF,MT,KEA,EIN,PAR
+      PRINT *,'DXSEXF:ZA0,ZAP,MF,MT,KEA,EIN,ELV,PAR'
+      PRINT *,nint(ZA0),IZP,MF,MT,KEA,EIN,ELV,PAR
       CALL DXSEXF(LC4,LLL,ZAI,ZA0,ZAP,MF0,MT,KEA
-     &           ,EIN,PAR,NPP,NS,SCL,COM2)
+     &           ,EIN,PAR,ELV,NPP,NS,SCL,COM2)
       IF(NPP.LE.0) THEN
         PRINT *,'DXSEXF ERROR: No matching points'
       ELSE
@@ -655,7 +653,7 @@ c...        DEG=ACOS(PAR)*180/PI
   924 FORMAT('MT',I3,1X,A1,'eV',F5.1,:,'  Deg',I3)
   925 FORMAT(' MAT',I4,' MF',I2,' MT',I3,:,20X,' EI',1P,E10.3)
       END
-      SUBROUTINE DXSEXF(LC4,LPN,ZAI,ZA0,ZAP0,MF0,MT0,KEA,EI0,PR0
+      SUBROUTINE DXSEXF(LC4,LPN,ZAI,ZA0,ZAP0,MF0,MT0,KEA,EI0,PR0,ELV
      1                 ,NPP,NS,SCL,COM2)
 C-Title  : Subroutine DXSEXF
 C-Purpose: Extract data from EXFOR computational format file
@@ -681,13 +679,14 @@ C-D            0  - tabulated data (cross sections)
 C-D            1  - angular distributions
 C-D            2  - energy distributions.
 C-D   EI0   - Incident particle energy.
+C-D   ELV   - Level energy (or upper bound of the energy)
 C-D   PR0   - Additional parameter for differential data:
-C-D            Energy  level for discrete level cross sections and
-C-D                    angular distributions [eV].
-C-D                    Note: matching is done on PR0 assuming this is the
-C-D                          lower bound of the level/energy interval.
-C-D            Angle   for double differential energy distributions [deg].
-C-D            Energy  for double differential angular distributions [eV].
+C-D            Energy  Lower energy level for discrete level cross
+C-D                    sections, if given as range [eV].
+C-D            Angle   for double differential energy distributions
+C-D                    [deg].
+C-D            Energy  for double differential angular distributions
+C-D                    [eV].
 C-D            LFS     metastable state number (0=ground) if MF0=10.
 C-D   NPP   -  Total number of points written to output.
 C-D   NS    -  Number of different data sets written to output.
@@ -731,7 +730,7 @@ C*
       IF(MT0/10000.EQ.4) THEN
         MTH=MT0-40000
       END IF
-      IF(MF0.EQ.10) LFS=NINT(PR0)
+      IF(MF0.EQ.10) LFS=NINT(ELV)
       IC4=0
       LAU=0
       NAU=0
@@ -765,14 +764,24 @@ C* Test for supported MTs in MF 1
         IF(MT.NE.452 .AND. MT.NE.455 .AND. MT.NE.456) GO TO 20
       ELSE IF(MF.EQ.3) THEN
 C* Test outgoing particle and discrete level energy
-        EL=F7
+        EH=F7
+        EL=0
         IF(F8.GT.0) THEN
           EH=MAX(F7,F8)
           EL=MIN(F7,F8)
           IF(LBL.EQ.'DE2') EL=EH-EL
         END IF
-        IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
-          IF6=F6
+C*      -- Test the level energy
+c...
+c...    print *,'el,eh,elv,pr0',el,eh,elv,pr0
+c...
+        IF(EH.GT.0 .AND.
+     &    (ABS(ELV-EH).GT.E2TOL*EH)) GO TO 20
+C*      -- Test the level energy range
+        IF(EL.GT.0 .AND.
+     &    (ABS(PR0-EL).GT.E2TOL*EL)) GO TO 20
+C*      -- Test for particle production
+        IF6=F6
         IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
       ELSE IF(MF.GE.4 .AND. MF.LE.6) THEN
 C* Test outgoing particle
@@ -793,12 +802,16 @@ c...        IF(ABS( COS(PR0*PI/180)-F5).GT.ETOL) GO TO 20
 C* Test incident and level energy for double differential data
             IF(ABS(EI0-F1).GT.ETOL*F1) GO TO 20
 C* Test level energy for angular distribution data
-            EL=F7
+            EH=F7
             IF(F8.GT.0) THEN
               EH=MAX(F7,F8)
               EL=MIN(F7,F8)
               IF(LBL.EQ.'DE2') EL=EH-EL
             END IF
+c...
+c...        print *,'el,eh,elv,pr0',el,eh,elv,pr0
+c...
+            IF(EH.GT.0 .AND. ABS(ELV-EH).GT.E2TOL*EH) GO TO 20
             IF(EL.GT.0 .AND. ABS(PR0-EL).GT.E2TOL*EL) GO TO 20
           END IF
         ELSE
