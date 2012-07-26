@@ -117,6 +117,7 @@ C*      cross sections at fixed angles.
       DXS1=0
       PRA1=0
       PRB1=0
+      PRD3=0
       LVL1=0
       ELV1=0
       REF1=0
@@ -200,6 +201,7 @@ C*      -- Define level energy or range (if applicable)
         ELV0=PRC0
         ELZ0=0
         IF(PRD0.GT.0) THEN
+          IF(PRC0.EQ.0) PRD3=PRD0
           ELV0=MAX(PRC0,PRD0)
 c...      IF(MT0.NE.9000) ELZ0=MIN(PRC0,PRD0)
           IF(MT0.NE.9000 .OR. (MT0.EQ.9000 .AND. MF0.EQ.4) ) THEN
@@ -256,7 +258,6 @@ C*      -- Define level energy or range (if applicable)
         IF(PRD1.GT.0) THEN
           ELV1=MAX(PRC1,PRD1)
 C...      IF(MT1.NE.9000) ELZ1=MIN(PRC1,PRD1)
-
           IF(MT1.NE.9000 .OR. (MT1.EQ.9000 .AND. MF1.EQ.4) ) THEN
             ELZ1=MIN(PRC1,PRD1)
             IF(CHC1.EQ.' E2') ELZ1=ELV1-ELZ1
@@ -295,7 +296,18 @@ c...
       IF(MT1 .NE.MT0 ) GO TO 40
       IF(CHA0.NE.CHA1) GO TO 40
 C* Mark partial inelastic MF 3 where level energy changes
-      IF(MF1 .EQ. 3 .AND. (ELV1.NE.ELV0 .OR. ELZ1.NE.ELZ0)) GO TO 40
+      IF(MF1 .EQ. 3) THEN
+        ELV3=PRD3
+        IF(ELZ1.LE.0) PRD3=ELV1
+        IF(ELV1.NE.ELV0 .OR. ELZ1.NE.ELZ0) THEN
+          IF(ELV1.GT.0 .AND. ELZ1.LE.0) THEN
+C*        -- Eliminate single level entries that fall into previous range
+            IF(ELV1.NE.ELV3) GO TO 40
+          ELSE
+            GO TO 40
+          END IF
+        END IF
+      END IF
 C* Mark ang.distr. MF 4 where level energy changes and save angle
       IF(MF1 .EQ. 4) THEN
         IF(ELV1.NE.ELV0 .OR. ELZ1.NE.ELZ0) GO TO 40
