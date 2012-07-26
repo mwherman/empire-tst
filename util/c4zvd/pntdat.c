@@ -6,7 +6,7 @@
 #define LSTR 220
 static  char    str [LSTR];
 static  char    strTmp[LSTR];
-static  char    strProjectile[LSTR]="N";
+static  char    strProjectile[LSTR]="n";
 static  int     izaProjectile=1;
 int za2particle(int za, char *str);
 int za2nuclide(int za, char *str);
@@ -384,13 +384,14 @@ int extractReaction(char *str0, int flagPrint)
         strcat(dataset.reaction,strTmp);
     }
 
-    for (ii=0, found=0; ii<(sizeof(mfRc)/sizeof(mfRc[0])); ii++) {
+/*    for (ii=0, found=0; ii<(sizeof(mfRc)/sizeof(mfRc[0])); ii++) {
         if (mfRc[ii].mf==mf) {
             strcat(dataset.reaction,mfRc[ii].reac);
 	    found=1;
 	    break;
         }
     }
+*/
     if (found==0)
     strcat(dataset.reaction,",?");
     strcpy(dataset.sf56,"");
@@ -446,7 +447,7 @@ acceptData()
 
 
 static char  *nucl[] = {
-   "N"  , "H"  , "He" , "Li" , "Be" , "B"  , "C"  , "N"  , "O"  , "F" 
+   "n"  , "H"  , "He" , "Li" , "Be" , "B"  , "C"  , "N"  , "O"  , "F"
  , "Ne" , "Na" , "Mg" , "Al" , "Si" , "P"  , "S"  , "Cl" , "Ar" , "K" 
  , "Ca" , "Sc" , "Ti" , "V"  , "Cr" , "Mn" , "Fe" , "Co" , "Ni" , "Cu"
  , "Zn" , "Ga" , "Ge" , "As" , "Se" , "Br" , "Kr" , "Rb" , "Sr" , "Y" 
@@ -465,14 +466,14 @@ int za2particle(int za, char *str)
 {
     int z,a,nNucl;
     switch (za) {
-	case  0:	strcpy(str,"G");	return(0);
-	case  1:	strcpy(str,"N");	return(0);
-	case -1:	strcpy(str,"E");	return(0);
-	case 12:	strcpy(str,"Pos");	return(0);
-	case 1001:	strcpy(str,"P");	return(0);
-	case 1002:	strcpy(str,"D");	return(0);
-	case 1003:	strcpy(str,"T");	return(0);
-	case 2004:	strcpy(str,"A");	return(0);
+	case  0:	strcpy(str,"g");	return(0);
+	case  1:	strcpy(str,"n");	return(0);
+	case -1:	strcpy(str,"e");	return(0);
+	case 12:	strcpy(str,"e+");	return(0);
+	case 1001:	strcpy(str,"p");	return(0);
+	case 1002:	strcpy(str,"d");	return(0);
+	case 1003:	strcpy(str,"t");	return(0);
+	case 2004:	strcpy(str,"a");	return(0);
 	case 2003:	strcpy(str,"He3");	return(0);
 	case 2005:	strcpy(str,"He5");	return(0);
 	case 2006:	strcpy(str,"He6");	return(0);
@@ -493,7 +494,7 @@ int za2nuclide(int za, char *str)
     if (z>=nNucl) return(-1);
 //  sprintf(str,"%d-%s-%d",z,nucl[z],a);
 //  printf("%s-%d...",nucl[z],a); getchar();
-    sprintf(str,"%s-%d",nucl[z],a);
+    sprintf(str,"%d-%s",a,nucl[z]);
     return(0);
 }
 

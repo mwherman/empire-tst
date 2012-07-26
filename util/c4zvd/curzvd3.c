@@ -299,13 +299,14 @@ int extractReaction(char *str0)
         strcat(dataset.reaction,strTmp);
     }
 
-    for (ii=0, found=0; ii<(sizeof(mfRc)/sizeof(mfRc[0])); ii++) {
+/*    for (ii=0, found=0; ii<(sizeof(mfRc)/sizeof(mfRc[0])); ii++) {
         if (mfRc[ii].mf==mf) {
             strcat(dataset.reaction,mfRc[ii].reac);
 	    found=1;
 	    break;
         }
     }
+*/
     if (found==0) {
         sprintf(strTmp,"MF=%d)",mf);
         strcat(dataset.reaction,strTmp);
@@ -364,7 +365,7 @@ int outputUnits(int mf)
 
 
 static char  *nucl[] = {
-   "N"  , "H"  , "He" , "Li" , "Be" , "B"  , "C"  , "N"  , "O"  , "F" 
+   "n"  , "H"  , "He" , "Li" , "Be" , "B"  , "C"  , "N"  , "O"  , "F"
  , "Ne" , "Na" , "Mg" , "Al" , "Si" , "P"  , "S"  , "Cl" , "Ar" , "K" 
  , "Ca" , "Sc" , "Ti" , "V"  , "Cr" , "Mn" , "Fe" , "Co" , "Ni" , "Cu"
  , "Zn" , "Ga" , "Ge" , "As" , "Se" , "Br" , "Kr" , "Rb" , "Sr" , "Y" 
@@ -386,7 +387,7 @@ int za2particle(int za, char *str)
 	case  0:	strcpy(str,"g");	return(0);
 	case  1:	strcpy(str,"n");	return(0);
 	case -1:	strcpy(str,"e");	return(0);
-	case 12:	strcpy(str,"pos");	return(0);
+	case 12:	strcpy(str,"e+");	return(0);
 	case 1001:	strcpy(str,"p");	return(0);
 	case 1002:	strcpy(str,"d");	return(0);
 	case 1003:	strcpy(str,"t");	return(0);
