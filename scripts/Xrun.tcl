@@ -1,6 +1,6 @@
-# $Rev: 2990 $
+# $Rev: 2995 $
 # $Author: rcapote $
-# $Date: 2012-07-25 01:33:17 +0200 (Mi, 25 Jul 2012) $
+# $Date: 2012-07-27 10:34:51 +0200 (Fr, 27 Jul 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6890,7 +6890,8 @@ foreach el $ddx {
 #file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
 
 if {$compeval != ""} {file delete COMPARE.DAT
-if {$compeval != ""} {file copy -force $compeval COMPARE.DAT }
+#if {$compeval != ""} {file copy -force $compeval COMPARE.DAT }
+if {$compeval != ""} {file link -symbolic COMPARE.DAT $compeval }
 #file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
 
 set lsttab [open LSTTAB.INP w+]

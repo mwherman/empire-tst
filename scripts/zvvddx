@@ -37,6 +37,6 @@ $EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
     || { echo; echo 'zvview closed'; }
 mv DDXPLOT.zvd $work/$file-$2.zvd
 
-rm angdis.p92 ps01.tit C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
+rm COMPARE.DAT angdis.p92 ps01.tit C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
 exit
 
