@@ -1,6 +1,6 @@
-# $Rev: 2995 $
+# $Rev: 2996 $
 # $Author: rcapote $
-# $Date: 2012-07-27 10:34:51 +0200 (Fr, 27 Jul 2012) $
+# $Date: 2012-07-27 17:57:43 +0200 (Fr, 27 Jul 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5500,7 +5500,8 @@ global widget file
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
    set ein [string range $line 45 53]
-   set ang [string range $line 56 58]
+   #set ang [string range $line 56 58]
+   set ang [string range $line 55 62]
    set elv [string range $line 63 72]
    if { $ej == "   0" } {set ejc "G"
    } elseif {$ej == "   1"} {set ejc "N"
@@ -5528,9 +5529,35 @@ global widget file
    } elseif {$mtt == "  37"} {set mt "4N   "
    } elseif {$mtt == " 102"} {set mt "CAPT "
    } elseif {$mtt == " 103"} {set mt "P    "
+   } elseif {$mtt == " 104"} {set mt "D    "
+   } elseif {$mtt == " 105"} {set mt "T    "
+   } elseif {$mtt == " 106"} {set mt "H    "
    } elseif {$mtt == " 107"} {set mt "A    "
+   } elseif {$mtt == " 108"} {set mt "2A   "
+   } elseif {$mtt == " 111"} {set mt "2P   "
+   } elseif {$mtt == " 112"} {set mt "PA   "
+   } elseif {$mtt == " 113"} {set mt "T2A  "
+   } elseif {$mtt == " 114"} {set mt "D2A  "
+   } elseif {$mtt == " 115"} {set mt "PD   "
+   } elseif {$mtt == " 116"} {set mt "PT   "
+   } elseif {$mtt == " 117"} {set mt "DA   "
+   } elseif {$mtt == "  19"} {set mt "NF-1C"
+   } elseif {$mtt == "  20"} {set mt "NF-2C"
+   } elseif {$mtt == "  21"} {set mt "NF-3C"
+   } elseif {$mtt == "  38"} {set mt "NF-4C"
+   } elseif {$mtt == "  41"} {set mt "2NP  "
+   } elseif {$mtt == "  42"} {set mt "3NP  "
+   } elseif {$mtt == "  44"} {set mt "N2P  "
+   } elseif {$mtt == "  45"} {set mt "NPA  "
    } elseif {$mtt == "  22"} {set mt "NA   "
+   } elseif {$mtt == "  23"} {set mt "N3A  "
+   } elseif {$mtt == "  24"} {set mt "2NA  "
+   } elseif {$mtt == "  25"} {set mt "3NA  "
    } elseif {$mtt == "  28"} {set mt "NP   "
+   } elseif {$mtt == "  29"} {set mt "N2A  "
+   } elseif {$mtt == "  32"} {set mt "ND   "
+   } elseif {$mtt == "  33"} {set mt "NT   "
+   } elseif {$mtt == "  34"} {set mt "NH   "
    } elseif {$mtt == " 251"} {set mt "MU-EL"
    } elseif {$mtt == "  51"} {set mt "INEL "
    } elseif {$mtt >= 9000} {set mt "X$ejc   "
@@ -5547,17 +5574,25 @@ global widget file
    } else {set mf $mff
    }
    if { $mff == "  3" } { # set ejc ""
-     if {$mtt == "  51"} {set ang ""}
+     #if {$mtt == "  51"} {set ang ""}
      #if {$mtt == " 251"} {
      #  set ejc ""
      #}
      # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
-     Mclistbox1 insert end [list $num  $mf $pejc $mt $ein $elv $ang "#" ]
+     if {$mtt == "  51"} {
+       if {$ang == "       "} {
+         set ang $elv
+         set elv ""
+       }
+       Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $ang $elv "#" ]
+     } else {
+       Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $elv $ang "#" ]
+     }
    } else { # set pejc ""
      if {$mff == "  4"} {set ang ""}
      if {$mff == "  4" && $mtt >= 9000 } {set elv "EL + INEL"}
      # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
-     Mclistbox1 insert end [list $num  $mf $pejc $mt $ein $elv $ang "#" ]
+     Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $elv $ang "#" ]
    }
   }
   close $plotc4log
@@ -5840,7 +5875,9 @@ proc vTclWindow.top75 {base} {
         -menu "$top.m88" -background #ffffff -highlightbackground #d9d9d9 \
         -highlightcolor black 
     wm focusmodel $top passive
-    wm geometry $top 957x465+155+363; update
+    #wm geometry $top 957x465+155+363; update
+    #Changed to accomodate the new ZVV plots' window
+    wm geometry $top 1050x465+155+363; update  
     wm maxsize $top 1265 994
     wm minsize $top 72 15
     wm overrideredirect $top 0
@@ -6817,7 +6854,7 @@ foreach el $ddxlist {
    set prev $el
 }
 lappend dd} \
-        -selectmode extended -width 44 -yscrollcommand {Scrollbar1 set} 
+        -selectmode extended -width 57 -yscrollcommand {Scrollbar1 set} 
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
         -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
@@ -6826,21 +6863,24 @@ lappend dd} \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
         -labelrelief flat -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col3 \
+        -background #ffffff -font {Helvetica -10} -label MT  -labelrelief flat \
+        -resizable 1 -visible 1 -width 6 
+    $site_9_0.mcl78 column add col4 \
         -background #ffffff -font {Helvetica -10} -label Inc -labelrelief flat \
         -resizable 1 -visible 1 -width 3 
-    $site_9_0.mcl78 column add col4 \
+    $site_9_0.mcl78 column add col5 \
         -background #f999f999f999 -font {Helvetica -10} -label MT \
         -labelrelief flat -resizable 1 -visible 1 -width 6 
-    $site_9_0.mcl78 column add col5 \
+    $site_9_0.mcl78 column add col6 \
         -background #ffffff -font {Helvetica -10} -label Einc \
         -labelrelief flat -resizable 1 -visible 1 -width 10 
-    $site_9_0.mcl78 column add col6 \
-        -background #f999f999f999 -font {Helvetica -10 } -label {Elev / Eg} \
-        -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col7 \
-        -background #ffffff -font {Helvetica -10} -label Ang \
-        -labelrelief flat -resizable 1 -visible 1 -width 5 
+        -background #f999f999f999 -font {Helvetica -10 } -label {Elev1/Eg} \
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
     $site_9_0.mcl78 column add col8 \
+        -background #ffffff -font {Helvetica -10} -label {Elev2/Ang} \
+        -labelrelief flat -resizable 1 -visible 1 -width 10 
+    $site_9_0.mcl78 column add col9 \
         -background #ffffff -font {Helvetica -10} -label init \
         -labelrelief flat -resizable 0 -visible 0 -width 3 
     scrollbar $site_9_0.scr80 \
