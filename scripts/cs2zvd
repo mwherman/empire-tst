@@ -40,6 +40,15 @@ fi
 if [ -f "$file-zp.zvd" ]; then
  rm "$file-zp.zvd" 
 fi
+if [ -f "$file-zd.zvd" ]; then
+ rm "$file-zd.zvd" 
+fi
+if [ -f "$file-zt.zvd" ]; then
+ rm "$file-zt.zvd" 
+fi
+if [ -f "$file-zh.zvd" ]; then
+ rm "$file-zh.zvd" 
+fi
 if [ -f "$file-za.zvd" ]; then
  rm "$file-za.zvd" 
 fi
@@ -49,11 +58,11 @@ fi
 if [ -f "$file-z3n.zvd" ]; then
  rm "$file-z3n.zvd" 
 fi
-if [ -f "$file-mubar.zvd" ]; then
- rm "$file-mubar.zvd" 
+if [ -f "$file-Mu-bar.zvd" ]; then
+ rm "$file-Mu-bar.zvd" 
 fi
-if [ -f "$file-nubar.zvd" ]; then
- rm "$file-nubar.zvd" 
+if [ -f "$file-Nu-bar.zvd" ]; then
+ rm "$file-Nu-bar.zvd" 
 fi
 #run cs2zvd to produce ZVView plots
 cp $file.xsc XSECTIONS.OUT
@@ -82,6 +91,15 @@ fi
 if [ -f "XS_(z,p).zvd" ]; then
   mv "XS_(z,p).zvd" $file-zp.zvd
 fi
+if [ -f "XS_(z,d).zvd" ]; then
+  mv "XS_(z,d).zvd" $file-zd.zvd
+fi
+if [ -f "XS_(z,t).zvd" ]; then
+  mv "XS_(z,t).zvd" $file-zt.zvd
+fi
+if [ -f "XS_(z,h).zvd" ]; then
+  mv "XS_(z,h).zvd" $file-zt.zvd
+fi
 if [ -f "XS_(z,a).zvd" ]; then
   mv "XS_(z,a).zvd" $file-za.zvd
 fi
@@ -92,12 +110,10 @@ if [ -f "XS_(z,3n).zvd" ]; then
   mv "XS_(z,3n).zvd" $file-z3n.zvd
 fi
 if [ -f "XS_Mu-bar.zvd" ]; then
-#  mv "XS_Mu-bar.zvd" $file-mu-bar.zvd
-rm XS_Mu-bar.zvd
+mv "XS_Mu-bar.zvd" $file-Mu-bar.zvd
 fi
 if [ -f "XS_Nu-bar.zvd" ]; then
-#  mv "XS_Nu-bar.zvd" $file-nu-bar.zvd
-rm XS_Nu-bar.zvd
+mv "XS_Nu-bar.zvd" $file-Nu-bar.zvd
 fi
 rm XSECTIONS.OUT
 rm CS2ZVD.INP
