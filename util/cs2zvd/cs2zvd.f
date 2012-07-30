@@ -9,19 +9,18 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       character*22 caz
       character*12 creaction(maxr)
       real*8 e(maxen),cs(maxen,maxr),check_cs(maxr)
-C
-C     Setting defaults plots
-C
       do i=1,maxr
-        toplot(i)=0
-	check_cs(i)=0.d0
+        toplot(i)=0	
+        check_cs(i)=0.d0
       enddo
-C#    Total       Elastic     Reaction    Fission   (z,gamma)   (z,n) 
-      toplot(3) = 1  ! reaction
+      toplot(3) = 1  ! nonelast
       toplot(4) = 1  ! fission
-      toplot(5) = 1  ! capture
-      toplot(6) = 1  ! n,n
-      toplot(7) = 1  ! n,2n
+      toplot(5) = 1  ! mu-bar
+      toplot(6) = 1  ! nu-bar
+      toplot(7) = 1  ! capture
+      toplot(8) = 1  ! n,n
+      toplot(9) = 1  ! n,2n
+      toplot(10)= 1  ! n,3n
 C       
       OPEN(10,file='CS2ZVD.INP',STATUS='OLD',ERR=10)
       READ(10,*) ! Skipping column indicator 
@@ -39,7 +38,6 @@ C	STOP
 C     endif  
       nreac = 30 ! reading up to 30 reactions only 	
 
-
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         
@@ -51,12 +49,15 @@ C    &
 
       do j=1,nreac
 	  if(creaction(j).eq.'(z,p)') toplot(j)=1
+	  if(creaction(j).eq.'(z,d)') toplot(j)=1
+	  if(creaction(j).eq.'(z,t)') toplot(j)=1
+	  if(creaction(j).eq.'(z,h)') toplot(j)=1
 	  if(creaction(j).eq.'(z,a)') toplot(j)=1
       enddo
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G10.5,1P,(100E12.5))',END=20) 
+        READ(20,'(G12.5,1P,(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
  	  check_cs(j)=check_cs(j) + cs(i,j)
@@ -87,11 +88,27 @@ C       Skipping plots
      &    iz,symb,ia,TRIM(creaction(j))       
         
         CALL OPEN_ZVV(20,caz,' ')
-        DO i = 1, nen
-          WRITE (20,'(G10.3,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
-        ENDDO
-        CALL CLOSE_ZVV(20,' ',' ')
+        if (j.eq.5) then
+C
+C         Mu-bar
+C
+          DO i = 1, nen
+            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d3*cs(i,j)
+          ENDDO
+        elseif (j.eq.6) then
+C
+C         Avoiding scaling mb->barn of Nu-bar
+C
+          DO i = 1, nen
+            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),cs(i,j)
+          ENDDO
+        else
+          DO i = 1, nen
+            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
+          ENDDO
+        endif
 
+        CALL CLOSE_ZVV(20,' ',' ')
         CLOSE(20)
 
       ENDDO
