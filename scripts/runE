@@ -126,7 +126,7 @@ def runE(proj):
     if not isEmpty(proj+'.rng'):
         cp(proj+'.rng','R250SEED.DAT')
         print('Using existing random number generator seed')
-    if not isEmpty(proj+'-nubar.endf'):
+    if not isEmpty(proj+'-nubar.dat'):
         cp(proj+'-nubar.dat','NUBAR.DAT')
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')	
     if not isEmpty(proj+'-cum.ps'):
