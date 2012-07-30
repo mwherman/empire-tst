@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2973 $
+Ccc   * $Rev: 3004 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-21 13:41:52 +0200 (Sa, 21 Jul 2012) $
+Ccc   * $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -402,7 +402,6 @@ C-----------is calculated by CC method.
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
               CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab) 
-C             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
               IF (ldbwacalc) THEN
                 CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
               ELSE
@@ -729,31 +728,20 @@ C-----Print elastic and direct cross sections from ECIS
         ENDIF
       ENDIF
 
-      IF(LTOtred) then
+      IF(TOTred.ne.1) then
+        FUSred = TOTred*FUSred0
+        ELAred = TOTred*ELAred0	
+        FCCred = TOTred*FCCred0 
+        FCOred = TOTred*FCOred0 
 
-        if(TOTred.eq.1) LTOtred = .false.
-
-        if(FUSred.ne.1) WRITE (8,'(
-     >''  WARNING: FUSRED dismissed as TOTRED is given in the input'')'
-     >)
-        if(ELAred.ne.1) WRITE (8,'(
-     >'' WARNING: ELARED dismissed as TOTRED is given in the input'')'
-     >)
-        if(FCCred.ne.1) WRITE (8,'(
-     >'' WARNING: FCCRED dismissed as TOTRED is given in the input'')'
-     >)
-        if(FCOred.ne.1) WRITE (8,'(
-     >'' WARNING: FCORED dismissed as TOTRED is given in the input'')'
-     >)
-        FUSred = TOTred
-        ELAred = TOTred	
-	  FCCred = TOTred 
-        FCOred = TOTred 
         WRITE (8,'(1x,A50,A50,F5.3)') 
-     >   ' WARNING: FUSRED,ELARED, FCCRED and FCORED changed',
-     >   ' to impose requested scaling of total by  TOTRED= ',
+     > ' WARNING: FUSRED,ELARED, FCCRED and FCORED changed',
+     > ' to impose requested scaling of total by  TOTRED= ',
      >     TOTred
-        TOTred = 1.d0
+        WRITE (8,'(1x,A22,F5.3)') ' Renormalized FUSRED :',FUSRED 
+        WRITE (8,'(1x,A22,F5.3)') ' Renormalized ELARED :',ELARED 
+        WRITE (8,'(1x,A22,F5.3)') ' Renormalized FCCRED :',FCCRED 
+        WRITE (8,'(1x,A22,F5.3)') ' Renormalized FCORED :',FCORED 
       ENDIF
 
       el = EINl
@@ -905,7 +893,9 @@ C        DO j = 1, NDLW !over compound nucleus spin
          ENDDO
       ENDDO
 
-      IF (ldbwacalc .AND. CSFus.GT.0.D0 .AND. SINl.GT.0.D0) THEN
+C     IF (ldbwacalc .AND. CSFus.GT.0 .AND. 
+      IF (                CSFus.GT.0 .AND. 
+     &   (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
          IF (DIRect.EQ.3) THEN
             WRITE (8,*)
      &         ' SOMP TLs normalized to substract DWBA contribution'
@@ -917,17 +907,15 @@ C-----------DIRECT=1 or DIRECT=2
      &         ' CC OMP TLs normalized to substract DWBA contribution'
             WRITE (8,*)
      &         '                               to collective levels'
-C           WRITE (8,*)
-C    &         '             to discrete un-coupled collective levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN
-         WRITE (8,*)
-         WRITE (8,*) 
+        WRITE (8,*)
+        WRITE (8,*) 
      &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(OMP) '
-         WRITE (8,'(4x,3(4x,D12.6,4x))')
+        WRITE (8,'(4x,3(4x,D12.6,4x))')
      &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
-         WRITE (8,*)
+        WRITE (8,*)
       ENDIF
 
 C

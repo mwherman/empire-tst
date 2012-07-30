@@ -1,6 +1,6 @@
-C $Rev: 2970 $
+C $Rev: 3004 $
 C $Author: rcapote $
-C $Date: 2012-07-21 13:38:37 +0200 (Sa, 21 Jul 2012) $
+C $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -19,8 +19,8 @@ C
      &                 AVSo(0:ndejc,0:ndnuc), awf(nfhump),
      &                 AWOm(0:ndejc,0:ndnuc),SHLlnor(0:ndnuc),
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc),
-     &                 BETav, BETcc(ndcc), BFUs, BR(ndlv,ndbr,3,0:ndnuc)
-     &                 ,AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
+     &                 BETav, BETcc(ndcc), BFUs,BR(ndlv,ndbr,3,0:ndnuc),
+     &                 AMUele, CANgler(ndangecis), CETa, CHMs, CRL,
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
@@ -79,7 +79,7 @@ C
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
-     &        DYNam, COLfile, LTOtred	 
+     &        DYNam, COLfile	 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -87,7 +87,7 @@ C
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
      &                 FISdis(ndnuc), FISmod(ndnuc), FISopt(ndnuc),
-     &                 FISshi(ndnuc), FITlev, FLAm(ndcc),FCCred,FDWred,
+     &                 FISshi(ndnuc), FITlev, FLAm(ndcc),FCCred,
      &                 FUSred, GAMmafis(nfhump), GCAsc, GDIv,FCOred, 
      &                 GDResh, GDRpar(ndgdrpm,0:ndnuc), GDRspl, GDRwa1,
      &                 GDRwa2, GDRweis, GGDr1, GGDr2, GDRdyn, DXSred,
@@ -148,7 +148,9 @@ C
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED,rFCCRED,rFDWRED,rFUSRED,rELAred,rCELred 
+      DOUBLE PRECISION rTOTRED,rFCCRED,rFUSRED,rELAred,rCELred 
+      DOUBLE PRECISION FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
+
       DOUBLE PRECISION rTUNEfi(0:ndnuc),rFCOred
       DOUBLE PRECISION rTUNe(0:ndejc,0:ndnuc), rTUNEPE(0:ndejc)
       DOUBLE PRECISION om2_ig(0:NDNUC),delp_ig(0:NDNUC),
@@ -156,7 +158,7 @@ C
 
       CHARACTER*2 SYMb(0:ndnuc), SYMbe(0:ndejc)
 
-      DOUBLE PRECISION ROFism(NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),  ! FISSMOD real
+      DOUBLE PRECISION ROFism(NFISENMAX,NDLW,NFMOD),HM(NFTRANS,NFMOD),    ! FISSMOD real
      & EFDism(NFTRANS,NFMOD), UGRidf(NFISENMAX,NFMOD), EFBm(NFMOD),
      & XMInnm(NFMOD), AFIsm(NFMOD), DEFbm(NFMOD), SHCfism(NFMOD),
      & DELtafism(NFMOD), GAMmafism(NFMOD), WFIsm(NFMOD),
@@ -208,10 +210,11 @@ C     COMMON /DEPTH / POTe
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,
-     &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,rFDWred, 
+     &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta, 
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,FDWred         
+     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,
+     &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
@@ -230,7 +233,7 @@ C     COMMON /DEPTH / POTe
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,
      &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,
      &                 D_nno, CSPfis, RECoil, SR_Ham_hw, SR_Ham_amb0,
-     &	               SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4,
+     &                 SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4,
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3,
      &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,
      &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape
@@ -258,7 +261,7 @@ C
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
-     &                  NUBarread, BENchm, CALctl, COLfile, LTOtred
+     &                  NUBarread, BENchm, CALctl, COLfile
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
@@ -266,3 +269,4 @@ C
       COMMON /TLCOEF/ TL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas
+

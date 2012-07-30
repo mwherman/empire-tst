@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2976 $
+Ccc   * $Rev: 3004 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-23 14:53:06 +0200 (Mo, 23 Jul 2012) $
+Ccc   * $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2630,12 +2630,12 @@ C          Discrete level scattering
 C             Coupled levels
               SINlcc = SINlcc + dtmp
            ELSE
-C             Uncoupled discrete levels
+C             Uncoupled discrete levels included into inelastic
               SINl = SINl + dtmp
            ENDIF
          ELSE
 C          Scattering into continuum
-           SINlcont = SINlcont + dtmp*FCOred
+           SINlcont = SINlcont + dtmp
 C          Not included into inelastic as it is renormalized in main.f
 C          SINl = SINl + dtmp
          ENDIF
@@ -2679,7 +2679,7 @@ C    &rmations of DWBA levels'
       IF (SINl+SINlcont.GT.ABScs) THEN
          WRITE (8,*)
          WRITE (8,*) 
-     &' ERROR: Too big dynam. deformations of DWBA uncoupled levels'
+     &' ERROR: Too big dynam. deformations of DWBA levels'
          WRITE (8,*)
      &' ERROR: DWBA calculation produces too big cross sections    '
          WRITE (8,'(
@@ -2706,23 +2706,23 @@ C
 C     Absorption cross section includes inelastic scattering cross section to coupled levels
 C
       sreac = sabs + SINlcc
-      IF (IOUt.EQ.5 .AND. sabs.GT.0.D0) THEN
+      IF (IOUt.EQ.5 .AND. sreac.GT.0.D0) THEN
          WRITE (8,*)
          WRITE (8,*) ' INCIDENT CHANNEL:'
          WRITE (8,'(A7,I6,A5,F10.3,A10,F10.3,A10)') '  LMAX:', Maxlw,
      &          ' E = ', EIN, ' MeV (CMS)', elab, ' MeV (LAB)'
-         WRITE (8,*) ' XS calculated using Smat:   Selast =',
-     &               SNGL(selast), ' mb '
+C        WRITE (8,*) ' XS calculated using Smat:   Selast =',
+C    &               SNGL(selast), ' mb '
          WRITE (8,*) ' Shape elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
-         WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
-     &               SNGL(sabs), ' mb '
+         WRITE (8,*) ' Reaction XS =', SNGL(sreac),
+     &               ' mb (calculated)'
          WRITE (8,*) ' Reaction XS =', SNGL(ABScs),
      &               ' mb (read from ECIS)'
          WRITE (8,*) ' ECIS/EMPIRE ratio of reaction cross section =',
-     &               (ABScs - SINlcc)/sabs
-         WRITE (8,*) ' Inelastic XS to coupled levels (SINlcc) =',
-     &               SNGL(SINlcc), ' mb '
+     &               ABScs/sreac
+         WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
+     &               SNGL(sabs), ' mb '
          WRITE (8,*)
      &      ' Inelastic XS to uncoupled discrete levels (DWBA) =',
      &               SNGL(SINl), ' mb '
@@ -2732,9 +2732,8 @@ C
             WRITE (8,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (8,*) ' Sreac - SINl - sinlcont(renormalized by DWBA) =',
-     &         SNGL(ABScs -SINlcc -SINl -SINlcont), 
-     &             ' mb (Sabs - SINl - SINlcont)'
+         WRITE (8,*)' Sreac - SINl - sinlcont (renormalized by DWBA) =',
+     &            SNGL(sreac - SINl - SINlcont), ' mb '
          WRITE (8,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (8,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
@@ -2742,18 +2741,21 @@ C
 
       ENDIF
 C
-C-----Renormalizing TLs to correct very small difference
-C     between calculated and read ECIS XS
+C-----Renormalizing TLs 
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
 C     continuum also included
 C
 158   CONTINUE
-      IF(SINlcc+SINl+SINlcont.LE.ABScs) THEN 
+      IF(SINlcc+SINl+SINlcont.LE.sabs) THEN 
         DO l = 0, Maxlw
           Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
+C         Stl(l + 1) = Stl(l + 1)*(sabs           - SINl -SINlcont)/sabs  ! ok
         ENDDO
         CSFus = ABScs - SINlcc - SINl - SINlcont
+C       CSFus = sabs           - SINl - SINlcont  ! ok
+
       ELSE 
+
          WRITE (8,*)
          WRITE (8,
      &'(1x,'' WARNING: CC cross section to coupled discrete levels ='',
@@ -2763,7 +2765,7 @@ C
      & 1x,'' WARNING: DWBA cross section to levels in the continuum =''
      & ,F8.2,'' mb  !!''/
      & 1x,'' WARNING: Reaction  cross section ='',F8.2,'' mb''/)') 
-     &   SINlcc, SINl, SINlcont, ABScs
+     &   SINlcc, SINl, SINlcont, sreac
         IF(SINlcont.gt.0) then
           SINlcont = 0.d0
           WRITE (8,*) 
