@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 3001 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2012-07-30 03:00:43 +0200 (Mo, 30 Jul 2012) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -464,7 +464,7 @@ C
       ampmwr = holamu
       IF (amupmu.NE.0.D0) ampmwr = holpmu
       IF (Iout.GT.3) WRITE (8,99065) XMEs, ampmwr
-99065 FORMAT (' XMES =',F7.5,3X,' UNIT =',A3)
+99065 FORMAT (' XMES =',F8.5,3X,' UNIT =',A3)
       n1mx = (LTRamx(1) + 1)*NANglr
       n2mx = (LTRamx(2) + 1)*n1mx
       n1wx = n1mx + KTRl(8)*n1mx
