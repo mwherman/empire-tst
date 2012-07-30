@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2443 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-02-06 04:12:36 +0100 (Mo, 06 Feb 2012) $
+Ccc   * $Rev: 3002 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-07-30 03:01:15 +0200 (Mo, 30 Jul 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -12966,8 +12966,6 @@ C     SUBROUTINE WOSA(V,A,P,CC,R,N,LX)                                  WOSA-001
 
       SUBROUTINE WOSA(VRR,A,P,CC,R,N,LX)                                RCN
 
-
-
 C COMPUTATION OF WOODS-SAXON FORM-FACTORS AT SOME POWER AND THEIR       WOSA-002
 C DERIVATIVES.                                                          WOSA-003
 C LIMITED TO THE SIXTH DERIVATIVE (THE FOURTH ONE ONLY IS USED IN ECIS).WOSA-004
@@ -21008,11 +21006,7 @@ C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
       IF (.NOT.LO(59)) GO TO 47                                         RESU-438
       IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-439
 
-
-
       IF (INIV.EQ.1) WRITE (55,'(1x,F10.2)') RX                         RCN
-
-
 
       IF (INIV.NE.1) WRITE (59,1034) RX,INIV-1                          RESU-440
    47 IF (LO(81)) WRITE (MW,1035) TX(NCOLL+INIV+1)                      RESU-441
@@ -21042,37 +21036,17 @@ C PSEUDO DO LOOP ON ANGLES.                                             RESU-447
    52 WRITE (MW,1036) THETB,EX(2,1),EX(I3+1,1),EX(I4,1)                 RESU-465
    53 IF (.NOT.LO(64)) GO TO 54                                         RESU-466
 
-
-
 C     WRITE (66,1038) (MF(2,NIX+K-2),THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10RESU-467
-
-
 C    1),K=2,I3)                                                         RESU-468
 
-
 C     Printing only cross sections (MF(2,NIX+K-2)=0)                  
-
-
       WRITE (66,10381)(THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10),K=2,2)        RCN
 
-
 C     IF (LO(81)) WRITE (66,1039) THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,ERESU-469
-
-
 C    1X(I4,1),(LG(K),K=6,10)                                            RESU-470
 
-
-
-
-
       IF (LO(81)) WRITE (66,10391)THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,E  RCN
-
-
      1X(I4,1),(LG(K),K=6,10)                                              RCN
-
-
-
-
 
    54 IF (I7.LE.0) GO TO 56                                             RESU-471
       DO 55 K=1,I7                                                      RESU-472
@@ -21221,7 +21195,10 @@ C     Printing only cross sections (01 instead of I8)
  1009 FORMAT ('<CROSS-S.>',F10.2,1P,D20.8,0P,F10.2,2I5)                 RESU-604
  1010 FORMAT ('<INE.C.S.>',F10.2,1P,D20.8,0P,F10.2,2I5)                 RESU-605
  1011 FORMAT (6X,'==> TOTAL CROSS SECTION =',F14.6,' MILLIBARNS.')      RESU-606
- 1012 FORMAT (1P,D12.5)                                                 RESU-607
+C1012 FORMAT (1P,D12.5)                                                 RESU-607
+
+ 1012 FORMAT (1P,D15.8)                                                 RESU-607
+
  1013 FORMAT (' TOTAL REACTION CROSS SECTION =',F14.6,' MILLIBARNS.')   RESU-608
  1014 FORMAT (' TOTAL REACTION CROSS SECTION =',F14.6,' MILLIBARNS',11X,RESU-609
      1'( INCLUDING COMPOUND ELASTIC ).')                                RESU-610
@@ -21263,14 +21240,12 @@ C     Printing only cross sections (01 instead of I8)
  1036 FORMAT (1X,F10.3,D16.5,2X,5F18.7)                                 RESU-646
  1037 FORMAT (29X,5F18.7)                                               RESU-647
  1038 FORMAT (I3,1P,2D12.5,5X,4A4,A2)                                   RESU-648
-10381 FORMAT (3X,1P,2D12.5,5X,4A4,A2)                                   RCN
 
+10381 FORMAT (3X,1P,2D12.5,5X,4A4,A2)                                   RCN
 
  1039 FORMAT (' -4',1P,2D12.5,5X,4A4,A2/' -5',2D12.5,5X,4A4,A2)         RESU-649
 
-
 10391 FORMAT (3X,1P,2D12.5,5X,4A4,A2/3X,2D12.5,5X,4A4,A2)               RCN
-
 
  1040 FORMAT (/' ANGULAR DISTRIBUTION OF COMPOUND SCATTERING ON LEVELS',RESU-650
      1I3,' TO',I3//6X,'ANGLE',6(I6,'-LEVEL',F5.1,A1))                   RESU-651
