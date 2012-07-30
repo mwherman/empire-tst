@@ -10313,28 +10313,41 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
                  It is recommended not to vary dynamical deformation above 10 MeV due to 
                  numerical stability problems.
+
 \item [{ELARED}] The shape elastic cross section will be multiplied by VAL (default: 1.).
                  The change is also reflected in the total cross section. \\
                  The relative uncertainty of the scaling factor in \% could be given by I1.
+
 \item [{FUSRED}] The fusion (reaction) cross section will be multiplied by VAL (default: 1.).
                  The change is also reflected in the total cross section. \\
                  The relative uncertainty of the scaling factor in \% could be given by I1.
-\item [{FCCRED}] The calculated direct cross section for all collective levels will be multiplied
-                 by VAL (default: 1.). \\
+
+\item [{FCCRED}] The calculated direct cross section for discrete collective levels will be multiplied
+                 by VAL (default: 1.). Both coupled and uncoupled levels are scaled. \\
                  The uncertainty of the scaling factor in \% could be given by I1.\\
                  It has no effect if DIRECT keyword is set to zero in the input (default).
+
+\item [{FCORED}] The DWBA calculated direct cross section for collective levels in the continuum will
+                 be multiplied by VAL (default: 1.). Giant multipole resonances are also scaled
+				 if specified in the collective level file (flagged with negative deformation). \\
+                 The uncertainty of the scaling factor in \% could be given by I1.\\
+                 It has no effect if DIRECT keyword is set to zero in the input (default).\\
+				 A value of zero could be used to supress DWBA collective levels in the continuum,
+				 without recalculating the transmission coefficients (TLs).
+
 \item [{TOTRED}] The total cross section will be multiplied by VAL (default: 1.). \\
                  The relative uncertainty of the scaling factor in \% can be given by I1.\\
-This parameter has a dual use:\\
-1) It may be used to correct small deficiencies of your optical model calculated cross sections.
-  In this case it is recommended to pair it with ELARED parameter having both the same value
-  as given in the example below. 
-\begin{verbatim}
-  TOTRED 1.03
-  ELARED 1.03
-\end{verbatim}
-2) It may be used to simulate the CN resonances observed in total cross sections (obviously not included
-  in the optical model). In this case it is recommended to not combine it with ELARED. 
+				 TOTRED is applied through other scaling factors, namely ELARED,FUSRED,FCCRED and FCORED.\\
+				 If those factors are present, then the final scaling will be a product of them 
+				 (e.g., if both TOTRED and FUSRED are specified, then the fusion (reaction) cross section
+				 will be multiplied by FUSRED*TOTRED.\\
+This parameter is recommended to be used to correct small deficiencies (~3\%) of your optical model 
+calculated total cross sections. It is not recommended to be used for simulation of the experimental fluctuations
+of total cross section.
+
+\item [{CELRED}] The compound elastic cross section will be multiplied by VAL (default: 1.). \\
+                 The relative uncertainty of the scaling factor in \% can be given by I1.\\
+This parameter may be used to simulate the CN resonances (obviously not included in the optical model). 
 
 \item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron on the target
                  nucleus will be multiplied by VAL). 
