@@ -728,7 +728,8 @@ C
 C       TOTAL
 C       WRITE(93,'(1X,E14.8)') CST*1000.
         WRITE(93,1012) CST*1000.d0
- 1012   FORMAT (1P,D12.5)                                               RESU-607
+C1012   FORMAT (1P,D12.5)                                               RESU-607
+ 1012   FORMAT (1P,D15.8)                                               RESU-607
 C
 C       INELASTIC TO LEVELS
         DO K=2,NMAX
@@ -12474,3 +12475,4 @@ C
 C     *******************************************************
 C     END of dispersive
 C     *******************************************************
+
