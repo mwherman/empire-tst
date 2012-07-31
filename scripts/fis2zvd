@@ -1,0 +1,37 @@
+#! /bin/sh -
+#script to produce ZVView plots from the *-fiss.xsc files
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Fission cross sections ready to be plotted'
+echo ' '
+ls *-fiss.xsc
+echo ' '
+echo -n 'Choose one of the above (without .xsc extention!): '
+read file
+fi                          
+
+# Deleting previous plots
+if [ -f "$file-zff.zvd" ]; then
+ rm "$file-zff.zvd" 
+fi
+
+#run fis2zvd to produce ZVView plots
+cp $file-fiss.xsc FISS_XS.OUT
+rm -f FIS2ZVD.INP
+ln -sf $EMPIREDIR/util/fis2zvd/FIS2ZVD.INP FIS2ZVD.INP
+#vi FIS2ZVD.INP	
+$EMPIREDIR/util/fis2zvd/fis2zvd.exe 
+if [ -f "XS_FISS.zvd" ]; then
+ mv "XS_FISS.zvd" $file-zf-part.zvd
+fi
+rm FISS_XS.OUT
+rm FIS2ZVD.INP
+exit
