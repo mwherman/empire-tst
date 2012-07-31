@@ -1,6 +1,6 @@
-cc   * $Rev: 3007 $
+cc   * $Rev: 3009 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-31 08:55:41 +0200 (Di, 31 Jul 2012) $
+Ccc   * $Date: 2012-07-31 21:47:39 +0200 (Di, 31 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -188,68 +188,56 @@ C-----
 C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
-         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A118)') 
-     &      nuc_print + 7, int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-     &2 CC added/substracted to Elastic/Nonelast respectively)'
-         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A118)') 16,
-     &      int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-     &2 CC added/substracted to Elastic/Nonelast respectively)'
+         WRITE(41, '(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3,5x,A133)') 
+     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
+     &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
+     &vely)'
+         WRITE(107,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3,5x,A133)') 
+     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
+     &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
+     &vely)'
 
-         WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
-
+         WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic*  ','  Nonelast* ',
-
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
-
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
-         WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
 
+         WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic*  ','   CN-el    ',
-
      &      ' Nonelast*  ','  CN-form   ','  Direct    ',
-
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
-
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
-
-     &      '  PCROSS    ','   HMS      ','  CC(4 lev) '
-
-
+     &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
 	  ELSE
 
+         WRITE(41, '(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+         WRITE(107,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
 
-         WRITE(41, '(''#'',I3,10X,i3,''-'',A2,''-'',I3)') nuc_print + 7, 
-     &      int(Z(0)), SYMb(0), int(A(0))
-         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') 15,
-     &      int(Z(0)), SYMb(0), int(A(0))
-
-         WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
-
+         WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ','  Nonelast  ',
-
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
-
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
-         WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
-
+         WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','   CN-el    ',
-
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
-
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
-
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
-
      &      '  PCROSS    ','   HMS      '
-
 	  ENDIF
 
-
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
+        WRITE(98,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+        WRITE(98,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
+     &      '  Fiss-tot  ','  Fiss-1st  ',
+     &      '  Fiss-2nd  ','  Fiss-3rd  ',
+     &      '  Fiss-4rd  ','  Fiss-5th  '
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
@@ -460,10 +448,7 @@ C------------Avoid reading closed channels
 C
 C              Storing the inelastic to the first two low-lying CC levels 
 C              to correct the "elastic" scattering for actinides for Ein > 3.5 MeV
-               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. 
-
-     &                      ilv.LT.3 .and. EINl.GT.3.5d0) 
-
+               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. ilv.LT.3) 
      &            xscclow = xscclow + popread
 C              To consider only open channels
                ncoll = i
@@ -2355,8 +2340,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
       endif
 
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
-     &  WRITE(98,'(G12.5,2X,1P,(30E12.5))') EINl,
-     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,max_prn-1))
+     &  WRITE(98,'(G10.5,1x,1P,(30E12.5))') EINl,
+     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,10,max_prn-1))
       CLOSE (80)
       CLOSE (79)
       WRITE (12,*) ' '
@@ -3068,18 +3053,14 @@ C     ENDDO
       WRITE (8,*)
       checkXS = checkXS + TOTcsfis
 
-
       xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont*FCOred
       xspreequ = xsinl + xsmsc + totemis + tothms
-
 C
-
 C     Elastic and Nonelastic modified for actinides
-
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states
 
       IF (A(0).gt.220) then 
-        WRITE(41,'(G10.5,1x,1P,95E12.5)') EINl, TOTcs*TOTred*totcorr,
+        WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
@@ -3101,7 +3082,7 @@ C                          Low-lying XS   and       CE         substracted from 
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
 	ELSE
-        WRITE(41,'(G10.5,1x,1P,95E12.5)') EINl, TOTcs*TOTred*totcorr,
+        WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
      &    ELAcs*ELAred            + 4.d0*PI*ELCncs, ! CE added to elastic
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
      &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
@@ -3881,7 +3862,11 @@ C
            CLOSE (73)
            CLOSE (74)
          ENDIF
-         CLOSE (98)
+         IF(TOTcsfis.LE.1.D-10) THEN
+           CLOSE (98,STATUS = 'delete')
+         ELSE
+           CLOSE(98)
+         ENDIF  
 C--------Saving random seeds
          ftmp = grand()
          OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
