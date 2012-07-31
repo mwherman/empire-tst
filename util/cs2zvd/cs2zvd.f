@@ -28,14 +28,8 @@ C
       CLOSE(10)
 
 10    OPEN(20,file='XSECTIONS.OUT',STATUS='OLD',ERR=100)
-C       WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+5,
-C    &      int(Z(0)), SYMb(0), int(A(0))       
-      READ(20,'(1x,I3,10x,i3,1x,a2,1x,i3)') ncol,iz,symb,ia
-C     nreac = ncol -1 ! energy does not count
-C     if(nreac.gt.maxr) then
-C	PAUSE 'Increase maxr PARAMETER !' 
-C	STOP 
-C     endif  
+      READ(20,'(7x,i3,1x,a2,1x,i3)') iz,symb,ia
+
       nreac = 30 ! reading up to 30 reactions only 	
 
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
@@ -57,10 +51,10 @@ C    &
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G12.5,1P,(100E12.5))',END=20) 
+        READ(20,'(G11.5,1P,(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
- 	  check_cs(j)=check_cs(j) + cs(i,j)
+   	      check_cs(j)=check_cs(j) + cs(i,j)
         enddo
         nen = i 
       enddo
@@ -112,7 +106,6 @@ C
         CLOSE(20)
 
       ENDDO
-
       STOP 'ZVView cross-section plots created !'
  100  WRITE(*,*) 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING'
       STOP
