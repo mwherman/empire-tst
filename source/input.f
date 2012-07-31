@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3006 $
+Ccc   * $Rev: 3008 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-31 08:52:55 +0200 (Di, 31 Jul 2012) $
+Ccc   * $Date: 2012-07-31 21:46:49 +0200 (Di, 31 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3303,12 +3303,14 @@ C
      >    ERR=753)
 C     VERSIONNUMBER = 3.1
 C     VERSIONNAME   = RIVOLI
-      read(23,'(16x,A5)',ERR=753,END=753) emp_ver
-      read(23,'(16x,A6)',ERR=753,END=753) emp_nam
+      read(23,'(16x,A5)',ERR=753,END=7531) emp_ver
+      read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
       close(23)
-
-      WRITE(8,'(A44,A5,A3)') 
-     > '                        |    E M P I R E  -  ',emp_ver ,'  |'
+	goto 7541
+ 7531 emp_ver='3.1.1 '
+      emp_nam='Rivoli'
+ 7541 WRITE(8,'(A44,A6,A3)') 
+     > '                        |    E M P I R E  -  ',emp_ver,'  |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,'(A33,A6,A13)')
@@ -3332,7 +3334,8 @@ C
       WRITE(8,30) source_rev
    30 FORMAT(24X,'| empire/source  rev. ',A5,'|')
       GOTO 756
-  755 emp_rev = "     "
+  755 emp_rev    = '     '
+      source_rev = '     '
       WRITE (8,*)'                       |       Not under SVN      |'
 C
   756 WRITE (8,*)'                       |                          |'
@@ -3359,11 +3362,12 @@ C
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
-     > trim(emp_ver), ' ',trim(emp_nam)
+     > trim(emp_ver), ' ',emp_nam
 
-      if(emp_rev(1:5).ne."     ") then
-        WRITE (12,35) trim(emp_rev)
-   35 FORMAT(1X,'(SVN revision ',A,') by M. Herman et al [EMP].',5X,' ')
+      if(emp_rev.ne.'     ') then
+        WRITE (12,35) emp_rev
+   35 FORMAT(1X,'(SVN revision ',A5,') by M. Herman et al [EMP].',5X,' '
+     >      )
       else
         WRITE (12,*)
      >             '(not under SVN) by M. Herman et al [EMP].          '
