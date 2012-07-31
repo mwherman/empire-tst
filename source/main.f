@@ -1,6 +1,6 @@
-cc   * $Rev: 3004 $
+cc   * $Rev: 3006 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
+Ccc   * $Date: 2012-07-31 08:52:55 +0200 (Di, 31 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -70,8 +70,8 @@ C                             and assumed isotropic
      &                 post_fisn(NDEPFN),csepfns(NDEPFN), deltae_pfns,
      &                 ratio2maxw(NDEPFN),enepfns(NDEPFN),fmed, 
 C                      -----------------------------------------------
-     &                 csprnt(ndnuc), csetmp(ndecse),ftmpA,ftmpB,
-     &                 fisxse, csinel, eps, checkprd,ftmp_gs,
+     &                 csetmp(ndecse),ftmpA,ftmpB,
+     &                 fisxse, eps, checkprd,ftmp_gs,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
@@ -99,10 +99,12 @@ C             PFNS quantities
 C             Total prompt fission spectra only for neutrons
      &        nepfns
 C             -----------------------------------------------
-      INTEGER INT, MIN0, NINT
+      INTEGER max_prn
       LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
-
+C
+	PARAMETER (max_prn = 30) ! maximum number of reactions to print by cs2zvd
+C
       real*8, external :: mu_bar
 
       DATA ctldir/'TL/'/
@@ -184,8 +186,8 @@ C-----
 C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
-         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A105)') i+7,
-     &      int(Z(0)), SYMb(0), int(A(0)),
+         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A105)') 
+     &      nuc_print + 7, int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
      &4 CC added/substracted to Elastic/Nonelast)'
          WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A105)') 16,
@@ -193,33 +195,34 @@ C        to include/exclude low-lying coupled states
      &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
      &4 CC added/substracted to Elastic/Nonelast)'
 
-         WRITE(41,'(''#'',A10,1X,(95A12))')'  Einc    ',
-     &       '  Total     ','  Elastic*  ', '  Nonelast* ',
-     &       '  Fission   ','  Mu-bar    ', '  Nu-bar    ',
-     &         (preaction(nnuc),nnuc=1,min(nuc_print,NDNUC,87))
-         WRITE(107,'(''#'',A10,1X,(20A12))') '   Einc   ',
+         WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
+     &      '  Total     ','  Elastic*  ','  Nonelast* ',
+     &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
+     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+         WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic*  ','   CN-el    ',
-     &      ' Nonelast*  ','  CN-form   ',
-     &      '  Direct    ','Pre-equil   ','Coup-Chan   ',
-     &      ' DWBA-disc  ','DWBA-cont   ','   MSD      ',
-     &      '    MSC     ','  PCROSS    ','   HMS      ',
-     &      '  CC(4 lev) '
+     &      ' Nonelast*  ','  CN-form   ','  Direct    ',
+     &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+     &      'DWBA-cont   ','   MSD      ','    MSC     ',
+     &      '  PCROSS    ','   HMS      ','  CC(4 lev) '
+
 	  ELSE
-         WRITE(41, '(''#'',I3,10X,i3,''-'',A2,''-'',I3)') i+6,
+
+         WRITE(41, '(''#'',I3,10X,i3,''-'',A2,''-'',I3)') nuc_print + 7, 
      &      int(Z(0)), SYMb(0), int(A(0))
          WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3)') 15,
      &      int(Z(0)), SYMb(0), int(A(0))
 
-         WRITE(41,'(''#'',A10,1X,(95A12))')'  Einc    ',
-     &       '  Total     ','  Elastic   ', '  Nonelast  ',
-     &       '  Fission   ','  Mu-bar    ', '  Nu-bar    ',
-     &         (preaction(nnuc),nnuc=1,min(nuc_print,NDNUC,87))
-         WRITE(107,'(''#'',A10,1X,(20A12))') '   Einc   ',
+         WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
+     &      '  Total     ','  Elastic   ','  Nonelast  ',
+     &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
+     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+         WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','   CN-el    ',
-     &      ' Nonelast   ','  CN-form   ',
-     &      '  Direct    ','Pre-equil   ','Coup-Chan   ',
-     &      ' DWBA-disc  ','DWBA-cont   ','   MSD      ',
-     &      '    MSC     ','  PCROSS    ','   HMS      '
+     &      ' Nonelast   ','  CN-form   ','  Direct    ',
+     &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+     &      'DWBA-cont   ','   MSD      ','    MSC     ',
+     &      '  PCROSS    ','   HMS      '
 	  ENDIF
 
 
@@ -432,9 +435,10 @@ C------------Avoid reading closed channels
                READ (46,*,END = 1400) popread
                popread = popread*FCCred
 C
-C              Storing the inelastic to the low-lying levels (first three levels)
-C              to correct the "elastic" scattering for actinides
-               IF (A(0).gt.220 .and. ilv.LT.3) 
+C              Storing the inelastic to the first two low-lying CC levels 
+C              to correct the "elastic" scattering for actinides for Ein > 3.5 MeV
+               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. 
+     &                      ilv.LT.3 .and. EINl.GT.3.5d0) 
      &            xscclow = xscclow + popread
 C              To consider only open channels
                ncoll = i
@@ -2314,14 +2318,8 @@ C-----Write a row in the table of cross sections (Note: inelastic has CN elastic
 cccccccccccccccccccc ccccccccccccccccccccccccccccc
 C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       eps=1.d-8
-      csinel=CSPrd(2)-4.d0*PI*ELCncs
-      if (CSPrd(1).lt.eps) CSPrd(1)=0.d0
-      if (csinel.lt.eps)   csinel=0.d0
-      i=0
-      do nnuc=3,NNUcd
+      do nnuc=1,NNUcd
         if (CSPrd(nnuc).lt.eps) CSPrd(nnuc)=0.d0
-          i = i + 1
-          csprnt(i) = CSPrd(nnuc)
       enddo
 cccccccccccccccccccccccccccccccccccccccccccccccc
 
@@ -2332,8 +2330,8 @@ cccccccccccccccccccccccccccccccccccccccccccccccc
       endif
 
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
-     &  WRITE(98,'(G12.5,2X,1P,(95E12.5))') EINl,
-     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,NNUcd)
+     &  WRITE(98,'(G12.5,2X,1P,(30E12.5))') EINl,
+     &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,max_prn-1))
       CLOSE (80)
       CLOSE (79)
       WRITE (12,*) ' '
@@ -3044,23 +3042,24 @@ C     ENDDO
       WRITE (8,*)
       WRITE (8,*)
       checkXS = checkXS + TOTcsfis
-C
-C     Elastic and Nonelastic modified for actinides
-C     to include/exclude scattering cross section (xscclow) low-lying coupled states
+
       xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont*FCOred
       xspreequ = xsinl + xsmsc + totemis + tothms
 
+C
+C     Elastic and Nonelastic modified for actinides
+C     to include/exclude scattering cross section (xscclow) low-lying coupled states
       IF (A(0).gt.220) then 
-        WRITE(41,'(G12.5,1P,(95E12.5))') EINl, TOTcs*TOTred*totcorr,
+        WRITE(41,'(G10.5,1x,1P,95E12.5)') EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
 C                          Low-lying XS   and       CE         substracted from nonelastic
      &                  -   xscclow       -    4.d0*PI*ELCncs,
      &    TOTcsfis, 
-     &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada)*1.D-3, xnub,
-     &    CSPrd(1), csinel,(csprnt(nnuc),nnuc=3,min(nuc_print,NDNUC,87))
-        WRITE(107,'(G12.5,1P,(20E12.5))') EINl, 
+     &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada)*1.D-3,xnub,
+     &    (CSPrd(nnuc),nnuc=1,min(nuc_print,max_prn))
+        WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
@@ -3071,15 +3070,15 @@ C                          Low-lying XS   and       CE         substracted from 
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
-     &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,XSlowcc(4 levels)
+     &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
 	ELSE
-        WRITE(41,'(G12.5,1P,(95E12.5))') EINl, TOTcs*TOTred*totcorr,
+        WRITE(41,'(G10.5,1x,1P,95E12.5)') EINl, TOTcs*TOTred*totcorr,
      &    ELAcs*ELAred            + 4.d0*PI*ELCncs, ! CE added to elastic
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
      &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,ELCncs,elada), xnub,
-     &    CSPrd(1), csinel,(csprnt(nnuc),nnuc=3,min(nuc_print,NDNUC,87))
-        WRITE(107,'(G12.5,1P,(20E12.5))') EINl, 
+     &    (CSPrd(nnuc),nnuc=1,min(nuc_print,max_prn))
+        WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
 C                            CE  added to elastic
      &    ELAcs*ELAred  +  4.d0*PI*ELCncs, 
@@ -3103,7 +3102,7 @@ C                            CE  substracted from nonelastic
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
-C    &    SINlcont*FCOred + ELAred*ELAcs
+C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
           WRITE (8,
      &  '('' * OM total cross section                         '',G13.6,
      &              '' mb  '')') ELAred*ELAcs + 
@@ -3163,10 +3162,10 @@ C    &    SINlcont*FCOred + ELAred*ELAcs
      &    WRITE (8,'('' * Comp. Elastic cross section scaled by '',
      &     G13.6)') CELred
         if(FCCred.ne.1)
-     &    WRITE (8,'('' * Discr.-level  cross section scaled by '',
+     &    WRITE (8,'('' * Discr. level  cross section scaled by '',
      &     G13.6)') FCCred
         if(FCOred.ne.1)
-     &    WRITE (8,'('' * Contin.-level cross section scaled by '',
+     &    WRITE (8,'('' * Contin. level cross section scaled by '',
      &      G13.6)') FCOred
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
@@ -3176,7 +3175,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs
      &  '(''   Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
-C    &    SINlcont*FCOred + ELAred*ELAcs
+C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
           WRITE (*,
      &  '(''   Shape Elastic cross section (ELAcs)            '',G13.6,
      &              '' mb  '')') ELAred*ELAcs

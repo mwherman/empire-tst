@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3004 $
+Ccc   * $Rev: 3006 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
+Ccc   * $Date: 2012-07-31 08:52:55 +0200 (Di, 31 Jul 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2068,8 +2068,8 @@ Cpr         END DO
 
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(8,*) 'Nuclei marked with < in the table below produce excl
-     &usive emission spectra'
+        WRITE(8,*) 'Nuclei marked with < in the table below produce only
+     &inclusive emission spectra'
       ENDIF
 
       WRITE (8,*) ' '
