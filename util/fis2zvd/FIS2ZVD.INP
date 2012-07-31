@@ -1,0 +1,14 @@
+012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789  <-  Column indicator
+0111110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000                                                                                                                                                                
+Each column correspond to one reaction. 
+For the zvd file to be produced the second column should contain 1.
+
+Check the cross section out put file XSECTIONS.OUT (or $proj.xsc) to see reactions
+The first fourth columns are fixed:
+ 1.- Total fission
+ 2.- 1st-chance fission
+ 3.- 2nd-chance fission
+ 4.- 3rd-chance fission
+ 5.- 4th-chance fission
+
+This file could be edited to print more fission chances.
