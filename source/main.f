@@ -1,6 +1,6 @@
-cc   * $Rev: 3006 $
+cc   * $Rev: 3007 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-31 08:52:55 +0200 (Di, 31 Jul 2012) $
+Ccc   * $Date: 2012-07-31 08:55:41 +0200 (Di, 31 Jul 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -103,7 +103,9 @@ C             -----------------------------------------------
       LOGICAL nvwful, fexist, skip_fiss, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
 C
+
 	PARAMETER (max_prn = 30) ! maximum number of reactions to print by cs2zvd
+
 C
       real*8, external :: mu_bar
 
@@ -186,27 +188,38 @@ C-----
 C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
-         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A105)') 
+         WRITE(41,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A118)') 
      &      nuc_print + 7, int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-     &4 CC added/substracted to Elastic/Nonelast)'
-         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A105)') 16,
+     &2 CC added/substracted to Elastic/Nonelast respectively)'
+         WRITE(107,'(''#'',I3,10X,i3,''-'',A2,''-'',I3,5x,A118)') 16,
      &      int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-     &4 CC added/substracted to Elastic/Nonelast)'
+     &2 CC added/substracted to Elastic/Nonelast respectively)'
 
          WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
+
      &      '  Total     ','  Elastic*  ','  Nonelast* ',
+
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
+
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
          WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
+
      &      '  Total     ','  Elastic*  ','   CN-el    ',
+
      &      ' Nonelast*  ','  CN-form   ','  Direct    ',
+
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
+
      &      '  PCROSS    ','   HMS      ','  CC(4 lev) '
 
+
+
 	  ELSE
+
 
          WRITE(41, '(''#'',I3,10X,i3,''-'',A2,''-'',I3)') nuc_print + 7, 
      &      int(Z(0)), SYMb(0), int(A(0))
@@ -214,15 +227,25 @@ C        to include/exclude low-lying coupled states
      &      int(Z(0)), SYMb(0), int(A(0))
 
          WRITE(41,'(''#'',A10,1X,95A12)') '  Einc    ',
+
      &      '  Total     ','  Elastic   ','  Nonelast  ',
+
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
+
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+
          WRITE(107,'(''#'',A10,1X,20A12)')'   Einc   ',
+
      &      '  Total     ','  Elastic   ','   CN-el    ',
+
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
+
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
+
      &      '  PCROSS    ','   HMS      '
+
 	  ENDIF
 
 
@@ -438,7 +461,9 @@ C
 C              Storing the inelastic to the first two low-lying CC levels 
 C              to correct the "elastic" scattering for actinides for Ein > 3.5 MeV
                IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. 
+
      &                      ilv.LT.3 .and. EINl.GT.3.5d0) 
+
      &            xscclow = xscclow + popread
 C              To consider only open channels
                ncoll = i
@@ -3043,12 +3068,16 @@ C     ENDDO
       WRITE (8,*)
       checkXS = checkXS + TOTcsfis
 
+
       xsdirect = SINlcc*FCCred + SINl*FCCred + SINlcont*FCOred
       xspreequ = xsinl + xsmsc + totemis + tothms
 
 C
+
 C     Elastic and Nonelastic modified for actinides
+
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states
+
       IF (A(0).gt.220) then 
         WRITE(41,'(G10.5,1x,1P,95E12.5)') EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
@@ -3102,7 +3131,9 @@ C                            CE  substracted from nonelastic
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
+
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
+
           WRITE (8,
      &  '('' * OM total cross section                         '',G13.6,
      &              '' mb  '')') ELAred*ELAcs + 
@@ -3175,7 +3206,9 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  '(''   Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
+
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
+
           WRITE (*,
      &  '(''   Shape Elastic cross section (ELAcs)            '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
