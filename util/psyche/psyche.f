@@ -31,6 +31,8 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.06   August 2012       A. Trkov
+!-V                        Fix initialisation of LNU
 !-V         Version 8.05   February 2011     A. Trkov
 !-V                        Fix energy balance calculation depending on
 !-V                        on the value of the LCT flag in MF6.
@@ -164,9 +166,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.05'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -548,6 +550,7 @@
          NMTBAR = 0
          MTTOT = 0
          MF5 = 0
+         LNU  = 0
          REWIND (UNIT=ISCR)
          REWIND (UNIT=JSCR)
          REWIND (UNIT=KSCR)
@@ -3181,7 +3184,12 @@
 !     CALCULATE TOTAL ENERGY AND TEST AGAINST AVAILABLE ENERGY
 !
    30 IF(NSUB.EQ.4)  GO TO 100
+      IF(LNU.LE.0) THEN
+        WRITE(NOUT,34)
+        GO TO 40
+      END IF
       WRITE(NOUT,35)
+   34 FORMAT(/4X,'WARNING - NU-BAR DATA UNDEFINED')
    35 FORMAT(/4X,'ENERGY GRID     TOTAL SECONDARY      ',               &       
      &  'AVERAGE SECONDARY        ENERGY'/                              &       
      &  25X,'ENERGY            NEUTRON ENERGY',8X,'AVAILABLE'/          &       
@@ -3209,7 +3217,7 @@
 !
 !     STORE FILE NAME AND REACTION IF THERE IS PHOTON PRODUCTION DATA
 !
-      DO NN=1,MTTOT
+   40 DO NN=1,MTTOT
          IF(MT.EQ.MTDCT(NN))  THEN
             MF5 = MF5+1
             MT5(MF5) = MF*1000+MT
@@ -3256,16 +3264,19 @@
 !     FISSION NEUTRONS
 !
       IF((MT.GE.18.AND.MT.LE.21).OR.MT.EQ.38)  THEN
-         IF(LNU.NE.2)   THEN
+         IF(LNU.EQ.1)   THEN
             ANU = POLI(1)
             EE = E
             DO I=2,NRC
                ANU = ANU + POLI(I)*EE
                EE = E*EE
             END DO
-         ELSE
+         ELSE IF(LNU.EQ.2) THEN
             IFP = 1
             CALL TERPR(E,ETERP,ANUTRP,NPT,ITERP,JTERP,NRC,IFP,ANU)
+         ELSE
+!           -- This should not happen (protected in the calling program)
+            STOP 'LNU undefined'
          END IF
 !
 !     ALL BUT FISSION
