@@ -1,6 +1,6 @@
-cc   * $Rev: 3009 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-31 21:47:39 +0200 (Di, 31 Jul 2012) $
+cc   * $Rev: 3015 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2012-08-01 20:39:36 +0200 (Mi, 01 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3067,7 +3067,7 @@ C                          Low-lying XS   and       CE         added to elastic
 C                          Low-lying XS   and       CE         substracted from nonelastic
      &                  -   xscclow       -    4.d0*PI*ELCncs,
      &    TOTcsfis, 
-     &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada)*1.D-3,xnub,
+     &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada),xnub,
      &    (CSPrd(nnuc),nnuc=1,min(nuc_print,max_prn))
         WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
