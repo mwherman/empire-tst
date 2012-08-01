@@ -8,11 +8,13 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       character*2 symb
       character*22 caz
       character*12 creaction(maxr)
-      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr)
+      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl
+
       do i=1,maxr
         toplot(i)=0	
         check_cs(i)=0.d0
       enddo
+
       toplot(3) = 1  ! nonelast
       toplot(4) = 1  ! fission
       toplot(5) = 1  ! mu-bar
@@ -81,28 +83,20 @@ C       Skipping plots
         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
      &    iz,symb,ia,TRIM(creaction(j))       
         
-        CALL OPEN_ZVV(20,caz,' ')
-        if (j.eq.5) then
-C
-C         Mu-bar
-C
-          DO i = 1, nen
-            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d3*cs(i,j)
-          ENDDO
-        elseif (j.eq.6) then
-C
-C         Avoiding scaling mb->barn of Nu-bar
-C
-          DO i = 1, nen
-            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),cs(i,j)
-          ENDDO
+        if ((j.eq.5) .or. (j.eq.6)) then
+          ! don't re-scale Nu-bar & Mu-bar
+           xsl = 1.D0
         else
-          DO i = 1, nen
-            WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
-          ENDDO
+           ! convert cross sections mb -> barns
+           xsl = 1.D-3
         endif
 
+        CALL OPEN_ZVV(20,caz,' ')
+        DO i = 1, nen
+          WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),xsl*cs(i,j)
+        ENDDO
         CALL CLOSE_ZVV(20,' ',' ')
+
         CLOSE(20)
 
       ENDDO
