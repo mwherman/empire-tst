@@ -33,7 +33,7 @@ then
 elif [ -e ../${fil}_orig.endf ]
    then origfil=../${fil}_orig.endf
 else
-   echo ' Original ENDF file not found!'
+   echo ' Donor ENDF file not found!'
    echo ' Please create file '${fil}_orig.endf
    exit
 fi
@@ -105,7 +105,7 @@ rm angdis.*
 rm input
 
 # add in nubar, fission spectra(MF5,MT18) and ang dist
-# (MF4,MT18) from "original" file containing these MFs
+# (MF4,MT18) from donor file containing these MFs
 # only do this if it's a fissile material!
 
 if ! /home/herman/empire/util/mkendf/add_endf ${fil}_2.endf ${origfil}
