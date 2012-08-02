@@ -1,6 +1,6 @@
-cc   * $Rev: 3015 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-08-01 20:39:36 +0200 (Mi, 01 Aug 2012) $
+cc   * $Rev: 3019 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-08-02 22:27:15 +0200 (Do, 02 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -188,13 +188,15 @@ C-----
 C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
-         WRITE(41, '(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3,5x,A133)') 
-     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+     &A133)') 
+     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
      &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
      &vely)'
-         WRITE(107,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3,5x,A133)') 
-     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+         WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+     &A133)') 
+     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
      &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
      &vely)'
@@ -213,10 +215,10 @@ C        to include/exclude low-lying coupled states
 
 	  ELSE
 
-         WRITE(41, '(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
-         WRITE(107,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+         WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
 
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ','  Nonelast  ',
