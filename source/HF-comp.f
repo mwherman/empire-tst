@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3032 $
+Ccc   * $Rev: 3040 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 12:10:24 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-03 13:53:41 +0200 (Fr, 03 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -689,7 +689,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION egd, gacs, popl
+      DOUBLE PRECISION egd, gacs, popl, gacs_noicc
       INTEGER i, icse, j, j1, l
       INTEGER INT, NINT
 C
@@ -785,7 +785,10 @@ C-----------Normal level with branching ratios
                   ENDIF
                   gacs = popl*BR(l,j,2,Nnuc)
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
-                  gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
+
+                  gacs_noicc = gacs                 ! no int. conversion
+                  gacs = gacs/(1 + BR(l,j,3,Nnuc))  !    int. conversion
+
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
 C
 C                 Xs should be stored in the second bin to avoid losing 
@@ -808,18 +811,18 @@ C-----------------NOTE: internal conversion taken into account
                   IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
      &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
      &                                  gacs
+C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-C                 write(104,*) Nnuc,l,j1,egd, EINl,gacs
-                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc)).eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
-     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
-                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc))+1.eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
-     &               16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
-                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc))+2.eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
-     &               37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
+                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &               16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &               37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
                ENDDO
             ENDIF
          ENDIF
@@ -880,9 +883,7 @@ C-----------Well... let it go down to the ground state
                   IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
-
-C                 gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
-
+                  gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
                ENDDO
             ENDIF
