@@ -128,11 +128,11 @@ def runE(proj):
         print('Using existing random number generator seed')
     if not isEmpty(proj+'-nubar.dat'):
         cp(proj+'-nubar.dat','NUBAR.DAT')
-        print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')	
+        print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')  
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
 
-	
+    
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
     sys.stdout.flush() # print in correct order under 'qsub'
@@ -149,8 +149,8 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
-	if not isEmpty('GAMMA_INT.DAT'):
-	    mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
+    if not isEmpty('GAMMA_INT.DAT'):
+        mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
     mv('EL_INEL.DAT',proj+'-preq.xsc',0)          # no message if not present    
     mv('XSECTIONS.OUT',proj+'.xsc',0)             # no message if not present
     mv('FISS_XS.OUT',proj+'-fiss.xsc',0)          # no message if not present
@@ -197,7 +197,7 @@ def runE(proj):
     if not isEmpty('CUMULPLOT.PS'):
         # no exception if ps2ps not found, just a message:
         # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
-	os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
+        os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
         if os.path.exists(proj+'-cum.ps'):
             # read preferences from .Xrunrc:
             prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
@@ -368,14 +368,14 @@ def runE(proj):
         cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','gamsort2zvd')
         os.system('"%s" %s' % (cmd, proj))
         # nng plots:
-    	for LDfile in glob("znng_*.zvd"):
-	        mv(LDfile,proj+'-'+LDfile,0)
-    	for LDfile in glob("z2ng_*.zvd"):
-	        mv(LDfile,proj+'-'+LDfile,0)
-    	for LDfile in glob("z3ng_*.zvd"):
-	        mv(LDfile,proj+'-'+LDfile,0)
-    	for LDfile in glob("z4ng_*.zvd"):
-	        mv(LDfile,proj+'-'+LDfile,0)
+        for LDfile in glob("znng_*.zvd"):
+            mv(LDfile,proj+'-'+LDfile,0)
+        for LDfile in glob("z2ng_*.zvd"):
+            mv(LDfile,proj+'-'+LDfile,0)
+        for LDfile in glob("z3ng_*.zvd"):
+            mv(LDfile,proj+'-'+LDfile,0)
+        for LDfile in glob("z4ng_*.zvd"):
+            mv(LDfile,proj+'-'+LDfile,0)
     
     return 0
 
