@@ -10,11 +10,16 @@ C     SELECTIVELY CONVERT EXFOR C5 FORMAT TO ZVD PLOTS
       character*10 cauthor
       character*5 creac(0:40)
       character*9 clevel
-      real*8 value(4),unc_value(4),elevel
+      real*8 value(4),unc_value(4),elevel,energy_gamma
       real*8 e(maxen) ,  e_unc(maxen)
       real*8 cs(maxen), cs_unc(maxen)
-	integer nlevel, nproj, iza, ich, ndata, mt, mtread
+	integer nlevel, nproj, iza, ndata, mt, mtread
 	logical Le_unc
+      integer icolor
+      common /color/icolor
+
+C     starting color 
+      icolor = 1 
 
 	do i=0,MTmax
 	  creac(i) = 'znng_'
@@ -40,6 +45,7 @@ C     SELECTIVELY CONVERT EXFOR C5 FORMAT TO ZVD PLOTS
 
       IF (cline(1:1).EQ.'#' .and. cline(2:8).EQ.'AUTHOR1') THEN
        cauthor  = trim(cline(17:26))
+       icolor = icolor + 1  
 	 GOTO 10
 	ENDIF
 
@@ -70,14 +76,11 @@ C/DATASET
         if(elevel.ne.value(4)) goto 20
 
         nch = len_trim(cline(77:85))
-        ich = 1
-        do while(ich .lt. nch)
-           if(cline(76+ich:76+ich) .ne. ' ') exit
-           ich = ich + 1
-        end do
+        clevel(1:nch) = cline(77:85)
 
-        nch = len_trim(cline(76+ich:85))
-	  clevel(1:nch) = cline(76+ich:85)
+C       Converting character to real and printing back in a right format
+        read(clevel,'(F9.0)') energy_gamma
+	  write(clevel,'(i9.9)') NINT(energy_gamma)
 
         e(nen) = value(1)
         e_unc(nen) = unc_value(1)
@@ -89,10 +92,9 @@ C/DATASET
 
 	  GOTO 10
 
- 20     IF(clevel(nch:nch).eq.'.') nch = nch-1
-        open(20,file= creac(mt)//clevel(1:nch)//'-EMP.zvd')
+ 20     open(20,file= creac(mt)//clevel//'-exp.zvd')
 
-        CALL OPEN_ZVV(20,trim(cauthor)//' '//clevel(1:nch),' ')
+        CALL OPEN_ZVV(20,trim(cauthor)//' '//clevel,' ')
         DO i = 1, nen-1
           IF(Le_unc) then
             WRITE (20,'(G12.5,2X,3(E12.5,1x))') 
@@ -122,13 +124,15 @@ C/DATASET
 
       SUBROUTINE OPEN_ZVV(iout,tfunct,title)
       character*(*) title, tfunct
-      integer iout
+      integer iout, icolor
+      common /color/icolor
+
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
       if(title(1:1).ne.' ') write(iout,'(A)') trim(title)      
       write(iout,'(A12,A)') 'fun: ',trim(tfunct)
       write(iout,'(A)')     'thick: 2'
       write(iout,'(A)')     'length:250'
-      write(iout,'(A)')     'color: 12'
+      write(iout,'(A7,i3)') 'color: ',icolor
       write(iout,'(A)')     'dot: o'
       write(iout,'(A)')     'con: n'
       write(iout,'(A)')     'bot: n'
