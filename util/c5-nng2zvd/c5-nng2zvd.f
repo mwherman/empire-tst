@@ -7,7 +7,7 @@ C     SELECTIVELY CONVERT EXFOR C5 FORMAT TO ZVD PLOTS
 
       character*150 cline
       character*10 cdata
-      character*10 cauthor
+      character*20 cauthor
       character*5 creac(0:40)
       character*9 clevel
       real*8 value(4),unc_value(4),elevel,energy_gamma
@@ -44,7 +44,7 @@ C     starting color
       IF (cline(1:1).EQ.'#' .and. cline(2:9).EQ.'/DATASET') GOTO 20
 
       IF (cline(1:1).EQ.'#' .and. cline(2:8).EQ.'AUTHOR1') THEN
-       cauthor  = trim(cline(17:26))
+       cauthor  = trim(cline(17:36))
        icolor = icolor + 1  
 	 GOTO 10
 	ENDIF
@@ -80,7 +80,7 @@ C/DATASET
 
 C       Converting character to real and printing back in a right format
         read(clevel,'(F9.0)') energy_gamma
-	  write(clevel,'(i9.9)') NINT(energy_gamma)
+	  write(clevel(1:8),'(i8.8)') NINT(energy_gamma)
 
         e(nen) = value(1)
         e_unc(nen) = unc_value(1)
@@ -92,9 +92,9 @@ C       Converting character to real and printing back in a right format
 
 	  GOTO 10
 
- 20     open(20,file= creac(mt)//clevel//'-exp.zvd')
+ 20     open(20,file= creac(mt)//clevel(1:8)//'-exp.zvd')
 
-        CALL OPEN_ZVV(20,trim(cauthor)//' '//clevel,' ')
+        CALL OPEN_ZVV(20,trim(cauthor)//' '//clevel(1:8),' ')
         DO i = 1, nen-1
           IF(Le_unc) then
             WRITE (20,'(G12.5,2X,3(E12.5,1x))') 
