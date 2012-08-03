@@ -1,0 +1,15 @@
+01234
+01000
+10
+
+- Each column correspond to one reaction. 
+  For the zvd file to be produced the second column should contain 1.
+
+  The columns are fixed: 
+  1.- n,ng
+  2.- n,2ng
+  3.- n,3ng
+  4.- n,4ng
+  This file could be edited to print more reactions
+
+-15 means the maximum level used to consider gamma transitions between.
