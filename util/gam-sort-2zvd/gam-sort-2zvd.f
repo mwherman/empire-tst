@@ -38,7 +38,9 @@ C
 
       DO lw = lwmin,lwmax
          DO j1w = lwmax-1,1,-1
-            write(nlj5,'(i2.2,A1,i2.2)') lw,'-',j1w
+          write(nlj5,'(i2.2,A1,i2.2)') lw,'-',j1w
+
+          if(toplot(1).gt.0) then
 
             lwrite = .false.          
             REWIND 106
@@ -74,7 +76,8 @@ C
               CLOSE(105)
             ENDIF
 
-            if(toplot(2).eq.0) cycle
+	    endif
+          if(toplot(2).gt.0) then
 
             lwrite = .false.          
             REWIND 106
@@ -107,7 +110,8 @@ C
               CLOSE(105)
             ENDIF
 
-            if(toplot(3).eq.0) cycle
+	    endif
+          if(toplot(3).gt.0) then
 
             lwrite = .false.          
             REWIND 106
@@ -140,7 +144,8 @@ C
               CLOSE(105)
             ENDIF
 
-            if(toplot(4).eq.0) cycle
+	    endif
+          if(toplot(4).gt.0) then
 
             lwrite = .false.          
             REWIND 106
@@ -172,6 +177,8 @@ C
               CALL CLOSE_ZVV(105,' ',' ')
               CLOSE(105)
             ENDIF
+	    
+		endif
 
          ENDDO
       ENDDO
