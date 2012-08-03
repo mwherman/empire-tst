@@ -8,7 +8,7 @@ C     SELECTIVELY CONVERT EXFOR C5 FORMAT TO ZVD PLOTS
       character*150 cline
       character*10 cdata
       character*10 cauthor
-      character*4 creac(0:40)
+      character*5 creac(0:40)
       character*9 clevel
       real*8 value(4),unc_value(4),elevel
       real*8 e(maxen) ,  e_unc(maxen)
@@ -17,9 +17,9 @@ C     SELECTIVELY CONVERT EXFOR C5 FORMAT TO ZVD PLOTS
 	logical Le_unc
 
 	do i=0,MTmax
-	  creac(i) = 'nng_'
-	  if(i.eq.16) creac(i)='2ng_'        
-	  if(i.eq.37) creac(i)='3ng_'        
+	  creac(i) = 'znng_'
+	  if(i.eq.16) creac(i)='z2ng_'        
+	  if(i.eq.37) creac(i)='z3ng_'        
 	enddo
   
       OPEN(10,file='EXFOR.c5',STATUS='OLD',ERR=1100)
