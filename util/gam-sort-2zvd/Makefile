@@ -1,14 +1,15 @@
 # set default compiler
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran    
+FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
 # FFLAGS are based on compiler setting
 
 ifeq ($(FC),gfortran)
-
+  # function EOF not available !!!
+  #
   #-------------------------
   #----GNU FORTRAN compiler
   #-------------------------

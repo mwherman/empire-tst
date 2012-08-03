@@ -54,7 +54,7 @@ C
 
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
-     &             '(A4, 1H- ,i8.8)')'znng',nint(egd*1000000)
+     &             '(A4, 1H_ ,i8.8)')'znng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -88,7 +88,7 @@ C
 
               IF(Acn.EQ.Acn0-1.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
-     &             '(A4, 1H- ,i8.8)')'z2ng',nint(egd*1000000)
+     &             '(A4, 1H_ ,i8.8)')'z2ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -122,7 +122,7 @@ C
 
               IF(Acn.EQ.Acn0-2.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
-     &             '(A4, 1H- ,i8.8)')'z3ng',nint(egd*1000000)
+     &             '(A4, 1H_ ,i8.8)')'z3ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -156,7 +156,7 @@ C
 
               IF(Acn.EQ.Acn0-3.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
-     &             '(A4, 1H- ,i8.8)')'z4ng',nint(egd*1000000)
+     &             '(A4, 1H_ ,i8.8)')'z4ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
