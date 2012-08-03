@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3008 $
+Ccc   * $Rev: 3046 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-31 21:46:49 +0200 (Di, 31 Jul 2012) $
+Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -310,6 +310,8 @@ C        IX4ret = 1 copy C4 file
          IX4ret = 1
 
          NPRIm_g = 0       ! No primary gammas (default)
+         NNG_xs  = 0       ! Gamma production cross section not printed
+
 C
 C        PFNS keywords
 C        
@@ -441,8 +443,9 @@ C--------GDR parameters
          GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0d0
-         PEQc = 1.5  ! default PE
+         PEQc = 1.5   ! default PE
          MFPp = 1.5
+	   PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
          NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
 
@@ -1398,6 +1401,9 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IF (DIRect.EQ.0) IDNa(3,2) = 1
                  IDNa(4,2) = 1
                ENDIF
+	         PESpin = 0
+               WRITE (8,*)
+     &          'WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 
@@ -1417,11 +1423,17 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IF (NPRoject.EQ.1) THEN
                  IDNa(1,2) = 1
                  IDNa(2,2) = 1
+	           PESpin = 0
+                 WRITE (8,*)
+     &          'WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
                IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
                  IDNa(4,2) = 1
+	           PESpin = 0
                ENDIF
+               WRITE (8,*)
+     &          'WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 C
@@ -3620,6 +3632,23 @@ C--------PCROSS input
             GOTO 100
          ENDIF
 C
+         IF (name.EQ.'PESPIN') THEN
+            PESpin = 0
+            IF (val.GT.0) THEN
+              PESpin = 1
+              WRITE (8, '('' Exciton model spin cut-off taken as ~(p+h)*
+     &0.26*A^(2/3)'')')
+              WRITE(12, '('' Exciton model spin cut-off taken as ~(p+h)*
+     &0.26*A^(2/3)'')')
+             ELSE
+              WRITE (8,
+     &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
+              WRITE (12,
+     &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
+             ENDIF
+            GOTO 100
+         ENDIF
+C
          IF (name.EQ.'PEDISC') THEN
             PEQcont = 0
             IF (val.GE.0.1) THEN
@@ -3795,6 +3824,22 @@ C
              ELSE
               WRITE (8 ,'('' Primary gammas not stored'')')
               WRITE (12,'('' Primary gammas not stored'')')
+             ENDIF
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'GAMPRN') THEN
+            IF(val.gt.0) THEN
+              NNG_xs = 1
+              WRITE (8 , 
+     &          '('' Gamma production cross sections are printed'')')
+              WRITE (12,
+     &          '('' Gamma production cross sections are printed'')')
+             ELSE
+              WRITE (8 ,
+     &          '('' Gamma production cross sections not printed'')')
+              WRITE (12,
+     &          '('' Gamma production cross sections not printed'')')
              ENDIF
             GOTO 100
          ENDIF
@@ -6989,13 +7034,6 @@ C--------------------------------------------------------------------------
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
                 FISspe = nint(val)
-C               if(FISspe.eq.1) THEN 
-C                 WRITE (8,*) 
-C    &         ' WARNING: Los Alamos model will be implemented in 2012'
-C                 WRITE (8,*) 
-C    &         ' WARNING:      changing to Kornilov Model             '
-C                FISspe = 2
-C               ENDIF                
                 WRITE (8,*) 'Prompt fission neutron spectra calculated'
                 if(FISspe.eq.2) WRITE (8,*) ' using Kornilov''s model'
                 if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'

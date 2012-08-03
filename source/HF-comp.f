@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3040 $
+Ccc   * $Rev: 3046 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 13:53:41 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -814,15 +814,17 @@ C-----------------NOTE: internal conversion taken into account
 C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+                  IF(NNG_xs.gt.0) then
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &               16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                  if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
-     &              write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &               37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+	            ENDIF
                ENDDO
             ENDIF
          ENDIF

@@ -1,6 +1,6 @@
-cc   * $Rev: 3019 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-08-02 22:27:15 +0200 (Do, 02 Aug 2012) $
+cc   * $Rev: 3046 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -172,7 +172,10 @@ C-----
       IF (FIRst_ein) THEN
         OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
         OPEN (41, FILE='XSECTIONS.OUT' , STATUS='unknown')
-        OPEN (104, FILE='GAMMA_INT.DAT', STATUS='unknown')
+
+        IF(NNG_xs.gt.0) 
+     &    OPEN (104, FILE='GAMMA_INT.DAT', STATUS='unknown')
+
         OPEN (107, FILE='EL_INEL.DAT'  , STATUS='unknown')
         OPEN (108, FILE='TOTCOR.DAT'  , STATUS='unknown')
         i = 0
@@ -3849,7 +3852,7 @@ C
          CLOSE (33)
          CLOSE (40)
          CLOSE (41)
-         CLOSE (104)
+         IF(NNG_xs.gt.0) CLOSE (104)
          CLOSE (107)
          CLOSE (108)
          IF(DEGa.GT.0) THEN

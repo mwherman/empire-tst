@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3030 $
+Ccc   * $Rev: 3046 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 12:07:12 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3138,7 +3138,7 @@ C-----calculate spin distribution for 1p-1h states
 
       IF (nexrt.GT.0) THEN
 C
-        IF(IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  ! MSD continuum
+        IF( (IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) .or. PESpin.eq.0) then  
 C
 C          distribution of the continuum neutron or proton MSD contribution -
 C          proportional to the 1p-1h (n=2) spin distribution shifted by the target

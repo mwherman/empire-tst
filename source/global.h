@@ -1,6 +1,6 @@
-C $Rev: 3031 $
+C $Rev: 3046 $
 C $Author: rcapote $
-C $Date: 2012-08-03 12:09:31 +0200 (Fr, 03 Aug 2012) $
+C $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -57,7 +57,7 @@ C
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw 
 
-      INTEGER MT2, MT91, MT649, MT849,
+      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
      &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe,
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,
@@ -257,7 +257,7 @@ C
      &                  NENdf, NENdfa, NEMn, NEMp, NEMa, NEXclusive,
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
-     &                  MT649, MT849, IOPran, NPRIm_g
+     &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
