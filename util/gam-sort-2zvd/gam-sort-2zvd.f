@@ -1,7 +1,7 @@
       program gamm_sort
 
 	implicit none
-      REAL*8 egd,u,gacs
+      REAL*8 egd,u,gacs,gacs_noicc
 
       INTEGER Acn0, Acn, Mt, Mt0
       INTEGER l,j1,toplot(4)
@@ -46,8 +46,8 @@ C
             REWIND 106
 
             DO while (.not.eof(106)) 
-              READ(106,'(1x,4i5,1x,3(g12.5,1x))')
-     &            Mt,Acn,l,j1,egd,u,gacs
+              READ(106,'(1x,4i5,1x,4(g12.5,1x))')
+     &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
               ! skipping gammas with energy higher than 9.9999 MeV
 	        if(egd.gt.99.999999d0) cycle 
@@ -57,22 +57,30 @@ C
      &             '(A4, 1H_ ,i8.8)')'znng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
-                  WRITE(104,*)u,gacs
+                  WRITE(104,'(1x,G12.5,3x,2(d13.6,1x))')
+     &               u,gacs_noicc,gacs
                   lwrite = .true.          
                 ENDIF
               ENDIF
             ENDDO
-
+	
             IF(lwrite) then
               OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13//' corr by ICC' ,' ')
+              REWIND 104 
+              DO while (.not.eof(104))
+                READ(104,*)u,gacs_noicc,gacs
+                WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs_noicc*1D-3
+              ENDDO
+              CALL CLOSE_ZVV(105,' ',' ')
               CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
-                READ(104,*)u,gacs
+                READ(104,*)u,gacs_noicc,gacs
                 WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs*1D-3
               ENDDO
-              CLOSE(104,STATUS='delete')  
               CALL CLOSE_ZVV(105,' ',' ')
+              CLOSE(104,STATUS='delete')  
               CLOSE(105)
             ENDIF
 
@@ -83,15 +91,19 @@ C
             REWIND 106
 
             DO while (.not.eof(106)) 
-              READ(106,'(1x,4i5,1x,3(g12.5,1x))')
-     &            Mt,Acn,l,j1,egd,u,gacs
+              READ(106,'(1x,4i5,1x,4(g12.5,1x))')
+     &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
-              IF(Acn.EQ.Acn0-1.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
+              ! skipping gammas with energy higher than 9.9999 MeV
+	        if(egd.gt.99.999999d0) cycle 
+
+              IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
      &             '(A4, 1H_ ,i8.8)')'z2ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
-                  WRITE(104,*)u,gacs
+                  WRITE(104,'(1x,G12.5,3x,2(d13.6,1x))')
+     &               u,gacs_noicc,gacs
                   lwrite = .true.          
                 ENDIF
               ENDIF
@@ -99,14 +111,21 @@ C
 
             IF(lwrite) then
               OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13//' corr by ICC' ,' ')
+              REWIND 104 
+              DO while (.not.eof(104))
+                READ(104,*)u,gacs_noicc,gacs
+                WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs_noicc*1D-3
+              ENDDO
+              CALL CLOSE_ZVV(105,' ',' ')
               CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
-                READ(104,*)u,gacs
+                READ(104,*)u,gacs_noicc,gacs
                 WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs*1D-3
               ENDDO
-              CLOSE(104,STATUS='delete')  
               CALL CLOSE_ZVV(105,' ',' ')
+              CLOSE(104,STATUS='delete')  
               CLOSE(105)
             ENDIF
 
@@ -117,15 +136,19 @@ C
             REWIND 106
 
             DO while (.not.eof(106)) 
-              READ(106,'(1x,4i5,1x,3(g12.5,1x))')
-     &            Mt,Acn,l,j1,egd,u,gacs
+              READ(106,'(1x,4i5,1x,4(g12.5,1x))')
+     &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
-              IF(Acn.EQ.Acn0-2.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
+              ! skipping gammas with energy higher than 9.9999 MeV
+	        if(egd.gt.99.999999d0) cycle 
+
+              IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
      &             '(A4, 1H_ ,i8.8)')'z3ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
-                  WRITE(104,*)u,gacs
+                  WRITE(104,'(1x,G12.5,3x,2(d13.6,1x))')
+     &               u,gacs_noicc,gacs
                   lwrite = .true.          
                 ENDIF
               ENDIF
@@ -133,14 +156,21 @@ C
 
             IF(lwrite) then
               OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13//' corr by ICC' ,' ')
+              REWIND 104 
+              DO while (.not.eof(104))
+                READ(104,*)u,gacs_noicc,gacs
+                WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs_noicc*1D-3
+              ENDDO
+              CALL CLOSE_ZVV(105,' ',' ')
               CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
-                READ(104,*)u,gacs
+                READ(104,*)u,gacs_noicc,gacs
                 WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs*1D-3
               ENDDO
-              CLOSE(104,STATUS='delete')  
               CALL CLOSE_ZVV(105,' ',' ')
+              CLOSE(104,STATUS='delete')  
               CLOSE(105)
             ENDIF
 
@@ -151,15 +181,19 @@ C
             REWIND 106
 
             DO while (.not.eof(106)) 
-              READ(106,'(1x,4i5,1x,3(g12.5,1x))')
-     &            Mt,Acn,l,j1,egd,u,gacs
+              READ(106,'(1x,4i5,1x,4(g12.5,1x))')
+     &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
-              IF(Acn.EQ.Acn0-3.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
+              ! skipping gammas with energy higher than 9.9999 MeV
+	        if(egd.gt.99.999999d0) cycle 
+
+              IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
      &             '(A4, 1H_ ,i8.8)')'z4ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
-                  WRITE(104,*)u,gacs
+                  WRITE(104,'(1x,G12.5,3x,2(d13.6,1x))')
+     &               u,gacs_noicc,gacs
                   lwrite = .true.          
                 ENDIF
               ENDIF
@@ -167,14 +201,21 @@ C
 
             IF(lwrite) then
               OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13//' corr by ICC' ,' ')
+              REWIND 104 
+              DO while (.not.eof(104))
+                READ(104,*)u,gacs_noicc,gacs
+                WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs_noicc*1D-3
+              ENDDO
+              CALL CLOSE_ZVV(105,' ',' ')
               CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
-                READ(104,*)u,gacs
+                READ(104,*)u,gacs_noicc,gacs
                 WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs*1D-3
               ENDDO
-              CLOSE(104,STATUS='delete')  
               CALL CLOSE_ZVV(105,' ',' ')
+              CLOSE(104,STATUS='delete')  
               CLOSE(105)
             ENDIF
 	    
@@ -192,9 +233,9 @@ C======================================================
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
       if(title(1:1).ne.' ') write(iout,'(A)') title      
       write(iout,'(A12,A)') 'fun: ',tfunct
-      write(iout,'(A)')     'thick: 3'
+      write(iout,'(A)')     'thick: 2'
       write(iout,'(A)')     'length:250'
-      write(iout,'(A)')     'color: 2'
+C     write(iout,'(A)')     'color: 2'
       write(iout,'(A)')     'hide: 0'
       write(iout,'(A)')     'dash: 0'
       write(iout,'(A)')     'dot: 0'
