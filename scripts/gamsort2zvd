@@ -33,7 +33,7 @@ if [ -f "$file-z4ng.zvd" ]; then
 fi
 
 #run gam2zvd to produce ZVView plots
-cp $file-gam-tr.xsc.xsc GAMMA_INT.DAT
+cp $file-gam-tr.xsc GAMMA_INT.DAT
 rm -f GAM-SORT-2ZVD.INP
 ln -sf $EMPIREDIR/util/gam-sort-2zvd/GAM-SORT-2ZVD.INP GAM-SORT-2ZVD.INP
 #vi GAM-SORT-2ZVD.INP
