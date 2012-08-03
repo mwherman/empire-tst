@@ -10,7 +10,7 @@ C
       program COVARIANCE
       implicit none
       integer*4 Nenergies, Nreact
-      parameter (Nenergies=150, Nreact=50)
+      parameter (Nenergies=150, Nreact=30)
       real*8 e(Nenergies),dtmp,ftmp,ex(Nenergies),ey(Nenergies)
       real*8 avermod(Nreact,Nenergies)
       real*8 sigmod(Nreact,Nenergies)
@@ -35,7 +35,15 @@ C-Purpose: Calculate eigenvalues of the covariance matrix
       do ir=1,Nreact
         lcovar(ir,ir) = .true.
       enddo
-C     lcovar (1,1)=.true. 
+      lcovar(1,2) = .true. 
+      lcovar(1,4) = .true.
+      lcovar(5,6) = .true.
+      lcovar(6,7) = .true.
+
+      lcovar(2,1) = .true. 
+      lcovar(4,1) = .true.
+      lcovar(6,5) = .true.
+      lcovar(7,6) = .true.
 
       avermod = 0.d0 
       sigmod  = 0.d0 
@@ -82,7 +90,8 @@ C         read(10,'(12x,(90A12))') (REAction(ir),ir=1,NNUcd)
           enddo
 
 C         Limiting the maximum number of reactions (z,xn),(z,p),(z,d),...
-          Nnucd = Ncalc
+C         Nnucd = Ncalc
+          Nnucd = Nreact
           Ncalc = 0
           ie = 1
           do i=1,Nenergies
@@ -229,8 +238,10 @@ C         WRITE(14,550) (covmod(ir,ir,i,j)/
 C    >        (sigmod(ir,i)*sigmod(ir,j)),j=nt(ir)+1,ie)
 
         enddo
-
-       cnorm_coef = 1.d2
+C
+C       Keeping 6 digits for eigenvalue calculations
+C
+        cnorm_coef = 1.d2
 
 C       Printing model covariance matrix
         write(16,618) 
@@ -266,12 +277,11 @@ C    >      (sigmod(ir,i)*sigmod(ir,j))),j=nt(ir)+1,ie)
 
 C           Approximation corresponding to printed covarainces with 3 digits
 C           It leads to negative eigenvalues !
-C 
-            ftmp = nint(cnorm_coef*covmod(ir,ir,i,j)/
-     >      (sigmod(ir,i)*sigmod(ir,j)))/cnorm_coef
-            cov(i-nt(ir)+1,j-nt(ir)+1) = ftmp*sigmod(ir,i)*sigmod(ir,j)
-C           cov(i-nt(ir)+1,j-nt(ir)+1) = 
-C    >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
+C           ftmp = nint(cnorm_coef*covmod(ir,ir,i,j)/
+C    >      (sigmod(ir,i)*sigmod(ir,j)))/cnorm_coef
+C           cov(i-nt(ir)+1,j-nt(ir)+1) = ftmp*sigmod(ir,i)*sigmod(ir,j)
+            cov(i-nt(ir)+1,j-nt(ir)+1) = 
+     >        covmod(ir,ir,i,j)/(sigmod(ir,i)*sigmod(ir,j))
            enddo
          enddo
 
