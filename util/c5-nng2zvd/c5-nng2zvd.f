@@ -90,7 +90,7 @@ C/DATASET
 	  GOTO 10
 
  20     IF(clevel(nch:nch).eq.'.') nch = nch-1
-        open(20,file= 'XS_'//creac(mt)//clevel(1:nch)//'.zvd')
+        open(20,file= creac(mt)//clevel(1:nch)//'-EMP'.zvd')
 
         CALL OPEN_ZVV(20,trim(cauthor)//' '//clevel(1:nch),' ')
         DO i = 1, nen-1
