@@ -48,7 +48,7 @@ C     lcovar (1,1)=.true.
   
       do ic=Nstart,Nruns
         write(crun,'(I4.4)') ic
-        open(10,file='XSC'//crun,status='OLD',err=200)
+        open(10,file='XS'//crun,status='OLD',err=200)
 
         if (Ncalc.LE.5 .or. mod(ic-1,50).eq.0) 
      >    write(*,*) 'Processing XS'//crun 
