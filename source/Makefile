@@ -1,6 +1,6 @@
-#$Rev: 3052 $
-#$Author: gnobre $
-#$Date: 2012-08-03 21:58:48 +0200 (Fr, 03 Aug 2012) $
+#$Rev: 3053 $
+#$Author: shoblit $
+#$Date: 2012-08-03 22:26:03 +0200 (Fr, 03 Aug 2012) $
 
 # set default fortran compiler:
 
@@ -47,38 +47,23 @@ else ifeq ($(FC),ifort)
   #----INTEL f95 compiler
   #---------------------------
   #----flags for production compilation using ifort
-  #FFLAGS = -O3 -x=host -logo 
-  #FFLAGS = -O3 -x=host -ftrapuv -trace
-  # Please note that ifort v11.1 does not work properly with -ipo !!!!!  
-  #FFLAGS = -arch pn4 -O3 -ipo
-  #FFLAGS = -arch pn4 -O3 -axPW -ipo
+  # ***  Please note that ifort v11.1 does not work properly with -ipo !!!!!  
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
-  #----flags for OPTMAN/ ECIS debug
-  #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
   # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
-  #FFLAGS = -O3 -x=host -logo -parallel -par-report1 -openmp
-  #EFLAGS = -O2 -x=host -logo
   # LIBS = -openmp-lib compat
-  #----flags for automatic parallelization & inter-procedural optimization 
-  # Please note that ifort v11.1 does not work properly with -ipo !!!!!
+  #----flags for automatic parallelization
   FFLAGS = -O3 -x=host -parallel -par-report1
   # Flags for ECIS
   EFLAGS = -O2 -x=host
   # Flags for OPTMAN
-  OFLAGS = -O3 -x=host -logo -parallel -par-report1
-  #----flags with no parallelization
-  # Please note that ifort v11.1 does not work properly with -ipo !!!!!  
-  #FFLAGS = -O3 -x=host -logo 
-  #EFLAGS = -O2 -x=host -logo
-  #------------------------------------------------------------------------------------------------
-  #----From http://www.macresearch.org/best-fortran-compiler-leopard
-  #----For Debugging under ifort:
-  #----For optimized code under ifort
-  #ifort -m64 -fast
-  #Note that the "-m64" flag is a Mac only flag, it doesn't work in Linux.
+  OFLAGS = -O3 -x=host -parallel -par-report1
+  #----flags for use on NNDC cluster
+  # FFLAGS = -O3
+  # EFLAGS = -O2
+  # OFLAGS = -O3
 
 else ifeq ($(FC),af95)
  
@@ -148,8 +133,11 @@ all:
 empire: $(OBJF) subecis06m.o
 	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
 
-optmand: optmand.o
-	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.o
+subecis06m.o : subecis06m.f
+	$(FC) $(EFLAGS) -c subecis06m.f
+
+optmand: optmand.f
+	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f
 
 # When making a debug image, don't compile ECIS /debug
 dbg:  
@@ -161,12 +149,6 @@ main.o  : nubar_reader.o
 input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
-
-subecis06m.o : subecis06m.f
-	$(FC) $(EFLAGS) -c subecis06m.f
-
-optmand.o : optmand.f
-	$(FC) $(OFLAGS) -c optmand.f
 
 clean:
 	rm -f *.o *.mod
