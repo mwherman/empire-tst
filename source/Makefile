@@ -1,6 +1,6 @@
-#$Rev: 2953 $
+#$Rev: 3023 $
 #$Author: rcapote $
-#$Date: 2012-07-18 13:19:01 +0200 (Mi, 18 Jul 2012) $
+#$Date: 2012-08-03 09:59:09 +0200 (Fr, 03 Aug 2012) $
 
 # set default fortran compiler:
 
@@ -13,7 +13,7 @@ FC   =  gfortran
 # various flags are set based on compiler FC:
 # FFLAGS are the normal complier options for production code
 # DFLAGS are the options used when debugging (except for ECIS)
-# EFLAGS are the options used for ECIS compilation (no debug allowed)
+# EFLAGS are the options used for OPTMAN/ECIS debug compilation (no debug allowed)
 
 LIBS =
 DFLAGS = 
@@ -31,7 +31,7 @@ ifeq ($(FC),gfortran)
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
-  #----flags for ECIS
+  #----flags for OPTMAN/ ECIS debug
   EFLAGS = -O2 -std=legacy -ffast-math
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
@@ -50,7 +50,7 @@ else ifeq ($(FC),ifort)
   #FFLAGS = -arch pn4 -O3 -axPW -ipo
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
-  #----flags for ECIS and OPTMAN
+  #----flags for OPTMAN/ ECIS debug
   #EFLAGS = -O2 -x=host
   #------------------------------------------------------------------------------------------------
   # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
@@ -64,7 +64,7 @@ else ifeq ($(FC),ifort)
   EFLAGS = -O3 -x=host -logo -parallel -par-report1
   #----flags with no parallelization
   # Please note that ifort v11.1 does not work properly with -ipo !!!!!  
-  #FFLAGS = -O3 -x=host -logo
+  #FFLAGS = -O3 -x=host -logo 
   #EFLAGS = -O2 -x=host -logo
   #------------------------------------------------------------------------------------------------
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
@@ -85,7 +85,7 @@ else ifeq ($(FC),af95)
   FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
   DFLAGS = -O0 -m64 -g -s
-  #----flags for ECIS
+  #----flags for OPTMAN/ ECIS debug
   EFLAGS = -O2 -march=host -s -m64
 
 else ifeq ($(FC),pfg90)
@@ -97,7 +97,7 @@ else ifeq ($(FC),pfg90)
   FFLAGS =  -O3 
   #----flags for debuging
   DFLAGS = -O0 -g
-  #----flags for ECIS
+  #----flags for OPTMAN/ ECIS debug
   EFLAGS = -O2
 
 else ifeq ($(FC),lf90)
@@ -109,7 +109,7 @@ else ifeq ($(FC),lf90)
   FFLAGS = -O3
   #----flags for debuging
   DFLAGS = -O0 -g --chk
-  #----flags for ECIS
+  #----flags for OPTMAN/ ECIS debug
   EFLAGS = -O2
 
 endif
@@ -148,7 +148,11 @@ main.o  : nubar_reader.o
 input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
+
 subecis06m.o : subecis06m.f
+	$(FC) $(FFLAGS) -c subecis06m.f
+
+optmand.o : optmand.f
 	$(FC) $(EFLAGS) -c subecis06m.f
 
 clean:
