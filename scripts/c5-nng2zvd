@@ -1,0 +1,25 @@
+#! /bin/sh -
+#script to produce ZVView plots from the experimental c5 files (derived from EXFOR)
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'C5 files containing experimental gamma production cross sections to be plotted'
+echo ' '
+ls *.c5
+echo ' '
+echo -n 'Choose one of the above (without .c5 extention!): '
+read file
+fi                          
+
+#run c5-nng2zvd to produce ZVView plots
+cp $file.c5 EXFOR.c5
+$EMPIREDIR/util/c5-nng2zvd/c5-nng2zvd.exe 
+rm EXFOR.c5
+exit
