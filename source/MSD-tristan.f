@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2982 $
+Ccc   * $Rev: 3030 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-23 19:23:32 +0200 (Mo, 23 Jul 2012) $
+Ccc   * $Date: 2012-08-03 12:07:12 +0200 (Fr, 03 Aug 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3135,22 +3135,27 @@ C
      & nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
-      SIG = 2*0.26*A(Nnur)**0.66666667
-      somj = 0.0
-      DO j = 1, NLW
-         xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
-         phdj(j) = 0.0
-         w = (xj + 1.0)*xj/2./SIG
-         IF (w.LE.50.D0) THEN
-            phdj(j) = (2*xj + 1.)*DEXP( - w)
-            somj = somj + phdj(j)
-         ENDIF
-      ENDDO
-C-----distribution of the continuum MSD contribution -
-C-----proportional to the p-h spin distribution shifted by the target
-C-----ground state target spin XJLV(1,0)
+
       IF (nexrt.GT.0) THEN
-         DO j = 1, NLW
+C
+        IF(IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  ! MSD continuum
+C
+C          distribution of the continuum neutron or proton MSD contribution -
+C          proportional to the 1p-1h (n=2) spin distribution shifted by the target
+C          ground state target spin XJLV(1,0), it is assumed the basic dependence
+C          SIG = n*0.26*A**(2.d0/3.d0) with n=2
+           SIG = 2*0.26*A(Nnur)**0.66666667
+           somj = 0.0
+           DO j = 1, NLW
+             xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
+             phdj(j) = 0.0
+             w = (xj + 1.0)*xj/2./SIG
+             IF (w.GT.50.D0) cycle
+             phdj(j) = (2*xj + 1.)*DEXP( - w)
+             somj = somj + phdj(j)
+           ENDDO
+
+           DO j = 1, NLW
             xnor = 0.5*phdj(j)/somj
             DO ie = 1, nexrt
                pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
@@ -3162,9 +3167,47 @@ C              as calculated by PCROSS or MSD+MSC
                POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
                POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
             ENDDO
-         ENDDO
+           ENDDO
 
-C--------add MSD contribution to the population spectra
+         ELSE
+	 
+
+C          distribution of the PCROSS continuum particle or photon emissions
+C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
+C          shifted by the target ground state target spin XJLV(1,0)
+           DO ie = 1, nexrt
+
+             SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
+     >            0.26d0*A(Nnur)**0.66666667
+
+             if(SIG.LE.0) CYCLE         
+
+             somj = 0.d0
+             DO j = 1, NLW
+               xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
+               phdj(j) = 0.0
+               w = (xj + 1.0)*xj/2./SIG
+               IF (w.GT.50.D0) cycle
+               phdj(j) = (2*xj + 1.)*DEXP( - w)
+               somj = somj + phdj(j)
+             ENDDO
+
+             DO j = 1, NLW
+               xnor = 0.5*phdj(j)/somj
+               pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
+C
+C              Population increased to preserve total flux
+C              as calculated by PCROSS 
+               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+
+               POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+               POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+             ENDDO
+           ENDDO
+             
+         ENDIF
+
+C--------add MSD/PCROSS contribution to the population spectra
 C--------used for ENDF exclusive spectra
          IF (ENDf(1).GT.0) THEN
             DO ie = 1, nexrt

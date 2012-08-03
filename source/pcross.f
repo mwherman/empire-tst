@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
+Ccc   * $Rev: 3030 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-08-03 12:07:12 +0200 (Fr, 03 Aug 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -60,7 +60,7 @@ C
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
       INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
-     &          ihmax, j, p, zc, zp, zr, zo, iang
+     &          ihmax, j, p, zc, zp, zr, zo, iang, nnn
 
       LOGICAL callpcross
       DOUBLE PRECISION DBLE, DENSW
@@ -100,6 +100,8 @@ C
      &   16.d0*EINl**4/(EINL**4+(450.d0/FLOAT(ac)**0.333333d0)**4)
       IF(ap.eq.1 .and. zp.eq.0) vsurf = 12.d0 +
      &   26.d0*EINl**4/(EINL**4+(245.d0/FLOAT(ac)**0.333333d0)**4)
+
+      XNAver = 0.d0
 
       fr = 0.D0
       totemis = 0.D0
@@ -454,12 +456,33 @@ C        Skipping cross sections if MSD and MSC active
          IF(nejc.eq.6 .and. IDNa(9,6).EQ.0) CYCLE
 
          hlp1 = 0.D0
+
          DO ienerg = iemin(nejc), iemax(nejc)
             emis = 0.D0
             DO h1 = 1, ihmax
                wb = we(nejc,h1,ienerg)
-               IF (wb.GT.0.) emis = emis + wb*em(h1)
+               IF (wb.le.0 .or. em(h1).le.0) cycle
+               hh = h1 - 1
+               p  = h1 - 1 + ap
+               emis = emis + wb*em(h1)
+C
+C              Exciton distribution weighted by emission rates
+C              h = h1 - 1; p = h - 1 + ap; n = p + h =  2*h1 - 3  + ap
+C
+C              We want to calculate the <average by emission> exciton number N
+C              for each ejectile and emission energy. Later we will use this average
+C              exciton number N to obtain the preequilibrium spin-cut off as proposed
+C              by Chadwick and Blann SIG ~ N*A^(2/3) being SIG the spin cut-off squared
+               nnn = 2*h1 - 3  + ap
+	         if(nnn.gt.0) XNAver(nejc,ienerg) =
+     >           XNAver(nejc,ienerg) + nnn*wb*em(h1)
             ENDDO          
+            if(emis.gt.0.d0) XNAver(nejc,ienerg) =
+     >                  NINT(XNAver(nejc,ienerg)/emis) 
+C           if(nejc.eq.1) then 
+C             write(*,*) 
+C    >       'nejc,IE,naver=',nejc,ienerg, NINT(xnaver(nejc,ienerg))
+C           endif
             step = 1.d0
             if(ienerg.eq.iemin(nejc) .OR.
      >         ienerg.eq.iemax(nejc) ) step=0.5d0
