@@ -10007,6 +10007,12 @@ $>1$ Primary gammas are  printed
 If keyword ENDF=0 is given in the input, then primary gammas are not
 printed independently of the keyword PRGAMM.
 
+\item [{GAMPRN}] Controls printing of gamma production cross sections (n,xng)
+
+= 0 Gamma production cross sections are not printed (default)
+
+$>0$ Gamma production cross sections files and plots are produced.
+
 \item [{HRTW}] Controls HRTW calculations (width fluctuation correction)
 
 = 0 no HRTW 
@@ -10618,6 +10624,20 @@ Estimated relative uncertainty in \% of this parameter can be given by I1.
 = 0 Preequilibrium contribution to discrete levels neglected (default).
 
 $>0$ Preequilibrium contribution to discrete levels considered.
+
+\item [{PESPIN}] Controls how preequilibrium spin cut-off paramater 
+is calculated in the exciton model (PCROSS):
+= 0 Exciton model spin cut-off parameter taken as 2*0.26*A$^(2/3)$ (default). \\
+    This is equivalent to the assumption that spin-distribution is equal to the
+	spin-distribution of the n=2 (p=h=1) exciton states independent of the emission
+	energy and of the exciton number $n$.
+
+> 0 Exciton model spin cut-off parameter taken as (p+h)*0.26*A$^(2/3)$ (default). \\
+    This produces higher-spin states at lower emission energies, changing the 
+	spin-distribution of the pre-equlibrium emission.
+	
+If MSD model is active, then PESPIN is reset to the default value of zero.
+	
 
 \item [{PEPAIR}] Controls how pairing is treated in PCROSS.
 
