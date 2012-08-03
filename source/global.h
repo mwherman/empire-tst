@@ -1,6 +1,6 @@
-C $Rev: 3004 $
+C $Rev: 3031 $
 C $Author: rcapote $
-C $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
+C $Date: 2012-08-03 12:09:31 +0200 (Fr, 03 Aug 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -54,7 +54,7 @@ C
      &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),
      &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
-     &                 FISn_n(NFHUMP,ndnuc),
+     &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw 
 
       INTEGER MT2, MT91, MT649, MT849,
@@ -221,7 +221,7 @@ C     COMMON /DEPTH / POTe
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
-     &                 PFNrat, PFNniu, TMAxw, rCELred
+     &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
