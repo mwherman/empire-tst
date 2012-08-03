@@ -149,12 +149,13 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     mv('LEVELS',proj+'.lev')
-    mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
-    mv('EL_INEL.DAT',proj+'-preq.xsc',0)      # no message if not present    
-    mv('XSECTIONS.OUT',proj+'.xsc',0)         # no message if not present
-    mv('FISS_XS.OUT',proj+'-fiss.xsc',0)      # no message if not present
-    mv('FISSION.INP',proj+'-inp.fis',0)       # no message if not present
-    # mv('CUMULPLOT.PS',proj+'-cum.ps',0)     # no message if not present     
+	if not isEmpty('GAMMA_INT.DAT'):
+	    mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
+    mv('EL_INEL.DAT',proj+'-preq.xsc',0)          # no message if not present    
+    mv('XSECTIONS.OUT',proj+'.xsc',0)             # no message if not present
+    mv('FISS_XS.OUT',proj+'-fiss.xsc',0)          # no message if not present
+    mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
+    # mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present     
 
     if not (os.path.isdir(proj+'-tl')):
         mv('TL',proj+'-tl')
@@ -361,10 +362,20 @@ def runE(proj):
     if not isEmpty(proj+'-fiss.xsc'):
         cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','fis2zvd')
         os.system('"%s" %s' % (cmd, proj))
+
+    # Produce ZVD files for nng 
+    if not isEmpty(proj+'-gam-tr.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','gam2zvd')
+        os.system('"%s" %s' % (cmd, proj))
+        # nng plots:
+    	for LDfile in glob("znng_*.zvd"):
+	        mv(LDfile,proj+'-'+LDfile,0)
+    	for LDfile in glob("z2ng_*.zvd"):
+	        mv(LDfile,proj+'-'+LDfile,0)
+    	for LDfile in glob("z3ng_*.zvd"):
+	        mv(LDfile,proj+'-'+LDfile,0)
     
     return 0
-
-
 
 def splashscreen():
     splash = [
