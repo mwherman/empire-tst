@@ -28,13 +28,15 @@ fi
 if [ -f "$file-z3ng.zvd" ]; then
  rm "$file-z3ng.zvd" 
 fi
+if [ -f "$file-z4ng.zvd" ]; then
+ rm "$file-z4ng.zvd" 
+fi
 
 #run gam2zvd to produce ZVView plots
 cp $file-gam-tr.xsc.xsc GAMMA_INT.DAT
-#rm -f GAM2ZVD.INP
-#ln -sf $EMPIREDIR/util/fis2zvd/GAM2ZVD.INP GAM2ZVD.INP
-#vi GAM2ZVD.INP	
-$EMPIREDIR/util/gam2zvd/gam2zvd.exe 
-rm GAMMA_INT.DAT
-#rm GAM2ZVD.INP
+rm -f GAM-SORT-2ZVD.INP
+ln -sf $EMPIREDIR/util/gam-sort-2zvd/GAM-SORT-2ZVD.INP GAM-SORT-2ZVD.INP
+#vi GAM-SORT-2ZVD.INP
+$EMPIREDIR/util/gam-sort-2zvd/gam-sort-2zvd.exe 
+rm GAMMA_INT.DAT GAM-SORT-2ZVD.INP
 exit
