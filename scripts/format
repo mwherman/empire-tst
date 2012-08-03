@@ -19,6 +19,11 @@ echo -n 'Choose one of the above (without .out extention!): '
 read file
 fi
 
+# Deleting previous file if exist
+if [ -s $file-e.endf ]; then
+  rm $file-e.endf 2>/dev/null
+fi
+
 #run EMPEND to format EMPIRE output into ENDF
 
 # EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
@@ -38,6 +43,7 @@ rm EMPEND.INP empmf1.tmp
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
 # moved to a new script "rec-ch-part" called from a GUI(Execute)
 
+
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
 if [ -s $file-res.endf ]; then
    ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
@@ -52,8 +58,12 @@ else
    cp $file-e.endf $file-endres.endf
 fi
 
-# RUN STANEF
+# Deleting previous file if exist
+if [ -s $file.endf ]; then
+  rm $file.endf 2>/dev/null
+fi
 
+# RUN STANEF
 rm -f INPUT 2>/dev/null
 cat >INPUT <<EOF
 $file-endres.endf
@@ -64,8 +74,7 @@ DONE
 EOF
 $EMPIREDIR/util/stanef/stanef <INPUT
 
-#$work/$file.endf is the final ENDF output file
-
+#echo $file.endf was produced by STANEF
 # remove left-over files
 rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null

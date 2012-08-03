@@ -26,6 +26,7 @@ ln -sf $file.endf ENDFB.IN
 $EMPIREDIR/util/linear/linear
 mv ENDFB.OUT  $work/$file-lin.endf
 mv LINEAR.LST $work/$file-log.linear
+rm ENDFB.IN 2>/dev/null
 
 # RUN RECENT
 
@@ -34,6 +35,7 @@ ln -sf $work/$file-lin.endf ENDFB.IN
 $EMPIREDIR/util/recent/recent
 mv ENDFB.OUT  $work/$file-rec.endf
 mv RECENT.LST $work/$file-log.recent
+rm ENDFB.IN 2>/dev/null
 
 # RUN SIGMA1
 
@@ -42,7 +44,7 @@ ln -sf $work/$file-rec.endf ENDFB.IN
 $EMPIREDIR/util/sigma1/sigma1
 mv ENDFB.OUT  $work/$file-sig.endf
 mv SIGMA1.LST $work/$file-log.sigma1
-rm ENDFB.IN
+rm ENDFB.IN 2>/dev/null
 
 # RUN MU_BAR TO ADD AVERAGE COSINE OF SCATTERING INTO MF3 MT 251
 
@@ -55,15 +57,14 @@ rm ENDFB.IN MU_BAR.INP MU_BAR.TMP
 mv ENDFB.OUT $work/$file-mub.endf
 
 # Running LEGEND to convert angular distributions into tabular form
-#cp $work/$file-mub.endf $work/$file-l.endf
+# cp $work/$file-mub.endf $work/$file-l.endf
 
 rm $file-l.endf 2>/dev/null
 ln -sf $work/$file-mub.endf ENDF.IN
 ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
 
 $EMPIREDIR/util/legend/legend < LEGEND.INP
-rm ENDF.IN
-rm LEGEND.INP LEGEND.TMP
+rm ENDF.IN LEGEND.INP LEGEND.TMP
 mv LEGEND.OUT $work/$file-l.endf
 mv LEGEND.LST $work/$file-log.legend
 
