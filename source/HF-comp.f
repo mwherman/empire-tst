@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2958 $
+Ccc   * $Rev: 3032 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-19 00:59:03 +0200 (Do, 19 Jul 2012) $
+Ccc   * $Date: 2012-08-03 12:10:24 +0200 (Fr, 03 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -810,8 +810,16 @@ C-----------------NOTE: internal conversion taken into account
      &                                  gacs
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-                  write(104,*) Nnuc,l,j1,egd, EINl,gacs
-C
+C                 write(104,*) Nnuc,l,j1,egd, EINl,gacs
+                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc)).eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
+     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
+                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc))+1.eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
+     &               16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
+                 if(Z(Nnuc).eq.Z(0) .and. NINT(A(Nnuc))+2.eq.NINT(A(0)))
+     &              write(104,'(1x,4i5,1x,3(g12.5,1x))') 
+     &               37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs
                ENDDO
             ENDIF
          ENDIF
@@ -872,7 +880,9 @@ C-----------Well... let it go down to the ground state
                   IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
-                  gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
+
+C                 gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
+
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
                ENDDO
             ENDIF
