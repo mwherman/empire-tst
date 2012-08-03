@@ -364,6 +364,11 @@ def runE(proj):
         os.system('"%s" %s' % (cmd, proj))
 
     # Produce ZVD files for nng 
+    if not isEmpty(proj+'.c5'):
+        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c5-nng2zvd')
+        os.system('"%s" %s' % (cmd, proj))
+
+    # Produce ZVD files for nng 
     if not isEmpty(proj+'-gam-tr.xsc'):
         cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','gamsort2zvd')
         os.system('"%s" %s' % (cmd, proj))
