@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3030 $
+Ccc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 12:07:12 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -226,7 +226,7 @@ C
 Cig---Direct reaction spectra for d,p and d,t only
 C
       dbreak  = 0.d0
-	  dstrip  = 0.d0 
+        dstrip  = 0.d0 
       dpickup = 0.d0
       scompn  = Sigr
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
@@ -474,7 +474,7 @@ C              for each ejectile and emission energy. Later we will use this ave
 C              exciton number N to obtain the preequilibrium spin-cut off as proposed
 C              by Chadwick and Blann SIG ~ N*A^(2/3) being SIG the spin cut-off squared
                nnn = 2*h1 - 3  + ap
-	         if(nnn.gt.0) XNAver(nejc,ienerg) =
+               if(nnn.gt.0) XNAver(nejc,ienerg) =
      >           XNAver(nejc,ienerg) + nnn*wb*em(h1)
             ENDDO          
             if(emis.gt.0.d0) XNAver(nejc,ienerg) =

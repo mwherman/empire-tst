@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3046 $
+Ccc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -445,7 +445,7 @@ C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0d0
          PEQc = 1.5   ! default PE
          MFPp = 1.5
-	   PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
+         PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
          NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
 
@@ -1401,7 +1401,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IF (DIRect.EQ.0) IDNa(3,2) = 1
                  IDNa(4,2) = 1
                ENDIF
-	         PESpin = 0
+               PESpin = 0
                WRITE (8,*)
      &          'WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
@@ -1423,14 +1423,14 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IF (NPRoject.EQ.1) THEN
                  IDNa(1,2) = 1
                  IDNa(2,2) = 1
-	           PESpin = 0
+                 PESpin = 0
                  WRITE (8,*)
      &          'WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
                IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
                  IDNa(4,2) = 1
-	           PESpin = 0
+                 PESpin = 0
                ENDIF
                WRITE (8,*)
      &          'WARNING: PE spin cut-off set as default (MSD is on)'
@@ -3318,7 +3318,7 @@ C     VERSIONNAME   = RIVOLI
       read(23,'(16x,A5)',ERR=753,END=7531) emp_ver
       read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
       close(23)
-	goto 7541
+      goto 7541
  7531 emp_ver='3.1.1 '
       emp_nam='Rivoli'
  7541 WRITE(8,'(A44,A6,A3)') 
@@ -4134,7 +4134,7 @@ C-----
      &      '('' Disc-lev. cross section was scaled by factor '',
      &           F6.3)') FCCred
             endif
-	      FCCred0 = FCCred
+            FCCred0 = FCCred
             GOTO 100
          ENDIF
 C-----
@@ -4166,7 +4166,7 @@ C-----
      &      '('' Contin.cross section was scaled by factor '',
      &           F6.3)') FCOred
             endif
-	      FCOred0 = FCOred
+            FCOred0 = FCOred
             GOTO 100
          ENDIF
 C-----
@@ -4198,7 +4198,7 @@ C-----
      &      '('' Fusion cross section was scaled by factor '',
      &           F6.3)') FUSred
             endif
-	      FUSred0 = FUSred
+            FUSred0 = FUSred
             GOTO 100
          ENDIF
 C-----
@@ -4230,7 +4230,7 @@ C-----
      &      '('' Total cross section was scaled by factor '',
      &          F6.3)') TOTred
             endif
-	      TOTred0 = TOTred
+            TOTred0 = TOTred
             GOTO 100
          ENDIF
 C-----
@@ -4262,7 +4262,7 @@ C-----
      &      '('' Shape elastic cross section was scaled by factor '',
      &          F6.3)') ELAred
             endif
-	      ELAred0 = ELAred
+            ELAred0 = ELAred
             GOTO 100
          ENDIF
 C-----------
@@ -9445,7 +9445,7 @@ C
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
            if (sheor.gt.0.) betahegor=sqrt(sheor/egrcoll(3,2))
-	   endif
+         endif
          if(      INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            write(8,*)
      >       '==========================================================

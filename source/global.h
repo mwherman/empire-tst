@@ -1,6 +1,6 @@
-C $Rev: 3046 $
+C $Rev: 3060 $
 C $Author: rcapote $
-C $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
+C $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -79,7 +79,7 @@ C
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
-     &        DYNam, COLfile	 
+     &        DYNam, COLfile   
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -177,7 +177,7 @@ C
      &                 BFFm, NRBinfism, DEStepm, TFBm, TDIrm, CSFism,
      &                 TFB, TDIrect, ECFism, VIBf12m, VIBfdtm, VIBfnormm
       
-	  
+        
       COMMON /COMFIS_CON/ ROFisp, UGRid, ENH_ld, SHCfis,
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,
      &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp,

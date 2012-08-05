@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3004 $
+Ccc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-30 03:11:46 +0200 (Mo, 30 Jul 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -68,7 +68,7 @@ C
 C
 C-----Reduced mass corrected for proper mass values
       xmas_npro = EJMass(Npro) 
-	xmas_ntrg = AMAss(Ntrg)
+      xmas_ntrg = AMAss(Ntrg)
 
       el = EINl
       ecms = EIN
@@ -730,7 +730,7 @@ C-----Print elastic and direct cross sections from ECIS
 
       IF(TOTred.ne.1) then
         FUSred = TOTred*FUSred0
-        ELAred = TOTred*ELAred0	
+        ELAred = TOTred*ELAred0     
         FCCred = TOTred*FCCred0 
         FCOred = TOTred*FCOred0 
 

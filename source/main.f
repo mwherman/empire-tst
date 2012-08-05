@@ -1,6 +1,6 @@
-cc   * $Rev: 3046 $
+cc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -104,7 +104,7 @@ C             -----------------------------------------------
       CHARACTER*21 reactionx, preaction(ndnuc)
 C
 
-	PARAMETER (max_prn = 30) ! maximum number of reactions to print by cs2zvd
+      PARAMETER (max_prn = 30) ! maximum number of reactions to print by cs2zvd
 
 C
       real*8, external :: mu_bar
@@ -182,10 +182,10 @@ C-----
         DO nnuc=1,NNUcd
           if( REAction(nnuc)(1:2).eq.'(z' ) then
             i = i + 1
-        	  preaction(i) = REAction(nnuc)
-	    endif
+              preaction(i) = REAction(nnuc)
+          endif
         ENDDO
-	  nuc_print = i
+        nuc_print = i
 
         IF (A(0).gt.220) then 
 C
@@ -216,7 +216,7 @@ C        to include/exclude low-lying coupled states
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
-	  ELSE
+        ELSE
 
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
@@ -234,7 +234,7 @@ C        to include/exclude low-lying coupled states
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      '
-	  ENDIF
+        ENDIF
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
@@ -283,9 +283,9 @@ C     Total cross section is set to absorption cross section
 C     for photon induced reactions (to process them in EMPEND)
 C
       IF (INT(AEJc(0)).EQ.0) then
-	  TOTcs = CSFus
-	  ELAcs = 0.d0
-	ENDIF
+        TOTcs = CSFus
+        ELAcs = 0.d0
+      ENDIF
 C
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -521,10 +521,10 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                ENDIF
              ELSE
                READ (46,*,END = 1400) popread ! reading zero for a closed channel
-C			 Bug found on July 18, 2012 affects calculations with unordered coll.levels
+C                  Bug found on July 18, 2012 affects calculations with unordered coll.levels
 C              READ (45,'(A)',END = 1400) ctmp    ! Skipping level identifier line
              ENDIF
-C	     
+C          
 C          Allowing states in the continuum even for MSD>0
 C          ELSEIF(MSD.eq.0)then
            ELSE
@@ -561,17 +561,17 @@ C
                if(D_Def(i,2).LT.0  .and.
      >             INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
                  write(8,
-     >		 '(/''  Giant Multipole Resonance with J ='',F4.1)') 
+     >             '(/''  Giant Multipole Resonance with J ='',F4.1)') 
      >           D_Xjlv(i)
                  IF(int(D_Xjlv(i)).eq.3) then
                    write(8,'( ''  GOR cross section (cont) ='',
      >               F7.1,'' mb'')') popread
                    write(8,'( ''  GOR energy ='',F6.2,'' MeV'')')
      >               D_Elv(i)
-                   write(8,'( ''  GOR width  ='',F6.2,'' MeV'')') ggor		   
+                   write(8,'( ''  GOR width  ='',F6.2,'' MeV'')') ggor           
                    write(8,'( ''  GOR deformation ='',F7.4)') 
-     >               -D_Def(i,2)		   		   
-		       ENDIF           
+     >               -D_Def(i,2)                         
+                   ENDIF           
                  IF(int(D_Xjlv(i)).eq.2) then
                    write(8,'( ''  GQR cross section (cont) ='',
      >               F7.1,'' mb'')') popread
@@ -579,18 +579,18 @@ C
      >               D_Elv(i)
                    write(8,'( ''  GQR width  ='',F6.2,'' MeV'')') ggqr     
                    write(8,'( ''  GQR deformation ='',F7.4)') 
-     >               -D_Def(i,2)		   		   
-		       ENDIF           
+     >               -D_Def(i,2)                         
+                   ENDIF           
                  IF(int(D_Xjlv(i)).eq.0) then
                    write(8,'( ''  GMR cross section (cont) ='',
      >               F7.1,'' mb'')') popread
                    write(8,'( ''  GMR energy ='',F6.2,'' MeV'')') 
      >               D_Elv(i)
-                   write(8,'( ''  GMR width  ='',F6.2,'' MeV'')') ggmr     		   
+                   write(8,'( ''  GMR width  ='',F6.2,'' MeV'')') ggmr                 
                    write(8,'( ''  GMR deformation ='',F7.4)')
      >               -D_Def(i,2)
-		       ENDIF    
-                 write(8,*)    		   		   		 
+                   ENDIF    
+                 write(8,*)                                        
                endif  
 C
 C--------------Spreading discrete levels in the continuum using a resolution function
@@ -630,7 +630,7 @@ C
                  CSEmsd(icsl,nejcec) = CSEmsd(icsl,nejcec)
      &              + popread/DE
                endif
-C	       
+C            
                IF (ICAlangs.EQ.0) THEN
                  READ (45,*,END = 1400)     ! Skipping level identifier line
                  iang = 0
@@ -1490,7 +1490,7 @@ C---------------------locate position of the projectile among ejectiles
                     ELSE
                       WRITE (40,'(12x,11D12.5)') 
 
-     &				            ELAred*ELAcs + 4.d0*PI*ELCncs
+     &                                    ELAred*ELAcs + 4.d0*PI*ELCncs
                       IF (ICAlangs.gt.0) THEN
                         DO iang = 1, NDANG
                           WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
@@ -3086,7 +3086,7 @@ C                          Low-lying XS   and       CE         substracted from 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
-	ELSE
+      ELSE
         WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
      &    ELAcs*ELAred            + 4.d0*PI*ELCncs, ! CE added to elastic
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
@@ -3105,7 +3105,7 @@ C                            CE  substracted from nonelastic
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms                     !MSD,MSC,PCROSS,HMS
-	ENDIF
+      ENDIF
 
       IF(ABScs.GT.0.) THEN
         WRITE (8,'('' ********************************************'',
@@ -3167,7 +3167,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
               WRITE (8,'('' *   set TOTRED '' , F13.6,
      &         '' to keep unchanged total'')') 1.d0/totcorr
             ENDIF  
-	    ENDIF
+          ENDIF
         ENDIF 
         IF(FUSred.ne.1)
      &    WRITE (8,'('' * Reaction      cross section scaled by '',
@@ -3784,7 +3784,7 @@ C
         READ(5,*,ERR=11570,END=1200) EIN
 
       ELSE
-	  
+        
  1158   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
         IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &     nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158

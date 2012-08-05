@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3046 $
+Ccc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -141,7 +141,7 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       ICMax = MAX(IC1max,IC2max)
 
       IF(BET2in.EQ.0.0D+0) BET2in = DEF(1,nnuc)
-	WRITE (8,*)
+      WRITE (8,*)
       WRITE (8,
      &'('' beta_2 deformation in Nilsson Hamiltonian (MSD)'', F6.3
      &)') BET2in
@@ -2993,7 +2993,7 @@ C
                      WRITE (8,99020) eout, s1, s2, s3, sigm, f11, a1,
      &                               a2, a3, ay, f21
                      WRITE (66,99020) eout, s1, s2, sigm
-                  ENDIF							 
+                  ENDIF                                      
 C                 necs = Nbinx - ne + 2
 C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
@@ -3120,8 +3120,8 @@ C-----
 C-----number of spectrum bins to continuum WARNING! might be negative!
 C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
       nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed) 
-C	Continuum increased by one to fill the hole in MSD calculation
-C	IF(MSD.GT.0) nexrt = nexrt + 1 	
+C     Continuum increased by one to fill the hole in MSD calculation
+C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
       next  = INT(excnq/DE + 1.0001)
 
@@ -3170,7 +3170,7 @@ C              as calculated by PCROSS or MSD+MSC
            ENDDO
 
          ELSE
-	 
+       
 
 C          distribution of the PCROSS continuum particle or photon emissions
 C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 

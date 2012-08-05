@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3046 $
+Ccc   * $Rev: 3060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-03 17:03:28 +0200 (Fr, 03 Aug 2012) $
+Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -653,7 +653,7 @@ C-----do loop over discrete levels --------- done --------------------
 C
   100 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
-	RETURN
+      RETURN
       END
 
 
@@ -824,7 +824,7 @@ C
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-	            ENDIF
+                  ENDIF
                ENDDO
             ENDIF
          ENDIF
@@ -1335,11 +1335,11 @@ c-----initialization
       Sumfis = 0.D0
       JCC = Jc
       tdirp  = 0.d0
-	tdirpp = 0.d0
-	sumtp  = 0.d0
-	wdir   = 0.d0
-	tabsp  = 0.d0
-	tabspp = 0.d0
+      tdirpp = 0.d0
+      sumtp  = 0.d0
+      wdir   = 0.d0
+      tabsp  = 0.d0
+      tabspp = 0.d0
       tfdis  = 0.d0
       tfcon  = 0.d0
       tdircont = 0.d0
