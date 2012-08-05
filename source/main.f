@@ -1,6 +1,6 @@
-cc   * $Rev: 3062 $
+cc   * $Rev: 3070 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 15:03:54 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-08-05 23:38:12 +0200 (So, 05 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -198,7 +198,7 @@ C        to include/exclude low-lying coupled states
      &2 CC added/substracted to Elastic/Nonelast respectively)'
          WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A118)') 
-     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
      &2 CC added/substracted to Elastic/Nonelast respectively)'
 
@@ -219,7 +219,7 @@ C        to include/exclude low-lying coupled states
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
          WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+     &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
 
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ','  Nonelast  ',
@@ -231,7 +231,7 @@ C        to include/exclude low-lying coupled states
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
      &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
-     &      '  PCROSS    ','   HMS      '
+     &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
         ENDIF
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
@@ -3109,7 +3109,7 @@ C                            CE  substracted from nonelastic
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
-     &    xsinl,xsmsc,totemis, tothms                     !MSD,MSC,PCROSS,HMS
+     &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
       ENDIF
 
       IF(ABScs.GT.0.) THEN
