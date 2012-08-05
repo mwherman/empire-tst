@@ -1,6 +1,6 @@
-cc   * $Rev: 3060 $
+cc   * $Rev: 3062 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-08-05 15:03:54 +0200 (So, 05 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -192,17 +192,15 @@ C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
-     &A133)') 
+     &A118)') 
      &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
-     &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
-     &vely)'
+     &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
+     &2 CC added/substracted to Elastic/Nonelast respectively)'
          WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
-     &A133)') 
+     &A118)') 
      &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 and En>3.5 MeV (Cro
-     &ss sections of 2 CC added/substracted to Elastic/Nonelast respecti
-     &vely)'
+     &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
+     &2 CC added/substracted to Elastic/Nonelast respectively)'
 
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic*  ','  Nonelast* ',
@@ -452,8 +450,15 @@ C------------Avoid reading closed channels
                popread = popread*FCCred
 C
 C              Storing the inelastic to the first two low-lying CC levels 
-C              to correct the "elastic" scattering for actinides for Ein > 3.5 MeV
-               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. ilv.LT.3) 
+C              to compare with the experimental "quasi-elastic" scattering
+C              for actinides. The experimental data are pure elastic below
+C              3.5 MeV, but at those energies Sel >> Sinl
+C
+C              The change is avoided in sensitivity calculations as the 
+C              ENDF-6 formatted output ALWAYS contains the unmodified elastic.
+C                
+               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. ilv.LT.3
+     &         .and. KALman.eq.0 ) 
      &            xscclow = xscclow + popread
 C              To consider only open channels
                ncoll = i
