@@ -1,6 +1,6 @@
-#$Rev: 3053 $
-#$Author: shoblit $
-#$Date: 2012-08-03 22:26:03 +0200 (Fr, 03 Aug 2012) $
+#$Rev: 3059 $
+#$Author: rcapote $
+#$Date: 2012-08-05 02:19:04 +0200 (So, 05 Aug 2012) $
 
 # set default fortran compiler:
 
@@ -59,11 +59,11 @@ else ifeq ($(FC),ifort)
   # Flags for ECIS
   EFLAGS = -O2 -x=host
   # Flags for OPTMAN
-  OFLAGS = -O3 -x=host -parallel -par-report1
+  OFLAGS = -O2 -x=host -parallel -par-report1
   #----flags for use on NNDC cluster
   # FFLAGS = -O3
   # EFLAGS = -O2
-  # OFLAGS = -O3
+  # OFLAGS = -O2
 
 else ifeq ($(FC),af95)
  
