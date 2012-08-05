@@ -1,0 +1,26 @@
+#! /bin/sh -
+#script to delete tabs and do dos2unix formatting
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Select the source file or script to be converted from Windows to Unix'
+echo ' '
+ls *.f
+echo ' '
+echo -n 'Choose one of the above : '
+read file
+fi                          
+
+cp $file $file.bkp
+dos2unix $file
+expand -t 6 $file > tmp
+mv tmp $file
+ls -lt $file*
+exit
