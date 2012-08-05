@@ -66,19 +66,19 @@ rm -rf $file-tl
 # If formatting if needed on the flight
 # run EMPEND to format EMPIRE output into ENDF
 # EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
-cat >EMPEND.INP <<EOF
-$file.out
-$file.endf
-1 
--1.0
-1111
-EOF
-$EMPIREDIR/util/empend/empend <EMPEND.INP
-rm EMPEND.INP empmf1.tmp empend.log
+#cat >EMPEND.INP <<EOF
+#$file.out
+#$file.endf
+#1 
+#-1.0
+#1111
+#EOF
+#$EMPIREDIR/util/empend/empend <EMPEND.INP
+#rm EMPEND.INP empmf1.tmp empend.log
 mv $file.xsc  XS$fnum
 mv $file.lst  LST$fnum
 mv $file.out  OUT$fnum
-mv $file.endf OUT$fnum.endf
+#mv $file.endf OUT$fnum.endf
 let sweep=sweep+1
 done
 # Calculating and plotting covariances
