@@ -11,7 +11,7 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl
 
       do i=1,maxr
-        toplot(i)=0	
+        toplot(i)=0     
         check_cs(i)=0.d0
       enddo
 
@@ -32,7 +32,7 @@ C
 10    OPEN(20,file='XSECTIONS.OUT',STATUS='OLD',ERR=100)
       READ(20,'(7x,i3,1x,a2,1x,i3)') iz,symb,ia
 
-      nreac = 30 ! reading up to 30 reactions only 	
+      nreac = 30 ! reading up to 30 reactions only    
 
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
@@ -44,11 +44,11 @@ C    &
       creaction(4)='(z,f)'
 
       do j=1,nreac
-	  if(creaction(j).eq.'(z,p)') toplot(j)=1
-	  if(creaction(j).eq.'(z,d)') toplot(j)=1
-	  if(creaction(j).eq.'(z,t)') toplot(j)=1
-	  if(creaction(j).eq.'(z,h)') toplot(j)=1
-	  if(creaction(j).eq.'(z,a)') toplot(j)=1
+        if(creaction(j).eq.'(z,p)') toplot(j)=1
+        if(creaction(j).eq.'(z,d)') toplot(j)=1
+        if(creaction(j).eq.'(z,t)') toplot(j)=1
+        if(creaction(j).eq.'(z,h)') toplot(j)=1
+        if(creaction(j).eq.'(z,a)') toplot(j)=1
       enddo
 
       nen = 0
@@ -56,7 +56,7 @@ C    &
         READ(20,'(G11.5,1P,(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
-   	      check_cs(j)=check_cs(j) + cs(i,j)
+            check_cs(j)=check_cs(j) + cs(i,j)
         enddo
         nen = i 
       enddo
