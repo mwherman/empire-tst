@@ -1,6 +1,6 @@
       program gamm_sort
 
-	implicit none
+      implicit none
       REAL*8 egd,u,gacs,gacs_noicc
 
       INTEGER Acn0, Acn, Mt, Mt0
@@ -12,7 +12,7 @@
 
 C     Maximum and minimum level to consider transition between
 
-      toplot = 0	
+      toplot = 0  
 
       toplot(1) = 1  ! n,ng
       toplot(2) = 0  ! n,2ng
@@ -20,7 +20,7 @@ C     Maximum and minimum level to consider transition between
       toplot(4) = 0  ! n,4ng
 C       
       lwmin = 2  ! We start to plot transitions from the second excited level
-	lwmax = 1
+      lwmax = 1
 
       OPEN(10,file='GAM-SORT-2ZVD.INP',STATUS='OLD',ERR=10)
       READ(10,*,END=10) ! Skipping column indicator 
@@ -28,7 +28,7 @@ C
       READ(10,*,END=10) lwmax 
       CLOSE(10)
   10  if(lwmax.gt.40) lwmax = 40
-	if(lwmax.le.1)  lwmax = 10
+      if(lwmax.le.1)  lwmax = 10
 
       OPEN(106,FILE='GAMMA_INT.DAT', STATUS='OLD',ERR=120)
 
@@ -50,7 +50,7 @@ C
      &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
               ! skipping gammas with energy higher than 9.9999 MeV
-	        if(egd.gt.99.999999d0) cycle 
+              if(egd.gt.99.999999d0) cycle 
 
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
@@ -63,7 +63,7 @@ C
                 ENDIF
               ENDIF
             ENDDO
-	
+      
             IF(lwrite) then
               OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
               CALL OPEN_ZVV(105,'Empire '//egamm13//' corr by ICC' ,' ')
@@ -84,7 +84,7 @@ C
               CLOSE(105)
             ENDIF
 
-	    endif
+          endif
           if(toplot(2).gt.0) then
 
             lwrite = .false.          
@@ -95,7 +95,7 @@ C
      &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
               ! skipping gammas with energy higher than 9.9999 MeV
-	        if(egd.gt.99.999999d0) cycle 
+              if(egd.gt.99.999999d0) cycle 
 
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
@@ -129,7 +129,7 @@ C
               CLOSE(105)
             ENDIF
 
-	    endif
+          endif
           if(toplot(3).gt.0) then
 
             lwrite = .false.          
@@ -140,7 +140,7 @@ C
      &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
               ! skipping gammas with energy higher than 9.9999 MeV
-	        if(egd.gt.99.999999d0) cycle 
+              if(egd.gt.99.999999d0) cycle 
 
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
@@ -174,7 +174,7 @@ C
               CLOSE(105)
             ENDIF
 
-	    endif
+          endif
           if(toplot(4).gt.0) then
 
             lwrite = .false.          
@@ -185,7 +185,7 @@ C
      &            Mt,Acn,l,j1,egd,u,gacs_noicc,gacs
 
               ! skipping gammas with energy higher than 9.9999 MeV
-	        if(egd.gt.99.999999d0) cycle 
+              if(egd.gt.99.999999d0) cycle 
 
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
                 write(egamm13,
@@ -218,8 +218,8 @@ C
               CLOSE(104,STATUS='delete')  
               CLOSE(105)
             ENDIF
-	    
-		endif
+          
+            endif
 
          ENDDO
       ENDDO
@@ -270,7 +270,7 @@ C     write(iout,'(A)')     'color: 2'
       write(iout,'(A)') 'planki: 0'
       write(iout,'(A)') 'mode: varsym'
       write(iout,'(A)') 'x-unit: 2 1e6 MeV'
-      write(iout,'(A)') 'x-units: mev'	
+      write(iout,'(A)') 'x-units: mev'    
       write(iout,'(A)') 'y-unit: mbarn 1e-3'
       write(iout,'(A)') 'y-units: mbarn'
       write(iout,*) 
