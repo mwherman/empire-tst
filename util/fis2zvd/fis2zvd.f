@@ -10,7 +10,7 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       character*12 creaction(maxr)
       real*8 e(maxen),cs(maxen,maxr),check_cs(maxr)
       do i=1,maxr
-        toplot(i)=0	
+        toplot(i)=0     
         check_cs(i)=0.d0
       enddo
       toplot(1) = 1  ! tot fission
@@ -35,7 +35,7 @@ C
         READ(20,'(G11.5,1P,(100E12.5))',END=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
- 	  check_cs(j)=check_cs(j) + cs(i,j)
+        check_cs(j)=check_cs(j) + cs(i,j)
         enddo
         nen = i 
       enddo
