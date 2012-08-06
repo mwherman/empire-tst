@@ -381,6 +381,11 @@ def runE(proj):
             mv(LDfile,proj+'-'+LDfile,0)
         for LDfile in glob("z4ng_*.zvd"):
             mv(LDfile,proj+'-'+LDfile,0)
+
+    # Produce ZVD files for elastic, nonelastic and preequilibrium emission 
+    if not isEmpty(proj+'-preq.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','preq2zvd')
+        os.system('"%s" %s' % (cmd, proj))
     
     return 0
 

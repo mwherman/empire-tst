@@ -1,0 +1,43 @@
+#! /bin/sh -
+#script to produce ZVView plots from the *-fiss.xsc files
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Preequilibrium and elastic cross sections ready to be plotted'
+echo ' '
+ls *-preq.xsc
+echo ' '
+echo -n 'Choose one of the above (without .xsc extention!): '
+read file
+fi                          
+
+# Deleting previous plots
+if [ -f "$file-preq.zvd" ]; then
+ rm "$file-preq.zvd" 
+fi
+if [ -f "$file-preq-det.zvd" ]; then
+ rm "$file-preq-det.zvd" 
+fi
+
+#run fis2zvd to produce ZVView plots
+cp $file-preq.xsc EL_INEL.DAT
+rm -f PREQ2ZVD.INP
+ln -sf $EMPIREDIR/util/preq2zvd/PREQ2ZVD.INP PREQ2ZVD.INP
+#vi PREQ2ZVD.INP	
+$EMPIREDIR/util/preq2zvd/preq2zvd.exe 
+if [ -f "XS_EL_INEL.zvd" ]; then
+ mv "XS_EL_INEL.zvd" $file-preq.zvd
+fi
+if [ -f "XS_PREQ.zvd" ]; then
+ mv "XS_PREQ.zvd" $file-preq-det.zvd
+fi
+rm EL_INEL.DAT
+rm PREQ2ZVD.INP
+exit
