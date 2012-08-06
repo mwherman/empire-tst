@@ -29,10 +29,14 @@ C
       READ(10,'(1x,100I1)') toplot
       CLOSE(10)
 
+C     WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
 10    OPEN(20,file='XSECTIONS.OUT',STATUS='OLD',ERR=100)
-      READ(20,'(7x,i3,1x,a2,1x,i3)') iz,symb,ia
+      READ(20,'(1x,I3,10X,i3,1x,A2,1X,I3)') nreac,iz,symb,ia
 
-      nreac = 30 ! reading up to 30 reactions only    
+      nreac = min(nreac,maxr)
+C
+C     Only 20 columns plotted for actinides
+      if(ia.gt.220) nreac = min(nreac,20)  
 
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
