@@ -2,8 +2,8 @@
 C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       implicit none
       integer maxr,maxen
-      parameter(maxr=100,maxen=500)
-      integer nreac,iz,ia,ncol,nch,ios,ich
+      parameter(maxr=50,maxen=500)
+      integer nreac,iz,ia,ncol,nch,ich
       integer i,j,nen,toplot(maxr)
       character*2 symb
       character*22 caz
@@ -17,17 +17,18 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       toplot(2) = 1  ! 1st chance
       toplot(3) = 1  ! 2nd chance
       toplot(4) = 1  ! 3rd chance
-      toplot(5) = 1  ! 4rd chance
 C       
       OPEN(10,file='FIS2ZVD.INP',STATUS='OLD',ERR=10)
       READ(10,*) ! Skipping column indicator 
       READ(10,'(1x,100I1)') toplot
       CLOSE(10)
 
+C     WRITE(98,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
 10    OPEN(20,file='FISS_XS.OUT',STATUS='OLD',ERR=100)
-      READ(20,'(7x,i3,1x,a2,1x,i3)') iz,symb,ia
+      READ(20,'(1x,I3,10X,i3,1x,A2,1X,I3)') nreac,iz,symb,ia
 
-      nreac = 10 ! reading up to 10 fission chances
+      nreac = min(maxr,nreac) ! reading fission chances
+
       READ(20,'(12x,(100A12))') (creaction(j),j=1,nreac)
 
       nen = 0
@@ -45,9 +46,8 @@ C
         if(check_cs(i).le.1.d-12) toplot(i)=0
       enddo
        
-      open(20,file='XS_FISS.zvd',ERR=200,iostat=ios)
+      open(20,file='XS_FISS.zvd',ERR=200)
       do j=1,nreac
-C       Deleting old plots
         nch = len_trim(creaction(j))
         ich = 1
         do while(ich .lt. nch)
@@ -57,7 +57,7 @@ C       Deleting old plots
 C       Skipping plots 
         if(toplot(j).eq.0) cycle 
         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
-     &    iz,symb,ia,TRIM(creaction(j))       
+     &    iz,symb,ia,trim(creaction(j))       
         IF(j.eq.1) then
           CALL OPEN_ZVV(20,caz,' EMPIRE-3.1 fission cross sections ')
         ELSE
