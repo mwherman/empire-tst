@@ -153,7 +153,8 @@ C       Converting character to real and printing back in a right format
       write(iout,'(A)') 'x-long: Incident Energy'
       write(iout,'(A)') 'y: Cross Section'
       write(iout,'(A)') 'x-unit:   MeV'
-      write(iout,'(A)') 'y-unit:   mbarns'
+C     write(iout,'(A)') 'y-unit:   mbarns'
+      write(iout,'(A)') 'y-unit:   barns'
       write(iout,'(A)') 'noStat: 1'
       write(iout,'(A)') 'x-grid: 0'
       write(iout,'(A)') 'y-grid: 0'
@@ -162,8 +163,10 @@ C       Converting character to real and printing back in a right format
       write(iout,'(A)') 'mode: varsym'
       write(iout,'(A)') 'x-unit: 2 1e6 MeV'
       write(iout,'(A)') 'x-units: mev'    
-      write(iout,'(A)') 'y-unit: mbarn 1e-3'
-      write(iout,'(A)') 'y-units: mbarn'
+C     write(iout,'(A)') 'y-unit: mbarn 1e-3'
+C     write(iout,'(A)') 'y-units: mbarn'
+      write(iout,'(A)') 'y-unit: barn'
+      write(iout,'(A)') 'y-units: barn'
       write(iout,*) 
       write(iout,'(A)') '#end control.tit/c'
       return
