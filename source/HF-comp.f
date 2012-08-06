@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3060 $
+Ccc   * $Rev: 3072 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-08-06 02:37:17 +0200 (Mo, 06 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -814,7 +814,7 @@ C-----------------NOTE: internal conversion taken into account
 C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-                  IF(NNG_xs.gt.0) then
+                  IF(NNG_xs.gt.0 .and. ENDF(Nnuc).eq.0) then
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
@@ -864,7 +864,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION gacs, popl
+      DOUBLE PRECISION gacs, popl, gacs_noicc
       INTEGER i, j, j1, l
       INTEGER NINT
 C
@@ -885,8 +885,26 @@ C-----------Well... let it go down to the ground state
                   IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
-                  gacs = gacs/(1 + BR(l,j,3,Nnuc))    ! int. conversion
+
+                  gacs_noicc = gacs                 ! no int. conversion
+                  gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
+
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+C
+99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
+C
+                  IF(NNG_xs.gt.0 .and. ENDF(nnuc).eq.1) then
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                  ENDIF
+
                ENDDO
             ENDIF
          ENDIF
