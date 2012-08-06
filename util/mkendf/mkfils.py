@@ -277,10 +277,10 @@ def run(proj):
     """
     print "Starting original input"
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
-    qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False)
+    qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, jnm="cent_")
     
     # start watching queue, report when all jobs finish:
-    os.system('time ~/bin/monitorQueue 0 &')
+    # os.system('time ~/bin/monitorQueue 0 &')
     
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -300,18 +300,15 @@ def run(proj):
             continue
         
         nameP, nameM = genNames(line,proj)
+        jname = line.split()[0]
         # pause between submitting each new file:
-        time.sleep(2)
+        time.sleep(0.5)
         print "Starting", nameP
-        qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=False)
-        time.sleep(2)
+        qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=False, jnm=jname+"+")
+        time.sleep(0.5)
         print "Starting", nameM
-        qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=False)
+        qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=False, jnm=jname+"-")
     
-    # after submitting all inputs (better to start monitoring earlier)
-    #os.system('time ~/bin/monitorQueue 0 &')
-
-
 def analyze(proj):
     """
     generate sensitivity matrix after run() finishes
