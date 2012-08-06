@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3060 $
+Ccc   * $Rev: 3085 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-08-06 19:17:28 +0200 (Mo, 06 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1896,7 +1896,7 @@ C-------continuum using current DE, if not adjust DE
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
 
-      IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
+      IF(2*NEXreq.GT.NDEX) WRITE(8,'(A,I4,A,A,I4)')  
      & ' WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEXreq     
 
