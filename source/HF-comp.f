@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3072 $
+Ccc   * $Rev: 3084 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-06 02:37:17 +0200 (Mo, 06 Aug 2012) $
+Ccc   * $Date: 2012-08-06 14:40:08 +0200 (Mo, 06 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -864,9 +864,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION gacs, popl, gacs_noicc
+      DOUBLE PRECISION gacs, popl, gacs_noicc, egd
       INTEGER i, j, j1, l
-      INTEGER NINT
 C
 C
       DO i = 1, NLV(Nnuc) - 1
@@ -894,6 +893,9 @@ C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
                   IF(NNG_xs.gt.0 .and. ENDF(nnuc).eq.1) then
+                   
+                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
+
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
