@@ -1,0 +1,26 @@
+0123456789012345  <- Column indicator
+0111111111111111  <- Reactions t be printed                                                                                                                                                              
+Each column correspond to one reaction. 
+For the zvd file to be produced the second column should contain 1.
+
+Check the cross section out put file EL_INEL.DAT (or $proj-preq.xsc) to see reactions
+All 15 columns are fixed:
+ 1.- Total
+ 2.- Elastic*    = Shape Elastic + CN-elastic + CC-2lev
+ 3.- CN-elastic 
+ 4.- Nonelastic* = Reaction      - CN-elastic - CC-2lev
+ 5.- CN formation = fusion = Nonelastic - Preq - Dir
+ 6.- Direct (sum of CC + DWBA-disc + DWBA-cont) 
+ 7.- CC (contribution of all coupled levels)
+ 8.- Preq (sum of MSD + MSC + exciton + HMS)
+ 9.- DWBA-disc (direct contribution to uncoupled discrete levels)
+10.- DWBA-cont (direct contribution to discrete levels embedded in continuum)
+11.- MSD contribution
+12.- MSC contribution
+13.- Exciton model contribution (PCROSS)
+14.- HMS contribution
+15.- CC-2lev (cross section of the first two coupled levels)
+
+
+
+
