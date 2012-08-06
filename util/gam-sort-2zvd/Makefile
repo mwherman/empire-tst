@@ -1,6 +1,9 @@
 # set default compiler
 
 #FC   =  gfortran    
+
+# This code needs ifort as the function EOF() 
+# is not implemented in gfortran (at least in old versions)
 FC  =  ifort
 #FC  =  af90
 #FC  =  lf95

@@ -271,8 +271,10 @@ C     write(iout,'(A)')     'color: 2'
       write(iout,'(A)') 'mode: varsym'
       write(iout,'(A)') 'x-unit: 2 1e6 MeV'
       write(iout,'(A)') 'x-units: mev'    
-      write(iout,'(A)') 'y-unit: mbarn 1e-3'
-      write(iout,'(A)') 'y-units: mbarn'
+C     write(iout,'(A)') 'y-unit: mbarn 1e-3'
+C     write(iout,'(A)') 'y-units: mbarn'
+      write(iout,'(A)') 'y-unit: barn '
+      write(iout,'(A)') 'y-units: barn'
       write(iout,*) 
       write(iout,'(A)') '#end control.tit/c'
       return
