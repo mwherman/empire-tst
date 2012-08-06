@@ -1,6 +1,6 @@
-cc   * $Rev: 3070 $
+cc   * $Rev: 3071 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 23:38:12 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-08-06 02:35:16 +0200 (Mo, 06 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -235,12 +235,13 @@ C        to include/exclude low-lying coupled states
         ENDIF
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
-        WRITE(98,'(''#  '',A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+        WRITE(98,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &     10, SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
         WRITE(98,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
-     &      '  Fiss-tot  ','  Fiss-1st  ',
-     &      '  Fiss-2nd  ','  Fiss-3rd  ',
-     &      '  Fiss-4rd  ','  Fiss-5th  '
+     &      '  Fiss-tot  ','  Fiss-1st  ','  Fiss-2nd  ',
+     &      '  Fiss-2nd  ','  Fiss-3rd  ','  Fiss-4rd  ',
+     &      '  Fiss-5th  ','  Fiss-6th  ','  Fiss-7th  ',
+     &      '  Fiss-8th  ','  Fiss-9th  '
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
