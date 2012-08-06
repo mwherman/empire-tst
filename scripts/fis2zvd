@@ -19,19 +19,20 @@ read file
 fi                          
 
 # Deleting previous plots
-if [ -f "$file-zff.zvd" ]; then
- rm "$file-zff.zvd" 
+if [ -f "$file-zf-part.zvd" ]; then
+ rm "$file-zf-part.zvd" 
 fi
 
 #run fis2zvd to produce ZVView plots
-cp $file-fiss.xsc FISS_XS.OUT
-rm -f FIS2ZVD.INP
-ln -sf $EMPIREDIR/util/fis2zvd/FIS2ZVD.INP FIS2ZVD.INP
-#vi FIS2ZVD.INP	
-$EMPIREDIR/util/fis2zvd/fis2zvd.exe 
-if [ -f "XS_FISS.zvd" ]; then
- mv "XS_FISS.zvd" $file-zf-part.zvd
+if [ -f "$file-fiss.xsc" ]; then
+  cp $file-fiss.xsc FISS_XS.OUT
+  rm -f FIS2ZVD.INP
+  ln -sf $EMPIREDIR/util/fis2zvd/FIS2ZVD.INP FIS2ZVD.INP
+  #vi FIS2ZVD.INP	
+  $EMPIREDIR/util/fis2zvd/fis2zvd.exe 
+  if [ -f "XS_FISS.zvd" ]; then
+    mv "XS_FISS.zvd" $file-zf-part.zvd
+  fi
+  rm FISS_XS.OUT FIS2ZVD.INP
 fi
-rm FISS_XS.OUT
-rm FIS2ZVD.INP
 exit
