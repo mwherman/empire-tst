@@ -1501,7 +1501,7 @@ to much higher energies. The exciton model code DEGAS implementing full angular 
 coupling  in pre equilibrium emission of nucleons and gammas has been temporarily disabled
 due to incompatibilities with the current system. 
 
-\section{Exciton model (PCROSS code)}\label{PCROSS}}
+\section{Exciton model (PCROSS code)}\label{PCROSS}
 
 The module PCROSS includes the pre-equilibrium mechanism as defined in the
 exciton model~\cite{Griffin:66}, as based on the solution of the
@@ -10359,7 +10359,7 @@ This parameter may be used to simulate the CN resonances (obviously not included
                  nucleus will be multiplied by VAL). 
                  It has no effect on other incident particles. 
                   
-              \begin{description}[style=multiline,leftmargin=3cm]
+              \begin{description}[style=multiline,leftmargin=1cm]
                \item[$>0$] deuteron pick-up/stripping parameterization of Kalbach used for incident deuterons (default: 1.),
                \item[$=0$] deuteron pick-up/stripping suppressed.  
               \end{description}
@@ -10482,7 +10482,7 @@ It is not recommended for reactions with light incident particles ($A<5$).\
 be used to adjust the fusion barrier. Typical range for changes $-10<DV<10$.
 (default: 10).
 \item [{FCC}] FCC parameter in CCFUS\index{CCFUS} set to VAL
-\begin{description}[style=multiline,leftmargin=3cm]
+\begin{description}[style=multiline,leftmargin=1cm]
 \item[=0] diagonalization of the coupling is performed at the barrier position
 $r_{b}$,
 \item[=1] exponential character of the form factor is taken into account.
@@ -10612,7 +10612,7 @@ set to VAL (default: 0.8).
 
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{PCROSS}] Controls calculations with PCROSS:
-\begin{description}[style=multiline,leftmargin=3cm]
+\begin{description}[style=multiline,leftmargin=1cm]
 \item[= 0] PCROSS disabled (default)
 \item[$>0$] PCROSS enabled with mean free path multiplier set to VAL.
 VAL must be greater than 1.05 and lower than 2. 
@@ -10627,15 +10627,16 @@ $>0$ Preequilibrium contribution to discrete levels considered.
 
 \item [{PESPIN}] Controls how preequilibrium spin cut-off paramater 
 is calculated in the exciton model (PCROSS):
-= 0 Exciton model spin cut-off parameter taken as 2*0.26*A$^(2/3)$ (default). \\
+\begin{description}[style=multiline,leftmargin=1cm]
+\item [{= 0}] Exciton model spin cut-off parameter taken as 2*0.26*A$^(2/3)$ (default). 
     This is equivalent to the assumption that spin-distribution is equal to the
 	spin-distribution of the n=2 (p=h=1) exciton states independent of the emission
 	energy and of the exciton number $n$.
 
-> 0 Exciton model spin cut-off parameter taken as (p+h)*0.26*A$^(2/3)$ (default). \\
+\item[{$> 0$}] Exciton model spin cut-off parameter taken as (p+h)*0.26*A$^(2/3)$ (default). \\
     This produces higher-spin states at lower emission energies, changing the 
 	spin-distribution of the pre-equlibrium emission.
-	
+\end {description}	
 If MSD model is active, then PESPIN is reset to the default value of zero.
 	
 
@@ -10662,7 +10663,7 @@ lower than 0.54 will produce smaller preequilibrium contribution.
 
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{LEVDEN}] Selects level density approach,\\
-\begin{description}[style=multiline,leftmargin=3cm]
+\begin{description}[style=multiline,leftmargin=1cm]
 
 
 \item[= 0] EMPIRE-specific level densities, adjusted to RIPL-3 experimental $D_{obs}$ 
@@ -10675,7 +10676,7 @@ experimental $D_{obs}$ and to discrete levels,
 \end{description}
 
 \item [{FITLEV}] Option for adjusting range of discrete levels used in the calculations. Plots of cumulative number of discrete levels along with the integrated level densities are created and calculations stop at this point.
-\begin{description}[style=multiline,leftmargin=3cm]
+\begin{description}[style=multiline,leftmargin=1cm]
 \item[$>0$] cumulative plots of discrete levels will be displayed.
 If LEVDEN=0 the energy range of the plot will extend VAL MeV above
 the last discrete level,
