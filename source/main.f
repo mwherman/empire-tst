@@ -1,6 +1,6 @@
-cc   * $Rev: 3071 $
+cc   * $Rev: 3086 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-06 02:35:16 +0200 (Mo, 06 Aug 2012) $
+Ccc   * $Date: 2012-08-06 19:21:08 +0200 (Mo, 06 Aug 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -51,7 +51,7 @@ C Local variables
 C
       DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, 
-     &                 dang, ded, delang, echannel,xscclow,
+     &                 dang, ded, delang, echannel, xscclow, csinel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
      &                 epre, ftmp, gang, grand, ! spechk(4),
@@ -376,8 +376,9 @@ C
 C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       xsinlcont = 0.d0
       xscclow   = 0.d0
-      xsinl = 0.d0
-      checkXS = 0.d0
+      xsinl     = 0.d0
+      csinel    = 0.d0
+      checkXS   = 0.d0
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
       IF(WIDcoll.GT.0.d0)
@@ -1470,9 +1471,6 @@ C--------------Write elastic to tape 12 and to tape 68
      &              (ELAred*elleg(1) + ELCncs),
      &              (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                   WRITE (12,*) ' '
-                  IF (ELCncs.EQ.0 .AND. EINl.LT.10.d0) 
-     &              WRITE (8,*) 'WARNING: CN elastic is 0'
-C
                   IF (FITomp.LT.0) THEN
                     WRITE(40,'(F12.4,3D12.5)') 
      &                EINl,TOTcs*TOTred*totcorr,ABScs*FUSred
@@ -1481,7 +1479,6 @@ C---------------------locate position of the projectile among ejectiles
                       CALL WHEREJC(IZAejc(0),nejcec,iloc)
                       its = ncoll
                       WRITE (40,'(12x,11D12.5)') 
-
      &                           ELAred*ELAcs + 4.d0*PI*ELCncs,
      &                         (CSDirlev(ICOller(ilv),nejcec),
      &                          ilv = 2,MIN(its,10))
@@ -1495,8 +1492,7 @@ C---------------------locate position of the projectile among ejectiles
                       ENDIF
                     ELSE
                       WRITE (40,'(12x,11D12.5)') 
-
-     &                                    ELAred*ELAcs + 4.d0*PI*ELCncs
+     &                           ELAred*ELAcs + 4.d0*PI*ELCncs
                       IF (ICAlangs.gt.0) THEN
                         DO iang = 1, NDANG
                           WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
@@ -2156,11 +2152,14 @@ C--------down on the ground state
 C----------CN contribution to elastic ddx
 
            ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI *CELred
-
-           WRITE (8,*) ' CN elastic cross section   ',
+           IF (ELCncs.EQ.0) then
+             WRITE (8,*) 'WARNING: CN elastic is 0'
+           ELSE
+             WRITE (8,*) ' CN elastic cross section   ',
      &                     POPlv(LEVtarg,mt2)*CELred,' mb'
-           WRITE (8,*)
+             WRITE (8,*)
      &          ' CN elastic angular distrib.', ELCncs, ' mb/str'
+           ENDIF
            WRITE (8,*)
          ENDIF
          checkXS = checkXS + CSPrd(nnuc)
@@ -2338,11 +2337,13 @@ C--------
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
 cccccccccccccccccccc ccccccccccccccccccccccccccccc
 C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
+
       eps=1.d-8
+      csinel=CSPrd(2)-4.d0*PI*ELCncs
+      if (csinel.lt.eps) csinel=0.d0
       do nnuc=1,NNUcd
         if (CSPrd(nnuc).lt.eps) CSPrd(nnuc)=0.d0
       enddo
-cccccccccccccccccccccccccccccccccccccccccccccccc
 
       if(NUBarread) then
           xnub = PFNniu*fniu_nubar_eval(EINl)
@@ -3071,23 +3072,30 @@ C     Elastic and Nonelastic modified for actinides
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states
 
       IF (A(0).gt.220) then 
+C        WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+C    &      '  Total     ','  Elastic*  ','  Nonelast* ',
+C    &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
+C    &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
         WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
+C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
 C                          Low-lying XS   and       CE         substracted from nonelastic
-     &                  -   xscclow       -    4.d0*PI*ELCncs,
+C    &                  -   xscclow       -    4.d0*PI*ELCncs,
      &    TOTcsfis, 
      &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada),xnub,
-     &    (CSPrd(nnuc),nnuc=1,min(nuc_print,max_prn))
+     &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
+C
         WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
      &                   4.d0*PI*ELCncs,                  !CN_el
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
+     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
+C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
 C                          Low-lying XS   and       CE         substracted from nonelastic
-     &                   -   xscclow       -   4.d0*PI*ELCncs,  
+C    &                   -   xscclow       -   4.d0*PI*ELCncs,  
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3095,18 +3103,21 @@ C                          Low-lying XS   and       CE         substracted from 
       ELSE
         WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
      &    ELAcs*ELAred            + 4.d0*PI*ELCncs, ! CE added to elastic
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
+     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+C    &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,ELCncs,elada), xnub,
-     &    (CSPrd(nnuc),nnuc=1,min(nuc_print,max_prn))
+     &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
+C
         WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
 C                            CE  added to elastic
      &    ELAcs*ELAred  +  4.d0*PI*ELCncs, 
      &                   4.d0*PI*ELCncs,                  !CN_el
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
+     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
 C                            CE  substracted from nonelastic
-     &                  -  4.d0*PI*ELCncs,  
+C    &                  -  4.d0*PI*ELCncs,  
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
