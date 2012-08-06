@@ -26,7 +26,7 @@ UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Ca
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
        util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/nubar \
        util/endtab util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar \
-       util/fis2zvd util/gam-sort-2zvd util/c5-nng2zvd
+       util/fis2zvd util/gam-sort-2zvd util/c5-nng2zvd util/preq2zvd
 
 all:
 	cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;
