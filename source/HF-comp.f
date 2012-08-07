@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3084 $
+Ccc   * $Rev: 3088 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-06 14:40:08 +0200 (Mo, 06 Aug 2012) $
+Ccc   * $Date: 2012-08-07 10:42:30 +0200 (Di, 07 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -823,6 +823,9 @@ C
      &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
                   ENDIF
                ENDDO
@@ -883,6 +886,7 @@ C-----------Well... let it go down to the ground state
                   IF (j1.EQ.0) GOTO 100
                   IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
+
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
 
                   gacs_noicc = gacs                 ! no int. conversion
@@ -903,6 +907,9 @@ C
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
+     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
+     &                17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
                   ENDIF
