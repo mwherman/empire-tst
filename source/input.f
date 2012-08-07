@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3090 $
+Ccc   * $Rev: 3091 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-07 13:33:03 +0200 (Di, 07 Aug 2012) $
+Ccc   * $Date: 2012-08-07 13:36:29 +0200 (Di, 07 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2504,7 +2504,7 @@ C---------levels for nucleus NNUC copied to file *.lev
                WRITE(8,'(1x,A,I3,A4,I3)') 
      &         ' ERROR: Check your discrete levels for Z =',
      &         NINT(Z(Nnuc)), ' A =', NINT(A(Nnuc))
-	         STOP ' ERROR: See the long output for explanations'
+               STOP ' ERROR: See the long output for explanations'
             ENDIF
             IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN

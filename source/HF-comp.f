@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3089 $
+Ccc   * $Rev: 3091 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-07 10:45:58 +0200 (Di, 07 Aug 2012) $
+Ccc   * $Date: 2012-08-07 13:36:29 +0200 (Di, 07 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
