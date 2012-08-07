@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3088 $
+Ccc   * $Rev: 3089 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-07 10:42:30 +0200 (Di, 07 Aug 2012) $
+Ccc   * $Date: 2012-08-07 10:45:58 +0200 (Di, 07 Aug 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -886,16 +886,12 @@ C-----------Well... let it go down to the ground state
                   IF (j1.EQ.0) GOTO 100
                   IF (j1.GE.l) return
                   gacs = popl*BR(l,j,2,Nnuc)
-
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
 
                   gacs_noicc = gacs                 ! no int. conversion
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
-
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-C
-99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
-C
+
                   IF(NNG_xs.gt.0 .and. ENDF(nnuc).eq.1) then
                    
                    egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
