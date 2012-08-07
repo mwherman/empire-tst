@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3085 $
+Ccc   * $Rev: 3090 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-06 19:17:28 +0200 (Mo, 06 Aug 2012) $
+Ccc   * $Date: 2012-08-07 13:33:03 +0200 (Di, 07 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2454,6 +2454,10 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
+C
+C     nlvr  is the total number of levels
+C     ngamr is the total number of gamma rays
+C
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)',END = 300) dum
@@ -2477,6 +2481,7 @@ C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
 C---------limit to max. of 40 levels if ENDF active
           IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
+C
           IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
@@ -2494,7 +2499,13 @@ C---------levels for nucleus NNUC copied to file *.lev
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
-C
+            IF(ilv.gt.1 .and. ELV(ilv,Nnuc).le.0.00001d0) then 
+               WRITE(8,*) ' ERROR: Discrete level with Elv<0.00001 MeV' 
+               WRITE(8,'(1x,A,I3,A4,I3)') 
+     &         ' ERROR: Check your discrete levels for Z =',
+     &         NINT(Z(Nnuc)), ' A =', NINT(A(Nnuc))
+	         STOP ' ERROR: See the long output for explanations'
+            ENDIF
             IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
                 WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
@@ -2504,10 +2515,10 @@ C
      &'('' Number of discrete levels changed from RIPL default of '',I3,
      &'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
              NLV(Nnuc) = max(ilv - 1,1)
-              IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
+                IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
                 GOTO 200
-           ENDIF
-         ENDIF
+              ENDIF
+            ENDIF
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
               NLV(Nnuc) = max(ilv - 1,1)
