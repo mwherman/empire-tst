@@ -19,7 +19,7 @@ module ENDF_MF6_IO
     end type
 
     type mf6_law1_list
-                real e1                         ! incident energy
+        real e1                                 ! incident energy
         integer nd                              ! # outgoing discreet energies
         integer na                              ! # angular params
         integer nep                             ! # secondary energies

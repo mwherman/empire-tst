@@ -38,6 +38,12 @@ module BASE_ENDF_IO
         type (real_pair), pointer :: dat(:)    ! data values
     end type
 
+    interface assignment (=)
+        module procedure assign_int_pair
+        module procedure assign_real_pair
+        module procedure assign_tab1
+    end interface
+
     ! define generic interfaces for reads & gets
     ! reads start on next line; gets start at next column (ipos 1-6)
 
@@ -1056,6 +1062,66 @@ module BASE_ENDF_IO
 
     return
     end subroutine write_fend
+
+!--------------------------------------------------------------------------------
+
+    subroutine assign_int_pair(a,b)
+
+    implicit none
+
+    type (int_pair), intent(out) :: a
+    type (int_pair), intent(in)  :: b
+
+    a%x = b%x
+    a%y = b%y
+
+    return
+    end subroutine assign_int_pair
+
+!--------------------------------------------------------------------------------
+
+    subroutine assign_real_pair(a,b)
+
+    implicit none
+
+    type (real_pair), intent(out) :: a
+    type (real_pair), intent(in)  :: b
+
+    a%x = b%x
+    a%y = b%y
+
+    return
+    end subroutine assign_real_pair
+
+!--------------------------------------------------------------------------------
+
+    subroutine assign_tab1(a,b)
+
+    implicit none
+
+    type tab1
+        integer nr                             ! # NR interpolation ranges
+        integer np                             ! # points
+        type (int_pair),  pointer :: itp(:)    ! interpolation tables
+        type (real_pair), pointer :: dat(:)    ! data values
+    end type
+
+    type (tab1), intent(out) :: a
+    type (tab1), intent(in)  :: b
+
+    a%nr = b%nr
+    a%np = b%np
+
+    if(associated(a%itp)) deallocate(a%itp)
+    if(associated(a%dat)) deallocate(a%dat)
+
+    allocate(a%itp(a%nr),a%dat(a%np))
+
+    a%itp = b%itp
+    a%dat = b%dat
+
+    return
+    end subroutine assign_tab1
 
 end module BASE_ENDF_IO
 
