@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # encoding: utf-8
 """
-sensitivity.py
-Make full set of inputs from empire input and sensitivity input
-For each line in the sensitivity.inp file, two directories with inputs 
-are created
+mkendf.py
 
-Created by Caleb Mattoon on 2009-12-13.
-Copyright (c) 2009 __nndc.bnl.gov__. All rights reserved.
+Make full set of inputs from empire input and sensitivity input file.
+For each line in the sensitivity.inp file, two directories with inputs 
+are created. From these we create the ENDF files for plus & minus. Then
+also create ACE files for the ENDF files, and also run MCNP jobs.
+
+Based on original sensitivity.py by Caleb Mattoon.
+Copyright (c) 2012 __nndc.bnl.gov__. All rights reserved.
 """
 
 import sys
@@ -16,6 +18,9 @@ import shutil
 import time
 from empy import bash
 import qsubEmpire
+
+try: EMPIRE_DIR = os.environ["EMPIREDIR"]
+except KeyError: raise KeyError("EMPIREDIR environment variable not defined!")
 
 # which parameters can be varied in the EMPIRE INPUT?
 # allowed: can always be varied
@@ -145,7 +150,6 @@ def init(proj):
     bash.cp(proj+"-inp.fis",proj+"_orig/",False)
     bash.cp(proj+".lev",proj+"_orig/",False)
     bash.cp(proj+"-lev.col",proj+"_orig/",False)
-
 
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -311,13 +315,13 @@ def run(proj):
     
 def analyze(proj):
     """
-    generate sensitivity matrix after run() finishes
+    create ENDF & ACE files run() finishes
     """
     import numpy
     
     # start with original input:
     qsubEmpire.reconstruct("%s_orig/%s.inp" % (proj,proj))
-    os.system('./mkendf.sh %s_orig %s' % (proj , proj) )
+    os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s_orig %s' % (proj , proj) )
     
     # grab two 'header' lines from original input:
     # f = open("%s_orig/%s.xsc" % (proj,proj),"r")
@@ -342,19 +346,76 @@ def analyze(proj):
             print "Parameter %s shouldn't be varied."%name\
                     + " Will not include in sensitivity output."
             continue
-
+        
         val = float(val)
         i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
         
         nameP, nameM = genNames(line,proj)
         
         # reconstruct cross sections for val+sigma and val-sigma:
-
+        
         qsubEmpire.reconstruct(nameP+"/%s.inp" % proj)
-        os.system('./mkendf.sh %s %s' % (nameP , proj) )
-
+        os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s %s' % (nameP , proj) )
+        
         qsubEmpire.reconstruct(nameM+"/%s.inp" % proj)
-        os.system('./mkendf.sh %s %s' % (nameM , proj) )
+        os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s %s' % (nameM , proj) )
+        
+    sens.close()
+
+def mcnp(proj):
+    """
+    run MCNP jobs after ACE files created
+    """
+    import numpy
+    
+    # start with original input:
+    workdir = os.path.abspath( proj + "_orig")
+    jobname = proj + '_orig_MC'
+    vars = ("proj=%s,workdir=%s" % (proj, workdir))
+    cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
+    cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
+    # print cmd
+    os.system(cmd)
+    
+    # open sensitivity input:
+    sens = open(proj+"-inp.sen", "r") # sensitivity input
+    
+    for line in sens:
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
+            continue
+        
+        tmp = line.split('!')[0]
+        tmp = tmp.split()
+        while len(tmp) < 6:
+            tmp.append('0')
+        
+        name, val, i1, i2, i3, i4 = tmp[:]
+        if not (name in allowed or name in restricted
+                or name in fisPars or name in pfnsPar):
+            print "Parameter %s shouldn't be varied."%name\
+                    + " Will not include in sensitivity output."
+            continue
+        
+        val = float(val)
+        i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
+        
+        nameP, nameM = genNames(line,proj)
+        
+        # reconstruct cross sections for val+sigma and val-sigma:
+        
+        workdir = os.path.abspath(nameP)
+        jobname = proj + '_' + name + '+MC'
+        vars = ("proj=%s,workdir=%s" % (proj, workdir))
+        cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
+        cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
+        os.system(cmd)
+        
+        workdir = os.path.abspath(nameM)
+        jobname = proj + '_' + name + '-MC'
+        vars = ("proj=%s,workdir=%s" % (proj, workdir))
+        cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
+        cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
+        os.system(cmd)
         
     sens.close()
 
@@ -372,7 +433,9 @@ no options: setup and run all parameters"""
     parser.add_option("-r", action="store_true", dest="run",
             help="run (after initializing manually)")
     parser.add_option("-a", "--analyze", action="store_true", dest="analyze", 
-            help="after running, generate sensitivity matrix")
+            help="after running, generate ENDF & ACE files")
+    parser.add_option("-m", "--mcnp", action="store_true", dest="mcnp", 
+            help="after creating ACE files, run MCNP jobs")
     parser.add_option("-c", "--clean", action="store_true", dest="clean", 
             help="remove all subdirectories")
     # help message (-h) is generated by OptionParser
@@ -395,6 +458,8 @@ def main():
         run(proj)
     elif opts.analyze:
         analyze(proj)
+    elif opts.mcnp:
+        mcnp(proj)
     else: # if no options, setup and run the analysis
         init(proj)
         run(proj)

@@ -85,6 +85,11 @@
 	call ins_mf5(456)
 	call ins_mf5(458)
 
+	! now trim mf6, if found, so that it's not too big for NJOY to handle
+	! when making the ACE files.
+
+	call trim_mf6
+
 	write(6,*) ' Writing new ENDF file'
 
 	status = write_endf_file(file1(1:nch1)//'add',endf1)
@@ -220,9 +225,80 @@
 		mat1%mf5 => mf52
 	endif
 
-	write(6,'(a,I3,a)') ' MF5/MT',mt,' moved'
+	write(6,'(a,I3,a)') '  MF5/MT',mt,' moved'
 
 	return
 	end subroutine ins_mf5
+
+	!---------------------------------------------------------------------
+
+	subroutine trim_mf6
+
+	implicit none
+
+	! trim the number of energies in MF6/MT18 to a reasonable number
+	! if left too big, MCNP will crash trying to read in the resulting ACE file
+
+	integer*4, parameter :: ne = 7
+	real*8, parameter :: goode(ne) = (/1.0D-05,3.0D+02,1.0D+03,1.0D+04,1.0D+05,1.0D+06,2.0D+07/)
+
+	integer*4 i,j,me
+
+	type (mf_6), pointer :: mf6
+	type (mf6_law1), pointer :: law1,new
+
+	mf6 => mat1%mf6
+	do while(associated(mf6))
+		if(mf6%mt == 18) exit
+		mf6 => mf6%next
+	end do
+
+	if(.not.associated(mf6)) return
+
+	! empend seems to usually write 1 law1 block
+	! check this.
+
+	if(mf6%nk /= 1) then
+		write(6,*) ' MF6/MT18 has more than one sub-section'
+		stop
+	endif
+
+	if(mf6%prd(1)%law /= 1) then
+		write(6,*) ' MF6/MT18 not LAW 1'
+		stop
+	endif
+
+	law1 => mf6%prd(1)%law1
+	allocate(new)
+
+	new%lang = law1%lang
+	new%lep = law1%lep
+	new%nr = law1%nr
+	new%itp => law1%itp
+	allocate(new%ll(ne))
+
+	! look through law1 lists and keep those in goode
+
+	me = 0
+	do i = 1,law1%ne
+		do j = 1,ne
+			if(law1%ll(i)%e1 == goode(j)) then
+				me = me + 1
+				new%ll(me) = law1%ll(i)
+				exit
+			endif
+		end do
+	end do
+
+	! replace pointer in MF6 to point to new list
+	! don't bother cleaning up
+
+	new%ne = me
+	mf6%prd(1)%law1 => new
+
+	write(6,*) ' MF6/MT18 trimmed'
+
+	return
+	end subroutine trim_mf6
 
 	end

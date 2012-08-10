@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
 # par 1 = working directory
 # par 2 = project (file) name
 
@@ -38,7 +44,7 @@ else
    exit
 fi
 
-matnum=$(getmtn ${resfil})
+matnum=$($EMPIREDIR/util/mkendf/getmtn ${resfil})
 matnum=${matnum:?" undefined!"}
 echo 'MAT = '$matnum
 
@@ -87,7 +93,7 @@ ${fil}_1.endf
 $matnum
 EOF
 
-/home/herman/empire/util/empend/empend < input
+$EMPIREDIR/util/empend/empend < input
 
 cat > input <<EOF
 ${fil}_1.endf
@@ -96,7 +102,7 @@ ${fil}_2.endf
 0
 EOF
 
-/home/herman/empire/util/endres/endres < input
+$EMPIREDIR/util/endres/endres < input
 
 rm ${fil}_1.endf
 rm empmf1.tmp
@@ -108,13 +114,13 @@ rm input
 # (MF4,MT18) from donor file containing these MFs
 # only do this if it's a fissile material!
 
-if ! /home/herman/empire/util/mkendf/add_endf ${fil}_2.endf ${origfil}
+if ! $EMPIREDIR/util/mkendf/add_endf ${fil}_2.endf ${origfil}
 then
     echo 'Error adding sections to ENDF file'
     exit
 fi
 rm ${fil}_2.endf
-# cp ${fil}_2.endf ${fil}_2.endfadd
+# mv ${fil}_2.endf ${fil}_2.endfadd
 
 # add 103-107 if data available and re-make elastic
 # FIXUP reads from local file, NOT input stream
@@ -143,7 +149,7 @@ S  2=+(  1,  1)-(  3,  3)
 
 EOF
 
-/home/herman/empire/util/fixup/fixup
+$EMPIREDIR/util/fixup/fixup
 echo ' Done with FIXUP'
 rm ${fil}_2.endfadd
 rm FIXUP.INP
@@ -151,21 +157,32 @@ echo ' Done cleaning FIXUP'
 
 # run STAN
 
-/home/herman/empire/util/stan/stan ${fil}_3.endf
+$EMPIREDIR/util/stan/stan ${fil}_3.endf
 mv ${fil}_3.STN ${fil}.endf
 rm ${fil}_3.endf
 
-# finally, process this file with NJOY
+# process this file with NJOY for 33-group
 if [ -e njoy_33grp.sh ]
 then
     runNJOY.py njoy_33grp.sh ${fil}.endf
 elif [ -e ../njoy_33grp.sh ]
     then runNJOY.py ../njoy_33grp.sh ${fil}.endf
+elif [ -e ../../njoy_33grp.sh ]
+    then runNJOY.py ../../njoy_33grp.sh ${fil}.endf
 else
-    echo ' ENDF file not processed with NJOY'
+    echo ' ${fil}.endf not processed for 33-group with NJOY'
 fi
 
-# To run NJOY on local machine (don't!):
-# ../njoyActinides.sh ${fil}.endf
+# finally, create ACE file with NJOY
+if [ -e ace_300k.sh ]
+then
+    runNJOY.py ace_300k.sh ${fil}.endf
+elif [ -e ../ace_300k.sh ]
+    then runNJOY.py ../ace_300k.sh ${fil}.endf
+elif [ -e ../../ace_300k.sh ]
+    then runNJOY.py ../../ace_300k.sh ${fil}.endf
+else
+    echo ' ${fil}.endf not processed for ACE file with NJOY'
+fi
 
 exit
