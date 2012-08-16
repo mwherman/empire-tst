@@ -21,6 +21,15 @@ fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $file.eps
 fi
+if [ -f zv.eps ]; then
+   mv zv.eps $file.eps
+fi
+if [ -f zv00.zvd ]; then
+   mv zv00.zvd $file.zvd	
+fi
+if [ -f ps01.zvd ]; then
+   mv ps01.zvd $file.zvd
+fi
 done
 rename 'zvd.ps' ps $file*
 rename 'zvd.eps' eps $file*
