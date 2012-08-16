@@ -71,6 +71,7 @@ if [ "$name2" != "" ]; then
       echo '[func]' >>end2.zvd
       echo 'color: 4' >>end2.zvd
       echo 'thick: 2' >>end2.zvd
+      echo 'dash: 1' >>end2.zvd
       echo 'set: apply' >>end2.zvd
       echo '#end aa.tit' >>end2.zvd
       cat end2.zvd >>$root-$MT$suf.zvd
@@ -88,6 +89,7 @@ if [ "$name3" != "" ]; then
       echo '[func]' >>end3.zvd
       echo 'color:  1' >>end3.zvd
       echo 'thick: 2' >>end3.zvd
+      echo 'dash: 2' >>end3.zvd
       echo 'set: apply' >>end3.zvd
       echo '#end aa.tit' >>end3.zvd
       cat end3.zvd >>$root-$MT$suf.zvd
@@ -105,11 +107,13 @@ if [ "$name4" != "" ]; then
       echo '[func]' >>end4.zvd
       echo 'color:  5' >>end4.zvd
       echo 'thick: 2' >>end4.zvd
+      echo 'dash: 3' >>end4.zvd
       echo 'set: apply' >>end4.zvd
       echo '#end aa.tit' >>end4.zvd
       cat end4.zvd >>$root-$MT$suf.zvd
    fi
    rm $name4 2>/dev/null
 fi
-
+rm c4.zvd end.zvd end*.zvd tmp.dat 2>/dev/null
+rm mt_x4r.txt 2>/dev/null
 exit
