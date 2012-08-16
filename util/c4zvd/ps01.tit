@@ -19,19 +19,28 @@ PS_SCALEPICT: 1.00 1.00
 LG_PS_BOX: 1
 LG_PS_PAGE2: 1
 LG_PS_FONT: 0 10 Helvetica  
-LG_PS_BOXTITLE: 0 20 Helvetica
+LG_PS_BOXTITLE: 0 22 Helvetica
+
+[Legend-Box]
+LG_BOX0: 1 20 435 40 5 0
+LG_BOX1: 0 320 435 40 0 5
+LG_BOX2: 0 640 435 40 0 5
+LG_BOX3: 0 960 435 40 0 5
+LG_BOX4: 0 1280 435 40 0 5
 
 !non-interactive EPS plots
 !NODIALOG: 4
 !non-interactive gif plots
 !NODIALOG: 2
 
-TIT:    
+[Main]
+!TIT:  
+!TIT: {+239}Pu(n,tot)
 TIT2:
-mode: varsym
-!TIT3XY: 100 200
+TIT3XY: 570 510
 !X-SCALE: log
-!X-RANGE: 10 20
+X-RANGE: 5 20
+X-RANGE: 0.020 20
 !Y-SCALE: log
 !X-GRID: 0
 !Y-GRID: 0
@@ -45,5 +54,29 @@ mode: varsym
 !X: E
 !Y: Cross Section
 !x-long: Incident Neutron Energy
-!legend: 1
-!mode: FIXSYM
+legend: 2
+!Various experiments with the same symbol
+mode: FIXSYM
+!Various experiments with various symbol
+!mode: varsym
+!Show values next to points
+!showTxtPoints: 1
+showTxtPointBox: 1
+!Include Chi**2 in the legend
+!typeExtendedLegend: 1
+LEVELS: 0
+
+[Func]
+useIfunc: 0
+useFunc: 1)c4.tab
+hide: 0
+dash: 0
+!Define color of exp points (7 - light grey; 1 - blue; ...)
+color: 7
+con: 0
+dot: 2
+bot: 0
+thick: 1
+err: 1
+err-fill: 0
+
