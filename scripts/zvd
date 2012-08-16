@@ -74,8 +74,14 @@ fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $work/$file-$MT.eps
 fi
+if [ -f zv.eps ]; then
+   mv zv.eps $work/$file-$MT.eps
+fi
 if [ -f zv00.zvd ]; then
    mv zv00.zvd $work/$file-$MT.zvd
 fi
-rm c4.zvd end.zvd tmp.dat 2>/dev/null
+if [ -f ps01.zvd ]; then
+   mv ps01.zvd $work/$file-$MT.zvd
+fi
+rm c4.zvd end.zvd end*.zvd tmp.dat 2>/dev/null
 exit
