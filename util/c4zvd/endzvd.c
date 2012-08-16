@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #define LSTR 220
-static  char    str [LSTR];
 static  char    str0[LSTR];
 static  char    str1[LSTR];
 
