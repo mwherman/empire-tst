@@ -71,8 +71,7 @@ else
    exit 6
 fi
 
-rm -f fort.* check.out $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
-#rm check.out 2>/dev/null
+rm -f fort.* $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
 #rm $file-*-c4.gpd 2>/dev/null
 #rm $file-{c4,par,*-err}.kal 2>/dev/null
 #rm ENERGYANDINDEX.TMP 2>/dev/null
@@ -110,24 +109,24 @@ for k in $MT; do
     fi
 
     echo  "Running genkal"
-    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
-
-    if [ -s check.out ]; then
-       exit
+    if ! $EMPIREDIR/util/kalman/genkal.exe <INPUT.D
+    then
+      echo " Error running genkal"
+      exit
     fi
 
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
     if [ "$EXPDAT" != 0 ]; then
-       if [ ! -s $file-expxsc.kal ]; then
-	  cp fort.10 $file-expxsc.kal
-       else
+       if [ -s $file-expxsc.kal ]; then
 	  cp $file-expxsc.kal fort.10
-       fi
-       if [ ! -s $file-expcorr.kal ]; then
-	  cp fort.12 $file-expcorr.kal
        else
+	  cp fort.10 $file-expxsc.kal
+       fi
+       if [ -s $file-expcorr.kal ]; then
 	  cp $file-expcorr.kal fort.12
+       else
+	  cp fort.12 $file-expcorr.kal
        fi
     else
        rm fort.10
@@ -209,7 +208,6 @@ done
 rm INPUT.D
 rm KALMAN.INP
 rm -f fort.{1*,50,52,75}
-rm check.out
 rm ENERGYANDINDEX.TMP 2>/dev/null
 
 exit
