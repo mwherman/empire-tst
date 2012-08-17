@@ -179,7 +179,6 @@
           call write_line(prm(j), xx*fnl(i), ip)
           write(6,*) ' Adjusted ',oname(i)
           qx = .true.
-          exit
        end do
 
        if(.not.(qx .or. absolute(nam))) then
@@ -205,7 +204,7 @@
           if(.not.eqr(ip,is)) cycle
           call write_line(enr(j)(2:), xx*fnl(i), ip)
           write(6,*) ' Adjusted energy-dependent ',nam
-          cycle pml
+          qx = .true.
        end do
 
        if(.not.qx) write(6,*) ' **** Parameter not found in input file: ',nam
