@@ -7,6 +7,13 @@ program c4tokal
     integer*4, parameter :: ngmt = 12      ! list of allowed MT's for Kalman fitting
     integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,251,456/)
 
+    integer*4, parameter :: kctl1 = 0      ! set nonzero to read priors
+    integer*4, parameter :: kctl2 = 0      ! set nonzero to write posteriors
+    integer*4, parameter :: kcovex = 1     ! set nonzero to read experimental covariances
+    real*4, parameter    :: scale = 1.0    ! scale factor for parameter unc**2
+    real*4, parameter    :: emin = 0.0     ! lower energy limit on exp data, 0 == no limit
+    real*4, parameter    :: emax = 0.0     ! upper energy limit on exp data, 0 == no limit
+
     character*4, parameter :: xsc = '.xsc'
     character*8, parameter :: inpsen = '-inp.sen'
 
@@ -119,6 +126,7 @@ program c4tokal
 
     write(15,*) 'INPUT'
     write(15,'(5I5,5X,3E10.3)') nsec,nparam,0,0,1,1.0,0.0,0.0
+    write(15,'(5I5,5X,3E10.3)') nsec,nparam,kctl1,kctl2,kcovex,scale,emin,emax
     write(15,'(14I5)') (I,I=1,NPARAM)
 
     do k = 1,nsec
@@ -196,11 +204,13 @@ program c4tokal
     endif
 
     write(10,100) sc%ref, sc%ent, sc%sub, sc%ndat
-    write(11,100) sc%ref, sc%ent, sc%sub, sc%ndat
-    write(12,100) sc%ref, sc%ent, sc%sub,-sc%ndat
     write(10,200) (1.D-06*sc%pt(i)%e,xf*sc%pt(i)%x, i=1,sc%ndat)
+    write(11,100) sc%ref, sc%ent, sc%sub, sc%ndat
     write(11,200) (1.D-06*sc%pt(i)%e,z(i),i=1,sc%ndat)
-    write(12,300) cor
+    if(kcovex /= 0) then
+      write(12,100) sc%ref, sc%ent, sc%sub,-sc%ndat
+      write(12,300) cor
+    endif
 
     deallocate(z)
 

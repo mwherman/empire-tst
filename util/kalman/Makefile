@@ -52,7 +52,7 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-all: kalman3.exe kalend c4tokal genkal.exe pnt2kal refmt-pfns
+all: kalman3.exe kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
 
 kalman3.exe : kalman3.1.f
 	$(FC) $(FFLAGS) -o $@ kalman3.1.f
@@ -65,17 +65,26 @@ OBJH =	c4tokal.f90 rctn.o strlen.o
 c4tokal:   $(OBJH)
 	$(FC) $(FFLAGS) -I ../IO -o $@ $(OBJH) ../IO/*.o
 
-OBJI =	genkal.f rctn.o strlen.o 
-genkal.exe:   $(OBJI)
+OBJI =	genkal.f90 rctn.o strlen.o 
+genkal:   $(OBJI)
 	$(FC) $(FFLAGS) -o $@ $(OBJI)
 
 OBJM =	pnt2kal.o aux_routines.o 
-pnt2kal :   $(OBJM)
+pnt2kal:   $(OBJM)
 	$(FC) $(FFLAGS) -o $@ $(OBJM)
 
 OBJN =	refmt-pfns.o aux_routines.o
 refmt-pfns :   $(OBJN)
 	$(FC) $(FFLAGS) -o $@ $(OBJN)
+
+kefkal: kefkal.f90
+	$(FC) $(FFLAGS) -o $@ kefkal.f90
+
+newinp: newinp.f90
+	$(FC) $(FFLAGS) -o $@ newinp.f90
+
+empsee: empire_sees.f90
+	$(FC) $(FFLAGS) -o $@ empire_sees.f90
 
 clean:
 	rm -f *.o *.mod
