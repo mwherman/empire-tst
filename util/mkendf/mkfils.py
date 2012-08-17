@@ -164,8 +164,12 @@ def init(proj):
         # some parameters are isotope-specific (optical model, for example)
         # in this case, we get Z,A of isotope from i1, i2:
         if not name in Globals:
-            i2 = atarget-i1-i2 + aproj-zproj
-            i1 = ztarget-i1
+            i2 = atarget - (i1+i2) + aproj
+            i1 = ztarget - i1 + zproj
+            # i1 = zdiff, i2 = ndiff, i1+i2 = adiff
+            # define mapping, SDH & MWH, Aug 2012
+            #i2 = atarget-i1-i2 + aproj-zproj
+            #i1 = ztarget-i1
         
         if name in fisPars:
             # these are a special case, require modifying the fission input
