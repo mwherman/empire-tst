@@ -478,7 +478,7 @@ of the soft-rotator theory, physical ideas and computation algorithms developed
 and incorporated into OPTMAN code, and description of input and output files, 
 allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
 amy consult those documents. OPTMAN is called as an independent module by EMPIRE; 
-EMPIRE automatically prepares OPTMAN input both for the incident or the outgoing channels. 
+EMPIRE automatically prepares OPTMAN input for the incident or the outgoing channels. 
 
 The latest version 12 of the code (Jan 2012, still unpublished) has been implemented
 within the EMPIRE system allowing the use of state-of-the-art optical model potentials
@@ -505,7 +505,7 @@ This information is supplemented by the parameters read from the TARGET\_COLL.DA
 Independently of the selected optical model, in the first EMPIRE run 
 $T_{l}$ values are calculated for the whole energy grid. These values
 are stored in the file \emph{{*}.tl} for further use. Although the 
-first run may take quite a lot of time (specially for DIRECT>0), all 
+first run may take quite a lot of time (specially for DIRECT$>0$), all 
 successive runs are much faster. It should be noted that files 
 \emph{{*}.tl} can be used for successive runs only if no changes were
 made to the files \emph{{*}-lev.col} and \emph{{*}-omp.ripl}. For
@@ -515,28 +515,43 @@ files stored in the \emph{work} directory.
 ECIS06/OPTMAN can be invoked by the EMPIRE in three different
 ways, using input directive DIRECT. The default value (DIRECT=0) calls
 the spherical optical model and suppresses calculation of direct reactions
-to the discrete levels (ECIS06 always used in this case). The remaining options
+(ECIS06 always used in this case). The remaining options
 have the following meaning:
 \begin{description}[style=multiline,leftmargin=3cm]
-\item [{DIRECT~1.}] Population of discrete, collective levels in the incident channel
-is calculated using the Coupled-Channels\index{Coupled-Channels}
-model. The direct cross sections are exact but spherical transmission
-coefficients $T_{l}$ are used for subsequent preequilibrium and HF\index{Hauser-Feshbach}
-calculations in the whole energy grid. These results are re-normalized
-at the $T_{l}$ level by taking into account direct component. The
-total, elastic, absorption and the inelastic cross sections are taken
-from the CC calculations if a true Coupled-Channel Optical Model Potential
-(CC-OMP) is being used (otherwise, in the case of the Spherical OMP
-(S-OMP), only inelastic cross sections are accepted). \\
-The option DIRECT=1 is fairly fast, though some accuracy may be lost
-compared to the DIRECT=2 option described below. In general, it should
-perform well for the weakly coupled levels. For strong coupling, such
-as in the highly deformed rotational bands in heavy nuclei, it should
-be used with caution. It is the recommended option if accuracy is
-not a critical issue and the appropriate CC-OMP is available.
 
-\item [{DIRECT~2.}] Population of discrete, collective levels both in the incident and
-outgoing channels is calculated within the CC as above. Importantly, the
+\item [{DIRECT~1.}] Population of collective levels
+in the incident channel is calculated using the Coupled-Channels\index{Coupled-Channels}
+model for coupled levels and DWBA method for uncoupled discrete levels 
+and levels embedded in the continuum. The coupled levels are defined by their level
+number $N$ and the dimension parameter $LEVCC$~(see description in the section~\ref{sec: dimensions}). 
+If $N < NDLEVCC$ then the level is coupled; otherwise the level is uncoupled.
+The excitation energy of the collective level defines whether this is a discrete level,
+or is a level embedded in the continuum. In the later case the collective level number $N$ is not used,
+as their scattering cross sections are spread among neighboring continuum energy bins using a gaussian
+function with the energy resolution defined by parameter RESOLF. However, the collective level number
+$N$ is quite important for collective discrete levels as it determines the corresponding discrete level
+(e.g. if the collective level number is $N=5$, then the calculated cross sections are assigned to the 
+5th discrete level). The latest remark is important as it will be a mistake to assign them sequential
+consecutive numbers without checking the discrete level numbering in the corresponding EMPIRE file (
+$file.lev).
+
+For the DIRECT 1 option, the direct cross sections are exact but spherical transmission
+coefficients $T_{l}$ are used for subsequent preequilibrium and HF\index{Hauser-Feshbach}
+calculations in the whole energy grid with optical model potentials defined by OMPOT keywords. 
+These results are re-normalized at the $T_{l}$ level by taking into account direct component. The
+total, elastic, absorption and the inelastic cross sections are taken from the CC calculations 
+if a true Coupled-Channel Optical Model Potential (CC-OMP) is being used (otherwise, in the case of the Spherical OMP
+(S-OMP), only inelastic cross sections are accepted). \\
+The option DIRECT=1 is fairly fast, though some accuracy may be lost compared to the DIRECT=2 option described below. 
+Differences to the exact (DIRECT 2) case are related to the use of approximated transmission coefficients in the outgoing
+channel. In general, the approximation should perform well for the weakly coupled levels. For strong coupling, such
+as in the highly deformed rotational bands in heavy nuclei, it should be used with caution. It is the recommended option
+if accuracy is not a critical issue and the appropriate CC-OMP is available.
+
+\item [{DIRECT~2.}] Population of collective levels both in the incident and
+outgoing channels is calculated using the Coupled-Channels\index{Coupled-Channels}
+model for coupled levels and DWBA method for uncoupled discrete levels 
+and levels embedded in the continuum. Importantly, the
 CC is used consistently, considering the ground state and the coupled
 levels, to calculate all necessary transmission coefficients for subsequent
 preequilibrium and HF\index{Hauser-Feshbach} calculations. These
@@ -563,7 +578,7 @@ S-OMP parameters in the DWBA calculations tuning inelastic cross sections
 by adjusting dynamical deformations of collective levels in file \emph{{*}-lev.col}.
 
 \end{description}
-OPTMAN can be invoked by the EMPIRE for DIRECT=1,2,3 for those optical model 
+OPTMAN can be invoked by the EMPIRE for DIRECT=1 and 2 for those optical model 
 potentials that use either soft-rotor for spherical nuclei, or rigid-rotor or deformed
 vibrational-rotational model for deformed nuclei.
 
@@ -1224,7 +1239,7 @@ the bound states embedded in the continuum. For excitation energies
 lower than the Fermi energy, which is approximately 40 MeV, it is
 not necessary to consider any additional limitations for the energies
 of the hole states. For the higher energies, the depth of the potential
-well have to be taken into account. Relevant formulas were reported
+well has to be taken into account. Relevant formulas were reported
 in Ref. \cite{Oblo}, but for the time being these were not implemented
 in the EMPIRE code. 
 
@@ -5644,8 +5659,9 @@ in everyday use of the code are listed below.
 \item[{NDEXCLUS}] maximum number of nuclei for which exclusive emission 
 spectra are calculated (default 50, sufficient for ENDF=2)
 \item [{NDEX}] maximum number of energy bins in the continuum discretization (default 121, it is recommended that NDEX is about twice the number of energy bins NEX requested in the input )
-\item [{NDLW}] maximum number of partial waves to be considered in calculations (default 40, for light and heavy ion projectiles this limit should be increased to about 100 due to higher angular momenta involved in the HI reactions)
-\item [{NDLEVCC}] maximum number of coupled channels in CC optical model calculations  (default 20, all collective levels in the *-coll.lev file with sequintila number larger than NDLEVCC  are only considered in the DWBA approximation; if CC coupling of such levels is needed the NDLEVCC has to be increased accordingly)   
+\item [{NDLW}] maximum number of partial waves to be considered in calculations (default 50, for light and heavy ion projectiles this limit should be increased to about 100 due to higher angular momenta involved in the HI reactions)
+\item [{LEVCC}] maximum number of coupled channels in CC optical model calculations  (default 20, all collective levels in the *-coll.lev file with their sequential number larger than NDLEVCC 
+ are only considered in the DWBA approximation; if coupling of such levels is needed the LEVCC parameter has to be increased accordingly)   
 \item [{NDLV}] maximum number of discrete levels in any nucleus (default 40 imposed by the ENDF-6 format; if no ENDF-6 formatting is performed this number might be increased however the excitation energy of the level should be below neutron binding)
 \item [{NDBR}] maximum number of branching ratios for each level (default 40)
 \item [{NDMSCS}] number of steps in Multi-step Compound (default 4)
@@ -7294,7 +7310,7 @@ which it is said explicitly otherwise.
 \item[ ] FISBAR = 3 $\leftrightarrow$ FISBAR $<$3
 \item[ ] FISMOD = 0 $\leftrightarrow$ FISMOD $>$0
 \end{itemize}
-If FISOPT = 0 $\rightarrow$ FISOPT > 0 one has to make sure that the number of transition states at each
+If FISOPT = 0 $\rightarrow$ FISOPT $>$ 0 one has to make sure that the number of transition states at each
 extremum is the same.
 
 \noindent The \emph{{*}-inp.fis} file is divided into sections corresponding to each fissioning
@@ -7327,7 +7343,7 @@ their change would have no impact.
 \item[- ]{L=20+$w;~ (w=1,N_w$)}     -
 parameters used in the energy dependence of the strength of the imaginary potential corresponding to each well
 (Eq.~\ref{wimag}). There are two differences compared to the older version of the code: (i) the energy 
-dependence was changed, therefore the values of $W_i (i=1,3)$ are changed accordingly and (ii) there is a set 
+dependence was changed, therefore the values of $W_i (i=1,3)$ are changed accordingly, and (ii) there is a set 
 of parameters for each well (instead a single set as it was before), meaning that to make them compatible 
 with the present version of the code, the old files containing triple-humped barrier have to be changed
 by copying L=21 in L=22 also.
@@ -7335,7 +7351,7 @@ by copying L=21 in L=22 also.
 %
 \item[- ]{L=25+$N_w$} -
 number of discrete states for the first hump $N_{dis}(h_1)$. It is writen and read as 'I2'  format starting after 
-"=" sign and has the maximum value equal to 30.  For FISOPT>0 The number of discrete states and their order 
+"=" sign and has the maximum value equal to 30.  For FISOPT$>$0 The number of discrete states and their order 
 ($K\pi$) must be the same. For FISOPT=0, the discrete states number might differ from one hump to another.
 However their values have to be equal to the number of lines below, associated to each discrete state.
 %
@@ -7345,7 +7361,7 @@ spin projection on the symmetry axes, parity and excitation energy with respect 
 discrete transition states (rotational band-heads) at hump $h$.
 This sequence of lines plus the one above are repeated for each extremum: first for the humps and next for the
 wells. 
-All the numbers on these lines can be changed but keeping in mind that for FISOPT>0 the number of discrete
+All the numbers on these lines can be changed but keeping in mind that for FISOPT$>$0 the number of discrete
 states and the order of $K\pi$ must be the same for all extrema.
 %
 \item[- ]{L=29+$N_w+[N_{dis,h}+2]*N_{parab}+h;~(h=1,N_h)$} - 
@@ -7361,7 +7377,7 @@ The degree of asymmetry has the following significance
 \begin{equation}
 B_{sym,h}=\left\{
 \begin{array}{lll}
-1 & {\rm axial,~ mirror~ symmetry}& h=1,\quad N<144) \\%({\rm ~inner~barrier} N<144) \\
+1 & {\rm axial,~ mirror~ symmetry}& h=1,\quad N$<$144) \\%({\rm ~inner~barrier} N$<$144) \\
 2 & {\rm axial~ asymmetry,~ mirror~ symmetry}& h=1,\quad N\geq 144) \\%({\rm ~inner~barrier} N\geq 144) \\
 3 & {\rm axial~ symmetry,~ mirror ~asymmetry}& h=2,(3)\\% ({\rm ~outer barrier(s)})\\
 \end{array}
@@ -7834,7 +7850,7 @@ versions of EMPIRE, excess levels \textbf{must not} be removed.
 The first run with the DIRECT option different from zero results in
 EMPIRE creating a file that contains collective levels to be used
 in the Coupled-Channels\index{Coupled-Channels} or DWBA\index{DWBA}
-calculations. Whenever possible coupled-channel data (i.e. coupled levels nad coupling model) 
+calculations. Whenever possible coupled-channel data (i.e. coupled levels and coupling model) 
 are taken from the optical segment of the RIPL\index{RIPL} library (note that CC potentials
 in RIPL contain the necessary information on the levels to be coupled and the coupling model), 
 while data for additional collective levels are retrieved from the \emph{{*}.lev} file. 
@@ -7851,19 +7867,19 @@ Additional uncoupled collective levels may be also retrieved from the \emph{{*}.
 depending on input keyword ECDWBA. The default cut-off energy is $3x30/A^{2/3}$, and the default maximum
 spin 4 (e.g. with these defaults all levels with excitation energy less than 2.4 MeV for $^{238}$U, and less than
 6.2 MeV for $^{56}$Fe are considered). Default selection rules for energy and spin could be modified in the input.
- 
 
-A first sample, containing 16 collective levels in $^{238}$U obtained for a coupled-channel rigid-rotor potential
-RIPL 2408 is reproduced below. Please note the keyword "deformed" in the third line that defines the rigid-rotor
+A first sample, containing 16 collective levels in $^{238}$U including 5 coupled levels defined in the coupled-channel
+rigid-rotor potential RIPL 2408 is reproduced below. Please note the keyword "deformed" in the third line that defines the rigid-rotor
 coupling model. In this sample file those collective levels are divided in three groups: 
 \begin{itemize}
-\item The first group contains five levels used in the  Coupled Channels calculations. These are the collective
+\item The first group contains five levels used in the Coupled Channels calculations (read from RIPL). These are the collective
   levels in the target, which happen to be consecutive in the EMPIRE file with discrete levels (\emph{{*}.lev}) 
-  hence their numbering is 1 through 5.  In  general, collective levels are mixed with the non-collective ones,  
-  thus their N numbers in the  \emph{{*}-lev.col} file are not necessarily consecutive. Dynamical deformations are
-  dummy entries for the level fo the ground-state rotational band, as the GS-band deformation is determined from the 
-  nucleus deformation given in the sixth line of the file.
-\item The second group are uncoupled collective levels, with N from 26 through 36, which are considered for the 
+  hence their numbering is 1 through 5. In  general, coupled collective levels are mixed with the uncoupled ones,  
+  thus their $N$ numbers in the \emph{{*}-lev.col} file are NOT necessarily consecutive nor sequential. However, their numbers
+  have to correspond to the desired discrete level number (from level file *.lev), otherwise calculated collective cross section
+  will be misassigned. Dynamical deformations are dummy entries for levels of the ground-state rotational band, as the GS-band
+  deformation is determined from the nucleus deformation given in the sixth line of the file.
+\item The second group are uncoupled collective levels, with N from 26 through 36, which are considered inr the 
 additional DWBA calculations. In order to distinguish them from the coupled-levels 20 is added to their serial number
 in the \emph{{*}.lev} file (it implies that only first 20 levels can be used in the CC calculations. The number 20 
 is also printed in the second line of the file, and corresponds to the parameter LEVCC defined in \emph{dimension.h}). 
@@ -7990,7 +8006,7 @@ model for a particular \emph{iz, ia}
 \item [{J}] level spin 
 \item [{pi}] level parity 
 \item [{2*K}] twice the level spin projection quantum number $K$
-\item [{Nc}] Flag indicating isobar-analogue states (>0) or normal states (=0)
+\item [{Nc}] Flag indicating isobar-analogue states ($>0$) or normal states (=0)
 \item [{Nb}] Band number. The ground-state band always has Nb=0.
 \item [{Dyn.Def.}] vibrational model deformation parameter. Not used for the ground state band.
 \end{description}
@@ -10284,7 +10300,7 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  $\alpha_0~0.9$ for Kornilov parameterization~\cite{Kornilov:99}) will be multiplied by VAL (default: 1.).
                  The values $E_f^L$ and $E_f^H$ of the average kinetic energy per nucleon
                  of the average light fragment AL and average heavy fragment AH are scaled
-                 by $\alpha$. The effect of this parameter on PFNS calculations will be corerelated
+                 by $\alpha$. The effect of this parameter on PFNS calculations is strongly correlated
                  with TKE (see keyword PFNTKE above). //
                  Physically, this parameter allows for a reduction of the kinetic energy of the
                  fragment due to neutron emission during Coulomb acceleration.\\
@@ -10294,7 +10310,7 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The default parameter $r=T_f^L/T_f^H$ ($r_0=1$ for Madland-Nix (LA) model~\cite{Madland:82} and
                  $r_0=1.248$ for Kornilov parameterization~\cite{Kornilov:99}) will be multiplied by VAL (default: 1.).
                  This parameter defines the ratio of temperatures of the light to heavy fragment.
-                 Recent evidence strongly supports ~20\% higher temperature of the light fragment.\\
+                 Experimental evidence strongly supports ~20\% higher temperature of the light fragment.\\
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
                 
 \item [{PFNERE}] Used in prompt fission neutron (PFN) calculations.
@@ -10304,21 +10320,21 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The relative uncertainty of the scaling factor in \% could be given by I1.
 
 \item [{TMAXW}]  Used in prompt fission neutron (PFN) calculations.
-		     PFNS plots are scaled by a Maxwellian function with T = VAL (default: 1.32) MeV.
+                 PFNS plots are scaled by a Maxwellian function with T = VAL (default: 1.32) MeV.
 
 \item [{DEFSTA}] The static deformation needed in rigid-rotor CC calculations
                  will be multiplied by VAL (default: 1.).\\
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
-                 It is recommended not to vary static deformation above 10 MeV due to numerical
-                 stability problems.
+                 It is recommended not to vary dynamical deformation above 10 MeV 
+				 (i.e. set its uncertainty to zero) to avoid numerical instabilities.
 
 \item [{DEFDYN}] Dynamical deformations of uncoupled levels for DWBA calculations will be 
                  multiplied by VAL (default: 1.).\\
                  Dynamical deformations are listed for all collective levels in the collective 
                  file ({*}-col.lev).\\ 
                  The relative uncertainty of the scaling factor in \% could be given by I1.\\
-                 It is recommended not to vary dynamical deformation above 10 MeV due to 
-                 numerical stability problems.
+                 It is recommended not to vary dynamical deformation above 10 MeV 
+				 (i.e. set its uncertainty to zero) to avoid numerical instabilities.
 
 \item [{ELARED}] The shape elastic cross section will be multiplied by VAL (default: 1.).
                  The change is also reflected in the total cross section. \\
@@ -10329,7 +10345,8 @@ Estimated relative uncertainty in \% of this parameter can be given by I2.
                  The relative uncertainty of the scaling factor in \% could be given by I1.
 
 \item [{FCCRED}] The calculated direct cross section for discrete collective levels will be multiplied
-                 by VAL (default: 1.). Both coupled and uncoupled levels are scaled. \\
+                 by VAL (default: 1.). Cross sections of both coupled and uncoupled discrete levels are 
+				 scaled. \\
                  The uncertainty of the scaling factor in \% could be given by I1.\\
                  It has no effect if DIRECT keyword is set to zero in the input (default).
 
@@ -10615,7 +10632,7 @@ set to VAL (default: 0.8).
 \begin{description}[style=multiline,leftmargin=1cm]
 \item[= 0] PCROSS disabled (default)
 \item[$>0$] PCROSS enabled with mean free path multiplier set to VAL.
-VAL must be greater than 1.05 and lower than 2. 
+VAL must be greater than 0.5 and lower than 3. 
 Estimated relative uncertainty in \% of this parameter can be given by I1.
 \end{description}
 
