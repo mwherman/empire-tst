@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3091 $
+Ccc   * $Rev: 3110 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-07 13:36:29 +0200 (Di, 07 Aug 2012) $
+Ccc   * $Date: 2012-08-18 03:10:38 +0200 (Sa, 18 Aug 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3604,7 +3604,7 @@ C--------DEGAS input
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.8 .AND. val.LE.3.D0) THEN
+            IF (val.GE.0.5 .AND. val.LE.3.D0) THEN
               PEQc = 1.
               MFPp = val
               WRITE (8,
