@@ -669,13 +669,13 @@ c     Getting the Maxwellian temperature used for normalization
 c     from file proj-pfns.out
       OPEN(150,file=trim(proj)//'-pfns.out')
       read(150,10) TMaxw  ! in MeV
-10    format(81X,G8.4)
+10    format(85X,G8.4)
       CLOSE(150)
 
 c     Opening and writing lsttab input file
       OPEN(160, file='input.lsttab')
       write(160,50) trim(proj),trim(proj),trim(proj), TMaxw*1.D6
-50    format(A5,'-log.plotc4',/,A5,'.c4',/,A5,'-s.endf',/,'-',///,
+50    format(A,'-log.plotc4',/,A,'.c4',/,A,'-s.endf',/,'-',///,
      & 1PG10.4)
 c     Reading from plotlist file the indices of fission spectra and writing them in lsttab input
       OPEN(170, file=trim(proj)//'-log.plotc4')

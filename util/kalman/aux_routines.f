@@ -44,14 +44,14 @@ c
       ispec=1
       do while(0==0)
         read(250,110,end=180) nucleus, Elab(ispec)
-110     format(18X,A10,7X,G10.5)
+110     format(18X,A10,7X,G12.5)
             read(250,*)
             read(250,*)
             ierr=0
             ip=1
             do while(ierr.EQ.0)
               read(250,120,iostat=ierr) Eemit(ip), pfns(ispec,ip)
-120           format(E10.4,19X,E11.5)
+120           format(1X,E10.4,19X,E11.5)
               ip=ip+1
             enddo
             NP=ip-2
