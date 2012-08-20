@@ -139,16 +139,20 @@
 
     character*(*), intent(in) :: kalout
 
-    logical*4 qx
-    integer*4 i,j,is(4),ip(4),nt,lp
+    character*3, parameter :: mon(12) = (/'Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'/)
+
+    logical*4 qx,qft
+    integer*4 i,j,is(4),ip(4),nt,lp,tims(8)
     real*4 fnl(np),xx
-    character oname*12(np),nam*6
+    character*12 oname(np)
+    character nam*6,tod*8,now*10,zone*20
 
     write(6,*) ' Reading ',kalout
 
     call readout(kalout,nt,oname,fnl)
 
     is = 0
+    qft = .true.
 
     pml: do i = 1,nt
 
@@ -172,19 +176,29 @@
             is(1) = ztgt + zprj - is(1)
        endif
 
-       do j = 1,npm
+       ! only vary the last parameter found
+
+       do j = npm,1,-1
           if(nam /= prm(j)(1:6)) cycle
           call get_orig(prm(j),xx,ip)
           if(.not.eqr(ip,is)) cycle
           call write_line(prm(j), xx*fnl(i), ip)
           write(6,*) ' Adjusted ',oname(i)
           qx = .true.
+          exit
        end do
 
        if(.not.(qx .or. absolute(nam))) then
 
           ! this is a relative parameter that was not specified
           ! in the original file. Add line for new value.
+
+          if(qft) then
+            npm = npm + 1
+            call date_and_time(tod,now,zone,tims)
+            prm(npm) = '##### Following parameters added by Kalman on '//tod(7:8)//'-'//mon(tims(2))//'-'//tod(1:4)//' at '//now(1:2)//':'//now(3:4)//'  ######'
+            qft = .false.
+          endif
 
           npm = npm + 1
           prm(npm) = ' '
