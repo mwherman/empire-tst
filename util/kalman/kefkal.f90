@@ -25,7 +25,7 @@
     real*4, parameter    :: cor = 0.0      ! exp covariance
 
     integer*4 i,j,m,ios,i1,i2,i3,i4,nparm,npr
-    real*8 PERTB(np),SW(np),W(np,np),xsen(np),dsen(np),xcen,dcen,xrel
+    real*4 PERTB(np),SW(np),W(np,np),xsen(np),dsen(np),xcen,dcen,xrel
     character proj*50,pparm*18,pname*12(np),pn*6
 
     call getarg(1,proj)
@@ -136,12 +136,12 @@
 
     integer*4, intent(in) :: npar
     character*(*), intent(in) :: file
-    real*8, intent(out) :: cov(npar,npar), unc(npar)
+    real*4, intent(out) :: cov(npar,npar), unc(npar)
     character*12, intent(out) :: parnam(npar)
 
     integer*4 i,j,k,n,nchr,iof,nparm,npare
     integer*4, allocatable :: icov(:,:)
-    real*8 xinit,finl
+    real*4 xinit,finl
     character line*300
 
     allocate(icov(npar,npar))
