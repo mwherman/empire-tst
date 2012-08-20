@@ -1,6 +1,6 @@
-# $Rev: 2997 $
-# $Author: mherman $
-# $Date: 2012-07-27 21:24:54 +0200 (Fr, 27 Jul 2012) $
+# $Rev: 3112 $
+# $Author: rcapote $
+# $Date: 2012-08-20 17:24:42 +0200 (Mo, 20 Aug 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5486,8 +5486,6 @@ global widget file
    Mclistbox1 delete 0 end
    if {[file exists $file-log.plotc4] == 0} return
    set plotc4log [open $file-log.plotc4 r]
-   set pejc ""
-   set ind 1
    while {[gets $plotc4log line] >= 0} {
       if [regexp MATERIAL $line] break
       }
@@ -5496,6 +5494,7 @@ global widget file
    while {[gets $plotc4log line] >= 0} {
       if [regexp ==== $line] {break}
    set num [string range $line 73 75]
+   set pej [string range $line 80 83]
    set ej  [string range $line 13 16]
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
@@ -5503,6 +5502,15 @@ global widget file
    #set ang [string range $line 56 58]
    set ang [string range $line 55 62]
    set elv [string range $line 63 72]
+   if { $pej == "   0" } {set pejc "g"
+   } elseif {$pej == "   1"} {set pejc "n"
+   } elseif {$pej == "1001"} {set pejc "p"
+   } elseif {$pej == "2004"} {set pejc "a"
+   } elseif {$pej == "1002"} {set pejc "d"
+   } elseif {$pej == "2003"} {set pejc "h"
+   } elseif {$pej == "1003"} {set pejc "t"
+   } else {set pejc "?"
+   }
    if { $ej == "   0" } {set ejc "g"
    } elseif {$ej == "   1"} {set ejc "n"
    } elseif {$ej == "1001"} {set ejc "p"
@@ -5510,12 +5518,8 @@ global widget file
    } elseif {$ej == "1002"} {set ejc "d"
    } elseif {$ej == "2003"} {set ejc "h"
    } elseif {$ej == "1003"} {set ejc "t"
-   } else {set ejc " "
+   } else {set ejc "?"
    }
-   if {$ind == 1} {
-   set pejc $ejc
-   set ind 2  
-   }  
    if { $mtt == "   1" } {set mt "total"
    } elseif {$mtt == "   2"} {set mt "elast."
    } elseif {$mtt == "   3"} {set mt "nonel."
@@ -5573,12 +5577,7 @@ global widget file
      if {$mtt == "  18"} {set mt "PFNS"}
    } else {set mf $mff
    }
-   if { $mff == "  3" } { # set ejc ""
-     #if {$mtt == "  51"} {set ang ""}
-     #if {$mtt == " 251"} {
-     #  set ejc ""
-     #}
-     # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
+   if { $mff == "  3" } { 
      if {$mtt == "  51"} {
        if {$ang == "       "} {
          set ang $elv
@@ -5588,10 +5587,9 @@ global widget file
      } else {
        Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $elv $ang "#" ]
      }
-   } else { # set pejc ""
+   } else { 
      if {$mff == "  4"} {set ang ""}
      if {$mff == "  4" && $mtt >= 9000 } {set elv "EL + INEL"}
-     # Mclistbox1 insert end [list $num $pejc,$mt $mf $mtt $ein $elv $ang "#" ]
      Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $elv $ang "#" ]
    }
   }
