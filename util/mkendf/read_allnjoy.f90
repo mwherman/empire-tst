@@ -12,11 +12,11 @@
         npr = len_trim(proj)
 
         open(20,file=proj(1:npr)//'_central_xsc.txt',status='NEW',action='WRITE',recl=500)
-        call read_njoy(proj(1:npr)//'_orig',20)
+        call read_njoy('_orig/',20)
         close(20)
 
         open(20,file=proj(1:npr)//'_ENDFVII1_xsc.txt',status='NEW',action='WRITE',recl=500)
-        call read_njoy('ENDF71',20)
+        call read_njoy('_ENDF71/',20)
         close(20)
 
 	open(1,file=proj(1:npr)//'-inp.sen',status='old',readonly)
@@ -26,7 +26,7 @@
 
 	do
 
-		read(1,'(a6,1x,e9.3,4(3x,i2))',end=100) prm,xrel,i1,i2,i3,i4
+		read(1,'(a6,e10.3,4(3x,i2))',end=100) prm,xrel,i1,i2,i3,i4
 
 		c12 = '_xx_xx_xx_xx'
 
@@ -36,9 +36,9 @@
 		write(c12(11:12),'(i2.2)') i4
 
 		dir = ' '
-		dir = proj(1:npr)//'_'//trim(prm)//c12
+		dir = '_'//trim(prm)//c12
 		nch = len_trim(dir)
-		type *,prm,xrel,trim(dir)
+		type *,prm,xrel,dir(1:nch)
 
 		! cycle
 
@@ -48,7 +48,7 @@
 		write(20,*) 'Central value   1.0'
 		write(20,*) 'Variation (+)  ',xrel
 		write(20,*)
-		call read_njoy(dir(1:nch)//'plus/'//proj(1:npr)//'.njoy',20)
+		call read_njoy(dir(1:nch)//'plus/',20)
 
 		write(21,*)
 		write(21,*)
@@ -56,30 +56,32 @@
 		write(21,*) 'Central value   1.0'
 		write(21,*) 'Variation (-)  ',xrel
 		write(21,*)
-		call read_njoy(dir(1:nch)//'minus/'//proj(1:npr)//'.njoy',21)
+		call read_njoy(dir(1:nch)//'minus/',21)
 
 	end do
 
 100	close(20)
 	close(21)
 
-	end program read_all_njoy
+	contains
 
 	!--------------------------------------------------------------------------------
 
-	subroutine read_njoy(njfil,iout)
+	subroutine read_njoy(dir,iout)
 
-	character*(*), intent(in) :: njfil
+	implicit none
+
+	character*(*), intent(in) :: dir
 	integer*4, intent(in) :: iout
 
 	integer*4 i,nch,ibin(33),nchr
 	real*4 el(33),eu(33),tcs(33),ecs(33),encs(33),e2ncs(33),efcs(33),egcs(33),epcs(33),eacs(33)
-	character cmd*130,line
+	character cmd*130,line*130
 
 	type *
-	type *,dirc
+	type *,dir
 
-	open(12,file=njfil,status='OLD',readonly)
+	open(12,file=proj(1:npr)//dir//proj(1:npr)//'.njoy',status='OLD',readonly)
 
 	read(12,'(q,a<nchr>)') nchr,line(1:nchr)
 	do while(line(1:nchr) .ne. ' neutron group structure......read in')
@@ -121,6 +123,8 @@
 
 	subroutine getcrs(header,xx,qflx)
 
+	implicit none
+
 	character*(*), intent(in) :: header
 	real*4, intent(out) :: xx(33)
 	logical*4, intent(in) :: qflx
@@ -158,3 +162,5 @@
 30	format(I4,4X,1PE11.5)
 
 	end subroutine getcrs
+
+	end program read_all_njoy
