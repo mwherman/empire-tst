@@ -75,7 +75,7 @@
 	integer*4, intent(in) :: iout
 
 	integer*4 i,nch,ibin(33),nchr
-	real*4 el(33),eu(33),tcs(33),ecs(33),encs(33),e2ncs(33),efcs(33),egcs(33),epcs(33),eacs(33)
+	real*4 el(33),eu(33),tcs(33),ecs(33),encs(33),e2ncs(33),efcs(33),egcs(33),epcs(33),eacs(33),mubar(33),nubar(33)
 	character cmd*130,line*130
 
 	type *
@@ -98,8 +98,10 @@
 	call getcrs(' for mf  3 and mt 16 (n,2n) cross',e2ncs,.false.)
 	call getcrs(' for mf  3 and mt 18 (n,fission) cross',efcs,.false.)
 	call getcrs(' for mf  3 and mt102 (n,g) cross',egcs,.false.)
-	call getcrs(' for mf  3 and mt103 (n,p) cross',epcs,.false.)
-	call getcrs(' for mf  3 and mt107 (n,a) cross',eacs,.false.)
+!	call getcrs(' for mf  3 and mt103 (n,p) cross',epcs,.false.)
+!	call getcrs(' for mf  3 and mt107 (n,a) cross',eacs,.false.)
+	call getcrs(' for mf  3 and mt251 mubar',mubar,.false.)
+	call getcrs(' for mf  3 and mt452 nubar',nubar,.false.)
 
 	close(12)
 
@@ -107,7 +109,7 @@
 
 	do i = 1,33
 		! write(iout,50) ibin(i),el(i),eu(i),tcs(i),ecs(i),encs(i),e2ncs(i),efcs(i),egcs(i),epcs(i),eacs(i)
-		write(iout,50) ibin(i),el(i),eu(i),tcs(i),ecs(i),encs(i),e2ncs(i),efcs(i),egcs(i)
+		write(iout,50) ibin(i),el(i),eu(i),tcs(i),ecs(i),encs(i),e2ncs(i),efcs(i),egcs(i),mubar(i),nubar(i)
 	end do
 
 10	format(I6,3X,1PE11.5,5X,1PE11.5)
@@ -115,7 +117,7 @@
 !100	format(6x,'Neutron Group Structure (eV)',14X,'Total',13X,'Elastic',11X,'Inelastic',11X,'(n,2n)', &
 !	       11X,'(n,fission)',9X,'(n,gamma)',12X,'(n,p)',14X,'(n,a)')
 100	format(6x,'Neutron Group Structure (eV)',14X,'Total',13X,'Elastic',11X,'Inelastic',11X,'(n,2n)', &
-	       11X,'(n,fission)',9X,'(n,gamma)')
+	       11X,'(n,fission)',9X,'(n,gamma)',11X,'Mubar',13X,'Nubar')
 
 	end subroutine read_njoy
 
