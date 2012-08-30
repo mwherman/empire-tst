@@ -98,7 +98,7 @@ def runInput(inputFile, clean=False, jnm="emp_"):
     best for sensitivity calculation)
     """
     from os.path import join
-    
+
     path = getPath(inputFile)
     proj = os.path.basename(inputFile).split('.')[0]
     if jnm == "emp_":
@@ -302,6 +302,7 @@ def getPath(inputFile):
     """
     path = os.path.abspath(inputFile)
     path = os.path.dirname(path).replace('/drives/4','/home2')
+    path = path.replace('/drives/5','/home3')
     assert os.path.exists(path), "Check path (qsubEmpire.getPath function)!"
     return path
 
