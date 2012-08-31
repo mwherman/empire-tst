@@ -27,8 +27,8 @@ add_endf: add_endf.f90 ../IO/*.o
 getmtn: getmtn.f90
 	$(FC) $(FFLAGS) -o $@ getmtn.f90
 
-mk_ace: mk_ace.f90
-	$(FC) $(FFLAGS) -o $@ mk_ace.f90
+#mk_ace: mk_ace.f90
+#	$(FC) $(FFLAGS) -o $@ mk_ace.f90
 
 mk_xsdir: mk_xsdir.f90
 	$(FC) $(FFLAGS) -o $@ mk_xsdir.f90
@@ -36,8 +36,9 @@ mk_xsdir: mk_xsdir.f90
 read_allnjoy: read_allnjoy.f90
 	$(FC) $(FFLAGS) -o $@ read_allnjoy.f90
 
-read_kal: read_kal.f90
-	$(FC) $(FFLAGS) -o $@ read_kal.f90
+# tailor read_kal for each material
+#read_kal: read_kal.f90
+#	$(FC) $(FFLAGS) -o $@ read_kal.f90
 
 read_mcnp: read_mcnp.f90
 	$(FC) $(FFLAGS) -o $@ read_mcnp.f90

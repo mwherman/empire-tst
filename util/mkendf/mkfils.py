@@ -95,6 +95,27 @@ def genNames(sensLine,proj):
     return (str+"plus",str+"minus")
 
 
+def getDir(dir):
+    # form full directory name with necessary replacements
+    workdir = os.path.abspath(dir)
+    workdir = workdir.replace('/drives/4','/home2')
+    workdir = workdir.replace('/drives/5','/home3')
+    return workdir
+
+
+def getMAT( filename ):
+    """
+    extract MAT number from endf file.
+    """
+    fin = open(filename,"r")
+    while True:
+        myline = fin.next()
+        MAT = myline[66:70]
+        if MAT != '' and int(MAT) > 100:
+            break
+    return int(MAT)
+
+
 def init(proj):
     """
     Starting with 'good' empire input file 'proj.inp', 
@@ -279,6 +300,7 @@ def init(proj):
         plus.close()
         minus.close()
 
+
 def run(proj):
     """
     use init to set up the project, then run!
@@ -286,7 +308,7 @@ def run(proj):
     print "Starting original input"
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
     qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, jnm="cent_")
-    
+
     # start watching queue, report when all jobs finish:
     # os.system('time ~/bin/monitorQueue 0 &')
     
@@ -297,41 +319,37 @@ def run(proj):
         if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
-        tmp = line.split('!')[0]
-        tmp = tmp.split()
-        while len(tmp) < 6:
-            tmp.append('0')
-        
-        name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
+        name = line.split()[0]
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
             continue
         
         nameP, nameM = genNames(line,proj)
         jname = line.split()[0]
         # pause between submitting each new file:
-        time.sleep(0.5)
+        time.sleep(0.25)
         print "Starting", nameP
         qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=False, jnm=jname+"+")
-        time.sleep(0.5)
+        time.sleep(0.25)
         print "Starting", nameM
         qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=False, jnm=jname+"-")
     
+
 def analyze(proj):
     """
     create ENDF & ACE files run() finishes
     """
     import numpy
     
+    def sub_ENDF(dir,nam):
+        # helper function: submit job to create ENDF file in dir with nam
+        vars = ("proj=%s,workdir=%s" % (proj, getDir(dir)))
+        cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v %s %s/util/mkendf/run_endf.sh' % (nam, vars, EMPIRE_DIR)
+        os.system(cmd)
+
     # start with original input:
     qsubEmpire.reconstruct("%s_orig/%s.inp" % (proj,proj))
-    os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s_orig %s' % (proj , proj) )
-    
-    # grab two 'header' lines from original input:
-    # f = open("%s_orig/%s.xsc" % (proj,proj),"r")
-    # header = (f.next(),f.next())
-    # f.close()
-    
+    sub_ENDF(proj+"_orig","ENDF_orig")
+
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
@@ -339,32 +357,19 @@ def analyze(proj):
         if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
-        tmp = line.split('!')[0]
-        tmp = tmp.split()
-        while len(tmp) < 6:
-            tmp.append('0')
-        
-        name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
-            print "Parameter %s shouldn't be varied."%name\
-                    + " Will not include in sensitivity output."
+        name = line.split()[0]
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
             continue
         
-        val = float(val)
-        i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
-        
-        nameP, nameM = genNames(line,proj)
-        
         # reconstruct cross sections for val+sigma and val-sigma:
-        
+        nameP, nameM = genNames(line,proj)
         qsubEmpire.reconstruct(nameP+"/%s.inp" % proj)
-        os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s %s' % (nameP , proj) )
-        
+        sub_ENDF(nameP,"ENDF+"+name)
         qsubEmpire.reconstruct(nameM+"/%s.inp" % proj)
-        os.system(EMPIRE_DIR+'/util/mkendf/mkendf.sh %s %s' % (nameM , proj) )
+        sub_ENDF(nameM,"ENDF-"+name)
         
     sens.close()
+
 
 def kleen(proj):
     """
@@ -373,8 +378,10 @@ def kleen(proj):
     import numpy
     
     # start with original input:
+    print " Kleening : Central values"
     qsubEmpire.clean("%s_orig/%s.inp" % (proj,proj))
-    
+    os.system('rm -r %s_orig/empire*.log' % proj)
+
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
@@ -382,23 +389,68 @@ def kleen(proj):
         if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
-        tmp = line.split('!')[0]
-        tmp = tmp.split()
-        while len(tmp) < 6:
-            tmp.append('0')
-        
-        name, val, i1, i2, i3, i4 = tmp[:]
-        val = float(val)
-        i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
-        
-        nameP, nameM = genNames(line,proj)
+        name = line.split()[0]
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+            continue
         
         # clean directories for val+sigma and val-sigma:
         
+        nameP, nameM = genNames(line,proj)
+        print " Kleening : ",nameP
         qsubEmpire.clean(nameP+"/%s.inp" % proj)
+        os.system('rm -r %s/empire*.log' % nameP)
+        print " Kleening : ",nameP
         qsubEmpire.clean(nameM+"/%s.inp" % proj)
+        os.system('rm -r %s/empire*.log' % nameM)
         
     sens.close()
+
+
+def njoy(proj,scpt, apx):
+    """
+    run NJOY jobs 
+    """
+    import numpy
+    
+    # look for default script first
+    
+    if not os.path.exists(scpt):
+        if os.path.exists("../"+scpt):
+            scpt = "../"+scpt
+        else:
+            print "NJOY script %s not found" %(scpt)
+            return 1
+    
+    def sub_njoy(dir,nam):
+        # helper function: submit NJOY jobs in specified directory & name
+        workdir = getDir(dir)
+        file = os.path.join(workdir,proj+".endf")
+        assert os.path.exists(file), "required ENDF file: %s" % (file)
+        vars = ("filename=%s,log=%s/%s_%s.log,workdir=%s,matnum=%i" %(file, dir, proj, apx, workdir, getMAT(file)))
+        cmd = "qsub -N %s%s%s -q batch1 -l ncpus=1 -V -v %s %s" %(proj, nam, apx, vars, scpt)
+        os.system(cmd)
+    
+    # start with original input:
+    sub_njoy(proj+"_orig","_orig_")
+
+    # open sensitivity input:
+    sens = open(proj+"-inp.sen", "r") # sensitivity input
+    
+    for line in sens:
+        if line.strip()=='' or line[0] in ('!','#','*','@'):
+            continue
+        
+        name = line.split()[0]
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+            continue
+        
+        # run jobs for val+sigma and val-sigma:
+        nameP, nameM = genNames(line,proj)
+        sub_njoy(nameP,'_' + name + '+')
+        sub_njoy(nameM,'_' + name + '-')
+        
+    sens.close()
+
 
 def mcnp(proj):
     """
@@ -406,14 +458,14 @@ def mcnp(proj):
     """
     import numpy
     
+    def sub_mcnp(dir,nam):
+        # helper function: submit MCNP job in specified directory & name
+        vars = ("proj=%s,workdir=%s" % (proj, getDir(dir)))
+        cmd = 'qsub -N %s%s -q  batch1  -l ncpus=1  -V -v %s %s/util/mkendf/mcnp.sh' % (proj, nam, vars, EMPIRE_DIR)
+        os.system(cmd)
+    
     # start with original input:
-    workdir = os.path.abspath( proj + "_orig")
-    jobname = proj + '_orig_MC'
-    vars = ("proj=%s,workdir=%s" % (proj, workdir))
-    cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
-    cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
-    # print cmd
-    os.system(cmd)
+    sub_mcnp(proj+"_orig","_orig_MC")
     
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -422,40 +474,16 @@ def mcnp(proj):
         if line.strip()=='' or line[0] in ('!','#','*','@'):
             continue
         
-        tmp = line.split('!')[0]
-        tmp = tmp.split()
-        while len(tmp) < 6:
-            tmp.append('0')
-        
-        name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
-            print "Parameter %s shouldn't be varied."%name\
-                    + " Will not include in sensitivity output."
+        name = line.split()[0]
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
             continue
         
-        val = float(val)
-        i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
-        
         nameP, nameM = genNames(line,proj)
-        
-        # reconstruct cross sections for val+sigma and val-sigma:
-        
-        workdir = os.path.abspath(nameP)
-        jobname = proj + '_' + name + '+MC'
-        vars = ("proj=%s,workdir=%s" % (proj, workdir))
-        cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
-        cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
-        os.system(cmd)
-        
-        workdir = os.path.abspath(nameM)
-        jobname = proj + '_' + name + '-MC'
-        vars = ("proj=%s,workdir=%s" % (proj, workdir))
-        cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v ' % jobname
-        cmd = cmd + vars + ' ' + EMPIRE_DIR + '/util/mkendf/mcnp.sh'
-        os.system(cmd)
+        sub_mcnp(nameP,'_' + name + '+MC')
+        sub_mcnp(nameM,'_' + name + '-MC')
         
     sens.close()
+
 
 def process_args():
     # see http://docs.python.org/lib/optparse-tutorial.html
@@ -472,11 +500,15 @@ no options: setup and run all parameters"""
             help="run (after initializing manually)")
     parser.add_option("-a", "--analyze", action="store_true", dest="analyze", 
             help="after running, generate ENDF & ACE files")
-    parser.add_option("-m", "--mcnp", action="store_true", dest="mcnp", 
+    parser.add_option("-m", "--mcnp", action="store_true", dest="mcnp",
             help="after creating ACE files, run MCNP jobs")
-    parser.add_option("-c", "--clean", action="store_true", dest="clean", 
+    parser.add_option("-n", "--njoy", action="store_true", dest="njoy",
+            help="after creating ENDF files, run NJOY jobs")
+    parser.add_option("-z", "--acer", action="store_true", dest="acer",
+            help="after creating ENDF files, run ACER jobs")
+    parser.add_option("-c", "--clean", action="store_true", dest="clean",
             help="remove all subdirectories")
-    parser.add_option("-k", "--kleen", action="store_true", dest="kleen", 
+    parser.add_option("-k", "--kleen", action="store_true", dest="kleen",
             help="remove all single-energy subdirectories")
     # help message (-h) is generated by OptionParser
     
@@ -502,6 +534,10 @@ def main():
         kleen(proj)
     elif opts.mcnp:
         mcnp(proj)
+    elif opts.njoy:
+        njoy(proj,"njoy_33grp.sh","NJOY")
+    elif opts.acer:
+        njoy(proj,"ace_300k.sh","ACER")
     else: # if no options, setup and run the analysis
         init(proj)
         run(proj)

@@ -22,13 +22,55 @@
 	character*300 file1,file2
 
 	type (endf_file), target :: endf1,endf2
-
 	type (endf_mat), pointer :: mat1,mat2
+
+	call load_files
+
+	! look for nubars (MF1) in donor and insert if not present
+
+	call ins_mf1
+
+	! look for MF4/MT18 or MF6/MT18. If neither found, use donor MF4/MT18
+
+	call ins_mf4
+
+	! now look through File2 for any of the MF5, MF=18,452,455,456,458
+	! if we find one, insert it into MF5 if not already there
+
+	call ins_mf5(18)
+	call ins_mf5(452)
+	call ins_mf5(455)
+	call ins_mf5(456)
+	call ins_mf5(458)
+
+	! now trim mf6 so that the resulting
+	! ACE file doesn't make MCNP crash
+
+	call trim_mf6
+
+	write(6,*) ' Writing new ENDF file'
+
+	status = write_endf_file(file1(1:nch1)//'add',endf1)
+	if(status /= 0) then
+           write(6,*) ' Error writing output ENDF file'
+           stop 1
+        endif
+
+	contains
+
+	!---------------------------------------------------------------------
+
+	subroutine load_files
+
+	implicit none
+
+	integer*4 status
 
 	! open the endf files and do basic sanity checks
 
 	call getarg(1,file1)
 	nch1 = len_trim(file1)
+        write(6,*)' Reading ',file1(1:nch1)
 	status = read_endf_file(file1(1:nch1),endf1)
 	if(status /= 0) then
             write(6,*) ' Error opening EMPEND ENDF file: ',file1(1:nch1)
@@ -47,6 +89,7 @@
 
 	call getarg(2,file2)
 	nch2 = len_trim(file2)
+        write(6,*)' Reading ',file2(1:nch2)
 	status = read_endf_file(file2(1:nch2),endf2)
 	if(status /= 0) then
             write(6,*) ' Error opening original ENDF file: ',file2(1:nch2)
@@ -65,40 +108,52 @@
 
         write(6,*)' Files read in'
 
-	! replace any nubars in EMPEND with Donor nubars
+	return
+	end subroutine load_files
 
-	if(associated(mat2%mf1)) then
-		mat1%mf1%next => mat2%mf1%next
-		if(associated(mat2%mf1%next)) write(6,*) ' MF1 nubars moved'
-	endif
+	!---------------------------------------------------------------------
 
-	! look for MF4/MT18 or MF6/MT18. If neither found, use donor MF4/MT18
+	subroutine ins_mf1
 
-	call ins_mf4
+	implicit none
 
-	! now look through File2 for any of the MF5, MF=18,452,455,456,458
-	! if we find one, insert it into File1 if not already there
+	! look for nubar sections in donor file and add to empire file.
+	! don't replace any nubar sections already in empire file
 
-	call ins_mf5(18)
-	call ins_mf5(452)
-	call ins_mf5(455)
-	call ins_mf5(456)
-	call ins_mf5(458)
+	type (mf_1), pointer :: mf1,lm1,m2,nxt
 
-	! now trim mf6, if found, so that it's not too big for NJOY to handle
-	! when making the ACE files.
+	m2 => mat2%mf1
+	do while(associated(m2))
 
-	call trim_mf6
+		nxt => m2%next
 
-	write(6,*) ' Writing new ENDF file'
+		if(m2%mt == 451) goto 10
+		if(m2%mt >= 460) exit
 
-	status = write_endf_file(file1(1:nch1)//'add',endf1)
-	if(status /= 0) then
-           write(6,*) ' Error writing output ENDF file'
-           stop 1
-        endif
+		nullify(lm1)
+		mf1 => mat1%mf1
+		do while(associated(mf1))
+			! don't replace existing sections
+			if(mf1%mt == m2%mt) goto 10
+			if(mf1%mt > m2%mt) exit
+			lm1 => mf1
+			mf1 => mf1%next
+		end do
 
-	contains
+		write(6,*) ' Inserting donor MF1 with MT=',m2%mt
+		m2%next => mf1
+		if(associated(lm1)) then
+			lm1%next => m2
+		else
+			mat1%mf1 => m2
+		endif
+
+10		m2 => nxt
+
+	end do
+
+	return
+	end subroutine ins_mf1
 
 	!---------------------------------------------------------------------
 
@@ -239,62 +294,118 @@
 	! trim the number of energies in MF6/MT18 to a reasonable number
 	! if left too big, MCNP will crash trying to read in the resulting ACE file
 
-	integer*4, parameter :: ne = 7
-	real*8, parameter :: goode(ne) = (/1.0D-05,3.0D+02,1.0D+03,1.0D+04,1.0D+05,1.0D+06,2.0D+07/)
+	! these values were set looking at the primary energies from U235, Pu239
+	! the outgoing energies were not trimmed.
+
+!	integer*4, parameter :: ne_18 = 17
+!	integer*4, parameter :: ix_18(ne_18) = (/1,2,6,11,13,16,20,25,30,35,40,45,49,54,62,67,72/)
+!	integer*4, parameter :: ne_91 = 10
+!	integer*4, parameter :: ix_91(ne_91) = (/1,4,8,11,15,19,24,28,33,38/)
+
+	integer*4, parameter :: ne_16 = 5
+	integer*4, parameter :: ix_16(ne_16,2) = (/1,5,9,13,19,1,4,9,12,18/)
+	integer*4, parameter :: ne_18 = 5
+	integer*4, parameter :: ix_18(ne_18) = (/1,14,38,57,72/)
+	integer*4, parameter :: ne_91 = 5
+	integer*4, parameter :: ix_91(ne_91) = (/1,8,15,25,38/)
 
 	integer*4 i,j,me
 
 	type (mf_6), pointer :: mf6
+	type (mf6_law1), target :: n16(2),n18,n91(2),n102
 	type (mf6_law1), pointer :: law1,new
 
 	mf6 => mat1%mf6
 	do while(associated(mf6))
-		if(mf6%mt == 18) exit
+		select case(mf6%mt)
+		case(16)
+			do i = 1,mf6%nk
+				if(mf6%prd(i)%law /= 1) then
+					write(6,*) ' MF6/MT16 not LAW 1'
+					stop
+				endif
+				law1 => mf6%prd(i)%law1
+				new => n16(i)
+				new%lang = law1%lang
+				new%lep = law1%lep
+				new%nr = law1%nr
+				new%ne = ne_16
+				new%itp => law1%itp
+				new%itp(1)%x = ne_16
+				allocate(new%ll(ne_16))
+				do j = 1,ne_16
+					new%ll(j) = law1%ll(ix_16(j,i))
+				end do
+				mf6%prd(i)%law1 => n16(i)
+			end do
+		case(18)
+			if(mf6%nk /= 1) then
+				write(6,*) ' MF6/MT18 has more than one sub-section'
+				stop
+			endif
+			if(mf6%prd(1)%law /= 1) then
+				write(6,*) ' MF6/MT18 not LAW 1'
+				stop
+			endif
+			law1 => mf6%prd(1)%law1
+			new => n18
+			new%lang = law1%lang
+			new%lep = law1%lep
+			new%nr = law1%nr
+			new%ne = ne_18
+			new%itp => law1%itp
+			new%itp(1)%x = ne_18
+			allocate(new%ll(ne_18))
+			do j = 1,ne_18
+				new%ll(j) = law1%ll(ix_18(j))
+			end do
+			mf6%prd(1)%law1 => n18
+		case(91)
+			do i = 1,mf6%nk
+				if(mf6%prd(i)%law /= 1) then
+					write(6,*) ' MF6/MT91 not LAW 1'
+					stop
+				endif
+				law1 => mf6%prd(i)%law1
+				new => n91(i)
+				new%lang = law1%lang
+				new%lep = law1%lep
+				new%nr = law1%nr
+				new%ne = ne_91
+				new%itp => law1%itp
+				new%itp(1)%x = ne_91
+				allocate(new%ll(ne_91))
+				do j = 1,ne_91
+					new%ll(j) = law1%ll(ix_91(j))
+				end do
+				mf6%prd(i)%law1 => n91(i)
+			end do
+		case(102)
+			! 102 seems to have same energy structure as 18
+			if(mf6%nk /= 1) then
+				write(6,*) ' MF6/MT102 has more than one sub-section'
+				stop
+			endif
+			if(mf6%prd(1)%law /= 1) then
+				write(6,*) ' MF6/MT102 not LAW 1'
+				stop
+			endif
+			law1 => mf6%prd(1)%law1
+			new => n102
+			new%lang = law1%lang
+			new%lep = law1%lep
+			new%nr = law1%nr
+			new%ne = ne_18
+			new%itp => law1%itp
+			new%itp(1)%x = ne_18
+			allocate(new%ll(ne_18))
+			do j = 1,ne_18
+				new%ll(j) = law1%ll(ix_18(j))
+			end do
+			mf6%prd(1)%law1 => n102
+		end select
 		mf6 => mf6%next
 	end do
-
-	if(.not.associated(mf6)) return
-
-	! empend seems to usually write 1 law1 block
-	! check this.
-
-	if(mf6%nk /= 1) then
-		write(6,*) ' MF6/MT18 has more than one sub-section'
-		stop
-	endif
-
-	if(mf6%prd(1)%law /= 1) then
-		write(6,*) ' MF6/MT18 not LAW 1'
-		stop
-	endif
-
-	law1 => mf6%prd(1)%law1
-	allocate(new)
-
-	new%lang = law1%lang
-	new%lep = law1%lep
-	new%nr = law1%nr
-	new%itp => law1%itp
-	allocate(new%ll(ne))
-
-	! look through law1 lists and keep those in goode
-
-	me = 0
-	do i = 1,law1%ne
-		do j = 1,ne
-			if(law1%ll(i)%e1 == goode(j)) then
-				me = me + 1
-				new%ll(me) = law1%ll(i)
-				exit
-			endif
-		end do
-	end do
-
-	! replace pointer in MF6 to point to new list
-	! don't bother cleaning up
-
-	new%ne = me
-	mf6%prd(1)%law1 => new
 
 	write(6,*) ' MF6/MT18 trimmed'
 

@@ -6,11 +6,9 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
-# par 1 = working directory
-# par 2 = project (file) name
+# par 1 = project (file) name
 
-fil=${2%.*}
-cd $1
+fil=${1%.*}
 
 # check that all the required files are present
 
@@ -18,7 +16,7 @@ outfil=${fil}.out
 
 if [ ! -e ${outfil} ]
 then
-   echo ' Empire output file not found: '${1%/}/${outfil}
+   echo ' Empire output file not found: '${outfil}
    exit
 fi
 
@@ -48,7 +46,7 @@ matnum=$($EMPIREDIR/util/mkendf/getmtn ${resfil})
 matnum=${matnum:?" undefined!"}
 echo 'MAT = '$matnum
 
-echo ' Processing Empire output file '${1%/}/${outfil}
+echo ' Processing Empire output file '${outfil}
 echo ''
 
 # clean up old temp files
@@ -160,29 +158,5 @@ echo ' Done cleaning FIXUP'
 $EMPIREDIR/util/stan/stan ${fil}_3.endf
 mv ${fil}_3.STN ${fil}.endf
 rm ${fil}_3.endf
-
-# process this file with NJOY for 33-group
-if [ -e njoy_33grp.sh ]
-then
-    runNJOY.py njoy_33grp.sh ${fil}.endf
-elif [ -e ../njoy_33grp.sh ]
-    then runNJOY.py ../njoy_33grp.sh ${fil}.endf
-elif [ -e ../../njoy_33grp.sh ]
-    then runNJOY.py ../../njoy_33grp.sh ${fil}.endf
-else
-    echo ' ${fil}.endf not processed for 33-group with NJOY'
-fi
-
-# finally, create ACE file with NJOY
-if [ -e ace_300k.sh ]
-then
-    runNJOY.py ace_300k.sh ${fil}.endf
-elif [ -e ../ace_300k.sh ]
-    then runNJOY.py ../ace_300k.sh ${fil}.endf
-elif [ -e ../../ace_300k.sh ]
-    then runNJOY.py ../../ace_300k.sh ${fil}.endf
-else
-    echo ' ${fil}.endf not processed for ACE file with NJOY'
-fi
 
 exit
