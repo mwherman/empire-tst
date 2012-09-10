@@ -1,5 +1,5 @@
-! $Rev: 2849 $                                                        
-! $Date: 2012-05-18 15:47:33 +0200 (Fr, 18 Mai 2012) $
+! $Rev: 3119 $                                                        
+! $Date: 2012-09-10 23:38:50 +0200 (Mo, 10 Sep 2012) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -24,11 +24,11 @@
 !/      PUBLIC :: RUN_STANEF
 !/      PUBLIC :: STANEF_INPUT, STANEF_DATA, STANEF_SUCCESS
 !/!
-!...LWI, DVF
-!/        PUBLIC :: IRERUN
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.08   September 2012   A. Koning
+!-V                        Cleanup unused variables.
 !-V         Version 8.07   May 2012, A. Trkov
 !-V                        1. Increase POINTSMAX from 500000 to 800000.
 !-V         Version 8.06   November 2011, A. Trkov
@@ -183,9 +183,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -269,7 +269,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: STANEF_SUCCESS, IRERUN
+      INTEGER(KIND=I4) :: STANEF_SUCCESS
 !
 !     FORMAT OF MATERIAL BEING PROCESSED
 !
@@ -1706,7 +1706,6 @@
       INTEGER(KIND=I4) :: L1,L2,N1,N2
       INTEGER(KIND=I4) :: LFW,NER,LRU,LRF,NRO,LBK,LPS
       INTEGER(KIND=I4) :: I,II,J,N,NCR,LIL,NL,NS,NJ
-      INTEGER(KIND=I4) :: IFG,KRM,KRL
       REAL(KIND=R8) :: C1,C2
 !
       CALL OUT_STATUS
@@ -2605,7 +2604,7 @@
       INTEGER(KIND=I4) :: NIS,NIT,NLS,NJS,NLRS,NSRS
       INTEGER(KIND=I4) :: NRSA12,NRSA,NM,NNN,NJSX,I3
       INTEGER(KIND=I4) :: L1,L2,N1,N2
-      INTEGER(KIND=I4) :: I,II,I2,N,NN
+      INTEGER(KIND=I4) :: I,II,I2,N
       REAL(KIND=R8) :: C1,C2
 !
       CALL OUT_STATUS
@@ -3457,8 +3456,6 @@
 !...VMS, ANS, WIN, UNX, MOD
          WRITE(OUTPUT,'(5X,A,I5,A,I3,A,I4)')                            &       
      &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
-!...DVF, LWI
-!/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MAT,MF,MT)
 !---MDC---
       END IF
 !
