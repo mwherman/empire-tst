@@ -24,13 +24,13 @@
 !/!
 !/      PUBLIC :: RUN_PSYCHE
 !/      PUBLIC :: PSYCHE_INPUT, PSYCHE_DATA, PSYCHE_SUCCESS
-!...LWI, DVF
-!/      PUBLIC :: IRERUN
 !---MDC---
 !-T Program PSYCHE
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.07   September 2012   A. Koning
+!-V                        Cleanup unused variables.
 !-V         Version 8.06   August 2012       A. Trkov
 !-V                        Fix initialisation of LNU
 !-V         Version 8.05   February 2011     A. Trkov
@@ -166,9 +166,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -254,7 +254,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: PSYCHE_SUCCESS, IRERUN
+      INTEGER(KIND=I4) :: PSYCHE_SUCCESS
 !
 !     FILE (TAPE) LABEL FROM FIRST RECORD
 !
@@ -283,11 +283,10 @@
 !
       INTEGER(KIND=I4) :: LIS,LISO
 !
-!     LDRV   IS THE DERIVED FILE FLAG
 !     LRP    IS THE RESONANCE PARAMETER FLAG
 !     LFI    IS THE FISSION FLAG
 !
-      INTEGER(KIND=I4) :: LDRV,LRP,LFI
+      INTEGER(KIND=I4) :: LRP,LFI
 !
 !     CONTENTS OF FIRST RECORD OF A LIST RECORD
 !
@@ -448,7 +447,6 @@
 !
 !     ERROR MESSAGE TEXT
 !
-      INTEGER(KIND=I4) :: MESS
       CHARACTER(LEN=80) :: EMESS
 !
 !     ERROR FLAG
@@ -1079,6 +1077,7 @@
 !********READ THE NEXT CONTROL RECORD AND SET PARAMETERS
          CALL RDCONT
          ELIS  = C1H
+         STA = C2H
          LIS = L1H
          LISO = L2H
          NFOR = N2H
@@ -7553,7 +7552,7 @@ C           Work in CM coordinate system for LCT=2,3
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NI,NF
+      INTEGER(KIND=I4) :: NI
       INTEGER(KIND=I4) :: N
       REAL(KIND=R8), DIMENSION(6) :: Y8
 
@@ -9105,8 +9104,6 @@ C           Work in CM coordinate system for LCT=2,3
 !...VMS, ANS, WIN, UNX, MOD
          WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
      &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
-!...DVF, LWI
-!/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MAT,MF,MT)
 !---MDC---
       END IF
 !
