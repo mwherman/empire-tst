@@ -1,5 +1,5 @@
-! $Rev: 2129 $                                                         |
-! $Date: 2011-08-31 10:52:34 +0200 (Mi, 31 Aug 2011) $                                                     
+! $Rev: 3121 $                                                         |
+! $Date: 2012-09-10 23:40:02 +0200 (Mo, 10 Sep 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -24,12 +24,14 @@
 !/      PUBLIC :: RUN_FIZCON
 !/      PUBLIC :: FIZCON_INPUT, FIZCON_DATA, FIZCON_SUCCESS
 !...LWI, DVF
-!/      PUBLIC :: Default_epsiln, epsiln3, IRERUN
+!/      PUBLIC :: Default_epsiln, epsiln3
 !---MDC---
 !-T Program FIZCON
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.11   September 2012   A. Koning
+!-V                        Cleanup unused variables.
 !-V         Version 8.10   August 2011   M. White
 !-V                        Upgrade for MF1/MT458 extension
 !-V         Version 8.09   August 2011   A. Trkov
@@ -218,9 +220,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -310,7 +312,7 @@
 !
 !     FLAG TO INDICATE SUCCESS OR FAILURE OF STANEF EXECUTION
 !
-      INTEGER(KIND=I4) :: FIZCON_SUCCESS, IRERUN
+      INTEGER(KIND=I4) :: FIZCON_SUCCESS
 !
 !     END OF FILE FLAG
 !
@@ -2038,9 +2040,6 @@
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: LO,NG,I
-      REAL(KIND=R4) :: YK
-      REAL(KIND=R4) :: SSUM
-      REAL(KIND=R4) :: ET,DELTA,ERBAR
 !
       IF(LFI.NE.1)  THEN
          EMESS = 'SECTION SHOULD BE USED FOR FERTILE AND '//            &       
@@ -2630,6 +2629,8 @@
       CALL RDLIST
       NPP=L1L
       IZA=ZA
+      IA1=0
+      IB1=0
 !     Checking of the contents of the LIST records ???
 !      DO J=1,NPP
 !!         Check charge conservation
@@ -12147,8 +12148,6 @@ C...        GO TO 10
 !...VMS, ANS, WIN, UNX, MOD
          WRITE(IOUT,'(5X,A,I5,A,I3,A,I4)')                              &       
      &         'PROCESSING MAT=',MAT,', MF=',MF,', MT=',MT
-!...DVF, LWI
-!/         IF(IRERUN.EQ.0) CALL ENDF_RUN_STATUS(MATO,MFO,MTO)
 !---MDC---
       END IF
 !
