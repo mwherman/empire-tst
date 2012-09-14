@@ -125,7 +125,6 @@ program c4tokal
     open(15,file='KALMAN.INP',status='NEW',recl=120,action='WRITE')
 
     write(15,*) 'INPUT'
-    write(15,'(5I5,5X,3E10.3)') nsec,nparam,0,0,1,1.0,0.0,0.0
     write(15,'(5I5,5X,3E10.3)') nsec,nparam,kctl1,kctl2,kcovex,scale,emin,emax
     write(15,'(14I5)') (I,I=1,NPARAM)
 
