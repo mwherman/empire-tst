@@ -4,6 +4,7 @@ C-Purpose: Legendre moments to C4 from angular distributions
 C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
 C-V  12/06 Fix bug on action when fitting is unsuccessful.
+C-V  12/09 Include sorting internally for better grouping of data
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -38,20 +39,28 @@ C-M   - Source C4 filename
 C-M   - Output C4 filename.
 C-M
 C-
-      CHARACTER*1  CH,ZAMH,ZAMG
-      CHARACTER*5  IXEH,IXEG
-      CHARACTER*30 HDR
-      CHARACTER*40 BLNK
-      CHARACTER*80 FLNM,FLIN,FLOU,FL92,FLCU,FLPT
-      CHARACTER*132 REC,RC1
+      PARAMETER   (MXNP=2000,MXLG=65,MXRW=20000
+     &            ,MXEN=80000,LCH=53,MEL1=20,MXIR=80000)
 C*
-      PARAMETER   (MXNP=200,MXLG=65,MXRW=10000)
+      CHARACTER*1      CH,ZAMH,ZAMG
+      CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR),CHAR1,CHAR2
+      CHARACTER*5      IXEG
+      CHARACTER*9      POU,ELW,ELE(MXNP)
+      CHARACTER*20     CH20,ZAMT,ELL(MXIR)
+      CHARACTER*30     HDR
+      CHARACTER*35     REF
+      CHARACTER*40     BLNK
+      CHARACTER*80     FLNM,FLIN,FLOU,FL92,FLCU,FLPT
+      CHARACTER*132    REC,RC1,RC6(MXIR)
+      CHARACTER*(LCH)  ENT(MXEN),ENTI
+C*
       DIMENSION    CSN(MXNP),XSR(MXNP),XSU(MXNP),PLN(MXLG),RWO(MXRW)
+     &            ,ELX(MXNP),ELU(MXNP),ID3(MXIR),ID4(MXIR)
 C* Character to mark the modification in the string
       DATA CH/'+'/
       DATA PI/3.1415926/
 C* Filenames and logical file units
-      DATA LIN,LOU,LKB,LTT / 1, 2, 5, 6 /
+      DATA LIN,LOU,LKB,LTT / 1, 2, 5, 6/
       DATA BLNK/'                                        '/
      1    ,FLIN/'C4.bkp'/
      2    ,FLOU/'C4.dat'/
@@ -92,125 +101,219 @@ C* Define the output file
       IF(FLNM(1:40).NE.BLNK) FLOU=FLNM
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
 C*
+      WRITE(LTT,901) ' '
+      WRITE(LTT,901) ' Source C4 filename                   : ',FLIN
+      WRITE(LTT,901) ' Output C4 filename                   : ',FLOU
+C*
 C* Begin processing the data - search for elastic angular distributions
   100 READ (LIN,932,END=800) REC
-  110 READ (REC,902) IZIH,IZAH,ZAMH,MFH,MTH,EINH,EID,XSRH,XSDH,CSNH,PRB
-     &              ,IXEH,IXSH
+  110 READ (REC,902) IZIH,IZAH,ZAMH,MFH,MTH
       IF(MFH.NE.4 .OR. MTH.NE.2) THEN
         WRITE(LOU,932) REC
         GO TO 100
       END IF
-C*    -- First data point found
-      NP=1
-      EMM=XSDH/XSRH
-C*    -- Check if conversion CM-->Lab is needed
-C*       (no need to add to C4, conversion is done in DXSEXF if needed)
-      IF(REC(22:22).EQ.'C') THEN
-        LCT=2
-        QI =0
-        AWI=IZIH-1000*(IZIH/1000)
-        IZ =IZAH/1000
-        IA =IZAH-1000*IZ
-        AWR=IZ
-        IF(IA.EQ.0) AWR=2*IZ
-        CALL CMLAB2B(EINH,EOUH,CSNH,XSRH,AWR,AWI,QI,LCT)
-      END IF
-      CSN(NP)=CSNH
-      XSR(NP)=XSRH
-      XSU(NP)=XSDH
+
+C*
+C* Re-sequence angular distribution data by angles/incident energies
+      REF =REC(98:132)
+      ZAMT=REC(1:20)
+c...
+c...    print *,'      at 112 nen,nset',nen,nset
+c...
+      IR  =0
+  112 IR  =IR+1
+      IF(IR.GT.MXIR) STOP 'ANG_MU ERROR - MXIR limit exceeded'
+C* Save record to output and to RC6 field and sorting string to ELL
       WRITE(LOU,932) REC
-      CSMN=CSNH
-      CSMX=CSNH
-  120 RC1=REC
-      IEF=1
-      READ (LIN,932,END=200) REC
-      IEF=0
-  122 READ (REC,902) IZIG,IZAG,ZAMG,MFG,MTG,EING,EID,XSRG,XSDG,CSNG,PRB
-     &              ,IXEG,IXSG
-      IF(IZIH.EQ.IZIG .AND. IZAH.EQ.IZAG .AND. MTH.EQ.MTG .AND.
-     &   EINH.EQ.EING .AND. IXEH.EQ.IXEG .AND. IXSH.EQ.IXSG) THEN
-        EMM=MAX(EMM,XSDG/XSRG)
-        IF(REC(22:22).EQ.'C') THEN
-c...
-c...      print *,'Input cm-->lab',eing,xsrg,csng,awr,awi,qi,lct
-c...
-          CALL CMLAB2B(EING,EOUG,CSNG,XSRG,AWR,AWI,QI,LCT)
-c...
-c...      print *,'                      Lab',eing,xsrg,csng
-c...
-        END IF
-        NP=NP+1
-        IF(NP.GT.MXNP) STOP 'ANG_MU ERROR - MXNP limit exceeded'
-        CSN(NP)=CSNG
-        XSR(NP)=XSRG
-        XSU(NP)=XSDG
-        WRITE(LOU,932) REC
-        CSMN=MIN(CSMN,CSNG)
-        CSMX=MAX(CSMX,CSNG)
-        GO TO 120
+      READ (REC(23:31),931) FIN
+      ELW=REC(59:67)
+      IF(ELW.NE.'         ') THEN
+        READ (ELW,931) ANG
+        WRITE(ELW,936) ANG
+        REC(59:67)=ELW
+        WRITE(ELW,936) ANG+1
       END IF
-C*    -- Tighten the fitting convergence criterion a bit (fraction)
-  200 EMMF=MAX(0.07,EMM/SQRT(2.0))
-C*    -- Skip fitting if less than four points or narrow range.
-      IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.8)) GO TO 600
-C*    -- One panel read - calculate mu-bar
-C*       Prepare header for test print in TESTPLT
-      WRITE(HDR,'(A2,1P,E8.2E1,A20)') 'E',EINH/1.E6,'MeV '//RC1(98:117)
+      RC6(IR)=REC
+      WRITE(POU,938) MIN(999999999,NINT(FIN))
+      ELL(IR)=POU//ELW//'  '
+C* Read the next record
+      IEN=1
+      READ (LIN,932,END=114) REC
+      IEN=0
 c...
-c...  PRINT *,HDR,NP,emmF,'"',CH,'"',mxlg,mxrw,mxnp
+C...  print *,'ir',ir,'"',rec(12:50),'"',REC(98:128)
 c...
-      LMI=2
-      LMX=22
-      IF(NP*4+(LMX+4)*(LMX+1).GT.MXRW)
-     &STOP 'ANG_MU ERROR - MXRW limit exceeded'
-      CALL LSQLGV(CSN,XSR,NP,PLN,LMI,LMX,EMMF,ERR,RWO,MXRW)
-      EEMX=MAX(EMMF,ERR)
-      IF(EEMX.GT.1 .OR. PLN(1).LT.0 .OR. PLN(2).LT.0) THEN
-        PRINT *,'WARNING - Large error fitting ang.dist',EEMX
-     &         ,PLN(1),PLN(2),hdr
-        GO TO 600
-      END IF
-C*    --Compare fitted curve to measured
-      CALL TSTPLT(NP,CSN,XSR,XSU,LMX,PLN,L92,LCU,LPT,HDR)
-C... Plot first NP points of extended mesh
-C...  CALL TSTPLT(NP,RWO,RWO(4*(NP+1)+1),XSU,LMX,PLN,L92,LCU,LPT,HDR)
+      IF(REC(1:20).EQ.'                    ') GO TO 114
+C* Check for change in IZI, IZA, MF, MT, Reference
+      IF(REC( 1: 20).NE.ZAMT) GO TO 114
+      IF(REC(98:132).NE. REF) GO TO 114
+      GO TO 112
+C*
+C* Block for one data type/author read - Sort by angle/energy
+  114 CONTINUE
+c...
+c...          print *,'Begin sorting DDX, IR',IR
+c...          do j=1,ir
+c...            print *,j,'"',ELL(j),'"'
+c...          end do
+c...
+      CALL SRTTCH(IR,MEL1,ID3,ID4,EL1)
+c...
+c...          print *,'Sorting completed'
+c...
+C* Write the sorted set from saved record sequence in RC6
+c...
+c...      do j=1,ir
+c...         print *,rc6(j)
+c...      end do
+c...
+c...      do j=1,ir
+c...         l=id4(j)
+c...         rc1=rc6(l)
+c...         print *,l,rc1(12:50),'"',rc1(98:132)
+c...      end do
+c...
+      NP  = 0
+      CSMN= 1
+      CSMX=-1
+      EMM = 0
+      L   =ID4(1)
+      POU =ELL(L)
+      NEL =0
+      DO I=1,IR
+        L=ID4(I)
+        RC1 =RC6(L)
+        READ (RC1,902) IZIG,IZAG,ZAMG,MFG,MTG,EING,EID,XSRG,XSDG,CSNG
+     &                ,PRB,IXEG,IXSG
+C* On change of incident energy(MF4) make a new record entry
+  116   CH20=ELL(L)
+c...
+c...    print *,'ir,ch20,pou',ir,'"',ch20,'"',pou
+c...    print *,l,rc1(12:50),'"',rc1(98:132)
+C...    print *,l,eing,csng,xsrg
+c...
+        IF(CH20(1:9).EQ.POU) THEN
+          NP = NP+1
+C*        -- Check if conversion CM-->Lab is needed
+C*        no need to add to C4, conversion is done in DXSEXF if needed)
+          IF(REC(22:22).EQ.'C') THEN
+            LCT=2
+            QI =0
+            AWI=IZIG-1000*(IZIG/1000)
+            IZ =IZAG/1000
+            IA =IZAG-1000*IZ
+            AWR=IZ
+            IF(IA.EQ.0) AWR=2*IZ
+            CALL CMLAB2B(EING,EOUG,CSNG,XSRG,AWR,AWI,QI,LCT)
+          END IF
+          CSN(NP)=CSNG
+          XSR(NP)=XSRG
+          XSU(NP)=XSDG
+          CSMN=MIN(CSMN,CSNG)
+          CSMX=MAX(CSMX,CSNG)
+          EMM =MAX(EMM,XSDG/XSRG)
+          EINH=EING
+          IZIH=IZIG
+          IZAH=IZAG
+          ZAMH=ZAMG
+          MFH =MFG
+          MTH =MTG
+          IF(I.GE.IR) THEN
+            ELL(L)='#########'
+            GO TO 116
+          END IF
+        ELSE
+C*        -- Fit Legendre polynomial
+C*        -- Tighten the fitting convergence criterion a bit (fraction)
+          EMMF=MAX(0.07,EMM/SQRT(2.0))
+C*        -- Skip fitting if less than four points or narrow range.
 C...
-C*    --Prepare the output record for mu-bar (remove CM flag, if any)
-      WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,154,MTH
-      RC1(22:22)=' '
-C*    --Arbitrarily increment subsection number by 500
-      JXSH=IXSH+500
-      WRITE(RC1(128:130),'(I3)') JXSH
-C*    -- Mark the entry as adjusted
-      LNC=122-98+1
-      CALL LBLMRK(RC1(98:122),LNC,CH)
-C*    -- The normalised P0 component is 1 by definition
-      WRITE(RC1(41:49),934) 1.
-      RC1(50:58)='         '
-      WRITE(RC1(59:67),934) 0.
-      RC1(68:76)='         '
-      WRITE(LOU,932) RC1
-C*    -- Normalised P1 component (dividing Pl by (2l+1)/2)
-      EMUB=PLN(2)/PLN(1)/3
-      WRITE(RC1(41:49),934) EMUB
-      WRITE(RC1(50:58),934) EMUB*MAX(EMM,ERR)
-      WRITE(RC1(59:67),934) 1.
-      WRITE(LOU,932) RC1
-C*    -- mu-bar entered, prepare the output record for elastic
+C...      print *,'np,csmn,csmx',np,csmn,csmx
+C...
+          IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.8)) GO TO 118
+C*        -- One panel read - calculate mu-bar
+C*        Prepare header for test print in TESTPLT
+          WRITE(HDR,'(A2,1P,E8.2E1,A20)') 'E',EINH/1.E6,'MeV '
+     &                                    //RC1(98:117)
+c...
+c...      PRINT *,HDR,NP,emmF,'"',CH,'"',mxlg,mxrw,mxnp
+c...
+          LMI=2
+          LMX=22
+          IF(NP*4+(LMX+4)*(LMX+1).GT.MXRW)
+     &    STOP 'ANG_MU ERROR - MXRW limit exceeded'
+          CALL LSQLGV(CSN,XSR,NP,PLN,LMI,LMX,EMMF,ERR,RWO,MXRW)
+          EEMX=MAX(EMMF,ERR)
+          IF(EEMX.GT.1 .OR. PLN(1).LT.0 .OR. PLN(2).LT.0) THEN
+            PRINT *,'WARNING - Large error fitting ang.dist',EEMX
+     &             ,PLN(1),PLN(2),hdr
+            GO TO 118
+          END IF
+C*        --Compare fitted curve to measured
+          CALL TSTPLT(NP,CSN,XSR,XSU,LMX,PLN,L92,LCU,LPT,HDR)
+C...
+C...      Plot first NP points of extended mesh
+C...      CALL TSTPLT(NP,RWO,RWO(4*(NP+1)+1),XSU,LMX,PLN,L92,LCU,LPT,HDR)
+C...
+C*        --Prepare the output record for mu-bar (remove CM flag, if any)
+          WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,154,MTH
+          RC1(22:22)=' '
+C*        --Incident particle energy
+          RC1(23:31)=POU
+C*        --Arbitrarily increment subsection number by 500
+          JXSG=IXSG+500
+          WRITE(RC1(128:130),'(I3)') JXSG
+C*        -- Mark the entry as adjusted
+          LNC=122-98+1
+          CALL LBLMRK(RC1(98:122),LNC,CH)
+C*        -- The normalised P0 component is 1 by definition
+          WRITE(RC1(41:49),936) 1.
+          RC1(50:58)='         '
+          WRITE(RC1(59:67),936) 0.
+          RC1(68:76)='         '
+          WRITE(LOU,932) RC1
+C*        -- Normalised P1 component (dividing Pl by (2l+1)/2)
+          EMUB=PLN(2)/PLN(1)/3
+          WRITE(RC1(41:49),936) EMUB
+          WRITE(RC1(50:58),936) EMUB*MAX(EMM,ERR)
+          WRITE(RC1(59:67),936) 1.
+          WRITE(LOU,932) RC1
+C*        -- mu-bar entered, save elastic cross section
+          SGEL=4*PI*PLN(1)
+          NEL=NEL+1
+          ELE(NEL)=POU
+          ELX(NEL)=SGEL
+          ELU(NEL)=SGEL*MAX(EMM,ERR)
+C*        --(next record is already in REC)
+  118     NP  = 0
+          CSMN= 1
+          CSMX=-1
+          EMM = 0
+          POU =ELL(L)
+          IF(I.LT.IR) THEN
+            GO TO 116
+          ELSE
+            EXIT
+          END IF
+        END IF
+      END DO
+C* Enter the elastic cross sections - prepare the output record
       WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,  3,MTH
 C*    --Arbitrarily increment the subsection number by 600
-      JXSH=IXSH+600
-      WRITE(RC1(128:130),'(I3)') JXSH
-C*    -- The P0 component is the cross section
-      SGEL=4*PI*PLN(1)
-      WRITE(RC1(41:49),934) SGEL
-      WRITE(RC1(50:58),934) SGEL*MAX(EMM,ERR)
+      JXSG=IXSG+600
+      WRITE(RC1(128:130),'(I3)') JXSG
       RC1(59:67)='         '
       RC1(68:76)='         '
-      WRITE(LOU,932) RC1
-C*    -- Elastic cross section entered, proceed with data processing
-C*      (next record is already in REC)
-  600 IF(IEF.NE.1) GO TO 110
+      DO I=1,NEL
+C*    -- The P0 component is the cross section
+        RC1(23:31)=ELE(I)
+        WRITE(RC1(41:49),936) ELX(I)
+        WRITE(RC1(50:58),936) ELU(I)
+        WRITE(LOU,932) RC1
+      END DO
+C*
+C* Continue processing the file
+      IF(IEN.NE.1) GO TO 110
 C* End of file processing
   800 STOP 'ANG_MU Completed'
 C*
@@ -219,8 +322,10 @@ C*
   900 FORMAT( A80)
   901 FORMAT(2A40)
   902 FORMAT(I5,I6,A1,I3,I4,3X,6F9.0,46X,A5,I3)
+  931 FORMAT(BN,F9.0)
   932 FORMAT(A132)
-  934 FORMAT(F9.6)
+  936 FORMAT(F9.6)
+  938 FORMAT(I9)
       END
       SUBROUTINE TSTPLT(NAN,ANG,DST,DSD,LOR,PLG,L92,LCU,LPT,HDR)
 C-Title  : Subroutine TSTPLT
@@ -977,5 +1082,72 @@ C*    --Solve by backward substitution
         END DO
       END DO
       X(1)=F(1)/A(1,1)
+      RETURN
+      END
+      SUBROUTINE SRTTCH(N,K,L,M,X)
+C-Title  : SRTTCH subroutine
+C-Purpose: Perform a sort in ascending order by Tree sort method
+C-Description:
+C-D Sort in ascending order the vector of N characters strings of
+C-D length K stored in array X. The actual entries in X remain
+C-D unaffected, but on exit:
+C-D   L (integer array) contains the relative positions of the
+C-D     consecutive array entries in a sorted sequence
+C-D     (i-th entry in X is placed L(i)-th in the sorted sequence).
+C-D   M (integer array) contains the addresses of the consecutive 
+C-D     array entries to produce a sorted sequence
+C-D     (i-th entry in the sorted sequence is M(i)-th entry in X).
+C-D The coding has been translated from Basic by A.Trkov. The
+C-D differences from the original program are the following:
+C-D  - the definitions of arrays L and M has been redefined for
+C-D    convenience.
+C-D NOTE: This routine is complementary to the SRTTRE routine,
+C-D       which operates on real numbers.
+C-Reference: Moj Mikro (1989)
+C... Coding below does not work with g77 on Linux (???)
+      CHARACTER*(K) X(*)
+      DIMENSION L(*),M(*)
+C...
+C-g77 CHARACTER X*1
+C-g77 DIMENSION L(1),M(1),X(K,1)
+C...
+      L(1)= 0
+      M(1)= 0
+      DO 20 I=2,N
+      L(I)= 0
+      M(I)= 0
+      J   = 1
+    8 IF(X(I).GE.X(J)) GO TO 15
+C...
+C-g77 8 IF(X(1,I)(1:K).GE.X(1,J)(1:K)) GO TO 15
+C...
+      IF(L(J).EQ.0)    GO TO 12
+      J = L(J)
+      GO TO 8
+   12 M(I)=-J
+      L(J)= I
+      GO TO 20
+   15 IF(M(J).LE.0) GO TO 18
+      J = M(J)
+      GO TO 8
+   18 M(I)= M(J)
+      M(J)= I
+   20 CONTINUE
+      J = 1
+      I = 0
+      GO TO 25
+   24 J = L(J)
+   25 IF(L(J).GT.0) GO TO 24
+   27 I    = I+1
+      L(J) = I
+      IF(M(J)) 33,35,31
+   31 J    = M(J)
+      GO TO 25
+   33 J    =-M(J)
+      GO TO 27
+   35 DO 38 I=1,N
+      J = L(I)
+      M(J)=I
+   38 CONTINUE
       RETURN
       END
