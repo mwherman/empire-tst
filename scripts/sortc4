@@ -32,11 +32,13 @@ ln -sf $EMPIREDIR/util/c4sort/C4SORT.INP C4SORT.INP
 ln -sf $EMPIREDIR/RIPL/levels/ RIPL_LEVELS
 
 # RUN c4sort TO SORT C4 DATA   
-$EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
+# (pre-sorting is no longer necessary with updated ang_mu)
+# $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
 
 # ADD MU-BAR DATA TO THE C4 FILE
+# (updated ang_mu reads the raw C4 file directly; input C4.SRT changed to C4.DAT)
 cat >ANG_MU.INP<<EOF
-C4.SRT
+C4.DAT
 C4.TMP
 EOF
 
