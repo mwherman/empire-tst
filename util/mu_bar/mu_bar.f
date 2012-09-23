@@ -3,6 +3,8 @@ C-Title  : Program MU_BAR
 C-Purpose: Generate average cosine from angular distributions
 C-Author : A. Trkov, Jožef Stefan Institute, Ljubljana, Slovenia
 C-Version: March 2012 (original code)
+C-V  2012/09  Skip transformation matrix (for backward compatibility
+C-V           with old files, e.g. ENDF/B-VI.8)
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -120,15 +122,20 @@ C* Read the angular distributions
       READ (C66,961) ZA,AWR,LVT,LTT1,N1,N2
       QI=0
 C...
-c...    print *,'mf,mt,lvt,ltt1',mf,mt,lvt,ltt1
+C...  print *,'mf,mt,lvt,ltt1',mf,mt,lvt,ltt1
 C...
-      CALL RDHEAD(LIN,MAT,MF,MT,DMY,AWR,LI,LCT,N1,N2,IER)
+C* Skip transformation matrix if present (for old files)
+      IF(LVT.EQ.1) THEN
+        CALL RDLIST(LIN,DMY,DMY,LI,LCT,N1,N2,RWO,MXRW,IER)
+      ELSE
+        CALL RDHEAD(LIN,MAT,MF,MT,DMY,AWR,LI,LCT,N1,N2,IER)
+      END IF
 C...
-c...    print *,'li,lct',li,lct
+C...  print *,'li,lctn1,n2',li,lct,n1,n2
 C...
       CALL RDTAB2(LIN,DMY,DMY,L1,L2,NR,NE1,NBT,INR,IER)
 C...
-c...    print *,'nr,ne',nr,ne1
+C...  print *,'nr,ne',nr,ne1
 C...
 C* Reserve array locations:
 C*  LE  - Incident energies (max.number MXEN < MXRW/8)
@@ -146,7 +153,7 @@ C*  LD  - Scratch array of distributions
       IE  =0
       LTT2=LTT1
       IF(LTT1.EQ.3) LTT2=1
-  142 IF(NEE.GT.MXEN) THEN
+  144 IF(NEE.GT.MXEN) THEN
         STOP 'MU_BAR ERROR - Insufficient MXRW for MXEN'
       END IF
       DO I=1,NE
@@ -273,7 +280,7 @@ c...
           NE  =NE2
           NEE =NE1+NE2
           LTT2=2
-          GO TO 142
+          GO TO 144
         ELSE
 C*        -- Tabulated range processed - repack P2,P3
 c...
