@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3110 $
+Ccc   * $Rev: 3126 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-18 03:10:38 +0200 (Sa, 18 Aug 2012) $
+Ccc   * $Date: 2012-09-26 16:53:59 +0200 (Mi, 26 Sep 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -7538,14 +7538,14 @@ C             If the file R250SEED.DAT does not exist,
 C             then starting seed is read
               iseed = abs(nint(val))
               if(iseed.le.1) iseed=1234567
-              WRITE (8,*) 'Random seeds :', 1, 104
+C             WRITE (8,*) 'Random seeds :', 1, 104
               Call R250Init(iseed)
             else
               OPEN(94,file='R250SEED.DAT',status='OLD')
               READ(94,*)  indexf, indexb
               CLOSE(94)
-              WRITE (8,*) 'Random seeds :', indexf, indexb
             endif
+            WRITE (8,*) 'Random seeds :', indexf, indexb			
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
