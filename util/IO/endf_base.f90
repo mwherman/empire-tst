@@ -1016,7 +1016,7 @@ module BASE_ENDF_IO
         dum(9:11) = dum(10:12)
     endif
 
-        rlw = dum(1:11)
+    rlw = dum(1:11)
 
     return
 
