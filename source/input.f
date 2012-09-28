@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3126 $
+Ccc   * $Rev: 3128 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-09-26 16:53:59 +0200 (Mi, 26 Sep 2012) $
+Ccc   * $Date: 2012-09-28 19:33:00 +0200 (Fr, 28 Sep 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3465,7 +3465,7 @@ C
       name = '      '
       READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
          IF (name.EQ.'GO    ') THEN
-            CLOSE(95)
+C           CLOSE(95)  ! SHOULD BE CLOSED IN MAIN.F
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.

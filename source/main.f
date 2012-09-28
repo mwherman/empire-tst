@@ -1,6 +1,6 @@
-cc   * $Rev: 3086 $
+cc   * $Rev: 3128 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-06 19:21:08 +0200 (Mo, 06 Aug 2012) $
+Ccc   * $Date: 2012-09-28 19:33:00 +0200 (Fr, 28 Sep 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3897,6 +3897,7 @@ C--------Saving random seeds
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
+         CLOSE(95)  ! FROM INPUT.F
          close(102)
          RETURN
       ENDIF

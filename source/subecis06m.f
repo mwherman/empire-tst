@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3002 $
+Ccc   * $Rev: 3128 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-30 03:01:15 +0200 (Mo, 30 Jul 2012) $
+Ccc   * $Date: 2012-09-28 19:33:00 +0200 (Fr, 28 Sep 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -52,7 +52,8 @@ C
       CHB=197.326968D0                                                  ECIS-035
       CZ=137.03599911D0                                                 ECIS-036
 
-      MR=95                                                             ECIS-037
+C     MR=95                                                             ECIS-037
+      MR=101                                                            
       MW=96                                                             ECIS-038
       MS=97
 
@@ -77,11 +78,11 @@ C
       OPEN (93,FILE = 'file93')
       OPEN (94,FILE = 'file94')
 
-      OPEN (95,FILE = TRIM(fname)//'.inp')
       OPEN (96,FILE = TRIM(fname)//'.out')
       OPEN (97,FILE = 'file97')
-
       OPEN (99,FILE = 'file99')
+      OPEN (101,FILE = TRIM(fname)//'.inp')
+
       CALL THORA(MW)      
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-040
       CALL THORA(MW)
@@ -104,10 +105,10 @@ C
       CLOSE (91,STATUS = 'delete')
       CLOSE (93,STATUS = 'delete')
       CLOSE (94,STATUS = 'delete')
-      CLOSE (95)
       CLOSE (96)
       CLOSE (97,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
+      CLOSE (101)
       RETURN                                                            ECIS-041
       END                                                               ECIS-042
 C 19/11/05                                                      ECIS06  MEMO-000
