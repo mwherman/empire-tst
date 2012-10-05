@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /bin/bash
 #script to run MC sampling 
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
@@ -16,17 +16,31 @@ ls *inp
 echo ' '
 echo -n 'Choose one of the above (without .inp extention!): '
 read file
-fi                          
-echo ' '
-echo -n 'Enter the number of stochastic samples to be calculated (default: 100) '
-read ns
-if [ "$ns" = "" ]
-   then
-   ns=100
-fi                          
+fi    
 
-sweep=1
-while [ $sweep -le $ns  ]; do
+nstart=$2
+if [ "$2" = "" ]
+   then
+  nstart=1
+  ns=100
+else 
+  ns=$3
+  if [ "$3" = "" ]
+   then
+   echo ' '
+   echo -n 'Enter the number of stochastic samples to be calculated (default: 100) '
+   read ns
+   if [ "$ns" = "" ]
+     then
+     ns=100
+   fi                          
+ fi
+fi
+
+sweep=$nstart
+
+while [ $sweep -le $ns ]
+do
 #
 if    [ $sweep -ge 1000 ]
   then
@@ -41,7 +55,7 @@ elif  [ $sweep -ge    0 ]
   then
       fnum=000$sweep
 else
-  echo ERRORR - invalid sequence number $sweep
+  echo ERROR - invalid sequence number $sweep
   exit
 fi
 echo Sequence $fnum
@@ -50,18 +64,18 @@ echo Sequence $fnum
 $EMPIREDIR/scripts/runE $file
 #
 # Removing all TLs
-rm -rf $file-tl 
+#rm -rf $file-tl 
 #     or 
 # Removing TLs for the incident channel
-#rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
+rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
 # Removing TLs for the outgoing neutron channel
-#rm -f $file-tl/000001_025055*.BIN
+rm -f $file-tl/000001_*.BIN
 # Removing TLs for the outgoing proton channel
-#rm -f $file-tl/001001_024055*.BIN
+#rm -f $file-tl/001001_*.BIN
 # Removing TLs for the outgoing alpha  channel
-#rm -f $file-tl/002004_023052*.BIN
+#rm -f $file-tl/002004_*.BIN
 # Removing TLs for the outgoing deut   channel
-#rm -f $file-tl/001002_024054*.BIN
+#rm -f $file-tl/001002_*.BIN
 #
 # If formatting if needed on the flight
 # run EMPEND to format EMPIRE output into ENDF
@@ -82,7 +96,7 @@ mv $file.out  OUT$fnum
 let sweep=sweep+1
 done
 # Calculating and plotting covariances
-$EMPIREDIR/util/Calc_Cov/Calc_Cov.exe
-mv MC_covar.out  $file-MC-cov.out
-mv MC_file33.out $file-MC-cov.endf
+#$EMPIREDIR/util/Calc_Cov/Calc_Cov.exe
+#mv MC_covar.out  $file-MC-cov.out
+#mv MC_file33.out $file-MC-cov.endf
 exit
