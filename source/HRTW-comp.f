@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2813 $
+Ccc   * $Rev: 3131 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-30 00:43:45 +0200 (Mo, 30 Apr 2012) $
+Ccc   * $Date: 2012-10-08 11:31:14 +0200 (Mo, 08 Okt 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -36,7 +36,7 @@ C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
      &              fisxse, sumtg
-C     DOUBLE PRECISION VT1
+      DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       CHARACTER*1 cpar(2)
@@ -164,7 +164,7 @@ C--------------check whether tfis is not too big compared to a good Tlump
 C--------------redefine fission transmission coef. using single iteration
 C              RCN & MS 03-2010
 C              redefinition avoided to keep the Cross section difference  right. No observed change to corrected XSs.
-C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
+               TFIs = VT1(TFIs,H_Tav,H_Sumtl)
                sumfis = FLOAT(NDIvf)*TFIs
             ELSE
                H_Tav = 0.0
@@ -292,6 +292,8 @@ C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
      &          'D0 = ', d0c,' keV (calculated)'
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')') d0c
          ENDIF
+
+         WRITE(12,*)
 
          if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
             WRITE(8,'(1x,''Normalization factor = '',F7.3)')
