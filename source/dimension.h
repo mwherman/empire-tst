@@ -5,7 +5,7 @@ C
      *,NDEXCLUS = 15
      *,NDEX= 161
      *,NDLW= 50
-     *,LEVCC=20
+     *,LEVCC=30
      *,NDLV=40
      *,NDBR=40
      *,NDMSCS=4)
