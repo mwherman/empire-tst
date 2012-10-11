@@ -1,5 +1,5 @@
-! $Rev: 3121 $                                                         |
-! $Date: 2012-09-10 23:40:02 +0200 (Mo, 10 Sep 2012) $                                                     
+! $Rev: 3134 $                                                         |
+! $Date: 2012-10-11 13:28:30 +0200 (Do, 11 Okt 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.12   October 2012   A. Trkov
+!-V                        Check for negative resonance widths
 !-V         Version 8.11   September 2012   A. Koning
 !-V                        Cleanup unused variables.
 !-V         Version 8.10   August 2011   M. White
@@ -220,9 +222,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.11'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -2252,7 +2254,7 @@
 !
       INTEGER(KIND=I4) :: NREP
       INTEGER(KIND=I4) :: NLS
-      INTEGER(KIND=I4) :: IGN
+      INTEGER(KIND=I4) :: IGN,JGN
       INTEGER(KIND=I4) :: ISEQ
       INTEGER(KIND=I4) :: NL,I
       REAL(KIND=R4)  :: AWRIL
@@ -2325,6 +2327,16 @@
      &               'NEUTRON WIDTH IS ZERO FOR RESONANCE',Y(I-3)
                CALL ERROR_MESSAGE(ISEQ)
             END IF
+!***********TEST FOR NEGATIVE WIDTHS
+            DO JGN=IGN,NREP
+              GN = Y(JGN)
+              IF(GN.LT.0.)   THEN
+                 ISEQ = NSEQP1 + (I+2)/NREP
+                 WRITE(EMESS,'(A,1PE12.5)')                               &       
+     &                 'NEGATIVE WIDTHS FOR RESONANCE',Y(I-3)
+                 CALL ERROR_MESSAGE(ISEQ)
+              END IF
+            END DO
          END DO
       END DO
 !
