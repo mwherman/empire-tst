@@ -53,4 +53,4 @@ To run empire you may create a working subdirectory of your empire root
 Good calculations !
 The EMPIRE team
 _______________________________________________________________________
-Report problems to: r.capotenoy@iaea.org (IAEA); mwherman@bnl.gov (BNL)
+Report problems to: r.capotenoy@iaea.org (IAEA); mwherman@bnl.gov (LANL)
